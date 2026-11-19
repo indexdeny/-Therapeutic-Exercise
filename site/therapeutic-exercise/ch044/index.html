@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тракция и сжатие — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 44, title: 'Тракция, сжатие и эффекты движения в суставе', minutes: 7, language: 'ru', next: '../ch045/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch044/cards.ru.json
+const CARDS_SHORT = {
+  "в норме\nпри опоре на конечность и в суставах позвоночника": "опора + суставы позвоночника",
+  "мышцы\nсокращаясь, немного сжимают сустав — он стабильнее": "сжимают сустав → стабильнее",
+};
+// cards-short end
+
+const HAND = '#b9cfe0';
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const gripOval = (p, k = 1) => { const e = mk('ellipse', { rx: 24 * k, ry: 16 * k, fill: HAND, 'fill-opacity': .9, stroke: '#7d93a3', 'stroke-width': 2 }, p); put(e, { o: 0 }); return e; };
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Тракция и сжатие', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 5 · Урок 44', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Тракция, сжатие', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и что даёт суставу движение', { x: 800, y: 380, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'почему скольжение безопаснее рычага', 800, 460, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), j = jointGlide(art, { x: 800, y: 690, s: .62, r: -90, t0: 0, shaft: 260 });
+    fluidIn(j);
+    show(art, m('sub', .2));
+    prog(q => j.set({ n: 8 * Math.sin(2 * Math.PI * 2 * q) }), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['lever', 'Рычаг или скольжение', (m) => {
+    const p = panel(0);
+    // angular stretching: a long lever, rolling without the slide, compression
+    const A = jointGlide(p, { x: 380, y: 360, s: .85, shaft: 200, t0: .2 });
+    txt(p, 'угловая растяжка: рычаг', 380, 95, m('lev'), { size: 25, weight: 700, fill: COL.bad, anchor: 'middle' });
+    const gA = gripOn(A, p, [0, 255], 1.1);
+    show(gA, m('lev', .5));
+    prog(q => { const a = 24 * io(q); A.set({ a, d: A.R * rad(a) * .5, raw: true }); }, m('lev', 1.5), 2, lin);
+    arcArrowTip(p, A, m('lev', 1.5));
+    pill(p, 'рычаг увеличивает силу в суставе', 380, 650, m('l1'), { col: COL.bad, size: 21 });
+    pill(p, 'сжатие на стороне качения', 380, 705, m('l2'), { col: COL.bad, size: 21 });
+    pill(p, 'качение без скольжения — не норма', 380, 760, m('l3'), { col: COL.bad, size: 21 });
+    txt(p, 'сжатие', A.stage([0, 0])[0] + 110, A.stage([0, 0])[1] - 70, m('l2'), { size: 22, weight: 700, fill: COL.bad });
+    // joint-glide stretching: the hand close to the joint, a small glide, the capsule on that side tightens
+    const B = jointGlide(p, { x: 1180, y: 360, s: .85, shaft: 200, t0: m('glide') });
+    txt(p, 'растяжка скольжением', 1180, 95, m('glide'), { size: 25, weight: 700, fill: COL.good, anchor: 'middle' });
+    const gB = gripOn(B, p, [0, 105], 1.1);
+    show(gB, m('glide', .5));
+    prog(q => B.set({ d: 13 * io(q) }), m('glide', 1.5), 1.6, lin);
+    arrowTo(p, [B.stage([0, 0])[0] + 45, B.stage([0, 0])[1] + 160], [B.stage([0, 0])[0] + 115, B.stage([0, 0])[1] + 160], m('glide', 1.5), { col: COL.whole, w: 5 });
+    pill(p, 'сила близко к суставу, дозируется', 1180, 650, m('g1'), { col: COL.good, size: 21 });
+    pill(p, 'повторяет скольжение — хрящ не сжат', 1180, 705, m('g2'), { col: COL.good, size: 21 });
+    pill(p, 'малая амплитуда — точно на тугой участок', 1180, 760, m('g3'), { col: ANAT.taut, size: 21 });
+    txt(p, 'капсула', B.stage([0, 0])[0] + 110, B.stage([0, 0])[1] + 40, m('g3'), { size: 22, weight: 700, fill: ANAT.taut });
+  }],
+
+  ['comp', 'Сжатие', (m) => {
+    const p = panel(0), j = jointGlide(p, { x: 430, y: 430, s: 1.1, shaft: 170, t0: .2 });
+    fluidIn(j);
+    txt(p, 'сжатие: суставная щель уменьшается', 430, 100, m('comp'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    prog(q => j.set({ n: -8 * io(q) }), m('comp', 1), 1.2, lin);
+    prog(q => j.set({ n: -8 * (1 - io(q)) }), m('wb', 3), 1, lin);
+    // intermittent compression pumps the synovial fluid
+    prog(q => j.set({ n: -7 * Math.sin(2 * Math.PI * 3 * q) * (Math.sin(2 * Math.PI * 3 * q) > 0 ? 1 : .6) }), m('pump'), 4.5, lin);
+    txt(p, 'синовиальная жидкость', 560, 300, m('pump', .5), { size: 22, fill: FLUID });
+    infoCard(p, 880, 120, 640, 150, 'в норме', 'при опоре на конечность и в суставах позвоночника', COL.whole, m('wb'), { size: 23 });
+    infoCard(p, 880, 290, 640, 150, 'мышцы', 'сокращаясь, немного сжимают сустав — он стабильнее', COL.nat, m('mus'), { size: 23 });
+    infoCard(p, 880, 460, 640, 120, 'при качении — на стороне отклонения кости', null, COL.task, m('roll'), { size: 23 });
+    infoCard(p, 880, 600, 640, 120, 'прерывистое сжатие → питание хряща', null, COL.good, m('pump'), { size: 23 });
+    infoCard(p, 880, 740, 640, 120, 'чрезмерное → разрушение хряща', null, COL.bad, m('high'), { size: 23 });
+  }],
+
+  ['trac', 'Тракция и дистракция', (m) => {
+    const p = panel(0);
+    txt(p, 'тракция — продольная тяга · дистракция — разведение поверхностей', 800, 95, m('ne'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // the right shoulder from the front, arm at the side: the glenoid faces right, the humerus hangs down
+    const mkSh = (x, t0) => jointGlide(p, { x, y: 330, s: .85, r: -90, movAng: -90, shaft: 260, t0 });
+    const A = mkSh(330, .2), B = mkSh(1000, m('perp'));
+    [A, B].forEach((j, i) => {
+      const C = j.stage([0, 0]);
+      txt(p, 'впадина', C[0] - 105, C[1] - 70, i ? m('perp') : .4, { size: 21, fill: COL.dim, anchor: 'end' });
+      txt(p, 'плечевая кость', C[0] + 50, C[1] + 230, i ? m('perp') : .4, { size: 21, fill: COL.dim });
+    });
+    const CA = A.stage([0, 0]);
+    arrowTo(p, [CA[0], CA[1] + 260], [CA[0], CA[1] + 340], m('side', 1.5), { col: COL.whole, w: 6 });
+    prog(q => A.set({ d: -14 * io(q) }), m('side', 2), 1.6, lin);
+    labelBox(p, CA[0], 760, 560, ['тяга по длинной оси, рука вдоль тела', '→ головка скользит вниз'], COL.whole, m('side', 3), { size: 24 });
+    const CB = B.stage([0, 0]);
+    arrowTo(p, [CB[0] + 110, CB[1]], [CB[0] + 200, CB[1]], m('perp', 1), { col: COL.good, w: 6 });
+    prog(q => B.set({ n: 12 * io(q) }), m('perp', 1.4), 1.6, lin);
+    labelBox(p, CB[0], 760, 560, ['под прямым углом к впадине', '→ поверхности расходятся'], COL.good, m('perp', 2.5), { size: 24 });
+    pill(p, 'в книге: «тракция по длинной оси» ≠ «дистракция»', 800, 860, m('terms'), { col: COL.task, size: 22 });
+    const tips = G(p, { o: 0 });
+    roundBox(tips, 1250, 150, 320, 330, COL.good, PANEL, 2.5);
+    [['мягкая дистракция', '→ меньше боли'], ['с силой растяжения', '→ растягивает капсулу'], ['+ лёгкая дистракция', 'к скольжениям — удобнее']].forEach(([a, b], i) => {
+      T(tips, a, { x: 1272, y: 200 + i * 100, size: 22, weight: 700, fill: COL.good });
+      T(tips, b, { x: 1272, y: 232 + i * 100, size: 21, fill: COL.chalk });
+    });
+    show(tips, m('tip'));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-trac', prompt: ['Рука опущена вдоль тела. Терапевт тянет плечевую кость вниз по длинной оси. Что произойдёт в плечевом суставе?'],
+    build: choice([
+      ['Головка скользнёт вниз по суставной впадине'],
+      ['Поверхности разойдутся'],
+      ['Головка прижмётся к впадине'],
+      ['Ничего не произойдёт'],
+    ], 0, 'Тяга вдоль кости здесь даёт скольжение вниз, а не разведение поверхностей.',
+    [null, 'Для разведения силу направляют под прямым углом к впадине.', 'Это было бы сжатие.', 'Головка смещается — скользит вниз.']),
+  }], done) }],
+
+  ['eff', 'Что даёт движение', (m) => {
+    const p = panel(0);
+    const A = jointGlide(p, { x: 360, y: 400, s: .9, shaft: 170, t0: .2 });
+    fluidIn(A);
+    prog(q => A.set({ a: 22 * Math.sin(2 * Math.PI * 2 * q), n: 4 * Math.sin(2 * Math.PI * 4 * q) }), m('fluid', .5), 6, lin);
+    txt(p, 'движение', 360, 95, .2, { size: 27, weight: 700, fill: COL.good, anchor: 'middle' });
+    pill(p, 'жидкость несёт питание хрящу и менискам', 360, 690, m('fluid', 1), { col: COL.good, size: 21 });
+    pill(p, 'растяжимость и прочность тканей', 360, 745, m('str'), { col: COL.good, size: 21 });
+    // immobilisation: still joint, adhesions, the capsule and ligaments shorten
+    const B = jointGlide(p, { x: 1180, y: 400, s: .9, shaft: 170, t0: m('atro') });
+    txt(p, 'иммобилизация', 1180, 95, m('atro'), { size: 27, weight: 700, fill: COL.bad, anchor: 'middle' });
+    const cast = G(p, { o: 0 });
+    const Cb = B.stage([0, 0]);
+    mk('rect', { x: Cb[0] - 120, y: Cb[1] - 200, width: 240, height: 400, rx: 26, fill: COL.dim, 'fill-opacity': .14, stroke: COL.dim, 'stroke-width': 3, 'stroke-dasharray': '10 8' }, cast);
+    show(cast, m('atro'));
+    const adh = G(p, { o: 0 });
+    [-34, -14, 10, 30].forEach(al => { const P = B.stage(B.cupAt(al)), Q = B.stage(B.headAt(al)); path(adh, `M${P[0].toFixed(1)} ${P[1].toFixed(1)}L${((P[0] + Q[0]) / 2 + 4).toFixed(1)} ${((P[1] + Q[1]) / 2).toFixed(1)}L${Q[0].toFixed(1)} ${Q[1].toFixed(1)}`, { stroke: COL.chalk, 'stroke-width': 3 }); });
+    show(adh, m('imm', 1));
+    pill(p, 'хрящ атрофируется скоро', 1180, 690, m('atro', .8), { col: COL.bad, size: 21 });
+    pill(p, 'спайки, фиброзно-жировая ткань', 1180, 745, m('imm', 1), { col: COL.bad, size: 21 });
+    pill(p, 'контрактуры, слабость связок', 1180, 800, m('imm', 4), { col: COL.bad, size: 21 });
+  }],
+
+  ['recep', 'Рецепторы сустава', (m) => {
+    const p = panel(0), j = jointGlide(p, { x: 420, y: 430, s: 1.15, shaft: 170, t0: .2 });
+    txt(p, 'рецепторы сустава: положение и движение', 420, 95, m('rec'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // a ligament outside the capsule on the left, a fat pad at the rim on the right, a vessel near the joint
+    const lig = ligEl(j.g, { rest: 230, w: 7 });
+    const L1 = [-(j.Rc + 34), -(j.Rc + 10)], L2 = j.movPt([-(j.R + 32), j.R + 52]);
+    lig.set(L1, L2);
+    mk('ellipse', { cx: j.R + 2, cy: -24, rx: 11, ry: 20, fill: ANAT.taut, 'fill-opacity': .55, stroke: ANAT.tendon, 'stroke-width': 2 }, j.g);
+    path(j.g, 'M150 -170Q120 0 150 170', { stroke: COL.bad, 'stroke-width': 3, 'stroke-opacity': .6 });
+    const mark = (pts, col, t0) => { const g = G(j.g, { o: 0 }); pts.forEach(([x, y]) => mk('circle', { cx: x, cy: y, r: 8, fill: col, stroke: COL.board, 'stroke-width': 2 }, g)); show(g, t0); pulse(g, t0 + .3, 1.15); return g; };
+    mark([[-(j.R + 17), -30], [j.R + 17, 10], [-(j.R + 15), 35]], COL.whole, m('t1'));
+    mark([[-(j.R + 4), 5], [j.R + 4, -40], [j.R + 2, -24]], COL.good, m('t2'));
+    mark([[L1[0] + (L2[0] - L1[0]) * .4, L1[1] + (L2[1] - L1[1]) * .4], [L1[0] + (L2[0] - L1[0]) * .7, L1[1] + (L2[1] - L1[1]) * .7]], COL.real, m('t3'));
+    mark([[-(j.R + 19), 5], [L1[0] + (L2[0] - L1[0]) * .55, L1[1] + (L2[1] - L1[1]) * .55], [j.R + 10, -18], [34, 150], [140, 60]], COL.bad, m('t4'));
+    txt(p, 'связка', j.stage(L1)[0] - 20, j.stage(L1)[1] - 14, m('t3'), { size: 20, fill: COL.dim, anchor: 'end' });
+    txt(p, 'жировая подушка', 610, 395, m('t2'), { size: 20, fill: COL.dim });
+    txt(p, 'сосуд', 610, 640, m('t4'), { size: 20, fill: COL.dim });
+    const rows = [['I', 'поверхностная капсула: положение и скорость', COL.whole, 't1'], ['II', 'глубокая капсула, жировые подушки: изменение скорости', COL.good, 't2'],
+      ['I + III', 'направление движения; III — в связках', COL.real, 't3'], ['I–III', 'регуляция мышечного тонуса', COL.task, 'tone'], ['IV', 'боль: капсула, связки, подушки, надкостница, сосуды', COL.bad, 't4']];
+    rows.forEach(([n, str, col, mk0], i) => {
+      const g = G(p, { o: 0 });
+      roundBox(g, 860, 130 + i * 118, 680, 100, col, PANEL, 2.5);
+      T(g, n, { x: 920, y: 191 + i * 118, size: 28, weight: 700, fill: col, anchor: 'middle' });
+      put(para(g, str, 990, 172 + i * 118, null, { size: 22, maxW: 530 }), { o: 1 });
+      show(g, m(mk0));
+    });
+    labelBox(p, 420, 840, 760, ['травма, выпот, дегенерация → меньше сигналов → хуже равновесие'], COL.int, m('bal'), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-rec', prompt: ['Какой тип рецепторов?'],
+    build: grid([
+      { parts: ['Поверхностный слой капсулы: положение и скорость'], ans: ['1'], why: 'Тип I.' },
+      { parts: ['Глубокие слои капсулы и жировые подушки: изменение скорости'], ans: ['2'], why: 'Тип II.' },
+      { parts: ['Находится в связках, сообщает о направлении'], ans: ['3'], why: 'Тип III.' },
+      { parts: ['Болевые сигналы, в том числе от надкостницы и стенок сосудов'], ans: ['4'], why: 'Тип IV.' },
+    ], [['1', 'Тип I', COL.whole], ['2', 'Тип II', COL.good], ['3', 'Тип III', COL.real], ['4', 'Тип IV', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Угловая растяжка рычагом сжимает сустав; скольжение безопаснее и избирательнее.', 'w1'],
+     ['Прерывистое сжатие питает хрящ, чрезмерное — разрушает.', 'w2'],
+     ['Тракция по длинной оси не всегда разводит поверхности: для дистракции сила — под прямым углом к вогнутой поверхности.', 'w3'],
+     ['Движение питает хрящ и даёт сигналы рецепторам; иммобилизация ведёт к спайкам и контрактурам.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-dist', prompt: ['Нужно развести поверхности плечевого сустава. Как направить силу?'],
+    build: choice([
+      ['Под прямым углом к суставной впадине'],
+      ['Вниз по длинной оси плечевой кости, рука вдоль тела'],
+      ['Отклонить руку как рычаг'],
+      ['Прижать головку к впадине'],
+    ], 0, 'Дистракция — разведение поверхностей: сила перпендикулярна вогнутой поверхности.',
+    [null, 'Так головка скользит вниз.', 'Рычаг сжимает сустав на стороне качения.', 'Это сжатие.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Рычаг уменьшает силу, действующую на сустав.'], ans: ['f'], why: 'Неверно: многократно увеличивает.' },
+      { parts: ['Прерывистое сжатие помогает питанию хряща.'], ans: ['t'], why: 'Верно: оно гонит синовиальную жидкость.' },
+      { parts: ['Тракция и дистракция — синонимы.'], ans: ['f'], why: 'Неверно: тяга и разведение поверхностей.' },
+      { parts: ['При иммобилизации хрящ начинает атрофироваться очень скоро.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Рецепторы IV типа — болевые.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+// The lever: a long arrow at the far end of the moving bone of j, pushing it into the swing.
+function arcArrowTip(p, j, t0) {
+  const C = j.stage([0, 0]), R = 250 * (st(j.g).s || 1);
+  const g = G(p, { o: 0 });
+  path(g, romArc(C, R, 4, 26, 90, -1), { stroke: COL.bad, 'stroke-width': 6 });
+  const e = rad(90 - 26), x = C[0] + R * Math.cos(e), y = C[1] + R * Math.sin(e), tx = Math.sin(e), ty = -Math.cos(e);
+  path(g, `M${(x - 20 * tx - 11 * ty).toFixed(1)} ${(y - 20 * ty + 11 * tx).toFixed(1)}L${x.toFixed(1)} ${y.toFixed(1)}L${(x - 20 * tx + 11 * ty).toFixed(1)} ${(y - 20 * ty - 11 * tx).toFixed(1)}`, { stroke: COL.bad, 'stroke-width': 6 });
+  show(g, t0);
+  return g;
+}
+
+boot();
+</script>
+</body>
+</html>

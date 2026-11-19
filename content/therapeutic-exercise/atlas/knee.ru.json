@@ -1,0 +1,1893 @@
+{
+  "region": "knee",
+  "exercises": [
+    {
+      "id": "quad-set",
+      "ru": "Изометрия четырёхглавой",
+      "en": "quadriceps setting",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "колено прямо, не переразгибать",
+        "надколенник подтянуть вверх",
+        "удержать на счёт 10"
+      ],
+      "page": 834,
+      "moments": [
+        {
+          "n": 214,
+          "beat": "quad",
+          "mark": "set"
+        },
+        {
+          "n": 202,
+          "beat": "prot",
+          "mark": "set"
+        },
+        {
+          "n": 204,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 206,
+          "beat": "open",
+          "mark": "ex"
+        },
+        {
+          "n": 207,
+          "beat": "rehab",
+          "mark": "max"
+        },
+        {
+          "n": 208,
+          "beat": "phases",
+          "mark": "max"
+        },
+        {
+          "n": 210,
+          "beat": "max",
+          "mark": "quad"
+        },
+        {
+          "n": 211,
+          "beat": "phases",
+          "mark": "max"
+        },
+        {
+          "n": 212,
+          "beat": "phases",
+          "mark": "max"
+        },
+        {
+          "n": 63,
+          "beat": "kinds",
+          "mark": "set"
+        }
+      ],
+      "sand": "j=knee&m=flex&pos=supine&mode=active"
+    },
+    {
+      "id": "slr",
+      "ru": "Подъём прямой ноги",
+      "en": "straight-leg raise",
+      "joint": [
+        "knee",
+        "hip"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "supine",
+        "prone",
+        "side"
+      ],
+      "gear": [
+        "none",
+        "weight"
+      ],
+      "key": [
+        "другая нога согнута",
+        "напрячь бедро, поднять до 45°",
+        "тяжелее всего первые градусы"
+      ],
+      "page": 834,
+      "moments": [
+        {
+          "n": 214,
+          "beat": "quad",
+          "mark": "slr",
+          "shot": 5.5
+        },
+        {
+          "n": 204,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 204,
+          "beat": "mod",
+          "mark": "str"
+        },
+        {
+          "n": 206,
+          "beat": "open",
+          "mark": "ex"
+        },
+        {
+          "n": 207,
+          "beat": "rehab",
+          "mark": "max"
+        },
+        {
+          "n": 208,
+          "beat": "phases",
+          "mark": "max"
+        },
+        {
+          "n": 210,
+          "beat": "max",
+          "mark": "quad"
+        },
+        {
+          "n": 211,
+          "beat": "phases",
+          "mark": "max"
+        },
+        {
+          "n": 212,
+          "beat": "phases",
+          "mark": "max"
+        },
+        {
+          "n": 199,
+          "beat": "flex",
+          "mark": "slr"
+        },
+        {
+          "n": 193,
+          "beat": "ex",
+          "mark": "mf"
+        },
+        {
+          "n": 196,
+          "beat": "max",
+          "mark": "ex"
+        }
+      ],
+      "sand": "j=hip&m=flex&pos=supine&mode=active",
+      "warn": "после артроскопии бедра с микропереломами или остеопластикой — лёжа на спине не раньше 3–4 недель: сильно сжимает сустав"
+    },
+    {
+      "id": "leg-lower",
+      "ru": "Опускание прямой ноги",
+      "en": "straight-leg lowering",
+      "joint": [
+        "knee",
+        "hip"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "при отставании разгибания",
+        "нога в 90°, опускать медленно",
+        "колено прямо, с каждым разом ниже"
+      ],
+      "page": 834,
+      "moments": [
+        {
+          "n": 214,
+          "beat": "quad",
+          "mark": "lower"
+        }
+      ],
+      "sand": "j=hip&m=flex&pos=supine&mode=active"
+    },
+    {
+      "id": "multi-angle",
+      "ru": "Изометрия под разными углами",
+      "en": "multiple-angle isometrics",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "manual",
+        "none"
+      ],
+      "key": [
+        "сопротивление над лодыжкой сидя",
+        "давить бедром в стол — обе группы",
+        "потом — активные движения"
+      ],
+      "page": 834,
+      "moments": [
+        {
+          "n": 214,
+          "beat": "quad",
+          "mark": "iso"
+        },
+        {
+          "n": 214,
+          "beat": "ham",
+          "mark": "iso"
+        },
+        {
+          "n": 202,
+          "beat": "str",
+          "mark": "iso"
+        },
+        {
+          "n": 204,
+          "beat": "mod",
+          "mark": "str"
+        },
+        {
+          "n": 206,
+          "beat": "open",
+          "mark": "ex"
+        },
+        {
+          "n": 210,
+          "beat": "max",
+          "mark": "quad"
+        },
+        {
+          "n": 63,
+          "beat": "kinds",
+          "mark": "multi"
+        }
+      ]
+    },
+    {
+      "id": "short-arc",
+      "ru": "Разгибание с короткой дуги",
+      "en": "short-arc terminal knee extension",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "roll",
+        "weight"
+      ],
+      "key": [
+        "валик под коленом",
+        "сначала без груза",
+        "груз — без боли и хруста"
+      ],
+      "warn": "груз на голени в конце разгибания тянет голень вперёд — не рано после пластики передней крестообразной",
+      "page": 834,
+      "moments": [
+        {
+          "n": 214,
+          "beat": "tke",
+          "mark": "short",
+          "to": "prec"
+        },
+        {
+          "n": 206,
+          "beat": "open",
+          "mark": "tke"
+        }
+      ],
+      "sand": "j=knee&m=flex&pos=supine&mode=active&q=kn:25"
+    },
+    {
+      "id": "full-arc",
+      "ru": "Разгибание по полной дуге",
+      "en": "full-arc extension",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "weight",
+        "machine"
+      ],
+      "key": [
+        "позже, когда колено спокойно",
+        "на тренажёре — малый вес, много раз",
+        "валик ближе к колену — легче связкам"
+      ],
+      "warn": "после пластики передней крестообразной — без сопротивления в последних 30–45° разгибания 6–12 недель",
+      "page": 835,
+      "moments": [
+        {
+          "n": 214,
+          "beat": "tke",
+          "mark": "full"
+        },
+        {
+          "n": 210,
+          "beat": "mod",
+          "mark": "ex"
+        },
+        {
+          "n": 210,
+          "beat": "prec",
+          "mark": "open"
+        }
+      ],
+      "sand": "j=knee&m=flex&pos=sit&mode=active"
+    },
+    {
+      "id": "ham-set",
+      "ru": "Изометрия задней группы",
+      "en": "hamstring setting",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "none",
+        "roll"
+      ],
+      "key": [
+        "колено прямо или с валиком",
+        "мягко давить пяткой в стол",
+        "до лёгкого напряжения"
+      ],
+      "page": 835,
+      "moments": [
+        {
+          "n": 214,
+          "beat": "ham",
+          "mark": "set"
+        },
+        {
+          "n": 202,
+          "beat": "prot",
+          "mark": "set"
+        },
+        {
+          "n": 204,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 208,
+          "beat": "phases",
+          "mark": "max"
+        },
+        {
+          "n": 212,
+          "beat": "phases",
+          "mark": "max"
+        }
+      ],
+      "sand": "j=knee&m=flex&pos=supine&mode=active"
+    },
+    {
+      "id": "ham-curl",
+      "ru": "Сгибание голени",
+      "en": "hamstring curls",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "stand",
+        "prone"
+      ],
+      "gear": [
+        "none",
+        "weight",
+        "band"
+      ],
+      "key": [
+        "стоя — тяжелее всего на 90°",
+        "на животе — тяжелее в начале",
+        "валик под бедро выше надколенника"
+      ],
+      "warn": "груз на голени сдвигает её назад: после задней крестообразной активно против тяжести — не раньше 6–12 недель",
+      "page": 835,
+      "moments": [
+        {
+          "n": 214,
+          "beat": "ham",
+          "mark": "curl",
+          "to": "prec"
+        },
+        {
+          "n": 210,
+          "beat": "max",
+          "mark": "quad"
+        },
+        {
+          "n": 210,
+          "beat": "mod",
+          "mark": "ex"
+        },
+        {
+          "n": 211,
+          "beat": "prec",
+          "mark": "early"
+        }
+      ],
+      "sand": "j=knee&m=flex&pos=stand&mode=active"
+    },
+    {
+      "id": "heel-slide",
+      "ru": "Скольжение пяткой",
+      "en": "heel slides",
+      "joint": [
+        "knee",
+        "hip"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "лёжа или сидя",
+        "сгибать колено, скользя пяткой"
+      ],
+      "page": 788,
+      "moments": [
+        {
+          "n": 204,
+          "beat": "max",
+          "mark": "rom"
+        },
+        {
+          "n": 210,
+          "beat": "max",
+          "mark": "quad"
+        },
+        {
+          "n": 212,
+          "beat": "phases",
+          "mark": "max"
+        },
+        {
+          "n": 199,
+          "beat": "flex",
+          "mark": "heel"
+        },
+        {
+          "n": 196,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 196,
+          "beat": "hemi",
+          "mark": "rehab"
+        }
+      ],
+      "sand": "j=knee&m=flex&pos=supine"
+    },
+    {
+      "id": "patella",
+      "ru": "Мобилизация надколенника",
+      "en": "patellar mobilization",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "supine",
+        "side"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "вниз и вверх по борозде",
+        "медиально — при боли впереди колена",
+        "пациента учат делать самому"
+      ],
+      "page": 795,
+      "moments": [
+        {
+          "n": 206,
+          "beat": "pat",
+          "mark": "glide",
+          "to": "tip"
+        },
+        {
+          "n": 213,
+          "beat": "flex",
+          "mark": "pat"
+        },
+        {
+          "n": 204,
+          "beat": "max",
+          "mark": "rom"
+        },
+        {
+          "n": 210,
+          "beat": "max",
+          "mark": "rom"
+        }
+      ]
+    },
+    {
+      "id": "prone-hang",
+      "ru": "Провисание лёжа на животе",
+      "en": "prone hang",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "prone"
+      ],
+      "gear": [
+        "weight",
+        "roll"
+      ],
+      "key": [
+        "стопа за краем стола",
+        "валик под бедро выше надколенника",
+        "груз на лодыжке — долго и мягко"
+      ],
+      "page": 830,
+      "moments": [
+        {
+          "n": 213,
+          "beat": "ext",
+          "mark": "hang"
+        }
+      ],
+      "sand": "j=knee&m=flex&pos=prone"
+    },
+    {
+      "id": "heel-prop",
+      "ru": "Валик под пятку",
+      "en": "supine heel prop",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "roll",
+        "weight"
+      ],
+      "key": [
+        "колено без опоры",
+        "груз — на бедро, не на надколенник",
+        "сам — ладонями на бедро сидя"
+      ],
+      "warn": "при сильной сгибательной контрактуре не подходит — только у конца разгибания",
+      "page": 831,
+      "moments": [
+        {
+          "n": 213,
+          "beat": "ext",
+          "mark": "prop"
+        },
+        {
+          "n": 204,
+          "beat": "max",
+          "mark": "rom"
+        },
+        {
+          "n": 210,
+          "beat": "max",
+          "mark": "rom"
+        }
+      ],
+      "sand": "j=knee&m=flex&pos=supine"
+    },
+    {
+      "id": "hold-relax",
+      "ru": "Постизометрическая релаксация",
+      "en": "hold-relax",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "supine",
+        "prone",
+        "sit"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "напрячь против руки — расслабить",
+        "колено доводят дальше",
+        "для разгибания и для сгибания"
+      ],
+      "page": 830,
+      "moments": [
+        {
+          "n": 213,
+          "beat": "ext",
+          "mark": "pnf"
+        },
+        {
+          "n": 213,
+          "beat": "flex",
+          "mark": "pnf"
+        },
+        {
+          "n": 202,
+          "beat": "mob",
+          "mark": "str"
+        },
+        {
+          "n": 204,
+          "beat": "mod",
+          "mark": "rom"
+        }
+      ]
+    },
+    {
+      "id": "dangle",
+      "ru": "Свешивание голени сидя",
+      "en": "gravity-assisted knee flexion",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "stretch",
+        "mobility"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none",
+        "weight"
+      ],
+      "key": [
+        "сидя на краю, голени свешены",
+        "расслабить бедро",
+        "можно лёгкий груз на голень"
+      ],
+      "page": 831,
+      "moments": [
+        {
+          "n": 210,
+          "beat": "max",
+          "mark": "rom"
+        },
+        {
+          "n": 204,
+          "beat": "max",
+          "mark": "rom"
+        },
+        {
+          "n": 211,
+          "beat": "prec",
+          "mark": "early"
+        },
+        {
+          "n": 212,
+          "beat": "phases",
+          "mark": "max"
+        },
+        {
+          "n": 213,
+          "beat": "flex",
+          "mark": "pnf",
+          "shot": 11
+        }
+      ],
+      "sand": "j=knee&m=flex&pos=sit",
+      "thumb": 4
+    },
+    {
+      "id": "wall-slide-supine",
+      "ru": "Скольжение по стене лёжа",
+      "en": "gravity-assisted supine wall slide",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "mobility",
+        "stretch"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "ягодицы у стены, ноги вверх",
+        "стопа скользит по стене вниз",
+        "до мягкого натяжения"
+      ],
+      "page": 831,
+      "moments": [
+        {
+          "n": 213,
+          "beat": "flex",
+          "mark": "wall"
+        },
+        {
+          "n": 210,
+          "beat": "max",
+          "mark": "rom"
+        },
+        {
+          "n": 208,
+          "beat": "phases",
+          "mark": "mod"
+        }
+      ]
+    },
+    {
+      "id": "self-flex",
+      "ru": "Самостоятельная растяжка в сгибание",
+      "en": "self-stretching into knee flexion",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "step",
+        "chair"
+      ],
+      "key": [
+        "здоровая нога давит на больную",
+        "покачиваться вперёд на ступеньке",
+        "сдвигаться вперёд на стуле"
+      ],
+      "warn": "на ступеньке — не доводить до прищемления впереди голеностопа",
+      "page": 831,
+      "moments": [
+        {
+          "n": 213,
+          "beat": "flex",
+          "mark": "self"
+        },
+        {
+          "n": 210,
+          "beat": "mod",
+          "mark": "ex"
+        },
+        {
+          "n": 204,
+          "beat": "mod",
+          "mark": "rom"
+        }
+      ]
+    },
+    {
+      "id": "foam-roll",
+      "ru": "Релиз тракта на ролике",
+      "en": "foam roller fascial release",
+      "joint": [
+        "knee",
+        "hip"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "side"
+      ],
+      "gear": [
+        "roll"
+      ],
+      "key": [
+        "лёжа на боку, бедро на ролике",
+        "катать вдоль тракта или держать",
+        "руки и стопа снимают часть веса"
+      ],
+      "page": 832,
+      "moments": [
+        {
+          "n": 213,
+          "beat": "itb",
+          "mark": "roll"
+        }
+      ]
+    },
+    {
+      "id": "co-contract",
+      "ru": "Совместное сокращение сидя",
+      "en": "co-contraction setting",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "control",
+        "strength"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "chair"
+      ],
+      "key": [
+        "пятка в пол, бедро в сиденье",
+        "четырёхглавая и задняя группа вместе",
+        "помогает обратная связь"
+      ],
+      "page": 836,
+      "moments": [
+        {
+          "n": 215,
+          "beat": "iso",
+          "mark": "co"
+        }
+      ]
+    },
+    {
+      "id": "rhythmic",
+      "ru": "Ритмическая стабилизация стоя",
+      "en": "rhythmic stabilization",
+      "joint": [
+        "knee",
+        "hip",
+        "ankle"
+      ],
+      "goal": [
+        "control",
+        "balance"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "manual",
+        "board"
+      ],
+      "key": [
+        "терапевт толкает таз всё быстрее",
+        "потом стоя на больной ноге",
+        "потом на неустойчивой опоре"
+      ],
+      "page": 836,
+      "moments": [
+        {
+          "n": 215,
+          "beat": "iso",
+          "mark": "rs"
+        },
+        {
+          "n": 210,
+          "beat": "max",
+          "mark": "neuro"
+        },
+        {
+          "n": 208,
+          "beat": "phases",
+          "mark": "neuro"
+        },
+        {
+          "n": 200,
+          "beat": "prin",
+          "mark": "iso"
+        },
+        {
+          "n": 196,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 227,
+          "beat": "cc",
+          "mark": "stab"
+        }
+      ]
+    },
+    {
+      "id": "band-iso",
+      "ru": "Изометрия против резинки стоя",
+      "en": "closed-chain isometrics against elastic resistance",
+      "joint": [
+        "knee",
+        "hip",
+        "ankle"
+      ],
+      "goal": [
+        "control",
+        "strength"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "band"
+      ],
+      "key": [
+        "стоять на больной ноге",
+        "резинка на другой, махи вперёд-назад",
+        "с разной скоростью"
+      ],
+      "page": 837,
+      "moments": [
+        {
+          "n": 215,
+          "beat": "iso",
+          "mark": "band"
+        },
+        {
+          "n": 200,
+          "beat": "single",
+          "mark": "set",
+          "to": "aim"
+        },
+        {
+          "n": 227,
+          "beat": "cc",
+          "mark": "band"
+        }
+      ]
+    },
+    {
+      "id": "stool",
+      "ru": "Катание на стуле с колёсами",
+      "en": "scooting on a wheeled stool",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "chair"
+      ],
+      "key": [
+        "вперёд — работает задняя группа",
+        "назад — четырёхглавая",
+        "колено над стопой"
+      ],
+      "page": 837,
+      "moments": [
+        {
+          "n": 215,
+          "beat": "dyn",
+          "mark": "stool"
+        },
+        {
+          "n": 210,
+          "beat": "max",
+          "mark": "quad"
+        },
+        {
+          "n": 204,
+          "beat": "mod",
+          "mark": "str"
+        }
+      ]
+    },
+    {
+      "id": "tke-stand",
+      "ru": "Концевое разгибание стоя с резинкой",
+      "en": "closed-chain terminal knee extension",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "band"
+      ],
+      "key": [
+        "резинка вокруг бедра, крепится спереди",
+        "разгибать колено под нагрузкой"
+      ],
+      "page": 837,
+      "moments": [
+        {
+          "n": 215,
+          "beat": "dyn",
+          "mark": "tke"
+        },
+        {
+          "n": 204,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 204,
+          "beat": "mod",
+          "mark": "str"
+        },
+        {
+          "n": 206,
+          "beat": "closed",
+          "mark": "prog"
+        }
+      ]
+    },
+    {
+      "id": "mini-squat",
+      "ru": "Мини-приседания",
+      "en": "minisquats",
+      "joint": [
+        "knee",
+        "hip"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "band",
+        "weight"
+      ],
+      "key": [
+        "до 30–45°",
+        "таз назад, туловище прямо",
+        "колени над носками"
+      ],
+      "warn": "колени не дальше носков; после пластики передней крестообразной — без нагрузки в 60–90°, после шва мениска — не глубже 45° первые 4 недели",
+      "page": 837,
+      "moments": [
+        {
+          "n": 215,
+          "beat": "dyn",
+          "mark": "squat"
+        },
+        {
+          "n": 210,
+          "beat": "max",
+          "mark": "neuro"
+        },
+        {
+          "n": 210,
+          "beat": "prec",
+          "mark": "closed"
+        },
+        {
+          "n": 204,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 212,
+          "beat": "prec",
+          "mark": "early"
+        },
+        {
+          "n": 206,
+          "beat": "closed",
+          "mark": "prog"
+        },
+        {
+          "n": 202,
+          "beat": "str",
+          "mark": "func"
+        },
+        {
+          "n": 200,
+          "beat": "squat",
+          "mark": "mini"
+        },
+        {
+          "n": 195,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 195,
+          "beat": "mod",
+          "mark": "str"
+        },
+        {
+          "n": 196,
+          "beat": "late",
+          "mark": "goals"
+        },
+        {
+          "n": 219,
+          "beat": "ex",
+          "mark": "str"
+        },
+        {
+          "n": 223,
+          "beat": "ex",
+          "mark": "max"
+        },
+        {
+          "n": 224,
+          "beat": "ph",
+          "mark": "mod"
+        }
+      ]
+    },
+    {
+      "id": "wall-slide",
+      "ru": "Скольжение по стене стоя",
+      "en": "standing wall slides",
+      "joint": [
+        "knee",
+        "hip",
+        "trunk"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "band",
+        "ball"
+      ],
+      "key": [
+        "спиной к стене — вниз и вверх",
+        "не глубже 60°",
+        "резинка над коленями — колени не внутрь"
+      ],
+      "page": 837,
+      "moments": [
+        {
+          "n": 215,
+          "beat": "dyn",
+          "mark": "wall"
+        },
+        {
+          "n": 204,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 212,
+          "beat": "phases",
+          "mark": "max"
+        },
+        {
+          "n": 210,
+          "beat": "mod",
+          "mark": "ex"
+        },
+        {
+          "n": 206,
+          "beat": "closed",
+          "mark": "prog"
+        },
+        {
+          "n": 200,
+          "beat": "squat",
+          "mark": "wall"
+        },
+        {
+          "n": 155,
+          "beat": "prep",
+          "mark": "ws"
+        },
+        {
+          "n": 140,
+          "beat": "stab2",
+          "mark": "prog"
+        },
+        {
+          "n": 230,
+          "beat": "le1",
+          "mark": "wall"
+        },
+        {
+          "n": 247,
+          "beat": "limbs",
+          "mark": "squat"
+        }
+      ]
+    },
+    {
+      "id": "step",
+      "ru": "Ступеньки",
+      "en": "step-ups and step-downs",
+      "joint": [
+        "knee",
+        "hip"
+      ],
+      "goal": [
+        "strength",
+        "function"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "step",
+        "band",
+        "weight"
+      ],
+      "key": [
+        "с 5–8 см, потом выше",
+        "колено над стопой",
+        "подъём и медленный спуск"
+      ],
+      "page": 838,
+      "moments": [
+        {
+          "n": 215,
+          "beat": "step",
+          "mark": "how",
+          "to": "emg"
+        },
+        {
+          "n": 204,
+          "beat": "mod",
+          "mark": "str"
+        },
+        {
+          "n": 210,
+          "beat": "mod",
+          "mark": "ex"
+        },
+        {
+          "n": 210,
+          "beat": "min",
+          "mark": "what"
+        },
+        {
+          "n": 202,
+          "beat": "str",
+          "mark": "func"
+        },
+        {
+          "n": 200,
+          "beat": "steps",
+          "mark": "step"
+        },
+        {
+          "n": 195,
+          "beat": "mod",
+          "mark": "str"
+        },
+        {
+          "n": 196,
+          "beat": "late",
+          "mark": "goals"
+        }
+      ]
+    },
+    {
+      "id": "lunge",
+      "ru": "Выпады",
+      "en": "lunges",
+      "joint": [
+        "knee",
+        "hip",
+        "trunk"
+      ],
+      "goal": [
+        "strength",
+        "function"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "weight"
+      ],
+      "key": [
+        "сначала короткий шаг, малое сгибание",
+        "колено не дальше носков",
+        "потом груз, скорость, диагонали"
+      ],
+      "warn": "после шва мениска — не глубже 45° первые 4 недели, глубокие — через 4–6 месяцев",
+      "page": 838,
+      "moments": [
+        {
+          "n": 215,
+          "beat": "step",
+          "mark": "lunge"
+        },
+        {
+          "n": 204,
+          "beat": "mod",
+          "mark": "str"
+        },
+        {
+          "n": 210,
+          "beat": "mod",
+          "mark": "ex"
+        },
+        {
+          "n": 210,
+          "beat": "min",
+          "mark": "what"
+        },
+        {
+          "n": 212,
+          "beat": "prec",
+          "mark": "early"
+        },
+        {
+          "n": 202,
+          "beat": "str",
+          "mark": "func",
+          "shot": 6
+        },
+        {
+          "n": 200,
+          "beat": "steps",
+          "mark": "lunge"
+        },
+        {
+          "n": 195,
+          "beat": "mod",
+          "mark": "str"
+        },
+        {
+          "n": 196,
+          "beat": "late",
+          "mark": "goals"
+        },
+        {
+          "n": 219,
+          "beat": "ex",
+          "mark": "str"
+        },
+        {
+          "n": 224,
+          "beat": "ph",
+          "mark": "mod"
+        },
+        {
+          "n": 155,
+          "beat": "prep",
+          "mark": "lun"
+        },
+        {
+          "n": 230,
+          "beat": "le2",
+          "mark": "lunge",
+          "to": "multi"
+        }
+      ],
+      "thumb": 5
+    },
+    {
+      "id": "leg-press",
+      "ru": "Жим ногами",
+      "en": "leg press",
+      "joint": [
+        "knee",
+        "hip"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "machine"
+      ],
+      "key": [
+        "закрытая цепь на тренажёре",
+        "высокие эксцентрические нагрузки"
+      ],
+      "warn": "после шва мениска — с 8 недель и в пределах 0–60°",
+      "page": 839,
+      "moments": [
+        {
+          "n": 215,
+          "beat": "func",
+          "mark": "str"
+        },
+        {
+          "n": 210,
+          "beat": "max",
+          "mark": "neuro",
+          "shot": 6
+        },
+        {
+          "n": 208,
+          "beat": "phases",
+          "mark": "mod"
+        },
+        {
+          "n": 212,
+          "beat": "prec",
+          "mark": "early"
+        }
+      ],
+      "thumb": 1
+    },
+    {
+      "id": "balance",
+      "ru": "Тренировка равновесия",
+      "en": "balance and perturbation training",
+      "joint": [
+        "knee",
+        "ankle",
+        "hip"
+      ],
+      "goal": [
+        "balance",
+        "control"
+      ],
+      "phase": [
+        "max",
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "board"
+      ],
+      "key": [
+        "от двух ног к одной",
+        "от устойчивой опоры к неустойчивой",
+        "толчки, перенос веса, шаги"
+      ],
+      "page": 839,
+      "moments": [
+        {
+          "n": 215,
+          "beat": "func",
+          "mark": "bal"
+        },
+        {
+          "n": 210,
+          "beat": "mod",
+          "mark": "neuro"
+        },
+        {
+          "n": 204,
+          "beat": "mod",
+          "mark": "bal"
+        },
+        {
+          "n": 212,
+          "beat": "phases",
+          "mark": "max"
+        },
+        {
+          "n": 212,
+          "beat": "phases",
+          "mark": "mod"
+        },
+        {
+          "n": 208,
+          "beat": "phases",
+          "mark": "neuro",
+          "shot": 4
+        },
+        {
+          "n": 200,
+          "beat": "func",
+          "mark": "box"
+        },
+        {
+          "n": 195,
+          "beat": "mod",
+          "mark": "gait"
+        },
+        {
+          "n": 192,
+          "beat": "str",
+          "mark": "mus"
+        },
+        {
+          "n": 222,
+          "beat": "ret",
+          "mark": "nm"
+        },
+        {
+          "n": 223,
+          "beat": "ex2",
+          "mark": "bal"
+        },
+        {
+          "n": 219,
+          "beat": "ex",
+          "mark": "str"
+        },
+        {
+          "n": 218,
+          "beat": "str",
+          "mark": "bal"
+        },
+        {
+          "n": 227,
+          "beat": "prog",
+          "mark": "eq"
+        },
+        {
+          "n": 77,
+          "beat": "bal",
+          "mark": "bal"
+        },
+        {
+          "n": 94,
+          "beat": "acl",
+          "mark": "ex"
+        },
+        {
+          "n": 94,
+          "beat": "acl",
+          "mark": "dyad"
+        }
+      ],
+      "thumb": 5
+    },
+    {
+      "id": "plyo",
+      "ru": "Плиометрика и ловкость",
+      "en": "plyometrics and agility",
+      "joint": [
+        "knee",
+        "body",
+        "ankle"
+      ],
+      "goal": [
+        "function"
+      ],
+      "phase": [
+        "min"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "быстрое растяжение — сокращение",
+        "прыжки с правильным приземлением",
+        "смена направления, повороты"
+      ],
+      "warn": "сначала исправить вальгусный провал колена и опускание таза; после эндопротеза голеностопа — не подходит",
+      "page": 839,
+      "moments": [
+        {
+          "n": 215,
+          "beat": "func",
+          "mark": "plyo"
+        },
+        {
+          "n": 210,
+          "beat": "min",
+          "mark": "what",
+          "shot": 4
+        },
+        {
+          "n": 212,
+          "beat": "phases",
+          "mark": "min"
+        },
+        {
+          "n": 212,
+          "beat": "pmen",
+          "mark": "late"
+        },
+        {
+          "n": 208,
+          "beat": "phases",
+          "mark": "min"
+        },
+        {
+          "n": 200,
+          "beat": "func",
+          "mark": "adv"
+        },
+        {
+          "n": 197,
+          "beat": "ret",
+          "mark": "fn"
+        },
+        {
+          "n": 224,
+          "beat": "prec",
+          "mark": "min"
+        },
+        {
+          "n": 222,
+          "beat": "ret",
+          "mark": "func"
+        },
+        {
+          "n": 223,
+          "beat": "ex2",
+          "mark": "bal"
+        },
+        {
+          "n": 219,
+          "beat": "ex",
+          "mark": "prec"
+        },
+        {
+          "n": 77,
+          "beat": "bal",
+          "mark": "tramp"
+        },
+        {
+          "n": 232,
+          "beat": "le1",
+          "mark": "kick",
+          "to": "shuf"
+        }
+      ],
+      "thumb": 1
+    },
+    {
+      "id": "bike",
+      "ru": "Велотренажёр",
+      "en": "stationary cycling",
+      "joint": [
+        "knee",
+        "hip",
+        "trunk"
+      ],
+      "goal": [
+        "endurance",
+        "mobility"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "machine"
+      ],
+      "key": [
+        "внизу колено разогнуто",
+        "высокое седло — для разгибания",
+        "низкое седло — для сгибания"
+      ],
+      "warn": "после шва мениска — седло как можно выше",
+      "page": 839,
+      "moments": [
+        {
+          "n": 215,
+          "beat": "func",
+          "mark": "aero"
+        },
+        {
+          "n": 202,
+          "beat": "str",
+          "mark": "aero"
+        },
+        {
+          "n": 204,
+          "beat": "mod",
+          "mark": "str"
+        },
+        {
+          "n": 210,
+          "beat": "max",
+          "mark": "neuro"
+        },
+        {
+          "n": 212,
+          "beat": "phases",
+          "mark": "mod"
+        },
+        {
+          "n": 212,
+          "beat": "prec",
+          "mark": "early"
+        },
+        {
+          "n": 192,
+          "beat": "prot",
+          "mark": "stiff"
+        },
+        {
+          "n": 192,
+          "beat": "str",
+          "mark": "ckc"
+        },
+        {
+          "n": 193,
+          "beat": "ex",
+          "mark": "lab"
+        },
+        {
+          "n": 195,
+          "beat": "mod",
+          "mark": "str"
+        },
+        {
+          "n": 196,
+          "beat": "late",
+          "mark": "goals"
+        },
+        {
+          "n": 218,
+          "beat": "str",
+          "mark": "aer"
+        },
+        {
+          "n": 219,
+          "beat": "ex",
+          "mark": "str"
+        },
+        {
+          "n": 222,
+          "beat": "ctrl",
+          "mark": "str"
+        },
+        {
+          "n": 223,
+          "beat": "ex2",
+          "mark": "aer"
+        },
+        {
+          "n": 224,
+          "beat": "ph",
+          "mark": "max"
+        },
+        {
+          "n": 227,
+          "beat": "prog",
+          "mark": "eq"
+        },
+        {
+          "n": 154,
+          "beat": "act",
+          "mark": "bike"
+        },
+        {
+          "n": 26,
+          "beat": "other",
+          "mark": "rec"
+        },
+        {
+          "n": 77,
+          "beat": "recip",
+          "mark": "cyc",
+          "to": "port"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+[
+ {
+  "beat": "fmgmt",
+  "fig": 0,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает rectus, фигура ×0.66",
+  "off": "места для лупы нет"
+ }
+]

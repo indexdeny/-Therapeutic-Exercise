@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мобилизация с движением — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 48, title: 'Мобилизация с движением (MWM)', minutes: 7, language: 'ru', next: '../ch049/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch048/cards.ru.json
+const CARDS_SHORT = {
+  "самолечение\nспортивный тейп или скольжение, которое пациент даёт сам во время активного движения": "тейп или скольжение во время движения",
+  "позиционное нарушение\nмодель Маллигана: кость стоит неправильно, скольжение её выравнивает": "скольжение выравнивает кость",
+  "другие модели\nизменённая мгновенная ось вращения, неправильное скольжение; нейрофизиологический ответ": "ось вращения, скольжение",
+  "хроническая боль снаружи локтя\nкак и после манипуляций на позвоночнике → ответ многосистемный: позвоночник или локоть": "ответ многосистемный",
+};
+// cards-short end
+
+const HAND = '#b9cfe0';
+const gripOval = (p, k = 1) => { const e = mk('ellipse', { rx: 24 * k, ry: 16 * k, fill: HAND, 'fill-opacity': .9, stroke: '#7d93a3', 'stroke-width': 2 }, p); put(e, { o: 0 }); return e; };
+// A standing figure that raises its arm (shoulder flexion), with a range arc and a pain spot on the shoulder.
+// arm(a) sets the flexion; pain(on) shows or hides the spot. The therapist's grip sits on the shoulder.
+function reachScene(p, x, y, s, t0) {
+  const f = fig(p, { x, y, s, o: 0 });
+  show(f.g, t0);
+  const arc = path(p, '', { stroke: COL.good, 'stroke-width': 4, 'stroke-dasharray': '7 7' }, { o: 0 });
+  const spot = G(p, { o: 0 });
+  mk('circle', { r: 22, fill: COL.bad, 'fill-opacity': .35, stroke: COL.bad, 'stroke-width': 4 }, spot);
+  const grip = gripOval(p, 1.1);
+  const sc = { f, arc, spot, grip, a: 0 };
+  sc.arm = a => { sc.a = a; f.set({ aN: a, eN: 6 }); const S = onStage(f, 'Sh'); arc.setAttribute('d', romArc(S, 125 * s, 0, a, 90, -1)); put(spot, { x: S[0] + 4, y: S[1] + 6 }); put(grip, { x: S[0] + 10, y: S[1] + 16 }); return sc; };
+  sc.arm(4);
+  return sc;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Мобилизация с движением', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 5 · Урок 48', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Мобилизация с движением', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, '(mobilization with movement, MWM)', { x: 800, y: 380, size: 34, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'концепция Маллигана', 800, 460, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), sc = reachScene(art, 800, 600, .8, 0);
+    show(art, m('sub', .2));
+    prog(q => sc.arm(lerp(4, 165, (1 - Math.cos(2 * Math.PI * q)) / 2)), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['what', 'Что такое MWM', (m) => {
+    const p = panel(0);
+    // the development of manual therapy, one step after another on one line
+    const evo = ['самостоятельная растяжка', 'пассивные физиологические', 'пассивные добавочные', 'MWM'], gap = 70;
+    let ex = 800 - (evo.reduce((a, str) => a + uiW(str, 22), 0) + gap * 3) / 2;
+    evo.forEach((str, i) => {
+      txt(p, str, ex, 128, m('evo', .5 + i * 1.3), { size: 22, weight: 700, fill: i === 3 ? COL.task : COL.whole });
+      ex += uiW(str, 22);
+      if (i < 3) txt(p, '→', ex + gap / 2, 128, m('evo', 1.1 + i * 1.3), { size: 26, fill: COL.dim, anchor: 'middle' });
+      ex += gap;
+    });
+    const sc = reachScene(p, 380, 560, 1.2, m('def'));
+    show(sc.grip, m('def', 1));
+    arrowTo(p, [490, 420], [490, 480], m('def', 1.2), { col: COL.whole, w: 5 });
+    txt(p, 'скольжение — терапевт', 520, 455, m('def', 1.2), { size: 21, fill: COL.whole });
+    prog(q => { sc.arm(lerp(4, 165, io(q))); put(sc.arc, { o: 1 }); }, m('def', 2.5), 2.4, lin);
+    txt(p, 'пациент: движение', 160, 290, m('def', 2.5), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    arrowTo(p, [300, 225], [355, 245], m('def', 5.5), { col: COL.task, w: 5 });
+    txt(p, 'давление в конце', 215, 215, m('def', 5.5), { size: 21, fill: COL.task, anchor: 'middle' });
+    NOTE(p, 380, 850, m('def', 1));
+    txt(p, 'когда применять', 1180, 230, m('when'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ['нет противопоказаний к мануальной терапии', 'полное ортопедическое обследование: местная патология', 'биомеханика: локальная потеря движения или боль при функции', 'боли нет — ни во время, ни сразу после'].forEach((str, i) => {
+      const g = G(p, { o: 0 }), y = 280 + i * 130;
+      roundBox(g, 830, y, 700, 110, i === 3 ? COL.good : COL.whole, PANEL, 2.5);
+      put(para(g, str, 900, y + 45, null, { size: 22, maxW: 600 }), { o: 1 });
+      show(g, i < 3 ? m('when', .5 + i * 2.2) : m('nopain'));
+      checkMark(p, 865, y + 55, (i < 3 ? m('when', .5 + i * 2.2) : m('nopain')) + .3, i === 3 ? COL.good : COL.whole, 1.2);
+    });
+  }],
+
+  ['steps', 'Порядок', (m) => {
+    const p = panel(0), sc = reachScene(p, 330, 560, 1.15, .2);
+    // 1. the comparable sign: the reach stops at about 100° with pain
+    prog(q => { sc.arm(lerp(4, 100, io(q))); put(sc.arc, { o: 1 }); }, m('cs', 1), 1.6, lin);
+    show(sc.spot, m('cs', 2.4)); pulse(sc.spot, m('cs', 2.6), 1.3);
+    prog(q => sc.arm(lerp(100, 4, io(q))), m('cs', 4.5), 1.2, lin);
+    hide(sc.spot, m('cs', 4.6), .3);
+    // 2. trying glides: one hurts, one does not
+    show(sc.grip, m('pass'));
+    const S0 = onStage(sc.f, 'Sh');
+    arrowTo(p, [S0[0] + 70, S0[1] - 40], [S0[0] + 70, S0[1] - 100], m('pass', 3), { col: COL.bad, w: 5 });
+    cross(p, S0[0] + 115, S0[1] - 70, 14, m('pass', 4));
+    arrowTo(p, [S0[0] + 90, S0[1] + 10], [S0[0] + 160, S0[1] + 10], m('pass', 6), { col: COL.good, w: 5 });
+    checkMark(p, S0[0] + 185, S0[1] + 12, m('pass', 7), COL.good, 1.3);
+    // 3. the comparable sign while the glide is held: more range, no pain
+    prog(q => sc.arm(lerp(4, 165, io(q))), m('act', 1.5), 2.4, lin);
+    txt(p, 'больше объём · без боли', 330, 120, m('act', 3), { size: 24, weight: 700, fill: COL.good, anchor: 'middle' });
+    // 5. repetitions
+    const cnt = txt(p, '', 330, 870, m('rep'), { size: 28, weight: 700, fill: COL.task, anchor: 'middle' });
+    prog(q => { const n = Math.min(8, 1 + Math.floor(q * 8)); cnt.textContent = `повтор ${n} из 6–10`; sc.arm(lerp(60, 165, (1 - Math.cos(2 * Math.PI * 4 * q)) / 2)); }, m('rep', .5), 6, lin);
+    NOTE(p, 330, 160, m('pass', .5));
+    const steps = [['1', 'сопоставимый признак', 'положительная проба, которую можно повторить', 'cs'], ['2', 'безболезненное добавочное движение', 'скольжение, вращение, тракция — направление и степень', 'pass'],
+      ['3', 'признак при удержании скольжения', 'объём больше, прежней боли нет', 'act'], ['4', 'всё время следить: боли нет', 'не помогло — другое направление или степень; или не показан', 'mon'], ['5', '6–10 повторений', '+ безболезненное давление в конце объёма', 'rep']];
+    steps.forEach(([n, a, b, mk0], i) => {
+      const g = G(p, { o: 0 }), y = 100 + i * 152;
+      roundBox(g, 760, y, 780, 136, COL.whole, PANEL, 2.5);
+      mk('circle', { cx: 806, cy: y + 46, r: 24, fill: COL.task }, g);
+      T(g, n, { x: 806, y: y + 56, size: 26, weight: 700, fill: COL.board, anchor: 'middle' });
+      T(g, a, { x: 848, y: y + 56, size: 25, weight: 700, fill: COL.chalk });
+      put(para(g, b, 848, y + 96, null, { size: 21, fill: COL.dim, maxW: 670 }), { o: 1 });
+      show(g, m(mk0));
+    });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-steps', prompt: ['Расставьте шаги по порядку.'],
+    build: grid([
+      { parts: ['Найти безболезненное добавочное движение'], ans: ['2'], why: 'Второй шаг.' },
+      { parts: ['Найти сопоставимый признак'], ans: ['1'], why: 'С него начинают.' },
+      { parts: ['Повторить 6–10 раз, давление в конце объёма'], ans: ['4'], why: 'Последний шаг.' },
+      { parts: ['Пациент выполняет признак, терапевт держит скольжение'], ans: ['3'], why: 'Третий шаг.' },
+    ], [['1', '1', COL.task], ['2', '2', COL.whole], ['3', '3', COL.good], ['4', '4', COL.real]], { multi: false, text: true }),
+  }], done) }],
+
+  ['resp', 'Реакция и продолжение', (m) => {
+    const p = panel(0), sc = reachScene(p, 330, 560, 1.15, .2);
+    prog(q => sc.arm(lerp(4, 165, (1 - Math.cos(2 * Math.PI * 2 * q)) / 2)), m('guide', .5), 5, lin);
+    txt(p, 'признак без боли, функция лучше — сразу', 330, 110, m('guide'), { size: 23, weight: 700, fill: COL.good, anchor: 'middle' });
+    // tape over the shoulder keeps the glide between visits
+    const tape = mk('rect', { x: -14, y: -60, width: 28, height: 120, rx: 8, fill: COL.task, 'fill-opacity': .8 }, p);
+    put(tape, { o: 0 });
+    const upd = () => { const S = onStage(sc.f, 'Sh'); put(tape, { x: S[0] + 8, y: S[1] + 30, r: -15 }); };
+    sc.f.onSet.push(upd); upd();
+    show(tape, m('self'));
+    txt(p, 'тейп', 450, 500, m('self'), { size: 22, weight: 700, fill: COL.task });
+    infoCard(p, 760, 110, 770, 200, 'самолечение', 'спортивный тейп или скольжение, которое пациент даёт сам во время активного движения', COL.task, m('self'), { size: 22 });
+    txt(p, 'дальше', 1145, 380, m('total'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ['функция сустава', 'сила', 'выносливость', 'нервно-мышечный контроль'].forEach((str, i) => {
+      const g = G(p, { o: 0 }), x = 780 + i * 180, y = 620 - i * 60;
+      roundBox(g, x, y, 170, 100, COL.good, PANEL, 2.5);
+      put(para(g, str, x + 85, y + 32, null, { size: 19, weight: 700, fill: COL.good, maxW: 150, anchor: 'middle' }), { o: 1 });
+      show(g, m('total', .5 + i * .8));
+    });
+    pill(p, 'продолжать — только при устойчивом улучшении', 1145, 800, m('total', 4.5), { col: COL.int, size: 21 });
+  }],
+
+  ['theory', 'Как это работает', (m) => {
+    const p = panel(0), j = jointGlide(p, { x: 230, y: 330, s: .55, shaft: 120, t0: m('fault') });
+    j.set({ d: -10, raw: true });
+    prog(q => j.set({ d: -10 * (1 - io(q)), raw: true }), m('fault', 1.5), 1.6, lin);
+    infoCard(p, 420, 110, 540, 180, 'позиционное нарушение', 'модель Маллигана: кость стоит неправильно, скольжение её выравнивает', COL.nat, m('fault'), { size: 21 });
+    infoCard(p, 990, 110, 540, 180, 'другие модели', 'изменённая мгновенная ось вращения, неправильное скольжение; нейрофизиологический ответ', COL.whole, m('fault', 3.5), { size: 21 });
+    labelBox(p, 560, 470, 820, ['польза подтверждается — механизм до конца не ясен'], COL.int, m('ev'), { size: 25 });
+    // the study: MWM against a placebo (a scheme, no numbers)
+    const x0 = 160, y0 = 760, g = G(p, { o: 0 });
+    path(g, `M${x0} ${y0}H${x0 + 820}`, { stroke: COL.dim, 'stroke-width': 3 });
+    [['боль', -1, COL.bad], ['сила хвата', 1, COL.good], ['симпатический ответ', 1, COL.whole]].forEach(([str, dir, col], i) => {
+      const x = x0 + 60 + i * 270, hp = 120, hm = dir > 0 ? 220 : 50;
+      mk('rect', { x, y: y0 - hp, width: 70, height: hp, rx: 6, fill: COL.dim, 'fill-opacity': .5 }, g);
+      mk('rect', { x: x + 90, y: y0 - hm, width: 70, height: hm, rx: 6, fill: col, 'fill-opacity': .8 }, g);
+      T(g, str, { x: x + 80, y: y0 + 34, size: 21, fill: col, anchor: 'middle' });
+    });
+    T(g, 'серые — плацебо, цветные — MWM', { x: x0 + 410, y: y0 + 74, size: 19, fill: COL.dim, anchor: 'middle' });
+    show(g, m('pa'));
+    pill(p, 'схема', x0 + 790, y0 - 240, m('pa'), { col: COL.dim, size: 18 });
+    infoCard(p, 1060, 450, 470, 330, 'хроническая боль снаружи локтя', 'как и после манипуляций на позвоночнике → ответ многосистемный: позвоночник или локоть', COL.real, m('multi'), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-pain', prompt: ['Во время мобилизации с движением пациент чувствует прежнюю боль. Что делать?'],
+    build: choice([
+      ['Изменить направление или степень скольжения; не помогло — приём не показан'],
+      ['Продолжать: боль пройдёт с повторениями'],
+      ['Усилить давление в конце объёма'],
+      ['Сразу перейти к толчку'],
+    ], 0, 'Боль — ориентир: при MWM её быть не должно.',
+    [null, 'Боль во время приёма недопустима.', 'Давление в конце — только безболезненное.', 'Толчок не решает проблему поиска безболезненного направления.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['MWM: безболезненное добавочное движение терапевта + движение пациента, затем давление в конце объёма.', 'w1'],
+     ['Порядок: сопоставимый признак → безболезненное скольжение → признак при удержании → 6–10 повторений.', 'w2'],
+     ['Боль — ориентир: есть боль или нет улучшения — другое направление или степень, либо не показан.', 'w3'],
+     ['Дальше — тейп или самолечение и восстановление силы, выносливости и контроля.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-sign', prompt: ['Что из этого — сопоставимый признак?'],
+    build: choice([
+      ['Боль по наружной поверхности локтя при разгибании запястья с сопротивлением'],
+      ['Общая утомляемость к вечеру'],
+      ['Заключение по рентгенограмме'],
+      ['Давление в конце объёма'],
+    ], 0, 'Это положительная проба, которую можно повторить после приёма.',
+    [null, 'Это не проба движения, которую можно повторить.', 'Это не проба движения.', 'Это часть самого приёма.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['При MWM допустима умеренная боль во время приёма.'], ans: ['f'], why: 'Неверно: боли быть не должно.' },
+      { parts: ['Движение повторяют 6–10 раз, удерживая скольжение.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['MWM можно продолжать с тейпом или самостоятельным скольжением.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Механизм MWM точно известен.'], ans: ['f'], why: 'Неверно: до конца не ясен.' },
+      { parts: ['Перед MWM нужно полное ортопедическое обследование.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

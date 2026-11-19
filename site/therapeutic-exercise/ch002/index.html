@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Компоненты физической функции и виды упражнений — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 2, title: 'Компоненты физической функции и виды упражнений', minutes: 9, language: 'ru', next: '../ch003/' };
+
+/* ---------- the six components keep their colours through the lesson ---------- */
+const CMP = { mus: COL.nat, card: COL.rat, mob: COL.whole, coord: COL.real, stab: COL.int, bal: COL.irr };
+const CMP_COLS = [['mus', 'Мышцы', CMP.mus], ['card', 'Выносливость', CMP.card], ['mob', 'Подвижность', CMP.mob],
+  ['coord', 'Координация', CMP.coord], ['stab', 'Стабильность', CMP.stab], ['bal', 'Равновесие', CMP.bal]];
+const title = (p, str, col, t0 = .2, y = 92) => txt(p, str, 800, y, t0, { size: 34, weight: 700, fill: col, anchor: 'middle' });
+// A card with a heading and bullet lines; returns the group and the bullet groups (hidden until shown).
+function listCard(p, x, y, w, h, head, col, items) {
+  const g = G(p, { o: 0 });
+  roundBox(g, x, y, w, h, col, PANEL, 2.5);
+  T(g, head, { x: x + 26, y: y + 46, size: 30, weight: 700, fill: col });
+  let yy = y + 92;
+  const rows = items.map(it => { const r = para(g, '• ' + it, x + 28, yy, null, { size: 23, maxW: w - 60 }); yy += r._h + 6; return r; });
+  return { g, rows };
+}
+// The pushing arrow of an outside force, drawn at the wrist of an elbow model (stage coordinates).
+function wristArrow(arm, ox, oy, k, el) {
+  const [ex, ey] = arm.pts.E, [wx, wy] = arm.pts.W, L = Math.hypot(wx - ex, wy - ey), F = [(wx - ex) / L, (wy - ey) / L], N = [F[1], -F[0]];
+  const tip = [ox + (wx - F[0] * 30) * k - N[0] * 34 * k / 2, oy + (wy - F[1] * 30) * k - N[1] * 34 * k / 2];
+  const tail = [tip[0] - N[0] * 90, tip[1] - N[1] * 90], f = v => v.toFixed(1);
+  el.setAttribute('d', `M${f(tail[0])} ${f(tail[1])}L${f(tip[0])} ${f(tip[1])}M${f(tip[0] - N[0] * 18 - F[0] * 11)} ${f(tip[1] - N[1] * 18 - F[1] * 11)}L${f(tip[0])} ${f(tip[1])}L${f(tip[0] - N[0] * 18 + F[0] * 11)} ${f(tip[1] - N[1] * 18 + F[1] * 11)}`);
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Компоненты функции и виды упражнений', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 1 · Урок 2', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Составляющие физической функции', { x: 800, y: 320, size: 64, weight: 600, anchor: 'middle' });
+    T(g, 'и виды упражнений', { x: 800, y: 395, size: 64, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = para(scene, 'из чего складывается движение, какие бывают упражнения и как заниматься безопасно', 800, 478, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600, maxW: 1100 });
+    const art = G(scene, { o: 0 });
+    path(art, 'M640 760H960', { stroke: COL.faint, 'stroke-width': 3 });
+    const f = fig(art, { x: 760, y: 760 - 182 * .5, s: .5 });
+    show(art, .9, .6);
+    walk(f, m('sub', .3), 3.4, { cycles: 3, dx: 90 });
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['wheel', 'Шесть составляющих', (m) => {
+    const p = panel(0), cx = 800, cy = 465, R = 225, r = 148;
+    const W = [['mus', ['Мышечная', 'работоспособность']], ['card', ['Кардиореспираторная', 'выносливость']], ['mob', ['Подвижность,', 'гибкость']],
+      ['coord', ['Нервно-мышечный', 'контроль,', 'координация']], ['stab', ['Стабильность']], ['bal', ['Равновесие']]];
+    const petals = W.map(([k, lines], i) => {
+      const a = rad(-90 + i * 60), g = G(p, { x: cx + R * Math.cos(a), y: cy + R * Math.sin(a), s: .3, o: 0 });
+      mk('circle', { r, fill: CMP[k], 'fill-opacity': .12, stroke: CMP[k], 'stroke-width': 3 }, g);
+      const tx = Math.cos(a) * 64, ty = Math.sin(a) * 64;
+      lines.forEach((l, j) => T(g, l, { x: tx, y: ty + (j - (lines.length - 1) / 2) * 30 + 9, size: l.length > 16 ? 22 : 24, weight: 600, fill: CMP[k], anchor: 'middle' }));
+      pop(g, m('c' + (i + 1)));
+      return g;
+    });
+    const hub = G(p, { x: cx, y: cy, s: .5, o: 0 });
+    mk('circle', { r: 104, fill: COL.board, stroke: COL.task, 'stroke-width': 5 }, hub);
+    T(hub, 'Функция', { x: 0, y: 13, size: 40, weight: 700, anchor: 'middle' });
+    pop(hub, .2);
+    petals.forEach((g, i) => pulse(g, m('ov', .3 + i * .15), 1.05));
+    pulse(hub, m('ov', 1.4), 1.12);
+  }],
+
+  ['mob', 'Подвижность', (m) => {
+    const p = panel(0), OX = 170, OY = 560, K = 2;
+    title(p, 'Подвижность (mobility) и гибкость (flexibility)', CMP.mob);
+    const arm = elbowModel(p, { x: OX, y: OY, s: K });
+    put(arm.g, { o: 0 }); arm.set(172); show(arm.g, .5);
+    para(p, 'способность сегментов тела двигаться или быть подвинутыми — чтобы хватало объёма движений (ROM) для повседневных задач', 860, 170, m('d'), { size: 27, maxW: 650 });
+    // passive: an outside force bends the elbow; the stretched triceps lights up
+    const push = path(p, '', { stroke: CMP.mob, 'stroke-width': 6 }, { o: 0 });
+    wristArrow(arm, OX, OY, K, push);
+    show(push, m('pas'), .3);
+    prog(q => { arm.set(lerp(172, 62, q)); wristArrow(arm, OX, OY, K, push); }, m('pas', .5), 3.4);
+    txt(p, 'Пассивная', 860, 345, m('pas'), { size: 32, weight: 700, fill: CMP.mob });
+    para(p, 'сустав двигает внешняя сила (синяя стрелка); всё решает растяжимость мягких тканей:', 860, 388, m('pas', .3), { size: 25, fill: COL.dim, maxW: 650 });
+    txt(p, '• сократительных — мышц', 880, 470, m('con'), { size: 26, weight: 600, fill: ANAT.muscle });
+    txt(p, '• несократительных — капсулы, связок, фасций', 880, 510, m('non'), { size: 26, weight: 600, fill: ANAT.tendon });
+    txt(p, 'трёхглавая растянута', 210, 700, m('pas', 3), { size: 24, fill: '#ffc2b2', weight: 600 });
+    // active: the biceps is switched on by its nerve and bends the elbow itself
+    hide(push, m('act'), .3);
+    prog(q => arm.set(lerp(62, 172, q)), m('act', .1), .8);
+    const nerve = path(p, `M${OX + 30} ${OY - 150}Q${OX + 120} ${OY - 120} ${OX + 150} ${OY - 40}`, { stroke: ANAT.taut, 'stroke-width': 4 }, { d: 0 });
+    draw(nerve, m('act', .9), .5);
+    const spark = mk('circle', { r: 9, fill: ANAT.taut }, p);
+    put(spark, { o: 0 });
+    prog(q => { const L = nerve.getTotalLength(), pt = nerve.getPointAtLength(q * L); put(spark, { x: pt.x, y: pt.y, o: q < .98 ? 1 : 0 }); }, m('act', 1.3), .7, lin);
+    prog(q => arm.act('biceps', q), m('act', 1.9), .3);
+    prog(q => arm.set(lerp(172, 62, q)), m('act', 2.2), 2.4);
+    txt(p, 'нерв', OX + 50, OY - 160, m('act', .9), { size: 22, fill: ANAT.taut, weight: 600 });
+    txt(p, 'двуглавая сокращается', 210, 740, m('act', 2.2), { size: 24, fill: '#ff7a5c', weight: 600 });
+    txt(p, 'Активная', 860, 600, m('act'), { size: 32, weight: 700, fill: CMP.mob });
+    para(p, 'двигаетесь сами — нужна ещё активация мышц нервной системой', 860, 643, m('act', .3), { size: 25, fill: COL.dim, maxW: 650 });
+  }],
+
+  ['perf', 'Мышечная работоспособность', (m) => {
+    const p = panel(0), X = [290, 800, 1310], GY = 600, S = .55;
+    title(p, 'Мышечная работоспособность (muscle performance)', CMP.mus);
+    [['Сила', 'какое усилие', 's'], ['Мощность', 'как быстро', 'p'], ['Выносливость', 'как долго и сколько раз', 'e']].forEach(([h, sub, k], i) => {
+      txt(p, h, X[i], 180, m(k), { size: 36, weight: 700, fill: CMP.mus, anchor: 'middle' });
+      txt(p, sub, X[i], 220, m(k, .3), { size: 24, fill: COL.dim, anchor: 'middle' });
+      ground(p, X[i] - 190, X[i] + 190, GY, i === 0 ? .4 : m(k, -.3));
+    });
+    // strength: sit to stand with a rising effort bar
+    const sit = fig(p, { x: 0, y: 0, s: S, pose: SIT, o: 0 });
+    plant(sit, 'AN', X[0] - 20, GY);
+    const hip = onStage(sit, 'H');
+    chair(p, hip[0], hip[1] + 7, GY, .5); show(sit.g, .5);
+    const bar = G(p, { o: 0 });
+    mk('rect', { x: X[0] + 120, y: 330, width: 30, height: 230, rx: 8, fill: 'none', stroke: COL.dim, 'stroke-width': 2 }, bar);
+    const fillB = mk('rect', { x: X[0] + 123, y: 557, width: 24, height: 0, rx: 6, fill: CMP.mus }, bar);
+    T(bar, 'усилие', { x: X[0] + 135, y: 318, size: 20, fill: COL.dim, anchor: 'middle' });
+    show(bar, m('s', .3));
+    prog(q => { const h = 224 * Math.sin(q * Math.PI * .5); fillB.setAttribute('y', 557 - h); fillB.setAttribute('height', h); }, m('s', .9), 1.6);
+    poseTo(sit, STAND, m('s', .9), 1.7, io, ['AN', X[0] - 20, GY]);
+    txt(p, 'встать со стула без рук', X[0], 660, m('s', 1.5), { size: 24, anchor: 'middle' });
+    // power: a quick step
+    const pw = fig(p, { x: X[1] - 70, y: GY - 182 * S, s: S, o: 0 });
+    show(pw.g, m('p', -.3));
+    const [fx0] = onStage(pw, 'AF');
+    poseTo(pw, STRIDE, m('p', .9), .32, out, ['AF', fx0, GY]);
+    [0, 1, 2].forEach(k => { const l = path(p, `M${X[1] - 170} ${430 + k * 34}h70`, { stroke: COL.dim, 'stroke-width': 4 }, { o: 0 }); show(l, m('p', .9), .15); hide(l, m('p', 1.6), .5); });
+    poseTo(pw, STAND, m('p', 2.6), .8, io, ['AF', fx0, GY]);
+    txt(p, 'быстро шагнуть, чтобы не упасть', X[1], 660, m('p', 1.2), { size: 24, anchor: 'middle' });
+    // endurance: many steps up and down
+    const st2 = stepUp(p, X[2] - 60, GY, S, m('e', -.4), { dur: .5 });
+    put(st2.g, { o: 0 }); show(st2.g, m('e', -.3));
+    const cnt = txt(p, 'повторов: 0', X[2] + 60, 300, m('e', .3), { size: 26, fill: CMP.mus, weight: 600 });
+    const [ax2] = onStage(st2, 'AF'), N = 6;
+    prog(q => {
+      const e = (1 + Math.cos(2 * Math.PI * N * q)) / 2, p2 = {};
+      for (const k in STEP) p2[k] = lerp(STAND[k], STEP[k], e);
+      st2.set(p2); plant(st2, 'AF', ax2, GY);
+      cnt.textContent = 'повторов: ' + Math.round(q * N);
+    }, m('e', 1), 6.5, lin);
+    txt(p, 'подняться на 5-й этаж', X[2], 660, m('e', 1.2), { size: 24, anchor: 'middle' });
+  }],
+
+  ['cardio', 'Кардиореспираторная выносливость', (m, D) => {
+    const p = panel(0), GY = 520, dur = Math.max(9, D + 1);
+    title(p, 'Кардиореспираторная выносливость', CMP.card);
+    para(p, 'долго выполнять повторяющиеся движения всем телом умеренной интенсивности', 800, 152, .8, { size: 28, anchor: 'middle', maxW: 1200 });
+    ground(p, 140, 1460, GY, .4);
+    const f = fig(p, { x: 170, y: GY - 182 * .5, s: .5 });
+    walk(f, .6, dur, { cycles: dur * .9, dx: 1180 });
+    const heart = G(p, { x: 220, y: 300, o: 0 });
+    path(heart, 'M0 20C-44 -10 -28 -44 0 -24C28 -44 44 -10 0 20Z', { fill: CMP.card, stroke: 'none' });
+    show(heart, .5);
+    prog(q => put(heart, { s: 1 + .1 * Math.max(0, Math.sin(2 * Math.PI * 1.3 * q * dur)) ** 4 }), .6, dur, lin);
+    txt(p, 'ровный ритм', 220, 360, .8, { size: 22, fill: COL.dim, anchor: 'middle' });
+    const tm = txt(p, '0 мин', 1380, 315, .8, { size: 34, weight: 700, fill: CMP.card, anchor: 'middle' });
+    prog(q => { tm.textContent = Math.round(q * 30) + ' мин'; }, .6, dur, lin);
+    ['ходьба', 'бег трусцой', 'велосипед', 'плавание'].forEach((s, i) => pill(p, s, 470 + i * 220, 640, m('ex', i * .35), { col: CMP.card, size: 24 }));
+    txt(p, 'синоним: кардиореспираторная тренированность (cardiopulmonary fitness)', 800, 748, m('syn'), { size: 26, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-components', prompt: ['Какая составляющая физической функции главная в каждом примере?'],
+    build: grid([
+      { parts: ['Достать книгу с верхней полки'], ans: ['mob'], why: 'Нужен достаточный объём движений в плече — это подвижность.' },
+      { parts: ['Пройти 30 минут быстрым шагом без сильной одышки'], ans: ['card'], why: 'Долгая повторяющаяся работа всем телом умеренной интенсивности — кардиореспираторная выносливость.' },
+      { parts: ['Не упасть, когда автобус резко тормозит'], ans: ['bal'], why: 'Удержать центр масс над площадью опоры — равновесие.' },
+      { parts: ['Встать со стула без помощи рук'], ans: ['mus'], why: 'Нужно усилие мышц ног — мышечная работоспособность (сила).' },
+      { parts: ['Донести полную чашку, не расплескав'], ans: ['coord'], why: 'Точный момент, порядок и сила включения мышц — координация.' },
+    ], CMP_COLS, { multi: false, text: true }),
+  }], done) }],
+
+  ['balance', 'Равновесие', (m) => {
+    const p = panel(0), GY = 720, S = .85, X0 = 500;
+    title(p, 'Равновесие (balance)', CMP.bal);
+    ground(p, 230, 790, GY, .3);
+    const f = fig(p, { x: X0, y: GY - 182 * S, s: S, o: 0 });
+    show(f.g, .3);
+    const ov = balanceOverlay(p, f, GY, m('com'));
+    const [cx, cy] = comOf(f);
+    txt(p, 'центр масс', cx - 70, cy - 40, m('com', .3), { size: 26, weight: 600, fill: COL.task, anchor: 'end' });
+    txt(p, 'площадь опоры', X0, GY + 58, m('bos'), { size: 26, weight: 600, fill: COL.good, anchor: 'middle' });
+    txt(p, 'Органы чувств + мышцы', 900, 260, m('sens'), { size: 30, weight: 700, fill: CMP.bal });
+    para(p, 'зрение, вестибулярный аппарат, чувство положения тела — и мышцы, которые отвечают на эти сигналы', 900, 302, m('sens', .3), { size: 25, fill: COL.dim, maxW: 620 });
+    const [axN] = onStage(f, 'AN');
+    poseTo(f, LEAN(9), m('lean'), 2, io, ['AN', axN, GY]);
+    txt(p, 'центр масс у края опоры', 900, 450, m('lean', 1), { size: 28, weight: 600, fill: COL.int });
+    poseTo(f, STRIDE, m('step'), .55, out, ['AF', axN, GY]);
+    txt(p, 'шаг — опора шире, равновесие восстановлено', 900, 500, m('step', .4), { size: 28, weight: 600, fill: COL.good });
+    para(p, 'постуральный контроль · постуральная устойчивость · эквилибриум — синонимы равновесия, статического и динамического', 900, 600, m('syn'), { size: 25, fill: COL.dim, maxW: 620 });
+    ov.g.parentNode.appendChild(ov.g);   // keep the overlay above the figure
+  }],
+
+  ['stab', 'Стабильность', (m) => {
+    const p = panel(0), GY = 700, S = .75, X0 = 330;
+    title(p, 'Стабильность (stability)', CMP.stab);
+    ground(p, 150, 520, GY, .3);
+    const f = fig(p, { x: X0, y: GY - 182 * S, s: S, o: 0 });
+    show(f.g, .3);
+    // the trunk's axis: green while it stays upright, red when it sways
+    const axis = mk('path', { stroke: COL.good, 'stroke-width': 4, 'stroke-dasharray': '10 8', fill: 'none' }, p);
+    put(axis, { o: 0 }); show(axis, m('arm', -.3));
+    f.onSet.push(() => {
+      const [hx, hy] = onStage(f, 'H'), [sx, sy] = onStage(f, 'Sh'), L = Math.hypot(sx - hx, sy - hy);
+      axis.setAttribute('d', `M${hx.toFixed(1)} ${hy.toFixed(1)}L${(hx + (sx - hx) / L * 300).toFixed(1)} ${(hy + (sy - hy) / L * 300).toFixed(1)}`);
+      axis.setAttribute('stroke', Math.abs(f.pose.t) < 3 ? COL.good : COL.bad);
+    });
+    f.set({});
+    const UP = { aN: 172, eN: 4, aF: 166, eF: 4 };
+    poseTo(f, UP, m('arm'), 1.3); poseTo(f, { aN: STAND.aN, eN: STAND.eN, aF: STAND.aF, eF: STAND.eF }, m('arm', 2.6), 1);
+    txt(p, '✓ туловище неподвижно', X0 + 30, 250, m('arm', .6), { size: 26, weight: 600, fill: COL.good });
+    poseTo(f, { ...UP, t: -14, hN: -10, hF: -18, aN: 186, aF: 180 }, m('bad'), 1.1);
+    txt(p, '✗ туловище раскачивается', X0 + 30, 290, m('bad', .6), { size: 26, weight: 600, fill: COL.bad });
+    poseTo(f, STAND, m('bad', 2.4), 1);
+    // a joint up close: an outside force shifts the lower bone; ligaments, then a muscle hold it
+    const J = G(p, { o: 0 }), cxj = 1080;
+    const ub = boneEl(J, 22), lb = boneEl(J, 22);
+    const L1 = ligEl(J, { rest: Math.hypot(33, 54), w: 6 }), L2 = ligEl(J, { rest: Math.hypot(31, 54), w: 6 });   // L1 tightens as the lower bone moves right
+    const mu = muscleEl(J, { rest: Math.hypot(14, 270), w: 16 });
+    const setJ = dx => {
+      ub.set([cxj, 240], [cxj, 410]); lb.set([cxj + dx, 480], [cxj + dx, 660]);
+      L1.set([cxj - 14, 418], [cxj + 14 + dx, 472]); L2.set([cxj + 14, 418], [cxj - 14 + dx, 472]);
+      mu.set([cxj + 44, 290], [cxj + 30 + dx, 560]);
+    };
+    setJ(0);
+    show(J, m('joint'));
+    txt(p, 'Стабильность сустава', cxj + 40, 190, m('joint'), { size: 30, weight: 700, fill: CMP.stab, anchor: 'middle' });
+    arrowTo(p, [900, 600], [cxj - 22, 600], m('pas', -.4), { col: COL.whole, w: 5 });
+    txt(p, 'сила', 905, 585, m('pas', -.3), { size: 22, fill: COL.whole });
+    prog(q => setJ(lerp(0, 7, q)), m('pas', .2), 1);
+    para(p, 'связки и капсула натягиваются — пассивно', 1150, 440, m('pas', .6), { size: 25, fill: ANAT.taut, weight: 600, maxW: 400 });
+    prog(q => { mu.act(q); setJ(lerp(7, 2, q)); }, m('dyn', .2), .9);
+    para(p, 'мышцы держат кости — динамически', 1150, 560, m('dyn', .4), { size: 25, fill: '#ff7a5c', weight: 600, maxW: 400 });
+  }],
+
+  ['coord', 'Координация', (m) => {
+    const p = panel(0), OX = 180, OY = 600, K = 1.9;
+    title(p, 'Координация и нервно-мышечный контроль', CMP.coord);
+    para(p, 'координация — правильный момент, порядок и сила включения мышц', 860, 165, .8, { size: 27, maxW: 640 });
+    const arm = elbowModel(p, { x: OX, y: OY, s: K });
+    arm.set(95); const [hx, hy] = arm.pts.hand; arm.set(172);
+    const cupX = OX + hx * K + 4, cupY = OY + hy * K - 22;
+    path(p, `M${cupX - 70} ${cupY + 24}H${cupX + 60}`, { stroke: COL.dim, 'stroke-width': 4 });
+    path(p, `M${cupX - 18} ${cupY - 22}L${cupX - 14} ${cupY + 22}H${cupX + 14}L${cupX + 18} ${cupY - 22}ZM${cupX + 18} ${cupY - 12}q16 4 0 22`, { stroke: COL.chalk, 'stroke-width': 3, fill: 'none' });
+    // muscle-activity strips: biceps (agonist) and triceps (antagonist) over time
+    const TX0 = 860, TX1 = 1480, TMAX = 2.8, tx = t => TX0 + (TX1 - TX0) * t / TMAX;
+    txt(p, 'двуглавая — агонист', TX0, 560, .8, { size: 22, fill: ANAT.muscle, weight: 600 });
+    txt(p, 'трёхглавая — антагонист', TX0, 640, .8, { size: 22, fill: ANAT.muscle, weight: 600 });
+    [575, 655].forEach(y => path(p, `M${TX0} ${y + 30}H${TX1}`, { stroke: COL.faint, 'stroke-width': 2 }));
+    // one reach: angle over time, the two muscles' on-times, a cursor; drawn into its own layer
+    function reach(t0, angleAt, bic, tri, col) {
+      const L = G(p), cur = mk('path', { stroke: COL.chalk, 'stroke-width': 2 }, L);
+      const bars = [[bic, 575], [tri, 655]].map(([[a, b], y]) => mk('rect', { x: tx(a), y, width: 0, height: 26, rx: 6, fill: col }, L));
+      prog(q => {
+        const t = q * TMAX;
+        arm.set(angleAt(t));
+        arm.act('biceps', t >= bic[0] && t <= bic[1] ? 1 : 0); arm.act('triceps', t >= tri[0] && t <= tri[1] ? 1 : 0);
+        [bic, tri].forEach(([a, b], i) => bars[i].setAttribute('width', Math.max(0, tx(Math.min(t, b)) - tx(a))));
+        cur.setAttribute('d', `M${tx(t).toFixed(1)} 560V700`);
+        if (q === 1) { arm.act('biceps', 0); arm.act('triceps', 0); }
+      }, t0, TMAX, lin);
+      return L;
+    }
+    const smooth = t => lerp(172, 95, io(Math.min(1, t / 2.1)));
+    const good = reach(m('go', .2), smooth, [0, 1.5], [1.1, 2.1], COL.good);
+    txt(p, 'плавно и точно', OX + 150, OY + 110, m('brake', 1), { size: 26, weight: 600, fill: COL.good });
+    // the common mistake: the antagonist comes in late, the hand overshoots
+    hide(good, m('bad', -.2), .3);
+    prog(q => arm.set(lerp(95, 172, q)), m('bad', -.2), .5);
+    const late = t => t < 1.7 ? lerp(172, 68, io(t / 1.7)) : t < 2.3 ? lerp(68, 102, io((t - 1.7) / .6)) : lerp(102, 95, io((t - 2.3) / .5));
+    reach(m('bad', .4), late, [0, 1.9], [1.8, 2.6], COL.bad);
+    txt(p, 'антагонист опоздал — промах', OX + 150, OY + 150, m('bad', 2), { size: 26, weight: 600, fill: COL.bad });
+    // neuromuscular control: senses ↔ nervous system ↔ muscles
+    const nm = G(p, { o: 0 });
+    [['органы чувств', TX0 + 90, CMP.bal], ['нервная система', TX0 + 320, ANAT.taut], ['мышцы', TX0 + 530, ANAT.muscle]].forEach(([s, x, c]) => pill(nm, s, x, 300, null, { col: c, size: 22 }).setAttribute('opacity', 1));
+    arrowTo(nm, [TX0 + 190, 292], [TX0 + 222, 292], m('nmc', .4), { dur: .3 });
+    arrowTo(nm, [TX0 + 420, 292], [TX0 + 476, 292], m('nmc', .6), { dur: .3 });
+    arrowTo(nm, [TX0 + 530, 324], [TX0 + 90, 324], m('nmc', .9), { c: [TX0 + 310, 400], dur: .8 });
+    show(nm, m('nmc'));
+    txt(p, 'сигналы о положении и движении тела', TX0 + 310, 440, m('nmc', 1.4), { size: 22, fill: COL.dim, anchor: 'middle' });
+    ['агонист', 'антагонист', 'синергист', 'стабилизатор', 'нейтрализатор'].forEach((s, i) => pill(p, s, 260 + i * 270, 812, m('roles', .3 + i * .3), { col: CMP.coord, size: 23 }));
+  }],
+
+  ['stress', 'Нагрузка', (m) => {
+    const p = panel(0), Y = 470, X0 = 180, X1 = 1420;
+    txt(p, 'Система движения реагирует на нагрузку и приспосабливается', 800, 110, m('sys'), { size: 30, weight: 600, anchor: 'middle' });
+    txt(p, 'напряжение = сила / площадь', 800, 225, m('f'), { size: 46, font: MATH, anchor: 'middle', fill: COL.task });
+    const zones = [[X0, 560, COL.int, 'мало'], [560, 1040, COL.good, 'оптимум'], [1040, X1, COL.bad, 'слишком много']].map(([a, b, c, s], i) => {
+      const r = mk('rect', { x: a, y: Y - 14, width: b - a, height: 28, rx: i === 1 ? 4 : 14, fill: c, 'fill-opacity': .55 }, p);
+      const t = T(p, s, { x: (a + b) / 2, y: Y - 34, size: 26, weight: 600, fill: c, anchor: 'middle' });
+      put(r, { o: 0 }); put(t, { o: 0 }); show(r, .2 + i * .15); show(t, .4 + i * .15);
+      return { r, t };
+    });
+    txt(p, 'нагрузка', X1, Y + 52, .6, { size: 22, fill: COL.dim, anchor: 'end' });
+    const mark = G(p, { x: 800, y: Y + 18, o: 0 });   // under the bar, pointing up at it
+    mk('path', { d: 'M-16 26H16L0 4Z', fill: COL.chalk }, mark);
+    show(mark, m('low', -.4));
+    tw(mark, { x: 360 }, m('low'), .8);
+    const bed = G(p, { o: 0 });
+    mk('rect', { x: 250, y: 600, width: 230, height: 14, rx: 5, fill: EDGE }, bed);
+    fig(bed, { x: 380, y: 583, s: .32, r: -90 });
+    show(bed, m('low', .3));
+    para(p, 'постельный режим: мышцы и кости слабеют, сердце и лёгкие работают хуже', 365, 668, m('low', .8), { size: 23, maxW: 380, anchor: 'middle' });
+    tw(mark, { x: 1230 }, m('high'), .8);
+    const bn = G(p, { o: 0 }), b0 = boneEl(bn, 16);
+    b0.set([1140, 610], [1320, 610]);
+    path(bn, 'M1222 594l-10 9l12 6l-10 10', { stroke: COL.bad, 'stroke-width': 5 });
+    show(bn, m('high', .3));
+    para(p, 'острые травмы: растяжения, переломы; хроническая перегрузка', 1230, 668, m('high', .8), { size: 23, maxW: 380, anchor: 'middle' });
+    tw(mark, { x: 760 }, m('ok'), .8);
+    txt(p, 'лечебные упражнения — дозированная нагрузка', 800, 548, m('ok', .5), { size: 30, weight: 700, fill: COL.good, anchor: 'middle' });
+    // progression: as tissues adapt, the optimum moves to the right and the load steps up with it
+    prog(q => {
+      const a = lerp(560, 680, q), b = lerp(1040, 1160, q);
+      zones[0].r.setAttribute('width', a - X0); zones[1].r.setAttribute('x', a); zones[1].r.setAttribute('width', b - a);
+      zones[2].r.setAttribute('x', b); zones[2].r.setAttribute('width', X1 - b);
+      zones[1].t.setAttribute('transform', `translate(${(a + b) / 2},${Y - 34})`);
+    }, m('prog', .3), 3);
+    [880, 1000].forEach((x, i) => tw(mark, { x }, m('prog', .8 + i * 1.2), .5, back));
+    txt(p, 'ткани приспосабливаются — нагрузку можно постепенно повышать', 800, 780, m('prog', .6), { size: 26, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => {
+    const p = panel(0);
+    mk('rect', { x: 120, y: 470, width: 440, height: 20, rx: 6, fill: EDGE }, p);
+    fig(p, { x: 360, y: 444, s: .55, r: -90 });
+    pill(p, 'месяц постельного режима', 340, 360, .1, { col: COL.int, size: 24 });
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-bedrest', prompt: ['После месяца постельного режима у человека, скорее всего…'],
+    build: choice([['ослабли мышцы и кости, снизилась выносливость'], ['мышцы окрепли — они отдохнули'], ['ничего не изменилось: месяц — это мало']], 0,
+      'Без привычной нагрузки весом тела мышцы и кости слабеют, а сердце и лёгкие работают менее эффективно.',
+      [null, 'Отдых без нагрузки не укрепляет: ткани приспосабливаются к тому, что от них требуется.', 'Книга прямо называет долгий постельный режим причиной ослабления мышц и костей.']),
+  }], done) }],
+
+  ['types', 'Девять видов', (m) => {
+    const p = panel(0);
+    txt(p, 'Девять видов лечебных упражнений (бокс 1.1)', 800, 78, .2, { size: 32, weight: 700, anchor: 'middle' });
+    const T9 = [['Аэробная тренировка и восстановление формы', 'гл. 7'], ['Сила, мощность и выносливость мышц', 'гл. 6'], ['Растяжка, мобилизация и манипуляция суставов', 'гл. 4–5'],
+      ['Нервно-мышечный контроль, торможение и облегчение; осознание осанки', 'гл. 6, 14'], ['Постуральный контроль, биомеханика тела, стабилизация', 'гл. 14–16'],
+      ['Равновесие и ловкость', 'гл. 8, 23'], ['Расслабление', 'гл. 14, 25'], ['Дыхательные упражнения и тренировка дыхательных мышц', 'гл. 2, 25'], ['Функциональная тренировка под конкретную задачу', 'гл. 23 и др.']];
+    const cards = T9.map(([s, ch], i) => {
+      const x = 100 + (i % 3) * 480, y = 120 + Math.floor(i / 3) * 200, g = G(p, { y: 16, o: 0 });
+      roundBox(g, x, y, 440, 180);
+      badge(g, i + 1, x + 40, y + 44, COL.task);
+      put(para(g, s, x + 78, y + 52, null, { size: 23, weight: 600, maxW: 340 }), { o: 1 });
+      pill(g, ch, x + 380, y + 150, null, { col: COL.whole, size: 18 }).setAttribute('opacity', 1);
+      tw(g, { o: 1, y: 0 }, m('t' + (i + 1)), .5, out);
+      return { g, x, y };
+    });
+    txt(p, 'номера глав — навигация по книге, не из бокса', 800, 740, m('t9', 1), { size: 20, fill: COL.faint, anchor: 'middle' });
+    const c3 = cards[2], hl = mk('rect', { x: c3.x - 6, y: c3.y - 6, width: 452, height: 192, rx: 26, fill: 'none', stroke: COL.task, 'stroke-width': 4 }, p);
+    put(hl, { o: 0 }); show(hl, m('note'));
+    para(p, 'мобилизацию суставов обычно относят к мануальной терапии; авторы включили её, чтобы охватить все методы растяжения тканей', 800, 790, m('note', .3), { size: 25, fill: COL.task, maxW: 1300, anchor: 'middle' });
+  }],
+
+  ['safety', 'Безопасность', (m) => {
+    const p = panel(0);
+    const C4 = [
+      [90, 60, 'Пациент', COL.whole, ['история здоровья и текущее состояние', 'факторы риска — взвесить заранее', 'лекарства: равновесие, координация, реакция сердца', 'иногда нужен допуск врача'], 'pat'],
+      [820, 60, 'Среда', COL.int, ['достаточно места', 'подходящая опорная поверхность', 'оборудование исправно, по размеру и применяется правильно'], 'env'],
+      [90, 410, 'Выполнение', COL.good, ['правильная поза и выравнивание', 'правильная схема движения', 'подходящие интенсивность, скорость, длительность', 'признаки утомления; отдых'], 'ex'],
+      [820, 410, 'Терапевт', COL.real, ['правильная биомеханика тела', 'защита своих суставов при ручных техниках'], 'ther'],
+    ];
+    C4.forEach(([x, y, h, c, items, k], i) => {
+      const card = listCard(p, x, y, 690, 330, h, c, items);
+      tw(card.g, { o: .45 }, .2 + i * .1, .4);
+      tw(card.g, { o: 1 }, m(k), .4);
+      card.rows.forEach((r, j) => show(r, m(k, .4 + j * .5)));
+    });
+    txt(p, 'занимаетесь сами → безопасность обеспечивают обучение и объяснения', 800, 800, m('home'), { size: 28, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['q3', 'Быстрая проверка', () => {
+    const p = panel(0), g = G(p, { x: 330, y: 420 });
+    mk('rect', { x: -60, y: -40, width: 120, height: 170, rx: 18, fill: PANEL, stroke: COL.dim, 'stroke-width': 3 }, g);
+    mk('rect', { x: -48, y: -78, width: 96, height: 40, rx: 8, fill: COL.whole }, g);
+    mk('rect', { x: -44, y: 10, width: 88, height: 60, rx: 6, fill: COL.chalk, 'fill-opacity': .85 }, g);
+    pill(p, 'вызывает головокружение', 330, 640, .1, { col: COL.int, size: 24 });
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-meds', prompt: ['Пациент принимает лекарство, от которого у него кружится голова. Что это значит для упражнений?'],
+    build: choice([['Лекарство может ухудшать равновесие и координацию — это фактор риска, его учитывают заранее'], ['Ничего: лекарства не связаны с упражнениями'], ['Нужно сразу увеличить нагрузку, чтобы организм привык']], 0,
+      'Книга прямо называет лекарства: они могут ухудшать равновесие, координацию и реакцию сердца на нагрузку.',
+      [null, 'Связаны: лекарства влияют на равновесие, координацию и реакцию сердца и лёгких на нагрузку.', 'Нагрузку повышают постепенно и только после оценки факторов риска.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Физическая функция — шесть связанных составляющих: мышцы, выносливость, подвижность, координация, стабильность, равновесие.', 'w1'],
+     ['Подвижность бывает пассивной и активной; для активной нужна работа мышц.', 'w2'],
+     ['Ткани приспосабливаются к нагрузке: мало — слабеют, слишком много — травмируются; упражнения — дозированная нагрузка.', 'w3'],
+     ['Безопасность: пациент, среда, точность выполнения и сам терапевт.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 150, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-components', prompt: ['Какая составляющая физической функции здесь главная?'],
+    build: grid([
+      { parts: ['Терапевт пассивно разгибает колено пациента после гипса'], ans: ['mob'], why: 'Объём движений, который зависит от растяжимости тканей, — подвижность (пассивная).' },
+      { parts: ['Удержать туловище ровным, поднимая руки над головой'], ans: ['stab'], why: 'Один сегмент неподвижен, пока другой движется, — стабильность.' },
+      { parts: ['Проехать на велосипеде 40 минут в среднем темпе'], ans: ['card'], why: 'Долгая работа всем телом умеренной интенсивности — кардиореспираторная выносливость.' },
+      { parts: ['Устоять на одной ноге, надевая носок'], ans: ['bal'], why: 'Центр масс над маленькой площадью опоры — равновесие.' },
+      { parts: ['Вовремя расслабить антагонист, чтобы движение было плавным'], ans: ['coord'], why: 'Момент и порядок включения мышц — координация.' },
+    ], CMP_COLS, { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Для активной подвижности нужна активация мышц нервной системой.'], ans: ['t'], why: 'Верно: пассивной хватает растяжимости тканей, активной нужна ещё работа мышц.' },
+      { parts: ['Мощность — это сколько раз мышца может повторить усилие.'], ans: ['f'], why: 'Неверно: это выносливость. Мощность — насколько быстро мышца развивает усилие.' },
+      { parts: ['Длительный постельный режим ослабляет мышцы и кости.'], ans: ['t'], why: 'Верно: без привычной нагрузки весом тела ткани слабеют.' },
+      { parts: ['Когда пациент занимается дома сам, безопасность обеспечивает хорошее обучение упражнениям.'], ans: ['t'], why: 'Верно: обучение и объяснения снижают риск травмы.' },
+      { parts: ['Мобилизацию суставов авторы исключили из лечебных упражнений.'], ans: ['f'], why: 'Неверно: авторы включили её, хотя обычно её относят к мануальной терапии.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

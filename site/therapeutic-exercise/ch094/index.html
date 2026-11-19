@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Равновесие при травмах — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 94, title: 'Равновесие при травмах опорно-двигательного аппарата', minutes: 8, language: 'ru', next: '../ch095/' };
+// bio begin: places of the biomechanics layer (B switches); made by tools/therapeutic-exercise/bio.py from content/therapeutic-exercise/ch094/bio.ru.json
+const BIO = [
+  {"beat": "mcg", "fig": 0, "level": "angle", "joint": "kN", "load": {"type": "none"}, "gon": "compact"},
+];
+// bio end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch094/cards.ru.json
+const CARDS_SHORT = {
+  "систематические обзоры\nравновесие ↑, риск растяжений ↓ — у тех, у кого они были": "равновесие ↑, растяжений ↓",
+  "успешные программы\nнеустойчивые платформы · прогрессия стойки на одной ноге · удары свободной ногой против ленты": "платформы, одна нога, лента",
+  "дозировка\nпрофилактика: ≥ 3 раз в неделю весь сезон · после травмы: 2–3 раза в неделю ≈ 6–8 недель": "≥ 3 раз в неделю",
+  "упражнения\nна двух ногах и на одной; твёрдая опора → диски, качающиеся доски, поролон; варианты — присед, ловля мяча": "двух → одной ногах; диски, доски, поролон",
+  "дозировка\nпредсезон: 10–15 мин ежедневно · сезон: 3 раза в неделю": "10–15 мин ежедневно",
+  "спортсменки\nзанятия дольше 20 минут, по-видимому, эффективнее коротких": "дольше 20 минут эффективнее",
+  "тренировка в парах (dyad)\nвнешний фокус; чередование ролей и разговор → больше умственных усилий → навык лучше сохраняется и переносится": "внешний фокус + разговор",
+  "выявить нарушения\nтесты равновесия, например звёздный тест (SEBT)": "тесты равновесия, например звёздный тест (SEBT)",
+  "данные пока\nнервно-мышечный контроль туловища: боль ↓ и функция ↑ (по оценке пациентов); улучшение равновесия и постуральных реакций не доказано": "боль ↓, функция ↑; равновесие — не доказано",
+};
+// cards-short end
+
+const ANK = COL.task, KNEE = COL.whole, BACK = COL.rat, ACT = '#ff5a3c', BAND_C = '#e07a9a';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+const sway = (q, lo, hi, k = 1) => lo + (hi - lo) * (.5 + .32 * Math.sin(q * 6.1 * k) + .18 * Math.sin(q * 15.7 * k + 1));
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A single-leg stance on a wobble board (side view): the near foot on the board, the far leg lifted.
+function sbBoard(p, x, gy, s, t0, pose = {}) {
+  const wb = wobbleBoard(p, x, gy, 220 * s / .8, t0);
+  const f = fig(p, { x, y: 0, s, o: 0, pose: { ...SINGLE, ...pose } });
+  if (t0 !== null) show(f.g, t0);
+  const set = (a, extra = {}) => { wb.set(a); const [bx, by] = wb.at(0); f.set({ ...extra, fN: (extra.fN ?? 0) + a }); plant(f, 'AN', bx, by); };
+  set(0);
+  return { wb, f, set };
+}
+// The right ankle from behind (frontal plane): tibia and fibula, talus and calcaneus, the lateral ligament (fibula to
+// calcaneus) and the peroneal tendons behind the lateral malleolus. ak.set(inv): the foot tips into inversion (deg);
+// the lateral ligament tightens, the peroneals pull back.
+function ankleBack(p, x, y, s = 1, t0 = null) {
+  const g = G(p, { x, y, s, o: 0 });
+  const bone = ANAT.bone, line = mix(bone, '#000000', .35);
+  mk('path', { d: 'M-28 -230L-26 -70C-30 -50 -44 -36 -42 -16C-40 -6 -30 -4 -24 -10L-10 -18H22C28 -24 30 -40 28 -70L24 -230Z', fill: bone, stroke: line, 'stroke-width': 2 }, g);
+  mk('path', { d: 'M40 -228L44 -60C46 -36 54 -18 58 0C60 12 52 18 44 12C38 4 36 -14 34 -40L32 -228Z', fill: mix(bone, COL.board, .12), stroke: line, 'stroke-width': 2 }, g);
+  T(g, 'большеберцовая', { x: -40, y: -160, size: 16, fill: COL.dim, anchor: 'end' });
+  T(g, 'малоберцовая', { x: 84, y: -120, size: 16, fill: COL.dim });
+  const foot = G(g, { x: 0, y: -10 });
+  mk('path', { d: 'M-24 0C-24 -14 -6 -16 10 -16C28 -16 36 -8 36 2L32 22H-22Z', fill: bone, stroke: line, 'stroke-width': 2 }, foot);
+  mk('path', { d: 'M-26 24H34C38 40 34 66 20 80C6 88 -10 86 -20 72C-28 58 -30 40 -26 24Z', fill: bone, stroke: line, 'stroke-width': 2 }, foot);
+  T(foot, 'таранная', { x: 6, y: 12, size: 13, fill: COL.board, anchor: 'middle' });
+  T(foot, 'пяточная', { x: 4, y: 58, size: 13, fill: COL.board, anchor: 'middle' });
+  // the foot turns about the ankle at (0, -10); points of the foot in the leg's frame
+  const geo = inv => { const at = P => { const [u, v] = rotPt(P[0], P[1], inv); return [u, v - 10]; }; return { lig: [[52, 10], at([32, 50])], per: [[72, -200], at([36, 40])] }; };
+  const len = ([A, B]) => Math.hypot(B[0] - A[0], B[1] - A[1]);
+  const lig = ligEl(g, { rest: len(geo(12).lig), w: 6 }), per = muscleEl(g, { rest: len(geo(0).per), w: 15, tendon: .22 });
+  const ak = { g, foot, lig, per };
+  ak.set = (inv, act = 0) => { put(foot, { x: 0, y: -10, r: inv }); const q = geo(inv); lig.set(...q.lig); per.act(act); per.set(...q.per); return ak; };
+  ak.set(0);
+  if (t0 !== null) show(g, t0);
+  return ak;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Равновесие при травмах', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 8 · Урок 94', { x: 800, y: 150, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Равновесие при травмах', { x: 800, y: 235, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'опорно-двигательного аппарата', { x: 800, y: 300, size: 42, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'голеностоп · передняя крестообразная связка · поясница', 800, 385, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const sb = sbBoard(art, 800, 840, .72, null, { aN: 70, eN: 10, aF: 70, eF: 10 });
+    put(sb.f.g, { o: 1 });
+    prog(q => sb.set(7 * Math.sin(q * 9), { aN: 70, eN: 10, aF: 70, eF: 10 }), .4, Math.max(3, D - 1), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['ankle', 'Растяжение голеностопа', (m, D) => {
+    const p = panel(0);
+    txt(p, 'растяжение голеностопа', 800, 56, m('ank'), { size: 28, weight: 700, anchor: 'middle', fill: ANK });
+    txt(p, 'программы на равновесие предупреждают и лечат нарушения после травм ног и туловища', 800, 96, m('ank', 1), { size: 20, fill: COL.dim, anchor: 'middle' });
+    // single-leg stance on a wobble board — post-acute phase
+    const sb = sbBoard(p, 300, 640, .9, m('sls'), { aN: 60, eN: 20, aF: 60, eF: 20 });
+    const M = { tib: muscleOn(sb.f, ...MUSCLE.tibAnt, { after: 'shN', w: 11 }), gas: muscleOn(sb.f, ...MUSCLE.gastroc, { after: 'shN', w: 12 }) };
+    txt(p, 'постострый период:', 300, 170, m('sls'), { size: 22, weight: 700, fill: ANK, anchor: 'middle' });
+    txt(p, 'одна нога на неустойчивой опоре', 300, 200, m('sls', .5), { size: 20, fill: COL.chalk, anchor: 'middle' });
+    // the ankle from behind: inversion tightens the lateral ligament; the peroneals answer
+    const ak = ankleBack(p, 730, 520, .95, m('sls', 1.5));
+    txt(p, 'голеностоп сзади (правый)', 730, 600, m('sls', 1.5), { size: 17, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'стопа подворачивается внутрь →', 730, 634, m('sls', 2.5), { size: 18, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'натягивается наружная связка', 730, 662, m('sls', 2.5), { size: 18, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    txt(p, 'включаются малоберцовые мышцы', 730, 690, m('sls', 3), { size: 18, weight: 700, fill: ACT, anchor: 'middle' });
+    NOTE(p, 730, 726, m('sls', 2.5));
+    const T0 = m('sls');
+    prog(q => {
+      const T = T0 + q * (D - T0), a = 6 * Math.sin((T - T0) * 1.7), inv = 14 * Math.max(0, Math.sin((T - T0) * 1.3));
+      sb.set(a, { aN: 60, eN: 20, aF: 60, eF: 20 }); M.tib.act(a < -1 ? .8 : 0); M.gas.act(a > 1 ? .8 : 0);
+      ak.set(inv, clamp((inv - 6) / 6, 0, 1));
+    }, T0, Math.max(3, D - T0), lin);
+    // the chain: ankle → hip → trunk
+    const ch = G(p, { o: 0 });
+    path(ch, 'M330 600C250 520 240 420 300 330C330 290 340 270 330 240', { stroke: COL.real, 'stroke-width': 4, 'stroke-dasharray': '8 6' });
+    path(ch, 'M318 252L330 236L340 254', { stroke: COL.real, 'stroke-width': 4 });
+    show(ch, m('chain'));
+    txt(p, 'энергия: ноги → туловище → руки', 300, 760, m('chain'), { size: 19, weight: 700, fill: COL.real, anchor: 'middle' });
+    txt(p, '+ мышцы бедра и туловища', 300, 790, m('chain', 1), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    // the evidence and the dose
+    pillRow(p, ['BESS', 'SEBT', 'Y-тест'], 1240, 170, m('tests'), { col: ANK, size: 20, gap: .4 });
+    txt(p, 'оценка нарушений и улучшений', 1240, 214, m('tests', .5), { size: 18, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 960, 250, 580, 150, 'систематические обзоры', 'равновесие ↑, риск растяжений ↓ — у тех, у кого они были', COL.good, m('sr'), { size: 20 });
+    infoCard(p, 960, 420, 580, 170, 'успешные программы', 'неустойчивые платформы · прогрессия стойки на одной ноге · удары свободной ногой против ленты', ANK, m('prog'), { size: 20 });
+    // a resisted kick of the free leg against an elastic band
+    const kk = fig(p, { x: 1110, y: 0, s: .5, o: 0, pose: SINGLE }); plant(kk, 'AN', 1110, 840); show(kk.g, m('prog', 2));
+    const bnd = path(p, '', { stroke: BAND_C, 'stroke-width': 4 });
+    put(bnd, { o: 0 }); show(bnd, m('prog', 2));
+    prog(q => { const k = cyc(q, 3); kk.set({ hF: lerp(10, 50, k), kF: lerp(40, 5, k), fF: 0 }); plant(kk, 'AN', 1110, 840); const [fx, fy] = onStage(kk, 'AF'); bnd.setAttribute('d', `M1010 830L${fx.toFixed(1)} ${fy.toFixed(1)}`); }, m('prog', 2), Math.max(3, D - m('prog', 2)), lin);
+    show(put(mk('rect', { x: 1000, y: 820, width: 14, height: 20, fill: COL.dim }, p), { o: 0 }), m('prog', 2));
+    infoCard(p, 1200, 620, 340, 220, 'дозировка', 'профилактика: ≥ 3 раз в неделю весь сезон · после травмы: 2–3 раза в неделю ≈ 6–8 недель', COL.task, m('dose'), { size: 18 });
+  }],
+
+  ['mcg', 'Программа Макгуайна и Кина', (m, D) => {
+    const p = panel(0);
+    txt(p, 'программа Макгуайна и Кина (McGuine, Keene)', 800, 56, m('mcg'), { size: 28, weight: 700, anchor: 'middle', fill: ANK });
+    const big = G(p, { o: 0 });
+    T(big, '−38 %', { x: 220, y: 200, size: 72, weight: 700, fill: COL.good, anchor: 'middle' });
+    T(big, 'риск растяжений', { x: 220, y: 240, size: 20, fill: COL.chalk, anchor: 'middle' });
+    show(big, m('mcg', .5));
+    txt(p, 'школьный футбол и баскетбол: 112 юношей + 261 девушка', 980, 160, m('mcg', 1), { size: 21, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'особенно — у тех, у кого растяжения уже были', 980, 196, m('mcg', 3), { size: 21, weight: 700, fill: ANK, anchor: 'middle' });
+    // three variants on a wobble board (as in the program)
+    const GY = 560, S = .66;
+    const v = [['присед, колено 30–45°', { aN: 60, eN: 10, aF: 60, eF: 10, hN: 40, kN: 40, t: 20 }], ['вращение доски', { aN: 50, eN: 20, aF: 40, eF: 20 }], ['ловля мяча', { aN: 80, eN: 40, aF: 80, eF: 40 }]];
+    v.forEach(([lab, pose], i) => {
+      const x = 300 + i * 360, t0 = m('var', i * 1.4), sb = sbBoard(p, x, GY, S, t0, pose);
+      txt(p, lab, x, GY + 40, t0, { size: 20, weight: 700, fill: ANK, anchor: 'middle' });
+      prog(q => { const a = 6 * Math.sin(q * (8 + i * 3)); const ex = i === 0 ? { kN: 40 + 5 * Math.sin(q * 6), fN: 30 } : {}; sb.set(a, { ...pose, ...ex }); }, t0, Math.max(3, D - t0), lin);
+      if (i === 2) { const ball = mk('circle', { r: 14, fill: '#e07a5f' }, p); put(ball, { o: 0 }); show(ball, t0); prog(q => { const u = (q * 3) % 1; put(ball, { x: lerp(x + 220, x + 70, u), y: 300 - 80 * Math.sin(Math.PI * u) }); }, t0, Math.max(3, D - t0), lin); }
+    });
+    txt(p, 'пол → качающаяся доска · глаза открыты и закрыты', 980, 234, m('sls'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // the schedule: weeks 1–5 five days, then three days a week
+    const cal = G(p, { o: 0 }), cx0 = 120, cy0 = 660;
+    for (let w = 0; w < 8; w++) for (let d = 0; d < 7; d++) {
+      const on = w < 5 ? d < 5 : [0, 2, 4].includes(d);
+      mk('rect', { x: cx0 + w * 62, y: cy0 + d * 26, width: 54, height: 20, rx: 4, fill: on ? mix(ANK, COL.board, .3) : PANEL, stroke: on ? ANK : EDGE, 'stroke-width': 1.5 }, cal);
+    }
+    [0, 4, 5, 7].forEach(w => T(cal, String(w + 1), { x: cx0 + w * 62 + 27, y: cy0 - 10, size: 16, fill: COL.dim, anchor: 'middle' }));
+    T(cal, 'недели', { x: cx0 + 8 * 62, y: cy0 - 10, size: 16, fill: COL.dim });
+    T(cal, '5 дней × 5 недель → затем 3 дня в неделю до конца сезона', { x: cx0, y: cy0 + 210, size: 19, weight: 700, fill: ANK });
+    show(cal, m('sched'));
+    // 30 s on each leg, legs alternate, 30 s rest
+    const tm = G(p, { o: 0 }), tx0 = 760, ty0 = 700;
+    [['левая 30 с', ANK], ['отдых 30 с', COL.dim], ['правая 30 с', ANK], ['отдых 30 с', COL.dim]].forEach(([s, col], i) => { mk('rect', { x: tx0 + i * 190, y: ty0, width: 180, height: 50, rx: 10, fill: mix(col, COL.board, .5), stroke: col, 'stroke-width': 2 }, tm); T(tm, s, { x: tx0 + 90 + i * 190, y: ty0 + 33, size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' }); });
+    T(tm, 'каждое упражнение: по 30 с на ногу, ноги чередуют', { x: tx0, y: ty0 + 90, size: 19, fill: COL.chalk });
+    show(tm, m('dose'));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-mcg', prompt: ['Посчитайте по программе Макгуайна и Кина.'],
+    build: blanks([
+      { parts: ['Без программы ожидали 50 растяжений; с программой (−38 %): ', { box: '31' }], why: '50 × 0,62 = 31.' },
+      { parts: ['Первые 5 недель по 5 дней — это занятий: ', { box: '25' }], why: '5 × 5 = 25.' },
+      { parts: ['Всего участников (112 + 261): ', { box: '373' }], why: '112 + 261 = 373.' },
+    ]),
+  }], done) }],
+
+  ['acl', 'Передняя крестообразная связка', (m, D) => {
+    const p = panel(0);
+    txt(p, 'передняя крестообразная связка (ПКС)', 800, 56, m('acl'), { size: 28, weight: 700, anchor: 'middle', fill: KNEE });
+    const big = G(p, { o: 0 });
+    T(big, '≈ 50 %', { x: 220, y: 190, size: 70, weight: 700, fill: COL.good, anchor: 'middle' });
+    T(big, 'травм ПКС меньше', { x: 220, y: 228, size: 20, fill: COL.chalk, anchor: 'middle' });
+    T(big, 'подростки и взрослые', { x: 220, y: 256, size: 18, fill: COL.dim, anchor: 'middle' });
+    show(big, m('acl', 1));
+    pillRow(p, ['проприоцепция и равновесие', '+ плиометрика', '+ туловище: стабилизация и сила', '+ функция для своего спорта'], 990, 150, m('acl', 2), { col: KNEE, size: 18, gap: .9, space: 10 });
+    infoCard(p, 450, 200, 1090, 120, 'упражнения', 'на двух ногах и на одной; твёрдая опора → диски, качающиеся доски, поролон; варианты — присед, ловля мяча', KNEE, m('ex'), { size: 19 });
+    infoCard(p, 60, 340, 720, 130, 'дозировка', 'предсезон: 10–15 мин ежедневно · сезон: 3 раза в неделю', COL.task, m('dose'), { size: 20 });
+    infoCard(p, 820, 340, 720, 130, 'спортсменки', 'занятия дольше 20 минут, по-видимому, эффективнее коротких', COL.rat, m('long'), { size: 20 });
+    // dyad training: one hops, the other watches and coaches, then they swap
+    const GY = 800, S = .66;
+    ground(p, 120, 1100, GY, m('dyad'));
+    const a = fig(p, { x: 420, y: GY - 182 * S, s: S, o: 0, pose: SINGLE }); show(a.g, m('dyad'));
+    const b = fig(p, { x: 820, y: GY - 182 * S, s: S, o: 0, dir: -1, pose: { aN: 40, eN: 90, aF: 20, eF: 60 } }); show(b.g, m('dyad', .5));
+    const [ax] = onStage(a, 'AN');
+    prog(q => { const u = (q * 4) % 1, h = 26 * Math.sin(Math.PI * Math.min(1, u / .5)) * (u < .5 ? 1 : 0), dx = 50 * Math.sin(q * Math.PI * 4); a.set(u > .9 ? STAND : { ...SINGLE, kN: 10 + 20 * (1 - Math.sin(Math.PI * Math.min(1, u / .5))) }); plant(a, 'AN', ax + dx, GY - h); }, m('dyad', .5), 6, lin);
+    const bub = G(p, { o: 0 }); mk('rect', { x: 760, y: 486, width: 280, height: 60, rx: 20, fill: PANEL, stroke: KNEE, 'stroke-width': 2.5 }, bub); T(bub, '«мягче приземляйся!»', { x: 900, y: 524, size: 20, weight: 700, fill: KNEE, anchor: 'middle' }); show(bub, m('dyad', 4));
+    txt(p, 'прыжки на одной ноге: вперёд-назад и в стороны → на две ноги', 610, 846, m('dyad', 1), { size: 18, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'после серии — обратная связь, потом меняются ролями', 610, 874, m('dyad', 5), { size: 18, weight: 700, fill: COL.good, anchor: 'middle' });
+    infoCard(p, 1140, 500, 400, 330, 'тренировка в парах (dyad)', 'внешний фокус; чередование ролей и разговор → больше умственных усилий → навык лучше сохраняется и переносится', COL.good, m('why'), { size: 19 });
+  }],
+
+  ['lbp', 'Боль в пояснице', (m, D) => {
+    const p = panel(0), GY = 780, S = 1.05, X0 = 360;
+    txt(p, 'боль в пояснице', 800, 56, m('lbp'), { size: 28, weight: 700, anchor: 'middle', fill: BACK });
+    txt(p, 'в лаборатории постуральные ответы на толчки изменены', 800, 96, m('lbp', 1), { size: 20, fill: COL.dim, anchor: 'middle' });
+    ground(p, 140, 620, GY, m('lbp'));
+    const f = fig(p, { x: X0, y: GY - 182 * S, s: S, o: 0 });
+    show(f.g, m('lbp'));
+    const M = { abdom: muscleOn(f, ...MUSCLE.abdom, { w: 11, after: 'torso' }), parasp: muscleOn(f, ...MUSCLE.parasp, { w: 11, after: 'torso' }) };
+    const [ax] = onStage(f, 'AN');
+    const push = G(p, { o: 0 }); path(push, 'M170 380H230M216 370L230 380L216 390', { stroke: COL.bad, 'stroke-width': 6 }); show(push, m('cc'));
+    prog(q => { const u = (q * 3) % 1, k = Math.sin(Math.PI * Math.min(1, u / .5)) * (u < .5 ? 1 : 0); f.set(LEAN(4 * k)); plant(f, 'AN', ax, GY); const a = q > 0 ? .9 : 0; M.abdom.act(a); M.parasp.act(a); }, m('cc', .3), Math.max(3, D - m('cc', .3)), lin);
+    txt(p, 'мышцы живота + разгибатели спины одновременно', 380, 180, m('cc', 1), { size: 21, weight: 700, fill: ACT, anchor: 'middle' });
+    txt(p, '→ позвоночник жёстче', 380, 212, m('cc', 1.5), { size: 21, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 760, 140, 780, 110, 'выявить нарушения', 'тесты равновесия, например звёздный тест (SEBT)', BACK, m('sebt'), { size: 20 });
+    // the trunk is about half the body mass
+    const pie = G(p, { x: 900, y: 420, o: 0 });
+    mk('circle', { r: 90, fill: mix(COL.chalk, COL.board, .8), stroke: COL.chalk, 'stroke-width': 2 }, pie);
+    mk('path', { d: 'M0 0V-90A90 90 0 0 1 0 90Z', fill: mix(BACK, COL.board, .3), stroke: BACK, 'stroke-width': 2 }, pie);
+    T(pie, '≈ ½', { x: 40, y: 10, size: 28, weight: 700, fill: COL.board, anchor: 'middle' });
+    T(pie, 'туловище — примерно половина массы тела', { x: 120, y: 8, size: 20, weight: 700, fill: COL.chalk });
+    show(pie, m('half'));
+    txt(p, '→ равновесие — часть многокомпонентного лечения', 1020, 470, m('half', 2), { size: 19, fill: COL.chalk });
+    infoCard(p, 760, 560, 780, 200, 'данные пока', 'нервно-мышечный контроль туловища: боль ↓ и функция ↑ (по оценке пациентов); улучшение равновесия и постуральных реакций не доказано', COL.task, m('ev'), { size: 20 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-region', prompt: ['О какой области речь?'],
+    build: grid([
+      { parts: ['Прыжки на одной ноге в паре с наблюдателем'], ans: ['k'], why: 'Тренировка в парах предложена для профилактики травм ПКС.' },
+      { parts: ['Удары свободной ногой против эластичной ленты'], ans: ['a'], why: 'Элемент успешных программ при растяжениях голеностопа.' },
+      { parts: ['Одновременное напряжение мышц туловища в ответ на толчок'], ans: ['b'], why: 'Частая компенсация при хронической боли в пояснице.' },
+      { parts: ['Травм примерно вдвое меньше'], ans: ['k'], why: 'Проприоцептивные программы — для ПКС.' },
+      { parts: ['−38 % у школьных футболистов и баскетболистов'], ans: ['a'], why: 'Программа Макгуайна и Кина — голеностоп.' },
+    ], [['a', 'Голеностоп', ANK], ['k', 'ПКС', KNEE], ['b', 'Поясница', BACK]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Голеностоп: стойка на одной ноге на неустойчивой опоре + бедро и туловище; BESS, SEBT, Y-тест.', 'w1'],
+     ['Макгуайн и Кин: −38 %; по 30 с на ногу; 5 дней × 5 недель, затем 3 дня в неделю.', 'w2'],
+     ['ПКС: травм примерно вдвое меньше; тренировка в парах с внешним фокусом.', 'w3'],
+     ['Поясница: напряжение мышц туловища; боль ↓ и функция ↑, но улучшение равновесия не доказано.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-sprain', prompt: ['Футболистка, растяжение голеностопа три недели назад, острый период прошёл. Что из урока подходит?'],
+    build: choice([
+      ['Стойка на одной ноге на неустойчивой опоре + упражнения для бедра и туловища, 2–3 раза в неделю ≈ 6–8 недель'],
+      ['Только покой до конца сезона'],
+      ['Стойка на двух ногах на полу, раз в неделю'],
+      ['Только упражнения для голеностопа — бедро и туловище не важны'],
+    ], 0, 'В постостром периоде — стойка на одной ноге на неустойчивой опоре, с работой бедра и туловища; после травмы — 2–3 раза в неделю около 6–8 недель.',
+    [null, 'Тренировка равновесия снижает риск повторных растяжений — покой её не заменит.', 'Слишком легко и редко: нужна неустойчивая опора и 2–3 раза в неделю.', 'Сегменты связаны: нужна работа мышц бедра и туловища.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-lbp', prompt: ['Что показывают данные о тренировке нервно-мышечного контроля туловища при боли в пояснице?'],
+    build: choice([
+      ['Меньше боли и лучше функция по оценке пациентов, но улучшение равновесия не доказано'],
+      ['Доказано улучшение равновесия и постуральных реакций'],
+      ['Никакого эффекта — тренировка бесполезна'],
+      ['Боль усиливается из-за напряжения мышц'],
+    ], 0, 'Пациенты отмечают меньше боли и лучшую функцию; а вот улучшение равновесия и постуральных реакций пока не доказано.',
+    [null, 'Как раз это пока не удаётся доказать.', 'Эффект есть: меньше боли и лучше функция.', 'В книге об этом не говорится; боль по оценке пациентов уменьшается.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

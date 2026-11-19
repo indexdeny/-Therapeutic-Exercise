@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как проводить упражнения — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 67, title: 'Как проводить силовые упражнения', minutes: 8, language: 'ru', next: '../ch068/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch067/lupa.ru.json
+const LUPA = [
+  {"beat": "intro", "fig": 0, "target": "m0", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch067/cards.ru.json
+const CARDS_SHORT = {
+  "дистально\nу конца сегмента, к которому крепится мышца: наибольший момент при наименьшем сопротивлении": "наибольший момент",
+  "через сустав\nесли он стабилен, безболезнен и поддержан мышцами": "если стабилен и безболезнен",
+  "неприятно давит?\nсменить место или увеличить площадь": "сменить место или увеличить площадь",
+  "концентрически\nсопротивление — прямо против движения": "сопротивление — прямо против движения",
+  "эксцентрически\nсопротивление — в ту же сторону, что и движение": "в ту же сторону, что движение",
+  "ручное сопротивление\nэффективнее всего перпендикулярно сегменту по всей дуге": "перпендикулярно сегменту по всей дуге",
+  "без опоры\nвнешне фиксируют проксимальный сегмент, к которому крепится мышца; ремни тоже подходят": "фиксируют проксимальный сегмент",
+  "с опорой, несколько суставов\nнеподвижные сегменты пациент стабилизирует сам, мышцами": "пациент стабилизирует сам",
+  "сначала — техника\nминимальная нагрузка, отработать рисунок движения": "минимальная нагрузка, отработать рисунок движения",
+  "сильно, но под контролем\nбез боли, плавно, без рывков": "без боли, плавно, без рывков",
+  "наблюдение\nисправлять положение, стабилизацию, скорость; следить за утомлением; ответ до, во время и после; жизненные показатели; предосторожности — урок 68": "исправлять, следить за утомлением",
+  "заминка (cool-down)\nритмичные движения без сопротивления — махи руками, ходьба, велотренажёр — и мягкая растяжка": "ритмичные движения + мягкая растяжка",
+};
+// cards-short end
+
+const RES = COL.whole, STABC = COL.good, STR = COL.nat;
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A standing figure raising the near arm forward (shoulder flexion) with the anterior deltoid on the shoulder.
+// The resistance arrow presses on the distal humerus toward extension. Returns { f, dl, arrow }.
+function flexFig(p, x, gy, s, t0) {
+  const f = fig(p, { x, y: gy - 182 * s, s, o: 0, pose: { aN: 4, eN: 4 } });
+  const dl = muscleOn(f, ['Sh', 'H', 4, -14], ['Sh', 'EN', 38, -9], { after: 'hdN', w: 12 });
+  const arrow = path(p, '', { stroke: RES, 'stroke-width': 7 }, { o: 0 });
+  f.onSet.push(() => {
+    const E = onStage(f, 'EN'), S = onStage(f, 'Sh'), dx = E[0] - S[0], dy = E[1] - S[1], L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+    const nx = -uy, ny = ux, v = w => w.toFixed(1);   // toward extension (back and down) for a figure facing right
+    const b = [E[0] - nx * 18, E[1] - ny * 18], a = [b[0] - nx * 80, b[1] - ny * 80];
+    arrow.setAttribute('d', `M${v(a[0])} ${v(a[1])}L${v(b[0])} ${v(b[1])}M${v(b[0] - nx * 16 - ny * 11)} ${v(b[1] - ny * 16 + nx * 11)}L${v(b[0])} ${v(b[1])}L${v(b[0] - nx * 16 + ny * 11)} ${v(b[1] - ny * 16 - nx * 11)}`);
+  });
+  f.set({});
+  show(f.g, t0);
+  return { f, dl, arrow };
+}
+// A strip of sets and rests (as in lesson 61).
+function setStrip(p, x, y, blocks, t0, { h = 50, n = 10 } = {}) {
+  const g = G(p, { o: 0 });
+  let cx = x;
+  blocks.forEach(([k, w, lab]) => {
+    if (k === 's') {
+      mk('rect', { x: cx, y, width: w, height: h, rx: 10, fill: mix(STR, COL.board, .6), stroke: STR, 'stroke-width': 2 }, g);
+      for (let i = 0; i < n; i++) path(g, `M${cx + (i + .5) * w / n} ${y + 10}V${y + h - 10}`, { stroke: STR, 'stroke-width': 4 });
+    } else mk('rect', { x: cx + 4, y: y + h / 2 - 3, width: w - 8, height: 6, rx: 3, fill: COL.dim }, g);
+    if (lab) T(g, lab, { x: cx + w / 2, y: y + h + 28, size: 20, fill: k === 's' ? STR : COL.dim, anchor: 'middle' });
+    cx += w;
+  });
+  show(g, t0);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Как проводить', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 67', { x: 800, y: 190, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Как проводить упражнения', { x: 800, y: 275, size: 54, weight: 600, anchor: 'middle' });
+    T(g, 'с сопротивлением', { x: 800, y: 340, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'от обследования до заминки', 800, 420, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 830;
+    path(art, `M640 ${GY}H960`, { stroke: COL.faint, 'stroke-width': 3 });
+    const ff = flexFig(art, 790, GY, .75, 0);
+    show(ff.arrow, .6);
+    prog(q => { ff.f.set({ aN: lerp(4, 95, cyc(q, 2.5)) }); ff.dl.act(.9); }, .5, Math.max(4, D - 1.2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['exam', 'Обследование и оценка', (m) => {
+    const p = panel(0);
+    txt(p, 'обследование и оценка', 800, 76, m('exam'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const ring = cycleRing(p, { cx: 425, cy: 470, r: 268, ry: 270, w: 246, items: [['обследование', 'анамнез, системы,', 'тесты'], ['исходные значения', 'сила, выносливость,', 'ROM, функция'], ['оценка', 'уместна ли', 'силовая?'], ['план', 'вместе с другими', 'методами'], ['переоценка', 'менять дозу', 'и виды']], col: COL.task, size: 23 });
+    ['e1', 'e2', 'e3', 'e4', 'e5'].forEach((k, i) => { ring.reveal(i, m(k)); ring.arc(i, m(k, .8)); });
+    const Q = ['нарушения силы → ограничения функции?', 'раздражимость, стадия заживления', 'отёк? боль: где и когда?', 'подвижность, равновесие, чувствительность, координация, познание', 'цели реалистичны?', 'показано или противопоказано?', 'что подчеркнуть: сила, мощность, выносливость', 'присмотр или самостоятельно?', 'сроки, нужна ли поддержка', 'предосторожности'];
+    txt(p, 'вопросы оценки', 1180, 140, m('e3'), { size: 25, weight: 700, fill: COL.task, anchor: 'middle' });
+    Q.forEach((s, i) => {
+      const g = G(p, { o: 0 }), y = 165 + i * 68;
+      mk('rect', { x: 830, y, width: 700, height: 58, rx: 12, fill: PANEL, stroke: COL.task, 'stroke-width': 1.5 }, g);
+      put(para(g, s, 848, y + 36, null, { size: 20, maxW: 670 }), { o: 1 });
+      show(g, m('e3', .8 + i * 1.6));
+    });
+  }],
+
+  ['prep', 'Подготовка', (m) => {
+    const p = panel(0);
+    txt(p, 'подготовка', 800, 76, m('prep'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const L = ['выбрать виды: ручное, механическое или оба', 'оборудование: что нужно и что есть', 'цели и ожидаемый результат — с пациентом', 'объяснить план; понимание и согласие', 'удобная одежда, поддерживающая обувь', 'твёрдая, но удобная опора', 'показать упражнение и рисунок движения'];
+    L.forEach((s, i) => {
+      const y = 140 + i * 100, g = G(p, { o: 0 });
+      mk('rect', { x: 200, y, width: 1200, height: 80, rx: 16, fill: PANEL, stroke: COL.good, 'stroke-width': 2 }, g);
+      mk('rect', { x: 225, y: y + 20, width: 40, height: 40, rx: 8, fill: 'none', stroke: COL.good, 'stroke-width': 3 }, g);
+      T(g, s, { x: 290, y: y + 50, size: 27, fill: COL.chalk });
+      show(g, m('p' + (i + 1)));
+      checkMark(p, 245, y + 42, m('p' + (i + 1), .5), COL.good, 1.2);
+    });
+  }],
+
+  ['warm', 'Разминка', (m, D) => {
+    const p = panel(0), GY = 640;
+    txt(p, 'разминка (warm-up)', 800, 76, m('warm'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'лёгкие повторяющиеся движения той же области — без сопротивления', 800, 122, m('warm', 1), { size: 24, fill: COL.dim, anchor: 'middle' });
+    const tm = G(p, { o: 0 });
+    mk('rect', { x: 380, y: GY, width: 440, height: 26, rx: 10, fill: PANEL, stroke: COL.dim, 'stroke-width': 3 }, tm);
+    path(tm, `M790 ${GY}L840 ${GY - 220}M840 ${GY - 220}H870`, { stroke: COL.dim, 'stroke-width': 6 });
+    show(tm, m('ex'));
+    const f = fig(p, { x: 560, y: GY - 182 * .9, s: .9, o: 0 });
+    show(f.g, m('ex'));
+    walk(f, m('ex', .3), Math.max(4, D - m('ex', .3) - .5), { cycles: Math.max(4, D - m('ex', .3) - .5) * .9, dx: 0 });
+    const clk = txt(p, '0 мин', 1100, 380, m('ex'), { size: 48, weight: 700, fill: COL.task, anchor: 'middle' });
+    prog(q => { clk.textContent = Math.round(10 * q) + ' мин'; }, m('ex', .3), Math.max(3, D - m('ex', .3) - 1), lin);
+    txt(p, 'ходьба на дорожке 5–10 мин', 1100, 450, m('ex', .3), { size: 26, fill: COL.task, anchor: 'middle' });
+    pill(p, 'затем — гибкость туловища и ног', 1100, 540, m('ex', 3), { col: COL.good, size: 25 });
+  }],
+
+  ['place', 'Где сопротивление', (m) => {
+    const p = panel(0), GY = 780;
+    txt(p, 'куда прикладывать сопротивление', 800, 76, m('place'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ground(p, 100, 560, GY, .3);
+    const ff = flexFig(p, 330, GY, 1.2, .3);
+    show(ff.arrow, m('dist', .5));
+    prog(q => { ff.f.set({ aN: lerp(4, 95, cyc(q, 1.5)) }); ff.dl.act(.9); }, m('dist', .5), 4.5, lin);
+    txt(p, 'передняя часть дельтовидной', 330, 230, m('dist'), { size: 22, fill: '#ff7a5c', anchor: 'middle', weight: 600 });
+    txt(p, 'R — у нижней части плеча', 330, 840, m('dist', .5), { size: 22, fill: RES, anchor: 'middle', weight: 700 });
+    // across the elbow: a dumbbell in the hand
+    ground(p, 640, 960, GY, m('across'));
+    const f2 = fig(p, { x: 800, y: GY - 182 * 1.0, s: 1, o: 0, pose: { aN: 4, eN: 4 } });
+    const dl2 = muscleOn(f2, ['Sh', 'H', 4, -14], ['Sh', 'EN', 38, -9], { after: 'hdN', w: 11 });
+    const db = carry(p, f2, c => dumbbell(c, 1.1));
+    [f2.g, db].forEach(e => { put(e, { o: 0 }); show(e, m('across')); });
+    prog(q => { f2.set({ aN: lerp(4, 95, cyc(q, 1.5)) }); dl2.act(.9); }, m('across', .4), 4.5, lin);
+    txt(p, 'через локоть — гантель', 800, 840, m('across'), { size: 22, fill: COL.task, anchor: 'middle', weight: 700 });
+    infoCard(p, 1020, 140, 520, 230, 'дистально', 'у конца сегмента, к которому крепится мышца: наибольший момент при наименьшем сопротивлении', RES, m('dist'), { size: 22 });
+    infoCard(p, 1020, 390, 520, 200, 'через сустав', 'если он стабилен, безболезнен и поддержан мышцами', COL.task, m('across'), { size: 22 });
+    infoCard(p, 1020, 610, 520, 170, 'неприятно давит?', 'сменить место или увеличить площадь', COL.good, m('press'), { size: 22 });
+  }],
+
+  ['dir', 'Направление', (m) => {
+    const p = panel(0), GY = 780;
+    txt(p, 'направление сопротивления', 800, 76, m('dir'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ground(p, 120, 620, GY, .3);
+    const ff = flexFig(p, 360, GY, 1.25, .3);
+    show(ff.arrow, m('con'));
+    const lab = txt(p, '', 360, 840, m('con'), { size: 26, weight: 700, fill: STR, anchor: 'middle' });
+    prog(q => { ff.f.set({ aN: lerp(4, 95, io(q)) }); ff.dl.act(.9); lab.textContent = 'поднимает: R против движения'; }, m('con', .3), 2.5, lin);
+    prog(q => { ff.f.set({ aN: lerp(95, 4, io(q)) }); ff.dl.act(.9); lab.textContent = 'опускает: R по движению'; lab.setAttribute('fill', COL.task); }, m('ecc', .3), 2.8, lin);
+    prog(q => { ff.f.set({ aN: lerp(4, 70, io(q)) }); ff.dl.act(.9); lab.textContent = 'R перпендикулярно сегменту'; lab.setAttribute('fill', RES); }, m('perp', .3), 2, lin);
+    infoCard(p, 760, 160, 760, 170, 'концентрически', 'сопротивление — прямо против движения', STR, m('con'), { size: 24 });
+    infoCard(p, 760, 350, 760, 170, 'эксцентрически', 'сопротивление — в ту же сторону, что и движение', COL.task, m('ecc'), { size: 24 });
+    infoCard(p, 760, 540, 760, 170, 'ручное сопротивление', 'эффективнее всего перпендикулярно сегменту по всей дуге', RES, m('perp'), { size: 24 });
+  }],
+
+  ['stab', 'Стабилизация', (m) => {
+    const p = panel(0);
+    txt(p, 'стабилизация', 800, 76, m('stab'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const sc = tableScene(p, { hx: 420, top: 430, s: 1, hands: ['WN', 'Sh'], t0: m('nwb') });
+    const bic = muscleOn(sc.pt, ...MUSCLE.biceps, { after: 'hdN', w: 10 });
+    prog(q => { sc.pt.set({ eN: lerp(6, 110, cyc(q, 1.5)) }); bic.act(.9); }, m('nwb', .6), 5, lin);
+    const sh = onStage(sc.pt, 'Sh');
+    const ring = put(mk('circle', { cx: sh[0], cy: sh[1], r: 26, fill: 'none', stroke: STABC, 'stroke-width': 5 }, p), { o: 0 });
+    show(ring, m('nwb', 1.5)); pulse(ring, m('nwb', 2), 1.2);
+    txt(p, 'держат переднюю поверхность плеча', 420, 650, m('nwb', 1.5), { size: 23, fill: STABC, anchor: 'middle', weight: 700 });
+    txt(p, 'сопротивление — у запястья', 420, 690, m('nwb', 1), { size: 22, fill: RES, anchor: 'middle' });
+    infoCard(p, 840, 140, 700, 240, 'без опоры', 'внешне фиксируют проксимальный сегмент, к которому крепится мышца; ремни тоже подходят', STABC, m('nwb'), { size: 23 });
+    infoCard(p, 840, 400, 700, 200, 'с опорой, несколько суставов', 'неподвижные сегменты пациент стабилизирует сам, мышцами', COL.task, m('wb'), { size: 23 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-stab', prompt: ['Терапевт сопротивляется сгибанию локтя, чтобы укрепить двуглавую мышцу. Что стабилизировать?'],
+    build: choice([['Переднюю поверхность плеча — проксимальный сегмент'], ['Запястье'], ['Кисть пациента'], ['Ничего не нужно']], 0,
+      'Стабилизируют проксимальный сегмент, к которому крепится укрепляемая мышца.',
+      [null, 'У запястья — сопротивление, а не стабилизация.', 'Кисть — дистальнее, это не помогает.', 'Без стабилизации появятся обходные движения плечом.']),
+  }], done) }],
+
+  ['int', 'Интенсивность', (m) => {
+    const p = panel(0), GY = 760;
+    txt(p, 'интенсивность', 800, 76, m('int'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ground(p, 100, 480, GY, .3);
+    const c = curlFig(p, 290, GY, 1.15, .7, .3);
+    curls(c, m('learn', .3), 4, 1.5, { lvl: .4 });
+    prog(q => { [...c.db.children].forEach(e => put(e, { s: 1 + .6 * io(q) })); }, m('eff'), 1, lin);
+    curls(c, m('eff', .8), 4, 1.5, { lvl: .95 });
+    infoCard(p, 620, 130, 920, 150, 'сначала — техника', 'минимальная нагрузка, отработать рисунок движения', COL.whole, m('learn'), { size: 23 });
+    infoCard(p, 620, 295, 920, 150, 'сильно, но под контролем', 'без боли, плавно, без рывков', STR, m('eff'), { size: 23 });
+    infoCard(p, 620, 460, 920, 190, 'поправить выравнивание, стабилизацию или груз, если:', null, COL.bad, m('adj'), { size: 23 });
+    ['не весь объём', 'дрожь', 'обходные движения'].forEach((s, i) => pill(p, s, 760 + i * 300, 590, m('adj', .8 + i * .6), { col: COL.bad, size: 25 }));
+  }],
+
+  ['reps', 'Повторения и подходы', (m) => {
+    const p = panel(0);
+    txt(p, 'повторения, подходы, отдых', 800, 76, m('reps'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    setStrip(p, 200, 180, [['s', 460, '8–12 повторений, умеренный груз'], ['r', 220, 'короткий отдых'], ['s', 460, 'второй подход 8–12']], m('reps', .5));
+    const g = G(p, { o: 0 });
+    roundBox(g, 200, 340, 560, 150, COL.bad, PANEL, 2.5);
+    T(g, 'меньше 8 повторений?', { x: 222, y: 384, size: 26, weight: 700, fill: COL.bad });
+    T(g, '→ уменьшить сопротивление', { x: 222, y: 430, size: 25, fill: COL.chalk });
+    show(g, m('less'));
+    const st = [['повторения', COL.task], ['подходы', COL.task], ['сопротивление', STR]];
+    txt(p, 'перегрузка: сначала', 840, 384, m('ov'), { size: 25, weight: 700, fill: COL.chalk });
+    st.forEach(([s, c], i) => {
+      const y = 420 + i * 90, gg = G(p, { o: 0 });
+      mk('rect', { x: 840 + i * 120, y, width: 420, height: 64, rx: 14, fill: PANEL, stroke: c, 'stroke-width': 2.5 }, gg);
+      T(gg, (i < 2 ? '↑ ' : 'позже ↑ ') + s, { x: 860 + i * 120, y: y + 42, size: 25, fill: c, weight: 700 });
+      show(gg, m('ov', .8 + i * .9));
+    });
+  }],
+
+  ['instr', 'Инструкции, наблюдение, заминка', (m) => {
+    const p = panel(0);
+    txt(p, 'инструкции, наблюдение, заминка', 800, 76, m('instr'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const bub = (x, y, s, col, t0) => { const g = G(p, { o: 0 }); const w = uiW(s, 26) + 60; mk('rect', { x: x - w / 2, y, width: w, height: 70, rx: 30, fill: PANEL, stroke: col, 'stroke-width': 3 }, g); path(g, `M${x - 20} ${y + 70}l-14 26l38 -26`, { fill: PANEL, stroke: col, 'stroke-width': 3 }); T(g, s, { x, y: y + 45, size: 26, fill: COL.chalk, anchor: 'middle' }); show(g, t0); return g; };
+    bub(420, 140, '«Выполните флексию и экстензию локтя»', COL.bad, m('instr', .5));
+    cross(p, 420 + uiW('«Выполните флексию и экстензию локтя»', 26) / 2 + 50, 175, 16, m('instr', 1.5));
+    bub(420, 260, '«Согните и разогните локоть»', COL.good, m('instr', 2.5));
+    checkMark(p, 420 + uiW('«Согните и разогните локоть»', 26) / 2 + 50, 295, m('instr', 3), COL.good, 1.5);
+    const sheet = G(p, { o: 0 });
+    mk('rect', { x: 1000, y: 140, width: 220, height: 260, rx: 10, fill: '#ece8dc' }, sheet);
+    [180, 220, 260].forEach(y => path(sheet, `M1020 ${y}H1200`, { stroke: '#9a9483', 'stroke-width': 3 }));
+    const mini = fig(sheet, { x: 1110, y: 375 - 182 * .3, s: .3, col: '#6f6a5c', pose: { aN: 4, eN: 100 } });
+    T(sheet, 'дома — письменно и с рисунками', { x: 1110, y: 440, size: 22, fill: COL.good, anchor: 'middle', weight: 600 });
+    show(sheet, m('instr', 4));
+    infoCard(p, 80, 470, 700, 250, 'наблюдение', 'исправлять положение, стабилизацию, скорость; следить за утомлением; ответ до, во время и после; жизненные показатели; предосторожности — урок 68', COL.whole, m('mon'), { size: 22 });
+    infoCard(p, 820, 470, 700, 250, 'заминка (cool-down)', 'ритмичные движения без сопротивления — махи руками, ходьба, велотренажёр — и мягкая растяжка', COL.good, m('cool'), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-impl', prompt: ['Верно или нет?'],
+    build: grid([
+      { parts: ['Сопротивление обычно прикладывают у дистального конца сегмента'], ans: ['t'], why: 'Так наибольший момент при наименьшем сопротивлении.' },
+      { parts: ['При эксцентрической работе сопротивление направлено против движения'], ans: ['f'], why: 'В ту же сторону, что и движение.' },
+      { parts: ['Разминку делают с сопротивлением'], ans: ['f'], why: 'Без сопротивления.' },
+      { parts: ['Ручное сопротивление эффективнее перпендикулярно сегменту'], ans: ['t'], why: 'Да, по всей дуге.' },
+      { parts: ['Заминка — ритмичные движения без сопротивления и мягкая растяжка'], ans: ['t'], why: 'Да.' },
+    ], TF, { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Обследование, исходные значения, оценка уместности, переоценка.', 'w1'],
+     ['Подготовка: виды и оборудование, цели, согласие, одежда, опора, показ.', 'w2'],
+     ['R — дистально; против движения (конц.) или по движению (эксц.); стабилизация — проксимально.', 'w3'],
+     ['8–12 повторений, второй подход; простые слова; разминка и заминка.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-adjust', prompt: ['Что сделать?'],
+    build: grid([
+      { parts: ['Пациент делает только 6 повторений из целевых 8–12'], ans: ['less'], why: 'Меньше 8 — уменьшить сопротивление.' },
+      { parts: ['12 повторений даются легко, программа только началась'], ans: ['more'], why: 'Сначала увеличивают повторения или подходы.' },
+      { parts: ['Поднимая гантель, пациент поднимает и плечо'], ans: ['fix'], why: 'Обходное движение — поправить стабилизацию.' },
+      { parts: ['Отводя ногу лёжа на боку, пациент сгибает бедро'], ans: ['fix'], why: 'Выравнивание (урок 60).' },
+    ], [['less', 'Меньше сопротивление', COL.bad], ['more', 'Больше повторений или подход', COL.task], ['fix', 'Поправить выравнивание и стабилизацию', STABC]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-home', prompt: ['Как лучше оформить упражнение для домашней программы?'],
+    build: choice([
+      ['Простыми словами с понятным рисунком: «Согните и разогните локоть, 8–12 раз, 2 подхода»'],
+      ['«Флексия-экстензия в локтевом суставе, 2 × 10ПМ»'],
+      ['Только устно, без записи'],
+      ['Ссылку на учебник по анатомии'],
+    ], 0, 'Инструкции — простые, без жаргона; дома — письменно и с рисунками.',
+    [null, 'Медицинские термины пациенту непонятны.', 'Домашнюю программу дают письменно и с рисунками.', 'Нужны понятные указания, а не теория.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

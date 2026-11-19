@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Где повреждаются нервы — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 119, title: 'Где повреждаются периферические нервы', minutes: 9, language: 'ru', next: '../ch120/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch119/cards.ru.json
+const CARDS_SHORT = {
+  "если корешок натягивают спайки\nтесты подвижности нерва воспроизводят симптомы при наклоне позвоночника в противоположную сторону": "симптомы при противоположном наклоне",
+  "верхний квадрант C5–T1, нижний L1–S3\nсимптомы — по дерматомам и миотомам": "симптомы — по дерматомам и миотомам",
+  "передние ветви C5–T1\nволокна переплетаются и распределяются по нервам": "волокна переплетаются",
+  "грудной выход: три места\nмежлестничный треугольник · рёберно-ключичное пространство · пространство под малой грудной мышцей; аномалии — шейное ребро, длинный отросток C7, неправильно сросшаяся ключица": "три места + аномалии",
+  "верхний ствол (C5, C6) — чаще всего\nнет отведения и наружной ротации плеча, слабы сгибание локтя и супинация — рука висит ладонью назад: поза «официанта, просящего чаевые»": "поза «официанта, просящего чаевые»",
+  "нижний ствол (C8, T1)\nшейное ребро или вытяжение руки вверх; при родах — паралич Клюмпке: слабость мелких мышц кисти": "паралич Клюмпке: мелкие мышцы кисти",
+  "полный родовой паралич сплетения\nу трети тяжёлых больных — с синдромом Горнера": "треть — с синдромом Горнера",
+  "подмышечный (C5, 6)\nвывих плеча, перелом хирургической шейки → отведение и наружная ротация": "отведение и наружная ротация",
+  "мышечно-кожный (C5, 6)\nне согнуть локоть с супинированным предплечьем": "не согнуть локоть с супинированным предплечьем",
+  "срединный (C6–8)\nкруглый пронатор: как запястный канал + мышцы предплечья; в кисть — через запястный канал": "круглый пронатор, запястный канал",
+  "локтевой (C8, T1)\nкубитальный канал, головки локтевого сгибателя запястья, канал Гийона → частичная когтеобразная кисть": "частичная когтеобразная кисть",
+  "перелом середины плеча, вывих плеча\nа ещё — костыль в подмышке и сон с рукой, перекинутой через спинку стула; трёхглавая выпадает, только если сдавление близко к подмышке": "костыль, сон на стуле",
+  "глубокая ветвь\nпод коротким лучевым разгибателем и в щели супинатора → слабеют разгибатели кисти и пальцев (кроме длинного лучевого) и супинатор; иногда принимают за теннисный локоть. Поверхностная ветвь — только чувствительная": "как теннисный локоть",
+  "бедренный (L2–4)\nпод паховой связкой: переломы бедра и таза, вправление вывиха, щипцы в родах, диабет → сгибание бедра и разгибание колена": "сгибание бедра, разгибание колена",
+  "запирательный (L2–4)\nприводящие мышцы; редко; трудно положить ногу на ногу": "трудно положить ногу на ногу",
+  "седалищный (L4–S3)\nсамый крупный; под грушевидной мышцей или сквозь неё — укороченная мышца сдавливает": "грушевидная мышца",
+  "большеберцовый\nза медиальной лодыжкой — синдром тарзального канала; подошвенные нервы — при избыточной пронации стопы": "синдром тарзального канала",
+  "поверхностная ветвь\nмалоберцовые мышцы: слабеет пронация стопы, со временем — конско-варусная стопа": "слабеет пронация",
+  "глубокая ветвь\nразгибатели стопы и пальцев: стопа свисает, со временем — вальгусная стопа": "стопа свисает",
+};
+// cards-short end
+
+const HEAD = COL.whole, NV = NERVE_C, PAIN = '#ff5a3c';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+// Two vertebrae in side view (front to the left) with the intervertebral foramen and the root in it.
+// set({ narrow, ext }): narrow 0..1 — the disc bulges and a spur grows into the foramen; ext 0..1 — the upper vertebra
+// tips back (extension) and closes the foramen further. The root reddens as it is squeezed.
+function foramen(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), B = ANAT.bone, line = mix(B, '#000000', .45);
+  const low = G(g, {}), up = G(g, {});
+  const body = (gg, yy) => { mk('rect', { x: -150, y: yy, width: 150, height: 90, rx: 14, fill: B, stroke: line, 'stroke-width': 2 }, gg); mk('path', { d: `M0 ${yy + 10}H40V${yy + 30}H120L150 ${yy + 50}L120 ${yy + 70}H40V${yy + 80}H0Z`, fill: B, stroke: line, 'stroke-width': 2 }, gg); };
+  body(low, 30); body(up, -100);
+  const disc = mk('path', { fill: '#8fb8c8', stroke: '#5d8797', 'stroke-width': 1.5 }, g);
+  const spur = mk('path', { fill: B, stroke: line, 'stroke-width': 2 }, g);
+  const hole = mk('ellipse', { cx: 30, cy: -2, rx: 26, ry: 40, fill: COL.board, stroke: '#5c6b68', 'stroke-width': 2 }, g);
+  const root = mk('circle', { cx: 30, cy: -2, r: 15, fill: NV, stroke: '#9b7d24', 'stroke-width': 2 }, g);
+  g.appendChild(up);
+  const S = { narrow: 0, ext: 0 }, e = { g, st: S };
+  e.set = o => {
+    Object.assign(S, o);
+    const b = 18 * S.narrow, sq = clamp(S.narrow * .6 + S.ext * .5, 0, 1);
+    disc.setAttribute('d', `M-150 -10H0Q${f1(8 + b)} 10 0 30H-150Z`);
+    spur.setAttribute('d', `M44 30L${f1(44 - 18 * S.narrow)} ${f1(30 - 22 * S.narrow)}L70 30Z`);
+    put(up, { r: -6 * S.ext });
+    hole.setAttribute('rx', f1(26 - 8 * sq)); hole.setAttribute('ry', f1(40 - 16 * sq));
+    root.setAttribute('r', f1(15 - 3 * sq)); root.setAttribute('fill', mix(NV, PAIN, clamp(sq * 1.4 - .2, 0, 1)));
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Где повреждаются нервы', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 13 · Урок 119', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Где повреждаются', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'периферические нервы', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'корешки, сплетения и уязвимые места на пути нервов', 800, 360, m('sub'), { size: 30, fill: NV, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const an = armNerves(art, 620, 420, .66, null); put(an.g, { o: 1 });
+    const ln = legNerves(art, 980, 480, .6, null); put(ln.g, { o: 1 });
+    ['ax', 'mc', 'med', 'uln', 'rad'].forEach((k, i) => an.hl(k, .6 + i * .5));
+    ['fem', 'sci', 'tib', 'per'].forEach((k, i) => ln.hl(k, 1 + i * .5));
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['roots', 'Корешки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'корешки в межпозвонковых отверстиях', 800, 56, m('roots'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    txt(p, 'поражение нерва: меняется чувствительность и слабеют мышцы в зоне его волокон', 800, 98, m('roots', .5), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const fo = foramen(p, 330, 400, 1.6, m('sten'));
+    prog(q => fo.set({ narrow: q }), m('sten', 1.5), 2);
+    prog(q => fo.set({ ext: cyc(q, 2) }), m('move', .5), Math.max(2, m('adh') - m('move', .5)), lin);
+    lab(p, 'корешок', 120, 210, 330 + 30 * 1.6, 400 - 2 * 1.6, NV, m('sten'));
+    lab(p, 'диск и костный шип сужают отверстие', 640, 600, 330 + 20 * 1.6, 400 + 10 * 1.6, '#8fb8c8', m('sten', 1.8));
+    txt(p, 'разгибание, наклон, поворот в сторону сужения → ещё теснее', 330, 700, m('move'), { size: 20, weight: 700, fill: PAIN, anchor: 'middle' });
+    pillRow(p, ['дегенерация диска и суставов', 'грыжа диска', 'спондилолистез'], 1180, 160, m('sten', .5), { col: COL.task, size: 19, gap: .8, space: 10 });
+    infoCard(p, 820, 210, 720, 170, 'если корешок натягивают спайки', 'тесты подвижности нерва воспроизводят симптомы при наклоне позвоночника в противоположную сторону', COL.real, m('adh'), { size: 21 });
+    // dermatome bands on an arm (schematic)
+    const f = frontStand(p, 1180, 870, 1.05, m('derm'), { muscles: false, pose: { aR: 24, eR: 4 } }), Q = f.pts;
+    const S = P => f.at(P), arm = Q.arms[1], mid = (A, B, k) => [A[0] + (B[0] - A[0]) * k, A[1] + (B[1] - A[1]) * k];
+    const bands = [['C5', [Q.Sh[1], mid(Q.Sh[1], arm[0], .6)], '#e2574c'], ['C6', [mid(arm[0], arm[1], .3), arm[2]], '#f0a04b'], ['T1', [mid(Q.Sh[1], arm[0], .6), mid(arm[0], arm[1], .3)], '#5aa7d6']];
+    bands.forEach(([s, [A, B], c], i) => { const e = path(p, `M${S(A).map(f1).join(' ')}L${S(B).map(f1).join(' ')}`, { stroke: c, 'stroke-width': 16, 'stroke-opacity': .6 }, { o: 0 }); show(e, m('derm', .6 + i * .5)); });
+    pillRow(p, ['C5', 'C6', 'T1'], 1430, 560, m('derm', .6), { col: ['#e2574c', '#f0a04b', '#5aa7d6'], size: 19, gap: .5, space: 8 });
+    pill(p, 'схема', 1430, 610, m('derm'), { col: COL.dim, size: 17 });
+    infoCard(p, 60, 750, 680, 120, 'верхний квадрант C5–T1, нижний L1–S3', 'симптомы — по дерматомам и миотомам', NV, m('derm'), { size: 21 });
+  }],
+
+  ['myo', 'Миотомы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ключевые мышцы для проверки миотомов (блок 13.2)', 800, 56, m('myo'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const U = [['C5', 'отведение плеча', 'c5'], ['C6', 'сгибание локтя, разгибание кисти', 'c6'], ['C7', 'разгибание локтя, сгибание кисти', 'c7'], ['C8', 'разгибание большого пальца', 'c8'], ['T1', 'отведение пальцев', 't1']];
+    const L = [['L1–2', 'сгибание бедра', 'l3'], ['L3', 'разгибание колена', 'l3'], ['L4', 'тыльное сгибание стопы', 'l4'], ['L5', 'разгибание большого пальца стопы', 'l5'], ['S1', 'пронация и подошвенное сгибание стопы, разгибание бедра', 's1'], ['S2', 'сгибание колена', 's1']];
+    const row = (x, y, r, s, k, i, c) => { const g0 = G(p, { o: 0 }); put(pill(g0, r, x + 40, y, null, { col: c, size: 21 }), { o: 1 }); put(para(g0, s, x + 96, y + 7, null, { size: 21, maxW: 560 }), { o: 1 }); show(g0, m(k, (k === 'l3' || k === 's1') ? i * .8 : 0)); };
+    U.forEach(([r, s, k], i) => row(60, 140 + i * 66, r, s, k, 0, COL.whole));
+    L.forEach(([r, s, k], i) => row(820, 140 + i * 66, r, s, k, i === 1 || i === 5 ? 1 : 0, COL.task));
+    txt(p, 'верхний квадрант', 380, 116, m('myo'), { size: 20, weight: 700, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'нижний квадрант', 1180, 116, m('l3'), { size: 20, weight: 700, fill: COL.task, anchor: 'middle' });
+    // C5: shoulder abduction; L3: knee extension sitting
+    const fa = frontStand(p, 380, 860, .7, m('c5'), { muscles: false });
+    prog(q => fa.set({ aR: 8 + 80 * cyc(q, 2) }), m('c5', .3), Math.max(1, m('c6') - m('c5', .3)), lin);
+    const fk = fig(p, { s: .7, o: 0, pose: { ...SIT, t: 0 } }); plant(fk, 'H', 1130, 760); show(fk.g, m('l3'));
+    chair(p, 1130, 774, 870, m('l3'));
+    prog(q => fk.set({ kN: 95 - 85 * cyc(q, 2) }), m('l3', .3), Math.max(1, m('l4') - m('l3', .3)), lin);
+    prog(q => fk.set({ kN: 95, fN: 5 + 25 * cyc(q, 2) }), m('l4', .2), Math.max(1, m('l5') - m('l4', .2)), lin);
+  }],
+
+  ['plexus', 'Плечевое сплетение', (m, D) => {
+    const p = panel(0);
+    txt(p, 'плечевое сплетение (по мотивам рис. 13.3)', 800, 56, m('plexus'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const R = ['C5', 'C6', 'C7', 'C8', 'T1'].map((s, i) => [120, 150 + i * 80]);
+    const TR = [[330, 190], [330, 310], [330, 430]], CO = [[530, 220], [530, 330], [530, 440]];
+    const NN = [['подмышечный', [760, 170]], ['мышечно-кожный', [760, 240]], ['лучевой', [760, 310]], ['срединный', [760, 380]], ['локтевой', [760, 450]]];
+    const nl = [];
+    [[0, 0], [1, 0], [2, 1], [3, 2], [4, 2]].forEach(([r, t]) => nl.push(nerveLine(p, [R[r], TR[t]], m('plexus'), { w: 8, n: 3 })));
+    [[0, 0], [0, 1], [1, 0], [1, 1], [1, 2], [2, 1], [2, 2]].forEach(([t, c]) => nl.push(nerveLine(p, [TR[t], CO[c]], m('plexus', .5), { w: 7, n: 3 })));
+    [[1, 0], [1, 1], [1, 2], [0, 3], [2, 3], [2, 4]].forEach(([c, n2]) => nl.push(nerveLine(p, [CO[c], NN[n2][1]], m('plexus', 1), { w: 7, n: 3 })));
+    ['C5', 'C6', 'C7', 'C8', 'T1'].forEach((s, i) => txt(p, s, 96, 157 + i * 80, m('plexus'), { size: 20, weight: 700, fill: COL.dim, anchor: 'end' }));
+    NN.forEach(([s, P]) => txt(p, s, P[0] + 14, P[1] + 7, m('plexus', 1), { size: 19, weight: 600, fill: NV }));
+    pillRow(p, ['корешки', 'стволы', 'пучки', 'нервы'], 440, 560, m('plexus', .5), { col: COL.dim, size: 18, gap: .3, space: 40 });
+    prog(q => nl.forEach((n, i) => n.set({ taut: q * (i < 5 ? .8 : .5) })), m('weave', .5), 1.5);
+    txt(p, 'натяжение одного нерва → на несколько корешков', 440, 620, m('weave'), { size: 21, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    infoCard(p, 960, 100, 580, 150, 'передние ветви C5–T1', 'волокна переплетаются и распределяются по нервам', NV, m('plexus'), { size: 21 });
+    infoCard(p, 960, 270, 580, 300, 'грудной выход: три места', 'межлестничный треугольник · рёберно-ключичное пространство · пространство под малой грудной мышцей; аномалии — шейное ребро, длинный отросток C7, неправильно сросшаяся ключица', COL.task, m('out'), { size: 21 });
+    pill(p, 'подробнее — в уроке 123', 1250, 610, m('out', 2), { col: COL.dim, size: 18 });
+  }],
+
+  ['plexinj', 'Травмы сплетения', (m, D) => {
+    const p = panel(0);
+    txt(p, 'травмы плечевого сплетения', 800, 56, m('up'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    // the mechanism of an upper trunk injury: the head goes one way, the shoulder is pushed down
+    const f = frontStand(p, 360, 860, 1.5, m('up'), { muscles: false }), Q = f.pts, S = P => f.at(P);
+    const up = nerveLine(p, [S([Q.Nk[0], Q.Nk[1] + 8]), S(Q.Sh[1]), S(Q.arms[1][0])], m('up'), { w: 9, n: 6 });
+    const arw = G(p, { o: 0 }); show(arw, m('up', .5));
+    prog(q => {
+      f.set({ hd: -32 * q, aR: 6, eR: 4 });
+      const sh = S(Q.Sh[1]);
+      arw.replaceChildren(); path(arw, `M${f1(sh[0] + 10)} ${f1(sh[1] - 90)}V${f1(sh[1] - 20)}m-12 -14l12 14l12 -14`, { stroke: PAIN, 'stroke-width': 5 });
+      up.reroute([S([Q.Nk[0], Q.Nk[1] + 8]), [sh[0], sh[1] + 30 * q], S(Q.arms[1][0])]); up.set({ taut: q, hot: q * .6 });
+    }, m('up', .5), 2);
+    const mech = txt(p, 'голова — в одну сторону, плечо — вниз', 360, 150, m('up', 1), { size: 21, weight: 700, fill: PAIN, anchor: 'middle' }); hide(mech, m('low', .3));
+    txt(p, 'рука вверх — натяжение нижнего ствола', 360, 150, m('low', .6), { size: 21, weight: 700, fill: COL.whole, anchor: 'middle' });
+    infoCard(p, 700, 100, 840, 210, 'верхний ствол (C5, C6) — чаще всего', 'нет отведения и наружной ротации плеча, слабы сгибание локтя и супинация — рука висит ладонью назад: поза «официанта, просящего чаевые»', NV, m('up'), { size: 21 });
+    pillRow(p, ['родовая травма — паралич Эрба', '«жгучая» травма в американском футболе'], 1120, 350, m('erb'), { col: COL.task, size: 19, gap: 2.5, space: 12 });
+    pill(p, 'C7 изолированно — редко', 1120, 410, m('mid'), { col: COL.dim, size: 19 });
+    infoCard(p, 700, 450, 840, 200, 'нижний ствол (C8, T1)', 'шейное ребро или вытяжение руки вверх; при родах — паралич Клюмпке: слабость мелких мышц кисти', COL.whole, m('low'), { size: 21 });
+    infoCard(p, 700, 680, 840, 170, 'полный родовой паралич сплетения', 'у трети тяжёлых больных — с синдромом Горнера', COL.bad, m('total'), { size: 21 });
+    prog(q => { f.set({ hd: -32 * (1 - q), aR: 6 + 160 * q }); up.reroute([S([Q.Nk[0], Q.Nk[1] + 8]), S(Q.Sh[1]), S(Q.arms[1][0])]); up.set({ taut: q * .5, hot: 0 }); }, m('low', .5), 1.5);
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-myo', prompt: ['Какой корешок проверяет это движение?'],
+    build: grid([
+      { parts: ['Отведение плеча'], ans: ['5'], why: 'Пятый шейный.' },
+      { parts: ['Сгибание локтя'], ans: ['6'], why: 'Шестой шейный.' },
+      { parts: ['Разгибание локтя'], ans: ['7'], why: 'Седьмой шейный.' },
+      { parts: ['Отведение пальцев'], ans: ['t'], why: 'Первый грудной.' },
+      { parts: ['Разгибание кисти'], ans: ['6'], why: 'Шестой шейный: сгибание локтя и разгибание кисти.' },
+    ], [['5', 'C5', COL.whole], ['6', 'C6', COL.task], ['7', 'C7', COL.real], ['t', 'T1', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['arm', 'Нервы руки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'нервы руки и места их сдавления', 800, 56, m('arm'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const an = armNerves(p, 340, 120, 1.08, m('arm'));
+    pill(p, 'схема', 140, 860, m('arm'), { col: COL.dim, size: 17 });
+    const K = [['ax', 'axSite', 'подмышечный (C5, 6)', 'вывих плеча, перелом хирургической шейки → отведение и наружная ротация', '#e2574c'],
+      ['mc', null, 'мышечно-кожный (C5, 6)', 'не согнуть локоть с супинированным предплечьем', '#86c9e8'],
+      ['med', 'pronator', 'срединный (C6–8)', 'круглый пронатор: как запястный канал + мышцы предплечья; в кисть — через запястный канал', '#8fd6b0'],
+      ['uln', 'cubital', 'локтевой (C8, T1)', 'кубитальный канал, головки локтевого сгибателя запястья, канал Гийона → частичная когтеобразная кисть', '#bba8ee']];
+    K.forEach(([k, site, h, s, c], i) => {
+      an.hl(k, m(k), c); if (i > 0) an.dim(K[i - 1][0], m(k));
+      if (site) an.mark(site, c, m(k, .8));
+      infoCard(p, 760, 100 + i * 190, 780, 172, h, s, c, m(k), { size: 20 });
+    });
+    an.mark('carpal', '#8fd6b0', m('med', 4)); an.mark('guyon', '#bba8ee', m('uln', 4));
+  }],
+
+  ['radial', 'Лучевой нерв', (m, D) => {
+    const p = panel(0);
+    txt(p, 'лучевой нерв (C6–8, T1)', 800, 56, m('rad'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const an = armNerves(p, 300, 110, 1.08, m('rad'));
+    an.hl('rad', m('rad', .3), '#f0a04b'); an.mark('spiral', '#f0a04b', m('rad', 1));
+    an.mark('axilla', PAIN, m('crutch', .3)); an.mark('supinator', '#f0a04b', m('deep', .5));
+    const cr = crutch(p); put(cr.g, { o: 0 }); cr.set([300 - 20 * 1.08, 110 + 52 * 1.08], [180, 820]); show(cr.g, m('crutch'));
+    lab(p, 'спиральная борозда', 560, 280, ...an.at('spiral'), '#f0a04b', m('rad', 1));
+    lab(p, 'давление костыля', 235, 112, ...an.at('axilla'), PAIN, m('crutch', .3));
+    infoCard(p, 640, 100, 900, 150, 'перелом середины плеча, вывих плеча', 'а ещё — костыль в подмышке и сон с рукой, перекинутой через спинку стула; трёхглавая выпадает, только если сдавление близко к подмышке', '#f0a04b', m('rad'), { size: 20 });
+    // wrist drop and the splint
+    const h = handSide(p, 1080, 480, 1.25);
+    show(h.g, m('drop'));
+    prog(q => h.set({ w: 70 * q, mcp: 30, pip: 30, dip: 20 }), m('drop', .5), 1);
+    const spl = G(p, { o: 0 }); mk('rect', { x: 980, y: 446, width: 220, height: 18, rx: 6, fill: '#6f8faa', 'fill-opacity': .8 }, spl);
+    prog(q => h.set({ w: 70 - 85 * q }), m('drop', 3), 1);
+    show(spl, m('drop', 3));
+    txt(p, 'свисающая кисть', 1180, 600, m('drop', .8), { size: 22, weight: 700, fill: PAIN, anchor: 'middle' });
+    txt(p, 'ортез в лёгком разгибании — хват снова работает', 1180, 640, m('drop', 3.5), { size: 20, weight: 700, fill: COL.good, anchor: 'middle' });
+    infoCard(p, 640, 680, 900, 190, 'глубокая ветвь', 'под коротким лучевым разгибателем и в щели супинатора → слабеют разгибатели кисти и пальцев (кроме длинного лучевого) и супинатор; иногда принимают за теннисный локоть. Поверхностная ветвь — только чувствительная', COL.task, m('deep'), { size: 19 });
+  }],
+
+  ['leg', 'Нервы ноги', (m, D) => {
+    const p = panel(0);
+    txt(p, 'нервы ноги', 800, 56, m('leg'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const ln = legNerves(p, 330, 200, 1.08, m('leg'));
+    pill(p, 'схема', 330, 880, m('leg'), { col: COL.dim, size: 17 });
+    const K = [['fem', 'inguinal', 'бедренный (L2–4)', 'под паховой связкой: переломы бедра и таза, вправление вывиха, щипцы в родах, диабет → сгибание бедра и разгибание колена', '#e2574c'],
+      ['obt', null, 'запирательный (L2–4)', 'приводящие мышцы; редко; трудно положить ногу на ногу', '#86c9e8'],
+      ['sci', 'piri', 'седалищный (L4–S3)', 'самый крупный; под грушевидной мышцей или сквозь неё — укороченная мышца сдавливает', '#8fd6b0'],
+      ['tib', 'tarsal', 'большеберцовый', 'за медиальной лодыжкой — синдром тарзального канала; подошвенные нервы — при избыточной пронации стопы', '#bba8ee']];
+    K.forEach(([k, site, h, s, c], i) => {
+      ln.hl(k, m(k), c); if (i > 0) ln.dim(K[i - 1][0], m(k));
+      if (site) ln.mark(site, c, m(k, .8));
+      infoCard(p, 760, 100 + i * 190, 780, 172, h, s, c, m(k), { size: 20 });
+    });
+    ln.mark('tarsal', '#bba8ee', m('plant', .5));
+  }],
+
+  ['per', 'Малоберцовый нерв', (m, D) => {
+    const p = panel(0);
+    txt(p, 'общий малоберцовый нерв (L4–S2)', 800, 56, m('per'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const ln = legNerves(p, 260, 200, 1.08, m('per'));
+    ln.hl('per', m('per', .3), '#f0a04b'); ln.mark('fibneck', PAIN, m('per', 1));
+    lab(p, 'шейка малоберцовой кости', 560, 470, ...ln.at('fibneck'), PAIN, m('per', 1));
+    pillRow(p, ['перелом головки', 'разрыв наружной связки колена', 'тугой гипс', 'нога на ногу'], 1140, 140, m('per', 1.5), { col: COL.task, size: 19, gap: 1.2, space: 10 });
+    infoCard(p, 700, 200, 840, 160, 'поверхностная ветвь', 'малоберцовые мышцы: слабеет пронация стопы, со временем — конско-варусная стопа', COL.whole, m('sup'), { size: 21 });
+    infoCard(p, 700, 380, 840, 160, 'глубокая ветвь', 'разгибатели стопы и пальцев: стопа свисает, со временем — вальгусная стопа', PAIN, m('deep'), { size: 21 });
+    // foot drop in swing: the toes catch
+    const w = fig(p, { s: .9, o: 0, pose: { hN: 30, kN: 40, fN: 0 } }); plant(w, 'AF', 1120, 870); show(w.g, m('deep'));
+    show(path(p, 'M900 870H1400', { stroke: COL.dim, 'stroke-width': 3 }, { o: 0 }), m('deep'));
+    prog(q => { const c = cyc(q, 3); w.set({ hN: 10 + 30 * c, kN: 10 + 40 * c, fN: -35 }); plant(w, 'AF', 1120, 870); }, m('deep', 1), Math.max(2, D - m('deep', 1)), lin);
+    txt(p, 'свисающая стопа', 1250, 640, m('deep', 1), { size: 22, weight: 700, fill: PAIN, anchor: 'middle' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-nerve', prompt: ['Какой нерв поражён?'],
+    build: grid([
+      { parts: ['Свисающая кисть после перелома середины плечевой кости'], ans: ['r'], why: 'Лучевой — в спиральной борозде.' },
+      { parts: ['Частичная когтеобразная кисть после падения на локтевой край'], ans: ['u'], why: 'Локтевой — в канале Гийона.' },
+      { parts: ['После вывиха плеча не отводит руку'], ans: ['a'], why: 'Подмышечный.' },
+      { parts: ['После тугого гипса на голени свисает стопа'], ans: ['p'], why: 'Малоберцовый — у шейки малоберцовой кости.' },
+      { parts: ['Слабость кисти у человека на подмышечных костылях'], ans: ['r'], why: 'Лучевой — сдавление костылём в подмышке.' },
+    ], [['r', 'Лучевой', '#f0a04b'], ['u', 'Локтевой', '#bba8ee'], ['a', 'Подмышечный', '#e2574c'], ['p', 'Малоберцовый', COL.whole]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Корешки сдавливаются в межпозвонковых отверстиях; симптомы — по дерматомам и миотомам.', 'w1'],
+     ['Верхний ствол сплетения — поза «официанта», нижний — слабость мелких мышц кисти.', 'w2'],
+     ['Подмышечный — вывих плеча; лучевой — свисающая кисть; локтевой — когтеобразная кисть; срединный — круглый пронатор и запястный канал.', 'w3'],
+     ['Нога: седалищный у грушевидной мышцы, большеберцовый в тарзальном канале, малоберцовый у шейки малоберцовой кости — свисающая стопа.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: NV }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-crutch', prompt: ['Пациент две недели ходит на подмышечных костылях, висит на них. Кисть не разгибается, онемела тыльная сторона у большого пальца. В чём дело?'],
+    build: choice([
+      ['Костыль сдавливает лучевой нерв в подмышке: подогнать костыли, опора на кисти, ортез в лёгком разгибании кисти'],
+      ['Синдром запястного канала'],
+      ['Поражение локтевого нерва в канале Гийона'],
+      ['Растяжение мышц предплечья'],
+    ], 0, 'Это «костыльный паралич» лучевого нерва: свисающая кисть; ортез в лёгком разгибании возвращает работу хвата.',
+    [null, 'Запястный канал — срединный нерв: онемение ладонной стороны первых пальцев, а не свисающая кисть.', 'Локтевой нерв даёт когтеобразную кисть и онемение мизинца.', 'Свисающая кисть с онемением — неврологический признак.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-cast', prompt: ['После наложения гипса до колена пациент не может поднять стопу и цепляется носком при ходьбе. Где искать причину?'],
+    build: choice([
+      ['Давление на общий малоберцовый нерв у шейки малоберцовой кости — срочно сообщить врачу'],
+      ['Седалищный нерв у грушевидной мышцы'],
+      ['Бедренный нерв под паховой связкой'],
+      ['Это нормально в гипсе'],
+    ], 0, 'Общий малоберцовый нерв огибает шейку малоберцовой кости и сдавливается тугим гипсом; глубокая ветвь даёт свисающую стопу.',
+    [null, 'Нерв сдавлен ниже — у шейки малоберцовой кости.', 'Бедренный нерв отвечает за сгибание бедра и разгибание колена.', 'Свисающая стопа после гипса — признак сдавления нерва.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

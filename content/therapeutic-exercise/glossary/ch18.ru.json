@@ -1,0 +1,191 @@
+{
+  "chapter": 18,
+  "terms": [
+    {
+      "id": "radioulnar-joints",
+      "ru": "Лучелоктевые суставы",
+      "en": "proximal and distal radioulnar joints",
+      "alt": [
+        "кольцевая связка"
+      ],
+      "def": "Одноосные вращательные суставы, которые вместе поворачивают предплечье: вверху головка лучевой вращается в кольцевой связке, внизу лучевая кость переходит через головку локтевой — в пронации кости перекрещиваются.",
+      "page": 624,
+      "moments": [
+        {
+          "n": 172,
+          "beat": "ru",
+          "mark": "pivot",
+          "to": "cross"
+        },
+        {
+          "n": 172,
+          "beat": "joints",
+          "mark": "pru",
+          "to": "dru"
+        }
+      ],
+      "see": [
+        "humeroulnar-joint",
+        "radial-head-subluxation"
+      ]
+    },
+    {
+      "id": "elbow-medial-collateral-ligament",
+      "ru": "Медиальная коллатеральная связка локтя",
+      "en": "medial (ulnar) collateral ligament",
+      "alt": [
+        "локтевая коллатеральная связка"
+      ],
+      "def": "Связка из передней, задней и поперечной частей, натянутых в разных положениях; держит локоть против вальгуса и особенно нагружается при броске и ударе в гольфе.",
+      "page": 624,
+      "moments": [
+        {
+          "n": 172,
+          "beat": "ligs",
+          "mark": "mcl",
+          "to": "throw"
+        }
+      ],
+      "see": [
+        "elbow-lateral-ligament-complex",
+        "medial-elbow-tendinopathy"
+      ]
+    },
+    {
+      "id": "elbow-lateral-ligament-complex",
+      "ru": "Латеральный связочный комплекс локтя",
+      "en": "lateral collateral ligament complex",
+      "def": "Веер из латеральной коллатеральной, латеральной локтевой коллатеральной и кольцевой связок: держит локоть против варуса и супинации и не даёт головке лучевой сместиться назад.",
+      "page": 624,
+      "moments": [
+        {
+          "n": 172,
+          "beat": "ligs",
+          "mark": "lcl",
+          "to": "lclJob"
+        }
+      ],
+      "see": [
+        "elbow-medial-collateral-ligament",
+        "radioulnar-joints"
+      ]
+    },
+    {
+      "id": "radial-head-arthroplasty",
+      "ru": "Резекция и эндопротез головки лучевой кости",
+      "en": "radial head excision or arthroplasty",
+      "def": "Операции при сильно оскольчатом переломе или переломовывихе головки, которые нельзя восстановить; протез выбирают при большем числе фрагментов и нестабильности. Резекция противопоказана растущему ребёнку.",
+      "page": 631,
+      "moments": [
+        {
+          "n": 174,
+          "beat": "ind",
+          "mark": "ind",
+          "to": "mat"
+        },
+        {
+          "n": 174,
+          "beat": "why",
+          "mark": "most",
+          "to": "fall"
+        }
+      ],
+      "see": [
+        "total-elbow-arthroplasty"
+      ]
+    },
+    {
+      "id": "total-elbow-arthroplasty",
+      "ru": "Эндопротезирование локтя",
+      "en": "total elbow arthroplasty (TEA)",
+      "alt": [
+        "полусвязанный протез",
+        "несвязанный протез"
+      ],
+      "def": "Замена плечевого и локтевого компонентов при ревматоидном артрите, тяжёлом артрозе, раздробленном переломе у пожилых; чаще полусвязанные протезы. Пожизненно — без тяжёлых грузов и ракеточных видов спорта.",
+      "page": 633,
+      "moments": [
+        {
+          "n": 175,
+          "beat": "ind",
+          "mark": "ind",
+          "to": "frac"
+        },
+        {
+          "n": 175,
+          "beat": "design",
+          "mark": "types",
+          "to": "which"
+        },
+        {
+          "n": 175,
+          "beat": "limits",
+          "mark": "lift",
+          "to": "never"
+        }
+      ],
+      "see": [
+        "radial-head-arthroplasty",
+        "total-joint-arthroplasty"
+      ]
+    },
+    {
+      "id": "lateral-elbow-tendinopathy",
+      "ru": "Латеральная тендинопатия локтя",
+      "en": "lateral elbow tendinopathy (tennis elbow)",
+      "alt": [
+        "«теннисный локоть»",
+        "латеральный эпикондилит"
+      ],
+      "def": "Дегенерация сухожилий разгибателей у наружного надмыщелка, без воспаления: боль при захвате и при разгибании запястья против сопротивления. Лечат эксцентрикой с растяжкой и изменением деятельности.",
+      "page": 641,
+      "moments": [
+        {
+          "n": 176,
+          "beat": "tend",
+          "mark": "lat",
+          "to": "latTest"
+        },
+        {
+          "n": 176,
+          "beat": "tend",
+          "mark": "osis"
+        },
+        {
+          "n": 176,
+          "beat": "ecc",
+          "mark": "ecc",
+          "to": "mod"
+        }
+      ],
+      "see": [
+        "medial-elbow-tendinopathy",
+        "tendinopathy",
+        "eccentric-exercise"
+      ]
+    },
+    {
+      "id": "medial-elbow-tendinopathy",
+      "ru": "Медиальная тендинопатия локтя",
+      "en": "medial elbow tendinopathy (golfer’s elbow)",
+      "alt": [
+        "«локоть гольфиста»",
+        "медиальный эпикондилит"
+      ],
+      "def": "Поражение общего сухожилия сгибателей и пронаторов у внутреннего надмыщелка от многократной или эксцентрической нагрузки: боль при сгибании запястья против сопротивления и при его пассивном разгибании.",
+      "page": 642,
+      "moments": [
+        {
+          "n": 176,
+          "beat": "med",
+          "mark": "med",
+          "to": "why"
+        }
+      ],
+      "see": [
+        "lateral-elbow-tendinopathy",
+        "elbow-medial-collateral-ligament"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Равновесие: центр масс и площадь опоры — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 86, title: 'Равновесие: центр масс и площадь опоры', minutes: 8, language: 'ru', next: '../ch087/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch086/cards.ru.json
+const CARDS_SHORT = {
+  "центр масс\nцентр всей массы тела: в этой точке тело в полном равновесии": "тело в полном равновесии",
+  "линейный импульс (linear momentum)\nскорость тела по прямой — например, в сагиттальной или горизонтальной плоскости": "скорость по прямой",
+  "угловой импульс (angular momentum)\nскорость вращения тела": "скорость вращения тела",
+  "центр давления\nпроекция вертикальной силы реакции опоры; средневзвешенное всех сил, давящих вниз": "проекция вертикальной силы реакции",
+};
+// cards-short end
+
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+// A gentle sway between lo and hi (degrees or units): a sum of slow sines of the beat progress q.
+const sway = (q, lo, hi, k = 1) => lo + (hi - lo) * (.5 + .32 * Math.sin(q * 6.1 * k) + .18 * Math.sin(q * 15.7 * k + 1));
+// Segment centres of a side-view figure with their mass shares (the same parts as comOf), on the stage.
+function segCentres(f) {
+  const P = f.pts, mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], s = st(f.g);
+  return [[P.Hc, .08], [mid(P.H, P.Sh), .46], [mid(P.H, P.KN), .1], [mid(P.H, P.KF), .1], [mid(P.KN, P.AN), .05], [mid(P.KF, P.AF), .05],
+    [mid(P.Sh, P.WN), .05], [mid(P.Sh, P.WF), .05], [P.AN, .03], [P.AF, .03]].map(([q, w]) => ({ x: s.x + q[0] * f.s, y: s.y + q[1] * f.s, w }));
+}
+// A vertical arrow from (x, y1) to (x, y2) with its head at y2.
+const vArrow = (x, y1, y2) => { const k = y2 > y1 ? 1 : -1; return `M${x} ${y1}V${y2}M${x - 10} ${y2 - 14 * k}L${x} ${y2}L${x + 10} ${y2 - 14 * k}`; };
+let PTS = [];
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Равновесие', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 8 · Урок 86', { x: 800, y: 150, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Равновесие', { x: 800, y: 235, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'центр масс и площадь опоры', { x: 800, y: 300, size: 42, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'падения — при самых разных диагнозах; равновесие проверяют и тренируют', 800, 385, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 850, S = .9, X0 = 790;
+    path(art, `M560 ${GY}H1040`, { stroke: COL.faint, 'stroke-width': 3 });
+    const f = fig(art, { x: X0, y: GY - 182 * S, s: S });
+    const [ax] = onStage(f, 'AN');
+    balanceOverlay(art, f, GY, .6);
+    prog(q => { f.set(LEAN(sway(q, -1, 6, 1.4))); plant(f, 'AN', ax, GY); }, .4, Math.max(4, D - 1.2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['terms', 'Что такое равновесие', (m, D) => {
+    const p = panel(0), GY = 760, S = 1;
+    txt(p, 'равновесие (balance) — постуральная устойчивость (postural stability)', 800, 70, m('bal'), { size: 28, weight: 700, anchor: 'middle' });
+    txt(p, 'динамический процесс: положение тела удерживается в равновесном состоянии (equilibrium)', 800, 116, m('bal', 2.5), { size: 23, fill: COL.dim, anchor: 'middle' });
+    ground(p, 160, 660, GY, m('eq'));
+    ground(p, 880, 1520, GY, m('eq'));
+    // static: the body at rest
+    const a = fig(p, { x: 410, y: GY - 182 * S, s: S, o: 0 });
+    show(a.g, m('stat'));
+    txt(p, 'статическое (static)', 410, 805, m('stat'), { size: 26, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'тело в покое', 410, 842, m('stat', .4), { size: 23, fill: COL.dim, anchor: 'middle' });
+    // dynamic: steady walking
+    const b = fig(p, { x: 960, y: GY - 182 * S, s: S, o: 0 });
+    show(b.g, m('dyn'));
+    const wt = m('dyn', .3), wd = Math.max(3, D - wt - .4);
+    walk(b, wt, wd, { cycles: Math.max(2, Math.round(wd / 1.1)), dx: 430 });
+    const ar = G(p, { o: 0 });
+    path(ar, 'M0 0H100M86 -10L100 0L86 10', { stroke: COL.whole, 'stroke-width': 5 });
+    T(ar, 'v = const', { x: 50, y: -16, size: 22, weight: 700, fill: COL.whole, anchor: 'middle' });
+    prog(q => { const s0 = st(b.g); put(ar, { x: s0.x - 20, y: s0.y - 222 * S }); }, wt, wd, lin);
+    show(ar, m('dyn', .5));
+    txt(p, 'динамическое (dynamic)', 1200, 805, m('dyn'), { size: 26, weight: 700, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'равномерное движение', 1200, 842, m('dyn', .4), { size: 23, fill: COL.dim, anchor: 'middle' });
+    // the best stability: the COM over the base of support
+    const ov = balanceOverlay(p, a, GY, m('best'));
+    txt(p, 'устойчивость наибольшая: центр масс над площадью опоры', 800, 200, m('best', .3), { size: 27, weight: 700, fill: COL.good, anchor: 'middle' });
+    const [cx, cy] = comOf(a);
+    txt(p, 'центр масс', cx + 30, cy - 18, m('best', .6), { size: 21, fill: COM_C, weight: 600 });
+    txt(p, 'площадь опоры', 470, GY - 8, m('best', .9), { size: 20, fill: BOS_C, weight: 600 });
+    ov.g.parentNode.appendChild(ov.g);
+  }],
+
+  ['com', 'Центр масс', (m, D) => {
+    const p = panel(0), GY = 850, S = 1.08, X0 = 380;
+    txt(p, 'центр масс (center of mass) и центр тяжести (center of gravity)', 800, 60, m('com'), { size: 28, weight: 700, anchor: 'middle' });
+    ground(p, 150, 640, GY, m('com'));
+    const f = fig(p, { x: X0, y: GY - 182 * S, s: S, o: 0 });
+    show(f.g, m('com'));
+    const [cx, cy] = comOf(f);
+    infoCard(p, 760, 96, 780, 124, 'центр масс', 'центр всей массы тела: в этой точке тело в полном равновесии', COM_C, m('com', .5), { size: 22 });
+    // the segment centres, sized by their share of the mass, average into one point
+    const segs = segCentres(f), lines = G(p, { o: 0 });
+    segs.forEach(q => path(lines, `M${q.x.toFixed(1)} ${q.y.toFixed(1)}L${cx.toFixed(1)} ${cy.toFixed(1)}`, { stroke: COM_C, 'stroke-width': 1.6, 'stroke-dasharray': '4 5', opacity: .75 }));
+    segs.forEach((q, i) => {
+      const d = mk('circle', { cx: q.x, cy: q.y, r: 4 + 20 * Math.sqrt(q.w), fill: mix(COM_C, COL.board, .5), stroke: COM_C, 'stroke-width': 2 }, p);
+      put(d, { o: 0 }); show(d, m('seg', .2 + i * .14), .3);
+    });
+    show(lines, m('seg', 2.6));
+    const cs = comSym(p, cx, cy, 16);
+    put(cs, { s: 0, o: 0 }); pop(cs, m('seg', 3.2));
+    infoCard(p, 760, 236, 780, 104, 'как его найти', 'взвешенное среднее центров масс головы, туловища, рук и ног', COM_C, m('seg'), { size: 22 });
+    txt(p, 'туловище тяжелее руки — тянет точку сильнее', 760, 378, m('seg', 3.5), { size: 21, fill: COL.chalk });
+    NOTE(p, 1420, 371, m('seg', 3.5));
+    // close-up: the lower spine in its body outline; the COM just in front of S2
+    const box = G(p, { o: 0 });
+    roundBox(box, 900, 405, 640, 330, EDGE, PANEL, 2);
+    T(box, 'чуть впереди второго крестцового позвонка (S2)', { x: 1220, y: 446, size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const ins = G(box, { x: 1200, y: 640, s: .78 });
+    const faint = mix(COL.chalk, COL.board, .62);
+    path(ins, 'M-170 -230C-150 -160 -138 -110 -150 -50C-160 0 -175 50 -150 96C-130 130 -90 140 -60 150', { stroke: faint, 'stroke-width': 3 });
+    path(ins, 'M150 -230C160 -170 168 -110 160 -60C150 -10 120 30 110 90', { stroke: faint, 'stroke-width': 3 });
+    T(ins, 'спина', { x: -186, y: -150, size: 22, fill: COL.dim, anchor: 'end' });
+    T(ins, 'живот', { x: 178, y: -150, size: 22, fill: COL.dim });
+    [[-30, -214, -6], [-34, -172, -10], [-34, -130, -16]].forEach(([x, y, r], i) => {
+      mk('rect', { x: x - 34, y: y - 17, width: 68, height: 34, rx: 8, fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .3), 'stroke-width': 1.5, transform: `rotate(${r} ${x} ${y})` }, ins);
+      path(ins, `M${x - 34} ${y}L${x - 66} ${y + 8}`, { stroke: ANAT.bone, 'stroke-width': 10, transform: `rotate(${r} ${x} ${y})` });
+      T(ins, 'L' + (i + 3), { x: x + 50, y: y + 8, size: 19, fill: COL.dim });
+    });
+    path(ins, 'M-70 -100L4 -92C2 -60 -10 -26 -32 6C-46 26 -60 40 -74 52C-88 40 -98 10 -98 -24C-96 -60 -86 -84 -70 -100Z', { fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .3), 'stroke-width': 2 });
+    path(ins, 'M-74 52L-66 80', { stroke: ANAT.bone, 'stroke-width': 9 });
+    const lv = [[-96, -66, 0, -60], [-98, -32, -12, -26], [-94, 0, -30, 6], [-86, 26, -48, 32]];
+    lv.forEach(([x1, y1, x2, y2]) => path(ins, `M${x1} ${y1}L${x2} ${y2}`, { stroke: mix(ANAT.bone, '#000000', .35), 'stroke-width': 2 }));
+    path(ins, 'M-96 -66L0 -60L-10 -26L-98 -32Z', { fill: '#fff4d8', stroke: COM_C, 'stroke-width': 3 });
+    ['S1', 'S2', 'S3', 'S4', 'S5'].forEach((n, i) => T(ins, n, { x: -110, y: [-80, -42, -10, 18, 44][i], size: 19, weight: i === 1 ? 700 : 500, fill: i === 1 ? COM_C : COL.dim, anchor: 'end' }));
+    mk('circle', { cx: 40, cy: 40, r: 22, fill: mix(ANAT.bone, COL.board, .4), stroke: mix(ANAT.bone, COL.board, .2), 'stroke-width': 2 }, ins);
+    T(ins, 'тазобедренный сустав', { x: 40, y: 92, size: 18, fill: COL.dim, anchor: 'middle' });
+    comSym(ins, 46, -44, 17);
+    T(ins, 'центр масс', { x: 72, y: -36, size: 23, weight: 700, fill: COM_C });
+    path(ins, 'M110 118H190M176 108L190 118L176 128', { stroke: COL.dim, 'stroke-width': 3 });
+    T(ins, 'вперёд', { x: 150, y: 102, size: 20, fill: COL.dim, anchor: 'middle' });
+    show(box, m('s2'));
+    show(put(path(p, `M${cx + 20} ${cy}L900 600`, { stroke: COM_C, 'stroke-width': 2, 'stroke-dasharray': '6 6' }), { o: 0 }), m('s2'));
+    // the height: about 55 % from the floor
+    const top = onStage(f, 'Hc')[1] - RIG.hr * S, RX = 170;
+    const rul = G(p, { o: 0 });
+    path(rul, `M${RX} ${GY}V${top}M${RX - 10} ${GY}H${RX + 10}M${RX - 10} ${top}H${RX + 10}`, { stroke: COL.dim, 'stroke-width': 3 });
+    T(rul, 'рост', { x: RX - 14, y: top + 7, size: 19, fill: COL.dim, anchor: 'end' });
+    T(rul, '0', { x: RX - 14, y: GY, size: 19, fill: COL.dim, anchor: 'end' });
+    path(rul, `M${RX - 12} ${cy}H${cx - 18}`, { stroke: COM_C, 'stroke-width': 2, 'stroke-dasharray': '5 5' });
+    T(rul, '≈ 55 %', { x: RX - 14, y: cy + 7, size: 22, weight: 700, fill: COM_C, anchor: 'end' });
+    show(rul, m('h55'));
+    // the centre of gravity: the plumb point of the COM on the support
+    draw(path(p, `M${cx} ${cy + 16}V${GY}`, { stroke: COL.chalk, 'stroke-width': 2.5, 'stroke-dasharray': '7 7' }, { d: 0 }), m('cog'), .6);
+    const cg = G(p, { x: cx, y: GY, o: 0, s: 0 });
+    mk('ellipse', { rx: 20, ry: 7, fill: COL.board, stroke: COM_C, 'stroke-width': 3 }, cg);
+    mk('path', { d: 'M0 0V-7A20 7 0 0 1 20 0ZM0 0V7A20 7 0 0 1 -20 0Z', fill: COM_C }, cg);
+    pop(cg, m('cog', .5));
+    infoCard(p, 760, 750, 780, 106, 'центр тяжести (center of gravity)', 'вертикальная проекция центра масс на опору', COM_C, m('cog', .3), { size: 22 });
+  }],
+
+  ['mom', 'Импульс', (m, D) => {
+    const p = panel(0), GY = 590, S = .88;
+    txt(p, 'количество движения, импульс (momentum) = масса × скорость', 800, 70, m('mom'), { size: 28, weight: 700, anchor: 'middle' });
+    // linear momentum: steady walking
+    ground(p, 80, 760, GY, m('lin'));
+    const a = fig(p, { x: 170, y: GY - 182 * S, s: S, o: 0 });
+    show(a.g, m('lin'));
+    const wt = m('lin', .3), wd = Math.max(3.5, m('ang') - wt + 1.5);
+    walk(a, wt, wd, { cycles: Math.max(3, Math.round(wd / 1.1)), dx: 400 });
+    const ar = G(p, { o: 0 });
+    path(ar, 'M0 0H110M96 -10L110 0L96 10', { stroke: COL.whole, 'stroke-width': 5 });
+    T(ar, 'm · v', { x: 55, y: -14, size: 24, weight: 700, fill: COL.whole, anchor: 'middle' });
+    prog(q => { const s0 = st(a.g); put(ar, { x: s0.x - 30, y: s0.y - 222 * S }); }, wt, wd, lin);
+    show(ar, m('lin', .5));
+    infoCard(p, 80, 668, 680, 160, 'линейный импульс (linear momentum)', 'скорость тела по прямой — например, в сагиттальной или горизонтальной плоскости', COL.whole, m('lin', .6), { size: 22 });
+    // angular momentum: the body rotating about the ankles
+    ground(p, 900, 1520, GY, m('ang'));
+    const b = fig(p, { x: 1150, y: GY - 182 * S, s: S, o: 0 });
+    show(b.g, m('ang'));
+    const [ax] = onStage(b, 'AN');
+    poseTo(b, LEAN(16), m('ang', .4), 1.6, io, ['AN', ax, GY]);
+    const R = 420 * S, a0 = rad(-3), a1 = rad(24), arc0 = G(p, { o: 0 });
+    path(arc0, `M${(ax + R * Math.sin(a0)).toFixed(1)} ${(GY - R * Math.cos(a0)).toFixed(1)}A${R} ${R} 0 0 1 ${(ax + R * Math.sin(a1)).toFixed(1)} ${(GY - R * Math.cos(a1)).toFixed(1)}`, { stroke: COL.real, 'stroke-width': 5 });
+    const hx = ax + R * Math.sin(a1), hy = GY - R * Math.cos(a1);
+    const ux = Math.cos(a1), uy = Math.sin(a1), hd = k => [(hx - 18 * ux + k * 10 * uy).toFixed(1), (hy - 18 * uy - k * 10 * ux).toFixed(1)];
+    path(arc0, `M${hd(1).join(' ')}L${hx} ${hy}L${hd(-1).join(' ')}`, { stroke: COL.real, 'stroke-width': 5 });
+    T(arc0, 'вращение', { x: ax + (R + 34) * Math.sin(rad(10)), y: GY - (R + 34) * Math.cos(rad(10)), size: 24, weight: 700, fill: COL.real, anchor: 'middle' });
+    show(arc0, m('ang', .8));
+    show(put(mk('circle', { cx: ax, cy: GY - 4, r: 7, fill: COL.real }, p), { o: 0 }), m('ang'));
+    infoCard(p, 880, 668, 660, 160, 'угловой импульс (angular momentum)', 'скорость вращения тела', COL.real, m('ang', .6), { size: 22 });
+  }],
+
+  ['bos', 'Площадь опоры', (m, D) => {
+    const p = panel(0), SX = 470, SY = 470, SS = 2.2;
+    txt(p, 'площадь опоры (base of support)', 800, 60, m('bos'), { size: 28, weight: 700, anchor: 'middle' });
+    txt(p, 'периметр площади контакта тела с опорой', 800, 102, m('bos', 1), { size: 23, fill: COL.dim, anchor: 'middle' });
+    const sp = stanceTop(p, SX, SY, SS, m('bos', .3), { marks: false });
+    txt(p, 'вид сверху, носки вперёд ↑', SX, 850, m('bos', .3), { size: 19, fill: COL.dim, anchor: 'middle' });
+    const hl = G(p, { o: 0 });
+    path(hl, `M${SX} 760V${SY + 12}M${SX - 9} ${SY + 26}L${SX} ${SY + 12}L${SX + 9} ${SY + 26}`, { stroke: BOS_C, 'stroke-width': 3 });
+    T(hl, 'и пространство между стопами', { x: SX, y: 800, size: 22, weight: 600, fill: BOS_C, anchor: 'middle' });
+    show(hl, m('hull'));
+    hide(hl, m('feet', 1.5));
+    // the area of each stance, relative to the usual one (from the drawn feet)
+    const area = k => { const t = stanceTop(p, -3000, -3000, 1, null, { stance: k, marks: false }); const v = t.area(); t.g.remove(); return v; };
+    const A0 = area('apart'), ROWS = [['обычная стойка', 'apart', 'feet', COL.chalk], ['широкая стойка', 'wide', 'wide', COL.good], ['стопа за стопой', 'tandem', 'narrow', COL.bad], ['ходьба: опора на одну стопу', 'single', 'walk', COL.bad]];
+    const AMAX = area('wide');
+    ROWS.forEach(([lab, k, mark, col], i) => {
+      const g = G(p, { o: 0 }), y = 200 + i * 120, v = area(k), w = 520 * v / AMAX;
+      T(g, lab, { x: 900, y, size: 24, weight: 700, fill: col });
+      mk('rect', { x: 900, y: y + 16, width: w, height: 34, rx: 8, fill: mix(BOS_C, COL.board, .55), stroke: BOS_C, 'stroke-width': 2 }, g);
+      T(g, Math.round(100 * v / A0) + ' %', { x: 900 + w + 14, y: y + 42, size: 22, weight: 700, fill: COL.chalk });
+      show(g, m(mark, .3));
+    });
+    pill(p, 'схема', 1480, 160, m('feet'), { col: COL.dim, size: 18 });
+    txt(p, 'устойчивость ↑ · часто у пожилых', 1540, 320, m('wide', 1), { size: 20, weight: 700, fill: COL.good, anchor: 'end' });
+    txt(p, 'устойчивость ↓', 1540, 440, m('narrow', 1), { size: 20, weight: 700, fill: COL.bad, anchor: 'end' });
+    sp.to('together', m('feet', .4), .9);
+    sp.to('apart', m('feet', 1.6), .9);
+    sp.to({ ...STANCES.wide, cog: [0, -2] }, m('wide'), .9);
+    sp.to({ ...STANCES.tandem, cog: [0, 0] }, m('narrow'), 1);
+    sp.to({ ...STANCES.single, upL: 1, cog: [44, -4] }, m('walk'), .9);
+    sp.to({ ...STANCES.apart, upL: 0, cog: [0, -2] }, m('los'), .9);
+    // the COG wanders to the toes and past them: the base turns red
+    show(sp.cog, m('los', .9));
+    sp.to({ cog: [8, -96] }, m('los', 1.6), 1.6);
+    sp.to({ cog: [12, -136] }, m('los', 3.4), .8);
+    sp.to({ cog: [0, -10] }, m('los', 4.6), 1);
+    txt(p, 'центр тяжести внутри — человек не падает', 1200, 720, m('los', .5), { size: 23, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'эти пределы — границы устойчивости (limits of stability)', 1200, 762, m('los', 5), { size: 22, weight: 600, fill: LOS_C, anchor: 'middle' });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-bos', prompt: ['По сравнению с обычной стойкой — устойчивее или менее устойчиво?'],
+    build: grid([
+      { parts: ['Широкая стойка'], ans: ['more'], why: 'Шире площадь опоры.' },
+      { parts: ['Стойка «стопа за стопой»'], ans: ['less'], why: 'Узкая площадь опоры.' },
+      { parts: ['Сидя на табурете без спинки'], ans: ['more'], why: 'Центр масс ниже, а опора больше.' },
+      { parts: ['Ходьба'], ans: ['less'], why: 'В книге ходьба — пример узкой площади опоры.' },
+      { parts: ['Стойка на одной ноге'], ans: ['less'], why: 'Опора — одна стопа.' },
+    ], [['more', 'Устойчивее', COL.good], ['less', 'Менее устойчиво', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['los', 'Границы устойчивости', (m, D) => {
+    const p = panel(0);
+    txt(p, 'границы устойчивости (limits of stability)', 800, 60, m('def'), { size: 28, weight: 700, anchor: 'middle' });
+    txt(p, 'пределы качания без изменения площади опоры', 800, 100, m('def', 1), { size: 23, fill: COL.dim, anchor: 'middle' });
+    pillRow(p, ['задача', 'биомеханика', 'среда'], 800, 150, m('chg', 1.2), { col: COL.whole, size: 22, gap: .5 });
+    // 1. quiet stance from above: the outer edges of the feet, the COG sways inside
+    const sp = stanceTop(p, 280, 430, 1.6, m('quiet'));
+    put(sp.cop, { o: 0 });
+    mk('path', { d: polyD(sp.poly), fill: 'none', stroke: LOS_C, 'stroke-width': 2.5, 'stroke-dasharray': '7 5' }, sp.g);
+    txt(p, 'спокойная стойка (вид сверху)', 280, 600, m('quiet'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'граница — по наружным краям стоп', 280, 632, m('quiet', .5), { size: 20, fill: LOS_C, anchor: 'middle' });
+    const trace = mk('path', { fill: 'none', stroke: COM_C, 'stroke-width': 1.6, 'stroke-opacity': .75 }, sp.g);
+    sp.g.appendChild(sp.cog);
+    const pt = u => [9 * Math.sin(1.3 * u) + 6 * Math.sin(3.1 * u + 1) + 3 * Math.sin(7.3 * u), -6 + 14 * Math.sin(.9 * u + 2) + 7 * Math.sin(2.7 * u) + 3 * Math.sin(6.1 * u + .5)];
+    sp.set({ cog: pt(0) });
+    const t0 = m('sway'), U = 26;
+    prog(q => {
+      const n = Math.max(2, Math.round(q * 260)), P = [];
+      for (let i = 0; i <= n; i++) P.push(pt(U * q * i / n));
+      trace.setAttribute('d', 'M' + P.map(v => v[0].toFixed(1) + ' ' + v[1].toFixed(1)).join('L'));
+      sp.set({ cog: P[P.length - 1] });
+    }, t0, Math.max(3, D - t0), lin);
+    txt(p, 'поправки время от времени →', 280, 690, m('sway', .5), { size: 20, fill: COM_C, anchor: 'middle' });
+    txt(p, 'лёгкое постоянное покачивание', 280, 718, m('sway', .5), { size: 20, fill: COM_C, anchor: 'middle' });
+    // 2. side view: about 12° from back to front
+    const GY = 770, S = .95, X0 = 790;
+    ground(p, 640, 960, GY, m('ap'));
+    const f = fig(p, { x: X0, y: GY - 182 * S, s: S, o: 0 });
+    show(f.g, m('ap'));
+    const [ax, ay] = onStage(f, 'AN'), [tx] = onStage(f, 'toeN'), [hx] = onStage(f, 'heelN'), [, cy] = comOf(f), h = ay - cy;
+    const top1 = onStage(f, 'Hc')[1] - RIG.hr * S;
+    const aF = Math.atan2(tx + 4 - ax, h), aB = Math.atan2(ax - hx + 2, h), R1 = (ay - top1) * 1.12;
+    const cone = G(p, { o: 0 });
+    path(cone, `M${ax} ${ay}L${(ax + R1 * Math.sin(aF)).toFixed(1)} ${(ay - R1 * Math.cos(aF)).toFixed(1)}A${R1} ${R1} 0 0 0 ${(ax - R1 * Math.sin(aB)).toFixed(1)} ${(ay - R1 * Math.cos(aB)).toFixed(1)}Z`, { fill: LOS_C, 'fill-opacity': .13, stroke: LOS_C, 'stroke-width': 2.5 });
+    T(cone, '≈ 12°', { x: ax + 14, y: ay - R1 - 14, size: 26, weight: 700, fill: LOS_C, anchor: 'middle' });
+    p.insertBefore(cone, f.g);
+    show(cone, m('ap', .4));
+    const ov = balanceOverlay(p, f, GY, m('ap', .4));
+    prog(q => { f.set(LEAN(sway(q, -1.5, 7, 1.2))); plant(f, 'AN', ax, GY); }, m('ap'), Math.max(3, D - m('ap')), lin);
+    txt(p, 'вперёд — назад', X0, 810, m('ap'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // 3. front view: about 16° side to side with ~10 cm between the feet
+    const fr = frontStand(p, 1300, GY, .95, m('lat'), { pose: { w: 33 }, muscles: false });
+    const [gx] = fr.at([0, 0]), top2 = fr.at(fr.pts.Hc)[1] - 26 * .95, R2 = (GY - top2) * 1.12, a8 = rad(8);
+    const cone2 = G(p, { o: 0 });
+    path(cone2, `M${gx} ${GY}L${(gx - R2 * Math.sin(a8)).toFixed(1)} ${(GY - R2 * Math.cos(a8)).toFixed(1)}A${R2} ${R2} 0 0 1 ${(gx + R2 * Math.sin(a8)).toFixed(1)} ${(GY - R2 * Math.cos(a8)).toFixed(1)}Z`, { fill: LOS_C, 'fill-opacity': .13, stroke: LOS_C, 'stroke-width': 2.5 });
+    T(cone2, '≈ 16°', { x: gx, y: GY - R2 - 14, size: 26, weight: 700, fill: LOS_C, anchor: 'middle' });
+    p.insertBefore(cone2, fr.g);
+    show(cone2, m('lat', .4));
+    const fc = comSym(p, 0, 0, 13);
+    put(fc, { o: 0 });
+    prog(q => { fr.set({ shift: 22 * Math.sin(q * 9) }); const [x, y] = fr.com(); put(fc, { x, y }); }, m('lat'), Math.max(3, D - m('lat')), lin);
+    show(fc, m('lat', .4));
+    ground(p, 1140, 1460, GY, m('lat'));
+    txt(p, 'вбок', 1300, 810, m('lat'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, '≈ 10 см между стопами (в книге — 4 дюйма)', 1300, 840, m('lat', 1), { size: 19, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'размах зависит от расстановки стоп и роста', 1300, 866, m('lat', 3), { size: 18, fill: COL.dim, anchor: 'middle' });
+    ov.g.parentNode.appendChild(ov.g);
+  }],
+
+  ['sit', 'Стоя, при ходьбе, сидя', (m, D) => {
+    const p = panel(0);
+    txt(p, 'границы устойчивости: стоя, при ходьбе, сидя', 800, 60, m('fig'), { size: 28, weight: 700, anchor: 'middle' });
+    pill(p, 'схема', 1260, 53, m('fig'), { col: COL.dim, size: 18 });
+    const outline = (sp, t0) => { const e = mk('path', { d: polyD(sp.poly), fill: 'none', stroke: LOS_C, 'stroke-width': 3, 'stroke-dasharray': '8 6' }, sp.g); put(e, { o: 0 }); show(e, t0); };
+    const a = stanceTop(p, 300, 290, 1.2, m('st'), { marks: false });
+    outline(a, m('st', .4));
+    txt(p, 'стоя', 300, 470, m('st'), { size: 23, weight: 700, anchor: 'middle' });
+    const b = stanceTop(p, 800, 285, 1.15, m('wk'), { marks: false, stance: 'step' });
+    outline(b, m('wk', .4));
+    path(p, 'M905 370V220M895 234L905 220L915 234', { stroke: COL.dim, 'stroke-width': 3 }, { o: 0 });
+    show(p.lastChild, m('wk', .4));
+    txt(p, 'при ходьбе', 800, 470, m('wk'), { size: 23, weight: 700, anchor: 'middle' });
+    // sitting: the buttocks and the feet on the floor
+    const c = G(p, { x: 1300, y: 325, s: .9, o: 0 }), pts = [];
+    [-1, 1].forEach(k => {
+      mk('ellipse', { cx: 42 * k, cy: 56, rx: 40, ry: 32, fill: mix('#cfc8b8', COL.board, .4), stroke: '#cfc8b8', 'stroke-width': 2.5 }, c);
+      for (let i = 0; i < 16; i++) { const t = i / 16 * 2 * Math.PI; pts.push([42 * k + 40 * Math.cos(t), 56 + 32 * Math.sin(t)]); }
+      const fg = G(c, { x: 46 * k, y: -112 });
+      mk('path', { d: footD(k), fill: mix('#cfc8b8', COL.board, .4), stroke: '#cfc8b8', 'stroke-width': 2.5 }, fg);
+      FOOT_PTS.forEach(([u, v]) => pts.push([46 * k + u * k, -112 + v]));
+    });
+    const H0 = hull(pts);
+    c.insertBefore(mk('path', { d: polyD(H0), fill: mix(BOS_C, COL.board, .8), stroke: BOS_C, 'stroke-width': 3 }), c.firstChild);
+    const lo = mk('path', { d: polyD(H0), fill: 'none', stroke: LOS_C, 'stroke-width': 3.5, 'stroke-dasharray': '8 6' }, c);
+    put(lo, { o: 0 });
+    show(c, m('si'));
+    show(lo, m('si', .4));
+    txt(p, 'сидя', 1300, 470, m('si'), { size: 23, weight: 700, anchor: 'middle' });
+    // side views: standing and sitting without a backrest
+    const GY = 850, S = .78;
+    ground(p, 200, 700, GY, m('sit'));
+    ground(p, 900, 1460, GY, m('sit'));
+    const A = fig(p, { x: 420, y: GY - 182 * S, s: S, o: 0 });
+    show(A.g, m('sit'));
+    const B = fig(p, { x: 1150, y: 0, s: S, o: 0, pose: { ...SIT, t: 4, aN: 20, aF: 20, eN: 70, eF: 70 } });
+    plant(B, 'AN', 1240, GY);
+    const [hx, hy] = onStage(B, 'H'), seat = hy + 22 * S;
+    const stool = path(p, `M${hx - 70} ${seat}H${hx + 50}M${hx - 58} ${seat}V${GY}M${hx + 38} ${seat}V${GY}`, { stroke: COL.dim, 'stroke-width': 6 }, { o: 0 });
+    p.insertBefore(stool, B.g);
+    show(stool, m('sit')); show(B.g, m('sit'));
+    txt(p, 'без опоры для спины — границы шире', 1180, 560, m('sit', .5), { size: 23, weight: 700, fill: LOS_C, anchor: 'middle' });
+    const height = (f, x, col, t0, lab) => {
+      const [cx, cy] = comOf(f), cs = comSym(p, cx, cy, 13);
+      put(cs, { o: 0 }); show(cs, t0);
+      const g = G(p, { o: 0 });
+      path(g, vArrow(x, GY - 4, cy + 6), { stroke: col, 'stroke-width': 3.5 });
+      path(g, `M${x} ${cy}H${cx - 14}`, { stroke: COM_C, 'stroke-width': 2, 'stroke-dasharray': '5 5' });
+      T(g, lab, { x: x - 14, y: (GY + cy) / 2, size: 21, weight: 700, fill: col, anchor: 'end' });
+      show(g, t0 + .3);
+    };
+    height(A, 300, COL.dim, m('low'), 'выше');
+    height(B, 1000, COL.good, m('low'), 'ниже');
+    // the base of support along the floor
+    const bos = (x1, x2, t0) => { const e = path(p, `M${x1} ${GY + 10}H${x2}`, { stroke: BOS_C, 'stroke-width': 10 }, { o: 0 }); show(e, t0); };
+    bos(onStage(A, 'heelN')[0] - 4, onStage(A, 'toeN')[0] + 4, m('big'));
+    bos(hx - 64, onStage(B, 'toeN')[0] + 4, m('big', .3));
+    txt(p, 'опора: ягодицы + стопы', 1180, GY + 40, m('big', .5), { size: 21, weight: 700, fill: BOS_C, anchor: 'middle' });
+    txt(p, 'опора: стопы', 420, GY + 40, m('big'), { size: 21, weight: 700, fill: BOS_C, anchor: 'middle' });
+  }],
+
+  ['cop', 'Центр давления', (m, D) => {
+    const p = panel(0), GY = 740, S = 1, X0 = 380, PT = GY - 20;
+    txt(p, 'сила реакции опоры и центр давления (center of pressure)', 800, 60, m('grf'), { size: 28, weight: 700, anchor: 'middle' });
+    const plate = G(p, { o: 0 });
+    mk('rect', { x: 150, y: PT, width: 440, height: 20, rx: 6, fill: '#3d4a52', stroke: ERGO, 'stroke-width': 3 }, plate);
+    path(plate, `M170 ${GY}V${GY + 14}M570 ${GY}V${GY + 14}`, { stroke: ERGO, 'stroke-width': 5 });
+    T(plate, 'силовая платформа (force plate)', { x: 370, y: GY + 46, size: 21, fill: COL.dim, anchor: 'middle' });
+    show(plate, m('grf'));
+    const f = fig(p, { x: X0, y: PT - 182 * S, s: S, o: 0 });
+    show(f.g, m('grf'));
+    const [ax] = onStage(f, 'AN'), [tx0] = onStage(f, 'toeN'), [hx0] = onStage(f, 'heelN');
+    // the body presses on the plate (behind the heels); the plate pushes back up through the COP
+    const wA = G(p, { o: 0 }), rA = G(p, { o: 0 });
+    const wx = hx0 - 34;
+    path(wA, vArrow(wx, PT - 150, PT - 4), { stroke: COM_C, 'stroke-width': 6 });
+    T(wA, 'тело давит на опору', { x: wx - 16, y: PT - 90, size: 20, weight: 600, fill: COM_C, anchor: 'end' });
+    const rl = path(rA, '', { stroke: COP_C, 'stroke-width': 6 });
+    const rt = T(rA, 'сила реакции опоры', { size: 20, weight: 700, fill: COP_C });
+    const cd = mk('circle', { r: 8, fill: COP_C, stroke: COL.board, 'stroke-width': 2 }, rA);
+    const cs = comSym(p, 0, 0, 13);
+    put(cs, { o: 0 }); show(cs, m('grf', .2));
+    prog(q => {
+      f.set(LEAN(sway(q, -1, 5, 1.3))); plant(f, 'AN', ax, PT);
+      const [cx, cy] = comOf(f), cpx = clamp(cx + 9 * Math.sin(q * 8.2 + .9), hx0 + 2, tx0 - 2);
+      rl.setAttribute('d', vArrow(cpx, PT - 2, PT - 190));
+      put(rt, { x: cpx + 40, y: PT - 160 });
+      cd.setAttribute('cx', cpx.toFixed(1)); cd.setAttribute('cy', PT);
+      put(cs, { x: cx, y: cy });
+    }, m('grf'), Math.max(3, D - m('grf')), lin);
+    show(wA, m('grf', 1)); show(rA, m('grf', 2.5));
+    txt(p, '← центр давления', tx0 + 22, PT - 10, m('cop'), { size: 21, weight: 700, fill: COP_C });
+    // from above: one foot, then two feet with the weight shifting to the right
+    const sp = stanceTop(p, 1180, 410, 1.9, m('cop', .5));
+    put(sp.cog, { o: 0 });
+    sp.set({ cop: [0, -2] });
+    infoCard(p, 880, 620, 660, 120, 'центр давления', 'проекция вертикальной силы реакции опоры; средневзвешенное всех сил, давящих вниз', COP_C, m('cop'), { size: 21 });
+    sp.to({ upL: 1, cop: [45, -2] }, m('one'), .8);
+    const one = txt(p, 'одна стопа — центр давления внутри неё', 1180, 182, m('one', .5), { size: 21, weight: 700, fill: COP_C, anchor: 'middle' });
+    hide(one, m('two'));
+    sp.to({ upL: 0, cop: [0, -2] }, m('two'), .8);
+    const wl2 = T(p, '', { x: 1180, y: 182, size: 22, weight: 700, fill: COP_C, anchor: 'middle', o: 0 });
+    show(wl2, m('two'));
+    prog(q => { const r = .5 + .2 * q; sp.set({ cop: [-44.7 + 89.4 * r, -2] }); wl2.textContent = `левая ${Math.round(100 - 100 * r)} % · правая ${Math.round(100 * r)} %`; }, m('two', 1), 1.6);
+    const own = G(sp.g, { o: 0 });
+    [[-44.7, 2], [44.7, 2]].forEach(([x, y]) => mk('circle', { cx: x, cy: y, r: 6, fill: 'none', stroke: COP_C, 'stroke-width': 2 }, own));
+    show(own, m('two', 3));
+    const ownT = txt(p, '○ — центр давления под каждой стопой', 1180, 590, m('two', 3), { size: 19, fill: COP_C, anchor: 'middle' });
+    hide(own, m('ctrl')); hide(ownT, m('ctrl')); hide(wl2, m('ctrl'));
+    // the stabilogram: the COP wanders round the COG as the muscles correct
+    const tr = mk('path', { fill: 'none', stroke: COP_C, 'stroke-width': 1.4, 'stroke-opacity': .85 }, sp.g);
+    sp.g.appendChild(sp.cog);
+    show(sp.cog, m('ctrl', .3));
+    const cog = u => [8 + 7 * Math.sin(.8 * u) + 3 * Math.sin(1.9 * u + 1), -8 + 12 * Math.sin(.6 * u + 2) + 5 * Math.sin(1.5 * u)];
+    const copf = u => { const c = cog(u); return [c[0] + 8 * Math.sin(3.3 * u + .4) + 4 * Math.sin(7.7 * u), c[1] + 10 * Math.sin(2.9 * u + 1.3) + 5 * Math.sin(6.4 * u + .2)]; };
+    prog(q => {
+      const n = Math.max(2, Math.round(q * 260)), P = [];
+      for (let i = 0; i <= n; i++) P.push(copf(22 * q * i / n));
+      tr.setAttribute('d', 'M' + P.map(v => v[0].toFixed(1) + ' ' + v[1].toFixed(1)).join('L'));
+      sp.set({ cop: P[P.length - 1], cog: cog(22 * q) });
+    }, m('ctrl', .3), Math.max(3, D - m('ctrl') - .3), lin);
+    txt(p, 'след центра давления — стабилограмма', 1180, 182, m('ctrl', .5), { size: 21, weight: 700, fill: COP_C, anchor: 'middle' });
+    infoCard(p, 880, 752, 660, 96, 'отражает нервно-мышечные ответы на смещения центра тяжести', null, COP_C, m('ctrl', 2), { size: 21 });
+    pillRow(p, ['сила — ньютоны (Н)', 'смещения центра давления — метры (м)'], 400, 836, m('plate', .8), { col: COL.whole, size: 19, space: 12 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => {
+    const p = panel(0), SX = 800, SY = 585, SS = 2.8;
+    const sp = stanceTop(p, SX, SY, SS, .2, { marks: false });
+    txt(p, 'левая: 30 % веса', SX - 100, SY + 215, .2, { size: 22, weight: 700, fill: COL.dim, anchor: 'end' });
+    txt(p, 'правая: 70 % веса', SX + 100, SY + 215, .2, { size: 22, weight: 700, fill: COL.task });
+    txt(p, 'вид сверху, носки вперёд ↑', SX, SY + 252, .2, { size: 19, fill: COL.dim, anchor: 'middle' });
+    PTS = [0, .3, .5, .7, 1].map((r, i) => {
+      const [x, y] = sp.at([-44.7 + 89.4 * r, -4]), g = G(p, { o: 0 });
+      mk('circle', { cx: x, cy: y, r: 18, fill: COL.board, stroke: COP_C, 'stroke-width': 3 }, g);
+      T(g, 'АБВГД'[i], { x, y: y + 8, size: 22, weight: 700, fill: COP_C, anchor: 'middle' });
+      show(g, .3 + i * .1);
+      return { el: g, box: [x - 26, y - 26, 52, 52], label: 'точка ' + 'АБВГД'[i] };
+    });
+  }, { ask: done => quiz({ x: 200, y: 40, w: 1200, cls: 'side' }, [{
+    id: 'c-cop', prompt: ['Пациент стоит на двух ногах, на правую приходится 70 % веса. Нажмите, где центр давления.'],
+    build: pickEls(PTS, 3, 'Г: средневзвешенное — 70 % пути от левой стопы к правой. Центр давления между стопами, ближе к нагруженной.',
+      i => ['А — внутри левой стопы: так было бы, если бы весь вес был на левой ноге.', 'Б — ближе к левой: так при 70 % веса на левой ноге.', 'В — посередине: так при равной нагрузке, 50 на 50.', '', 'Д — внутри правой стопы: так только если левая стопа оторвана от опоры.'][i]),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Равновесие — удержание центра масс над площадью опоры; статическое и динамическое.', 'w1'],
+     ['Центр масс — взвешенное среднее сегментов, у взрослых около S2; центр тяжести — его проекция на опору.', 'w2'],
+     ['Площадь опоры — периметр контакта: шире — устойчивее. Границы устойчивости: вперёд-назад ≈ 12°.', 'w3'],
+     ['Центр давления — точка силы реакции опоры; его движения отражают работу мышц равновесия.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-com', prompt: ['Посчитайте. Центр масс — на высоте ≈ 55 % роста; центр давления — средневзвешенное по нагрузке стоп.'],
+    build: blanks([
+      { parts: ['Рост 180 см → центр масс на высоте ≈ ', { box: '99' }, ' см'], why: '0,55 × 180 = 99 см.' },
+      { parts: ['Между центрами стоп 30 см, на правую ногу — 60 % веса. Центр давления от правой стопы: ', { box: '12' }, ' см'], why: 'Он сдвинут к нагруженной ноге: от правой стопы 30 × 0,4 = 12 см.' },
+      { parts: ['…и от левой стопы: ', { box: '18' }, ' см'], why: '30 × 0,6 = 18 см (или 30 − 12).' },
+    ]),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-wide', prompt: ['Пожилая пациентка стоит, широко расставив стопы, и не хочет сводить их вместе. Чем ей помогает широкая стойка?'],
+    build: choice([
+      ['Площадь опоры больше — центру тяжести дальше до её краёв'],
+      ['Центр масс поднимается выше'],
+      ['Сила реакции опоры становится меньше'],
+      ['Центр давления выходит за пределы стоп'],
+    ], 0, 'Шире опора — шире и границы устойчивости: то же покачивание не выводит центр тяжести за край.',
+    [null, 'Выше центр масс — наоборот, менее устойчиво; широкая стойка его не поднимает.', 'В спокойной стойке сила реакции опоры равна весу тела и от ширины стойки не зависит.', 'Центр давления всегда лежит в пределах площади опоры.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

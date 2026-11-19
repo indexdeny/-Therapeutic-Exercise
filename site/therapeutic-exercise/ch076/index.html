@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Эластичное сопротивление — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 76, title: 'Эластичное сопротивление', minutes: 10, language: 'ru', next: '../ch077/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch076/cards.ru.json
+const CARDS_SHORT = {
+  "работают\nсопротивления достаточно для роста силы; активация мышц — как на тренажёрах и со свободными весами": "достаточно для роста силы",
+  "цвет = степень сопротивления\nленты и трубки разной толщины или диаметра": "разная толщина или диаметр",
+  "чтобы работать грамотно\nнужны биомеханика и знание свойств материала": "нужны биомеханика и знание свойств материала",
+  "пик — в середине объёма\nплечо рычага меняется с углом ленты; на ответ мышцы влияет и её отношение длины и напряжения": "плечо рычага меняется с углом",
+  "зависит от числа растяжений и от того, насколько сильно растягивают\nснижение заметное, но небольшое; ленты всё равно меняют регулярно": "снижение небольшое; меняют регулярно",
+  "толщина\nтолще — больше сопротивление; шкалы цветов у марок разные (в одном исследовании крайние степени расходились на 30–35 %) → одному пациенту — одна марка": "толще — больше; одному пациенту — одна марка",
+  "длина\nпод упражнение и рост; оба конца надёжно закреплены; каждый раз одна и та же длина — иначе нагрузка «гуляет»": "каждый раз одна и та же длина",
+  "терапевт выбирает положение\nгде нужен максимум — и крепит ленту так, чтобы там был прямой угол": "прямой угол там, где нужен максимум",
+  "острый угол\nменьше сопротивление, больше сжатие в суставе": "меньше сопротивление, больше сжатие в суставе",
+  "каждый раз одинаково\nположение пациента и место крепления": "положение пациента и место крепления",
+  "прогрессия\nбольше повторений с той же лентой или следующая по толщине лента": "больше повторений или толще лента",
+  "плюсы\nлёгкий и недорогой — идеален для дома; мало зависит от тяжести → много положений и сочетаний движений; на средних и быстрых скоростях безопасен — нет инерции тяжёлого груза, подходит для плиометрики": "лёгкий, недорогой, безопасен на скоростях",
+  "минусы\nсопротивление цветов — по таблицам: трудно выбрать и оценить смену ленты; нет стабилизации — рисунок движения держат свои мышцы; ленты изнашиваются — менять регулярно, при общих отрезках трудно понять когда; латекс — аллерген (есть безлатексные по сопоставимой цене)": "нет стабилизации, изнашиваются, латекс — аллерген",
+};
+// cards-short end
+
+const BANDC = '#e05a5a', SKIN = '#d8d1c1', FORCE = COL.whole, COMP = COL.bad;
+const GRADES = [['#f3e15a', 5], ['#e05a5a', 7], ['#5fb878', 9], ['#4a7fd0', 11], ['#3a4148', 13], ['#b8bcc2', 15]];
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// An elastic band from A to B with rest length L0: it thins and pales as it stretches; set() returns the elongation (0..).
+function band(p, col = BANDC, w = 12) {
+  const e = path(p, '', { stroke: col, 'stroke-width': w, 'stroke-linecap': 'round' });
+  return { e, set(A, B, L0) {
+    const L = Math.hypot(B[0] - A[0], B[1] - A[1]), k = clamp(L0 / Math.max(L, 1), .3, 1);
+    e.setAttribute('d', `M${A[0].toFixed(1)} ${A[1].toFixed(1)}L${B[0].toFixed(1)} ${B[1].toFixed(1)}`);
+    e.setAttribute('stroke-width', (w * Math.sqrt(k)).toFixed(1)); e.setAttribute('stroke', mix(col, '#ffffff', (1 - k) * .4));
+    return Math.max(0, (L - L0) / L0);
+  } };
+}
+const arrowD = (A, u, L) => { const B = [A[0] + u[0] * L, A[1] + u[1] * L], f = v => v.toFixed(1); return `M${f(A[0])} ${f(A[1])}L${f(B[0])} ${f(B[1])}M${f(B[0] - u[0] * 14 - u[1] * 9)} ${f(B[1] - u[1] * 14 + u[0] * 9)}L${f(B[0])} ${f(B[1])}L${f(B[0] - u[0] * 14 + u[1] * 9)} ${f(B[1] - u[1] * 14 - u[0] * 9)}`; };
+// A lever (upper arm + forearm about the elbow E) pulled by a band anchored at A; returns { set(phi) → {el, torque, perp, along} }.
+function bandLever(p, E, L, A, phi0, t0) {
+  const g = G(p, { o: 0 }), defs = mk('defs', {}, g), line = mix(SKIN, COL.board, .6);
+  limbEl(g, defs, SKIN, 22, 17, line).set([E[0] - 170, E[1] + 40], E);
+  const fa = limbEl(g, defs, SKIN, 17, 12, line);
+  mk('circle', { cx: A[0], cy: A[1], r: 10, fill: 'none', stroke: COL.chalk, 'stroke-width': 4 }, g);
+  const bd = band(g), W0 = [E[0] + L * Math.cos(rad(phi0)), E[1] - L * Math.sin(rad(phi0))], L0 = Math.hypot(A[0] - W0[0], A[1] - W0[1]);
+  const aP = path(g, '', { stroke: FORCE, 'stroke-width': 5 }), aC = path(g, '', { stroke: COMP, 'stroke-width': 5 });
+  if (t0 !== null) show(g, t0);
+  const calc = phi => {
+    const u = [Math.cos(rad(phi)), -Math.sin(rad(phi))], W = [E[0] + L * u[0], E[1] + L * u[1]], c = [A[0] - W[0], A[1] - W[1]], d = Math.hypot(...c), cu = [c[0] / d, c[1] / d];
+    const el = Math.max(0, (d - L0) / L0), along = cu[0] * u[0] + cu[1] * u[1], n = [-u[1], u[0]], perp = cu[0] * n[0] + cu[1] * n[1];
+    return { u, W, cu, el, along, n, perp, torque: el * Math.abs(perp) };
+  };
+  return { g, calc, set(phi, { comp = true } = {}) {
+    const r = calc(phi); fa.set(E, r.W); bd.set(r.W, A, L0);
+    aP.setAttribute('d', r.el > .02 ? arrowD(r.W, [r.n[0] * Math.sign(r.perp), r.n[1] * Math.sign(r.perp)], 15 + 70 * r.el * Math.abs(r.perp)) : '');
+    aC.setAttribute('d', comp && r.el > .02 && r.along < -.1 ? arrowD(r.W, [r.u[0] * -1, r.u[1] * -1], 12 + 70 * r.el * -r.along) : '');
+    return r;
+  } };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Эластичное сопротивление', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 76', { x: 800, y: 170, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Эластичное сопротивление', { x: 800, y: 255, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'ленты и трубки', { x: 800, y: 320, size: 44, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'растяжение, угол, прогрессия', 800, 400, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const f = fig(art, { x: 800, y: 800 - 182 * .9, s: .9, pose: { aN: 6, eN: 10 } });
+    const bi = muscleOn(f, ...MUSCLE.biceps, { after: 'hdN', w: 11 }), bd = band(art);
+    f.onSet.push(() => bd.set(onStage(f, 'toeN'), onStage(f, 'WN'), 120));
+    ground(art, 680, 920, 800, 0);
+    prog(q => { f.set({ aN: 6, eN: lerp(10, 125, cyc(q, 3)) }); bi.act(.9); }, .4, Math.max(4, D - 1.4), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['what', 'Ленты и трубки', (m) => {
+    const p = panel(0);
+    txt(p, 'эластичные ленты и трубки', 800, 66, m('what'), { size: 28, weight: 700, anchor: 'middle' });
+    infoCard(p, 60, 110, 760, 220, 'работают', 'сопротивления достаточно для роста силы; активация мышц — как на тренажёрах и со свободными весами', COL.good, m('what'), { size: 23 });
+    // grades: thicker material, more resistance
+    GRADES.forEach(([c, w], i) => { const y = 450 + i * 62, b = path(p, `M190 ${y}H700`, { stroke: c, 'stroke-width': w * 2, 'stroke-linecap': 'round' }, { o: 0 }); show(b, m('types', .3 + i * .3)); });
+    txt(p, 'тоньше', 60, 455, m('types'), { size: 20, fill: COL.dim, anchor: 'start' });
+    txt(p, 'толще', 60, 765, m('types'), { size: 20, fill: COL.dim });
+    arrowTo(p, [760, 450], [760, 760], m('types', 1), { col: COL.task, w: 4 });
+    txt(p, 'больше сопротивление', 790, 610, m('types', 1.4), { size: 22, fill: COL.task, weight: 700 });
+    NOTE(p, 420, 830, m('types', 2));
+    txt(p, 'цвета — пример; шкалы у производителей разные', 420, 870, m('types', 2), { size: 19, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 880, 110, 660, 220, 'цвет = степень сопротивления', 'ленты и трубки разной толщины или диаметра', COL.task, m('types'), { size: 23 });
+    infoCard(p, 880, 360, 660, 220, 'чтобы работать грамотно', 'нужны биомеханика и знание свойств материала', COL.whole, m('phys'), { size: 23 });
+  }],
+
+  ['elong', 'Удлинение', (m, D) => {
+    const p = panel(0);
+    txt(p, 'сила растёт с процентом удлинения', 800, 66, m('elong'), { size: 28, weight: 700, anchor: 'middle' });
+    // one band stretched: the elongation and the force
+    const ax = 120, ay = 200, L0 = 240, anch = G(p, { o: 0 });
+    mk('rect', { x: ax - 30, y: ay - 40, width: 18, height: 80, rx: 4, fill: COL.dim }, anch); show(anch, m('elong'));
+    const b1 = band(p), hand = put(mk('circle', { r: 14, fill: SKIN }, p), { o: 0 }); show(hand, m('elong'));
+    const pct = txt(p, '', 520, 290, m('formula'), { size: 26, weight: 700, fill: COL.task, anchor: 'middle' });
+    path(p, `M${ax} ${ay + 40}H${ax + L0}`, { stroke: COL.dim, 'stroke-width': 3 });
+    txt(p, 'L₀ — длина покоя', ax + L0 / 2, ay + 70, m('formula'), { size: 20, fill: COL.dim, anchor: 'middle' });
+    // force against elongation: a straight line
+    const cx0 = 960, cy0 = 470, cw = 520, ch = 300;
+    chartAxes(p, cx0, cy0, cw, ch, 'сила', '', m('elong', 1));
+    draw(path(p, `M${cx0} ${cy0}L${cx0 + cw} ${cy0 - ch * .95}`, { stroke: COL.task, 'stroke-width': 4 }, { d: 0 }), m('elong', 1.5), 1);
+    [0, 50, 100, 150].forEach(v => txt(p, v + '%', cx0 + v / 150 * cw, cy0 + 28, m('elong', 1), { size: 18, fill: COL.dim, anchor: 'middle' }));
+    txt(p, 'удлинение, %', cx0 + cw / 2, cy0 + 62, m('elong', 1), { size: 20, fill: COL.dim, anchor: 'middle' });
+    const dot = put(mk('circle', { r: 10, fill: COL.chalk }, p), { o: 0 }); show(dot, m('elong', 1.5));
+    const fArr = path(p, '', { stroke: FORCE, 'stroke-width': 6 });
+    prog(q => { const L = L0 * (1 + 1.5 * cyc(q, Math.max(2, Math.round((m('ex') - m('elong')) / 3)))), B = [ax + L, ay]; const el = b1.set([ax, ay], B, L0); put(hand, { x: B[0], y: B[1] }); pct.textContent = `(L − L₀) / L₀ × 100 = ${Math.round(el * 100)} %`; put(dot, { x: cx0 + el / 1.5 * cw, y: cy0 - ch * .95 * el / 1.5 }); fArr.setAttribute('d', el > .03 ? arrowD([B[0] + 4, ay - 34], [-1, 0], 20 + 60 * el) : ''); }, m('elong', .3), Math.max(3, m('ex') - m('elong', .5)), lin);
+    // same elongation, same force: 30 → 60 cm and 60 → 120 cm
+    const ex = G(p, { o: 0 });
+    [[30, 60, 560], [60, 120, 660]].forEach(([a, b, y]) => {
+      const k = 4;
+      mk('rect', { x: ax - 30, y: y - 30, width: 18, height: 60, rx: 4, fill: COL.dim }, ex);
+      path(ex, `M${ax} ${y}H${ax + b * k}`, { stroke: BANDC, 'stroke-width': 7, 'stroke-linecap': 'round' });
+      path(ex, `M${ax} ${y + 26}H${ax + a * k}`, { stroke: COL.dim, 'stroke-width': 3 });
+      T(ex, `${a} → ${b} см = 100 %`, { x: ax + b * k + 110, y: y + 8, size: 22, weight: 700, fill: COL.task });
+      path(ex, arrowD([ax + b * k + 92, y], [-1, 0], 78), { stroke: FORCE, 'stroke-width': 6 });
+    });
+    show(ex, m('ex'));
+    txt(p, 'та же сила', 900, 720, m('ex', 3), { size: 23, weight: 700, fill: FORCE });
+    txt(p, 'в книге — футы: 2 → 4 фута', 470, 770, m('ex', 3), { size: 19, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 920, 760, 620, 110, 'скорость растяжения почти не влияет', null, COL.good, m('rate'), { size: 22 });
+  }],
+
+  ['torque', 'Момент', (m, D) => {
+    const p = panel(0);
+    txt(p, 'натяжение растёт, а момент — колоколом', 800, 66, m('torque'), { size: 28, weight: 700, anchor: 'middle' });
+    const E = [360, 520], Lv = 220, A = [E[0] + .6 * Lv, E[1] + 1 * Lv], lev = bandLever(p, E, Lv, A, -20, m('torque', .3));
+    // the curves: tension (elongation) and torque against the angle
+    const N = 60, a0 = -20, a1 = 110, S = []; for (let i = 0; i <= N; i++) S.push(lev.calc(lerp(a0, a1, i / N)));
+    const eMax = Math.max(...S.map(r => r.el)), tMax = Math.max(...S.map(r => r.torque));
+    const cx0 = 860, cy0 = 520, cw = 620, ch = 300;
+    chartAxes(p, cx0, cy0, cw, ch, '', 'угол →', m('torque', .5));
+    path(p, fnPath(cx0, cy0, cw, ch, x => S[Math.round(x * N)].el / eMax * .95, 0, 1, N), { stroke: COL.task, 'stroke-width': 4 }, { o: 0 });
+    show(p.lastChild, m('torque', 1));
+    path(p, fnPath(cx0, cy0, cw, ch, x => S[Math.round(x * N)].torque / tMax * .9, 0, 1, N), { stroke: FORCE, 'stroke-width': 5 }, { o: 0 });
+    show(p.lastChild, m('bell'));
+    txt(p, 'натяжение', cx0 + cw - 10, cy0 - ch * .95 - 12, m('torque', 1), { size: 21, fill: COL.task, anchor: 'end', weight: 700 });
+    txt(p, 'момент', cx0 + cw / 2, cy0 - ch * .95, m('bell'), { size: 22, fill: FORCE, anchor: 'middle', weight: 700 });
+    pill(p, 'схема', cx0 + 60, cy0 - ch - 20, m('torque', .5), { col: COL.dim, size: 19 });
+    const d1 = put(mk('circle', { r: 9, fill: COL.task }, p), { o: 0 }), d2 = put(mk('circle', { r: 9, fill: FORCE }, p), { o: 0 });
+    show(d1, m('torque', 1)); show(d2, m('bell'));
+    prog(q => { const x = cyc(q, Math.max(2, Math.round((D - m('torque')) / 4))), r = lev.set(lerp(a0, a1, x)); put(d1, { x: cx0 + x * cw, y: cy0 - r.el / eMax * .95 * ch }); put(d2, { x: cx0 + x * cw, y: cy0 - r.torque / tMax * .9 * ch }); }, m('torque', .6), Math.max(4, D - m('torque', .9)), lin);
+    txt(p, 'синяя стрелка — часть натяжения поперёк кости', 360, 820, m('torque', 2), { size: 21, fill: FORCE, anchor: 'middle', weight: 600 });
+    infoCard(p, 860, 620, 680, 220, 'пик — в середине объёма', 'плечо рычага меняется с углом ленты; на ответ мышцы влияет и её отношение длины и напряжения', FORCE, m('bell'), { size: 22 });
+  }],
+
+  ['fat', 'Усталость материала', (m) => {
+    const p = panel(0);
+    txt(p, 'усталость и ползучесть материала', 800, 66, m('fat'), { size: 28, weight: 700, anchor: 'middle' });
+    const cx0 = 120, cy0 = 470, cw = 640, ch = 280;
+    chartAxes(p, cx0, cy0, cw, ch, 'сила ленты', 'число растяжений →', m('fat', .5));
+    draw(path(p, fnPath(cx0, cy0, cw, ch, x => .78 + .17 * Math.exp(-x / .05), 0, 1), { stroke: BANDC, 'stroke-width': 5 }, { d: 0 }), m('small'), 1.4);
+    pill(p, 'схема', cx0 + cw - 40, cy0 - ch - 10, m('fat', .5), { col: COL.dim, size: 19 });
+    txt(p, '20–50', cx0 + .05 * cw, cy0 + 28, m('small', .8), { size: 19, fill: COL.task, anchor: 'middle', weight: 700 });
+    txt(p, '> 5000', cx0 + cw - 40, cy0 - 40, m('small', 2.5), { size: 19, fill: COL.task, anchor: 'middle', weight: 700 });
+    txt(p, 'основное снижение — в начале, дальше почти ровно', cx0 + cw / 2, cy0 - ch * .45, m('small', 1.5), { size: 21, fill: COL.chalk, anchor: 'middle' });
+    // 5000 cycles in plain terms
+    const chips = ['10 повторений', '× 4 упражнения', '× 3 раза в день', '× 6 недель', '≈ 5000'];
+    chips.forEach((s, i) => pill(p, s, [100, 282, 472, 642, 780][i], 590, m('small', 4 + i * .5), { col: i === 4 ? COL.task : COL.dim, size: 20 }));
+    // creep: a band under a constant load turns brittle; heat and humidity
+    const cg = G(p, { o: 0 });
+    path(cg, 'M900 300V560', { stroke: mix(BANDC, '#ffffff', .25), 'stroke-width': 12, 'stroke-linecap': 'round' });
+    mk('rect', { x: 860, y: 280, width: 80, height: 16, rx: 4, fill: COL.dim }, cg);
+    mk('rect', { x: 870, y: 560, width: 60, height: 50, rx: 6, fill: '#5b6b78' }, cg);
+    show(cg, m('creep'));
+    const cracks = path(p, 'M894 380l12 6M893 420l13 -5M895 470l11 7', { stroke: COL.board, 'stroke-width': 3 }, { o: 0 }); show(cracks, m('creep', 2));
+    txt(p, 'постоянная нагрузка → хрупкость, разрыв', 990, 440, m('creep', 1), { size: 21, fill: COMP, weight: 700 });
+    const sun = G(p, { x: 1060, y: 560, o: 0 }); mk('circle', { r: 26, fill: '#f3c95c' }, sun); for (let i = 0; i < 8; i++) { const a = rad(i * 45); path(sun, `M${36 * Math.cos(a)} ${36 * Math.sin(a)}L${48 * Math.cos(a)} ${48 * Math.sin(a)}`, { stroke: '#f3c95c', 'stroke-width': 4 }); }
+    const drop = G(p, { x: 1190, y: 560, o: 0 }); path(drop, 'M0 -36Q24 0 0 26Q-24 0 0 -36Z', { fill: '#7fc4e8' });
+    show(sun, m('creep', 3)); show(drop, m('creep', 3.4));
+    txt(p, 'жара и влажность', 1125, 640, m('creep', 3.4), { size: 21, fill: COL.chalk, anchor: 'middle', weight: 600 });
+    infoCard(p, 120, 680, 1420, 170, 'зависит от числа растяжений и от того, насколько сильно растягивают', 'снижение заметное, но небольшое; ленты всё равно меняют регулярно', BANDC, m('fat'), { size: 22 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-elong', prompt: ['Удлинение = (растянутая длина − длина покоя) / длина покоя × 100.'],
+    build: blanks([
+      { parts: ['Лента 50 см растянута до 75 см: удлинение ', { box: '50' }, ' %'], why: '(75 − 50) / 50 × 100 = 50 %.' },
+      { parts: ['Лента 40 см растянута до 80 см: ', { box: '100' }, ' %'], why: '(80 − 40) / 40 × 100 = 100 %.' },
+      { parts: ['Для 100 % ленту 30 см растягивают до ', { box: '60' }, ' см'], why: 'Вдвое: 30 + 30.' },
+    ]),
+  }], done) }],
+
+  ['use', 'Как применять', (m) => {
+    const p = panel(0);
+    txt(p, 'толщина, длина, крепление', 800, 66, m('use'), { size: 28, weight: 700, anchor: 'middle' });
+    // standing, the band tied in front at chest height: shoulder extension against it
+    const W0 = 330, f = fig(p, { x: 0, y: 0, s: 1.05, o: 0, dir: -1, pose: { aN: 70, eN: 10, aF: 70, eF: 10 } });
+    plant(f, 'AN', 520, 760);
+    const wall = G(p, { o: 0 }); mk('rect', { x: W0 - 40, y: 300, width: 24, height: 460, fill: COL.dim, 'fill-opacity': .5 }, wall);
+    mk('circle', { cx: W0 - 6, cy: onStage(f, 'Sh')[1], r: 12, fill: COL.task }, wall);
+    show(wall, m('fix')); ground(p, 260, 640, 760, m('len')); show(f.g, m('len'));
+    const ex = muscleOn(f, ['Sh', 'H', 6, 14], ['Sh', 'EN', 34, 9], { after: 'hdN', w: 12 }), bd = band(p);
+    const Aw = [W0 - 6, onStage(f, 'Sh')[1]], L0 = Math.hypot(onStage(f, 'WN')[0] - Aw[0], onStage(f, 'WN')[1] - Aw[1]);
+    f.onSet.push(() => bd.set(Aw, onStage(f, 'WN'), L0)); f.set({});
+    put(bd.e, { o: 0 }); show(bd.e, m('len'));
+    prog(q => { f.set({ aN: lerp(70, -20, cyc(q, 3)), aF: lerp(70, -20, cyc(q, 3)) }); ex.act(.9); }, m('len', .5), 9, lin);
+    txt(p, 'в начале — натянута, но не растянута', 450, 820, m('len', 1), { size: 21, fill: COL.task, anchor: 'middle', weight: 700 });
+    infoCard(p, 760, 110, 790, 230, 'толщина', 'толще — больше сопротивление; шкалы цветов у марок разные (в одном исследовании крайние степени расходились на 30–35 %) → одному пациенту — одна марка', COL.task, m('grade'), { size: 22 });
+    infoCard(p, 760, 360, 790, 200, 'длина', 'под упражнение и рост; оба конца надёжно закреплены; каждый раз одна и та же длина — иначе нагрузка «гуляет»', COL.good, m('len'), { size: 22 });
+    ['дверная ручка', 'ножка стола', 'кольцо', 'наступить ногой', 'петля на конечности', 'пояс — ходьба', 'двумя руками', 'под обе стопы'].forEach((s, i) => pill(p, s, 880 + (i % 3) * 230, 620 + Math.floor(i / 3) * 62, m('fix', .4 + i * .35), { col: COL.whole, size: 20 }));
+  }],
+
+  ['setup', 'Настройка', (m, D) => {
+    const p = panel(0);
+    txt(p, 'максимум — где лента под прямым углом к кости', 800, 66, m('setup'), { size: 28, weight: 700, anchor: 'middle' });
+    const E = [420, 560], Lv = 230, tgt = 60, Wt = [E[0] + Lv * Math.cos(rad(tgt)), E[1] - Lv * Math.sin(rad(tgt))];
+    const A = [Wt[0] + 200 * Math.sin(rad(tgt)), Wt[1] + 200 * Math.cos(rad(tgt))];
+    const lev = bandLever(p, E, Lv, A, -15, m('setup', .3));
+    const mark = G(p, { o: 0 }); path(mark, `M${E[0]} ${E[1]}L${(E[0] + 300 * Math.cos(rad(tgt))).toFixed(1)} ${(E[1] - 300 * Math.sin(rad(tgt))).toFixed(1)}`, { stroke: COL.good, 'stroke-width': 2, 'stroke-dasharray': '6 8' });
+    T(mark, 'здесь нужен максимум', { x: E[0] + 310 * Math.cos(rad(tgt)), y: E[1] - 310 * Math.sin(rad(tgt)) - 10, size: 20, fill: COL.good, weight: 700, anchor: 'middle' });
+    show(mark, m('setup', 1));
+    const lab = txt(p, '', 420, 860, m('setup', .6), { size: 22, weight: 700, fill: FORCE, anchor: 'middle' });
+    prog(q => { const ph = lerp(-15, 120, cyc(q, Math.max(2, Math.round((D - m('setup')) / 4)))), r = lev.set(ph), ang = Math.acos(clamp(Math.abs(r.along), 0, 1)) * 180 / Math.PI; lab.textContent = `угол ленты к кости ≈ ${Math.round(ang)}°` + (r.along < -.35 && r.el > .05 ? ' — больше сжатие' : ''); lab.setAttribute('fill', r.along < -.35 && r.el > .05 ? COMP : FORCE); }, m('setup', .6), Math.max(4, D - m('setup', .9)), lin);
+    txt(p, 'синяя — сопротивление, красная — сжатие в суставе', 420, 820, m('acute'), { size: 20, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 860, 120, 690, 210, 'терапевт выбирает положение', 'где нужен максимум — и крепит ленту так, чтобы там был прямой угол', COL.good, m('setup'), { size: 22 });
+    infoCard(p, 860, 350, 690, 150, 'острый угол', 'меньше сопротивление, больше сжатие в суставе', COMP, m('acute'), { size: 22 });
+    infoCard(p, 860, 520, 690, 150, 'каждый раз одинаково', 'положение пациента и место крепления', COL.task, m('same'), { size: 22 });
+    infoCard(p, 860, 690, 690, 170, 'прогрессия', 'больше повторений с той же лентой или следующая по толщине лента', COL.whole, m('prog'), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-elastic', prompt: ['Эластичное сопротивление. Верно или нет?'],
+    build: grid([
+      { parts: ['Длинная лента при том же проценте удлинения даёт больше силы.'], ans: ['f'], why: 'Сила зависит от процента удлинения, а не от исходной длины.' },
+      { parts: ['При быстром движении сопротивление ленты заметно больше.'], ans: ['f'], why: 'Скорость растяжения почти не влияет.' },
+      { parts: ['Максимальный момент — когда лента под прямым углом к кости.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['В начальном положении лента натянута, но не растянута.'], ans: ['t'], why: 'Это длина покоя в исходном положении.' },
+      { parts: ['Основная потеря силы ленты — в первые 20–50 растяжений.'], ans: ['t'], why: 'Дальше она почти не меняется.' },
+    ], TF, { multi: false, text: true }),
+  }], done) }],
+
+  ['pm', 'Плюсы и минусы', (m) => {
+    const p = panel(0);
+    txt(p, 'эластик: плюсы и минусы', 800, 66, m('pm'), { size: 28, weight: 700, anchor: 'middle' });
+    // a quick movement is safe: no heavy weight to stop
+    const f = fig(p, { x: 260, y: 820 - 182 * .9, s: .9, o: 0, pose: { aN: 6, eN: 10 } });
+    const bi = muscleOn(f, ...MUSCLE.biceps, { after: 'hdN', w: 11 }), bd = band(p);
+    f.onSet.push(() => bd.set(onStage(f, 'toeN'), onStage(f, 'WN'), 120)); f.set({});
+    put(bd.e, { o: 0 }); show(f.g, m('pm')); show(bd.e, m('pm')); ground(p, 150, 380, 820, m('pm'));
+    prog(q => { f.set({ eN: lerp(10, 125, cyc(q, 8)) }); bi.act(.9); }, m('pm', 2), 6, lin);
+    txt(p, 'быстро — безопасно', 260, 870, m('pm', 2), { size: 21, fill: COL.good, anchor: 'middle', weight: 700 });
+    infoCard(p, 480, 110, 1060, 290, 'плюсы', 'лёгкий и недорогой — идеален для дома; мало зависит от тяжести → много положений и сочетаний движений; на средних и быстрых скоростях безопасен — нет инерции тяжёлого груза, подходит для плиометрики', COL.good, m('pm'), { size: 23 });
+    infoCard(p, 480, 420, 1060, 420, 'минусы', 'сопротивление цветов — по таблицам: трудно выбрать и оценить смену ленты; нет стабилизации — рисунок движения держат свои мышцы; ленты изнашиваются — менять регулярно, при общих отрезках трудно понять когда; латекс — аллерген (есть безлатексные по сопоставимой цене)', COMP, m('cons'), { size: 23 });
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Сопротивление растёт с процентом удлинения — не с длиной и не со скоростью.', 'w1'],
+     ['Момент — колоколом; максимум — лента под прямым углом к кости; острый угол — больше сжатие.', 'w2'],
+     ['Каждый раз та же длина, положение и крепление; прогрессия — повторения или толще лента.', 'w3'],
+     ['Плюсы: дёшево, портативно, много положений, безопасно быстро. Минусы: таблицы, нет стабилизации, износ, латекс.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 150, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-bandsetup', prompt: ['Что сделать?'],
+    build: grid([
+      { parts: ['Максимум сопротивления нужен при 90° сгибания локтя'], ans: ['perp'], why: 'Закрепить ленту так, чтобы при 90° она шла под прямым углом к предплечью.' },
+      { parts: ['С той же лентой нагрузка от занятия к занятию разная'], ans: ['same'], why: 'Одна и та же длина, положение и место крепления.' },
+      { parts: ['Упражнение стало слишком лёгким'], ans: ['prog'], why: 'Больше повторений или следующая по толщине лента.' },
+      { parts: ['Лента под острым углом сильно сжимает сустав'], ans: ['perp'], why: 'Перенести крепление, чтобы угол был ближе к прямому.' },
+    ], [['perp', 'Прямой угол к кости', FORCE], ['same', 'Та же длина и крепление', COL.task], ['prog', 'Повторы или толще', COL.good]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-latex', prompt: ['У пациентки аллергия на латекс; нужна домашняя программа с сопротивлением. Что предложить?'],
+    build: choice([
+      ['Безлатексную ленту — и один и тот же отрезок, положение и крепление каждый раз'],
+      ['Обычную ленту, но короче'],
+      ['Отказаться от эластика: замены нет'],
+      ['Любую ленту, а нагрузку повышать скоростью движения'],
+    ], 0, 'Есть безлатексные изделия по сопоставимой цене; условия упражнения повторяют одинаково.',
+    [null, 'Длина не решает проблему аллергии.', 'Безлатексные ленты есть, и цена сопоставима.', 'Скорость почти не меняет сопротивление ленты.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

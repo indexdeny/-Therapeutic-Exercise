@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тренировка равновесия — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 92, title: 'Тренировка равновесия: принципы и прогрессия', minutes: 10, language: 'ru', next: '../ch093/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch092/cards.ru.json
+const CARDS_SHORT = {
+  "внешний фокус — на предмете\n«держите доску горизонтально» · «держите палку горизонтально»": "«держите доску горизонтально»",
+  "внутренний фокус — на своём теле\n«держите стопы горизонтально» · «держите туловище прямо»": "«держите туловище прямо»",
+  "внешний фокус эффективнее для обучения\nзапускает бессознательные, быстрые, рефлекторные процессы (автоматизм) и ускоряет обучение": "автоматизм, ускоряет обучение",
+  "когнитивные нарушения, не следует инструкциям\nотдельные упражнения небезопасны → многократно повторять повседневные действия": "повторять повседневные действия",
+  "подскоки, прыжки, скакалка\nспрыгнуть с низкой скамейки и удержать равновесие": "спрыгнуть и удержать равновесие",
+  "функциональные задачи для всего тела\nподнимать разный вес в разных позах и темпе · открывать разные двери · полоса препятствий": "поднимать, двери, препятствия",
+  "если дефицит не изменить\nизменить среду · вспомогательные средства · больше помощи семьи и других людей": "среда, средства, помощь семьи",
+  "роллатор (rollator walker)\nчасто назначают для компенсации; неправильно подобранный или неправильно используемый сам вызывает падения → подогнать и научить": "подогнать и научить",
+};
+// cards-short end
+
+const ST_C = COL.good, DY_C = COL.whole, AN_C = COL.task, RE_C = COL.rat, SO_C = COL.real, EXT = COL.good, INT = COL.dim, ACT = '#ff5a3c';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function row(p, x, y, w, s, col, t0, { size = 21, h = 64 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x, y, width: w, height: h, rx: 12, fill: PANEL, stroke: col, 'stroke-width': 2 }, g);
+  mk('circle', { cx: x + 24, cy: y + h / 2, r: 8, fill: col }, g);
+  const t = para(g, s, x + 44, y + h / 2 + size * .35, null, { size, maxW: w - 60 });
+  put(t, { o: 1, y: -(t._h - size * 1.32) / 2 });
+  show(g, t0);
+  return g;
+}
+const sway = (q, lo, hi, k = 1) => lo + (hi - lo) * (.5 + .32 * Math.sin(q * 6.1 * k) + .18 * Math.sin(q * 15.7 * k + 1));
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// Postures for the static progression (side view). Kneeling figures are planted by a knee.
+const HALFK = { ...STAND, hN: 88, kN: 90, fN: 2, hF: 0, kF: 92, fF: -40, aN: 10, aF: -6 };
+const TALLK = { ...STAND, hN: 0, kN: 92, fN: -40, hF: 0, kF: 92, fF: -40 };
+const LUNGE = { ...STAND, t: 6, hN: 78, kN: 84, fN: 18, hF: -22, kF: 60, fF: 30, aN: 6, aF: 2 };
+const TANDEM = { ...STAND, hN: 9, hF: -9 };
+const SIT0 = { ...SIT, t: 2, aN: 10, aF: 10, eN: 20, eF: 20 };
+// A small figure at x on the ground gy in a pose, planted by `by` (an ankle or a knee).
+function mini(p, x, gy, s, pose, t0, by = 'AN', o = {}) {
+  const f = fig(p, { x, y: 0, s, o: 0, pose, ...o });
+  plant(f, by, x, gy);
+  if (t0 !== null) show(f.g, t0);
+  return f;
+}
+// A rollator (side view) with its handle at (x, y).
+function rollator(p, x, gy, s = 1, t0 = null) {
+  const g = G(p, { o: 0 }), c = '#9fb0bf';
+  path(g, `M${x} ${gy - 160 * s}L${x - 10 * s} ${gy - 22 * s}M${x} ${gy - 160 * s}L${x + 70 * s} ${gy - 22 * s}M${x - 4 * s} ${gy - 90 * s}H${x + 44 * s}`, { stroke: c, 'stroke-width': 5 * s });
+  path(g, `M${x - 14 * s} ${gy - 164 * s}H${x + 16 * s}`, { stroke: '#2c353d', 'stroke-width': 9 * s });
+  [[x - 10 * s], [x + 70 * s]].forEach(([cx]) => mk('circle', { cx, cy: gy - 14 * s, r: 14 * s, fill: '#2c353d', stroke: c, 'stroke-width': 3 }, g));
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Тренировка равновесия', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 8 · Урок 92', { x: 800, y: 150, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Тренировка равновесия', { x: 800, y: 235, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'принципы и прогрессия', { x: 800, y: 300, size: 42, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'внешний фокус, безопасность, упражнения по типам контроля', 800, 385, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 840;
+    const wb = wobbleBoard(art, 800, GY, 260);
+    const f = fig(art, { x: 800, y: 0, s: .72, pose: { aN: 90, eN: 4, aF: 90, eF: 4 } });
+    prog(q => { const a = 7 * Math.sin(q * 9); wb.set(a); const [x, y] = wb.at(0); f.set({ fN: a, fF: a, t: 0 }); plant(f, 'AN', x, y); }, .4, Math.max(3, D - 1), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['multi', 'Многосистемный подход', (m, D) => {
+    const p = panel(0), GY = 620;
+    txt(p, 'программа затрагивает несколько систем', 800, 60, m('multi'), { size: 28, weight: 700, anchor: 'middle' });
+    txt(p, 'пример: после долгого постельного режима или бездействия', 800, 104, m('ex'), { size: 22, fill: COL.dim, anchor: 'middle' });
+    const card = (x, title, sub, col, t0) => { const g = G(p, { o: 0 }); roundBox(g, x, 140, 460, 600, col, PANEL, 2.5); T(g, title, { x: x + 230, y: 184, size: 25, weight: 700, fill: col, anchor: 'middle' }); T(g, sub, { x: x + 230, y: 700, size: 20, fill: COL.chalk, anchor: 'middle' }); show(g, t0); };
+    card(80, 'растяжка ног и туловища', 'осанка и подвижность', COL.good, m('ex', 1));
+    card(570, 'силовые упражнения', 'мышечная работоспособность', ACT, m('str'));
+    card(1060, 'функциональное равновесие', 'безопасность в повседневных делах', COL.whole, m('fun'));
+    // a calf stretch against a wall, a squat with dumbbells, a single-leg stance
+    ground(p, 120, 500, GY, m('ex', 1));
+    const CALF = { ...STAND, t: 14, hN: -20, kN: 0, fN: 34, hF: 40, kF: 40, fF: 14, aN: 100, eN: 10, aF: 96, eF: 10 };
+    const a = mini(p, 230, GY, .9, CALF, m('ex', 1));
+    const [ash, asy] = onStage(a, 'Sh');
+    path(p, `M${ash + 120} ${GY}V300`, { stroke: COL.dim, 'stroke-width': 6 }, { o: 0 }); show(p.lastChild, m('ex', 1));
+    reach(a, 'N', ash + 114, asy + 10); reach(a, 'F', ash + 114, asy + 10);
+    muscleOn(a, ...MUSCLE.gastroc, { after: 'shN', w: 11 });
+    txt(p, 'икроножная растягивается', 300, 655, m('ex', 2), { size: 18, fill: ANAT.stretch, anchor: 'middle' });
+    ground(p, 610, 990, GY, m('str'));
+    const b = mini(p, 800, GY, .9, { ...STAND, aN: 6, eN: 8, aF: 6, eF: 8 }, m('str'));
+    const db = carry(p, b, c => dumbbell(c, 1.1)); put(db, { o: 0 }); show(db, m('str'));
+    const SQ = { ...STAND, t: 28, hN: 82, hF: 82, kN: 86, kF: 86, fN: 32, fF: 32, aN: 34, aF: 30, eN: 6, eF: 6 };
+    const MQ = muscleOn(b, ...MUSCLE.quads, { after: 'thN', w: 12 });
+    prog(q => { const k = cyc(q, 3); b.set({ ...blendPose({ ...STAND, aN: 6, eN: 8, aF: 6, eF: 8 }, SQ, k) }); plant(b, 'AN', 800, GY); MQ.act(.9); }, m('str', .5), 6, lin);
+    ground(p, 1100, 1480, GY, m('fun'));
+    const fp = foamPad(p, 1290, GY, 200, 36, m('fun'));
+    const c = mini(p, 1290, fp.top, .9, { ...SINGLE, aN: 80, eN: 6, aF: 80, eF: 6 }, m('fun'));
+    const [cx0] = onStage(c, 'AN');
+    prog(q => { c.set({ t: sway(q, -3, 3, 2) }); plant(c, 'AN', cx0, fp.top); }, m('fun'), Math.max(3, D - m('fun')), lin);
+    txt(p, 'методики силы, подвижности, гибкости, осанки — в своих главах', 800, 800, m('ref'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    NOTE(p, 1400, 836, m('ex', 2));
+    txt(p, 'упражнения на рисунках — примеры', 1270, 843, m('ex', 2), { size: 17, fill: COL.dim, anchor: 'end' });
+  }],
+
+  ['focus', 'Внешний фокус внимания', (m, D) => {
+    const p = panel(0), GY = 640;
+    txt(p, 'куда направлено внимание (focus of attention)', 800, 60, m('focus'), { size: 28, weight: 700, anchor: 'middle' });
+    // the wobble board: two instructions
+    const wb = wobbleBoard(p, 360, GY, 280, m('focus'));
+    const f = fig(p, { x: 360, y: 0, s: 1, o: 0, pose: { aN: 70, eN: 4, aF: 70, eF: 4 } });
+    show(f.g, m('focus'));
+    prog(q => { const a = 8 * Math.sin(q * 10) * (1 - .7 * clamp((q - .5) * 3, 0, 1)); wb.set(a); const [x, y] = wb.at(0); f.set({ fN: a, fF: a }); plant(f, 'AN', x, y); }, m('focus'), Math.max(3, D - m('focus')), lin);
+    const lvl = path(p, `M190 ${GY - 34}H520`, { stroke: EXT, 'stroke-width': 3, 'stroke-dasharray': '10 8' }, { o: 0 });
+    show(lvl, m('ext'));
+    infoCard(p, 980, 120, 560, 230, 'внешний фокус — на предмете', '«держите доску горизонтально» · «держите палку горизонтально»', EXT, m('ext'), { size: 22 });
+    infoCard(p, 980, 380, 560, 200, 'внутренний фокус — на своём теле', '«держите стопы горизонтально» · «держите туловище прямо»', INT, m('int'), { size: 22 });
+    // a bar held out in the hand, kept level
+    const fr = frontStand(p, 720, GY, .62, m('ext', 2), { pose: { w: 22, aR: 88, eR: 0 }, muscles: false });
+    const bar = path(p, '', { stroke: '#c9a97a', 'stroke-width': 8 });
+    put(bar, { o: 0 }); show(bar, m('ext', 2));
+    prog(q => { fr.set({ shift: 6 * Math.sin(q * 7) }); const [hx, hy] = fr.at(fr.pts.arms[1][2]); bar.setAttribute('d', `M${hx - 60} ${hy}H${hx + 60}`); }, m('ext', 2), Math.max(3, D - m('ext', 2)), lin);
+    infoCard(p, 980, 610, 560, 240, 'внешний фокус эффективнее для обучения', 'запускает бессознательные, быстрые, рефлекторные процессы (автоматизм) и ускоряет обучение', COL.good, m('better'), { size: 21 });
+  }],
+
+  ['safe', 'Безопасность', (m, D) => {
+    const p = panel(0), GY = 800, S = .98;
+    txt(p, 'безопасность при тренировке равновесия', 800, 56, m('safe'), { size: 28, weight: 700, anchor: 'middle' });
+    // the patient with a gait belt, the therapist slightly behind and to the side
+    ground(p, 120, 640, GY, m('b1'));
+    const th = fig(p, { x: 260, y: GY - 182 * S, s: S, o: 0, col: '#b9cfe0' });
+    const pt = fig(p, { x: 400, y: GY - 182 * S, s: S, o: 0, pose: SINGLE });
+    show(pt.g, m('b1'));
+    const belt = gaitBelt(pt);
+    put(belt.e, { o: 0 }); show(belt.e, m('b1'));
+    show(th.g, m('b2'));
+    const [px] = onStage(pt, 'AN');
+    const target = () => { const [sx, sy] = onStage(pt, 'Sh'); return [sx - 18, sy + 4]; };
+    holdHand(th, 'N', pt, () => belt.handle());
+    holdHand(th, 'F', pt, target);
+    prog(q => { pt.set({ t: sway(q, -3, 4, 2) }); plant(pt, 'AN', px, GY); }, m('b1'), Math.max(3, D - m('b1')), lin);
+    txt(p, 'пояс', 470, 610, m('b1', .5), { size: 19, weight: 700, fill: '#6fa8c8' });
+    txt(p, 'сзади и сбоку; рука на поясе, другая у плеча', 380, 850, m('b2', 1), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    const L = ['страховочный пояс', 'сзади и сбоку: пояс + верх плеча (туловище, не рука)', 'рядом поручень или брусья', 'без острых краёв рядом', 'высокий риск: двое — спереди и сзади', 'исправное оборудование', 'страховать на входе и сходе с тренажёра', 'чистый пол'];
+    L.forEach((s, i) => row(p, 720, 96 + i * 76, 820, `${i + 1}. ${s}`, COL.good, m('b' + (i + 1)), { h: 64, size: 20 }));
+    infoCard(p, 720, 712, 820, 150, 'когнитивные нарушения, не следует инструкциям', 'отдельные упражнения небезопасны → многократно повторять повседневные действия', COL.task, m('cog'), { size: 19 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-guard', prompt: ['Пациент стоит на качающейся доске. Где и как стоит терапевт?'],
+    build: choice([
+      ['Чуть позади и сбоку; одна рука на поясе, другая у верха плеча'],
+      ['Спереди, держа пациента за обе руки'],
+      ['Сзади на расстоянии шага, чтобы не мешать'],
+      ['Сбоку, держа пациента за предплечье'],
+    ], 0, 'Страхуют за туловище: пояс и верх плеча, стоя чуть позади и сбоку.',
+    [null, 'За руки не страхуют: рука — не туловище, и пациент тянет терапевта на себя.', 'На расстоянии шага не успеть: рука должна быть на поясе или рядом.', 'Держат туловище (пояс, плечо), а не руку.']),
+  }], done) }],
+
+  ['stat', 'Статический контроль', (m, D) => {
+    const p = panel(0), GY = 470, S = .62;
+    txt(p, 'статический контроль: позы на твёрдой опоре', 800, 56, m('stat'), { size: 28, weight: 700, anchor: 'middle', fill: ST_C });
+    const X = [130, 315, 500, 685, 870, 1055, 1240, 1420];
+    const steps = [['сидя', SIT0, 'AN', 'stat'], ['на одном колене', HALFK, 'KF', 'stat'], ['на коленях', TALLK, 'KN', 'stat'], ['стоя', STAND, 'AN', 'stat'], ['тандем', TANDEM, 'AN', 'hard'], ['одна нога', SINGLE, 'AN', 'hard'], ['выпад', LUNGE, 'AF', 'hard'], ['присед', SQUAT, 'AN', 'hard']];
+    ground(p, 60, 1540, GY, m('stat'));
+    steps.forEach(([lab, pose, by, mark], i) => {
+      const t0 = m(mark, (i % 4) * .8 + (mark === 'stat' ? .5 : 0));
+      const f = mini(p, X[i], GY, S, pose, t0, by);
+      if (lab === 'сидя') { const [hx, hy] = onStage(f, 'H'); const st0 = path(p, `M${hx - 40} ${hy + 14}H${hx + 26}M${hx - 32} ${hy + 14}V${GY}M${hx + 18} ${hy + 14}V${GY}`, { stroke: COL.dim, 'stroke-width': 4 }, { o: 0 }); p.insertBefore(st0, f.g); show(st0, t0); }
+      txt(p, lab, X[i], GY + 34, t0, { size: 19, weight: 700, fill: i < 4 ? COL.chalk : ST_C, anchor: 'middle' });
+    });
+    path(p, 'M80 560H1520M1500 548L1520 560L1500 572', { stroke: ST_C, 'stroke-width': 3 }, { o: 0 }); show(p.lastChild, m('hard'));
+    txt(p, 'сложнее →', 1520, 594, m('hard'), { size: 18, fill: ST_C, anchor: 'end' });
+    // the bar held level
+    const bf = frontStand(p, 220, 860, .5, m('bar'), { pose: { w: 18, aR: 88, eR: 0 }, muscles: false });
+    const [bx, by] = bf.at(bf.pts.arms[1][2]);
+    path(p, `M${bx - 50} ${by}H${bx + 50}`, { stroke: '#c9a97a', 'stroke-width': 7 }, { o: 0 }); show(p.lastChild, m('bar'));
+    txt(p, 'палка горизонтально — внешний фокус', 220, 640, m('bar'), { size: 18, weight: 700, fill: EXT, anchor: 'middle' });
+    // how to make it harder
+    txt(p, 'усложнение:', 460, 650, m('prog'), { size: 22, weight: 700, fill: COL.chalk });
+    pillRow(p, ['мягкая опора: поролон, песок, трава', 'уже опора', 'движения рук', 'глаза закрыты'], 1000, 700, m('prog', .5), { col: ST_C, size: 19, gap: 1.2, space: 10 });
+    pillRow(p, ['сопротивление: гантели, эластичная лента'], 800, 770, m('res'), { col: ACT, size: 19 });
+    pillRow(p, ['вторая задача: поймать мяч, считать в уме'], 1220, 770, m('dual'), { col: COL.whole, size: 19 });
+  }],
+
+  ['dyn', 'Динамический контроль', (m, D) => {
+    const p = panel(0), GY = 470;
+    txt(p, 'динамический контроль: подвижная опора и движения', 800, 56, m('dyn'), { size: 28, weight: 700, anchor: 'middle', fill: DY_C });
+    // a ball, a wobble board, a mini-trampoline
+    const ball = G(p, { o: 0 }); show(ball, m('dyn'));
+    const fb = mini(p, 250, GY, .62, { ...SIT, t: 0, aN: 10, aF: 10, eN: 10, eF: 10, hN: 88, hF: 88, kN: 92, kF: 92, fN: 4, fF: 4 }, m('dyn'));
+    const [bhx, bhy] = onStage(fb, 'H'), br = (GY - bhy - 6) / 2;
+    mk('circle', { cx: bhx - 4, cy: GY - br, r: br, fill: mix('#e07a5f', COL.board, .45), stroke: '#e07a5f', 'stroke-width': 3 }, ball);
+    p.insertBefore(ball, fb.g);
+    ground(p, 120, 1500, GY, m('dyn'));
+    txt(p, 'мяч: «чтобы не катился»', 250, GY + 34, m('dyn'), { size: 18, fill: EXT, anchor: 'middle' });
+    const wb = wobbleBoard(p, 640, GY, 220, m('dyn', 1.2));
+    const fw = fig(p, { x: 640, y: 0, s: .62, o: 0 }); show(fw.g, m('dyn', 1.2));
+    const tA = m('add');
+    prog(q => { const T = m('dyn', 1.2) + q * (D - m('dyn', 1.2)), a = 7 * Math.sin(T * 1.6); wb.set(a); const [x, y] = wb.at(0); const arms = T < tA + 2 ? 10 : T < tA + 5 ? 90 : 170; fw.set({ fN: a, fF: a, aN: arms, aF: arms, eN: 4, eF: 4, t: T > tA ? 8 * Math.sin(T * .9) : 0 }); plant(fw, 'AN', x, y); }, m('dyn', 1.2), Math.max(3, D - m('dyn', 1.2)), lin);
+    txt(p, 'доска: «держите горизонтально»', 640, GY + 34, m('dyn', 1.2), { size: 18, fill: EXT, anchor: 'middle' });
+    const tr = G(p, { o: 0 });
+    path(tr, `M930 ${GY - 30}H1150`, { stroke: '#7f909c', 'stroke-width': 8 });
+    path(tr, `M945 ${GY - 30}L930 ${GY}M1135 ${GY - 30}L1150 ${GY}`, { stroke: '#7f909c', 'stroke-width': 5 });
+    show(tr, m('dyn', 2.4));
+    const ft = fig(p, { x: 1040, y: 0, s: .6, o: 0 }); show(ft.g, m('dyn', 2.4));
+    prog(q => { const h = 30 * Math.abs(Math.sin(q * 18)); plant(ft, 'AN', 1040, GY - 34 - h); }, m('dyn', 2.4), Math.max(3, D - m('dyn', 2.4)), lin);
+    txt(p, 'мини-батут', 1040, GY + 34, m('dyn', 2.4), { size: 18, fill: COL.chalk, anchor: 'middle' });
+    pillRow(p, ['перенос веса', 'повороты туловища', 'движения головы и рук', 'руки в стороны → над головой'], 800, 560, m('add', .5), { col: DY_C, size: 19, gap: .8, space: 10 });
+    // stepping: small steps → mini-lunges → full lunges
+    const lg = [['шаг', { ...STRIDE }], ['мини-выпад', blendPose(STRIDE, LUNGE, .5)], ['выпад', LUNGE]];
+    const GY2 = 820;
+    ground(p, 120, 800, GY2, m('lunge'));
+    lg.forEach(([lab, pose], i) => { const x = 220 + i * 220, f = mini(p, x, GY2, .55, pose, m('lunge', i * .7), 'AF'); txt(p, lab, x, GY2 + 30, m('lunge', i * .7), { size: 18, weight: 700, fill: DY_C, anchor: 'middle' }); });
+    txt(p, '«доска за спиной — давите в пол опорной ногой»', 460, 600, m('lunge', 2.5), { size: 18, fill: EXT, anchor: 'middle' });
+    infoCard(p, 860, 620, 680, 110, 'подскоки, прыжки, скакалка', 'спрыгнуть с низкой скамейки и удержать равновесие', DY_C, m('hop'), { size: 19 });
+    infoCard(p, 860, 750, 680, 100, 'упражнения для рук и ног', 'в обычной стойке, в тандеме, на одной ноге', DY_C, m('limbs'), { size: 19 });
+  }],
+
+  ['ant', 'Упреждающий контроль', (m, D) => {
+    const p = panel(0), GY = 560;
+    txt(p, 'упреждающий контроль: дотянуться, поймать, ударить', 800, 56, m('ant'), { size: 28, weight: 700, anchor: 'middle', fill: AN_C });
+    ground(p, 100, 1500, GY, m('ant'));
+    // reach to a shelf
+    const shelf = G(p, { o: 0 }); path(shelf, 'M400 250H520', { stroke: COL.dim, 'stroke-width': 6 }); mk('rect', { x: 452, y: 210, width: 30, height: 40, rx: 4, fill: '#9fd8ef', stroke: '#c9e9f5', 'stroke-width': 2 }, shelf); show(shelf, m('ant'));
+    const a = mini(p, 300, GY, .8, STAND, m('ant'));
+    const [ax0] = onStage(a, 'AN');
+    prog(q => { const k = cyc(q, 1.5); a.set(LEAN(5 * k)); plant(a, 'AN', ax0, GY); reach(a, 'N', lerp(380, 462, k), lerp(430, 240, k)); }, m('ant', .5), 4, lin);
+    txt(p, '«коснитесь легко»', 300, 610, m('ant', 1), { size: 19, fill: EXT, anchor: 'middle' });
+    // catch a ball
+    const b = mini(p, 720, GY, .8, { aN: 70, eN: 40, aF: 70, eF: 40 }, m('ant', 1.5));
+    const ball = mk('circle', { r: 16, fill: '#e07a5f', stroke: '#f0a08a', 'stroke-width': 2 }, p);
+    put(ball, { o: 0 }); show(ball, m('ant', 1.5));
+    prog(q => { const u = (q * 2) % 1, x = lerp(1000, 800, u), y = 330 - 160 * Math.sin(Math.PI * u) + 40 * u; put(ball, { x, y }); }, m('ant', 1.5), 4, lin);
+    txt(p, '«поймайте мягко»', 720, 610, m('ant', 2), { size: 19, fill: EXT, anchor: 'middle' });
+    // kick a ball
+    const c = mini(p, 1180, GY, .8, STAND, m('ant', 2.5));
+    const [cAF] = onStage(c, 'AF');
+    const kb = mk('circle', { cx: 1290, cy: GY - 17, r: 17, fill: '#e8e3d6', stroke: '#9aa59f', 'stroke-width': 2 }, p);
+    put(kb, { o: 0 }); show(kb, m('ant', 2.5));
+    prog(q => { const b1 = io(clamp(q / .3, 0, 1)), b2 = io(clamp((q - .3) / .25, 0, 1)), b3 = io(clamp((q - .65) / .35, 0, 1)); const hN = q < .3 ? lerp(4, -25, b1) : q < .55 ? lerp(-25, 55, b2) : lerp(55, 4, b3), kN = q < .3 ? lerp(2, 60, b1) : q < .55 ? lerp(60, 4, b2) : 2; c.set({ hN, kN, fN: 0, t: -3 }); plant(c, 'AF', cAF, GY); put(kb, { x: q > .5 ? 300 * (q - .5) : 0 }); }, m('ant', 3), 2.5, lin);
+    txt(p, '«ударьте далеко»', 1200, 610, m('ant', 3), { size: 19, fill: EXT, anchor: 'middle' });
+    pillRow(p, ['сидя', 'стоя', 'на коленях', 'разная скорость и высота мяча'], 800, 680, m('var'), { col: AN_C, size: 20, gap: .6, space: 12 });
+    infoCard(p, 100, 730, 1400, 120, 'функциональные задачи для всего тела', 'поднимать разный вес в разных позах и темпе · открывать разные двери · полоса препятствий', AN_C, m('task'), { size: 20 });
+  }],
+
+  ['react', 'Реактивный контроль', (m, D) => {
+    const p = panel(0), GY = 470;
+    txt(p, 'реактивный контроль: стратегии и внешние силы', 800, 56, m('react'), { size: 28, weight: 700, anchor: 'middle', fill: RE_C });
+    ground(p, 80, 1520, GY, m('react'));
+    // sway on a firm surface: the feet press on the floor
+    const a = mini(p, 220, GY, .7, STAND, m('react'));
+    const [ax] = onStage(a, 'AN');
+    const fa = G(p, { o: 0 }), fl = path(fa, '', { stroke: COP_C, 'stroke-width': 5 });
+    show(fa, m('react', 1));
+    prog(q => { const d = 7 * Math.sin(q * 8); a.set(LEAN(d)); plant(a, 'AN', ax, GY); const x = ax + 12 + d * 2.2; fl.setAttribute('d', `M${x} ${GY + 6}V${GY + 46}M${x - 8} ${GY + 34}L${x} ${GY + 46}L${x + 8} ${GY + 34}`); }, m('react'), Math.max(3, D - m('react')), lin);
+    txt(p, 'покачивание шире', 220, 192, m('react', .5), { size: 19, weight: 700, fill: RE_C, anchor: 'middle' });
+    txt(p, '«с какой силой стопы давят в пол»', 220, GY + 74, m('react', 1), { size: 17, fill: EXT, anchor: 'middle' });
+    // ankle: single leg, trunk erect
+    const b = mini(p, 520, GY, .7, SINGLE, m('ank'));
+    const [bx] = onStage(b, 'AN');
+    prog(q => { b.set({ ...SINGLE, ...LEAN(sway(q, -2, 3, 2)), hF: 62, kF: 85, fF: -10 }); plant(b, 'AN', bx, GY); }, m('ank'), Math.max(3, D - m('ank')), lin);
+    txt(p, 'голеностопная', 520, 192, m('ank'), { size: 20, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'одна нога, туловище прямо', 520, GY + 40, m('ank'), { size: 17, fill: COL.chalk, anchor: 'middle' });
+    // hip: on a beam, trunk bending
+    const beam = G(p, { o: 0 }); mk('rect', { x: 720, y: GY - 26, width: 200, height: 26, rx: 4, fill: '#9b7b55', stroke: '#c9a97a', 'stroke-width': 2 }, beam); show(beam, m('hip'));
+    const c = mini(p, 820, GY - 26, .7, TANDEM, m('hip'));
+    const [cx] = onStage(c, 'AN');
+    prog(q => { const k = Math.abs(Math.sin(q * 6)); c.set({ ...TANDEM, ...HIPSTRAT(24 * k, 9 * k), hN: 24 * k + 9 * k + 9, hF: 24 * k + 9 * k - 9 }); plant(c, 'AN', cx, GY - 26); }, m('hip'), Math.max(3, D - m('hip')), lin);
+    txt(p, 'тазобедренная', 820, 192, m('hip'), { size: 20, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'брус, линия, наклоны туловища', 820, GY + 40, m('hip'), { size: 17, fill: COL.chalk, anchor: 'middle' });
+    // step: up onto a stool, braiding
+    const d = stepUp(p, 1080, GY, .7, m('step', .3));
+    put(d.g, { o: 0 }); show(d.g, m('step'));
+    txt(p, 'шаговая', 1140, 192, m('step'), { size: 20, weight: 700, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'шаг на скамейку, «плетёнка»', 1140, GY + 40, m('step'), { size: 17, fill: COL.chalk, anchor: 'middle' });
+    // braiding seen from above
+    const br = G(p, { x: 1400, y: 330, s: .38, o: 0 });
+    [[-30, 0, -1], [40, -60, 1], [-60, -120, -1], [10, -180, 1]].forEach(([x, y, sd]) => { const g = G(br, { x, y, r: 90 }); mk('path', { d: footD(sd), fill: mix('#cfc8b8', COL.board, .4), stroke: '#cfc8b8', 'stroke-width': 5 }, g); });
+    show(br, m('step', 1.5));
+    // external forces
+    const ex = G(p, { o: 0 }); roundBox(ex, 80, 580, 1440, 270, RE_C, PANEL, 2.5);
+    T(ex, '+ ожидаемые и неожиданные внешние силы', { x: 110, y: 622, size: 22, weight: 700, fill: RE_C });
+    show(ex, m('force'));
+    [0, 1].forEach(i => { const g = G(p, { x: 200 + i * 110, y: 760, o: 0 }); boxProp(g, 80, 60, '#c9a97a'); T(g, i ? '5 кг' : '1 кг', { x: 0, y: 64, size: 17, fill: COL.dim, anchor: 'middle' }); show(g, m('force', .5)); });
+    txt(p, 'одинаковые коробки, разный вес', 255, 685, m('force', .5), { size: 18, fill: COL.chalk, anchor: 'middle' });
+    [12, 18, 26].forEach((r, i) => { const e = mk('circle', { cx: 560 + i * 80, cy: 770, r, fill: mix('#e07a5f', COL.board, .3 + i * .1), stroke: '#e07a5f', 'stroke-width': 2 }, p); put(e, { o: 0 }); show(e, m('force', 1.5)); });
+    txt(p, 'мячи разного веса и размера', 640, 685, m('force', 1.5), { size: 18, fill: COL.chalk, anchor: 'middle' });
+    const tm = treadmill(p, 1260, 840, .45, m('force', 3));
+    prog(q => tm.set({ ph: q < .5 ? q * 6 : 3 + (q - .5) * (q > .7 ? 2 : 0) }), m('force', 3), Math.max(3, D - m('force', 3)), lin);
+    txt(p, 'дорожка: стоп и старт, скорость ↑↓', 1250, 668, m('force', 3), { size: 18, fill: COL.chalk, anchor: 'middle' });
+  }],
+
+  ['sens', 'Сенсорные системы и функция', (m, D) => {
+    const p = panel(0);
+    txt(p, 'менять опору на сенсорные системы', 800, 56, m('sens'), { size: 28, weight: 700, anchor: 'middle', fill: SO_C });
+    const card = (x, y, w, h, title, items, col, mark) => { const g = G(p, { o: 0 }); roundBox(g, x, y, w, h, col, PANEL, 2.5); T(g, title, { x: x + 26, y: y + 42, size: 22, weight: 700, fill: col }); items.forEach((s, i) => T(g, '· ' + s, { x: x + 36, y: y + 86 + i * 38, size: 20, fill: COL.chalk })); show(g, m(mark)); return g; };
+    card(60, 100, 720, 230, 'зрение: убрать или исказить', ['закрыть глаза', 'призматические очки', 'двигать глазами вместе с головой'], COL.whole, 'vis');
+    card(820, 100, 720, 230, 'соматосенсорные сигналы: снизить', ['сузить площадь опоры', 'встать на поролон', 'встать на наклонную доску'], COL.rat, 'som');
+    // functional: a glass in a cupboard kept level
+    const fn = G(p, { o: 0 }); roundBox(fn, 60, 360, 1480, 330, AN_C, PANEL, 2.5);
+    T(fn, 'функциональные упражнения — по найденным ограничениям', { x: 90, y: 402, size: 22, weight: 700, fill: AN_C });
+    show(fn, m('func'));
+    const GY = 660;
+    path(p, `M120 ${GY}H560`, { stroke: COL.faint, 'stroke-width': 3 }, { o: 0 }); show(p.lastChild, m('func'));
+    const cup = G(p, { o: 0 }); mk('rect', { x: 400, y: 440, width: 150, height: 120, fill: 'none', stroke: COL.dim, 'stroke-width': 4 }, cup); path(cup, 'M400 500H550', { stroke: COL.dim, 'stroke-width': 3 }); show(cup, m('func'));
+    const a = mini(p, 280, GY, .62, STAND, m('func'));
+    const glass = G(p, { o: 0 }); mk('path', { d: 'M-12 -30L-9 6H9L12 -30Z', fill: mix('#9fd8ef', COL.board, .5), stroke: '#c9e9f5', 'stroke-width': 2 }, glass); path(glass, 'M-11 -14H11', { stroke: '#6fc0e8', 'stroke-width': 3 }); show(glass, m('func', .5));
+    prog(q => { const k = cyc(q, 1.5); a.set({ t: 6 * k }); plant(a, 'AN', 280, GY); const tx = lerp(330, 470, k), ty = lerp(560, 494, k); reach(a, 'N', tx, ty); put(glass, { x: tx + 4, y: ty + 6 }); }, m('func', .5), 4, lin);
+    T(p, '«держите воду ровно»', { x: 340, y: 690 - 4, size: 18, fill: EXT, anchor: 'middle', o: 0 }); show(p.lastChild, m('func', 1));
+    txt(p, 'достать стакан из шкафа · завести руку назад (рукав) · поймать мяч сбоку', 900, 470, m('func', 2), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    pillRow(p, ['+ вторая и третья задача'], 900, 540, m('two'), { col: COL.whole, size: 20 });
+    // golf
+    const gf = mini(p, 1360, GY, .62, { ...STAND, t: 30, hN: 34, hF: 34, kN: 14, kF: 14, fN: 10, fF: 10, aN: 50, eN: 6, aF: 54, eF: 6 }, m('rec'));
+    const club = path(p, '', { stroke: '#cfd8dc', 'stroke-width': 4 });
+    put(club, { o: 0 }); show(club, m('rec'));
+    prog(q => { const sw = Math.sin(q * 5); gf.set({ aN: 50 + 60 * sw, aF: 54 + 60 * sw }); plant(gf, 'AN', 1360, GY); const [wx, wy] = onStage(gf, 'WN'), [ex, ey] = onStage(gf, 'EN'), L = Math.hypot(wx - ex, wy - ey); club.setAttribute('d', `M${wx} ${wy}L${(wx + (wx - ex) / L * 90).toFixed(1)} ${(wy + (wy - ey) / L * 90).toFixed(1)}`); }, m('rec'), Math.max(3, D - m('rec')), lin);
+    txt(p, 'любимые занятия (гольф) — мотивация', 1330, 730, m('rec', .5), { size: 20, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['gait', 'Безопасность и компенсация', (m, D) => {
+    const p = panel(0), GY = 760;
+    txt(p, 'безопасность: в пределах реальных границ', 800, 56, m('lim'), { size: 28, weight: 700, anchor: 'middle' });
+    const sp = stanceTop(p, 300, 330, 1.5, m('lim'), { marks: true });
+    put(sp.cop, { o: 0 });
+    mk('path', { d: polyD(sp.poly), fill: 'none', stroke: LOS_C, 'stroke-width': 2.5, 'stroke-dasharray': '7 5' }, sp.g);
+    prog(q => sp.set({ cog: [14 * Math.sin(q * 9), -8 + 22 * Math.sin(q * 6)] }), m('lim'), Math.max(3, D - m('lim')), lin);
+    txt(p, 'покачивания — внутри реальных границ', 300, 520, m('lim', .5), { size: 20, weight: 700, fill: LOS_C, anchor: 'middle' });
+    txt(p, 'динамика: упор на функцию и внешний фокус', 300, 556, m('lim', 2), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 620, 110, 920, 170, 'если дефицит не изменить', 'изменить среду · вспомогательные средства · больше помощи семьи и других людей', COL.task, m('comp'), { size: 21 });
+    // a rollator: fitted and taught
+    ground(p, 620, 1540, GY, m('dev'));
+    const w = fig(p, { x: 820, y: GY - 182 * .95, s: .95, o: 0, pose: { t: 8, hN: 14, hF: 6 } });
+    show(w.g, m('dev'));
+    const r = rollator(p, 960, GY, 1.1, m('dev'));
+    reach(w, 'N', 960, GY - 176); reach(w, 'F', 960, GY - 176);
+    infoCard(p, 1060, 320, 480, 380, 'роллатор (rollator walker)', 'часто назначают для компенсации; неправильно подобранный или неправильно используемый сам вызывает падения → подогнать и научить', COL.bad, m('dev', 1), { size: 20 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-train', prompt: ['Какой контроль равновесия тренирует упражнение?'],
+    build: grid([
+      { parts: ['Стоять на поролоне с закрытыми глазами'], ans: ['so'], why: 'Меняют опору на системы — сенсорная организация.' },
+      { parts: ['Ловить мяч, брошенный с разной скоростью'], ans: ['an'], why: 'Поза настраивается заранее — упреждающий.' },
+      { parts: ['Шагать «плетёнкой»'], ans: ['re'], why: 'Шаговая стратегия — реактивный контроль.' },
+      { parts: ['Стоять на качающейся доске'], ans: ['dy'], why: 'Подвижная опора — динамический.' },
+      { parts: ['Стоять в тандеме, держа палку горизонтально'], ans: ['st'], why: 'Удержание позы на твёрдой опоре — статический.' },
+    ], [['st', 'Статический', ST_C], ['dy', 'Динамический', DY_C], ['an', 'Упреждающий', AN_C], ['re', 'Реактивный', RE_C], ['so', 'Сенсорный', SO_C]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Многосистемно: растяжка, сила, функциональное равновесие; внешний фокус эффективнее.', 'w1'],
+     ['Безопасность: пояс, страховка сзади и сбоку, поручни, чистый пол, исправное оборудование.', 'w2'],
+     ['Прогрессия: мягкая и подвижная опора, уже опора, руки, глаза закрыты, сопротивление, вторая задача.', 'w3'],
+     ['Голеностоп — одна нога; таз — брус; шаг — скамейка и «плетёнка».', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-next', prompt: ['Пациентка уверенно стоит 30 секунд на одной ноге на полу с открытыми глазами. Какой следующий шаг прогрессии?'],
+    build: choice([
+      ['Та же стойка на поролоне или с закрытыми глазами'],
+      ['Вернуться к стойке на двух ногах'],
+      ['Сразу прыжки со скамейки'],
+      ['Убрать страховку — она уже справляется'],
+    ], 0, 'Усложняют по одному параметру: мягкая опора или закрытые глаза.',
+    [null, 'Назад не нужно: она уверенно справляется.', 'Слишком резкий скачок; прыжки — позже, в динамической тренировке.', 'Страховка нужна при любых упражнениях, нарушающих равновесие.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-focus', prompt: ['Пациент тянется к стакану в шкафу. Какая инструкция создаёт внешний фокус внимания?'],
+    build: choice([
+      ['«Держите воду в стакане ровно»'],
+      ['«Держите колено над стопой»'],
+      ['«Напрягите мышцы живота»'],
+      ['«Следите, чтобы спина была прямой»'],
+    ], 0, 'Внешний фокус — на предмете: вода в стакане.',
+    [null, 'Это внимание на своём теле — внутренний фокус.', 'Тоже внутренний фокус: на своих мышцах.', 'Внутренний фокус: положение своего туловища.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

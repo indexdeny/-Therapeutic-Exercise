@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Силовые упражнения в воде — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 99, title: 'Силовые упражнения в воде', minutes: 9, language: 'ru', next: '../ch100/' };
+// bio begin: places of the biomechanics layer (B switches); made by tools/therapeutic-exercise/bio.py from content/therapeutic-exercise/ch099/bio.ru.json
+const BIO = [
+  {"beat": "ue", "fig": 1, "level": "angle", "joint": "aN", "load": {"type": "none"}},
+];
+// bio end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch099/cards.ru.json
+const CARDS_SHORT = {
+  "ноги — над, руки — от\nтело проходит над зафиксированным сегментом ноги или уходит от сегмента руки": "тело проходит над ногой",
+  "лёжа на спине — нельзя\nэксцентрика и ритмическая стабилизация: тело наклоняется и вращается, мало силы и трения; горизонтальное приведение и отведение плеча — избегать": "эксцентрика и ритмическая стабилизация",
+  "руки терапевта\nнаправляющая — на той же стороне, проксимальнее; сопротивления — противоположная, дистально; дистальнее → больше сопротивление": "дистальнее → больше сопротивление",
+  "ротации бедра (колено 90°)\nтело уходит от зафиксированного сегмента; не делать при возможной нестабильности колена": "нестабильность колена — не делать",
+  "разгибание колена\nтерапевт у стоп; четырёхглавая уводит тело от терапевта": "уводит тело от терапевта",
+  "голеностоп: короткий рычаг, движется всё тело\nтыльное сгибание → к терапевту, подошвенное → от; инверсия → к, эверсия → от; при слабых связках — не в полную силу": "при слабых связках — не в полную силу",
+  "фронтальная плоскость\nтерапевт держит за плечи или за стопы и ведёт из стороны в сторону": "из стороны в сторону",
+  "✗ боковой изгиб туловища\nстабилизация потеряна — подсказка": "стабилизация потеряна — подсказка",
+  "интенсивнее\nбыстрее движение; держать дистальнее (за стопы)": "быстрее, дистальнее",
+  "многонаправленный вариант\nконечность зафиксирована; схемы с сопротивлением при нейтральном позвоночнике; одна конечность тяжелее двух; скорость и длительность ↑": "одна конечность тяжелее двух",
+  "положение\nруки — по плечи; ноги — до середины туловища; многое — вертикально на глубине; на спине или на животе — для прогрессии и спорта; диагонали двух ног — на спине, на животе или вертикально на глубине": "руки по плечи, ноги до середины туловища",
+};
+// cards-short end
+
+const AQ = COL.whole, GUIDE = COL.good, RES = COL.task, ACT = '#ff5a3c', TH_C = '#b9cfe0', AWAY = COL.rat, TOWARD = COL.irr;
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const mixPt = (A, B, k) => [lerp(A[0], B[0], k), lerp(A[1], B[1], k)];
+// Stage point of a local point of a flatFig that has been moved (and turned) with put.
+const stg = (f, P) => { const s0 = st(f.g), [u, v] = rotPt(P[0] * f.s, P[1] * f.s, s0.r || 0); return [s0.x + u, s0.y + v]; };
+const therapist = (p, s, pose = {}, dir = -1) => fig(p, { s, dir, o: 0, col: TH_C, pose: { ...STAND, ...pose } });
+// Shoulder flexion against the hand (side view): the forearm stays where the therapist holds it, the body slides away.
+// r.set(a) — shoulder flexion in degrees.
+function flexRig(w, SY, GY, xSh, t0, { sP = .9, sT = 1.05 } = {}) {
+  const th = therapist(w.mid, sT, { t: 8 }, 1);
+  const pt = floater(w.mid, 0, SY, sP, null, { aN: 30, eN: 6 }, { collar: true, belt: true, rings: true });
+  const fl = muscleOn(pt, ['Sh', 'H', 4, -24], ['Sh', 'EN', 36, -9], { w: 12, after: 'torso' });
+  const y0 = SY + 2 * sP;
+  const r = { th, pt, fl };
+  // the hand's x is fixed; at a = 30 the shoulder is at xSh
+  pt.set({ aN: 30 }); put(pt.g, { x: 0, y: y0 }); const W0 = onStage(pt, 'WN'), S0 = onStage(pt, 'Sh'), HX = xSh + (W0[0] - S0[0]);
+  plant(th, 'AN', xSh - 10, GY);
+  r.set = (a, act = 0) => {
+    pt.set({ aN: a, eN: 6 });
+    const W = onStage(pt, 'WN'), s0 = st(pt.g); put(pt.g, { x: s0.x + HX - W[0], y: y0 }); pt.set({});
+    fl.act(act);
+  };
+  holdHand(th, 'N', pt, () => onStage(pt, 'WN'));
+  holdHand(th, 'F', pt, () => { const [x, y] = onStage(pt, 'Sh'); return [x + 4, y - 18]; });
+  r.set(30);
+  if (t0 !== null) { show(th.g, t0); show(pt.g, t0); }
+  return r;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Силовые упражнения в воде', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 9 · Урок 99', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Силовые упражнения в воде', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'ручное сопротивление · стабилизация туловища · самостоятельно', 800, 300, m('sub'), { size: 28, fill: AQ, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const w = pool(art, 300, 1300, 640, 640 + 182 * 1.05 + 40, null, { rim: 40 });
+    w.wave(.3, D, 4);
+    const r = flexRig(w, 640, 640 + 182 * 1.05 + 40, 640, null);
+    put(r.th.g, { o: 1 }); put(r.pt.g, { o: 1 });
+    prog(q => { const k = cyc(q, 1.3); r.set(lerp(30, 150, k), .8); }, .3, Math.max(3, D - .3), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['why', 'Почему раньше, чем на суше', (m, D) => {
+    const p = panel(0);
+    txt(p, 'силовые упражнения в воде', 800, 56, m('why'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    pillRow(p, ['сжатие суставов ↓', 'сопротивление в 3D', 'боль приглушена'], 800, 104, m('why', .5), { col: COL.good, size: 21, gap: .8 });
+    txt(p, '→ можно начать раньше, чем на суше', 800, 150, m('why', 3), { size: 22, weight: 700, fill: COL.good, anchor: 'middle' });
+    // the buoyed arm: the shoulder girdle works differently
+    const w = pool(p, 60, 640, 440, 820, m('mech'), { rim: 30 });
+    const f = fig(w.mid, { s: 1.15, o: 0, pose: { ...STAND, aN: 70, eN: 6 } }); plant(f, 'AN', 300, 820); show(f.g, m('mech'));
+    const up = fArrow(p, 0, 0, 0, -70, BUOY_C); put(up, { o: 0 }); show(up, m('mech'));
+    prog(q => { const [x, y] = onStage(f, 'EN'); up.set(x + 14, y + 4, 0, -64); }, m('mech'), .1, lin);
+    txt(p, 'плавучесть поддерживает руку →', 350, 250, m('mech'), { size: 20, weight: 700, fill: BUOY_C, anchor: 'middle' });
+    txt(p, 'иная нагрузка на плечевой пояс', 350, 280, m('mech'), { size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'обычно — по пояс; механические — и на глубине', 350, 860, m('depth'), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    // closed-chain leg work: deeper → less load
+    const GY = 820, S = .6;
+    [[820, 'по грудь', IMM.xiph, 60], [1080, 'по бёдра', 0, 100], [1340, 'по колено', -100, 140]].forEach(([x, lab, lv, h], i) => {
+      const t0 = m('inv', .4 + i * .5), H = GY - 182 * S;
+      const w2 = pool(p, x - 100, x + 100, H - lv * S, GY, t0, { rim: Math.max(20, H - lv * S - 500) });
+      const g2 = fig(w2.mid, { s: S, o: 0 }); plant(g2, 'AN', x, GY); show(g2.g, t0);
+      repeatPose(g2, { ...SQUAT, t: 20, aN: 90, aF: 90 }, t0 + .6, Math.max(2, D - t0 - .6), Math.max(1, Math.round((D - t0) / 2.4)), ['AN', x, GY]);
+      txt(p, lab, x, GY + 34, t0, { size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      const bar = G(p, { o: 0 }); mk('rect', { x: x - 26, y: 470 - h, width: 52, height: h, rx: 6, fill: mix(ACT, COL.board, .35), stroke: ACT, 'stroke-width': 2 }, bar); show(bar, t0 + .4);
+    });
+    txt(p, 'нагрузка на ноги в замкнутой цепи', 1080, 260, m('inv'), { size: 21, weight: 700, fill: ACT, anchor: 'middle' });
+    txt(p, 'обратно пропорциональна глубине', 1080, 290, m('inv'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pill(p, 'схема', 1440, 230, m('inv'), { col: COL.dim, size: 17 });
+  }],
+
+  ['manual', 'Ручное сопротивление', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ручное сопротивление: замкнутая цепь', 800, 56, m('manual'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    txt(p, 'концентрическое; терапевт фиксирует дистальный сегмент — движется тело пациента', 800, 98, m('manual', 1), { size: 20, fill: COL.dim, anchor: 'middle' });
+    // shoulder abduction from above: the elbow is held, the body glides away
+    const tp = poolTop(p, 60, 130, 900, 560, m('body'));
+    const f = flatFig(tp.mid, 0, 0, .55, null); floatsTop(f); f.face(true); put(f.g, { o: 1 });
+    const C = [700, 340], k = .55;
+    const thG = G(tp.top, { s: .62 }), th = therapistTop(thG, null); put(th, { o: 1 });
+    const cG = contact(tp.top), cR = contact(tp.top); cG.setAttribute('fill', GUIDE); cR.setAttribute('fill', RES);
+    put(cG, { o: 0 }); put(cR, { o: 0 }); show(cG, m('hands')); show(cR, m('hands', 1));
+    const drg = fArrow(tp.top, 0, 0, 0, 0, DRAG_C, { w: 6 }); put(drg, { o: 0 }); show(drg, m('drag'));
+    const delt = mk('path', { stroke: ACT, 'stroke-width': 9, 'stroke-linecap': 'round', fill: 'none', 'stroke-opacity': 0 }, tp.top);
+    const setF = (th0, dth) => {
+      f.arm(th0);
+      const E = f.pts.E;
+      put(f.g, { x: C[0] - E[0] * k, y: C[1] - E[1] * k });
+      const Pp = stg(f, mixPt(f.S, E, .35)), Pd = stg(f, mixPt(f.S, E, .9));
+      cG.at(Pp, false, 0); cR.at([Pd[0] + 10, Pd[1]], false, 0);
+      const ks = 1 / .62; th.set([(C[0] + 112) * ks, (C[1] + 34) * ks], [Pp[0] * ks, Pp[1] * ks], [(Pd[0] + 10) * ks, Pd[1] * ks]);
+      const hip = stg(f, [0, -60]); drg.set(hip[0] + 60 * Math.sign(dth), hip[1], 70 * Math.sign(dth), 0); put(drg, { o: Math.abs(dth) > .2 ? 1 : 0 });
+      const a0 = stg(f, [70, -176]), a1 = stg(f, mixPt(f.S, E, .55));
+      delt.setAttribute('d', `M${a0[0].toFixed(1)} ${a0[1].toFixed(1)}L${a1[0].toFixed(1)} ${a1[1].toFixed(1)}`);
+      delt.setAttribute('stroke-opacity', dth > .2 ? .85 : 0);
+    };
+    setF(12, 0);
+    const T0 = m('body', .5), ang = T => T < T0 ? 12 : lerp(12, 80, cyc((T - T0) / 4, 1));
+    prog(q => { const T = q * D, a = ang(T), da = ang(T + .05) - ang(T - .05); setF(a, da); }, 0, D, lin);
+    txt(p, 'отведение плеча: локоть держат — тело уходит от терапевта', 510, 740, m('body'), { size: 20, weight: 700, fill: AWAY, anchor: 'middle' });
+    txt(p, 'стрелка — сопротивление воды телу пациента', 510, 772, m('drag'), { size: 19, fill: DRAG_C, anchor: 'middle' });
+    txt(p, 'работают отводящие мышцы плеча', 510, 804, m('body', 2), { size: 19, weight: 700, fill: ACT, anchor: 'middle' });
+    NOTE(p, 510, 840, m('body', 2));
+    infoCard(p, 1000, 130, 550, 150, 'ноги — над, руки — от', 'тело проходит над зафиксированным сегментом ноги или уходит от сегмента руки', AQ, m('body'), { size: 20 });
+    infoCard(p, 1000, 295, 550, 90, 'подсказки голосом: «сокращай» — «расслабься»', null, COL.good, m('cue'), { size: 20 });
+    infoCard(p, 1000, 400, 550, 210, 'лёжа на спине — нельзя', 'эксцентрика и ритмическая стабилизация: тело наклоняется и вращается, мало силы и трения; горизонтальное приведение и отведение плеча — избегать', COL.bad, m('limit'), { size: 19 });
+    infoCard(p, 1000, 625, 550, 220, 'руки терапевта', 'направляющая — на той же стороне, проксимальнее; сопротивления — противоположная, дистально; дистальнее → больше сопротивление', RES, m('hands'), { size: 20 });
+  }],
+
+  ['ue', 'Руки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ручное сопротивление: руки', 800, 56, m('ue'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const SY = 430, GY = SY + 182 * 1.05 + 40, w = pool(p, 60, 1000, SY, GY, m('ue'), { rim: 40 });
+    w.wave(m('ue'), Math.max(3, D - m('ue')), 3);
+    const r = flexRig(w, SY, GY, 380, m('ue'));
+    const T1 = m('flex'), T2 = m('ext');
+    prog(q => { const T = q * D; if (T < T1) r.set(30); else if (T < T2) r.set(lerp(30, 150, io(clamp((T - T1) / 2.6, 0, 1))), .85); else r.set(lerp(150, 40, io(clamp((T - T2) / 2.6, 0, 1))), 0); }, 0, D, lin);
+    const aw = G(p, { o: 0 }); fArrow(aw, 560, 520, 200, 0, AWAY, { w: 6 }); T(aw, 'сгибание → тело от терапевта', { x: 560, y: 560, size: 20, weight: 700, fill: AWAY }); show(aw, m('flex')); hide(aw, m('ext'));
+    const tw0 = G(p, { o: 0 }); fArrow(tw0, 760, 520, -200, 0, TOWARD, { w: 6 }); T(tw0, 'разгибание → тело к терапевту', { x: 560, y: 560, size: 20, weight: 700, fill: TOWARD }); show(tw0, m('ext'));
+    txt(p, 'направляющая рука — на акромиально-ключичном суставе,', 690, 150, m('ue', 2), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'рука сопротивления — на нижней части предплечья', 690, 178, m('ue', 2), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'нужно активное сгибание ≥ 120°', 690, 222, m('ext', 2), { size: 20, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'работают сгибатели плеча', 690, 262, m('flex', .5), { size: 19, weight: 700, fill: ACT, anchor: 'middle' });
+    NOTE(p, 690, 296, m('flex', .5));
+    const row = (y, t0, name, a, b) => { const g = G(p, { o: 0 }); roundBox(g, 1030, y, 520, 128, EDGE, PANEL, 2); T(g, name, { x: 1052, y: y + 38, size: 22, weight: 700, fill: COL.chalk }); if (a) T(g, a, { x: 1052, y: y + 72, size: 19, weight: 700, fill: a.includes('от') ? AWAY : TOWARD }); if (b) T(g, b, { x: 1052, y: y + 104, size: 19, weight: 700, fill: b.includes('от') ? AWAY : TOWARD }); show(g, t0); };
+    row(110, m('abd'), 'отведение', 'тело уходит от руки и от терапевта');
+    row(250, m('rot'), 'ротации (локоть 90°)', 'внутренняя → к поражённой руке', 'наружная → от поражённой руки');
+    row(390, m('diag'), 'D1, D2 одной руки', 'сгибание → от терапевта', 'D2 разгибание → к терапевту');
+    row(530, m('diag', 3), 'D2 обеих рук (терапевт у головы)', 'сгибание → от терапевта', 'разгибание → к терапевту');
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-glide', prompt: ['Конечность зафиксирована. Куда скользит тело пациента?'],
+    build: grid([
+      { parts: ['Сгибание плеча против руки терапевта'], ans: ['a'], why: 'Сгибание уводит тело от терапевта.' },
+      { parts: ['Разгибание плеча из согнутого положения'], ans: ['t'], why: 'Разгибание возвращает тело к терапевту.' },
+      { parts: ['Отведение бедра'], ans: ['a'], why: 'Тело скользит от поражённой ноги и от терапевта.' },
+      { parts: ['Приведение бедра'], ans: ['t'], why: 'Тело скользит к поражённой ноге и к терапевту.' },
+      { parts: ['Сгибание бедра и колена (стопа зафиксирована)'], ans: ['t'], why: 'Тело скользит к терапевту и к зафиксированной стопе.' },
+    ], [['t', 'К терапевту', TOWARD], ['a', 'От терапевта', AWAY]], { multi: false, text: true }),
+  }], done) }],
+
+  ['le', 'Ноги', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ручное сопротивление: ноги', 800, 56, m('le'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    // hip abduction and adduction from above: the leg is held, the body glides
+    const tp = poolTop(p, 60, 100, 700, 430, m('add'));
+    const f = flatFig(tp.mid, 0, 0, .45, null); floatsTop(f); f.face(true); put(f.g, { o: 1 });
+    const C = [560, 400], k = .45;
+    const thG = G(tp.top, { s: .66 }), th = therapistTop(thG, null); put(th, { o: 1 });
+    const cG = contact(tp.top), cR = contact(tp.top); cG.setAttribute('fill', GUIDE); cR.setAttribute('fill', RES);
+    const lbl = txt(p, '', 410, 570, m('add'), { size: 20, weight: 700, fill: AWAY, anchor: 'middle' });
+    const setL = (a, da) => {
+      f.leg(a);
+      const P = mixPt(f.pts.K, f.pts.A, .75);
+      put(f.g, { x: C[0] - P[0] * k, y: C[1] - P[1] * k });
+      const R0 = stg(f, P), G0 = stg(f, [0, -50]);
+      cR.at([R0[0] + 8, R0[1]], false, 90); cG.at([G0[0] + 40, G0[1]], false, 90);
+      const ks = 1 / .66; th.set([(R0[0] + 120) * ks, (R0[1] - 70) * ks], [(R0[0] + 8) * ks, R0[1] * ks], [(G0[0] + 40) * ks, G0[1] * ks]);
+      lbl.textContent = da > .2 ? 'отведение → тело от терапевта' : da < -.2 ? 'приведение → тело к терапевту' : '';
+      lbl.setAttribute('fill', da > 0 ? AWAY : TOWARD);
+    };
+    setL(3, 0);
+    const T0 = m('add', .5), ang = T => T < T0 ? 3 : lerp(3, 32, cyc((T - T0) / 5, 1));
+    prog(q => { const T = q * D, a = ang(T), da = ang(T + .05) - ang(T - .05); setL(a, da); }, 0, D, lin);
+    // hip and knee flexion, side view: the foot is held, the body glides toward it
+    const SY = 640, GY = SY + 182 + 30, w = pool(p, 800, 1540, SY, GY, m('flex'), { rim: 40 });
+    const pt = floater(w.mid, 1000, SY, .8, null, {}, { collar: true, belt: true });
+    const thS = therapist(w.mid, 1, { t: 10 }); plant(thS, 'AN', 1440, GY);
+    w.mid.insertBefore(thS.g, pt.g);
+    const ip = muscleOn(pt, ...MUSCLE.iliopsoas, { w: 12, after: 'torso' }), hm = muscleOn(pt, ...MUSCLE.hamstrings, { w: 12, after: 'thN' });
+    pt.set({}); const A0 = onStage(pt, 'AN');
+    show(pt.g, m('flex')); show(thS.g, m('flex'));
+    holdHand(thS, 'N', pt, () => onStage(pt, 'AN').map((v, i) => i ? v - 8 : v - 18));
+    holdHand(thS, 'F', pt, () => figPt(pt, [0, -10]));
+    const TF = m('flex', .8);
+    const y0 = st(pt.g).y;
+    prog(q => { const T = q * D, kq = T < TF ? 0 : cyc((T - TF) / 4.4, 1); pt.set({ hN: 70 * kq, kN: 100 * kq, fN: -30 }); const A = onStage(pt, 'AN'), s0 = st(pt.g); put(pt.g, { x: s0.x + A0[0] - A[0], y: y0 }); pt.set({}); ip.act(kq > .05 && cyc((T - TF + .05) / 4.4, 1) > kq ? .9 : 0); hm.act(ip.level); }, 0, D, lin);
+    txt(p, 'сгибание бедра и колена: тело → к терапевту и стопе', 1170, 470, m('flex'), { size: 19, weight: 700, fill: TOWARD, anchor: 'middle' });
+    txt(p, 'работают сгибатели бедра и колена', 1100, 502, m('flex', 1), { size: 18, weight: 700, fill: ACT, anchor: 'middle' });
+    NOTE(p, 1100, 540, m('flex', 1));
+    infoCard(p, 800, 100, 740, 170, 'ротации бедра (колено 90°)', 'тело уходит от зафиксированного сегмента; не делать при возможной нестабильности колена', COL.bad, m('rot'), { size: 19 });
+    infoCard(p, 800, 285, 740, 120, 'разгибание колена', 'терапевт у стоп; четырёхглавая уводит тело от терапевта', RES, m('kext'), { size: 19 });
+    infoCard(p, 60, 610, 700, 240, 'голеностоп: короткий рычаг, движется всё тело', 'тыльное сгибание → к терапевту, подошвенное → от; инверсия → к, эверсия → от; при слабых связках — не в полную силу', RES, m('ankle'), { size: 19 });
+    pill(p, 'слабость связок → не в полную силу', 410, 870, m('lax'), { col: COL.bad, size: 18 });
+  }],
+
+  ['trunk', 'Стабилизация туловища', (m, D) => {
+    const p = panel(0);
+    txt(p, 'динамическая стабилизация туловища', 800, 56, m('trunk'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const tp = poolTop(p, 60, 100, 820, 760, m('trunk'));
+    const f = flatFig(tp.mid, 0, 0, .62, null); floatsTop(f); f.face(true); f.leg(2); f.legF(2); put(f.g, { o: 1 });
+    const k = .62, C = [470, 210], PIV = [0, -170];
+    const thG = G(tp.top, { s: .9 }), th = therapistTop(thG, null); put(th, { o: 0 }); show(th, m('move'));
+    const spine = mk('path', { stroke: COL.good, 'stroke-width': 5, 'stroke-dasharray': '10 6', fill: 'none' }, tp.top); put(spine, { o: 0 }); show(spine, m('set'));
+    const core = mk('rect', { x: -60, y: -96, width: 120, height: 34, rx: 14, fill: ACT, 'fill-opacity': .45, stroke: ACT, 'stroke-width': 3 }, f.top); put(core, { o: 0 }); show(core, m('set', 1.5));
+    const bend = mk('path', { stroke: COL.bad, 'stroke-width': 6, fill: 'none', 'stroke-linecap': 'round' }, tp.top); put(bend, { o: 0 });
+    const drs = [fArrow(tp.top, 0, 0, 0, 0, DRAG_C, { w: 5 }), fArrow(tp.top, 0, 0, 0, 0, DRAG_C, { w: 5 })]; drs.forEach(e => put(e, { o: 0 }));
+    const T0 = m('move'), TI = m('int');
+    const angAt = T => { if (T < T0) return 0; const u = T - T0, fast = T >= TI ? 1.7 : 1; return 22 * Math.sin(u * 1.3 * fast) * Math.min(1, u / .8); };
+    prog(q => {
+      const T = q * D, a = angAt(T), da = angAt(T + .03) - angAt(T - .03);
+      const [px, py] = rotPt(PIV[0] * k, PIV[1] * k, a);
+      put(f.g, { x: C[0] - px, y: C[1] - py, r: a });
+      const P = (x, y) => { const s0 = st(f.g), [u, v] = rotPt(x * k, y * k, a); return [s0.x + u, s0.y + v]; };
+      const L = P(-84, -168), R = P(84, -168), B = [C[0], C[1] - 70];
+      const ks = 1 / .9; th.set([B[0] * ks, B[1] * ks], [L[0] * ks, L[1] * ks], [R[0] * ks, R[1] * ks]);
+      const s0 = P(0, -170), s1 = P(0, 0), s2 = P(0, 150);
+      spine.setAttribute('d', `M${s0[0].toFixed(1)} ${s0[1].toFixed(1)}L${s1[0].toFixed(1)} ${s1[1].toFixed(1)}L${s2[0].toFixed(1)} ${s2[1].toFixed(1)}`);
+      const err = T >= m('cue') && T < m('cue') + 2.2;
+      put(bend, { o: err ? 1 : 0 });
+      if (err) { const b0 = P(0, -170), b1 = P(40, -60), b2 = P(0, 40); bend.setAttribute('d', `M${b0[0].toFixed(1)} ${b0[1].toFixed(1)}Q${b1[0].toFixed(1)} ${b1[1].toFixed(1)} ${b2[0].toFixed(1)} ${b2[1].toFixed(1)}`); }
+      const sp = Math.min(1, Math.abs(da) / 1.2);
+      [P(-70, 80), P(-70, 260)].forEach((Q, i) => { const d = -Math.sign(da) * 30 * (1 + i * .3) * sp * (T >= TI ? 1.7 : 1); drs[i].set(Q[0], Q[1], d * Math.cos(rad(a)), d * Math.sin(rad(a))); put(drs[i], { o: sp > .1 ? 1 : 0 }); });
+    }, 0, D, lin);
+    txt(p, 'нейтральный позвоночник', 1210, 140, m('set'), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, '+ втягивание живота (изометрия)', 1210, 172, m('set', 1.5), { size: 21, weight: 700, fill: ACT, anchor: 'middle' });
+    txt(p, 'поплавки у шеи, на поясе, у ног', 1210, 210, m('set'), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 920, 250, 630, 140, 'фронтальная плоскость', 'терапевт держит за плечи или за стопы и ведёт из стороны в сторону', AQ, m('move'), { size: 20 });
+    infoCard(p, 920, 405, 630, 110, '✗ боковой изгиб туловища', 'стабилизация потеряна — подсказка', COL.bad, m('cue'), { size: 20 });
+    infoCard(p, 920, 530, 630, 120, 'интенсивнее', 'быстрее движение; держать дистальнее (за стопы)', ACT, m('int'), { size: 20 });
+    infoCard(p, 920, 665, 630, 190, 'многонаправленный вариант', 'конечность зафиксирована; схемы с сопротивлением при нейтральном позвоночнике; одна конечность тяжелее двух; скорость и длительность ↑', AQ, m('multi'), { size: 19 });
+  }],
+
+  ['indep', 'Самостоятельно: четыре режима', (m, D) => {
+    const p = panel(0);
+    txt(p, 'самостоятельные упражнения', 800, 56, m('indep'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    txt(p, 'сопротивление зависит от скорости → пациент сам дозирует нагрузку; сначала — знакомство со скоростью и площадью', 800, 98, m('indep', 1), { size: 19, fill: COL.dim, anchor: 'middle' });
+    const S = .8, panels = [[230, 'ba', 'с помощью плавучести', 'вверх, плавучесть помогает', COL.good], [610, 'bs', 'с поддержкой плавучести', 'горизонтально (вид сверху)', AQ], [990, 'br', 'против плавучести', 'вниз — сопротивление', COL.bad], [1370, 'bsr', 'усиленное сопротивление', 'снаряд + скорость', ACT]];
+    panels.forEach(([x, key, name, sub, col], i) => {
+      const t0 = m(key), GY = 760, HIP = GY - 182 * S, SY = HIP - IMM.c7 * S + 10;
+      const g = G(p, { o: 0 }); show(g, t0);
+      T(g, name, { x, y: 200, size: 21, weight: 700, fill: col, anchor: 'middle' });
+      T(g, sub, { x, y: 228, size: 18, fill: COL.chalk, anchor: 'middle' });
+      if (key === 'bs') {   // from above: a horizontal sweep at the surface
+        const tp = poolTop(g, x - 170, 300, 340, 420, null);
+        const body = therapistTop(tp.top, null); put(body, { o: 1 });
+        const ex = fArrow(tp.top, 0, 0, 0, 0, COL.chalk, { w: 4, head: 12 });
+        prog(q => { const a = rad(lerp(-60, 60, cyc(q * 3, 1))), da = Math.cos(q * 6 * Math.PI); const B = [x, 560], H1 = [x + 150 * Math.sin(a), 560 - 150 * Math.cos(a)]; body.set(B, H1, [x - 40, 600]); ex.set(H1[0], H1[1] - 18, 40 * Math.cos(a) * Math.sign(da), 40 * Math.sin(a) * Math.sign(da)); }, t0, Math.max(3, D - t0), lin);
+        return;
+      }
+      const w = pool(g, x - 170, x + 170, SY, GY, null, { rim: 40 });
+      const f = fig(w.mid, { s: S, pose: { ...STAND, aN: 10 } }); plant(f, 'AN', x - 40, GY);
+      const ext = muscleOn(f, ['Sh', 'H', 44, 20], ['Sh', 'EN', 24, 4], { w: 11, after: 'torso' });
+      let bl = null;
+      if (key === 'bsr') { bl = G(g, {}); [-1, 1].forEach(kk => mk('path', { d: `M${kk * 8} -10C${kk * 14} -26 ${kk * 34} -26 ${kk * 38} -22V22C${kk * 34} 26 ${kk * 14} 26 ${kk * 8} 10Z`, fill: '#7fb0d0', stroke: mix('#7fb0d0', '#000000', .45), 'stroke-width': 2 }, bl)); }
+      const bu = fArrow(g, 0, 0, 0, -1, BUOY_C, { w: 5, head: 13 }), dr = fArrow(g, 0, 0, 0, 0, DRAG_C, { w: 5, head: 13 });
+      put(dr, { o: 0 });
+      const per = key === 'ba' ? 4 : 2.6;
+      prog(q => {
+        const T = q * (D - t0), u = (T % per) / per;
+        const a = key === 'ba' ? lerp(8, 85, io(Math.min(1, u * 1.3))) : lerp(85, 8, io(Math.min(1, u * 1.6)));
+        f.set({ aN: a, eN: 4 });
+        const [hx, hy] = onStage(f, 'WN');
+        bu.set(hx + 10, hy - 4, 0, -50);
+        if (bl) put(bl, { x: hx + 6, y: hy + 4 });
+        const moving = key === 'ba' ? u < .77 : u < .62;
+        ext.act(key !== 'ba' && moving ? .9 : 0);
+        if (key !== 'ba') { dr.set(hx + 26, hy + 16, 0, -(bl ? 80 : 44)); put(dr, { o: moving ? 1 : 0 }); }
+      }, t0, Math.max(3, D - t0), lin);
+    });
+    txt(p, 'светлая стрелка — плавучесть; синяя — сопротивление воды', 800, 820, m('terms'), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'работают разгибатели плеча', 1180, 860, m('br', .5), { size: 18, weight: 700, fill: ACT, anchor: 'middle' });
+    NOTE(p, 1440, 860, m('br', .5));
+  }],
+
+  ['table', 'Таблица 9.1', (m, D) => {
+    const p = panel(0);
+    txt(p, 'упражнения для рук и ног (табл. 9.1)', 800, 56, m('table'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const cols = [['плечо', 'sh', ['сгибание / разгибание', 'отведение / приведение', 'гориз. отвед. / привед.', 'внутр. / наружная ротация', 'диагонали одной руки', 'диагонали двух рук']],
+      ['локоть', 'el', ['сгибание / разгибание', 'диагонали', 'толкание / тяга']],
+      ['бедро', 'hip', ['сгибание / разгибание', 'отведение / приведение', 'внутр. / наружная ротация', 'диагонали одной ноги', 'диагонали двух ног']],
+      ['колено', 'kn', ['сгибание / разгибание', 'диагонали']]];
+    cols.forEach(([name, key, items], i) => {
+      const x = 60 + i * 300, g = G(p, { o: 0 });
+      roundBox(g, x, 100, 280, 380, AQ, PANEL, 2);
+      T(g, name, { x: x + 140, y: 140, size: 24, weight: 700, fill: AQ, anchor: 'middle' });
+      items.forEach((s, j) => T(g, s, { x: x + 16, y: 186 + j * 46, size: 17, fill: COL.chalk }));
+      show(g, m(key));
+    });
+    infoCard(p, 60, 500, 1160, 200, 'положение', 'руки — по плечи; ноги — до середины туловища; многое — вертикально на глубине; на спине или на животе — для прогрессии и спорта; диагонали двух ног — на спине, на животе или вертикально на глубине', AQ, m('pos'), { size: 20 });
+    // a functional squat in the water
+    const SY = 560, GY = 830, w = pool(p, 1250, 1560, SY, GY, m('squat'), { rim: 40, alpha: .32 });
+    const f = fig(w.mid, { s: .95, o: 0 }); plant(f, 'AN', 1405, GY); show(f.g, m('squat'));
+    const q4 = muscleOn(f, ...MUSCLE.quads, { w: 13, after: 'thN' }), gl = muscleOn(f, ['H', 'Sh', 8, -24], ['H', 'KN', 36, 14], { w: 14, after: 'thN' });
+    const TS = m('squat', .5);
+    prog(q => { const T = q * D, k = T < TS ? 0 : cyc((T - TS) / 3, 1), up = T >= TS && Math.sin(2 * Math.PI * (T - TS) / 3) < 0; f.set(blendPose(STAND, { ...SQUAT, t: 24, aN: 80, aF: 80 }, k)); plant(f, 'AN', 1405, GY); q4.act(up ? .9 : .3 * (k > .05)); gl.act(up ? .9 : .3 * (k > .05)); }, 0, D, lin);
+    txt(p, 'функциональный присед', 1405, 140, m('squat'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'разгибатели бедра и колена', 1405, 172, m('squat', .5), { size: 18, weight: 700, fill: ACT, anchor: 'middle' });
+    NOTE(p, 1405, 206, m('squat', .5));
+  }],
+
+  ['lumbar', 'Укрепление поясницы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'укрепление поясничного отдела (табл. 9.2)', 800, 56, m('lumbar'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    txt(p, 'нейтральный позвоночник + втягивание живота; нагрузка ↑: длительность, скорость, площадь, поплавки на глубине', 800, 98, m('lumbar', 1), { size: 19, fill: COL.dim, anchor: 'middle' });
+    const colX = [170, 480, 790, 1100, 1410], SY = 380, GY = 600, S = .5;
+    const w = pool(p, 40, 1560, SY, GY, m('lumbar'), { rim: 30 });
+    w.wave(m('lumbar'), Math.max(3, D - m('lumbar')), 3);
+    [1, 2, 3, 4].forEach(i => path(p, `M${(colX[i - 1] + colX[i]) / 2} 140V${GY + 260}`, { stroke: EDGE, 'stroke-width': 2, 'stroke-dasharray': '6 8' }));
+    // standing: walking with a vertical kickboard
+    const a = fig(w.mid, { s: .75, o: 0 }); plant(a, 'AN', 140, GY); show(a.g, m('stand'));
+    const kb = G(w.mid, { o: 0 }); mk('rect', { x: -20, y: -34, width: 40, height: 68, rx: 14, fill: FLOAT_C, stroke: mix(FLOAT_C, '#000000', .4), 'stroke-width': 2 }, kb); show(kb, m('stand'));
+    walk(a, m('stand'), Math.max(2, D - m('stand')), { cycles: Math.max(1, Math.round((D - m('stand')) / 1.4)), dx: 60 });
+    prog(q => { const [sx, sy] = onStage(a, 'Sh'); put(kb, { x: sx + 46, y: sy + 44 }); }, m('stand'), Math.max(2, D - m('stand')), lin);
+    // semi-reclined on a noodle: bicycling
+    const b = fig(w.mid, { s: S, o: 0, r: -55, pose: { ...STAND, aN: 150, eN: 60, aF: 150, eF: 60 } }); put(b.g, { x: 470, y: SY + 26 }); show(b.g, m('semi'));
+    const nd = mk('circle', { r: 13, fill: FLOAT_C, stroke: mix(FLOAT_C, '#000000', .4), 'stroke-width': 2 }, w.mid); put(nd, { o: 0 }); show(nd, m('semi'));
+    prog(q => { const ph = q * 30; b.set({ hN: 60 + 30 * Math.sin(ph), kN: 60 + 40 * Math.cos(ph), hF: 60 - 30 * Math.sin(ph), kF: 60 - 40 * Math.cos(ph) }); const [sx, sy] = onStage(b, 'Sh'); put(nd, { x: sx - 8, y: sy + 6 }); }, m('semi'), Math.max(3, D - m('semi')), lin);
+    // supine: bridging over a long dumbbell at the knees
+    const c = floater(w.mid, 760, SY, S, m('sup'), { hN: 30, kN: 40 }, { collar: true });
+    const db = mk('circle', { r: 14, fill: FLOAT_C, stroke: mix(FLOAT_C, '#000000', .4), 'stroke-width': 2 }, w.mid); put(db, { o: 0 }); show(db, m('sup'));
+    const K0 = onStage(c, 'KN');
+    prog(q => { const k = cyc(q, 2.5); c.set({ hN: lerp(36, 4, k), kN: lerp(46, 30, k) }); plant(c, 'KN', K0[0], K0[1]); put(db, { x: K0[0], y: K0[1] + 14 }); }, m('sup'), Math.max(3, D - m('sup')), lin);
+    // prone: flutter kick
+    const d = fig(w.mid, { s: S, o: 0, r: 90, pose: { ...STAND, aN: 170, eN: 6, aF: 170, eF: 6 } }); put(d.g, { x: 1100, y: SY + 8 }); show(d.g, m('prone'));
+    prog(q => { const ph = q * 60; d.set({ hN: 10 * Math.sin(ph), hF: -10 * Math.sin(ph), kN: 10 + 8 * Math.cos(ph), kF: 10 - 8 * Math.cos(ph) }); }, m('prone'), Math.max(3, D - m('prone')), lin);
+    // deep water: a vertical pike with bracing
+    const e = fig(w.mid, { s: S, o: 0, pose: { ...STAND, hN: 88, kN: 0, hF: 88, kF: 0, aN: 60, eN: 20, aF: 40, eF: 20 } }); put(e.g, { x: 1390, y: SY + 120 * S }); show(e.g, m('deep'));
+    const ab = muscleOn(e, ...MUSCLE.abdom, { w: 11, after: 'torso' }); ab.act(.9);
+    prog(q => e.set({ aN: 60 + 40 * Math.sin(q * 20), aF: 40 - 40 * Math.sin(q * 20) }), m('deep'), Math.max(3, D - m('deep')), lin);
+    const lists = [['стоя', 'stand', ['ходьба: вперёд, назад, в сторону', 'выпады, высокие колени', 'доска вертикально', 'стойка + движения рук', '(гантели, лопатки, трубки)']],
+      ['полулёжа', 'semi', ['опора: нудлы, гантели, доска', 'велосипед', 'отведение / приведение', 'кроль ногами', 'диагонали, сгибание–разгибание']],
+      ['на спине', 'sup', ['плавательные удары ногами', 'мост с длинной гантелью', 'под коленями']],
+      ['на животе', 'prone', ['кроль ногами']],
+      ['на глубине', 'deep', ['вертикально: пресс напряжён', 'щучка или крест', 'сидя на гантели', 'стоя на доске или гантели']]];
+    lists.forEach(([name, key, items], i) => {
+      const g = G(p, { o: 0 }), x = colX[i];
+      T(g, name, { x, y: 170, size: 23, weight: 700, fill: AQ, anchor: 'middle' });
+      items.forEach((s, j) => T(g, s, { x, y: GY + 50 + j * 30, size: 17, fill: COL.chalk, anchor: 'middle' }));
+      show(g, m(key));
+    });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-mode', prompt: ['Какой это режим?'],
+    build: grid([
+      { parts: ['По плечи в воде: рука поднимается вверх от бедра'], ans: ['a'], why: 'Движение вверх, параллельно плавучести, — она помогает.' },
+      { parts: ['Рука движется горизонтально у поверхности'], ans: ['s'], why: 'Плавучесть поддерживает руку против силы тяжести.' },
+      { parts: ['Рука идёт вниз из сгибания 90°, без снарядов'], ans: ['r'], why: 'Движение против плавучести создаёт сопротивление.' },
+      { parts: ['То же движение с гантелью Hydro-tone, быстрее'], ans: ['x'], why: 'Снаряд увеличивает площадь и лобовое сопротивление; скорость — ещё больше.' },
+    ], [['a', 'С помощью', COL.good], ['s', 'С поддержкой', AQ], ['r', 'Против', COL.bad], ['x', 'Усиленное', ACT]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['В воде силовые можно начать раньше: суставы сжаты меньше, сопротивление в 3D, боль приглушена.', 'w1'],
+     ['Ручное сопротивление — замкнутая цепь: конечность держат, движется тело; дистальнее рука — больше сопротивление.', 'w2'],
+     ['Стабилизация туловища: нейтральный позвоночник и втягивание живота; быстрее и дистальнее — тяжелее.', 'w3'],
+     ['Четыре режима: с помощью плавучести, с её поддержкой, против неё, усиленное сопротивление.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: AQ }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-res', prompt: ['Ручное сопротивление разгибанию колена в воде. Как увеличить сопротивление, не меняя упражнение?'],
+    build: choice([
+      ['Положить руку сопротивления дистальнее на сокращающемся сегменте'],
+      ['Сделать упражнение эксцентрическим лёжа на спине'],
+      ['Убрать подсказки голосом'],
+      ['Положить направляющую руку дистально, а руку сопротивления — проксимально'],
+    ], 0, 'Чем дистальнее рука сопротивления, тем больше общее сопротивление.',
+    [null, 'Лёжа на спине эксцентрику толком не стабилизировать: тело наклоняется и вращается.', 'Подсказки обязательны: они синхронизируют пациента и терапевта.', 'Наоборот: направляющая — проксимальнее, сопротивления — дистально.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-trunk', prompt: ['Пациент с болью в пояснице хорошо держит нейтральный позвоночник, пока терапевт за плечи медленно ведёт его из стороны в сторону. Как усложнить?'],
+    build: choice([
+      ['Вести быстрее или держать дистальнее — за стопы'],
+      ['Держать ближе к центру тела и медленнее'],
+      ['Разрешить боковой изгиб туловища'],
+      ['Перейти от одной конечности к двум в многонаправленном варианте'],
+    ], 0, 'Быстрее — больше лобовое сопротивление; дистальнее хват — больше интенсивность.',
+    [null, 'Так интенсивность снизится.', 'Боковой изгиб — признак, что стабилизация потеряна.', 'Две конечности нагружают меньше, чем одна.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сенсорные системы равновесия — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 87, title: 'Сенсорные системы равновесия', minutes: 8, language: 'ru', next: '../ch088/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch087/cards.ru.json
+const CARDS_SHORT = {
+  "среда\nзакрытая (предсказуемая) / открытая (с помехами)": "закрытая / открытая",
+  "опорная поверхность\nтвёрдая / скользкая, устойчивая / нет, обувь": "твёрдая / скользкая",
+  "задача\nзнакомая / новая, предсказуемая / нет, одна / несколько": "знакомая / новая",
+  "чувство положения сустава\nдают в основном мышечные веретёна: анестезия тканей сустава и эндопротезирование его не нарушают. Суставные рецепторы помогают гамма-системе держать тонус и жёсткость мышц — для упреждающих поправок и ответа на толчки": "мышечные веретёна; суставные — тонус",
+};
+// cards-short end
+
+const VIS_C = COL.whole, SOM_C = COL.rat, VEST_C = COL.real, NERVE = '#f3d36b', SKIN = '#d8d1c1';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function row(p, x, y, w, s, col, t0, { size = 21, h = 64 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x, y, width: w, height: h, rx: 12, fill: PANEL, stroke: col, 'stroke-width': 2 }, g);
+  mk('circle', { cx: x + 24, cy: y + h / 2, r: 8, fill: col }, g);
+  const t = para(g, s, x + 44, y + h / 2 + size * .35, null, { size, maxW: w - 60 });
+  put(t, { o: 1, y: -(t._h - size * 1.32) / 2 });
+  show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+
+/* small icons of the three senses */
+function eyeIcon(p, x, y, s = 1, col = VIS_C) {
+  const g = G(p, { x, y, s });
+  mk('path', { d: 'M-34 0Q0 -30 34 0Q0 30 -34 0Z', fill: '#f2efe6', stroke: col, 'stroke-width': 3 }, g);
+  mk('circle', { r: 12, fill: col }, g);
+  mk('circle', { r: 5, fill: COL.board }, g);
+  return g;
+}
+function footIcon(p, x, y, s = .5, col = SOM_C) {
+  const g = G(p, { x, y, s });
+  mk('path', { d: footD(1), fill: mix(col, COL.board, .5), stroke: col, 'stroke-width': 5 }, g);
+  return g;
+}
+function earIcon(p, x, y, s = 1, col = VEST_C) {
+  const g = G(p, { x, y, s });
+  [[0, -14, 14, 22, 15], [-16, -2, 12, 20, -55], [-12, 10, 20, 8, 0]].forEach(([cx, cy, rx, ry, r]) => mk('ellipse', { cx, cy, rx, ry, fill: 'none', stroke: col, 'stroke-width': 4, transform: `rotate(${r} ${cx} ${cy})` }, g));
+  mk('ellipse', { cx: 6, cy: 12, rx: 12, ry: 9, fill: col }, g);
+  return g;
+}
+// A head in profile facing right, rotating about the top of the neck at (0, 0): put(h.g, { r }) nods it.
+function headSide(p, x, y, r, t0) {
+  const base = G(p, { o: 0 }), id = 'hs' + (++SHADE_ID), defs = mk('defs', {}, base);
+  const gr = mk('radialGradient', { id, cx: .4, cy: .32, r: .8 }, defs);
+  [[0, '#f4ede0'], [.6, SKIN], [1, '#8f877a']].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, gr));
+  mk('path', { d: `M${x - r * .42} ${y - r * .1}L${x - r * .5} ${y + r * .9}H${x + r * .32}L${x + r * .24} ${y}Z`, fill: '#b8b0a2', stroke: '#6f685d', 'stroke-width': 2 }, base);
+  const g = G(base, { x, y });
+  mk('circle', { cx: 0, cy: -r * .8, r, fill: `url(#${id})`, stroke: '#6f685d', 'stroke-width': 2 }, g);
+  path(g, `M${r * .92} ${-r * .85}L${r * 1.22} ${-r * .58}L${r * .95} ${-r * .5}`, { fill: SKIN, stroke: '#6f685d', 'stroke-width': 2 });
+  mk('ellipse', { cx: -r * .08, cy: -r * .75, rx: r * .16, ry: r * .26, fill: '#cfc7b8', stroke: '#6f685d', 'stroke-width': 2 }, g);
+  mk('path', { d: `M${r * .44} ${-r}Q${r * .58} ${-r * 1.1} ${r * .72} ${-r}Q${r * .58} ${-r * .9} ${r * .44} ${-r}Z`, fill: '#f2efe6', stroke: '#6f685d', 'stroke-width': 1.5 }, g);
+  mk('circle', { cx: r * .62, cy: -r, r: r * .06, fill: '#3d3a35' }, g);
+  if (t0 !== null) show(base, t0);
+  return { base, g, eye: [r * .62, -r], ear: [-r * .08, -r * .75] };
+}
+// The inner ear (labyrinth) from the side: three semicircular canals as tubes, the vestibule with the utricle and
+// the saccule, the cochlea faint. lab.flow(q) moves the fluid dots round the lateral canal.
+function labyrinth(p, x, y, s = 1, t0 = null) {
+  const g = G(p, { x, y, s, o: 0 }), wall = mix(VEST_C, COL.board, .25);
+  const canal = (cx, cy, rx, ry, r) => { const c = G(g, { x: cx, y: cy, r }); tube(c, `M${-rx} 0A${rx} ${ry} 0 1 1 ${rx} 0A${rx} ${ry} 0 1 1 ${-rx} 0`, wall, 18); return c; };
+  canal(-10, -84, 44, 70, 14); canal(-104, -26, 40, 66, -56);
+  const lat = canal(-86, 34, 66, 22, -6);
+  [[24, -26], [-66, 40], [-30, 36]].forEach(([cx, cy]) => mk('circle', { cx, cy, r: 13, fill: wall, stroke: mix(wall, '#000000', .3), 'stroke-width': 2 }, g));
+  mk('ellipse', { cx: 2, cy: 34, rx: 50, ry: 32, fill: mix(VEST_C, COL.board, .55), stroke: wall, 'stroke-width': 3 }, g);
+  mk('ellipse', { cx: -8, cy: 24, rx: 22, ry: 12, fill: VEST_C }, g);
+  mk('ellipse', { cx: 18, cy: 48, rx: 16, ry: 10, fill: VEST_C }, g);
+  [[-16, 20], [-8, 18], [0, 21], [12, 45], [20, 44]].forEach(([cx, cy]) => mk('circle', { cx, cy, r: 2.6, fill: '#ffffff' }, g));
+  let sp = 'M80 70';
+  for (let i = 1; i <= 50; i++) { const a = i * .3, r = 34 - i * .55; sp += `L${(80 + r * Math.cos(a)).toFixed(1)} ${(70 + r * Math.sin(a)).toFixed(1)}`; }
+  path(g, sp, { stroke: mix(COL.chalk, COL.board, .6), 'stroke-width': 6 });
+  const dots = [0, 1, 2, 3, 4, 5].map(() => mk('circle', { r: 4, fill: '#ffffff' }, lat));
+  const lab = { g, lat };
+  lab.flow = q => dots.forEach((d, i) => { const a = q * 2 * Math.PI + i * Math.PI / 3; d.setAttribute('cx', (66 * Math.cos(a)).toFixed(1)); d.setAttribute('cy', (22 * Math.sin(a)).toFixed(1)); });
+  lab.flow(0);
+  if (t0 !== null) show(g, t0);
+  return lab;
+}
+// An otolith organ (macula) in section: hair cells under a gel layer with crystals. mac.set(tilt) tilts it; the
+// heavy layer slides downhill and bends the hairs.
+function macula(p, x, y, s = 1, t0 = null) {
+  const g = G(p, { x, y, s, o: 0 }), pl = G(g);
+  mk('rect', { x: -120, y: 0, width: 240, height: 22, rx: 6, fill: mix(VEST_C, COL.board, .5), stroke: VEST_C, 'stroke-width': 2 }, pl);
+  const hairs = [], N = 9;
+  for (let i = 0; i < N; i++) { const hx = -96 + i * 24; mk('rect', { x: hx - 7, y: 2, width: 14, height: 18, rx: 4, fill: mix(VEST_C, '#ffffff', .3) }, pl); hairs.push(path(pl, '', { stroke: NERVE, 'stroke-width': 3 })); }
+  const gel = G(pl);
+  mk('rect', { x: -120, y: -46, width: 240, height: 26, rx: 8, fill: mix('#b9d8e8', COL.board, .45), stroke: '#b9d8e8', 'stroke-width': 2 }, gel);
+  for (let i = 0; i < 16; i++) mk('rect', { x: -112 + i * 14, y: -58 + (i % 3) * 3, width: 9, height: 12, rx: 2, fill: '#f2efe6', transform: `rotate(${(i * 37) % 50 - 25} ${-108 + i * 14} ${-52})` }, gel);
+  const mac = { g, pl, gel };
+  mac.set = tilt => {
+    const dx = 22 * Math.sin(rad(tilt)) / Math.sin(rad(25));
+    put(pl, { r: tilt }); put(gel, { x: dx });
+    hairs.forEach((h, i) => { const hx = -96 + i * 24; h.setAttribute('d', `M${hx} 2Q${hx} -10 ${(hx + dx).toFixed(1)} -20`); });
+  };
+  mac.set(0);
+  if (t0 !== null) show(g, t0);
+  return mac;
+}
+// The lower leg close up (side view, facing right): tibia, foot bones, calf muscle (gastrocnemius–soleus with the
+// Achilles tendon), tibialis anterior, the ankle capsule front and back, and the receptors: a muscle spindle in the
+// calf, a Golgi tendon organ at its tendon, joint receptors on the capsule, skin receptors in the sole.
+// leg.set(a): the shank tilts forward by a degrees over the flat foot (dorsiflexion); returns the calf strain.
+function calfModel(p, x, gy, s = 1, t0 = null) {
+  const g = G(p, { x, y: gy, s, o: 0 }), defs = mk('defs', {}, g), A = [0, -46], L = 300, C = [-58, -28];
+  const skinF = mk('path', { d: 'M-74 -30C-76 -70 -44 -84 -14 -80L20 -70C60 -50 110 -30 168 -22C188 -18 192 0 178 6L-52 6C-68 4 -74 -10 -74 -30Z', fill: '#4b5f57', stroke: '#6f857b', 'stroke-width': 2, opacity: .9 }, g);
+  const skinS = limbEl(g, defs, '#4b5f57', 34, 50, '#6f857b');
+  skinS.e.setAttribute('opacity', .9);
+  mk('path', { d: 'M-58 -32C-60 -52 -40 -62 -20 -60L12 -54C28 -52 42 -42 60 -34L150 -16C162 -14 170 -10 176 -6L176 2L130 0L40 -8L-40 -4C-56 -6 -60 -18 -58 -32Z', fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .3), 'stroke-width': 2 }, g);
+  const tib = boneEl(g, 15), fem = boneEl(g, 18), cond = mk('circle', { r: 20, fill: ANAT.bone }, g);
+  const at = (P, v, k) => [P[0] + v[0] * k, P[1] + v[1] * k];
+  const geo = a => { const u = [Math.sin(rad(a)), -Math.cos(rad(a))], n = [-Math.cos(rad(a)), -Math.sin(rad(a))], K = at(A, u, L); return { u, n, K }; };
+  const att = a => {
+    const { u, n, K } = geo(a);
+    return { calf: [at(at(K, n, 26), u, 14), C], ta: [at(at(A, u, 230), n, -18), [34, -50]],
+      capF: [at(at(A, u, 22), n, -17), [26, -52]], capB: [at(at(A, u, 22), n, 17), [-28, -46]] };
+  };
+  const len = ([P, Q]) => Math.hypot(Q[0] - P[0], Q[1] - P[1]);
+  const capB = ligEl(g, { rest: len(att(14).capB), w: 5 }), capF = ligEl(g, { rest: len(att(-22).capF), w: 5 });
+  const ta = muscleEl(g, { rest: len(att(0).ta), w: 13, tendon: .25 });
+  const calf = muscleEl(g, { rest: len(att(0).calf), w: 30, tendon: .3 });
+  const rec = G(g);
+  const spin = G(rec), gto = G(rec);
+  mk('ellipse', { rx: 26, ry: 7, fill: '#f6dcd3', stroke: NERVE, 'stroke-width': 2.5 }, spin);
+  path(spin, 'M-10 0q2.5 -7 5 0t5 0t5 0t5 0', { stroke: NERVE, 'stroke-width': 2 });
+  path(gto, 'M-8 -10q8 3 0 6t0 6t0 6', { stroke: NERVE, 'stroke-width': 3 });
+  const jr = [0, 1, 2].map(() => mk('circle', { r: 4.5, fill: NERVE }, rec));
+  const sk = [-40, -6, 40, 90, 136].map(xx => mk('circle', { cx: xx, cy: 0, r: 5, fill: NERVE }, rec));
+  const nerve = path(g, '', { stroke: NERVE, 'stroke-width': 3, 'stroke-dasharray': '2 5', opacity: .9 });
+  const leg = { g, calf, ta, capF, capB, spin, gto, jr, sk, pts: {} };
+  leg.set = a => {
+    const { u, n, K } = geo(a), T0 = att(a);
+    skinS.set(at(A, u, -4), at(K, u, 10));
+    tib.set(at(A, u, 12), at(K, u, -10));
+    fem.set(at(K, u, 6), at(K, u, 90));
+    cond.setAttribute('cx', K[0].toFixed(1)); cond.setAttribute('cy', K[1].toFixed(1));
+    calf.set(...T0.calf); ta.set(...T0.ta); capF.set(...T0.capF); capB.set(...T0.capB);
+    const [P, Q] = T0.calf, M = [lerp(P[0], Q[0], .42), lerp(P[1], Q[1], .42)], J = [lerp(P[0], Q[0], .7), lerp(P[1], Q[1], .7)];
+    const ang = Math.atan2(Q[1] - P[1], Q[0] - P[0]) * 180 / Math.PI;
+    put(spin, { x: M[0], y: M[1], r: ang, s: 1 + 2.5 * Math.max(0, calf.strain) });
+    put(gto, { x: J[0], y: J[1], r: ang - 90 });
+    const [B0, B1] = T0.capB;
+    jr.forEach((d, i) => { d.setAttribute('cx', lerp(B0[0], B1[0], .25 + i * .25).toFixed(1)); d.setAttribute('cy', lerp(B0[1], B1[1], .25 + i * .25).toFixed(1)); });
+    const top = at(at(K, n, 46), u, 60);
+    nerve.setAttribute('d', `M${M[0].toFixed(1)} ${M[1].toFixed(1)}Q${at(M, n, 30)[0].toFixed(1)} ${at(M, n, 30)[1].toFixed(1)} ${top[0].toFixed(1)} ${top[1].toFixed(1)}`);
+    Object.assign(leg.pts, { M, J, K, cap: [lerp(B0[0], B1[0], .5), lerp(B0[1], B1[1], .5)], top, u, n });
+    return calf.strain;
+  };
+  leg.set(0);
+  if (t0 !== null) show(g, t0);
+  return leg;
+}
+
+let BOATS = [];
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Сенсорные системы', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 8 · Урок 87', { x: 800, y: 150, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Сенсорные системы равновесия', { x: 800, y: 235, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'зрение · тело · внутреннее ухо', { x: 800, y: 300, size: 42, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'и как нервная система выбирает, каким сигналам верить', 800, 385, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    eyeIcon(art, 560, 620, 1.6); footIcon(art, 800, 650, .9); earIcon(art, 1040, 620, 1.9);
+    T(art, 'зрение', { x: 560, y: 740, size: 26, weight: 700, fill: VIS_C, anchor: 'middle' });
+    T(art, 'соматосенсорная', { x: 800, y: 740, size: 26, weight: 700, fill: SOM_C, anchor: 'middle' });
+    T(art, 'вестибулярная', { x: 1040, y: 740, size: 26, weight: 700, fill: VEST_C, anchor: 'middle' });
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['ctrl', 'Управление равновесием', (m, D) => {
+    const p = panel(0);
+    txt(p, 'управление равновесием (balance control)', 800, 60, m('def'), { size: 28, weight: 700, anchor: 'middle' });
+    txt(p, 'обнаружить и объединить ощущения → выполнить мышечный ответ с учётом среды и задачи', 800, 102, m('def', 1.5), { size: 22, fill: COL.dim, anchor: 'middle' });
+    const circ = (cx, col, title, t0) => {
+      const g = G(p, { o: 0 });
+      mk('circle', { cx, cy: 500, r: 300, fill: col, 'fill-opacity': .08, stroke: col, 'stroke-width': 3 }, g);
+      T(g, title, { x: cx, y: 260, size: 27, weight: 700, fill: col, anchor: 'middle' });
+      show(g, t0);
+    };
+    circ(580, NERVE, 'нервная система', m('two'));
+    circ(1020, ANAT.muscle, 'опорно-двигательный аппарат', m('two', .6));
+    T(p, 'равновесие', { x: 800, y: 508, size: 24, weight: 700, fill: COL.good, anchor: 'middle', o: 0 });
+    show(p.lastChild, m('two', 1.2));
+    const item = (x, y, s, col, t0, anchor = 'start') => txt(p, s, x, y, t0, { size: 22, weight: 600, fill: col, anchor });
+    item(350, 340, 'сенсорная обработка', NERVE, m('ns'));
+    txt(p, 'зрение · вестибулярная · соматосенсорная', 350, 370, m('ns', 2), { size: 18, fill: COL.dim });
+    item(310, 430, 'сенсомоторная интеграция', NERVE, m('int'));
+    item(310, 480, '· адаптивные механизмы', COL.chalk, m('int', 2));
+    item(310, 520, '· упреждающие механизмы', COL.chalk, m('int', 3));
+    txt(p, 'поправки позы опережают движение', 330, 550, m('int', 4), { size: 18, fill: COL.dim });
+    item(330, 620, 'двигательные стратегии', NERVE, m('mot'));
+    txt(p, 'план → программа → выполнение', 350, 650, m('mot', 1), { size: 18, fill: COL.dim });
+    ['осанка', 'гибкость, объём движений', 'целостность суставов', 'мышечная работоспособность', 'чувствительность'].forEach((s, i) => item(900, 330 + i * 70, s, i === 3 ? ANAT.muscle : COL.chalk, m('msk', .5 + i * 1.6)));
+    txt(p, 'сила · мощность · выносливость', 920, 568, m('msk', 5.5), { size: 18, fill: COL.dim });
+    txt(p, 'касание, давление, вибрация,', 920, 638, m('msk', 7.5), { size: 18, fill: COL.dim });
+    txt(p, 'проприоцепция, кинестезия', 920, 662, m('msk', 7.5), { size: 18, fill: COL.dim });
+  }],
+
+  ['ctx', 'Условия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'условия (contextual effects)', 800, 60, m('ctx'), { size: 28, weight: 700, anchor: 'middle' });
+    const core = G(p, { o: 0 });
+    mk('circle', { cx: 720, cy: 420, r: 130, fill: NERVE, 'fill-opacity': .08, stroke: NERVE, 'stroke-width': 3 }, core);
+    mk('circle', { cx: 880, cy: 420, r: 130, fill: ANAT.muscle, 'fill-opacity': .08, stroke: ANAT.muscle, 'stroke-width': 3 }, core);
+    T(core, 'нервная', { x: 670, y: 412, size: 21, weight: 700, fill: NERVE, anchor: 'middle' });
+    T(core, 'система', { x: 670, y: 438, size: 21, weight: 700, fill: NERVE, anchor: 'middle' });
+    T(core, 'опорно-', { x: 932, y: 400, size: 20, weight: 700, fill: ANAT.muscle, anchor: 'middle' });
+    T(core, 'двигательный', { x: 932, y: 425, size: 20, weight: 700, fill: ANAT.muscle, anchor: 'middle' });
+    T(core, 'аппарат', { x: 932, y: 450, size: 20, weight: 700, fill: ANAT.muscle, anchor: 'middle' });
+    show(core, m('ctx'));
+    const C = [['среда', 'закрытая (предсказуемая) / открытая (с помехами)', 'env', 230, 170], ['опорная поверхность', 'твёрдая / скользкая, устойчивая / нет, обувь', 'surf', 1370, 170],
+      ['освещение', null, 'light', 230, 560], ['гравитация и инерция', null, 'grav', 1370, 560], ['задача', 'знакомая / новая, предсказуемая / нет, одна / несколько', 'task', 800, 700]];
+    C.forEach(([t, b, k, x, y]) => {
+      const w = 440, h = b ? 118 : 70;
+      infoCard(p, x - w / 2, y, w, h, t, b, COL.good, m(k), { size: 19 });
+      const tx = x < 800 ? 600 : x > 800 ? 1000 : 800, ty = y < 400 ? 320 : y > 650 ? 560 : 470;
+      arrowTo(p, [x + (x < 800 ? w / 2 - 20 : x > 800 ? -w / 2 + 20 : 0), y + (y > 650 ? 0 : h / 2)], [tx, ty], m(k, .3), { col: COL.good, w: 3 });
+    });
+    // demands outgrow the internal mechanisms
+    const gx = 1180, gy = 770, H = 90;
+    const box = G(p, { o: 0 });
+    T(box, 'требования', { x: gx - 120, y: gy + 26, size: 17, fill: COL.bad, anchor: 'middle' });
+    T(box, 'возможности', { x: gx + 40, y: gy + 26, size: 17, fill: COL.good, anchor: 'middle' });
+    mk('rect', { x: gx + 10, y: gy - H * .7, width: 60, height: H * .7, rx: 6, fill: mix(COL.good, COL.board, .5), stroke: COL.good, 'stroke-width': 2 }, box);
+    const dem = mk('rect', { x: gx - 150, width: 60, rx: 6, fill: mix(COL.bad, COL.board, .5), stroke: COL.bad, 'stroke-width': 2 }, box);
+    show(box, m('over'));
+    prog(q => { const h = H * lerp(.4, 1.15, q); dem.setAttribute('y', (gy - h).toFixed(1)); dem.setAttribute('height', h.toFixed(1)); }, m('over', 1), 2.5);
+    txt(p, 'падение возможно и при исправных системах', 1350, 860, m('over', 3), { size: 20, weight: 700, fill: COL.bad, anchor: 'middle' });
+  }],
+
+  ['vis', 'Зрение', (m, D) => {
+    const p = panel(0);
+    txt(p, 'зрительная система (visual system)', 800, 60, m('sen'), { size: 28, weight: 700, anchor: 'middle', fill: VIS_C });
+    pillRow(p, ['зрение', 'соматосенсорная', 'вестибулярная'], 800, 106, m('sen', 1), { col: [VIS_C, SOM_C, VEST_C], size: 20, gap: .5 });
+    // the head, its gaze and the room
+    const room = G(p, { o: 0 });
+    mk('rect', { x: 560, y: 220, width: 80, height: 60, rx: 6, fill: 'none', stroke: COL.dim, 'stroke-width': 3 }, room);
+    path(room, 'M560 250H640M600 220V280', { stroke: COL.dim, 'stroke-width': 2 });
+    path(room, 'M80 520H700', { stroke: COL.faint, 'stroke-width': 3, 'stroke-dasharray': '10 8' });
+    T(room, 'горизонт', { x: 700, y: 548, size: 18, fill: COL.dim, anchor: 'end' });
+    show(room, m('vis'));
+    const h = headSide(p, 250, 400, 70, m('vis'));
+    const gaze = path(p, '', { stroke: VIS_C, 'stroke-width': 3, 'stroke-dasharray': '8 6' });
+    put(gaze, { o: 0 }); show(gaze, m('vis', .5));
+    const upd = () => { const b0 = st(h.base), s0 = st(h.g), [ex, ey] = rotPt(h.eye[0], h.eye[1], s0.r || 0); gaze.setAttribute('d', `M${(b0.x + s0.x + ex + 8).toFixed(1)} ${(b0.y + s0.y + ey).toFixed(1)}L600 250`); };
+    upd();
+    txt(p, '1 · положение головы относительно окружения', 80, 620, m('vis', 1), { size: 21, weight: 600, fill: VIS_C });
+    // 2: the head tilts; vision keeps the gaze level
+    prog(q => { put(h.g, { r: 14 * Math.sin(q * Math.PI) }); upd(); }, m('lvl'), 2.5);
+    txt(p, '2 · ориентация головы: взгляд остаётся горизонтальным', 80, 660, m('lvl'), { size: 21, weight: 600, fill: VIS_C });
+    // 3: the head moves, the room slides the other way
+    const flow = G(p, { o: 0 });
+    [0, 1, 2].forEach(i => path(flow, `M${620 - i * 10} ${330 + i * 50}H${540 - i * 10}M${556 - i * 10} ${320 + i * 50}L${540 - i * 10} ${330 + i * 50}L${556 - i * 10} ${340 + i * 50}`, { stroke: COL.dim, 'stroke-width': 3 }));
+    T(flow, 'предметы — назад', { x: 580, y: 470, size: 19, fill: COL.dim, anchor: 'middle' });
+    show(flow, m('mv', .6));
+    prog(q => { put(h.base, { x: 60 * q }); upd(); }, m('mv'), 1.6);
+    txt(p, '3 · направление и скорость движений головы', 80, 700, m('mv'), { size: 21, weight: 600, fill: VIS_C });
+    // fixing the gaze: less sway (shape only)
+    const cx0 = 860, cy0 = 330;
+    const ch = G(p, { o: 0 });
+    roundBox(ch, cx0, 150, 680, 330, EDGE, PANEL, 2);
+    T(ch, 'взгляд фиксирован на предмете', { x: cx0 + 340, y: 190, size: 22, weight: 700, fill: VIS_C, anchor: 'middle' });
+    const wob = (k, x0, col) => { let d = ''; for (let i = 0; i <= 120; i++) { const t = i / 120, y = cy0 + 30 * k * (Math.sin(t * 19) * .6 + Math.sin(t * 43 + 1) * .4); d += (i ? 'L' : 'M') + (x0 + t * 280).toFixed(1) + ' ' + y.toFixed(1); } return path(ch, d, { stroke: col, 'stroke-width': 3 }); };
+    wob(1, cx0 + 40, COL.dim); wob(.4, cx0 + 360, VIS_C);
+    T(ch, 'без фиксации', { x: cx0 + 180, y: cy0 + 90, size: 19, fill: COL.dim, anchor: 'middle' });
+    T(ch, 'с фиксацией', { x: cx0 + 500, y: cy0 + 90, size: 19, fill: VIS_C, anchor: 'middle' });
+    T(ch, 'покачивание тела', { x: cx0 + 340, y: cy0 + 130, size: 18, fill: COL.dim, anchor: 'middle' });
+    show(ch, m('fix'));
+    pill(p, 'схема', cx0 + 620, 175, m('fix'), { col: COL.dim, size: 17 });
+    txt(p, 'когда проприоцепция или вестибулярные сигналы ненадёжны', cx0 + 340, 506, m('fix', 1), { size: 20, fill: COL.chalk, anchor: 'middle' });
+    // the bus: an illusion of moving
+    const GY = 820, bus = G(p, { o: 0 });
+    mk('rect', { x: 1010, y: 640, width: 420, height: 150, rx: 18, fill: mix('#e8c25a', COL.board, .35), stroke: '#e8c25a', 'stroke-width': 3 }, bus);
+    [0, 1, 2, 3].forEach(i => mk('rect', { x: 1030 + i * 98, y: 660, width: 80, height: 54, rx: 6, fill: mix('#9fc8e0', COL.board, .45) }, bus));
+    [1080, 1360].forEach(cx => mk('circle', { cx, cy: 800, r: 24, fill: '#2c353d', stroke: COL.dim, 'stroke-width': 3 }, bus));
+    show(bus, m('bus'));
+    tw(bus, { x: 70 }, m('bus', 1), 2.5);
+    ground(p, 820, 1540, GY, m('bus'));
+    const f = fig(p, { x: 900, y: GY - 182 * .62, s: .62, o: 0 });
+    show(f.g, m('bus'));
+    const [ax] = onStage(f, 'AN');
+    poseTo(f, LEAN(-6), m('bus', 1.4), 1.2, io, ['AN', ax, GY]);
+    txt(p, 'кажется, что движешься сам', 900, 560, m('bus', 2), { size: 21, weight: 700, fill: COL.bad, anchor: 'middle' });
+    arrowTo(p, [1240, 625], [1360, 625], m('bus', 1), { col: '#e8c25a', w: 4 });
+  }],
+
+  ['som', 'Соматосенсорная система', (m, D) => {
+    const p = panel(0);
+    txt(p, 'соматосенсорная система (somatosensory system)', 800, 56, m('som'), { size: 28, weight: 700, anchor: 'middle', fill: SOM_C });
+    txt(p, 'положение и движение частей тела — друг относительно друга и относительно опоры', 800, 96, m('som', 1), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const leg = calfModel(p, 300, 830, 1.15, m('som'));
+    put(leg.spin, { o: 0 }); put(leg.gto, { o: 0 }); leg.jr.forEach(d => put(d, { o: 0 })); leg.sk.forEach(d => put(d, { o: 0 }));
+    // the shank tilts forward over the foot: the calf, the spindle and the back of the capsule lengthen
+    const pulses = [0, 1, 2, 3].map(() => mk('circle', { r: 6, fill: NERVE, opacity: 0 }, leg.g));
+    prog(q => {
+      const a = 18 * cyc(q, 2.5), str = leg.set(a);
+      pulses.forEach((d, i) => {
+        const k = ((q * (6 + 30 * Math.max(0, str)) + i / 4) % 1), P = leg.pts.M, Q = leg.pts.top;
+        d.setAttribute('cx', lerp(P[0], Q[0], k).toFixed(1)); d.setAttribute('cy', lerp(P[1], Q[1], k).toFixed(1));
+        d.setAttribute('opacity', Math.max(0, str) > .01 ? .9 : .25);
+      });
+    }, m('sp'), Math.max(3, D - m('sp')), lin);
+    show(leg.spin, m('sp', .3)); show(leg.gto, m('sp', 1.5));
+    const lab = (s, x, y, col, t0, anchor = 'start') => txt(p, s, x, y, t0, { size: 20, weight: 700, fill: col, anchor });
+    lab('мышечное веретено (muscle spindle) — длина', 560, 250, SOM_C, m('sp', .3));
+    lab('сухожильный орган Гольджи — напряжение', 560, 285, SOM_C, m('sp', 1.5));
+    leg.jr.forEach((d, i) => show(d, m('jr', i * .2)));
+    lab('суставные рецепторы — положение, движение, нагрузка', 560, 330, SOM_C, m('jr'));
+    leg.sk.forEach((d, i) => show(d, m('skin', i * .15)));
+    lab('кожа стопы — вибрация, касание, давление, растяжение', 560, 375, SOM_C, m('skin'));
+    txt(p, 'икроножная растягивается, задняя капсула голеностопа натягивается', 560, 420, m('sp', 3), { size: 19, fill: ANAT.taut });
+    NOTE(p, 1420, 413, m('sp', 3));
+    infoCard(p, 560, 460, 980, 84, 'главные сигналы на твёрдой, ровной, неподвижной опоре', null, COL.good, m('firm'), { size: 21 });
+    // a moving deck and a ramp: the support misleads
+    const bt = G(p);
+    const sc = (x, label, t0) => {
+      const g = G(bt, { o: 0 }), deck = G(g, { x, y: 810 });
+      if (label === 'палуба') path(g, `M${x - 150} 842q25 -12 50 0t50 0t50 0t50 0t50 0t50 0`, { stroke: '#7fb0d0', 'stroke-width': 4 });
+      path(deck, `M-150 0H150`, { stroke: COL.dim, 'stroke-width': 6 });
+      const f = fig(deck, { x: 0, y: -182 * .45, s: .45 });
+      T(g, label, { x, y: 872, size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      show(g, t0);
+      return { deck, f, x };
+    };
+    const b1 = sc(820, 'палуба', m('boat')), b2 = sc(1190, 'пандус', m('boat', 1.2));
+    put(b1.deck, { x: 820, y: 810 }); put(b2.deck, { x: 1190, y: 810 });
+    // the deck tilts; the body stays upright, so the ankles bend: the support says nothing true about vertical
+    const tilt = (b, deg) => { put(b.deck, { r: deg }); b.f.set({ t: -deg, hN: 0, hF: 0, kN: 0, kF: 0, fN: -deg, fF: -deg, aN: 8 - 2 * deg, aF: -6 - 2 * deg }); plant(b.f, 'AN', 0, 0); };
+    prog(q => tilt(b1, 9 * Math.sin(q * 9)), m('boat'), Math.max(3, D - m('boat')), lin);
+    prog(q => tilt(b2, -12 * Math.min(1, q * 4)), m('boat', 1.2), 3);
+    put(txt(bt, 'сигналы опоры вводят в заблуждение — нужны другие системы', 1050, 590, m('boat', 2), { size: 20, weight: 700, fill: COL.bad, anchor: 'middle' }), {});
+    hide(bt, m('js'));
+    // what gives the conscious joint position sense
+    infoCard(p, 560, 570, 980, 280, 'чувство положения сустава', 'дают в основном мышечные веретёна: анестезия тканей сустава и эндопротезирование его не нарушают. Суставные рецепторы помогают гамма-системе держать тонус и жёсткость мышц — для упреждающих поправок и ответа на толчки', SOM_C, m('js'), { size: 21 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-sense', prompt: ['Какая система?'],
+    build: grid([
+      { parts: ['Сообщает положение головы относительно окружающих предметов'], ans: ['vis'], why: 'Это зрение.' },
+      { parts: ['Чувствует длину и напряжение мышцы'], ans: ['som'], why: 'Мышечные веретёна и сухожильные органы Гольджи — соматосенсорная система.' },
+      { parts: ['Улавливает угловое ускорение головы'], ans: ['vest'], why: 'Полукружные каналы — вестибулярная система.' },
+      { parts: ['Обманывает, когда рядом трогается автобус'], ans: ['vis'], why: 'Иллюзия собственного движения — зрительная.' },
+      { parts: ['Главная на твёрдой, ровной, неподвижной опоре'], ans: ['som'], why: 'Соматосенсорные сигналы.' },
+    ], [['vis', 'Зрение', VIS_C], ['som', 'Соматосенсорная', SOM_C], ['vest', 'Вестибулярная', VEST_C]], { multi: false, text: true }),
+  }], done) }],
+
+  ['vest', 'Вестибулярная система', (m, D) => {
+    const p = panel(0);
+    txt(p, 'вестибулярная система (vestibular system)', 800, 56, m('vest'), { size: 28, weight: 700, anchor: 'middle', fill: VEST_C });
+    txt(p, 'положение и движение головы относительно гравитации и сил инерции', 800, 96, m('vest', 1), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const lab = labyrinth(p, 330, 320, 1.2, m('vest', .5));
+    const L = (s, x, y, col, t0, anchor = 'start', size = 20) => txt(p, s, x, y, t0, { size, weight: 700, fill: col, anchor });
+    L('полукружные каналы', 470, 170, VEST_C, m('scc'));
+    L('угловое ускорение', 470, 198, COL.chalk, m('scc', 1), 'start', 18);
+    L('быстрые движения', 470, 222, COL.chalk, m('scc', 1), 'start', 18);
+    prog(q => lab.flow(q * 3), m('scc', .5), 3.5);
+    L('маточка и мешочек', 90, 470, VEST_C, m('oto'));
+    L('улитка — слух', 500, 440, COL.dim, m('vest', .5), 'start', 17);
+    // the otolith organ: the heavy layer slides when the head tilts
+    const mac = macula(p, 330, 620, 1.4, m('oto', .5));
+    prog(q => mac.set(25 * Math.sin(q * Math.PI * 2)), m('oto', 1), 4);
+    L('отолиты: линейное ускорение и положение относительно гравитации', 330, 760, COL.chalk, m('oto', 1), 'middle', 18);
+    L('медленные движения — покачивание в стойке', 330, 790, COL.chalk, m('oto', 2), 'middle', 18);
+    // a nod and a forward bend look the same to the inner ear; the neck tells them apart
+    const GY = 690, S = .72, pos = [[980, { hd: 34 }], [1300, { t: 34, hN: 38, hF: 30, aN: 46, aF: 30 }]];
+    ground(p, 860, 1520, GY, m('nod'));
+    const figs = pos.map(([x, pose], i) => { const f = fig(p, { x, y: GY - 182 * S, s: S, o: 0 }); show(f.g, m('nod', i * .5)); const [ax] = onStage(f, 'AN'); poseTo(f, pose, m('nod', 1 + i * .5), 1.2, io, ['AN', ax, GY]); return f; });
+    txt(p, 'кивок', 980, 730, m('nod'), { size: 21, weight: 700, anchor: 'middle' });
+    txt(p, 'наклон туловища', 1300, 730, m('nod', .5), { size: 21, weight: 700, anchor: 'middle' });
+    figs.forEach((f, i) => { const e = G(p, { o: 0 }); earIcon(e, 0, 0, .55); prog(() => { const [x, y] = onStage(f, 'Hc'); put(e, { x: x - 4, y: y + 2 }); }, m('nod', 1.01 + i * .5), 1.4); show(e, m('nod', 2.4)); });
+    txt(p, 'внутреннему уху — одинаково: голова наклонена', 1150, 790, m('nod', 2.4), { size: 20, weight: 700, fill: VEST_C, anchor: 'middle' });
+    txt(p, 'шея согнута', 980, 400, m('neck'), { size: 20, weight: 700, fill: SOM_C, anchor: 'middle' });
+    txt(p, 'шея прямая', 1300, 400, m('neck', .4), { size: 20, weight: 700, fill: SOM_C, anchor: 'middle' });
+    txt(p, 'механорецепторы шеи различают', 1150, 826, m('neck', 1), { size: 20, weight: 700, fill: SOM_C, anchor: 'middle' });
+  }],
+
+  ['refl', 'Вестибулярные рефлексы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'вестибулярные ядра → поза и взгляд', 800, 60, m('path'), { size: 28, weight: 700, anchor: 'middle', fill: VEST_C });
+    // vestibulospinal reflex: the body tilts, antigravity muscles straighten it
+    const GY = 820, S = 1, X0 = 420;
+    ground(p, 180, 700, GY, m('vsr'));
+    const f = fig(p, { x: X0, y: GY - 182 * S, s: S, o: 0 });
+    show(f.g, m('path'));
+    const mus = ['gastroc', 'quads', 'parasp'].map(k => muscleOn(f, ...MUSCLE[k], { w: k === 'parasp' ? 12 : 13, after: k === 'parasp' ? 'torso' : k === 'quads' ? 'thN' : 'shN' }));
+    const cord = path(p, '', { stroke: NERVE, 'stroke-width': 4 });
+    put(cord, { o: 0 });
+    const [ax] = onStage(f, 'AN');
+    const upd = () => { const [hx, hy] = onStage(f, 'Hc'), [sx, sy] = onStage(f, 'Sh'), [px, py] = onStage(f, 'H'); cord.setAttribute('d', `M${(hx - 10).toFixed(1)} ${hy.toFixed(1)}L${(sx - 22).toFixed(1)} ${sy.toFixed(1)}L${(px - 22).toFixed(1)} ${py.toFixed(1)}`); };
+    f.onSet.push(upd); upd();
+    show(cord, m('vsr'));
+    prog(q => {
+      const tilt = q < .35 ? 9 * io(q / .35) : 9 * (1 - io(Math.min(1, (q - .35) / .4)));
+      f.set(LEAN(tilt)); plant(f, 'AN', ax, GY);
+      const a = q > .3 && q < .85 ? .9 : 0;
+      mus.forEach(mu => mu.act(a));
+    }, m('vsr', .6), 4.5, lin);
+    txt(p, 'вестибулоспинальный рефлекс', X0, 150, m('vsr'), { size: 24, weight: 700, fill: VEST_C, anchor: 'middle' });
+    txt(p, 'к антигравитационным мышцам', X0, 184, m('vsr', 1), { size: 20, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'на всех уровнях спинного мозга', X0, 212, m('vsr', 1), { size: 20, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'выправляет позу', X0, 870, m('vsr', 2.5), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    // vestibulo-ocular reflex: the head turns, the eyes turn back — the gaze stays on the target
+    const fc = G(p, { x: 1180, y: 470, o: 0 });
+    const hgid = 'vf' + (++SHADE_ID), defs = mk('defs', {}, fc), gr = mk('radialGradient', { id: hgid, cx: .4, cy: .32, r: .8 }, defs);
+    [[0, '#f4ede0'], [.6, SKIN], [1, '#8f877a']].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, gr));
+    mk('ellipse', { rx: 120, ry: 150, fill: `url(#${hgid})`, stroke: '#6f685d', 'stroke-width': 2.5 }, fc);
+    const feat = G(fc), eyes = [-1, 1].map(k => { const e = G(feat, { x: 46 * k, y: -20 }); mk('ellipse', { rx: 26, ry: 15, fill: '#f2efe6', stroke: '#6f685d', 'stroke-width': 2 }, e); const pu = mk('circle', { r: 10, fill: VIS_C }, e); return pu; });
+    mk('path', { d: 'M0 -4L-12 40H12Z', fill: '#cfc7b8', stroke: '#6f685d', 'stroke-width': 2 }, feat);
+    path(feat, 'M-30 80Q0 94 30 80', { stroke: '#6f685d', 'stroke-width': 3 });
+    show(fc, m('vor'));
+    const tgt = G(p, { o: 0 });
+    mk('circle', { cx: 1180, cy: 200, r: 16, fill: 'none', stroke: COL.task, 'stroke-width': 4 }, tgt);
+    mk('circle', { cx: 1180, cy: 200, r: 5, fill: COL.task }, tgt);
+    T(tgt, 'цель взгляда', { x: 1210, y: 207, size: 19, fill: COL.task });
+    show(tgt, m('vor'));
+    prog(q => { const r = Math.sin(q * Math.PI * 4); put(feat, { x: 46 * r }); eyes.forEach(e => e.setAttribute('cx', (-14 * r).toFixed(1))); }, m('vor', .8), Math.max(3, D - m('vor') - .8), lin);
+    txt(p, 'вестибулоокулярный рефлекс', 1180, 690, m('vor'), { size: 24, weight: 700, fill: VEST_C, anchor: 'middle' });
+    txt(p, 'голова поворачивается — глаза в обратную сторону', 1180, 724, m('vor', 1.5), { size: 20, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'взгляд стабилен', 1180, 760, m('vor', 2.5), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['org', 'Сенсорная организация', (m, D) => {
+    const p = panel(0);
+    txt(p, 'сенсорная организация (sensory organization)', 800, 56, m('org'), { size: 28, weight: 700, anchor: 'middle' });
+    // three inputs feed the hub
+    const IN = [[VIS_C, 'зрение', 250], [SOM_C, 'соматосенсорная', 450], [VEST_C, 'вестибулярная', 650]];
+    const hub = G(p, { o: 0 });
+    mk('rect', { x: 760, y: 300, width: 420, height: 250, rx: 26, fill: PANEL, stroke: NERVE, 'stroke-width': 3 }, hub);
+    ['мозжечок', 'базальные ганглии', 'дополнительная', 'моторная область'].forEach((s, i) => T(hub, s, { x: 970, y: 370 + i * 40, size: 23, weight: 600, fill: NERVE, anchor: 'middle' }));
+    show(hub, m('cns'));
+    const lines = IN.map(([col, lab, y], i) => {
+      const g = G(p, { o: 0 });
+      if (i === 0) eyeIcon(g, 140, y, 1.1); else if (i === 1) footIcon(g, 140, y + 20, .5); else earIcon(g, 140, y, 1.3);
+      T(g, lab, { x: 200, y: i === 2 ? y + 36 : y - 22, size: 22, weight: 700, fill: col });
+      const ln = path(g, `M200 ${y}C480 ${y} 560 ${425} 760 ${425}`, { stroke: col, 'stroke-width': 8 });
+      show(g, m('org', .3 + i * .3));
+      return { g, ln };
+    });
+    const outG = G(p, { o: 0 });
+    path(outG, 'M1180 425H1290M1276 415L1290 425L1276 435', { stroke: COL.good, 'stroke-width': 5 });
+    T(outG, 'единое ощущение', { x: 1300, y: 418, size: 22, weight: 700, fill: COL.good });
+    T(outG, 'положения и движения', { x: 1300, y: 446, size: 22, weight: 700, fill: COL.good });
+    show(outG, m('org', 1.5));
+    // speed of processing: the order only
+    const sp = G(p, { o: 0 });
+    T(sp, 'скорость обработки', { x: 80, y: 770, size: 21, weight: 700, fill: COL.chalk });
+    [[SOM_C, 'соматосенсорные', 1], [VIS_C, 'зрительные', 2], [VEST_C, 'вестибулярные', 3]].forEach(([col, s, k], i) => {
+      T(sp, `${k}. ${s}`, { x: 300 + i * 270, y: 770, size: 21, weight: 700, fill: col });
+    });
+    show(sp, m('speed'));
+    pill(p, 'только порядок', 1260, 763, m('speed', 1), { col: COL.dim, size: 17 });
+    // one input is wrong: it is suppressed, the other two carry the weight
+    const foam = G(p, { o: 0 });
+    mk('rect', { x: 60, y: 485, width: 120, height: 26, rx: 9, fill: mix(FOAM, COL.board, .45), stroke: FOAM, 'stroke-width': 2 }, foam);
+    T(foam, 'поролон', { x: 120, y: 538, size: 18, fill: FOAM, anchor: 'middle' });
+    show(foam, m('sup'));
+    tw(lines[1].ln, { 'a_stroke-width': 2, c_stroke: COL.bad }, m('sup', .5), .8);
+    tw(lines[0].ln, { 'a_stroke-width': 13 }, m('sup', 1.5), .8);
+    tw(lines[2].ln, { 'a_stroke-width': 13 }, m('sup', 1.5), .8);
+    const x = G(p, { o: 0 });
+    cross(x, 520, 446, 18, m('sup', .6));
+    show(x, m('sup', .5));
+    txt(p, 'неточный вход подавлен — опора на два других', 800, 640, m('sup', 2), { size: 23, weight: 700, fill: COL.bad, anchor: 'middle' });
+    txt(p, 'большинство хорошо компенсируют нарушение одной системы → основа многих программ лечения', 800, 830, m('comp'), { size: 23, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['types', 'Типы контроля', (m, D) => {
+    const p = panel(0);
+    txt(p, 'типы контроля равновесия', 800, 56, m('types'), { size: 28, weight: 700, anchor: 'middle' });
+    const GY = 410, S = .6;
+    const card3 = (x, title, sub, col, t0) => { const g = G(p, { o: 0 }); roundBox(g, x, 90, 480, 400, col, PANEL, 2.5); T(g, title, { x: x + 240, y: 130, size: 24, weight: 700, fill: col, anchor: 'middle' }); T(g, sub, { x: x + 240, y: 462, size: 19, fill: COL.chalk, anchor: 'middle' }); show(g, t0); return g; };
+    card3(60, 'статический', 'удержать позу в покое', COL.good, m('st'));
+    card3(560, 'динамический', 'опора или тело движется', COL.whole, m('dy'));
+    card3(1060, 'автоматические реакции', 'неожиданный внешний толчок', COL.task, m('re'));
+    // static: standing and sitting still
+    const a = fig(p, { x: 220, y: GY - 182 * S, s: S, o: 0 }); show(a.g, m('st', .3));
+    const b = fig(p, { x: 380, y: 0, s: S, o: 0, pose: { ...SIT, t: 4, aN: 10, aF: 10, eN: 60, eF: 60 } });
+    plant(b, 'AN', 430, GY); show(b.g, m('st', .6));
+    const [bhx, bhy] = onStage(b, 'H');
+    const stool = path(p, `M${bhx - 40} ${bhy + 14}H${bhx + 30}M${bhx - 32} ${bhy + 14}V${GY}M${bhx + 22} ${bhy + 14}V${GY}`, { stroke: COL.dim, 'stroke-width': 5 }, { o: 0 });
+    p.insertBefore(stool, b.g); show(stool, m('st', .6));
+    ground(p, 100, 500, GY, m('st'));
+    // dynamic: rising from a chair, then walking
+    const c = fig(p, { x: 700, y: 0, s: S, o: 0, pose: { ...SIT, aN: 30, aF: 30 } });
+    plant(c, 'AN', 740, GY);
+    const [chx, chy] = onStage(c, 'H');
+    const ch = chair(p, chx, chy + 14, GY, m('dy'));
+    show(c.g, m('dy'));
+    poseTo(c, { ...STAND }, m('dy', 1), 1.4, io, ['AN', 740, GY]);
+    walk(c, m('dy', 2.6), 3, { cycles: 3, dx: 220 });
+    ground(p, 600, 1000, GY, m('dy'));
+    // automatic reactions: the bus floor jerks, the rider steps
+    const bus = G(p, { o: 0 });
+    mk('rect', { x: 1110, y: GY, width: 340, height: 14, rx: 4, fill: mix('#e8c25a', COL.board, .4), stroke: '#e8c25a', 'stroke-width': 2 }, bus);
+    show(bus, m('re'));
+    const d = fig(p, { x: 1290, y: GY - 182 * S, s: S, o: 0 }); show(d.g, m('re'));
+    const [dax] = onStage(d, 'AN');
+    prog(q => {
+      const dx = 60 * out(Math.min(1, q * 2.5)), lean = q < .3 ? -10 * out(q / .3) : -10 * (1 - io(Math.min(1, (q - .3) / .5)));
+      put(bus, { x: dx }); d.set(LEAN(lean)); plant(d, 'AN', dax + dx, GY);
+    }, m('re', 1), 2.4, lin);
+    arrowTo(p, [1180, 360], [1250, 360], m('re', 1), { col: '#e8c25a', w: 4 });
+    // feedforward: back and leg muscles switch on before the pull
+    const fg = G(p, { o: 0 });
+    roundBox(fg, 60, 520, 980, 340, EDGE, PANEL, 2);
+    T(fg, 'упреждающий контроль (прямая связь)', { x: 440, y: 566, size: 23, weight: 700, fill: NERVE });
+    show(fg, m('ff'));
+    const GY2 = 830, e = fig(p, { x: 220, y: GY2 - 182 * .78, s: .78, o: 0 });
+    show(e.g, m('ff'));
+    const door = G(p, { o: 0 });
+    path(door, `M392 ${GY2}V600`, { stroke: COL.dim, 'stroke-width': 6 });
+    const handle = mk('rect', { x: 352, y: 680, width: 34, height: 14, rx: 5, fill: COL.task }, door);
+    show(door, m('ff'));
+    reach(e, 'N', 360, 687);
+    const em = ['hamstrings', 'gastroc', 'parasp'].map(k => muscleOn(e, ...MUSCLE[k], { w: k === 'parasp' ? 11 : 12, after: k === 'parasp' ? 'torso' : k === 'gastroc' ? 'shN' : 'thN' }));
+    // the timeline: postural muscles start first, the arm pulls after
+    const tl = G(p, { o: 0 }), X0 = 470, W = 520;
+    path(tl, `M${X0} 790H${X0 + W}`, { stroke: COL.dim, 'stroke-width': 2 });
+    T(tl, 'время →', { x: X0 + W, y: 815, size: 17, fill: COL.dim, anchor: 'end' });
+    const bar = (y, x1, x2, col, s) => { mk('rect', { x: X0 + x1 * W, y, width: (x2 - x1) * W, height: 30, rx: 8, fill: mix(col, COL.board, .4), stroke: col, 'stroke-width': 2 }, tl); T(tl, s, { x: X0 + x1 * W + 10, y: y + 22, size: 18, weight: 700, fill: COL.chalk }); };
+    bar(620, .1, .95, '#ff5a3c', 'задние мышцы ног, разгибатели спины');
+    bar(690, .35, .95, COL.task, 'рука тянет ручку');
+    show(tl, m('ant'));
+    const qT = m('ant', .5);
+    prog(q => { em.forEach(mu => mu.act(q > .1 ? .9 : 0)); const pull = q > .35 ? io(Math.min(1, (q - .35) / .4)) : 0; e.set({ t: -5 * pull }); reach(e, 'N', 360, 687); }, qT, 3, lin);
+    txt(p, '+ планирование обхода препятствий', 520, 760, m('ant', 4), { size: 19, fill: COL.dim });
+    // closed loop: sitting on a ball
+    const cl = G(p, { o: 0 });
+    roundBox(cl, 1060, 520, 480, 340, EDGE, PANEL, 2);
+    T(cl, 'обратная связь', { x: 1300, y: 560, size: 23, weight: 700, fill: COL.whole, anchor: 'middle' });
+    T(cl, 'точные движения: мяч, бревно', { x: 1300, y: 594, size: 19, fill: COL.chalk, anchor: 'middle' });
+    path(cl, 'M1110 828H1490', { stroke: COL.faint, 'stroke-width': 3 });
+    path(cl, 'M1440 650A70 70 0 1 1 1440 780', { stroke: COL.whole, 'stroke-width': 4 });
+    path(cl, 'M1426 772L1440 780L1434 764', { stroke: COL.whole, 'stroke-width': 4 });
+    T(cl, 'ощущения → поправка', { x: 1300, y: 640, size: 18, fill: COL.whole, anchor: 'middle' });
+    show(cl, m('cl'));
+    const fb = fig(p, { x: 1280, y: 0, s: .62, o: 0, pose: { ...SIT, t: 0, aN: 70, aF: 70, eN: 10, eF: 10, hN: 88, hF: 88, kN: 92, kF: 92, fN: 4, fF: 4 } });
+    plant(fb, 'AN', 1340, 828);
+    const [bx, by] = onStage(fb, 'H'), br = (828 - by - 6) / 2;
+    const ball = mk('circle', { cx: bx - 4, cy: 828 - br, r: br, fill: mix('#e07a5f', COL.board, .45), stroke: '#e07a5f', 'stroke-width': 3 }, cl);
+    show(fb.g, m('cl'));
+    prog(q => fb.set({ t: 6 * Math.sin(q * 14) }), m('cl'), Math.max(3, D - m('cl')), lin);
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-types', prompt: ['Какой контроль равновесия нужен?'],
+    build: grid([
+      { parts: ['Стоять в очереди'], ans: ['st'], why: 'Устойчивая поза в покое — статический контроль.' },
+      { parts: ['Встать со стула'], ans: ['dy'], why: 'Тело движется на неподвижной опоре — динамический.' },
+      { parts: ['Устоять, когда автобус резко тронулся'], ans: ['re'], why: 'Неожиданный внешний толчок — автоматические реакции.' },
+      { parts: ['Идти по коридору'], ans: ['dy'], why: 'Ходьба — динамический контроль.' },
+      { parts: ['Сидеть на стуле'], ans: ['st'], why: 'Поза в покое — статический.' },
+    ], [['st', 'Статический', COL.good], ['dy', 'Динамический', COL.whole], ['re', 'Автоматические реакции', COL.task]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Равновесие — нервная система + опорно-двигательный аппарат; условия повышают или снижают требования.', 'w1'],
+     ['Зрение — голова и окружение; соматосенсорная — части тела и опора; вестибулярная — голова и гравитация.', 'w2'],
+     ['Неточный вход подавляется, работают два других — сенсорная организация.', 'w3'],
+     ['Контроль: статический, динамический, реактивный; упреждающий включает мышцы заранее.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-foam', prompt: ['Пациент стоит на толстом поролоне с закрытыми глазами. На сигналы какой системы ему приходится опираться?'],
+    build: choice([
+      ['Вестибулярной'],
+      ['Зрительной'],
+      ['Соматосенсорной'],
+      ['Ни одной — устоять невозможно'],
+    ], 0, 'Глаза закрыты, а поролон искажает сигналы опоры: точной остаётся только вестибулярная информация.',
+    [null, 'Глаза закрыты — зрительных сигналов нет.', 'Поролон искажает сигналы о положении тела относительно опоры.', 'Вестибулярная система работает; многие люди так стоят, хотя и труднее.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-neuro', prompt: ['У пациента снижена чувствительность стоп (полинейропатия). Что, по материалу урока, поможет ему стоять устойчивее?'],
+    build: choice([
+      ['Фиксировать взгляд на неподвижном предмете'],
+      ['Закрыть глаза, чтобы сосредоточиться на ощущениях стоп'],
+      ['Встать на мягкий коврик'],
+      ['Быстро поворачивать голову, чтобы «разбудить» вестибулярный аппарат'],
+    ], 0, 'Когда проприоцептивные сигналы ненадёжны, фиксация взгляда на предмете повышает устойчивость.',
+    [null, 'Так он лишится зрения — одной из двух оставшихся надёжных систем.', 'Мягкая опора ещё больше искажает и без того сниженные сигналы стоп.', 'Быстрые движения головы не заменят сигналов стоп и скорее затруднят задачу.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

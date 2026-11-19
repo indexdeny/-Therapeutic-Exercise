@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Показания к операции и подготовка — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 113, title: 'Показания к операции и подготовка к ней', minutes: 8, language: 'ru', next: '../ch114/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch113/lupa.ru.json
+const LUPA = [
+  {"beat": "intro", "fig": 0, "target": "biceps", "zoom": 3},
+  {"beat": "prehab", "fig": 0, "target": "biceps", "to": "rooks", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch113/cards.ru.json
+const CARDS_SHORT = {
+  "знать, чего ждать\nэто помогает понять день операции и первые дни после неё и снижает тревогу": "понятен день операции → снижает тревогу",
+  "учить заранее\nпока не мешают боль после операции и сонливость от обезболивающих": "пока не мешают боль и сонливость",
+  "но доказательства ограничены\nобзор 18 исследований перед эндопротезированием: не меньше тревоги, боли и осложнений, не лучше функция": "обзор 18 исследований: эффекта нет",
+};
+// cards-short end
+
+const HEAD = COL.whole, PAIN = '#ff5a3c', SURG = '#7fc8c2', ICE = '#a8d8ea';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function numLine(p, n, str, x, y, col, t0, { size = 22, maxW = 860 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 20, cy: y - 8, r: 19, fill: col }, g);
+  T(g, String(n), { x: x + 20, y: y, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 54, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A scalpel (blade to the right), centre at (x, y).
+function scalpel(p, x, y, s = 1, t0 = null) {
+  const g = G(p, { x, y, s, o: 0 });
+  mk('rect', { x: -90, y: -9, width: 100, height: 18, rx: 6, fill: '#9fb0bf', stroke: '#5f6b72', 'stroke-width': 2 }, g);
+  path(g, 'M10 -8L44 -8Q74 -6 92 6Q60 10 10 8Z', { fill: '#dfe6ea', stroke: '#7d8a93', 'stroke-width': 2 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// A figure on two crutches (side view), the near leg held off the floor.
+function crutchFig(p, x, gy, s, t0) {
+  const back = G(p, { o: 0 }), cF = crutch(back);
+  const f = fig(p, { x, y: gy - 182 * s, s, o: 0, pose: { t: 8, hN: 22, kN: 48, fN: -12, hF: -2, kF: 2, fF: 0 } });
+  plant(f, 'AF', x, gy);
+  const front = G(p, { o: 0 }), cN = crutch(front);
+  const [sx, sy] = onStage(f, 'Sh'), [fx] = onStage(f, 'AF');
+  cF.set([sx + 10 * s, sy + 26 * s], [fx + 58 * s, gy]); cN.set([sx + 4 * s, sy + 28 * s], [fx + 70 * s, gy]);
+  reach(f, 'F', ...cF.grip); reach(f, 'N', ...cN.grip);
+  if (t0 !== null) { show(back, t0); show(f.g, t0); show(front, t0); }
+  return { f, groups: [back, f.g, front] };
+}
+// A small group of standing figures (front view), for «one to one» and «group» education.
+function people(p, xs, gy, s, t0, cols = []) {
+  const fs = xs.map((x, i) => frontStand(p, x, gy, s, null, { muscles: false, col: cols[i] || '#d8d1c1' }));
+  fs.forEach(f => show(f.g, t0));
+  return fs;
+}
+// A clipboard with a questionnaire; rows tick one by one.
+function clipboard(p, x, y, t0, tick0) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x: x - 60, y: y - 70, width: 120, height: 150, rx: 10, fill: '#e9e3d4', stroke: '#9b8f74', 'stroke-width': 3 }, g);
+  mk('rect', { x: x - 24, y: y - 80, width: 48, height: 20, rx: 5, fill: '#7d8a93' }, g);
+  [0, 1, 2, 3].forEach(i => {
+    mk('rect', { x: x - 44, y: y - 44 + i * 30, width: 16, height: 16, rx: 3, fill: 'none', stroke: '#6b6150', 'stroke-width': 2 }, g);
+    path(g, `M${x - 18} ${y - 36 + i * 30}H${x + 42}`, { stroke: '#9b8f74', 'stroke-width': 3 });
+    if (tick0 !== undefined) checkMark(p, x - 36, y - 36 + i * 30, tick0 + i * .4, COL.good, .55);
+  });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Показания к операции', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 12 · Урок 113', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Показания к операции', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и подготовка к ней', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'когда нужна операция и что сделать ещё до неё', 800, 360, m('sub'), { size: 30, fill: SURG, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    path(art, 'M260 720H1340', { stroke: COL.dim, 'stroke-width': 3 });
+    [['до', 420], ['операция', 800], ['после', 1180]].forEach(([s, x]) => T(art, s, { x, y: 790, size: 24, weight: 700, fill: COL.dim, anchor: 'middle' }));
+    const cf = curlFig(art, 400, 720, .72, .8, null); put(cf.f.g, { o: 1 }); put(cf.db, { o: 1 });
+    curls(cf, .8, Math.max(2, D - 1.6), 4, { lvl: .7 });
+    scalpel(art, 800, 600, 1.3, null); put(art.lastChild, { o: 1 });
+    const w = fig(art, { x: 1180, y: 720 - 182 * .72, s: .72 }); walk(w, .8, Math.max(2, D - 1.6), { cycles: 4 });
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['ind', 'Когда нужна операция', (m, D) => {
+    const p = panel(0);
+    txt(p, 'показания к операции (блок 12.1)', 800, 56, m('ind'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const cg = G(p, { o: 0 }); roundBox(cg, 60, 96, 700, 260, COL.good, PANEL, 2.5); show(cg, m('ind'));
+    txt(p, 'консервативное лечение', 90, 140, m('ind'), { size: 25, weight: 700, fill: COL.good });
+    pillRow(p, ['покой', 'шина, костыли', 'лекарства'], 410, 192, m('ind', 1.5), { col: COL.good, size: 20, gap: .5, space: 12 });
+    pillRow(p, ['упражнения', 'мануальная терапия'], 410, 246, m('ind', 3), { col: COL.good, size: 20, gap: .5, space: 12 });
+    pillRow(p, ['функциональная тренировка', 'физические факторы'], 410, 300, m('ind', 4.5), { col: COL.good, size: 20, gap: .5, space: 12 });
+    const ar = G(p, { o: 0 }); path(ar, 'M410 362V404m-12 -14l12 14l12 -14', { stroke: COL.bad, 'stroke-width': 4 }); show(ar, m('when'));
+    txt(p, 'не помогло или слишком тяжело', 430, 390, m('when'), { size: 20, weight: 700, fill: COL.bad });
+    pill(p, 'операция', 410, 442, m('when', 1.5), { col: SURG, size: 24 });
+    // a joint that worsens with the indications
+    const aj = arthroJoint(p, 410, 700, .58, m('box'));
+    const t = k => m('i' + k);
+    prog(q => aj.set({ sublux: 9 * Math.sin(q * 40) }), t(3), Math.max(1, t(4) - t(3)), lin);
+    prog(q => aj.set({ sublux: 9 * q }), t(4), 1);
+    prog(q => aj.set({ cart: [1 - .3 * q, 1 - .85 * q], osteo: q, fiss: q }), t(5), 1.4);
+    prog(q => aj.set({ eff: q, syn: .5 * q }), t(6), 1.2);
+    const pm = G(p, { x: 480, y: 700, s: 0, o: 0 }); mk('circle', { r: 22, fill: PAIN, 'fill-opacity': .35, stroke: PAIN, 'stroke-width': 4 }, pm);
+    pop(pm, t(1)); pulse(pm, t(1) + .8, 1.4);
+    const I = ['изнуряющая боль в покое или при деятельности', 'выраженное ограничение активных или пассивных движений', 'грубая нестабильность сустава или костных сегментов',
+      'деформация сустава или нарушение его оси', 'значительная дегенерация структур', 'хронический отёк сустава', 'неудача консервативного или прежнего хирургического лечения',
+      'значительная потеря функции'];
+    I.forEach((s, i) => numLine(p, i + 1, s, 820, 132 + i * 92, i === 7 ? COL.bad : SURG, t(i + 1), { size: 21, maxW: 660 }));
+  }],
+
+  ['pre', 'Реабилитация начинается до операции', (m, D) => {
+    const p = panel(0);
+    txt(p, 'реабилитация начинается до операции', 800, 56, m('pre'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const X = [140, 560, 1000, 1400], Y = 200;
+    const tl = G(p, { o: 0 }); path(tl, `M${X[0] - 60} ${Y}H${X[3] + 100}m-16 -12l16 12l-16 12`, { stroke: COL.dim, 'stroke-width': 4 }); show(tl, m('pre'));
+    [['обучение', 'преабилитация', COL.task, 'pre', 0], ['операция', '', SURG, 'pre', 1.5], ['с терапевтом', '', COL.whole, 'post', 0], ['долго — самостоятельно', '', COL.good, 'post', 1.2]].forEach(([a, b, c, k, d], i) => {
+      const g0 = G(p, { o: 0 }); mk('circle', { cx: X[i], cy: Y, r: 14, fill: c }, g0);
+      T(g0, a, { x: X[i], y: Y - 30, size: 22, weight: 700, fill: c, anchor: 'middle' });
+      if (b) T(g0, b, { x: X[i], y: Y + 46, size: 20, fill: COL.chalk, anchor: 'middle' });
+      show(g0, m(k, d));
+    });
+    // one to one or in a group
+    const one = G(p, { o: 0 }); roundBox(one, 60, 300, 700, 330, COL.whole, PANEL, 2); show(one, m('contact'));
+    const two = G(p, { o: 0 }); roundBox(two, 840, 300, 700, 330, COL.dim, PANEL, 2); show(two, m('contact', 2));
+    txt(p, 'лучше один на один', 410, 345, m('contact'), { size: 23, weight: 700, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'или в группе с похожими операциями', 1190, 345, m('contact', 2), { size: 23, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    people(p, [330, 490], 600, .55, m('contact'), ['#b9cfe0', '#d8d1c1']);
+    people(p, [990, 1100, 1210, 1320, 1430], 600, .45, m('contact', 2), ['#b9cfe0', '#d8d1c1', '#d8d1c1', '#d8d1c1', '#d8d1c1']);
+    txt(p, 'зачем встречаться:', 800, 700, m('why'), { size: 23, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pillRow(p, ['оценить исходную функцию', 'обсудить цели и ожидания', 'установить контакт', 'обучить'], 800, 760, m('why', .4), { col: COL.task, size: 21, gap: .9, space: 14 });
+  }],
+
+  ['exam', 'Обследование до операции', (m, D) => {
+    const p = panel(0);
+    txt(p, 'обследование до операции', 800, 56, m('exam'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    txt(p, 'исходный уровень функции → прогноз результата', 800, 96, m('exam', .5), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const tile = (i, title, body, col, k) => {
+      const r = i < 4 ? 0 : 1, c = r ? i - 4 : i, x = r ? 250 + c * 380 : 60 + c * 380, y = r ? 486 : 120, g = G(p, { o: 0 });
+      roundBox(g, x, y, 350, 340, col, PANEL, 2.2);
+      T(g, title, { x: x + 175, y: y + 38, size: 23, weight: 700, fill: col, anchor: 'middle' });
+      put(para(g, body, x + 175, y + 252, null, { size: 18, maxW: 320, anchor: 'middle' }), { o: 1 });
+      show(g, m(k));
+      return { x, y, cx: x + 175, t: m(k) };
+    };
+    // 1 pain scale
+    const a = tile(0, 'боль', 'визуальная аналоговая шкала или боль при определённых действиях', PAIN, 'e1');
+    const sg = G(p, { o: 0 }), gid = 'vas' + (++SHADE_ID), lg = mk('linearGradient', { id: gid }, mk('defs', {}, sg));
+    [[0, COL.good], [1, COL.bad]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, lg));
+    mk('rect', { x: a.x + 30, y: a.y + 120, width: 290, height: 22, rx: 11, fill: `url(#${gid})` }, sg);
+    T(sg, '0', { x: a.x + 30, y: a.y + 172, size: 18, fill: COL.dim, anchor: 'middle' }); T(sg, '10', { x: a.x + 320, y: a.y + 172, size: 18, fill: COL.dim, anchor: 'middle' });
+    show(sg, a.t);
+    const mk1 = G(p, { x: a.x + 40, y: a.y + 112, o: 0 }); path(mk1, 'M0 0l-10 -16h20Z', { fill: COL.chalk }); show(mk1, a.t + .4); tw(mk1, { x: a.x + 233 }, a.t + .8, 1);
+    // 2 range of motion: a hinge sweeping an arc
+    const b = tile(1, 'объём и стабильность', 'активный и пассивный — со здоровой стороной; качество движения; стабильность сустава', COL.whole, 'e2');
+    const Jx = b.x + 110, Jy = b.y + 170, hg = G(p, { o: 0 });
+    const arc = path(hg, romArc([Jx, Jy], 90, 0, 0, 0, -1), { stroke: COL.whole, 'stroke-width': 4, 'stroke-dasharray': '6 6' });
+    const sh = limbEl(hg, mk('defs', {}, hg), '#d8d1c1', 14, 12, mix('#d8d1c1', COL.board, .62)); sh.set([Jx - 100, Jy + 30], [Jx, Jy]);
+    const seg = limbEl(hg, mk('defs', {}, hg), '#d8d1c1', 12, 10, mix('#d8d1c1', COL.board, .62));
+    show(hg, b.t);
+    prog(q => { const ang = 80 * cyc(q, 2); seg.set([Jx, Jy], [Jx + 120 * Math.cos(rad(-ang)), Jy + 120 * Math.sin(rad(-ang))]); arc.setAttribute('d', romArc([Jx, Jy], 90, 0, Math.max(1, ang), 0, -1)); }, b.t + .3, Math.max(2, D - b.t - .5), lin);
+    // 3 skin and scars
+    const c = tile(2, 'кожа', 'рубцы, особенно спаянные с подлежащими тканями', COL.real, 'e3');
+    const sk = G(p, { o: 0 }); mk('rect', { x: c.x + 30, y: c.y + 100, width: 290, height: 90, rx: 18, fill: SKIN_C(), 'fill-opacity': .55, stroke: '#c99a86', 'stroke-width': 2 }, sk);
+    path(sk, `M${c.x + 70} ${c.y + 146}C${c.x + 130} ${c.y + 136} ${c.x + 210} ${c.y + 156} ${c.x + 280} ${c.y + 144}`, { stroke: '#a2584c', 'stroke-width': 5 });
+    for (let i = 0; i < 7; i++) path(sk, `M${c.x + 90 + i * 28} ${c.y + 132}v26`, { stroke: '#a2584c', 'stroke-width': 2 });
+    show(sk, c.t);
+    // 4 strength: the operated limb and the arms that will push the crutches
+    const d = tile(3, 'сила', 'поражённой области (боль её снижает) и здоровых сегментов — для костылей и пересаживаний', COL.task, 'e4');
+    const mu = muscleEl(p, { rest: 200, w: 26 }); put(mu.g, { o: 0 }); mu.set([d.x + 60, d.y + 120], [d.x + 260, d.y + 120]); show(mu.g, d.t);
+    prog(q => mu.act(cyc(q, 3)), d.t + .3, 3, lin);
+    const cr = crutch(p); put(cr.g, { o: 0 }); cr.set([d.x + 120, d.y + 150], [d.x + 290, d.y + 200]); show(cr.g, d.t + 1);
+    // 5 posture
+    const e = tile(4, 'осанка', 'удобные положения и нарушения осанки', COL.good, 'e5');
+    const pf = fig(p, { x: e.cx, y: e.y + 232 - 182 * .42, s: .42, o: 0, pose: { t: 14, hd: 18 } }); show(pf.g, e.t);
+    // 6 gait
+    const f = tile(5, 'ходьба', 'вспомогательные средства и переносимая нагрузка весом', COL.whole, 'e6');
+    const wf = fig(p, { x: f.cx - 30, y: f.y + 232 - 182 * .42, s: .42, o: 0 }); show(wf.g, f.t);
+    walk(wf, f.t, Math.max(2, D - f.t), { cycles: 6, dx: 60 });
+    // 7 a questionnaire
+    const h = tile(6, 'функция', 'надёжный опросник — лучше для этой области тела', COL.real, 'e7');
+    clipboard(p, h.cx, h.y + 150, h.t, h.t + .6);
+  }],
+
+  ['edu', 'Обучение до операции', (m, D) => {
+    const p = panel(0);
+    txt(p, 'обучение до операции', 800, 56, m('edu'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    people(p, [180], 470, .7, m('edu'), ['#b9cfe0']);
+    people(p, [360, 470, 580, 690], 470, .55, m('edu', 1), []);
+    txt(p, 'медсёстры, физические и эрготерапевты', 430, 520, m('edu', 2), { size: 20, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 820, 100, 720, 160, 'знать, чего ждать', 'это помогает понять день операции и первые дни после неё и снижает тревогу', COL.whole, m('calm'), { size: 21 });
+    infoCard(p, 820, 280, 720, 180, 'учить заранее', 'пока не мешают боль после операции и сонливость от обезболивающих', COL.task, m('learn'), { size: 21 });
+    // what is taught
+    const p2 = panel(m('comp'));
+    txt(p2, 'что входит в обучение', 800, 56, m('comp'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const C = ['план лечения после операции', 'предосторожности: положения, движения, нагрузка весом', 'движения в постели и пересаживания',
+      'первые упражнения: дыхание и откашливание, насос стопами, установочное напряжение', 'ходьба с костылями или ходунками', 'уход за раной', 'холод для обезболивания'];
+    C.forEach((s, i) => numLine(p2, i + 1, s, 60, 120 + i * 74, SURG, m('c' + (i + 1)), { size: 21, maxW: 620 }));
+    // first exercises: ankle pumps in bed and deep breathing
+    bench(p2, 820, 1300, 360, m('c4'), COL.dim, 100);
+    const f = supine(p2, 1070, 360, .72, m('c4'), { aN: 6, eN: 8 });
+    prog(q => f.set({ fN: -30 + 55 * cyc(q, 6), fF: -30 + 55 * cyc(q, 6) }), m('c4', 1), Math.max(2, m('c5') - m('c4', 1)), lin);
+    lab(p2, 'насос стопами', 1370, 262, ...onStage(f, 'toeN'), COL.good, m('c4', 1));
+    const lu = lungsEl(p2, 1420, 600, .55, m('c4')); prog(q => lu.breathe(cyc(q, 4)), m('c4'), Math.max(2, m('c5') - m('c4')), lin);
+    txt(p2, 'глубокое дыхание', 1420, 690, m('c4'), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    const cfg = crutchFig(p2, 980, 820, .62, m('c5'));
+    const ice = G(p2, { o: 0 }); mk('rect', { x: 1150, y: 760, width: 120, height: 50, rx: 14, fill: ICE, stroke: '#ffffff', 'stroke-width': 2 }, ice);
+    [[-30, 0], [0, 8], [30, -4]].forEach(([dx, dy]) => mk('rect', { x: 1206 + dx, y: 778 + dy, width: 10, height: 10, fill: '#ffffff', 'fill-opacity': .8, transform: `rotate(45 ${1211 + dx} ${783 + dy})` }, ice));
+    show(ice, m('c7')); txt(p2, 'холод', 1210, 846, m('c7'), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p2, 60, 660, 680, 200, 'но доказательства ограничены', 'обзор 18 исследований перед эндопротезированием: не меньше тревоги, боли и осложнений, не лучше функция', COL.bad, m('ev'), { size: 20 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-edu', prompt: ['Входит ли это в обучение до операции?'],
+    build: grid([
+      { parts: ['Насос стопами против застоя крови'], ans: ['y'], why: 'Да: первые упражнения.' },
+      { parts: ['Глубокое дыхание и откашливание'], ans: ['y'], why: 'Да.' },
+      { parts: ['Ходьба с костылями или ходунками'], ans: ['y'], why: 'Да: обучение ходьбе.' },
+      { parts: ['Интенсивная растяжка сустава, который будут оперировать'], ans: ['n'], why: 'Нет: этого нет в перечне.' },
+      { parts: ['Уход за раной и холод от боли'], ans: ['y'], why: 'Да.' },
+    ], [['y', 'Входит', COL.good], ['n', 'Нет', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['prehab', 'Упражнения до операции', (m, D) => {
+    const p = panel(0);
+    txt(p, 'расширенная программа упражнений до операции', 800, 56, m('why'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    pillRow(p, ['не дать нарастать слабости и тугоподвижности', 'правильно выполнять упражнения после', 'лучший результат'], 800, 126, m('why', .5), { col: COL.task, size: 20, gap: 1.2, space: 12 });
+    txt(p, 'особенно полезна перед долгой иммобилизацией или ограничением опоры', 800, 190, m('imm'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const study = (x, title, lines, col, t0) => { infoCard(p, x, 230, 470, 330, title, null, col, t0); lines.forEach(([s, c], i) => put(para(p, s, x + 24, 330 + i * 70, t0 + .6 + i * 1.2, { size: 20, maxW: 420, fill: c || COL.chalk }), {})); };
+    study(60, 'перед остеотомией', [['14 пациентов, силовые 3 раза в неделю, 12 недель'], ['сила выросла'], ['через полгода быт и спорт — лучше контроля', COL.good]], COL.good, m('kean'));
+    checkMark(p, 470, 510, m('kean', 4), COL.good, 1.6);
+    study(565, 'перед эндопротезированием', [['сила ног +20 %'], ['функция после операции —'], ['не лучше контроля', COL.bad]], COL.task, m('rooks'));
+    T(p, '=', { x: 975, y: 530, size: 60, weight: 700, fill: COL.bad, anchor: 'middle', o: 0 }); show(p.lastChild, m('rooks', 2.6));
+    study(1070, 'обзор 17 исследований', [['пользы по сравнению с обычной помощью нет', COL.bad], ['> 500 часов занятий — меньше нужна реабилитация после', COL.good]], COL.whole, m('rev'));
+    txt(p, 'различались программы, возраст пациентов и тяжесть артроза', 800, 615, m('diff'), { size: 21, weight: 700, fill: COL.dim, anchor: 'middle' });
+    const cf = curlFig(p, 800, 880, .5, .9, m('why'));
+    curls(cf, m('why', .5), Math.max(2, D - m('why', .5)), 8, { lvl: .7 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-ev', prompt: ['Верно ли это по данным исследований из книги?'],
+    build: grid([
+      { parts: ['Обучение до эндопротезирования снижает тревогу'], ans: ['n'], why: 'Нет: обзор 18 исследований эффекта не нашёл.' },
+      { parts: ['Силовая программа перед остеотомией улучшила функцию через полгода'], ans: ['y'], why: 'Верно.' },
+      { parts: ['Рост силы на 20 % перед эндопротезированием улучшил функцию после'], ans: ['n'], why: 'Нет: функция не стала лучше.' },
+      { parts: ['Больше 500 часов преабилитации уменьшили потребность в реабилитации'], ans: ['y'], why: 'Верно — единственный положительный результат обзора.' },
+      { parts: ['Обзор 17 исследований показал явную пользу преабилитации'], ans: ['n'], why: 'Нет.' },
+    ], [['y', 'Верно', COL.good], ['n', 'Неверно', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Операция — когда консервативное лечение не помогло или состояние слишком тяжело: боль, ограничение движений, нестабильность, деформация, дегенерация, отёк, потеря функции.', 'w1'],
+     ['До операции обследуют боль, объём и стабильность, кожу, силу, осанку, ходьбу и функцию.', 'w2'],
+     ['Обучают: план, предосторожности, движения в постели, первые упражнения, ходьба, уход за раной, холод.', 'w3'],
+     ['Польза обучения и преабилитации в исследованиях неоднозначна.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SURG }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tka', prompt: ['Пациентке через месяц эндопротезирование коленного сустава. Что важнее всего разобрать на встрече до операции?'],
+    build: choice([
+      ['Предосторожности, движения в постели, насос стопами и дыхание, ходьбу с ходунками, уход за раной и холод'],
+      ['Только устройство протеза'],
+      ['Ничего: обучение бесполезно'],
+      ['Упражнения с максимальной нагрузкой на больной сустав'],
+    ], 0, 'Это компоненты обучения до операции из книги; заранее их легче освоить, чем после операции.',
+    [null, 'Обучение охватывает план, предосторожности, движения и упражнения, а не только сам протез.', 'Доказательства ограничены, но обучение остаётся частью подготовки.', 'Цель — подготовить к послеоперационному периоду, а не перегрузить больной сустав.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-why', prompt: ['Почему первые упражнения лучше выучить до операции?'],
+    build: choice([
+      ['После операции учиться мешают боль и сонливость от обезболивающих'],
+      ['До операции пациент сильнее, и упражнения можно делать с весом'],
+      ['После операции упражнения не нужны'],
+      ['Это требование страховки'],
+    ], 0, 'Пациент осваивает упражнения, пока ему не мешают послеоперационная боль и побочные эффекты обезболивающих.',
+    [null, 'Дело не в нагрузке, а в возможности спокойно научиться.', 'Наоборот: дыхание, насос стопами и установочное напряжение начинают сразу после операции.', 'Книга объясняет это пользой для обучения.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+function SKIN_C() { return '#e7c3ae'; }
+boot();
+</script>
+</body>
+</html>

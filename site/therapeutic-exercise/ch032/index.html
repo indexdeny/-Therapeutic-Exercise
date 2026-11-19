@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мышца при растяжении — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 32, title: 'Мышца при растяжении; веретено и орган Гольджи', minutes: 9, language: 'ru', next: '../ch033/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch032/cards.ru.json
+const CARDS_SHORT = {
+  "главное сопротивление\nпассивному растяжению даёт этот соединительнотканный каркас; спайки в нём ограничивают движение": "соединительнотканный каркас",
+  "мышечное веретено\nчувствует изменение длины мышцы и его скорость": "длина мышцы и скорость",
+  "аутогенное торможение\nпри длительном растяжении орган Гольджи снижает напряжение своей мышцы": "Гольджи снижает напряжение",
+};
+// cards-short end
+
+const MUS = ANAT.muscle, BONE = ANAT.bone, NERVE = '#f3d36b', SIG = '#ffe08a';
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A row of n sarcomeres in series starting at x; set(len) sets each sarcomere's length. Returns the row.
+function sarcRow(p, x, y, n, len, h = 40) {
+  const g = G(p, {}), S = [];
+  for (let i = 0; i < n; i++) S.push(sarcomere(g, 0, y, len, h));
+  const r = { g, n, set(l) { S.forEach((s, i) => { s.set(l); put(s.g, { x: x + l / 2 + i * l }); }); r.len = l; r.end = x + n * l; return r; } };
+  return r.set(len);
+}
+// Signal dots running along a path element from t0 for dur seconds (a nerve impulse).
+function impulses(p, pathEl, t0, dur, { n = 4, col = SIG, every = .5 } = {}) {
+  const dots = Array.from({ length: n }, () => { const d = mk('circle', { r: 7, fill: col }, p); put(d, { o: 0 }); return d; });
+  prog(q => {
+    const T = q * dur, len = pathEl.getTotalLength();
+    dots.forEach((d, i) => { const k = ((T - i * every) % (every * n)) / (every * n); const on = T >= i * every; const pt = pathEl.getPointAtLength(clamp(k, 0, 1) * len); put(d, { x: pt.x, y: pt.y, o: on ? 1 : 0 }); });
+  }, t0, dur, lin);
+  prog(() => dots.forEach(d => put(d, { o: 0 })), t0 + dur, .05, lin);
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Мышца при растяжении', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 4 · Урок 32', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Мышца при растяжении:', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'веретено и сухожильный орган Гольджи', { x: 800, y: 380, size: 44, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'что сопротивляется растяжке внутри мышцы', 800, 460, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), sr = sarcomere(art, 800, 700, 260, 80);
+    show(art, m('sub', .2));
+    prog(q => sr.set(lerp(260, 340, wave(q, 1))), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['struct', 'Строение', (m) => {
+    const p = panel(0), defs = mk('defs', {}, p);
+    // muscle → fibers → myofibril → sarcomere, each a closer look at the one before
+    const mus = G(p, { o: 0 });
+    mk('path', { d: capsuleD([120, 260], [460, 260], 50, 50), fill: MUS, stroke: mix(MUS, '#000000', .35), 'stroke-width': 2 }, mus);
+    path(mus, 'M60 260H120M460 260H520', { stroke: ANAT.tendon, 'stroke-width': 10 });
+    T(mus, 'мышца', { x: 290, y: 350, size: 22, fill: COL.dim, anchor: 'middle' });
+    show(mus, m('mus'));
+    const fib = G(p, { o: 0 });
+    for (let i = 0; i < 5; i++) limbEl(fib, defs, MUS, 14, 14, mix(MUS, '#000000', .35)).set([640, 200 + i * 30], [960, 200 + i * 30]);
+    T(fib, 'волокна — параллельно', { x: 800, y: 380, size: 22, fill: COL.dim, anchor: 'middle' });
+    show(fib, m('mus', 1.5));
+    const myo = G(p, { o: 0 });
+    for (let i = 0; i < 4; i++) sarcomere(myo, 1130 + i * 90 + 45, 260, 90, 30);
+    T(myo, 'миофибрилла: саркомеры друг за другом', { x: 1310, y: 380, size: 22, fill: COL.dim, anchor: 'middle' });
+    show(myo, m('mus', 3));
+    [[470, 620], [970, 1110]].forEach(([a, b], i) => { const e = path(p, `M${a} 260H${b}`, { stroke: COL.dim, 'stroke-width': 2, 'stroke-dasharray': '6 6' }, { o: 0 }); show(e, m('mus', 1.5 + i * 1.5)); });
+    // one big sarcomere: actin and myosin overlap; contraction pulls the Z-lines together
+    const big = sarcomere(p, 800, 620, 420, 110);
+    put(big.g, { o: 0 }); show(big.g, m('sarc'));
+    T(p, 'Z', { x: 590, y: 700, size: 24, weight: 700, fill: COL.chalk, anchor: 'middle', o: 0 }); show(p.lastChild, m('sarc', .5));
+    txt(p, 'актин', 470, 600, m('sarc', 1), { size: 22, weight: 700, fill: mix(MUS, '#ffffff', .35) });
+    txt(p, 'миозин', 800, 520, m('sarc', 1.5), { size: 22, weight: 700, fill: mix(MUS, '#000000', .1), anchor: 'middle' });
+    prog(q => big.set(lerp(420, 330, wave(q, 2))), m('cb', .3), 4, lin);
+    txt(p, 'сокращение: мостики, нити скользят', 800, 800, m('cb'), { size: 24, weight: 700, fill: COL.task, anchor: 'middle' });
+  }],
+
+  ['ct', 'Оболочки', (m) => {
+    const p = panel(0), cx = 480, cy = 470;
+    // a muscle in cross-section: epimysium around fascicles (perimysium) around fibers (endomysium)
+    const epi = mk('circle', { cx, cy, r: 300, fill: MUS, 'fill-opacity': .12, stroke: ANAT.tendon, 'stroke-width': 3 }, p);
+    const peri = G(p, {}), endo = G(p, {});
+    const fasc = [[-130, -110], [100, -130], [-160, 90], [40, 40], [170, 120], [-20, 200], [180, -20]];
+    fasc.forEach(([dx, dy]) => {
+      mk('circle', { cx: cx + dx, cy: cy + dy, r: 78, fill: 'none', stroke: ANAT.tendon, 'stroke-width': 2.5 }, peri);
+      for (let a = 0; a < 6; a++) { const r = a ? 46 : 0, ang = a * 60; mk('circle', { cx: cx + dx + r * Math.cos(rad(ang)), cy: cy + dy + r * Math.sin(rad(ang)), r: 20, fill: MUS, 'fill-opacity': .75, stroke: ANAT.tendon, 'stroke-width': 1.2 }, endo); }
+    });
+    [epi, peri, endo].forEach(e => { put(e, { o: 0 }); show(e, .2); });
+    const ring = (r, x, y, t0) => { const c = mk('circle', { cx: x, cy: y, r, fill: 'none', stroke: ANAT.taut, 'stroke-width': 6 }, p); put(c, { o: 0 }); show(c, t0); hide(c, t0 + 3); };
+    ring(22, cx + 40 + 46, cy + 40, m('endo'));
+    ring(80, cx + 40, cy + 40, m('peri'));
+    ring(302, cx, cy, m('epi'));
+    infoCard(p, 860, 140, 660, 120, 'эндомизий — вокруг волокна', null, ANAT.tendon, m('endo'), { size: 22 });
+    infoCard(p, 860, 280, 660, 120, 'перимизий — вокруг пучка', null, ANAT.tendon, m('peri'), { size: 22 });
+    infoCard(p, 860, 420, 660, 120, 'эпимизий — вокруг мышцы', null, ANAT.tendon, m('epi'), { size: 22 });
+    infoCard(p, 860, 580, 660, 200, 'главное сопротивление', 'пассивному растяжению даёт этот соединительнотканный каркас; спайки в нём ограничивают движение', ANAT.taut, m('res'), { size: 22 });
+  }],
+
+  ['pull', 'Растяжение саркомеров', (m) => {
+    const p = panel(0);
+    mk('rect', { x: 120, y: 280, width: 24, height: 120, rx: 4, fill: BONE }, p);
+    const row = sarcRow(p, 144, 340, 5, 150, 60);
+    const end = mk('rect', { y: 280, width: 24, height: 120, rx: 4, fill: BONE }, p);
+    const meter = mk('rect', { x: 1400, width: 60, rx: 8, fill: ANAT.taut }, p);
+    mk('rect', { x: 1400, y: 180, width: 60, height: 300, rx: 8, fill: 'none', stroke: COL.dim, 'stroke-width': 2 }, p);
+    T(p, 'натяжение', { x: 1430, y: 520, size: 20, fill: COL.dim, anchor: 'middle' });
+    const setT = v => { meter.setAttribute('y', (480 - 300 * v).toFixed(1)); meter.setAttribute('height', (300 * v).toFixed(1)); };
+    const setL = l => { row.set(l); put(end, { x: row.end }); };
+    setL(150); setT(0);
+    // tension rises sharply, then the cross-bridges let go: the sarcomeres suddenly lengthen ("give")
+    prog(q => { setL(lerp(150, 162, q)); setT(.75 * q); }, m('se', .3), 1.5, lin);
+    prog(q => { setL(lerp(162, 205, io(q))); setT(lerp(.75, .4, q)); }, m('give', .3), 1.2, lin);
+    prog(q => { setL(lerp(205, 150, io(q))); setT(lerp(.4, 0, q)); }, m('back', .3), 1.6, lin);
+    arrowTo(p, [1080, 560], [1200, 560], m('tr'), { col: COL.whole, w: 5 });
+    txt(p, 'сила передаётся через эндомизий и перимизий', 800, 160, m('tr'), { size: 24, weight: 700, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'сначала резко растёт натяжение', 800, 620, m('se'), { size: 24, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    txt(p, 'мостики рвутся — саркомеры «уступают»', 800, 670, m('give'), { size: 24, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'короткое растяжение: возврат — упругость; стойкое удлинение — только при долгом', 800, 720, m('back'), { size: 23, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['imm', 'Иммобилизация', (m) => {
+    const p = panel(0);
+    // atrophy: the fibre shrinks
+    txt(p, 'атрофия', 260, 130, m('atr'), { size: 27, weight: 700, fill: COL.bad, anchor: 'middle' });
+    const fb = mk('circle', { cx: 260, cy: 300, r: 110, fill: MUS, 'fill-opacity': .8, stroke: ANAT.tendon, 'stroke-width': 3 }, p);
+    put(fb, { o: 0 }); show(fb, m('atr'));
+    prog(q => fb.setAttribute('r', lerp(110, 70, io(q)).toFixed(1)), m('atr', 1), 2, lin);
+    put(para(p, 'уже через несколько дней — неделю; быстрее в медленных волокнах; ещё хуже включение двигательных единиц', 260, 470, null, { size: 21, maxW: 380, anchor: 'middle', fill: COL.chalk }), { o: 0 });
+    show(p.lastChild, m('atr', 2));
+    // shortened position: fewer sarcomeres; lengthened: more
+    txt(p, 'в укороченном положении', 1000, 130, m('short'), { size: 25, weight: 700, fill: COL.nat, anchor: 'middle' });
+    const r1 = sarcRow(p, 640, 230, 8, 80, 34); put(r1.g, { o: 0 }); show(r1.g, m('short'));
+    prog(q => { const n = Math.round(lerp(8, 6, q)); r1.g.childNodes.forEach((c, i) => c.setAttribute('opacity', i < n ? 1 : .08)); }, m('short', 1), 1.5, lin);
+    txt(p, 'саркомеров меньше; пассивное напряжение — раньше', 1000, 300, m('short', 1.5), { size: 21, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'в удлинённом положении (животные)', 1000, 420, m('long'), { size: 25, weight: 700, fill: COL.good, anchor: 'middle' });
+    const r2 = sarcRow(p, 640, 520, 10, 72, 34); put(r2.g, { o: 0 }); show(r2.g, m('long'));
+    r2.g.childNodes.forEach((c, i) => { if (i >= 8) { c.setAttribute('opacity', 0); } });
+    prog(q => r2.g.childNodes.forEach((c, i) => { if (i >= 8) c.setAttribute('opacity', q.toFixed(2)); }), m('long', 1), 1.5, lin);
+    txt(p, 'саркомеры добавляются', 1000, 590, m('long', 1.5), { size: 21, fill: COL.chalk, anchor: 'middle' });
+    labelBox(p, 800, 760, 1100, ['изменения временные — 3–5 недель, если мышца снова работает в полном объёме'], COL.int, m('adapt'), { size: 24 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-sarc', prompt: ['Саркомеров станет больше или меньше?'],
+    build: grid([
+      { parts: ['Мышцу долго держали в укороченном положении'], ans: ['l'], why: 'Меньше: саркомеры рассасываются.' },
+      { parts: ['Мышцу долго держали в удлинённом положении'], ans: ['m'], why: 'Больше (по данным на животных).' },
+      { parts: ['Серия гипсов удлиняет мышцу неделями'], ans: ['m'], why: 'Возможно добавление саркомеров.' },
+      { parts: ['Локоть неделями зафиксирован в сгибании — сгибатели'], ans: ['l'], why: 'Сгибатели в укороченном положении — меньше саркомеров.' },
+      { parts: ['Удлинение бедренной кости аппаратом'], ans: ['m'], why: 'У человека описано добавление саркомеров.' },
+    ], [['l', 'Меньше', COL.nat], ['m', 'Больше', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['spindle', 'Мышечное веретено', (m) => {
+    const p = panel(0), defs = mk('defs', {}, p);
+    // extrafusal fibres around a spindle capsule; the Ia ending spirals around the middle, II nearby
+    for (let i = 0; i < 2; i++) limbEl(p, defs, MUS, 22, 22, mix(MUS, '#000000', .35)).set([140, 330 + i * 300], [1000, 330 + i * 300]);
+    const sp = G(p, { o: 0 });
+    mk('ellipse', { cx: 570, cy: 480, rx: 330, ry: 70, fill: 'none', stroke: COL.chalk, 'stroke-width': 3, 'stroke-dasharray': '8 6' }, sp);
+    [-1, 1].forEach(k => limbEl(sp, defs, mix(MUS, '#ffffff', .2), 10, 10, mix(MUS, '#000000', .3)).set([300, 480 + 16 * k], [840, 480 + 16 * k]));
+    show(sp, m('intra'));
+    txt(p, 'интрафузальные волокна', 570, 400, m('intra'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const ia = path(p, 'M540 480q8 -26 16 0t16 0t16 0M570 466V200H1180', { stroke: NERVE, 'stroke-width': 4 }, { d: 0 });
+    draw(ia, m('ia'), 1);
+    txt(p, 'Ia — быстрое и длительное', 1195, 208, m('ia'), { size: 22, weight: 700, fill: NERVE });
+    const ii = path(p, 'M660 480q8 -22 16 0t16 0M676 470V260H1180', { stroke: '#e8c47a', 'stroke-width': 3 }, { d: 0 });
+    draw(ii, m('ii'), 1);
+    txt(p, 'II — только длительное', 1195, 268, m('ii'), { size: 22, weight: 700, fill: '#e8c47a' });
+    const gm = path(p, 'M330 492V760H1180M810 492V760', { stroke: COL.whole, 'stroke-width': 3 }, { d: 0 });
+    draw(gm, m('gam'), 1);
+    txt(p, 'гамма — чувствительность веретена', 1195, 768, m('gam'), { size: 22, weight: 700, fill: COL.whole });
+    const al = path(p, 'M1000 630H1180', { stroke: COL.bad, 'stroke-width': 4 }, { d: 0 });
+    draw(al, m('gam', 1.5), .8);
+    txt(p, 'альфа — основные волокна', 1195, 638, m('gam', 1.5), { size: 22, weight: 700, fill: COL.bad });
+    infoCard(p, 1040, 330, 480, 170, 'мышечное веретено', 'чувствует изменение длины мышцы и его скорость', NERVE, m('sp'), { size: 23 });
+    impulses(p, ia, m('ia', 1.2), 3);
+  }],
+
+  ['gto', 'Орган Гольджи', (m) => {
+    const p = panel(0), defs = mk('defs', {}, p);
+    limbEl(p, defs, MUS, 60, 60, mix(MUS, '#000000', .35)).set([140, 470], [760, 470]);
+    path(p, 'M820 470H1180', { stroke: ANAT.tendon, 'stroke-width': 30 });
+    path(p, 'M760 470H830', { stroke: ANAT.tendon, 'stroke-width': 50 });
+    mk('rect', { x: 1180, y: 380, width: 60, height: 180, rx: 8, fill: BONE }, p);
+    const g = G(p, { o: 0 });
+    mk('ellipse', { cx: 860, cy: 470, rx: 60, ry: 34, fill: NERVE, 'fill-opacity': .35, stroke: NERVE, 'stroke-width': 3 }, g);
+    path(g, 'M815 460q15 20 30 0t30 0t30 0', { stroke: NERVE, 'stroke-width': 3 });
+    show(g, m('gto'));
+    txt(p, 'сухожильный орган Гольджи', 860, 400, m('gto'), { size: 24, weight: 700, fill: NERVE, anchor: 'middle' });
+    const ib = path(p, 'M860 436V200H1180', { stroke: NERVE, 'stroke-width': 4 }, { d: 0 });
+    draw(ib, m('ib'), 1);
+    txt(p, 'Ib', 880, 300, m('ib'), { size: 26, weight: 700, fill: NERVE });
+    const cord = G(p, { o: 0 });
+    mk('rect', { x: 1200, y: 120, width: 300, height: 180, rx: 30, fill: PANEL, stroke: COL.chalk, 'stroke-width': 3 }, cord);
+    T(cord, 'спинной мозг', { x: 1350, y: 160, size: 21, fill: COL.dim, anchor: 'middle' });
+    show(cord, m('ib'));
+    impulses(p, ib, m('ib', 1), 4);
+    const minus = G(p, { o: 0 });
+    mk('circle', { cx: 1350, cy: 240, r: 28, fill: COL.bad }, minus);
+    T(minus, '−', { x: 1350, y: 252, size: 40, weight: 700, fill: COL.board, anchor: 'middle' });
+    show(minus, m('inh'));
+    txt(p, 'тормозит альфа-мотонейрон — напряжение мышцы снижается', 800, 700, m('inh'), { size: 24, weight: 700, fill: COL.good, anchor: 'middle' });
+    pill(p, 'порог низкий: постоянно регулирует напряжение', 800, 770, m('low'), { col: COL.whole, size: 23 });
+  }],
+
+  ['reflex', 'Рефлекс на растяжение', (m, D) => {
+    const p = panel(0), defs = mk('defs', {}, p);
+    // a quick stretch of the hamstrings: the spindle fires and the muscle tightens against the stretch
+    const sc = tableScene(p, { hx: 620, top: 560, s: 1.1, t0: .2 });
+    const ham = muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 14 }), rf = muscleOn(sc.pt, ...MUSCLE.rectus, { after: 'ftN', w: 13 });
+    prog(q => { const v = q < .2 ? q / .2 : 1; sc.pt.set({ hN: 60 * v }); ham.act(q > .25 ? .85 : 0); }, m('sr', .3), 3, lin);
+    txt(p, 'быстро — мышца напрягается и сопротивляется', 620, 120, m('sr', 1.2), { size: 24, weight: 700, fill: COL.bad, anchor: 'middle' });
+    pill(p, 'реципрокное торможение противоположной мышцы — показано только на животных', 800, 180, m('ri'), { col: COL.dim, size: 21 });
+    prog(q => { ham.act(.85 * (1 - q)); sc.pt.set({ hN: lerp(60, 0, q) }); }, m('slow', -1), 1, lin);
+    prog(q => sc.pt.set({ hN: 70 * io(q) }), m('slow', .3), 4, lin);
+    labelBox(p, 1260, 360, 500, ['медленно, малой силой, долго'], COL.good, m('slow'), { size: 26 });
+    infoCard(p, 1010, 460, 510, 210, 'аутогенное торможение', 'при длительном растяжении орган Гольджи снижает напряжение своей мышцы', COL.good, m('ai'), { size: 22 });
+  }],
+
+  ['sum', 'Что важнее', (m) => {
+    const p = panel(0);
+    labelBox(p, 800, 300, 1420, ['прирост растяжимости — скорее от нагрузки на вязкоупругую соединительную ткань,', 'чем от рефлекторного расслабления мышцы'], COL.task, m('sum'), { size: 27 });
+    const x = 800, y = 560, sc = G(p, { o: 0 });
+    path(sc, `M${x - 300} ${y}H${x + 300}M${x} ${y}V${y + 60}`, { stroke: COL.dim, 'stroke-width': 5 });
+    const beam = G(sc, { x, y });
+    path(beam, 'M-300 0H300', { stroke: COL.chalk, 'stroke-width': 6 });
+    T(beam, 'соединительная ткань', { x: -200, y: -30, size: 23, weight: 700, fill: ANAT.tendon, anchor: 'middle' });
+    T(beam, 'рефлексы', { x: 200, y: -30, size: 23, weight: 700, fill: COL.dim, anchor: 'middle' });
+    show(sc, m('sum', 1));
+    tw(beam, { r: -10 }, m('sum', 2), 1, io);
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-sense', prompt: ['Мышечное веретено или орган Гольджи?'],
+    build: grid([
+      { parts: ['Чувствует длину мышцы и скорость её изменения'], ans: ['s'], why: 'Веретено.' },
+      { parts: ['Чувствует напряжение мышцы'], ans: ['g'], why: 'Орган Гольджи.' },
+      { parts: ['Запускает рефлекс на растяжение'], ans: ['s'], why: 'Веретено.' },
+      { parts: ['Тормозит свою мышцу — аутогенное торможение'], ans: ['g'], why: 'Орган Гольджи.' },
+      { parts: ['Волокна Ia и II'], ans: ['s'], why: 'Веретено; у органа Гольджи — Ib.' },
+    ], [['s', 'Веретено', NERVE], ['g', 'Орган Гольджи', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Главное сопротивление растяжению — соединительнотканный каркас мышцы.', 'w1'],
+     ['Укороченное положение — меньше саркомеров, удлинённое — больше; это держится 3–5 недель.', 'w2'],
+     ['Веретено чувствует длину и запускает рефлекс; орган Гольджи чувствует напряжение и тормозит.', 'w3'],
+     ['Растягивают медленно, с малой силой и долго.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-why', prompt: ['Почему мышцу растягивают медленно и долго, а не быстро и коротко?'],
+    build: choice([
+      ['Быстрое растяжение запускает рефлекс на растяжение, и мышца сопротивляется'],
+      ['Быстрое растяжение лучше удлиняет соединительную ткань'],
+      ['Орган Гольджи реагирует только на быстрое растяжение'],
+      ['Саркомеры добавляются за несколько секунд'],
+    ], 0, 'Веретено чувствует скорость: быстрое растяжение вызывает рефлекторное напряжение.',
+    [null, 'Наоборот: соединительная ткань уступает медленной длительной нагрузке.', 'Он тормозит мышцу именно при длительном растяжении.', 'Для этого нужны недели.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Главное сопротивление пассивному растяжению даёт соединительнотканный каркас мышцы.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Атрофия при иммобилизации начинается только через два месяца.'], ans: ['f'], why: 'Неверно: уже через несколько дней — неделю.' },
+      { parts: ['Сухожильный орган Гольджи чувствует напряжение мышцы.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Реципрокное торможение доказано в исследованиях на людях.'], ans: ['f'], why: 'Неверно: только на животных.' },
+      { parts: ['Изменения числа саркомеров сохраняются годами без использования нового объёма.'], ans: ['f'], why: 'Неверно: 3–5 недель.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

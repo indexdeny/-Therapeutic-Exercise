@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Предосторожности и правила выполнения ROM — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 21, title: 'Предосторожности и правила выполнения ROM', minutes: 7, language: 'ru', next: '../ch022/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch021/cards.ru.json
+const CARDS_SHORT = {
+  "после инфаркта, шунтирования, ангиопластики\nактивные движения рук и немного ходьбы у кровати; следить за симптомами, нагрузкой и давлением": "руки + ходьба у кровати",
+  "состояние угрожает жизни\nосторожно — пассивные в крупных суставах и активные в стопах и голеностопах: против застоя и тромбоза": "против застоя и тромбоза",
+  "искусственная вентиляция\nранняя мобилизация: через 1–2 дня или раньше чем через 3 дня после интубации": "мобилизация через 1–2 дня",
+  "анатомические плоскости\nфронтальная, сагиттальная, поперечная": "фронтальная, сагиттальная, поперечная",
+  "удлинение мышцы\nпротив линии её тяги": "против линии её тяги",
+  "комбинированные\nдиагональные": "диагональные",
+  "функциональные\nкак в повседневных делах": "как в повседневных делах",
+  "объяснить\nплан и метод": "план и метод",
+  "освободить область\nтесная одежда, бельё, шины, повязки; укрыть": "тесная одежда, бельё, шины, повязки; укрыть",
+  "удобное положение\nвыравнивание и стабилизация — и чтобы сегмент можно было провести через весь объём": "стабилизация + весь объём",
+  "терапевт\nвстать так, чтобы соблюдать механику своего тела": "механика своего тела",
+};
+// cards-short end
+
+const ROMC = { p: COL.whole, a: COL.bad, aa: COL.task };
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+// A supine patient whose near leg the therapist moves (hip and knee flexion); the hands hold the knee and the heel.
+function legScene(p, hx, TOP, s, t0) {
+  const legH = 155 * s;
+  const th = fig(p, { x: hx + 40, y: TOP + legH - 182 * s, s, dir: -1, col: '#b9cfe0', o: 0, pose: { t: 24, hN: 26, hF: 22, kN: 8, kF: 8 } });
+  bench(p, hx - 260, hx + 230, TOP, t0, COL.dim, legH);
+  const pt = supine(p, hx, TOP, s, t0);
+  show(th.g, t0);
+  holdHand(th, 'N', pt, () => onStage(pt, 'KN'));
+  holdHand(th, 'F', pt, () => onStage(pt, 'heelN'));
+  return { pt, th };
+}
+const flexLeg = (pt, v) => pt.set({ hN: 110 * v, kN: 120 * v, fN: 10 * v });
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Предосторожности и правила', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 3 · Урок 21', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Предосторожности и правила', { x: 800, y: 315, size: 60, weight: 600, anchor: 'middle' });
+    T(g, 'выполнения упражнений на объём движений', { x: 800, y: 378, size: 38, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как двигать сустав безопасно и с пользой', 800, 455, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const sc = legScene(art, 840, 690, .5, 0);
+    show(art, m('sub', .2));
+    prog(q => flexLeg(sc.pt, (1 - Math.cos(2 * Math.PI * q)) / 2), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['contra', 'Противопоказания', (m) => {
+    const p = panel(0);
+    const no = G(p, { o: 0 });
+    roundBox(no, 90, 110, 680, 140, COL.bad, PANEL, 3);
+    T(no, 'нельзя, если движение', { x: 430, y: 168, size: 28, weight: 700, fill: COL.bad, anchor: 'middle' });
+    T(no, 'нарушает заживление', { x: 430, y: 212, size: 28, weight: 700, fill: COL.bad, anchor: 'middle' });
+    show(no, m('no'));
+    txt(p, 'но полная неподвижность — это', 1160, 150, m('imm'), { size: 25, fill: COL.dim, anchor: 'middle' });
+    ['спайки и контрактуры', 'застой крови', 'долгое восстановление'].forEach((s, i) => pill(p, s, 1160, 200 + i * 56, m('imm', .4 + i * .5), { col: COL.bad, size: 24 }));
+    labelBox(p, 800, 430, 1400, ['раннее непрерывное пассивное движение в безболезненном объёме помогает заживлению', 'исследования Солтера и других'], COL.good, m('early'), { size: 24 });
+    const tl = G(p, { o: 0 });
+    mk('rect', { x: 140, y: 560, width: 560, height: 150, rx: 18, fill: PANEL, stroke: COL.faint, 'stroke-width': 2 }, tl);
+    T(tl, 'раньше', { x: 170, y: 605, size: 26, weight: 700, fill: COL.dim });
+    T(tl, 'запрет после разрывов, переломов, операций', { x: 170, y: 650, size: 23, fill: COL.dim });
+    mk('rect', { x: 880, y: 560, width: 580, height: 150, rx: 18, fill: PANEL, stroke: COL.good, 'stroke-width': 3 }, tl);
+    T(tl, 'сейчас', { x: 910, y: 605, size: 26, weight: 700, fill: COL.good });
+    T(tl, 'раннее контролируемое движение', { x: 910, y: 650, size: 23 });
+    T(tl, 'под контролем переносимости', { x: 910, y: 684, size: 23, fill: COL.dim });
+    show(tl, m('hist'));
+    arrowTo(p, [720, 635], [860, 635], m('hist', .5), { col: COL.good, w: 4 });
+  }],
+
+  ['signs', 'Признаки перебора', (m) => {
+    const p = panel(0), TOP = 520;
+    ['объём', 'скорость', 'переносимость'].forEach((s, i) => pill(p, s, 520 + i * 280, 120, m('keep', .3 + i * .4), { col: COL.good, size: 27 }));
+    txt(p, 'оставаться в пределах', 800, 80, m('keep'), { size: 26, fill: COL.dim, anchor: 'middle' });
+    bench(p, 360, 1240, TOP, m('too', -.3));
+    const pt = supine(p, 820, TOP, .9, m('too', -.3));
+    const [kx, ky] = onStage(pt, 'KN');
+    const glow = mk('circle', { cx: kx, cy: ky, r: 30, fill: COL.bad, 'fill-opacity': .35, stroke: COL.bad, 'stroke-width': 4 }, p);
+    put(glow, { o: 0 }); show(glow, m('pain'));
+    pulse(glow, m('pain', .5), 1.4); pulse(glow, m('infl', .3), 1.6);
+    txt(p, 'признаки слишком большого или неправильного движения', 800, 330, m('too'), { size: 27, weight: 700, fill: COL.bad, anchor: 'middle' });
+    pill(p, 'боль ↑', 560, 700, m('pain'), { col: COL.bad, size: 28 });
+    ['отёк ↑', 'жар', 'покраснение'].forEach((s, i) => pill(p, s, 830 + i * 200, 700, m('infl', .3 + i * .5), { col: COL.bad, size: 28 }));
+    txt(p, 'воспаление усилилось', 1030, 770, m('infl', 1.6), { size: 23, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['cardiac', 'Сердце и реанимация', (m) => {
+    const p = panel(0);
+    infoCard(p, 90, 100, 450, 330, 'после инфаркта, шунтирования, ангиопластики', 'активные движения рук и немного ходьбы у кровати; следить за симптомами, нагрузкой и давлением', COL.int, m('mi'), { size: 23 });
+    infoCard(p, 575, 100, 450, 330, 'состояние угрожает жизни', 'осторожно — пассивные в крупных суставах и активные в стопах и голеностопах: против застоя и тромбоза', COL.bad, m('life'), { size: 23 });
+    infoCard(p, 1060, 100, 450, 330, 'искусственная вентиляция', 'ранняя мобилизация: через 1–2 дня или раньше чем через 3 дня после интубации', COL.whole, m('icu'), { size: 23 });
+    const S = ['перерыв в седации', 'активные движения', 'сидеть', 'стоять', 'ходить'];
+    const SX = [180, 470, 740, 980, 1220], AR = [[295, 355], [585, 685], [795, 925], [1035, 1165]];
+    S.forEach((s, i) => {
+      pill(p, s, SX[i], 520, m('icu', 2 + i * .5), { col: COL.whole, size: 24 });
+      if (i < 4) arrowTo(p, [AR[i][0], 520], [AR[i][1], 520], m('icu', 2.3 + i * .5), { col: COL.dim, w: 3 });
+    });
+    ['короче делирий', 'больше дней без аппарата', 'лучше функция при выписке'].forEach((s, i) => pill(p, s, 330 + i * 470, 640, m('res', .3 + i * .5), { col: COL.good, size: 25 }));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-signs', prompt: ['После занятия: это признак слишком большого или неправильного движения?'],
+    build: grid([
+      { parts: ['Боль усилилась'], ans: ['y'], why: 'Признак перебора.' },
+      { parts: ['Колено стало более отёчным'], ans: ['y'], why: 'Усиление воспаления — признак перебора.' },
+      { parts: ['Сустав стал горячим'], ans: ['y'], why: 'Жар — признак воспаления.' },
+      { parts: ['Кожа над суставом покраснела'], ans: ['y'], why: 'Покраснение — признак воспаления.' },
+      { parts: ['Движение было безболезненным, отёк не изменился'], ans: ['n'], why: 'Признаков перебора нет.' },
+    ], [['y', 'Признак перебора', COL.bad], ['n', 'Нет признаков', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['plan', 'План', (m) => {
+    const p = panel(0);
+    head(p, 'Обследование, оценка и план', .2, 70, COL.chalk);
+    const S7 = [['обследовать и оценить; предосторожности, прогноз', 'ev'], ['может ли участвовать; какой вид', 'type'], ['сколько движения безопасно', 'amt'], ['выбрать паттерны', 'pat'], ['следить во время и после', 'mon'], ['записать и сообщить', 'doc'], ['переоценить и изменить', 're']];
+    S7.forEach(([s, k], i) => {
+      const g = G(p, { o: 0 }), y = 140 + i * 88;
+      mk('circle', { cx: 120, cy: y + 22, r: 22, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 120, y: y + 31, size: 25, weight: 700, fill: COL.board, anchor: 'middle' });
+      T(g, s, { x: 160, y: y + 31, size: 26, weight: 600 });
+      show(g, m(k));
+    });
+    const P4 = [['анатомические плоскости', 'фронтальная, сагиттальная, поперечная', 'pat'], ['удлинение мышцы', 'против линии её тяги', 'mr'], ['комбинированные', 'диагональные', 'comb'], ['функциональные', 'как в повседневных делах', 'func']];
+    P4.forEach(([h, s, k], i) => infoCard(p, 880, 120 + i * 130, 620, 112, h, s, COL.whole, m(k, k === 'pat' ? .8 : 0), { size: 22 }));
+    ['жизненные показатели', 'тепло и цвет', 'объём', 'боль', 'качество движения'].forEach((s, i) => pill(p, s, [1010, 1270, 1440, 1080, 1300][i], 680 + Math.floor(i / 3) * 56, m('mon', .4 + i * .4), { col: COL.good, size: 20 }));
+  }],
+
+  ['prep', 'Подготовка пациента', (m) => {
+    const p = panel(0);
+    head(p, 'Подготовка пациента', .2, 70, COL.chalk);
+    infoCard(p, 90, 130, 690, 200, 'объяснить', 'план и метод', COL.whole, m('com'), { size: 25 });
+    infoCard(p, 820, 130, 690, 200, 'освободить область', 'тесная одежда, бельё, шины, повязки; укрыть', COL.whole, m('free'), { size: 25 });
+    infoCard(p, 90, 370, 690, 230, 'удобное положение', 'выравнивание и стабилизация — и чтобы сегмент можно было провести через весь объём', COL.whole, m('pos'), { size: 25 });
+    infoCard(p, 820, 370, 690, 230, 'терапевт', 'встать так, чтобы соблюдать механику своего тела', COL.whole, m('me'), { size: 25 });
+  }],
+
+  ['apply', 'Как выполнять', (m) => {
+    const p = panel(0), TOP = 600;
+    const sc = legScene(p, 560, TOP, .85, .2);
+    pill(p, 'захват у суставов', 300, 140, m('grip'), { col: COL.whole, size: 25 });
+    pill(p, 'поддержать слабые места', 680, 140, m('sup'), { col: COL.whole, size: 25 });
+    txt(p, 'гипермобильный сустав · свежий перелом · парализованный сегмент', 500, 196, m('sup', .4), { size: 21, fill: COL.dim, anchor: 'middle' });
+    // range bar: free range up to tissue resistance; beyond it — stretching
+    const X0 = 1020, W = 460, Y = 300;
+    const rg = G(p, { o: 0 });
+    mk('rect', { x: X0, y: Y, width: W * .8, height: 26, rx: 13, fill: COL.good, 'fill-opacity': .7 }, rg);
+    mk('rect', { x: X0 + W * .8, y: Y, width: W * .2, height: 26, rx: 13, fill: COL.bad, 'fill-opacity': .4 }, rg);
+    path(rg, `M${X0 + W * .8} ${Y - 16}V${Y + 42}`, { stroke: COL.chalk, 'stroke-width': 4 });
+    T(rg, 'безболезненный объём', { x: X0, y: Y - 20, size: 22, fill: COL.good });
+    T(rg, 'сопротивление тканей', { x: X0 + W * .8, y: Y - 50, size: 22, fill: COL.chalk, anchor: 'middle' });
+    show(rg, m('rng'));
+    const fx = G(p, { o: 0 });
+    T(fx, 'дальше — растяжка', { x: X0 + W, y: Y + 76, size: 22, weight: 700, fill: COL.bad, anchor: 'end' });
+    show(fx, m('force'));
+    cross(p, X0 + W * .9, Y + 13, 18, m('force', .3), 5);
+    const dot = mk('circle', { r: 12, fill: COL.chalk }, p);
+    put(dot, { o: 0 }); show(dot, m('rng'));
+    const cnt = T(p, '', { x: 1250, y: 500, size: 34, weight: 700, fill: COL.task, anchor: 'middle', o: 0 });
+    show(cnt, m('rep'));
+    prog(q => {
+      const n = 3 * q, v = (1 - Math.cos(2 * Math.PI * n)) / 2;
+      flexLeg(sc.pt, v * .8);
+      put(dot, { x: X0 + W * .8 * v, y: Y + 13 });
+      cnt.textContent = `повтор ${Math.min(3, Math.floor(n) + 1)}`;
+    }, m('grip'), m('rep', 3) - m('grip'), lin);
+    txt(p, '5–10 повторений, плавно и ритмично', 1250, 560, m('rep', .4), { size: 25, weight: 700, fill: COL.task, anchor: 'middle' });
+  }],
+
+  ['rules', 'Пассивные и активные', (m) => {
+    const p = panel(0);
+    infoCard(p, 90, 100, 690, 520, 'пассивные', '', ROMC.p, m('pr'));
+    ['силу даёт терапевт или аппарат (или здоровая конечность пациента)', 'мышцы через сустав не помогают и не сопротивляются', 'если сокращаются — это уже активное упражнение', 'только свободный объём: без форсирования и боли'].forEach((s, i) => para(p, '• ' + s, 120, 210 + i * 100, m('pr', .5 + i * 1.6), { size: 24, maxW: 620 }));
+    infoCard(p, 820, 100, 690, 520, 'активные', '', ROMC.a, m('ar'));
+    ['показать движение пассивно, затем пациент сам', 'руки наготове', 'помогать только для плавности', 'часто — в начале или в конце объёма, где у тяжести наибольший рычаг'].forEach((s, i) => para(p, '• ' + s, 850, 210 + i * 100, m(i < 2 ? 'ar' : 'as', i < 2 ? .5 + i * 1.6 : (i - 2) * 1.6), { size: 24, maxW: 620 }));
+  }],
+
+  ['gravity', 'Сила тяжести', (m) => {
+    const p = panel(0), GY = 520;
+    // three arm positions on a standing figure, with the weight of the arm and its lever arm
+    const A3 = [['вверх, против тяжести', 'помочь основным мышцам', 60, COL.bad, 'up'], ['параллельно полу', 'только поддержать', 90, COL.good, 'flat'], ['вниз, по тяжести', 'антагонисты контролируют спуск', 140, COL.int, 'down']];
+    A3.forEach(([h, s, ang, c, k], i) => {
+      const cx = 280 + i * 520;
+      ground(p, cx - 150, cx + 150, GY, m(k, -.2));
+      const f = fig(p, { x: cx - 40, y: GY - 182 * .6, s: .6, o: 0, pose: { aN: ang, eN: 2 } }); show(f.g, m(k, -.2));
+      const [hx, hy] = onStage(f, 'WN');
+      arrowTo(p, [hx, hy], [hx, hy + 70], m(k, .3), { col: c, w: 4 });
+      txt(p, h, cx, 110, m(k), { size: 25, weight: 700, fill: c, anchor: 'middle' });
+      txt(p, s, cx, 580, m(k, .5), { size: 23, fill: c, anchor: 'middle' });
+    });
+    labelBox(p, 800, 680, 940, ['сила меньше 3 из 5 → движения против тяжести требуют помощи'], COL.task, m('g3'), { size: 26 });
+    txt(p, 'большинство техник — лёжа на спине; сначала всё в одном положении, потом сменить', 800, 775, m('pos'), { size: 23, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-grav', prompt: ['Слабые мышцы. Что нужно в этом движении?'],
+    build: grid([
+      { parts: ['Лёжа на спине поднять руку вверх'], ans: ['u'], why: 'Против силы тяжести — помочь основным мышцам.' },
+      { parts: ['Лёжа на спине отвести ногу в сторону по столу'], ans: ['f'], why: 'Параллельно полу — только поддержать.' },
+      { parts: ['Опустить руку из положения над головой'], ans: ['d'], why: 'По силе тяжести — помочь антагонистам контролировать спуск.' },
+      { parts: ['Лёжа на спине согнуть бедро'], ans: ['u'], why: 'Бедро поднимается против силы тяжести.' },
+      { parts: ['Сидя отвести руку горизонтально по столу'], ans: ['f'], why: 'Движение параллельно полу.' },
+    ], [['u', 'Помощь основным', COL.bad], ['f', 'Только поддержка', COL.good], ['d', 'Помощь при спуске', COL.int]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Не двигать, если движение мешает заживлению; раннее контролируемое движение без боли полезно.', 'w1'],
+     ['Признаки перебора — больше боли, отёка, жара и красноты.', 'w2'],
+     ['Захват у суставов, весь безболезненный объём до сопротивления тканей, 5–10 повторений.', 'w3'],
+     ['Сила тяжести: вверх — помощь основным мышцам, вниз — антагонистам.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-case', prompt: ['На второй день после операции после пассивных движений колено стало горячим, отёчным, боль усилилась. Что это значит?'],
+    build: choice([
+      ['Движения было слишком много или оно было неправильным — уменьшить и пересмотреть'],
+      ['Нормальная реакция — увеличить объём'],
+      ['Нужно перейти к растяжке'],
+      ['Нужно полностью обездвижить ногу надолго'],
+    ], 0, 'Больше боли, отёка и жара — признаки слишком большого или неправильного движения.',
+    [null, 'Это признаки перебора, увеличивать нельзя.', 'Растяжка тем более нагрузит ткани.', 'Полная неподвижность тоже вредна: спайки, контрактуры, застой крови.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Если движение нарушает заживление, упражнения на объём противопоказаны.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Полная неподвижность ускоряет восстановление.'], ans: ['f'], why: 'Неверно: ведёт к спайкам, контрактурам и затягивает восстановление.' },
+      { parts: ['Если давить за пределы доступного объёма, это уже растяжка.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['При пассивных движениях мышцы пациента помогают движению.'], ans: ['f'], why: 'Неверно: если они сокращаются, упражнение становится активным.' },
+      { parts: ['Обычно выполняют 5–10 повторений.'], ans: ['t'], why: 'Верно, в зависимости от целей и реакции пациента.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

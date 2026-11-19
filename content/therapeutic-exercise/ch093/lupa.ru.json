@@ -1,0 +1,38 @@
+[
+ {
+  "beat": "otstr",
+  "fig": 0,
+  "target": "quads",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает quads, фигура ×0.82",
+  "off": "лупа видна меньше 2 с — мелькает"
+ },
+ {
+  "beat": "otstr",
+  "fig": 1,
+  "target": "hamstrings",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает hamstrings, фигура ×0.82",
+  "off": "лупа видна меньше 2 с — мелькает"
+ },
+ {
+  "beat": "otstr",
+  "fig": 2,
+  "target": "gastroc",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает gastroc, фигура ×0.82",
+  "off": "места для лупы нет"
+ },
+ {
+  "beat": "otstr",
+  "fig": 3,
+  "target": "tibAnt",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает tibAnt, фигура ×0.82",
+  "off": "места для лупы нет"
+ }
+]

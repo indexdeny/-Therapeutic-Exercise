@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Растяжка: тазобедренный сустав — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 40, title: 'Ручная растяжка: тазобедренный сустав', minutes: 8, language: 'ru', next: '../ch041/' };
+// bio begin: places of the biomechanics layer (B switches); made by tools/therapeutic-exercise/bio.py from content/therapeutic-exercise/ch040/bio.ru.json
+const BIO = [
+  {"beat": "rot", "fig": 0, "level": "angle", "joint": "kN", "load": {"type": "none"}},
+];
+// bio end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch040/cards.ru.json
+const CARDS_SHORT = {
+  "таз стабилизируют всегда\nмышцы бедра крепятся к тазу и пояснице; иначе сила уйдёт в поясницу": "иначе — в поясницу",
+  "другое бедро — в разгибании\nремень или рука: таз не наклоняется назад": "таз не наклоняется назад",
+  "другая нога\nприжата по передней поверхности бедра — рукой или ремнём": "прижата рукой или ремнём",
+  "ротация уточняет\nнаружная ротация бедра — сила на внутренние мышцы группы, внутренняя — на наружные": "наружная → внутренние мышцы",
+  "можно на коленях на столе\nпятка на плече терапевта, обе руки держат колено прямым": "пятка на плече терапевта",
+  "растягиваем приводящие\nтерапевт поддерживает нижнюю часть бедра; таз — давление на противоположную подвздошную ость или другая нога в лёгком отведении": "поддерживает бедро, таз — давление на ость",
+  "не тянуть за лодыжку\nтолько при стабильном и безболезненном колене: сильно нагружаются внутренние связки колена; авторы не рекомендуют": "нагружаются внутренние связки колена",
+  "порядок\nстабилизировать гребень, колено согнуть, бедро разогнуть до нуля, дать бедру опуститься, прижать снаружи": "гребень → колено → бедро",
+};
+// cards-short end
+
+const SKIN = '#d8d1c1', HAND = '#b9cfe0';
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const gripOval = (p, k = 1, col = HAND) => { const e = mk('ellipse', { rx: 24 * k, ry: 16 * k, fill: col, 'fill-opacity': .9, stroke: '#7d93a3', 'stroke-width': 2 }, p); put(e, { o: 0 }); return e; };
+// Hip muscles on the side-view figure (near side).
+const HIP = {
+  glut: [['H', 'Sh', 10, -26], ['H', 'KN', 40, -12]],         // gluteus maximus: back of the pelvis → upper femur
+  ilio: [['H', 'Sh', 46, 14], ['H', 'KN', 18, 12]],           // iliopsoas: lumbar spine → lesser trochanter
+};
+// A strap over the far thigh: it holds the other leg flat on the table.
+function strapOn(p, pt, t0) {
+  const e = mk('rect', { width: 26, height: 60, rx: 6, fill: COL.int, 'fill-opacity': .85 }, p);
+  const upd = () => { const [x, y] = onStage(pt, 'KF'); put(e, { x: x - 60, y: y - 40 }); };
+  pt.onSet.push(upd); upd();
+  put(e, { o: 0 }); show(e, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Тазобедренный сустав', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 4 · Урок 40', { x: 800, y: 240, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Ручная растяжка: тазобедренный сустав', { x: 800, y: 335, size: 54, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'таз — всегда под контролем', 800, 430, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const sc = tableScene(art, { hx: 820, top: 680, s: .55, t0: 0 });
+    muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 13 });
+    show(art, m('sub', .2));
+    prog(q => sc.pt.set({ hN: 85 * wave(q, 1) }), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['gen', 'Таз', (m) => {
+    const p = panel(0);
+    // without stabilisation the pelvis tilts back and the low back rounds: the stretch goes into the spine
+    const sc = tableScene(p, { hx: 640, top: 560, s: 1.2, t0: .2, hands: null });
+    const sp = mk('path', { fill: 'none', stroke: COL.int, 'stroke-width': 6, 'stroke-linecap': 'round' }, p);
+    const upd = k => { const [hx, hy] = onStage(sc.pt, 'H'), [sx, sy] = onStage(sc.pt, 'Sh'); const A = [hx + (sx - hx) * .05, hy + (sy - hy) * .05], B = [hx + (sx - hx) * .5, hy + (sy - hy) * .5]; sp.setAttribute('d', `M${A[0]} ${A[1]}Q${(A[0] + B[0]) / 2} ${(A[1] + B[1]) / 2 + 22 * k} ${B[0]} ${B[1]}`); };
+    upd(-1);
+    prog(q => { const v = io(q); sc.pt.set({ hN: 110 * v, kN: 0, hF: 40 * v }); upd(lerp(-1, 1.2, v)); }, m('why', .3), 2.4, lin);
+    txt(p, 'без стабилизации: другое бедро поднимается, поясница округляется', 640, 800, m('why', 1), { size: 23, weight: 700, fill: COL.bad, anchor: 'middle' });
+    infoCard(p, 1100, 140, 420, 300, 'таз стабилизируют всегда', 'мышцы бедра крепятся к тазу и пояснице; иначе сила уйдёт в поясницу', COL.int, m('pel'), { size: 23 });
+  }],
+
+  ['glut', 'Большая ягодичная', (m) => {
+    const p = panel(0);
+    const sc = tableScene(p, { hx: 640, top: 560, s: 1.2, t0: .2, hands: ['KN', 'heelN'], follow: 'KN', dx: 80 });
+    const gl = muscleOn(sc.pt, ...HIP.glut, { w: 16, slack: 1.3 });
+    prog(q => sc.pt.set({ hN: 125 * io(q), kN: 130 * io(q) }), m('glut', .6), 2.4, lin);
+    strapOn(p, sc.pt, m('opp'));
+    txt(p, 'бедро и колено сгибают вместе', 640, 110, m('glut'), { size: 26, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'большая ягодичная натягивается', 640, 160, m('glut', 2.6), { size: 23, weight: 700, fill: ANAT.stretch, anchor: 'middle' });
+    infoCard(p, 1100, 200, 420, 220, 'другое бедро — в разгибании', 'ремень или рука: таз не наклоняется назад', COL.int, m('opp'), { size: 23 });
+  }],
+
+  ['ham', 'Задняя группа', (m) => {
+    const p = panel(0);
+    let shoulder = false;
+    const sc = tableScene(p, { hx: 600, top: 560, s: 1.2, t0: .2, hands: ['KN', 'AN'], follow: 'AN', dx: 60 });
+    const pt = sc.pt, ham = muscleOn(pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 14 });
+    strapOn(p, pt, m('opp'));
+    prog(q => pt.set({ hN: 82 * io(q), kN: 0 }), m('move', .2), 2.4, lin);
+    txt(p, 'колено разогнуто, голень на руке или плече терапевта', 600, 110, m('ham'), { size: 24, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'задняя группа натягивается', 600, 160, m('move', 1), { size: 23, weight: 700, fill: ANAT.stretch, anchor: 'middle' });
+    infoCard(p, 1060, 140, 460, 170, 'другая нога', 'прижата по передней поверхности бедра — рукой или ремнём', COL.int, m('opp'), { size: 22 });
+    infoCard(p, 1060, 330, 460, 230, 'ротация уточняет', 'наружная ротация бедра — сила на внутренние мышцы группы, внутренняя — на наружные', COL.whole, m('rot'), { size: 22 });
+    infoCard(p, 1060, 580, 460, 200, 'можно на коленях на столе', 'пятка на плече терапевта, обе руки держат колено прямым', HAND, m('kneel'), { size: 22 });
+  }],
+
+  ['ilio', 'Подвздошно-поясничная', (m) => {
+    const p = panel(0);
+    // at the table edge: the other knee to the chest (pelvis held), this thigh pressed down, the knee free
+    let farKnee = () => [0, 0];
+    const sc = tableScene(p, { hx: 820, top: 520, s: 1.15, t0: .2, hands: ['KN', () => farKnee()], thx: 40, pose: { hF: 115, kF: 120 } });
+    farKnee = () => onStage(sc.pt, 'KF');
+    sc.pt.set({});
+    const il = muscleOn(sc.pt, ...HIP.ilio, { w: 13, slack: .96 });
+    prog(q => sc.pt.set({ hN: -22 * io(q), kN: 30 * io(q) }), m('push', .5), 2.4, lin);
+    txt(p, 'у края стола; другое колено — к груди', 800, 110, m('ilio'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'давить на бедро вниз, колено свободно', 800, 160, m('push'), { size: 23, weight: 700, fill: HAND, anchor: 'middle' });
+    txt(p, 'подвздошно-поясничная натягивается', 800, 820, m('push', 2.5), { size: 23, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    pill(p, 'или лёжа на животе: стабилизировать таз через ягодицы и поднять бедро', 800, 880, m('prone'), { col: COL.dim, size: 21 });
+  }],
+
+  ['rf', 'Прямая мышца бедра', (m) => {
+    const p = panel(0);
+    const sc = tableScene(p, { hx: 700, top: 560, s: 1.2, t0: .2, prone: true, hands: ['heelN', 'H'], thx: 150, pose: { hN: -12 } });
+    const rf = muscleOn(sc.pt, ...MUSCLE.rectus, { after: 'ftN', w: 14 });
+    prog(q => sc.pt.set({ kN: 125 * io(q) }), m('rf', .5), 2.4, lin);
+    txt(p, 'бедро разогнуто — колено сгибают как можно дальше', 800, 110, m('rf'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'прямая мышца натягивается', 800, 160, m('rf', 2.5), { size: 23, weight: 700, fill: ANAT.stretch, anchor: 'middle' });
+    pill(p, 'бедро не отводится и не вращается', 800, 820, m('no'), { col: COL.bad, size: 23 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-mus', prompt: ['Какая мышца растягивается?'],
+    build: grid([
+      { parts: ['Сгибание бедра с согнутым коленом'], ans: ['gl'], why: 'Большая ягодичная.' },
+      { parts: ['Сгибание бедра с разогнутым коленом'], ans: ['hm'], why: 'Задняя группа бедра.' },
+      { parts: ['Разгибание бедра, колено свободно'], ans: ['il'], why: 'Подвздошно-поясничная.' },
+      { parts: ['Разгибание бедра с согнутым коленом'], ans: ['rf'], why: 'Прямая мышца бедра.' },
+    ], [['gl', 'Большая ягодичная', COL.nat], ['hm', 'Задняя группа', COL.whole], ['il', 'Подвздошно-поясничная', COL.task], ['rf', 'Прямая мышца', COL.real]], { multi: false, text: true }),
+  }], done) }],
+
+  ['abd', 'Отведение', (m) => {
+    const p = panel(0), cx = 470, cy = 380, s = .9;
+    txt(p, 'вид сверху', cx, 70, .2, { size: 22, fill: COL.dim, anchor: 'middle' });
+    tableTop(p, cx, cy, s, .2);
+    const f = flatFig(p, cx, cy, s, .2);
+    const P0 = [8, 10], thighPt = () => { const u = f.pts.uL, n = [-u[1], u[0]]; return [30 + 120 * u[0] - 14 * n[0], 120 * u[1] - 14 * n[1]]; };
+    f.leg(10);
+    const add = muscleEl(f.top, { rest: Math.hypot(...thighPt().map((v, i) => v - P0[i])), w: 14 });
+    const gK = gripOval(f.top, 1.1), gP = gripOval(f.top, 1.1), gA = gripOval(f.top, 1, COL.bad);
+    f.onSet.push(() => { add.set(P0, thighPt()); const K = f.pts.K, A = f.pts.A; put(gK, { x: K[0] - 6, y: K[1] - 40, r: -f.thL }); put(gA, { x: A[0], y: A[1], r: -f.thL }); });
+    f.leg(3); f.legF(6);
+    put(gP, { x: -60, y: -10 });
+    show(gK, m('abd', 1)); show(gP, m('abd', 1.6));
+    prog(q => f.leg(lerp(3, 40, io(q))), m('abd', 2.4), 2.2, lin);
+    infoCard(p, 860, 120, 660, 270, 'растягиваем приводящие', 'терапевт поддерживает нижнюю часть бедра; таз — давление на противоположную подвздошную ость или другая нога в лёгком отведении', COL.whole, m('abd'), { size: 22 });
+    show(gA, m('mm', .4));
+    f.leg(40); const Aend = f.stage(f.pts.A); f.leg(3);
+    cross(p, Aend[0] + 46, Aend[1] - 30, 14, m('mm', .8));
+    infoCard(p, 860, 420, 660, 230, 'не тянуть за лодыжку', 'только при стабильном и безболезненном колене: сильно нагружаются внутренние связки колена; авторы не рекомендуют', COL.bad, m('mm'), { size: 22 });
+  }],
+
+  ['add', 'Приведение', (m) => {
+    const p = panel(0), s = 1.2, TOP = 560;
+    // side-lying, the upper leg is stretched; seen from behind, the leg drops across the midline
+    bench(p, 200, 1000, TOP, .2, COL.dim, 155 * s);
+    const cx = 600, defs = mk('defs', {}, p), line = mix(SKIN, COL.board, .62);
+    const body = G(p, { o: 0 });
+    limbEl(body, defs, SKIN, 50, 58, line).set([cx, TOP - 50], [cx - 250, TOP - 70]);
+    mk('circle', { cx: cx - 320, cy: TOP - 70, r: 40, fill: SKIN, stroke: line, 'stroke-width': 2 }, body);
+    limbEl(body, defs, mix(SKIN, COL.board, .3), 22, 16, line).set([cx + 20, TOP - 30], [cx + 200, TOP - 20]);
+    limbEl(body, defs, mix(SKIN, COL.board, .3), 16, 11, line).set([cx + 200, TOP - 20], [cx + 130, TOP - 10]);
+    show(body, .2);
+    const H = [cx + 20, TOP - 90], th = limbEl(p, defs, SKIN, 24, 17, line), sh = limbEl(p, defs, SKIN, 17, 11, line);
+    const tfl = muscleEl(p, { rest: 230, w: 12 });
+    const crest = gripOval(p, 1.1), knee = gripOval(p, 1.1);
+    const set = a => {
+      const r = rad(a), K = [H[0] + 230 * Math.cos(r), H[1] + 230 * Math.sin(r)], A = [K[0] - 70, K[1] + 120];
+      th.set(H, K); sh.set(K, A);
+      const n = [-Math.sin(r), Math.cos(r)], U = [H[0] - 18 * n[0] + 10, H[1] - 18 * n[1]], D = [K[0] - 16 * n[0], K[1] - 16 * n[1]];
+      tfl.rest = 230 / (1 + .12 * clamp((a - 2) / 22, 0, 1)); tfl.set(U, D);
+      put(crest, { x: H[0] - 30, y: H[1] - 40 }); put(knee, { x: K[0], y: K[1] - 30, r: a });
+    };
+    set(-14);
+    [th.e, sh.e, tfl.g].forEach(e => { put(e, { o: 0 }); show(e, .2); });
+    show(crest, m('st')); show(knee, m('grav', 1));
+    prog(q => set(lerp(-14, 0, io(q))), m('st', 1.5), 1.5, lin);
+    prog(q => set(lerp(0, 24, io(q))), m('grav', .5), 2.4, lin);
+    txt(p, 'вид сзади: лёжа на боку, растягиваемая нога сверху, нижняя согнута', 800, 110, m('add'), { size: 24, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pill(p, 'напрягатель широкой фасции и подвздошно-большеберцовый тракт', 800, 170, m('add', 1.5), { col: ANAT.taut, size: 22 });
+    infoCard(p, 1080, 260, 440, 230, 'порядок', 'стабилизировать гребень, колено согнуть, бедро разогнуть до нуля, дать бедру опуститься, прижать снаружи', HAND, m('st'), { size: 22 });
+    labelBox(p, 800, 840, 1000, ['бедро не разгибается до нуля → сначала растянуть сгибатели бедра'], COL.int, m('note'), { size: 23 });
+  }],
+
+  ['rot', 'Ротация', (m) => {
+    const p = panel(0);
+    // prone, knee bent 90°: the shank is the lever; the leg moving out turns the hip in, and the reverse
+    const sc = tableScene(p, { hx: 620, top: 560, s: 1.15, t0: .2, prone: true, hands: null, pose: { kN: 90 } });
+    const pt = sc.pt;
+    // a top-view inset: the shank swings like a pendulum; out = internal rotation, in = external rotation
+    const C = [1180, 260], g = G(p, { o: 0 }), defs = mk('defs', {}, g), line = mix(SKIN, COL.board, .62);
+    mk('rect', { x: C[0] - 200, y: C[1] - 70, width: 400, height: 380, rx: 16, fill: 'none', stroke: EDGE, 'stroke-width': 2 }, g);
+    T(g, 'вид сверху: голень вертикально', { x: C[0], y: C[1] - 86, size: 20, fill: COL.dim, anchor: 'middle' });
+    limbEl(g, defs, SKIN, 26, 20, line).set([C[0], C[1] - 40], [C[0], C[1] + 40]);
+    const shank = limbEl(g, defs, SKIN, 18, 12, line);
+    const gM = mk('ellipse', { rx: 18, ry: 12, fill: HAND, stroke: '#7d93a3', 'stroke-width': 2 }, g);
+    const setS = a => { const E = [C[0] + 220 * Math.sin(rad(a)), C[1] + 40 + 220 * Math.cos(rad(a))]; shank.set([C[0], C[1] + 40], E); put(gM, { x: E[0] + (a > 0 ? -18 : 18), y: E[1] - 40, r: -a }); };
+    setS(0);
+    show(g, m('er'));
+    prog(q => setS(-32 * io(q)), m('er', 1.5), 1.6, lin);
+    prog(q => setS(lerp(-32, 32, io(q))), m('ir', .4), 2, lin);
+    const lab = txt(p, 'наружная ротация: давить на наружную лодыжку', 620, 120, m('er'), { size: 24, weight: 700, fill: COL.whole, anchor: 'middle' });
+    hide(lab, m('ir'), .3);
+    txt(p, 'внутренняя ротация: давить на внутреннюю лодыжку', 620, 120, m('ir'), { size: 24, weight: 700, fill: COL.task, anchor: 'middle' });
+    pill(p, 'таз стабилизирован через ягодицы', 620, 180, m('er', 1), { col: HAND, size: 22 });
+    pill(p, 'или сидя на краю стола', 1180, 680, m('sit'), { col: COL.dim, size: 22 });
+    labelBox(p, 800, 820, 1200, ['сила через колено: оно стабильно и безболезненно; иначе — за бедро, но рычаг хуже и кожа скручивается'], COL.bad, m('knee'), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-pel', prompt: ['Как стабилизировать таз?'],
+    build: grid([
+      { parts: ['Задняя группа бедра'], ans: ['f'], why: 'Другое бедро прижато к столу.' },
+      { parts: ['Подвздошно-поясничная лёжа на спине'], ans: ['c'], why: 'Другое колено к груди.' },
+      { parts: ['Приводящие'], ans: ['a'], why: 'Противоположная подвздошная ость или другая нога в лёгком отведении.' },
+      { parts: ['Ротации лёжа на животе'], ans: ['b'], why: 'Давление через ягодицы.' },
+    ], [['f', 'Другое бедро к столу', COL.int], ['c', 'Другое колено к груди', COL.task], ['a', 'Ость или другая нога', COL.whole], ['b', 'Через ягодицы', HAND]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Таз стабилизируют всегда.', 'w1'],
+     ['Большая ягодичная — колено согнуто; задняя группа — колено прямое, другое бедро прижато.', 'w2'],
+     ['Подвздошно-поясничная — другое колено к груди; прямая мышца — бедро разогнуто, колено согнуто.', 'w3'],
+     ['Приводящие — без тяги за лодыжку; напрягатель фасции — на боку; ротации — при стабильном колене.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-fix', prompt: ['Студент растягивает заднюю группу бедра: другая нога поднимается со стола, поясница округляется. Что исправить?'],
+    build: choice([
+      ['Прижать другое бедро к столу рукой или ремнём'],
+      ['Согнуть колено растягиваемой ноги'],
+      ['Растягивать быстрее'],
+      ['Отвести растягиваемую ногу'],
+    ], 0, 'Таз стабилизируют, прижимая другое бедро в разгибании.',
+    [null, 'Тогда задняя группа расслабится — растяжки не будет.', 'Скорость не решает проблему стабилизации.', 'Отведение не стабилизирует таз.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['При растяжке подвздошно-поясничной колено растягиваемой ноги лучше свободно разогнуть.'], ans: ['t'], why: 'Верно: прямая мышца не ограничит движение.' },
+      { parts: ['Приводящие удобнее растягивать за внутреннюю лодыжку.'], ans: ['f'], why: 'Неверно: нагружает внутренние связки колена.' },
+      { parts: ['Напрягатель широкой фасции растягивают лёжа на боку.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Внутренняя ротация бедра растягивает внутренние ротаторы.'], ans: ['f'], why: 'Неверно: наружные ротаторы.' },
+      { parts: ['Наружная ротация бедра направляет силу на внутренние мышцы задней группы.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

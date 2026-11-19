@@ -1,0 +1,621 @@
+{
+  "joint": "hip",
+  "title": "тазобедренный",
+  "structures": {
+    "ilio": {
+      "ru": "подвздошно-поясничная",
+      "en": "iliopsoas",
+      "kind": "muscle",
+      "limb": "ilio",
+      "close": "ilio"
+    },
+    "rf": {
+      "ru": "прямая мышца бедра",
+      "en": "rectus femoris",
+      "kind": "muscle",
+      "limb": "rf",
+      "close": "rf"
+    },
+    "gmax": {
+      "ru": "большая ягодичная",
+      "en": "gluteus maximus",
+      "kind": "muscle",
+      "limb": "gmax",
+      "close": "gmax"
+    },
+    "ham": {
+      "ru": "подколенные мышцы",
+      "en": "hamstrings",
+      "kind": "muscle",
+      "limb": "ham",
+      "close": "ham"
+    },
+    "tfl": {
+      "ru": "напрягатель широкой фасции",
+      "en": "tensor fasciae latae",
+      "kind": "muscle",
+      "limb": "tfl",
+      "close": "tfl"
+    },
+    "gmed": {
+      "ru": "средняя ягодичная",
+      "en": "gluteus medius",
+      "kind": "muscle",
+      "limb": "gmed",
+      "close": "gmed"
+    },
+    "gmin": {
+      "ru": "малая ягодичная",
+      "en": "gluteus minimus",
+      "kind": "muscle",
+      "close": "gmin"
+    },
+    "add": {
+      "ru": "приводящие мышцы",
+      "en": "adductors",
+      "kind": "muscle",
+      "limb": "add",
+      "close": "add"
+    },
+    "iliofem": {
+      "ru": "подвздошно-бедренная связка",
+      "en": "iliofemoral ligament",
+      "kind": "lig",
+      "limb": "iliofem",
+      "close": "iliofem"
+    },
+    "ischfem": {
+      "ru": "седалищно-бедренная связка",
+      "en": "ischiofemoral ligament",
+      "kind": "lig",
+      "limb": "ischfem",
+      "close": "ischfem"
+    },
+    "capA": {
+      "ru": "передняя капсула",
+      "en": "anterior capsule",
+      "kind": "cap",
+      "limb": "C.ant",
+      "close": "C.ant"
+    },
+    "capP": {
+      "ru": "задняя капсула",
+      "en": "posterior capsule",
+      "kind": "cap",
+      "limb": "C.post",
+      "close": "C.post"
+    },
+    "ifL": {
+      "ru": "подвздошно-бедренная, наружный пучок",
+      "en": "iliofemoral ligament, lateral band",
+      "kind": "lig",
+      "limb": "ifL",
+      "close": "ifL"
+    },
+    "ifM": {
+      "ru": "подвздошно-бедренная, внутренний пучок",
+      "en": "iliofemoral ligament, medial band",
+      "kind": "lig",
+      "limb": "ifM",
+      "close": "ifM"
+    },
+    "pf": {
+      "ru": "лобково-бедренная связка",
+      "en": "pubofemoral ligament",
+      "kind": "lig",
+      "limb": "pf",
+      "close": "pf"
+    },
+    "contactH": {
+      "ru": "бедро встретило живот",
+      "en": "soft-tissue approximation",
+      "kind": "contact"
+    },
+    "contactK": {
+      "ru": "голень встретила бедро",
+      "en": "soft-tissue approximation",
+      "kind": "contact"
+    },
+    "kneeEnd": {
+      "ru": "колено разогнуто до конца",
+      "en": "full knee extension",
+      "kind": "contact"
+    },
+    "contactLeg": {
+      "ru": "нога встретила другую ногу",
+      "en": "the other leg",
+      "kind": "contact"
+    }
+  },
+  "motions": [
+    {
+      "id": "flex",
+      "title": "сгибание — разгибание",
+      "ids": ["ilio", "rf", "gmax", "ham", "iliofem", "ischfem", "capA", "capP", "contactH", "contactK", "kneeEnd"],
+      "limb": {
+        "model": "hipSag",
+        "muscles": ["ilio", "rf", "gmax", "ham"]
+      },
+      "close": {
+        "model": "hipSag",
+        "muscles": ["ilio", "rf", "gmax", "ham"],
+        "clip": [160, 215]
+      },
+      "main": "th",
+      "dof": [
+        {
+          "key": "th",
+          "ru": "бедро",
+          "act": "сгибание бедра",
+          "range": [-30, 130],
+          "norm": [-10, 120],
+          "normNote": true,
+          "handle": {
+            "limb": 0.55,
+            "close": 0.32
+          }
+        },
+        {
+          "key": "kn",
+          "ru": "колено",
+          "act": "сгибание колена",
+          "range": [-10, 145],
+          "norm": [0, 135],
+          "normNote": true,
+          "handle": {
+            "limb": 0.62
+          }
+        }
+      ],
+      "groups": [
+        {
+          "id": "hflex",
+          "dof": "th",
+          "dir": 1,
+          "ids": ["ilio", "rf"]
+        },
+        {
+          "id": "hext",
+          "dof": "th",
+          "dir": -1,
+          "ids": ["gmax", "ham"]
+        },
+        {
+          "id": "kflex",
+          "dof": "kn",
+          "dir": 1,
+          "ids": ["ham"]
+        },
+        {
+          "id": "kext",
+          "dof": "kn",
+          "dir": -1,
+          "ids": ["rf"]
+        }
+      ],
+      "positions": {
+        "stand": {
+          "r": 0,
+          "q0": {
+            "th": 0,
+            "kn": 0
+          },
+          "above": [],
+          "limb": [250, 280, 0.62],
+          "close": [800, 560, 1.25]
+        },
+        "sit": {
+          "r": 0,
+          "q0": {
+            "th": 90,
+            "kn": 90
+          },
+          "above": ["K"],
+          "pad": 46,
+          "seat": true,
+          "limb": [170, 330, 0.55],
+          "close": [800, 560, 1.25]
+        },
+        "supine": {
+          "r": -90,
+          "q0": {
+            "th": 0,
+            "kn": 0
+          },
+          "above": ["K", "ankle", "heel"],
+          "pad": 0,
+          "table": true,
+          "limb": [230, 600, 0.55],
+          "close": [800, 330, 1.2]
+        },
+        "prone": {
+          "r": 90,
+          "q0": {
+            "th": 0,
+            "kn": 0
+          },
+          "above": ["K", "ankle"],
+          "pad": 34,
+          "table": true,
+          "limb": [640, 620, 0.55],
+          "close": [790, 290, 1.2]
+        }
+      },
+      "stops": [
+        {
+          "id": "rf",
+          "max": 0.159,
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "id": "ham",
+          "max": 0.22,
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "id": "iliofem",
+          "max": 0.071,
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "kn",
+          "min": -5,
+          "ids": ["kneeEnd"],
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "kn",
+          "max": 140,
+          "ids": ["contactK"],
+          "feel": "soft",
+          "note": true
+        },
+        {
+          "dof": "th",
+          "max": 125,
+          "ids": ["contactH"],
+          "feel": "soft",
+          "note": true
+        }
+      ],
+      "refs": [
+        {
+          "pos": "prone",
+          "q": {
+            "th": 0,
+            "kn": 0
+          },
+          "dof": "kn",
+          "to": 145,
+          "expect": 125,
+          "by": "rf",
+          "src": "note"
+        },
+        {
+          "pos": "supine",
+          "q": {
+            "th": 0,
+            "kn": 0
+          },
+          "dof": "th",
+          "to": 130,
+          "expect": 80,
+          "by": "ham",
+          "src": "note"
+        },
+        {
+          "pos": "supine",
+          "q": {
+            "th": 60,
+            "kn": 90
+          },
+          "dof": "th",
+          "to": 130,
+          "expect": 125,
+          "by": "contactH",
+          "src": "note"
+        },
+        {
+          "pos": "stand",
+          "q": {
+            "th": 0,
+            "kn": 0
+          },
+          "dof": "th",
+          "to": -30,
+          "expect": -15,
+          "by": "iliofem",
+          "src": "note"
+        },
+        {
+          "pos": "sit",
+          "q": {
+            "th": 90,
+            "kn": 90
+          },
+          "dof": "kn",
+          "to": 145,
+          "expect": 140,
+          "by": "contactK",
+          "src": "note"
+        }
+      ],
+      "marks": [
+        {
+          "dof": "th",
+          "at": 30,
+          "short": "покой",
+          "ru": "положение покоя",
+          "page": 154
+        }
+      ],
+      "chip": "сгибание"
+    },
+    {
+      "id": "abd",
+      "title": "отведение — приведение",
+      "ids": ["gmed", "gmin", "tfl", "add", "ilio", "ifL", "ifM", "pf", "contactLeg"],
+      "limb": {
+        "model": "hipFront",
+        "muscles": ["gmed", "tfl", "add", "ilio"]
+      },
+      "close": {
+        "model": "hipFront",
+        "muscles": ["gmed", "gmin", "tfl", "add", "ilio"],
+        "clip": [160, 210]
+      },
+      "main": "ab",
+      "dof": [
+        {
+          "key": "ab",
+          "ru": "бедро",
+          "act": "отведение бедра",
+          "range": [-10, 60],
+          "norm": [0, 45],
+          "normNote": true,
+          "handle": {
+            "limb": 0.6,
+            "close": 0.3
+          }
+        }
+      ],
+      "groups": [
+        {
+          "id": "habd",
+          "dof": "ab",
+          "dir": 1,
+          "ids": ["gmed", "gmin", "tfl"]
+        },
+        {
+          "id": "hadd",
+          "dof": "ab",
+          "dir": -1,
+          "ids": ["add"]
+        }
+      ],
+      "positions": {
+        "stand": {
+          "r": 0,
+          "q0": {
+            "ab": 0
+          },
+          "above": [],
+          "limb": [320, 330, 0.6],
+          "close": [790, 440, 1.3]
+        },
+        "side": {
+          "r": 90,
+          "q0": {
+            "ab": 0
+          },
+          "above": ["K@L", "ankle@L"],
+          "pad": 30,
+          "table": true,
+          "range": {
+            "ab": [0, 60]
+          },
+          "rest": {
+            "ab": 0
+          },
+          "limb": [520, 640, 0.55],
+          "close": [800, 280, 1.25]
+        },
+        "supine": {
+          "r": 0,
+          "q0": {
+            "ab": 0
+          },
+          "above": [],
+          "gravity": false,
+          "limb": [320, 330, 0.6],
+          "close": [790, 440, 1.3],
+          "bed": [120, 112, 400, 770]
+        }
+      },
+      "stops": [
+        {
+          "id": "pf",
+          "max": 0.197,
+          "feel": "firm"
+        },
+        {
+          "dof": "ab",
+          "min": -10,
+          "ids": ["contactLeg"],
+          "feel": "soft",
+          "note": true
+        }
+      ],
+      "refs": [
+        {
+          "pos": "stand",
+          "q": {
+            "ab": 0
+          },
+          "dof": "ab",
+          "to": 60,
+          "expect": 45,
+          "by": "pf",
+          "src": "note"
+        },
+        {
+          "pos": "stand",
+          "q": {
+            "ab": 0
+          },
+          "dof": "ab",
+          "to": -20,
+          "expect": -10,
+          "by": "contactLeg",
+          "src": "note"
+        }
+      ],
+      "marks": [
+        {
+          "dof": "ab",
+          "at": 30,
+          "short": "покой",
+          "ru": "положение покоя",
+          "page": 154
+        }
+      ],
+      "chip": "отведение"
+    }
+  ],
+  "facts": [
+    {
+      "ru": "Положение покоя бедра — 30° сгибания, 30° отведения и лёгкая наружная ротация.",
+      "page": 154
+    },
+    {
+      "motion": "flex",
+      "ru": "Разгибание бедра ограничивают все три связки капсулы, сильнее всех — подвздошно-бедренная.",
+      "page": 716
+    },
+    {
+      "motion": "flex",
+      "ru": "Для нормальной ходьбы бедро должно разгибаться хотя бы на 10° за нейтраль.",
+      "page": 736
+    },
+    {
+      "motion": "abd",
+      "ru": "Отведение ограничивает лобково-бедренная связка.",
+      "page": 716
+    },
+    {
+      "motion": "abd",
+      "ru": "Лёжа на спине отведение идёт без силы тяжести (нога скользит по опоре), лёжа на боку — против неё.",
+      "page": 735
+    }
+  ],
+  "tasks": [
+    {
+      "id": "rest",
+      "text": "Поставьте бедро в положение покоя по сгибанию.",
+      "when": {
+        "motion": "flex",
+        "q": {
+          "th": [25, 35]
+        }
+      },
+      "hint": "Ищите зелёную метку «покой» на дуге у бедра.",
+      "show": {
+        "motion": "flex",
+        "pos": "supine",
+        "q": {
+          "th": 30
+        }
+      },
+      "why": "Положение покоя бедра — около 30° сгибания (и 30° отведения, лёгкая наружная ротация): капсула свободнее всего.",
+      "page": 154
+    },
+    {
+      "id": "extLig",
+      "text": "Разогните бедро до упора при прямом колене. Что его останавливает?",
+      "when": {
+        "motion": "flex",
+        "stop": "iliofem"
+      },
+      "hint": "Стоя тяните бедро назад.",
+      "show": {
+        "motion": "flex",
+        "pos": "stand",
+        "q": {
+          "th": -30
+        }
+      },
+      "why": "Разгибание бедра ограничивают связки капсулы, прежде всего подвздошно-бедренная.",
+      "page": 716
+    },
+    {
+      "id": "extRf",
+      "text": "Найдите позу, в которой разогнуть бедро мешает прямая мышца бедра.",
+      "when": {
+        "motion": "flex",
+        "stop": "rf"
+      },
+      "hint": "Сначала сильно согните колено, потом разгибайте бедро — удобнее лёжа на животе.",
+      "show": {
+        "motion": "flex",
+        "pos": "prone",
+        "path": [
+          {
+            "kn": 120
+          }
+        ],
+        "q": {
+          "th": -30
+        }
+      },
+      "why": "При согнутом колене прямая мышца бедра уже растянута и останавливает разгибание бедра; чтобы растянуть подвздошно-поясничную, колено оставляют прямым.",
+      "page": 118
+    },
+    {
+      "id": "abdPf",
+      "text": "Отведите бедро до упора. Какая связка его останавливает?",
+      "when": {
+        "motion": "abd",
+        "stop": "pf"
+      },
+      "hint": "Стоя ведите ногу в сторону.",
+      "show": {
+        "motion": "abd",
+        "pos": "stand",
+        "q": {
+          "ab": 60
+        }
+      },
+      "why": "Отведение ограничивает лобково-бедренная связка.",
+      "page": 716
+    },
+    {
+      "id": "abdSide",
+      "text": "Лёжа на боку в активном режиме поднимите ногу. Какие мышцы работают и как?",
+      "when": {
+        "motion": "abd",
+        "pos": "side",
+        "mode": "active",
+        "work": {
+          "habd": "con"
+        }
+      },
+      "hint": "Медленно отводите верхнюю ногу вверх.",
+      "show": {
+        "motion": "abd",
+        "pos": "side",
+        "mode": "active",
+        "q": {
+          "ab": 35
+        },
+        "dur": 2.2
+      },
+      "hold": 0.6,
+      "why": "Лёжа на боку отведение идёт против силы тяжести: средняя и малая ягодичные работают, укорачиваясь.",
+      "page": 735
+    }
+  ]
+}

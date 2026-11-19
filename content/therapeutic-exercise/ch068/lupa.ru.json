@@ -1,0 +1,19 @@
+[
+ {
+  "beat": "intro",
+  "fig": 0,
+  "target": "biceps",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает biceps, фигура ×0.72"
+ },
+ {
+  "beat": "val",
+  "fig": 0,
+  "target": "biceps",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает biceps, фигура ×0.62",
+  "off": "места для лупы нет"
+ }
+]

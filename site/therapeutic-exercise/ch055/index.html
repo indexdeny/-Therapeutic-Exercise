@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Специфичность и обратимость — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 55, title: 'Обратимость, SAID, перенос тренировки', minutes: 7, language: 'ru', next: '../ch056/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch055/lupa.ru.json
+const LUPA = [
+  {"beat": "intro", "fig": 0, "target": "m0", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch055/cards.ru.json
+const CARDS_SHORT = {
+  "для терапевта\nкакие параметры упражнений дадут нужный эффект для функции и целей пациента": "параметры → нужный эффект для функции",
+  "эффект зависит от способа тренировки\nсила, мощность, выносливость — каждая от «своих» упражнений": "каждая — от «своих» упражнений",
+  "похоже на функцию\nнужна выносливость больше, чем сила → меньшая интенсивность, дольше": "выносливость → меньшая интенсивность, дольше",
+  "в основе\nизменения строения и обмена веществ в мышце + нервная система: двигательное обучение": "строение и обмен мышцы + нервная система",
+  "приспособление временно\nесли новые возможности не используют в повседневных делах": "если не используют в делах",
+  "детренированность (detraining)\nс 1–2-й недели без упражнений — пока эффект не исчезнет": "с 1–2-й недели без упражнений",
+};
+// cards-short end
+
+const STR = COL.nat, POW = COL.task, END = COL.real;
+// A figure with the near foot on a step and the vasti (one-joint knee extensors) on the near thigh.
+// up(q) rises onto the step (the vasti shorten: concentric), q back to 0 lowers (they lengthen: eccentric).
+const UPST = { ...STAND, t: 6, hN: 4, kN: 4, fN: 6, hF: 14, kF: 50, fF: -15, aN: 16, aF: -4 };
+function stairFig(p, x, gy, s, t0) {
+  const f = fig(p, { x, y: gy - 182 * s, s, o: 0 });
+  f.set(STEP); plant(f, 'AF', x, gy);
+  const [hx, hy] = onStage(f, 'heelN'), [tx] = onStage(f, 'toeN'), A = onStage(f, 'AN');
+  const stp = mk('path', { d: `M${x - 80 * s} ${gy}H${hx - 10 * s}V${hy}H${tx + 70 * s}V${gy}`, fill: PANEL, stroke: COL.dim, 'stroke-width': 4 }, p);
+  p.insertBefore(stp, f.g);
+  put(stp, { o: 0 });
+  const vas = muscleOn(f, ['H', 'KN', 26, -14], ['KN', 'AN', 6, -19], { after: 'ftN', w: 14 });
+  const st0 = { f, vas, up: q => { f.set(blendPose(STEP, UPST, q)); plant(f, 'AN', A[0], A[1]); } };
+  if (t0 !== null) { show(f.g, t0); show(stp, t0); }
+  return st0;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Специфичность и обратимость', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 55', { x: 800, y: 200, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Специфичность, перенос', { x: 800, y: 285, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и обратимость', { x: 800, y: 350, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'чему именно учится мышца', 800, 430, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    path(art, 'M600 820H1000', { stroke: COL.faint, 'stroke-width': 3 });
+    const sf = stairFig(art, 760, 820, .7, 0);
+    prog(q => { sf.up((1 - Math.cos(2 * Math.PI * 2.5 * q)) / 2); sf.vas.act(.85); }, .6, Math.max(4, D - 1.2), lin);
+    show(art, .4);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['said', 'Принцип SAID', (m) => {
+    const p = panel(0);
+    txt(p, 'принцип SAID (specific adaptation to imposed demands)', 800, 82, m('said'), { size: 29, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'специфическая адаптация к предъявляемым требованиям', 800, 124, m('said', 1), { size: 25, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'требование', 245, 200, m('match'), { size: 23, fill: COL.dim, anchor: 'middle', weight: 600 });
+    txt(p, 'адаптация', 720, 200, m('match'), { size: 23, fill: COL.dim, anchor: 'middle', weight: 600 });
+    const lane = (y, a, b, col, t0) => {
+      labelBox(p, 245, y, 420, [a], col, t0, { size: 22 });
+      arrowTo(p, [462, y], [562, y], t0 + .4, { col, w: 4, dur: .4 });
+      labelBox(p, 720, y, 300, [b], col, t0 + .7, { size: 26 });
+    };
+    lane(270, 'тяжёлый груз', 'сила', STR, m('match', .8));
+    lane(390, 'много повторений', 'выносливость', END, m('match', 1.8));
+    lane(510, 'больше работы, меньше времени', 'мощность', POW, m('ex'));
+    // Wolff's law: trabeculae line up with the load (scheme)
+    const wg = G(p, { o: 0 });
+    mk('rect', { x: 1110, y: 250, width: 200, height: 330, rx: 60, fill: mix(ANAT.bone, COL.board, .7), stroke: ANAT.bone, 'stroke-width': 4 }, wg);
+    const tr = [];
+    for (let i = 0; i < 18; i++) {
+      const cx = 1150 + (i % 3) * 60, cy = 300 + Math.floor(i / 3) * 46, a0 = [35, -50, 70, -20, 55, -65][i % 6] + i * 7;
+      const l = G(wg, { x: cx, y: cy, r: a0 });
+      path(l, 'M0 -17V17', { stroke: ANAT.bone, 'stroke-width': 4 });
+      tr.push([l, a0]);
+    }
+    show(wg, m('wolff'));
+    const ld = G(p, { o: 0 });
+    path(ld, 'M1210 140V230M1194 212L1210 232L1226 212', { stroke: COL.whole, 'stroke-width': 6 });
+    path(ld, 'M1210 690V600M1194 618L1210 598L1226 618', { stroke: COL.whole, 'stroke-width': 6 });
+    T(ld, 'нагрузка', { x: 1240, y: 190, size: 22, fill: COL.whole });
+    show(ld, m('wolff', 1));
+    prog(q => tr.forEach(([l, a0]) => put(l, { r: lerp(a0, 0, io(q)) })), m('wolff', 1.6), 2.4, lin);
+    txt(p, 'закон Вольфа (Wolff’s law)', 1210, 735, m('wolff'), { size: 25, weight: 700, fill: ANAT.bone, anchor: 'middle' });
+    txt(p, 'ткани перестраиваются под нагрузку', 1210, 772, m('wolff', .6), { size: 22, fill: COL.dim, anchor: 'middle' });
+    pill(p, 'схема', 1440, 270, m('wolff'), { col: COL.dim, size: 19 });
+    infoCard(p, 80, 620, 860, 150, 'для терапевта', 'какие параметры упражнений дадут нужный эффект для функции и целей пациента', COL.good, m('use'), { size: 23 });
+  }],
+
+  ['spec', 'Специфичность тренировки', (m) => {
+    const p = panel(0), GY = 760;
+    txt(p, 'специфичность тренировки (specificity of training)', 800, 82, m('spec'), { size: 29, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ground(p, 80, 620, GY, m('stairs', -.6));
+    const sf = stairFig(p, 300, GY, 1, m('stairs', -.6));
+    const lab = txt(p, '', 340, 840, m('stairs', .6), { size: 25, weight: 700, fill: STR, anchor: 'middle' });
+    prog(q => { sf.up(io(q)); sf.vas.act(.9); lab.textContent = 'подъём: мышца укорачивается'; }, m('stairs', .6), 2.2, lin);
+    prog(q => { sf.up(1 - io(q)); sf.vas.act(.9); lab.textContent = 'спуск: удлиняется под нагрузкой'; lab.setAttribute('fill', COL.task); }, m('ecc', .2), 2.6, lin);
+    pill(p, 'концентрически', 170, 230, m('stairs', 1), { col: STR, size: 23 });
+    pill(p, 'эксцентрически', 420, 230, m('ecc', .2), { col: COL.task, size: 23 });
+    pill(p, 'с опорой на ногу', 300, 290, m('ecc', 1.2), { col: COL.good, size: 23 });
+    const sp = pill(p, 'постепенно быстрее', 300, 350, m('speed'), { col: COL.whole, size: 23 });
+    prog(q => { sf.up((1 - Math.cos(2 * Math.PI * 3 * q * q)) / 2); sf.vas.act(.9); }, m('speed', .4), 5, lin);
+    txt(p, 'четырёхглавая (широкие мышцы)', 300, 880, m('stairs', -.3), { size: 21, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 680, 120, 860, 130, 'эффект зависит от способа тренировки', 'сила, мощность, выносливость — каждая от «своих» упражнений', COL.whole, m('spec', 1), { size: 22 });
+    infoCard(p, 680, 270, 860, 150, 'похоже на функцию', 'нужна выносливость больше, чем сила → меньшая интенсивность, дольше', COL.good, m('mim'), { size: 22 });
+    [['режим', 'mode'], ['скорость', 'velocity'], ['положение', 'position'], ['рисунок движения', 'pattern']].forEach(([a, b], i) => pill(p, `${a} (${b})`, 890 + (i % 2) * 420, 470 + Math.floor(i / 2) * 60, m('four', .5 + i * .7), { col: COL.task, size: 23 }));
+    infoCard(p, 680, 590, 860, 100, 'всегда — практика самого задания', null, COL.good, m('task'), { size: 22 });
+    infoCard(p, 680, 710, 860, 150, 'в основе', 'изменения строения и обмена веществ в мышце + нервная система: двигательное обучение', COL.dim, m('why'), { size: 22 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-stairs', prompt: ['Цель пациента — подниматься и спускаться по лестнице дома. Что лучше подходит к цели?'],
+    build: choice([
+      ['Шаг на ступеньку вверх и вниз с опорой на ногу, постепенно быстрее'],
+      ['Разгибание колена сидя с манжетой на голени'],
+      ['Напряжение четырёхглавой мышцы без движения, лёжа'],
+      ['Езда на велотренажёре'],
+    ], 0, 'Тот же рисунок движения: концентрически вверх, эксцентрически вниз, с опорой — и до нужной скорости.',
+    [null, 'Без опоры на ногу и далеко от рисунка ходьбы по лестнице.', 'Статическая работа лёжа — не тот режим и не то положение.', 'Другой рисунок движения; нет эксцентрической работы спуска с опорой.']),
+  }], done) }],
+
+  ['trans', 'Перенос тренировки', (m) => {
+    const p = panel(0);
+    txt(p, 'перенос тренировки (transfer of training, cross-training effect)', 800, 82, m('trans'), { size: 28, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pill(p, 'между скоростями', 560, 140, m('lim', .5), { col: COL.dim, size: 22 });
+    pill(p, 'между видами упражнений', 900, 140, m('lim', 1), { col: COL.dim, size: 22 });
+    txt(p, 'очень ограниченно', 1230, 148, m('lim', 1.5), { size: 23, fill: COL.dim, italic: true });
+    // cross-education: the trained arm and the other arm
+    const A = elbowModel(p, { x: 90, y: 340, s: 1.15 }), B = elbowModel(p, { x: 90, y: 590, s: 1.15 });
+    [A, B].forEach(e => { put(e.g, { o: 0 }); show(e.g, m('cross')); });
+    const db = G(p, { o: 0 });
+    dumbbell(db, 1);
+    const setA = a => { A.set(a); const { E, W, hand } = A.pts; put(db, { x: 90 + hand[0] * 1.15, y: 340 + hand[1] * 1.15, r: Math.atan2(W[1] - E[1], W[0] - E[0]) * 180 / Math.PI + 90, s: 1.15 * .8 }); };
+    setA(160); B.set(160); show(db, m('cross'));
+    prog(q => { setA(lerp(160, 70, (1 - Math.cos(2 * Math.PI * 2.5 * q)) / 2)); A.act('biceps', 1); B.act('biceps', .25); }, m('cross', .5), 5, lin);
+    txt(p, 'тренируемая рука', 100, 412, m('cross'), { size: 22, fill: STR, weight: 600 });
+    txt(p, 'другая рука — немного сильнее', 100, 662, m('cross', 1), { size: 22, fill: COL.dim, weight: 600 });
+    txt(p, '(предполагают)', 100, 692, m('cross', 1), { size: 21, fill: COL.dim, italic: true });
+    // carry-over between elements and speeds
+    const link = (y, a, b, w, dash, note, col, t0) => {
+      labelBox(p, 720, y, 300, [a], col, t0, { size: 23 });
+      const l = path(p, `M875 ${y}H1045`, { stroke: col, 'stroke-width': w, 'stroke-dasharray': dash || 'none' }, { o: 0 });
+      path(p, `M1035 ${y - 8 - w}L1060 ${y}L1035 ${y + 8 + w}`, { stroke: col, 'stroke-width': Math.max(3, w * .6) }, { o: 0 });
+      show(l, t0 + .4); show(l.nextSibling, t0 + .4);
+      labelBox(p, 1230, y, 300, [b], col, t0 + .6, { size: 23 });
+      txt(p, note, 960, y - 24, t0 + .8, { size: 21, fill: col, anchor: 'middle', weight: 600 });
+    };
+    link(260, 'силовая', 'выносливость', 9, null, 'умеренно', STR, m('se'));
+    link(400, 'выносливость', 'сила', 3, '6 8', 'почти нет', END, m('es'));
+    txt(p, 'вместе с силовой — прирост силы меньше', 1060, 470, m('es', 3), { size: 22, fill: COL.bad, anchor: 'middle' });
+    link(560, 'одна скорость', 'другие скорости', 4, null, 'немного', COL.whole, m('vel'));
+    // specific training vs carry-over
+    const bars = G(p, { o: 0 });
+    T(bars, 'специфичная тренировка', { x: 560, y: 690, size: 23, fill: COL.good, weight: 600 });
+    T(bars, 'перенос', { x: 560, y: 750, size: 23, fill: COL.dim, weight: 600 });
+    const b1 = mk('rect', { x: 870, y: 668, width: 0, height: 30, rx: 9, fill: COL.good }, bars), b2 = mk('rect', { x: 870, y: 728, width: 0, height: 30, rx: 9, fill: COL.dim }, bars);
+    show(bars, m('less'));
+    prog(q => { b1.setAttribute('width', (600 * q).toFixed(1)); b2.setAttribute('width', (130 * q).toFixed(1)); }, m('less', .3), 1.2);
+    txt(p, '→ программа повторяет нужную функцию', 1000, 830, m('less', 2.5), { size: 25, fill: COL.good, anchor: 'middle', weight: 600 });
+    pill(p, 'схема', 1500, 785, m('less'), { col: COL.dim, size: 19 });
+  }],
+
+  ['rev', 'Обратимость', (m) => {
+    const p = panel(0), x0 = 120, y0 = 690, W = 860, H = 440;
+    txt(p, 'принцип обратимости (reversibility principle)', 560, 82, m('rev'), { size: 29, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    chartAxes(p, x0, y0, W, H, 'сила', 'недели →', .3);
+    // training to week 8 of 20, then either maintenance or detraining after 1–2 weeks
+    const base = .2, top = .75, wk = t => t * 20;
+    const trainF = t => base + (top - base) * (1 - Math.exp(-wk(t) / 3.2)) / (1 - Math.exp(-8 / 3.2));
+    const T8 = .4, T10 = .5;
+    const keepF = t => t <= T8 ? trainF(t) : top;
+    const lossF = t => t <= T10 ? keepF(t) : base + (top - base) * Math.exp(-(wk(t) - 10) / 3.5);
+    const f = v => v.toFixed(1);
+    draw(path(p, fnPath(x0, y0, W, H, trainF, 0, T8), { stroke: COL.whole, 'stroke-width': 5 }, { d: 0 }), m('rev', 1), 2);
+    path(p, `M${x0 + T8 * W} ${y0 - H - 10}V${y0}`, { stroke: COL.dim, 'stroke-width': 2, 'stroke-dasharray': '7 7' }, { o: 0 });
+    show(p.lastChild, m('rev', 2.5));
+    txt(p, 'упражнения прекратили', x0 + T8 * W + 10, y0 - H + 4, m('rev', 2.5), { size: 21, fill: COL.dim });
+    txt(p, 'тренировка', x0 + 60, y0 - .32 * H, m('rev', 1.5), { size: 22, fill: COL.whole, weight: 600 });
+    draw(path(p, fnPath(x0, y0, W, H, keepF, T8, 1), { stroke: COL.good, 'stroke-width': 5 }, { d: 0 }), m('keep'), 1.5);
+    txt(p, 'используют и поддерживают', x0 + .66 * W, y0 - top * H - 18, m('keep', .8), { size: 22, fill: COL.good, weight: 600, anchor: 'middle' });
+    draw(path(p, fnPath(x0, y0, W, H, lossF, T8, 1), { stroke: COL.bad, 'stroke-width': 5, 'stroke-dasharray': '12 8' }, { d: 0 }), m('det'), 2);
+    const br = G(p, { o: 0 });
+    path(br, `M${f(x0 + T8 * W)} ${y0 - top * H + 26}V${y0 - top * H + 38}H${f(x0 + T10 * W)}V${y0 - top * H + 26}`, { stroke: COL.bad, 'stroke-width': 3 });
+    T(br, '1–2 нед.', { x: x0 + (T8 + T10) / 2 * W, y: y0 - top * H + 70, size: 21, fill: COL.bad, anchor: 'middle', weight: 700 });
+    show(br, m('det', .4));
+    txt(p, 'детренированность', x0 + .8 * W, y0 - .1 * H, m('det', 1.5), { size: 23, fill: COL.bad, weight: 700, anchor: 'middle' });
+    pill(p, 'схема', 900, 150, .3, { col: COL.dim, size: 19 });
+    infoCard(p, 1040, 120, 500, 160, 'приспособление временно', 'если новые возможности не используют в повседневных делах', COL.whole, m('use', -1.5), { size: 22 });
+    infoCard(p, 1040, 300, 500, 120, '…или нет поддерживающей программы', null, COL.whole, m('keep'), { size: 22 });
+    infoCard(p, 1040, 440, 500, 160, 'детренированность (detraining)', 'с 1–2-й недели без упражнений — пока эффект не исчезнет', COL.bad, m('det'), { size: 22 });
+    infoCard(p, 1040, 620, 500, 120, 'как можно раньше — в повседневные дела', null, COL.good, m('early'), { size: 22 });
+    infoCard(p, 1040, 760, 500, 100, 'поддержка — на всю жизнь', null, COL.good, m('life'), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-transfer', prompt: ['Верно или нет?'],
+    build: grid([
+      { parts: ['Силовая тренировка умеренно улучшает и выносливость'], ans: ['t'], why: 'Такой перенос описан.' },
+      { parts: ['Тренировка выносливости заметно увеличивает силу'], ans: ['f'], why: 'На силу она почти не влияет.' },
+      { parts: ['Без упражнений сила держится годами'], ans: ['f'], why: 'Детренированность начинается через 1–2 недели.' },
+      { parts: ['Тренировка одной руки может немного усилить другую'], ans: ['t'], why: 'Такой перекрёстный эффект предполагают.' },
+      { parts: ['Перенос даёт больше, чем специфичная тренировка'], ans: ['f'], why: 'Перенос заметно меньше.' },
+    ], TF, { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['SAID: тело приспосабливается именно к тем требованиям, которые к нему предъявляют.', 'w1'],
+     ['Упражнения похожи на функцию: режим, скорость, положение, рисунок движения.', 'w2'],
+     ['Перенос мал: сила умеренно улучшает выносливость, выносливость силу — почти нет.', 'w3'],
+     ['Обратимость: без использования и поддержки эффект теряется; спад — через 1–2 недели.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-principle', prompt: ['Какой это принцип?'],
+    build: grid([
+      { parts: ['Через две недели без упражнений сила начинает снижаться'], ans: ['r'], why: 'Обратимость: детренированность.' },
+      { parts: ['Для спуска по лестнице тренируют эксцентрическую работу с опорой на ногу'], ans: ['s'], why: 'Специфичность: режим и положение как в задаче.' },
+      { parts: ['Тренировали правую руку — левая тоже стала чуть сильнее'], ans: ['t'], why: 'Перенос (перекрёстный эффект).' },
+      { parts: ['Чтобы сила продолжала расти, груз постепенно увеличивают'], ans: ['o'], why: 'Перегрузка (урок 54).' },
+      { parts: ['Кость перестраивается под нагрузки, которые на неё действуют'], ans: ['s'], why: 'SAID продолжает закон Вольфа.' },
+    ], [['o', 'Перегрузка', COL.task], ['s', 'SAID', COL.good], ['t', 'Перенос', COL.whole], ['r', 'Обратимость', COL.bad]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-keep', prompt: ['Пациентка закончила курс укрепления мышц плеча и выписывается. Как сохранить результат?'],
+    build: choice([
+      ['Использовать новую силу в повседневных делах и продолжать поддерживающие упражнения'],
+      ['Ничего не делать: сила останется'],
+      ['Сделать перерыв на два месяца, потом начать заново'],
+      ['Тренировать только другую руку'],
+    ], 0, 'Обратимость: эффект держится, только если его используют и поддерживают.',
+    [null, 'Без использования спад начинается уже через 1–2 недели.', 'За перерыв эффект будет потерян.', 'Перенос на другую конечность мал и не сохранит силу этой.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROM: шейный и поясничный отделы — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 25, title: 'ROM: шейный и поясничный отделы', minutes: 6, language: 'ru', next: '../ch026/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch025/cards.ru.json
+const CARDS_SHORT = {
+  "колени в одну сторону\nпока противоположная сторона таза не оторвётся от стола": "пока таз не оторвётся",
+  "верхняя рука\nстабилизирует грудную клетку": "стабилизирует грудную клетку",
+  "затем\nв другую сторону": "в другую сторону",
+};
+// cards-short end
+
+const SKIN = '#d8d1c1', HAND = '#b9cfe0';
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A lumbar spine line drawn over a lying figure: from the pelvis to the lower thorax. bend > 0 arches it toward
+// the belly (lordosis, extension), bend < 0 rounds it toward the back (flexion).
+function lumbar(p, f, t0) {
+  const e = mk('path', { fill: 'none', stroke: COL.int, 'stroke-width': 6, 'stroke-linecap': 'round' }, p);
+  put(e, { o: 0 }); show(e, t0);
+  e.bend = 1;
+  const upd = () => {
+    const [hx, hy] = onStage(f, 'H'), [sx, sy] = onStage(f, 'Sh');
+    const A = [hx + (sx - hx) * .02, hy + (sy - hy) * .02], B = [hx + (sx - hx) * .5, hy + (sy - hy) * .5];
+    const dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy), nx = -dy / L * f.dir, ny = dx / L * f.dir, k = 22 * f.s * e.bend;
+    const M = [(A[0] + B[0]) / 2 + nx * k, (A[1] + B[1]) / 2 + ny * k];   // normal in stage space: anterior for supine and prone
+    e.setAttribute('d', `M${A[0].toFixed(1)} ${A[1].toFixed(1)}Q${M[0].toFixed(1)} ${M[1].toFixed(1)} ${B[0].toFixed(1)} ${B[1].toFixed(1)}`);
+  };
+  f.onSet.push(upd); upd();
+  e.upd = upd;
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Позвоночник', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 3 · Урок 25', { x: 800, y: 240, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Объём движений: шейный и поясничный', { x: 800, y: 325, size: 54, weight: 600, anchor: 'middle' });
+    T(g, 'отделы позвоночника', { x: 800, y: 390, size: 44, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'позвоночник тоже нужно двигать', 800, 470, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    bench(art, 600, 1020, 700, 0, COL.dim, 78);
+    const pt = supine(art, 830, 700, .5, 0);
+    show(art, m('sub', .2));
+    prog(q => { const v = wave(q, 1); pt.set({ hN: 125 * v, hF: 125 * v, kN: 125 * v, kF: 125 * v }); }, m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['cflex', 'Сгибание шеи', (m) => {
+    const p = panel(0), TOP = 540, s = 1.25, legH = 155 * s, hx = 930;
+    const th = fig(p, { x: 545, y: TOP + legH - 182 * s, s, col: HAND, o: 0, pose: { t: 26, hN: 28, hF: 24, kN: 8, kF: 8 } });
+    bench(p, hx - 280 * s, hx + 300 * s, TOP, .2, COL.dim, legH);
+    const pt = supine(p, hx, TOP, s, .2);
+    // the extensors at the back of the neck: from the upper back to the occiput; they lengthen as the head bends
+    const ext = muscleOn(pt, ['Sh', 'H', 14, 10], ['Hc', 'Sh', 6, 21], { w: 10, after: 'torso' });
+    put(ext.g, { o: 0 });
+    show(th.g, .2);
+    holdHand(th, 'N', pt, () => { const [x, y] = onStage(pt, 'Hc'); return [x - 4, y + 18]; });
+    holdHand(th, 'F', pt, () => { const [x, y] = onStage(pt, 'Hc'); return [x + 8, y + 22]; });
+    txt(p, 'обе руки под затылком, терапевт у головного конца', 800, 110, m('pos'), { size: 26, weight: 700, fill: HAND, anchor: 'middle' });
+    prog(q => pt.set({ hd: 25 * Math.min(1, q * 2) }), m('nod', .3), 1.6, io);
+    txt(p, '1 · кивок: подбородок к гортани', 800, 180, m('nod'), { size: 26, weight: 700, fill: COL.task, anchor: 'middle' });
+    prog(q => pt.set({ hd: lerp(25, 60, q) }), m('full', .3), 1.6, io);
+    txt(p, '2 · дальше — голова к грудине', 800, 230, m('full'), { size: 26, weight: 700, fill: COL.good, anchor: 'middle' });
+    show(ext.g, m('nod'));
+    txt(p, 'мышцы задней поверхности шеи растягиваются', 800, 800, m('full', .8), { size: 23, weight: 700, fill: ANAT.stretch, anchor: 'middle' });
+    NOTE(p, 800, 846, m('full', .8));
+  }],
+
+  ['cext', 'Разгибание шеи', (m) => {
+    const p = panel(0);
+    const sc = (cx, edge, k, t0) => {
+      const TOP = 500, s = .95;
+      bench(p, edge ? cx + 20 : cx - 300, cx + 300, TOP, t0, COL.dim, 155 * s);
+      const pt = supine(p, cx + 120, TOP, s, t0);
+      prog(q => pt.set({ hd: -(edge ? 70 : 18) * wave(q, 1) }), t0 + .5, 4, lin);
+      txt(p, k, cx, 720, t0, { size: 23, weight: 700, fill: edge ? COL.good : COL.int, anchor: 'middle' });
+      return pt;
+    };
+    sc(400, false, 'на столе — только голова и верхний отдел', m('sup'));
+    sc(1130, true, 'голова за краем стола — весь шейный отдел', m('sup', 2));
+    txt(p, 'разгибание: наклонить голову назад', 800, 110, m('ext'), { size: 27, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pill(p, 'или лёжа на животе, или сидя', 800, 790, m('sup', 4), { col: COL.dim, size: 23 });
+  }],
+
+  ['clat', 'Наклон и поворот', (m) => {
+    const p = panel(0), cx = 520, cy = 460, s = 1.05;
+    txt(p, 'вид сверху: пациент лежит на спине', cx, 70, .2, { size: 23, fill: COL.dim, anchor: 'middle' });
+    tableTop(p, cx, cy, s, .2);
+    const f = flatFig(p, cx, cy, s, .2).face(true);
+    prog(q => f.head(25 * Math.sin(2 * Math.PI * 2 * q), 0), m('lat', .3), m('rot') - m('lat', .3), lin);
+    prog(q => f.head(0, 70 * Math.sin(2 * Math.PI * 2 * q)), m('rot', .3), 5, lin);
+    labelBox(p, 1200, 240, 600, ['боковой наклон: ухо к плечу'], COL.whole, m('lat'), { size: 26 });
+    labelBox(p, 1200, 380, 600, ['ротация: из стороны в сторону'], COL.task, m('rot'), { size: 26 });
+    labelBox(p, 1200, 540, 600, ['шея — в нейтрали между', 'сгибанием и разгибанием'], COL.chalk, m('lat', 1.5), { size: 25 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-cext', prompt: ['Пациент лежит на спине. Как разогнуть весь шейный отдел?'],
+    build: choice([['Голова должна выйти за край стола'], ['Подложить подушку под затылок'], ['Сделать только кивок']], 0,
+      'На столе разгибаются только голова и верхний шейный отдел; для всего отдела голова выходит за край.',
+      [null, 'Подушка, наоборот, сгибает шею.', 'Кивок — это сгибание головы относительно шеи.']),
+  }], done) }],
+
+  ['lflex', 'Сгибание поясницы', (m) => {
+    const p = panel(0), TOP = 540, s = 1.2, legH = 155 * s;
+    const th = fig(p, { x: 900 + 140 * s, y: TOP + legH - 182 * s, s, dir: -1, col: HAND, o: 0, pose: { t: 24, hN: 26, hF: 22, kN: 8, kF: 8 } });
+    bench(p, 900 - 330 * s, 900 + 350 * s, TOP, .2, COL.dim, legH);
+    const pt = supine(p, 900, TOP, s, .2);
+    show(th.g, .2);
+    const sp = lumbar(p, pt, m('pel', -.2));
+    holdHand(th, 'N', pt, () => onStage(pt, 'KN'));
+    holdHand(th, 'F', pt, () => { const [x, y] = onStage(pt, 'KF'); return [x, y + 10]; });
+    prog(q => { const v = wave(q, 1.25), hip = 135 * v; pt.set({ hN: hip, hF: hip, kN: 130 * v, kF: 130 * v }); sp.bend = hip < 90 ? 1 : lerp(1, -1.2, (hip - 90) / 45); sp.upd(); }, m('knees'), m('sac', 3) - m('knees'), lin);
+    txt(p, 'колени к груди', 800, 110, m('knees'), { size: 27, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    labelBox(p, 800, 200, 980, ['поясница сгибается, когда бёдра согнуты полностью и таз поворачивается кзади'], COL.int, m('pel'), { size: 24 });
+    pill(p, 'больше — приподнять крестец нижней рукой', 800, 280, m('sac'), { col: HAND, size: 23 });
+    txt(p, 'жёлтая линия — поясничный отдел', 400, 790, m('pel', .5), { size: 21, fill: COL.int, anchor: 'middle' });
+  }],
+
+  ['lext', 'Разгибание поясницы', (m) => {
+    const p = panel(0), TOP = 540, s = 1.2, legH = 155 * s;
+    const th = fig(p, { x: 900 - 200 * s, y: TOP + legH - 182 * s, s, col: HAND, o: 0, pose: { t: 24, hN: 26, hF: 22, kN: 8, kF: 8 } });
+    bench(p, 900 - 350 * s, 900 + 330 * s, TOP, .2, COL.dim, legH);
+    const pt = fig(p, { x: 900, y: TOP - 25 * s, s, r: 90, o: 0, pose: { ...STAND, hN: 0, hF: 0, kN: 0, kF: 0, aN: 4, aF: 4, eN: 6, eF: 6, fN: -40, fF: -40 } });
+    show(pt.g, .2); show(th.g, .2);
+    const sp = lumbar(p, pt, m('ext', -.2));
+    sp.bend = .6; sp.upd();
+    holdHand(th, 'N', pt, () => onStage(pt, 'KN'));
+    holdHand(th, 'F', pt, () => onStage(pt, 'KF'));
+    prog(q => { const v = wave(q, 1.25); pt.set({ hN: -30 * v, hF: -30 * v }); sp.bend = .6 + 1.2 * v; sp.upd(); }, m('ext', .5), 6, lin);
+    txt(p, 'лёжа на животе: поднимать бёдра', 800, 110, m('ext'), { size: 27, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    labelBox(p, 800, 200, 900, ['таз поворачивается кпереди — поясница разгибается'], COL.int, m('ext', 2), { size: 25 });
+  }],
+
+  ['lrot', 'Ротация поясницы', (m) => {
+    const p = panel(0), cx = 560, TOP = 600;
+    txt(p, 'вид со стороны стоп: согнутые ноги, стопы на столе', cx, 110, .2, { size: 24, fill: COL.dim, anchor: 'middle' });
+    path(p, `M${cx - 300} ${TOP}H${cx + 300}`, { stroke: COL.dim, 'stroke-width': 6 });
+    const thx = mk('ellipse', { cx, cy: TOP - 70, rx: 170, ry: 70, fill: SKIN, 'fill-opacity': .15, stroke: SKIN, 'stroke-width': 2, 'stroke-dasharray': '8 6' }, p);
+    put(thx, { o: 0 }); show(thx, m('hook'));
+    T(p, 'грудная клетка', { x: cx - 170, y: TOP - 160, size: 21, fill: COL.dim, o: 0 });
+    show(p.lastChild, m('hook'));
+    const pel = G(p, { x: cx, y: TOP - 40, o: 0 }), defs = mk('defs', {}, p), line = mix(SKIN, COL.board, .62);
+    const rg = mk('radialGradient', { id: 'lrK', cx: .38, cy: .3, r: .8 }, defs);
+    [[0, mix(SKIN, '#ffffff', .45)], [.55, SKIN], [1, mix(SKIN, '#000000', .45)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, rg));
+    mk('ellipse', { cx: 0, cy: 0, rx: 150, ry: 40, fill: 'url(#lrK)', stroke: line, 'stroke-width': 2 }, pel);
+    [-60, 60].forEach(x => { limbEl(pel, defs, SKIN, 30, 22, line).set([x, -20], [x * .4, -230]); mk('circle', { cx: x * .4, cy: -240, r: 26, fill: 'url(#lrK)', stroke: line, 'stroke-width': 2 }, pel); });
+    show(pel, m('hook'));
+    const hand = mk('rect', { x: cx - 60, y: TOP - 150, width: 120, height: 34, rx: 16, fill: HAND, 'fill-opacity': .8 }, p);
+    put(hand, { o: 0 }); show(hand, m('stab'));
+    prog(q => { const v = Math.sin(2 * Math.PI * 1.25 * q); put(pel, { r: 35 * v, x: cx + 40 * v, y: TOP - 40 - 12 * Math.abs(v) }); }, m('push'), m('rep', 3) - m('push'), lin);
+    infoCard(p, 960, 160, 550, 160, 'колени в одну сторону', 'пока противоположная сторона таза не оторвётся от стола', COL.task, m('push'), { size: 23 });
+    infoCard(p, 960, 350, 550, 130, 'верхняя рука', 'стабилизирует грудную клетку', HAND, m('stab'), { size: 23 });
+    infoCard(p, 960, 510, 550, 110, 'затем', 'в другую сторону', COL.good, m('rep'), { size: 23 });
+  }],
+
+  ['comb', 'Сочетания плоскостей', (m) => {
+    const p = panel(0), GY = 640;
+    labelBox(p, 800, 100, 1000, ['сочетать плоскости: косые, функциональные, диагональные паттерны'], COL.chalk, m('comb'), { size: 26 });
+    pill(p, 'сгибание запястья + локтевое отведение', 420, 220, m('ex1'), { col: COL.whole, size: 24 });
+    pill(p, 'сгибание плеча + отведение + наружная ротация', 1150, 220, m('ex2'), { col: COL.whole, size: 24 });
+    ground(p, 520, 1080, GY, m('ex3', -.3));
+    const f = fig(p, { x: 800, y: GY - 182 * .9, s: .9, o: 0 }); show(f.g, m('ex3', -.3));
+    poseTo(f, { aN: 160, eN: 125, hd: -6 }, m('ex3', .3), 1.4);
+    txt(p, 'рука за голову, как при расчёсывании, + поворот шеи', 800, 700, m('ex3', .6), { size: 25, weight: 700, fill: COL.good, anchor: 'middle' });
+    pill(p, 'диагонали PNF — в главе 6', 800, 770, m('pnf'), { col: COL.real, size: 24 });
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Шейный отдел: руки под затылком; сначала кивок, затем сгибание к грудине.', 'w1'],
+     ['Весь шейный отдел разгибается, когда голова за краем стола; ещё — лёжа на животе или сидя.', 'w2'],
+     ['Поясница: колени к груди; лёжа на животе — бёдра вверх; ротация — колени в сторону, грудь держим.', 'w3'],
+     ['Сочетайте плоскости и функциональные паттерны.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tech', prompt: ['Какая техника для поясничного отдела?'],
+    build: grid([
+      { parts: ['Сгибание поясничного отдела'], ans: ['k'], why: 'Оба колена к груди.' },
+      { parts: ['Разгибание поясничного отдела'], ans: ['p'], why: 'Лёжа на животе поднять бёдра.' },
+      { parts: ['Ротация поясничного отдела'], ans: ['s'], why: 'Колени в сторону, грудь стабилизирована.' },
+      { parts: ['Нужно больше сгибания — приподнять крестец'], ans: ['k'], why: 'Колени к груди, нижняя рука приподнимает крестец.' },
+      { parts: ['Верхняя рука стабилизирует грудную клетку'], ans: ['s'], why: 'При ротации грудь держат, колени уходят в сторону.' },
+    ], [['k', 'Колени к груди', COL.int], ['p', 'Бёдра вверх', COL.whole], ['s', 'Колени в сторону', COL.task]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Лёжа на спине на столе можно разогнуть весь шейный отдел.'], ans: ['f'], why: 'Неверно: только голову и верхний отдел.' },
+      { parts: ['Поясница сгибается, когда таз поворачивается кзади.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['При ротации поясницы стабилизируют грудную клетку.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Боковой наклон шеи делают из положения полного сгибания.'], ans: ['f'], why: 'Неверно: шея в нейтрали.' },
+      { parts: ['Сгибание запястья можно сочетать с локтевым отведением.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

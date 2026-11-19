@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тестирование перед программой — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 81, title: 'Тестирование перед программой', minutes: 9, language: 'ru', next: '../ch082/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch081/cards.ru.json
+const CARDS_SHORT = {
+  "тест физической формы\nу здоровых людей": "у здоровых людей",
+  "ступенчатый нагрузочный тест\nс записью ЭКГ": "с записью ЭКГ",
+  "оценивают по потреблению O₂\nсубмаксимальному, максимальному или ограниченному симптомами; оно отражает, как человек доставляет и использует кислород": "доставка и использование кислорода",
+  "только для подготовленных\nмолодые и средний возраст, после тщательного отбора, давно бегают": "давно бегают",
+  "дыхание\nчаще и глубже, но не затруднённое; нет чувства нехватки воздуха": "не затруднённое",
+  "кожа\nщёки, нос, мочки ушей — розовые, влажные, тёплые: кровоток отводит тепло и снабжает мышцы": "розовые и тёплые",
+};
+// cards-short end
+
+const FITC = COL.good, STRC = COL.task, O2C = '#9fe0f0', STOP = COL.bad;
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+// A row of a list with a coloured marker.
+function row(p, x, y, w, s, col, t0, { size = 21, h = 64 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x, y, width: w, height: h, rx: 12, fill: PANEL, stroke: col, 'stroke-width': 2 }, g);
+  mk('circle', { cx: x + 24, cy: y + h / 2, r: 8, fill: col }, g);
+  const t = para(g, s, x + 44, y + h / 2 + size * .35, null, { size, maxW: w - 60 });
+  put(t, { o: 1, y: -(t._h - size * 1.32) / 2 });
+  show(g, t0);
+  return g;
+}
+// The Bruce protocol: five stages of 3 minutes (speed in km/h, grade in %); only the first and last are in the book.
+const BRUCE = [[2.7, 10], [4.0, 12], [5.5, 14], [6.8, 16], [8.0, 18]];
+// A head in profile facing right whose cheeks, nose and earlobe flush: hd.flush(k).
+function headSide(p, cx, cy, r, t0) {
+  const g = G(p, { o: 0 }), id = 'hs' + (++SHADE_ID), defs = mk('defs', {}, g), gr = mk('radialGradient', { id, cx: .4, cy: .32, r: .8 }, defs);
+  [[0, '#f4ede0'], [.6, '#d8d1c1'], [1, '#8f877a']].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, gr));
+  mk('path', { d: `M${cx - r * .42} ${cy + r * .5}L${cx - r * .5} ${cy + r * 1.45}H${cx + r * .3}L${cx + r * .22} ${cy + r * .6}Z`, fill: '#b8b0a2', stroke: '#6f685d', 'stroke-width': 2 }, g);
+  mk('circle', { cx, cy, r, fill: `url(#${id})`, stroke: '#6f685d', 'stroke-width': 2 }, g);
+  path(g, `M${cx + r * .92} ${cy - r * .05}L${cx + r * 1.22} ${cy + r * .22}L${cx + r * .95} ${cy + r * .3}`, { fill: '#d8d1c1', stroke: '#6f685d', 'stroke-width': 2 });
+  mk('ellipse', { cx: cx - r * .08, cy: cy + r * .05, rx: r * .16, ry: r * .26, fill: '#cfc7b8', stroke: '#6f685d', 'stroke-width': 2 }, g);
+  mk('circle', { cx: cx + r * .55, cy: cy - r * .2, r: r * .07, fill: '#3d3a35' }, g);
+  const fl = [[cx + r * .55, cy + r * .3, r * .26], [cx + r * 1.05, cy + r * .2, r * .13], [cx - r * .08, cy + r * .28, r * .1]].map(([x, y, rr]) =>
+    mk('circle', { cx: x, cy: y, r: rr, fill: '#f08c8c', opacity: 0 }, g));
+  if (t0 !== null) show(g, t0);
+  return { g, flush(k) { fl.forEach(e => e.setAttribute('opacity', (.75 * k).toFixed(2))); } };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Тестирование', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 7 · Урок 81', { x: 800, y: 150, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Тестирование', { x: 800, y: 235, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'перед программой упражнений', { x: 800, y: 300, size: 44, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как оценить выносливость и когда нужен нагрузочный тест', 800, 380, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const tm = treadmill(art, 620, 850, .8);
+    const e = ecgStrip(art, 900, 640, 500, 60, { win: 3 });
+    prog(q => { tm.set({ grade: 10 + 8 * q, ph: q * 8 }); e.set(80 + 50 * q, q * 8); }, .4, Math.max(4, D - 1.4), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['two', 'Два вида тестов', (m, D) => {
+    const p = panel(0);
+    txt(p, 'два разных теста', 800, 62, m('two'), { size: 28, weight: 700, anchor: 'middle' });
+    infoCard(p, 60, 100, 700, 120, 'тест физической формы', 'у здоровых людей', FITC, m('two'), { size: 23 });
+    const t1 = treadmill(p, 410, 560, .72, m('two', .5));
+    prog(q => t1.set({ ph: q * 10, run: true }), m('two', .5), Math.max(4, D - m('two', .8)), lin);
+    infoCard(p, 840, 100, 700, 120, 'ступенчатый нагрузочный тест', 'с записью ЭКГ', STRC, m('two', 2), { size: 23 });
+    const t2 = treadmill(p, 1110, 560, .72, m('two', 2.5));
+    prog(q => t2.set({ grade: 10 + 6 * q, ph: q * 7 }), m('two', 2.5), Math.max(4, D - m('two', 2.8)), lin);
+    const e = ecgStrip(p, 1300, 330, 230, 34, { win: 2, t0: m('two', 2.5) });
+    prog(q => e.set(90 + 30 * q, q * 12), m('two', 2.5), Math.max(4, D - m('two', 2.8)), lin);
+    txt(p, 'кому нужен:', 1190, 610, m('who'), { size: 22, weight: 700, fill: STRC, anchor: 'middle' });
+    ['выздоравливающие пациенты', 'симптомы ишемической болезни', '35 лет и старше — даже без симптомов'].forEach((s, i) => pill(p, s, 1190, 660 + i * 56, m('who', .8 + i * 1.1), { col: STRC, size: 21 }));
+    infoCard(p, 60, 620, 700, 240, 'оценивают по потреблению O₂', 'субмаксимальному, максимальному или ограниченному симптомами; оно отражает, как человек доставляет и использует кислород', O2C, m('base'), { size: 22 });
+  }],
+
+  ['field', 'Полевые тесты', (m, D) => {
+    const p = panel(0);
+    txt(p, 'полевые тесты', 800, 62, m('field'), { size: 28, weight: 700, anchor: 'middle' });
+    // a running track with a runner
+    const tg = G(p, { o: 0 });
+    mk('rect', { x: 100, y: 120, width: 620, height: 300, rx: 150, fill: 'none', stroke: '#c0705a', 'stroke-width': 26 }, tg);
+    mk('rect', { x: 100, y: 120, width: 620, height: 300, rx: 150, fill: 'none', stroke: COL.chalk, 'stroke-width': 2, 'stroke-dasharray': '10 10' }, tg);
+    mk('rect', { x: 150, y: 170, width: 520, height: 200, rx: 100, fill: mix(COL.good, COL.board, .7) }, tg);
+    show(tg, m('field'));
+    const rd = put(mk('circle', { r: 13, fill: COL.task, stroke: COL.board, 'stroke-width': 3 }, p), { o: 0 });
+    const ovalPt = u => { const L1 = 320, L2 = Math.PI * 150, P = 2 * L1 + 2 * L2, s = (u % 1) * P;
+      if (s < L1) return [260 + s, 120]; if (s < L1 + L2) { const a = -Math.PI / 2 + (s - L1) / 150; return [580 + 150 * Math.cos(a), 270 + 150 * Math.sin(a)]; }
+      if (s < 2 * L1 + L2) return [580 - (s - L1 - L2), 420]; const a = Math.PI / 2 + (s - 2 * L1 - L2) / 150; return [260 + 150 * Math.cos(a), 270 + 150 * Math.sin(a)]; };
+    prog(q => { const [x, y] = ovalPt(q * 4); put(rd, { x, y, o: 1 }); }, m('run'), Math.max(4, D - m('run')), lin);
+    const clk = txt(p, '', 410, 285, m('run'), { size: 34, weight: 700, fill: COL.task, anchor: 'middle' });
+    prog(q => { const s = Math.round(q * 720); clk.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }, m('run'), Math.max(4, D - m('run')), lin);
+    row(p, 60, 460, 700, 'бег на 2,4 км — на время', FITC, m('run', .5));
+    row(p, 60, 535, 700, 'бег 12 минут — на расстояние', FITC, m('run', 1.5));
+    txt(p, 'в книге — 1,5 мили', 410, 630, m('run', 1.5), { size: 19, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'хорошо согласуются с VO₂max', 410, 668, m('run', 3), { size: 22, weight: 700, fill: O2C, anchor: 'middle' });
+    infoCard(p, 60, 700, 700, 160, 'только для подготовленных', 'молодые и средний возраст, после тщательного отбора, давно бегают', STOP, m('lim'), { size: 22 });
+    // for the less active: walking and stepping
+    txt(p, 'для менее активных', 1180, 130, m('walk'), { size: 26, weight: 700, fill: COL.whole, anchor: 'middle' });
+    const wf = fig(p, { x: 900, y: 500 - 182 * .8, s: .8, o: 0 });
+    show(wf.g, m('walk'));
+    ground(p, 870, 1260, 500, m('walk'));
+    walk(wf, m('walk', .3), Math.max(3, D - m('walk', .6)), { cycles: 5, dx: 240 });
+    const sf = stepUp(p, 1360, 500, .8, m('walk', 3));
+    put(sf.g, { o: 0 }); show(sf.g, m('walk', 3));
+    repeatPose(sf, STEP, m('walk', 4.5), Math.max(3, D - m('walk', 4.8)), 4, ['AF', 1360, 500]);
+    ['ходьба на 1,6 км', '6-минутная ходьба', 'степ-тест'].forEach((s, i) => pill(p, s, 1180, 580 + i * 60, m('walk', .6 + i * 1.2), { col: COL.whole, size: 23 }));
+    txt(p, 'в книге — 1 миля', 1180, 790, m('walk', 1), { size: 19, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['multi', 'Ступенчатый тест', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ступенчатый тест: VO₂max напрямую', 800, 62, m('multi'), { size: 28, weight: 700, anchor: 'middle' });
+    const tm = treadmill(p, 330, 560, .78, m('multi'));
+    // a mouthpiece to the gas analyser
+    const ga = G(p, { o: 0 });
+    mk('rect', { x: 60, y: 140, width: 170, height: 70, rx: 10, fill: '#2c353d', stroke: O2C, 'stroke-width': 2 }, ga);
+    T(ga, 'O₂ · CO₂', { x: 145, y: 184, size: 22, weight: 700, fill: O2C, anchor: 'middle' });
+    const hose = path(ga, '', { stroke: '#9aa8b0', 'stroke-width': 6 });
+    show(ga, m('multi', .5));
+    txt(p, 'анализ выдыхаемого воздуха', 145, 240, m('multi', .5), { size: 18, fill: COL.dim, anchor: 'middle' });
+    const e = ecgStrip(p, 70, 650, 520, 50, { win: 3, t0: m('st', 3) });
+    txt(p, 'ЭКГ всё время теста', 330, 740, m('st', 3), { size: 20, fill: COL.good, anchor: 'middle' });
+    // the chart: workload in stages, VO2 rises with each and plateaus at the top
+    const x0 = 700, y0 = 790, w = 800, h = 560, n = 6, sw = w / n;
+    chartAxes(p, x0, y0, w, h, 'нагрузка · потребление O₂', 'ступени по 3–6 мин', m('st'));
+    const stair = path(p, '', { stroke: COL.dim, 'stroke-width': 4 }), vo = path(p, '', { stroke: O2C, 'stroke-width': 6 });
+    put(stair, { o: 0 }); put(vo, { o: 0 }); show(stair, m('st', .5)); show(vo, m('st', .5));
+    const lvl = i => .12 + .14 * i, voAt = x => { const i = Math.floor(x / sw), u = x / sw - i, top = Math.min(lvl(i), lvl(4)) - .03, prev = i ? Math.min(lvl(i - 1), lvl(4)) - .03 : .05; return prev + (top - prev) * (1 - Math.exp(-u * 5)); };
+    const t0 = m('st', .5), dur = Math.max(4, D - t0);
+    prog(q => {
+      const X = q * w; let ds = `M${x0} ${y0}`, dv = '';
+      for (let i = 0; i < n; i++) { const a = i * sw; if (a > X) break; const b = Math.min(X, a + sw); ds += `V${(y0 - lvl(i) * h).toFixed(1)}H${(x0 + b).toFixed(1)}`; }
+      for (let x = 0; x <= X; x += 4) dv += `${x ? 'L' : 'M'}${(x0 + x).toFixed(1)} ${(y0 - voAt(x) * h).toFixed(1)}`;
+      stair.setAttribute('d', ds); vo.setAttribute('d', dv);
+      const st = Math.min(n - 1, Math.floor(q * n));
+      tm.set({ grade: 6 + 2.4 * st, ph: q * 14, run: st >= 4 });
+      e.set(85 + 16 * st, q * 30);
+      const H = onStage(tm.f, 'Hc'); hose.setAttribute('d', `M230 175C${H[0] - 120} 175 ${H[0] - 40} ${H[1] + 20} ${H[0] + 24} ${H[1] + 8}`);
+    }, t0, dur, lin);
+    const lg = G(p, { o: 0 });
+    path(lg, `M${x0 + 30} ${y0 - h + 40}h40`, { stroke: COL.dim, 'stroke-width': 4 }); T(lg, 'нагрузка', { x: x0 + 82, y: y0 - h + 47, size: 20, fill: COL.dim });
+    path(lg, `M${x0 + 30} ${y0 - h + 78}h40`, { stroke: O2C, 'stroke-width': 6 }); T(lg, 'потребление O₂', { x: x0 + 82, y: y0 - h + 85, size: 20, weight: 700, fill: O2C });
+    show(lg, m('st', 2));
+    const pl = G(p, { o: 0 });
+    path(pl, `M${x0 + 4 * sw} ${y0 - (lvl(4) - .03) * h - 18}H${x0 + w}`, { stroke: COL.good, 'stroke-width': 3, 'stroke-dasharray': '8 6' });
+    T(pl, 'плато = VO₂max', { x: x0 + 4.2 * sw, y: y0 - (lvl(4) - .03) * h - 48, size: 24, weight: 700, fill: COL.good });
+    show(pl, m('plat'));
+    pill(p, 'схема', x0 + w - 40, y0 - h - 20, m('st'), { col: COL.dim, size: 18 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-test', prompt: ['Какой тест выбрать?'],
+    build: grid([
+      { parts: ['Здоровый бегун 25 лет, тренируется много лет'], ans: ['run'], why: 'Подготовленным молодым — бег на 2,4 км или 12 минут.' },
+      { parts: ['Малоподвижный студент 22 лет'], ans: ['walk'], why: 'Менее активным — ходьба или степ-тест.' },
+      { parts: ['Мужчина 50 лет без симптомов'], ans: ['stress'], why: 'С 35 лет — ступенчатый нагрузочный тест, даже без симптомов.' },
+      { parts: ['Пациент, выздоравливающий после инфаркта'], ans: ['stress'], why: 'Выздоравливающим — нагрузочный тест с ЭКГ.' },
+      { parts: ['Здоровая малоактивная девушка 19 лет'], ans: ['walk'], why: 'Ходьба на 1,6 км, 6-минутная ходьба или степ-тест.' },
+    ], [['run', 'Бег: 12 мин / 2,4 км', FITC], ['walk', 'Ходьба / степ-тест', COL.whole], ['stress', 'Нагрузочный тест с ЭКГ', STRC]], { multi: false, text: true }),
+  }], done) }],
+
+  ['stress', 'Нагрузочный тест', (m, D) => {
+    const p = panel(0);
+    txt(p, 'нагрузочный тест: подготовка, принципы, задачи', 800, 62, m('stress'), { size: 28, weight: 700, anchor: 'middle' });
+    txt(p, 'подготовка', 270, 120, m('stress'), { size: 25, weight: 700, fill: COL.whole, anchor: 'middle' });
+    ['медицинский осмотр', 'ЭКГ и наблюдение: в покое, при нагрузке, в восстановлении', 'подписанное согласие'].forEach((s, i) => row(p, 50, 145 + i * 92, 440, s, COL.whole, m('stress', .5 + i * 1.5), { h: 80 }));
+    txt(p, 'принципы', 790, 120, m('pr'), { size: 25, weight: 700, fill: STRC, anchor: 'middle' });
+    ['нагрузку повышают скоростью, наклоном или сопротивлением', 'старт — ниже ожидаемого аэробного порога', 'каждая ступень — не меньше минуты', 'стоп — при симптомах или изменениях ЭКГ', 'по возможности — измерить VO₂max'].forEach((s, i) =>
+      row(p, 530, 145 + i * 92, 520, s, STRC, m('pr', .5 + i * 2.2), { h: 80 }));
+    txt(p, 'зачем', 1310, 120, m('why'), { size: 25, weight: 700, fill: COL.good, anchor: 'middle' });
+    ['диагноз явной или скрытой болезни сердца', 'допуск к тяжёлой работе и программе упражнений', 'работоспособность: кгм/мин или МЕТ', 'ответ на тренировку', 'выбор и проверка лечения', 'мотивация', 'боль в груди: вероятность ИБС'].forEach((s, i) =>
+      row(p, 1090, 145 + i * 92, 460, s, COL.good, m('why', .8 + i * 1.6), { h: 80, size: 20 }));
+    const e = ecgStrip(p, 60, 800, 1000, 40, { win: 6, t0: m('stress', 2) });
+    prog(q => e.set(lerp(72, 140, cyc(q, .5)), q * 40), m('stress', 2), Math.max(4, D - m('stress', 2.3)), lin);
+    ['покой', 'нагрузка', 'восстановление'].forEach((s, i) => txt(p, s, 160 + i * 400, 860, m('stress', 2.5), { size: 20, fill: COL.dim, anchor: 'middle' }));
+  }],
+
+  ['bruce', 'Протокол Брюса', (m, D) => {
+    const p = panel(0);
+    txt(p, 'протокол Брюса', 800, 62, m('bruce'), { size: 28, weight: 700, anchor: 'middle' });
+    txt(p, 'протоколы различаются:', 800, 112, m('bruce'), { size: 22, fill: COL.dim, anchor: 'middle' });
+    pillRow(p, ['число ступеней', 'нагрузка', 'оборудование', 'длительность ступеней'], 800, 160, m('bruce', .5), { col: COL.dim, size: 20, gap: .4 });
+    pillRow(p, ['критерии остановки', 'положение тела', 'работающие мышцы'], 800, 212, m('bruce', 2.2), { col: COL.dim, size: 20, gap: .4 });
+    const tm = treadmill(p, 330, 800, 1, m('bruce', 4));
+    const disp = txt(p, '', 520, 330, m('stage'), { size: 28, weight: 700, fill: STRC, anchor: 'middle' });
+    // the table of stages
+    const tx = 700, ty = 300, cw = 140;
+    const head = G(p, { o: 0 });
+    T(head, 'ступень', { x: tx, y: ty, size: 21, weight: 700, fill: COL.dim });
+    T(head, 'км/ч', { x: tx, y: ty + 90, size: 21, weight: 700, fill: COL.dim });
+    T(head, 'наклон, %', { x: tx - 20, y: ty + 180, size: 21, weight: 700, fill: COL.dim });
+    show(head, m('stage'));
+    const cells = BRUCE.map(([v, g], i) => {
+      const c = G(p, { o: 0 }), x = tx + 150 + i * cw;
+      const bx = mk('rect', { x: x - 60, y: ty - 36, width: 120, height: 250, rx: 14, fill: PANEL, stroke: COL.faint, 'stroke-width': 2 }, c);
+      T(c, String(i + 1), { x, y: ty, size: 26, weight: 700, anchor: 'middle' });
+      T(c, String(v).replace('.', ','), { x, y: ty + 90, size: 26, weight: 700, fill: STRC, anchor: 'middle' });
+      T(c, String(g), { x, y: ty + 180, size: 26, weight: 700, fill: COL.whole, anchor: 'middle' });
+      show(c, m('stage', .3 + i * .3));
+      return bx;
+    });
+    txt(p, 'каждые 3 минуты', tx + 150 + 2 * cw, ty + 270, m('stage', 1), { size: 23, weight: 700, fill: STRC, anchor: 'middle' });
+    txt(p, 'в книге — 1,7 → 5 миль/ч; промежуточные ступени — типичные значения протокола', tx + 150 + 2 * cw, ty + 320, m('stage', 2), { size: 18, fill: COL.dim, anchor: 'middle' });
+    NOTE(p, tx + 150 + 2 * cw, ty + 370, m('stage', 2));
+    const t0 = m('stage', .5), dur = Math.max(5, D - t0);
+    prog(q => {
+      const st = Math.min(4, Math.floor(q * 5)), [v, g] = BRUCE[st];
+      tm.set({ grade: g, ph: q * 20, run: st >= 4 });
+      cells.forEach((b, i) => { b.setAttribute('stroke', i === st ? STRC : COL.faint); b.setAttribute('stroke-width', i === st ? 4 : 2); });
+      disp.textContent = `${String(v).replace('.', ',')} км/ч · ${g} %`;
+    }, t0, dur, lin);
+  }],
+
+  ['prec', 'Нормальные сдвиги', (m, D) => {
+    const p = panel(0);
+    txt(p, 'что нормально при нагрузке', 800, 62, m('prec'), { size: 28, weight: 700, anchor: 'middle' });
+    // HR and BP per MET (bands), with the BP limits
+    const ch = (y0, h, lab, t0) => { chartAxes(p, 130, y0, 600, h, lab, 'МЕТ', t0); [0, 2, 4, 6, 8].forEach(v => txt(p, String(v), 130 + v / 9 * 600, y0 + 28, t0, { size: 18, fill: COL.dim, anchor: 'middle' })); };
+    ch(400, 290, 'ЧСС', m('hrm'));
+    const band = (y0, h, base, v1, lo, hi, max, col, t0) => {
+      const X = v => 130 + v / 9 * 600, Y = v => y0 - (v - base) / (max - base) * h;
+      const d = `M${X(1)} ${Y(v1)}L${X(8)} ${Y(v1 + 7 * hi)}L${X(8)} ${Y(v1 + 7 * lo)}Z`;
+      show(put(path(p, d, { fill: col, 'fill-opacity': .3, stroke: col, 'stroke-width': 2 }), { o: 0 }), t0);
+      return { X, Y };
+    };
+    band(400, 290, 50, 70, 8, 12, 160, COL.good, m('hrm', .5));
+    txt(p, '+8–12 уд/мин на 1 МЕТ', 200, 170, m('hrm', 1), { size: 23, weight: 700, fill: COL.good });
+    ch(820, 330, 'АД', m('bpm'));
+    const B = band(820, 330, 60, 120, 8, 12, 270, STRC, m('bpm', .5));
+    txt(p, '+8–12 мм рт. ст. на 1 МЕТ', 200, 590, m('bpm', 1), { size: 23, weight: 700, fill: STRC });
+    [[250, 'систолическое ≤ 250'], [115, 'диастолическое ≤ 115']].forEach(([v, s], i) => {
+      show(put(path(p, `M130 ${B.Y(v)}H730`, { stroke: STOP, 'stroke-width': 3, 'stroke-dasharray': '10 6' }), { o: 0 }), m('bpm', 3 + i * 1.5));
+      txt(p, s, 735, B.Y(v) + 7, m('bpm', 3 + i * 1.5), { size: 20, weight: 700, fill: STOP });
+    });
+    pill(p, 'схема', 660, 110, m('hrm'), { col: COL.dim, size: 18 });
+    // breathing and skin
+    const lu = lungsEl(p, 1080, 290, .62, m('br'));
+    prog(q => lu.breathe(cyc(q, 10)), m('br'), Math.max(3, D - m('br')), lin);
+    infoCard(p, 1200, 140, 360, 260, 'дыхание', 'чаще и глубже, но не затруднённое; нет чувства нехватки воздуха', O2C, m('br'), { size: 21 });
+    const hd = headSide(p, 1090, 600, 90, m('skin'));
+    prog(q => hd.flush(q), m('skin', .5), 2);
+    infoCard(p, 1230, 470, 330, 290, 'кожа', 'щёки, нос, мочки ушей — розовые, влажные, тёплые: кровоток отводит тепло и снабжает мышцы', COL.bad, m('skin'), { size: 21 });
+  }],
+
+  ['stop', 'Когда остановить', (m, D) => {
+    const p = panel(0);
+    txt(p, 'когда тест прекращают', 800, 62, m('stop'), { size: 28, weight: 700, anchor: 'middle' });
+    const sg = G(p, { x: 120, y: 180, o: 0 });
+    let d = ''; for (let i = 0; i < 8; i++) { const a = rad(22.5 + i * 45); d += `${i ? 'L' : 'M'}${(70 * Math.cos(a)).toFixed(1)} ${(70 * Math.sin(a)).toFixed(1)}`; }
+    path(sg, d + 'Z', { fill: STOP, stroke: COL.chalk, 'stroke-width': 4 });
+    T(sg, 'СТОП', { y: 10, size: 28, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    show(sg, m('stop'));
+    const L = [['появилась или нарастает стенокардия', 'stop', .5], ['систолическое АД падает на ≥ 10 мм рт. ст. при растущей нагрузке', 'drop', 0],
+      ['головокружение, спутанность, бледность, синюшность, тошнота', 'sym', 0], ['плохое периферическое кровообращение, одышка, свистящее дыхание, судороги в ногах', 'sym', 3],
+      ['чрезмерный рост АД', 'more', 0], ['пульс не растёт вместе с нагрузкой', 'more', 1.5], ['появилось или изменилось нарушение ритма', 'more', 3.2], ['выраженная усталость', 'more', 5], ['человек хочет остановиться', 'more', 6.5]];
+    L.forEach(([s, k, dt], i) => row(p, i < 4 ? 230 : 870, 120 + (i < 4 ? i : i - 4) * 88, i < 4 ? 610 : 670, s, STOP, m(k, dt), { h: 76, size: 20 }));
+    // SBP over the stages: a drop despite the rising workload
+    const x0 = 230, y0 = 850, w = 560, h = 210, X = i => x0 + i * w / 5;
+    chartAxes(p, x0, y0, w, h, 'систолическое АД', 'ступени', m('drop'));
+    const sbp = [.3, .5, .68, .82, .62];
+    draw(path(p, sbp.map((v, i) => `${i ? 'L' : 'M'}${X(i + .5)} ${y0 - v * h}`).join(''), { stroke: STRC, 'stroke-width': 5 }, { d: 0 }), m('drop', .5), 1.5);
+    const dm = G(p, { o: 0 });
+    mk('circle', { cx: X(4.5), cy: y0 - sbp[4] * h, r: 14, fill: 'none', stroke: STOP, 'stroke-width': 4 }, dm);
+    T(dm, '↓ ≥ 10', { x: X(4.5) + 24, y: y0 - sbp[4] * h + 8, size: 22, weight: 700, fill: STOP });
+    show(dm, m('drop', 2));
+    pill(p, 'схема', x0 + w - 30, y0 - h - 10, m('drop'), { col: COL.dim, size: 18 });
+    // a rhythm change on the ECG
+    const e = ecgStrip(p, 900, 760, 640, 60, { win: 3, t0: m('more', 3.2) });
+    prog(q => { const irr = q > .45; e.set(irr ? 150 + 40 * Math.sin(q * 50) : 110, q * 8, irr ? -.4 : 0); e.tr.setAttribute('stroke', irr ? STOP : COL.good); }, m('more', 3.2), Math.max(3, D - m('more', 3.5)), lin);
+    txt(p, 'изменения на ЭКГ', 1220, 860, m('more', 3.2), { size: 20, fill: STOP, anchor: 'middle' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-stop', prompt: ['Идёт нагрузочный тест. Продолжать или остановить?'],
+    build: grid([
+      { parts: ['ЧСС растёт примерно на 10 уд/мин на каждый МЕТ'], ans: ['go'], why: 'Нормальный прирост: 8–12 уд/мин на МЕТ.' },
+      { parts: ['Систолическое АД упало со 170 до 156 мм рт. ст., хотя нагрузка растёт'], ans: ['stop'], why: 'Падение на 10 мм и больше при растущей нагрузке — стоп.' },
+      { parts: ['Кожа лица порозовела, тёплая и влажная'], ans: ['go'], why: 'Нормальный ответ: кровоток отводит тепло.' },
+      { parts: ['Появилось свистящее дыхание'], ans: ['stop'], why: 'Один из критериев остановки.' },
+      { parts: ['Нагрузка растёт, а пульс не меняется'], ans: ['stop'], why: 'Пульс должен расти вместе с нагрузкой.' },
+    ], [['go', 'Продолжать', COL.good], ['stop', 'Остановить', STOP]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Тест формы у здоровых и нагрузочный тест у пациентов и людей от 35 лет — разные вещи.', 'w1'],
+     ['Бег на 2,4 км и 12-минутный бег — для подготовленных; ходьба и степ-тесты — для менее активных.', 'w2'],
+     ['Ступенчатый тест: нагрузка ступенями под ЭКГ, плато потребления O₂ — это VO₂max; самый популярный протокол — Брюса.', 'w3'],
+     ['Стоп: стенокардия, падение систолического АД, признаки плохого кровообращения, нарушения ритма, желание человека.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-permet', prompt: ['Нагрузка выросла на 3 МЕТ. Каких сдвигов ждать в норме?'],
+    build: blanks([
+      { parts: ['ЧСС: примерно на ', { box: '24' }, ' – ', { box: '36' }, ' уд/мин'], why: '8–12 уд/мин на каждый МЕТ: 3 × 8 = 24, 3 × 12 = 36.' },
+      { parts: ['АД: примерно на ', { box: '24' }, ' – ', { box: '36' }, ' мм рт. ст.'], why: 'Тоже 8–12 на каждый МЕТ.' },
+      { parts: ['Систолическое АД не должно превышать ', { box: '250' }, ' мм рт. ст.'], why: 'Предел для систолического — 250, для диастолического — 115.' },
+    ]),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-sbpdrop', prompt: ['Мужчина 58 лет на 3-й ступени протокола Брюса. Нагрузка растёт, а систолическое АД снизилось со 160 до 148 мм рт. ст. Жалоб нет. Что делать?'],
+    build: choice([
+      ['Прекратить тест: систолическое АД упало на 10 мм и больше при растущей нагрузке'],
+      ['Продолжать: жалоб нет'],
+      ['Продолжать, пока систолическое АД не дойдёт до 250'],
+      ['Продолжать, но только на велоэргометре'],
+    ], 0, 'Падение систолического давления на 10 мм рт. ст. и больше при растущей нагрузке — критерий остановки теста.',
+    [null, 'Критерий остановки не требует жалоб.', '250 — верхний предел роста, а здесь давление падает.', 'Смена тренажёра не отменяет критерий остановки.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

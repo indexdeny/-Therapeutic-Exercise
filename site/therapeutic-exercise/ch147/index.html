@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Шея: манипуляции и мышечная энергия — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 147, title: 'Шея: манипуляции и мышечная энергия', minutes: 8, language: 'ru', next: '../ch148/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch147/cards.ru.json
+const CARDS_SHORT = {
+  "зачем и сколько\nуменьшить боль и улучшить движение; все, кроме толчка, — одна–две минуты, затем переоценка; закончить при результате или по переносимости": "одна–две минуты, затем переоценка",
+  "I и II\nмалые и большие колебания от боли, обычно в острой стадии": "от боли, острая стадия",
+  "III\nбольшие колебания до барьера — для объёма; подострая и хроническая стадии": "до барьера — для объёма",
+  "IV\nмалые колебания через барьер — только хроническая стадия": "через барьер — хроническая",
+  "V — толчок\nвысокая скорость, малая амплитуда на физиологическом пределе; один раз и только ради объёма": "один раз, ради объёма",
+  "положение\nлёжа на животе, руки вдоль тела, подушка под ключицы — нейтральный шейно-грудной изгиб; работают с верхним позвонком ограниченного трёхсуставного комплекса": "на животе, верхний позвонок",
+  "сгибание\nтерапевт сбоку лицом к голове; два больших пальца на остистом отростке — сдвиг к голове и вперёд": "к голове и вперёд",
+  "разгибание\nтерапевт у изголовья лицом к ногам; остистый отросток — вниз и назад": "вниз и назад",
+  "поворот\nбольшие пальцы на поперечном отростке верхнего позвонка, чтобы он поворачивался к ограничению; вверх, вперёд и к середине": "поперечный отросток к ограничению",
+  "положение\nтерапевт у изголовья; рука со стороны, противоположной ограничению, держит голову; второй пястно-фаланговый сустав другой руки — на краю фасетки и суставного столба": "держит голову; пястно-фаланговый сустав",
+  "скольжение вверх\nсгибание, поворот и наклон в противоположную сторону до нужного сегмента; сдвиг вперёд, вверх и к середине под 45°; отверстие на своей стороне шире — как при повороте и наклоне в другую сторону": "вперёд и вверх — отверстие шире",
+  "скольжение вниз\nразгибание, поворот и наклон в свою сторону; сдвиг вниз и к середине под 45°; отверстие на своей стороне уже": "вниз — отверстие уже",
+  "что это\nмягкие неполные изометрические сокращения мышц, чья тяга даёт нужное дополнительное движение; удержание против дозированного сопротивления 3–5 с, затем расслабление; 3–5 повторов; безопасно и подходит на любой стадии заживления": "изометрия 3–5 с, расслабление; безопасно",
+  "позвоночная артерия\nне пережать её: проверить заранее; изменилась чувствительность в руке, головокружение или «лёгкость» в голове при подготовке — приём не делать": "головокружение — не делать",
+  "вариант 1\nна спине; рука под затылком, другая поперёк лба; пациент мягко смотрит вверх, как бы кивая назад, — сопротивление у затылка; расслабился — пассивный кивок в новый объём": "смотрит вверх → новый объём",
+  "вариант 2\nтерапевт сидит, предплечья на столе; второй шейный — между большим и указательным; пассивный кивок до натяжения; пациент поднимает глаза вверх, 3–5 с, расслабился — новый объём; 3–5 раз": "глаза вверх 3–5 с",
+  "только затылок — второй позвонок\nсокращение очень мягкое, чтобы не включились длинные разгибатели и верхняя трапециевидная": "очень мягко",
+  "установка\nна спине; терапевт обхватывает голову с боков, пальцы под затылком; голову сгибают до конца, затем поворачивают в сторону ограничения до предела — например, влево": "сгибание → поворот до предела",
+  "сокращение\nпациент смотрит в противоположную сторону — вправо; терапевт мягко сопротивляется сбоку головы; через 3–5 с расслабление и больший поворот; повторять по необходимости": "смотрит в противоположную",
+};
+// cards-short end
+
+const SP = '#8fd6b0', MAN = '#86c9e8', ME = '#f0c060', PAIN = '#ff5a3c', PIL = '#c8b8e8';
+const GR = ['#9fd0e8', '#86c9e8', '#c9b8e8', '#bba8ee', '#ff6b5a'];
+const BN = ANAT.bone, BL = mix(ANAT.bone, '#000000', .45);
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19, anchor = null } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x, an = anchor || (right ? 'end' : 'start');
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: an });
+  const lx = an === 'start' && right ? x + uiW(str, size) + 8 : x + (right ? 8 : -8);
+  path(g, `M${lx} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+function numLine(p, n, str, x, y, col, t0, { size = 19, maxW = 640 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 16, cy: y - 7, r: 15, fill: col }, g);
+  T(g, String(n), { x: x + 16, y: y, size: 18, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 44, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const swing = (q, n) => Math.sin(2 * Math.PI * n * q);
+const f1 = v => v.toFixed(1);
+const thumb = (p, t0) => { const g = G(p, { o: 0 }); mk('ellipse', { rx: 14, ry: 22, fill: mix(ANAT.skin, '#c08060', .3), stroke: BL, 'stroke-width': 2 }, g); if (t0 !== null) show(g, t0); return g; };
+const arw = (p, x1, y1, x2, y2, col, t0, w = 6) => { const a = Math.atan2(y2 - y1, x2 - x1), h = 14, g = G(p, { o: 0 }); path(g, `M${f1(x1)} ${f1(y1)}L${f1(x2)} ${f1(y2)}M${f1(x2 - h * Math.cos(a - .5))} ${f1(y2 - h * Math.sin(a - .5))}L${f1(x2)} ${f1(y2)}L${f1(x2 - h * Math.cos(a + .5))} ${f1(y2 - h * Math.sin(a + .5))}`, { stroke: col, 'stroke-width': w }); if (t0 !== null) show(g, t0); else put(g, { o: 1 }); return g; };
+// A cervical facet joint from the side: the upper articular pillar slides along a 45° plane over the lower one;
+// set(u): u > 0 — up-glide, u < 0 — down-glide; the foramen on that side opens or narrows.
+function facet45(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), bone = { fill: BN, stroke: BL, 'stroke-width': 2.5, 'stroke-linejoin': 'round' };
+  path(g, 'M-170 120L170 -120', { stroke: COL.dim, 'stroke-width': 2, 'stroke-dasharray': '7 6' });
+  mk('path', { d: 'M-150 130L110 -54L150 30L150 150L-150 150Z', ...bone }, g);
+  mk('path', { d: 'M-128 116L108 -50', stroke: CART, 'stroke-width': 8, fill: 'none', 'stroke-linecap': 'round' }, g);
+  const up = G(g, {});
+  mk('path', { d: 'M-110 74L150 -110L150 -150L-150 -150L-150 40Z', ...bone }, up);
+  mk('path', { d: 'M-104 64L132 -102', stroke: CART, 'stroke-width': 8, fill: 'none', 'stroke-linecap': 'round' }, up);
+  const fo = mk('ellipse', { cx: -60, cy: 210, rx: 40, ry: 26, fill: '#101a17', stroke: BL, 'stroke-width': 2 }, g);
+  T(g, 'отверстие', { x: -60, y: 268, size: 17, fill: COL.dim, weight: 600, anchor: 'middle' });
+  const e = { g, set: u => { const d = 40 * u; up.setAttribute('transform', `translate(${f1(d * .82)} ${f1(-d * .58)})`); fo.setAttribute('rx', f1(40 + 16 * u)); fo.setAttribute('ry', f1(26 + 12 * u)); return e; } };
+  e.set(0);
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// A vertebra seen from above (front up) for rotation, and a head from above with the nose.
+function vertTop(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), v = G(g, {}), bone = { fill: BN, stroke: BL, 'stroke-width': 2.2, 'stroke-linejoin': 'round' };
+  mk('ellipse', { cx: 0, cy: -30, rx: 46, ry: 32, ...bone }, v);
+  mk('path', { d: 'M-30 0L-90 -6L-96 12L-40 24L-14 70L0 96L14 70L40 24L96 12L90 -6L30 0Z', ...bone }, v);
+  mk('ellipse', { cx: 0, cy: 22, rx: 18, ry: 14, fill: '#101a17', stroke: BL, 'stroke-width': 1.5 }, v);
+  T(g, 'вперёд ↑', { x: 0, y: -84, size: 15, fill: COL.dim, anchor: 'middle', weight: 600 });
+  const e = { g, v, set: r => { v.setAttribute('transform', `rotate(${f1(r)})`); return e; } };
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+function headTop(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), h = G(g, {});
+  mk('ellipse', { cx: 0, cy: 0, rx: 80, ry: 96, fill: ANAT.skin, stroke: BL, 'stroke-width': 2.5 }, h);
+  mk('path', { d: 'M-14 -94L0 -122L14 -94Z', fill: ANAT.skin, stroke: BL, 'stroke-width': 2 }, h);
+  [-1, 1].forEach(k => mk('ellipse', { cx: k * 82, cy: 0, rx: 10, ry: 22, fill: ANAT.skin, stroke: BL, 'stroke-width': 2 }, h));
+  const e = { g, h, set: r => { h.setAttribute('transform', `rotate(${f1(r)})`); return e; } };
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Манипуляции на шее', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 16 · Урок 147', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Шея: манипуляции', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и мышечная энергия', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'степени, противопоказания, скольжения фасеток, мягкие изометрические приёмы', 800, 360, m('sub'), { size: 28, fill: SP, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const fz = facet45(art, 800, 640, .9, null); put(fz.g, { o: 1 });
+    prog(q => fz.set(swing(q, 2) * .8), 1, Math.max(3, D - 2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['grades', 'Пять степеней', (m, D) => {
+    const p = panel(0);
+    txt(p, 'пять степеней манипуляции', 800, 56, m('use'), { size: 28, weight: 700, anchor: 'middle', fill: MAN });
+    const X0 = 100, X1 = 680, Y = 560, gx = k => X0 + (X1 - X0) * k, base = G(p, { o: 0 });
+    path(base, `M${X0} ${Y}H${X1 + 40}`, { stroke: COL.dim, 'stroke-width': 3 });
+    path(base, `M${gx(.82)} ${Y - 420}V${Y + 14}`, { stroke: COL.bad, 'stroke-width': 3, 'stroke-dasharray': '6 4' });
+    T(base, 'начало', { x: X0, y: Y + 34, size: 16, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(base, 'барьер', { x: gx(.82), y: Y + 34, size: 16, fill: COL.bad, anchor: 'middle', weight: 600 });
+    T(base, 'предел', { x: X1 + 40, y: Y + 34, size: 16, fill: COL.dim, anchor: 'middle', weight: 600 });
+    show(base, m('use'));
+    const rows = [[.05, .2, 'I', 'g1'], [.1, .7, 'II', 'g2'], [.35, .82, 'III', 'g3'], [.76, .92, 'IV', 'g4']];
+    rows.forEach(([a, b, n, mk2], i) => {
+      const yy = Y - 50 - i * 70, g = G(p, { o: 0 });
+      mk('rect', { x: gx(a), y: yy - 14, width: gx(b) - gx(a), height: 28, rx: 14, fill: GR[i], 'fill-opacity': .3, stroke: GR[i], 'stroke-width': 2 }, g);
+      T(g, n, { x: gx(a) - 14, y: yy + 7, size: 21, fill: GR[i], weight: 700, anchor: 'end' });
+      const dot = mk('circle', { cx: gx(a), cy: yy, r: 9, fill: GR[i] }, g);
+      show(g, m(mk2));
+      prog(q => dot.setAttribute('cx', f1(lerp(gx(a), gx(b), cyc(q, 6)))), m(mk2, .3), Math.max(1, D - m(mk2) - .5), lin);
+    });
+    const v = G(p, { o: 0 }), yv = Y - 50 - 4 * 70;
+    path(v, `M${gx(.86)} ${yv}H${gx(1) + 30}M${gx(1) + 16} ${yv - 12}L${gx(1) + 32} ${yv}L${gx(1) + 16} ${yv + 12}`, { stroke: GR[4], 'stroke-width': 6 });
+    T(v, 'V · толчок', { x: gx(.86) - 14, y: yv + 7, size: 21, fill: GR[4], weight: 700, anchor: 'end' });
+    show(v, m('g5'));
+    [['I–II: боль', MAN], ['III–IV: объём', '#bba8ee'], ['V: объём, один раз', GR[4]]].forEach(([s, c], i) => pill(p, s, 200 + i * 210, 700, m(['g2', 'g4', 'g5'][i], 1), { col: c, size: 17 }));
+    pill(p, 'по мотивам главы 5 · схема', 400, 770, m('use'), { col: COL.dim, size: 15 });
+    infoCard(p, 800, 90, 760, 190, 'зачем и сколько', 'уменьшить боль и улучшить движение; все, кроме толчка, — одна–две минуты, затем переоценка; закончить при результате или по переносимости', MAN, m('use'), { size: 19 });
+    infoCard(p, 800, 295, 760, 120, 'I и II', 'малые и большие колебания от боли, обычно в острой стадии', GR[1], m('g1'), { size: 19 });
+    infoCard(p, 800, 430, 760, 140, 'III', 'большие колебания до барьера — для объёма; подострая и хроническая стадии', GR[2], m('g3'), { size: 19 });
+    infoCard(p, 800, 585, 760, 120, 'IV', 'малые колебания через барьер — только хроническая стадия', GR[3], m('g4'), { size: 19 });
+    infoCard(p, 800, 720, 760, 150, 'V — толчок', 'высокая скорость, малая амплитуда на физиологическом пределе; один раз и только ради объёма', GR[4], m('g5'), { size: 19 });
+  }],
+
+  ['prec', 'Предосторожности', (m, D) => {
+    const p = panel(0);
+    txt(p, 'когда остановиться и когда нельзя', 800, 56, m('pre'), { size: 28, weight: 700, anchor: 'middle', fill: PAIN });
+    const stop = G(p, { x: 400, y: 330, o: 0 });
+    const oct = []; for (let i = 0; i < 8; i++) { const a = rad(22.5 + i * 45); oct.push(f1(130 * Math.cos(a)) + ' ' + f1(130 * Math.sin(a))); }
+    mk('path', { d: 'M' + oct.join('L') + 'Z', fill: COL.bad, 'fill-opacity': .85, stroke: '#ffffff', 'stroke-width': 6 }, stop);
+    T(stop, 'СТОП', { x: 0, y: 18, size: 54, fill: '#ffffff', weight: 800, anchor: 'middle' });
+    show(stop, m('pre')); pulse(stop, m('pre', .5), 1.1);
+    ['изменилась чувствительность', 'боль пошла вниз по руке или ноге', 'головокружение или «лёгкость» в голове'].forEach((s, i) => numLine(p, i + 1, s, 120, 560 + i * 60, COL.bad, m('pre', 2 + i * 2), { size: 20, maxW: 560 }));
+    pill(p, 'крайняя осторожность: кортикостероиды, очень сильная боль', 400, 790, m('pre', 9), { col: COL.task, size: 17 });
+    infoCard(p, 800, 90, 760, 780, 'противопоказания', '', COL.bad, m('ci'));
+    ['несросшийся перелом', 'разболтанность суставов или связок после травмы или при системных болезнях — например, ревматоидном артрите', 'болезнь или закупорка позвоночной артерии', 'острое воспаление или раздражение сустава', 'симптомы конского хвоста'].forEach((s, i) => numLine(p, i + 1, s, 830, 210 + i * 120, COL.bad, m('ci', 1 + i * 1.5), { size: 21, maxW: 660 }));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-grade', prompt: ['Какая это степень?'],
+    build: grid([
+      { parts: ['Острая стадия, малые колебания от боли'], ans: ['1'], why: 'Первая степень.' },
+      { parts: ['Большие колебания до барьера в подострой стадии'], ans: ['3'], why: 'Третья степень.' },
+      { parts: ['Малые колебания через барьер, хроническая стадия'], ans: ['4'], why: 'Четвёртая степень.' },
+      { parts: ['Однократный быстрый толчок на пределе'], ans: ['5'], why: 'Пятая степень — толчок.' },
+      { parts: ['Большие колебания от боли'], ans: ['2'], why: 'Вторая степень.' },
+    ], [['1', 'I', GR[0]], ['2', 'II', GR[1]], ['3', 'III', GR[2]], ['4', 'IV', GR[3]], ['5', 'V', GR[4]]], { multi: false, text: true }),
+  }], done) }],
+
+  ['prone', 'Лёжа на животе', (m, D) => {
+    const p = panel(0);
+    txt(p, 'лёжа на животе: сгибание, разгибание, поворот', 800, 56, m('pos'), { size: 28, weight: 700, anchor: 'middle', fill: MAN });
+    matLine(p, 80, 760, 300, m('pos'));
+    const f = lieFig(p, 100, 300, .5, m('pos'), 'prone', { cerv: 28 });
+    const cl = f.unit(15, 40); show(mk('ellipse', { cx: f1(cl[0]), cy: 288, rx: 40, ry: 12, fill: PIL, stroke: mix(PIL, '#000000', .35), 'stroke-width': 2, opacity: 0 }, p), m('pos', 1));
+    txt(p, 'подушка под ключицы', 560, 340, m('pos', 1), { size: 17, fill: PIL, anchor: 'middle', weight: 600 });
+    // the segment in close-up: thumbs on the spinous process of the upper vertebra
+    const X = 430, Y = 640, S = .9, sg = spineSeg(p, X, Y, S, m('pos', 4), { ligs: false });
+    pill(p, 'схема: верхний позвонок сегмента', 380, 420, m('pos', 4), { col: COL.dim, size: 15 });
+    const th = thumb(p, m('fl')); const SPU = sg.at('spinU'); put(th, { x: SPU[0] - 6, y: SPU[1] - 30, r: 0 });
+    arw(p, SPU[0] - 70, SPU[1] - 40, SPU[0] - 70, SPU[1] - 110, MAN, m('fl', 1));
+    txt(p, 'к голове и вперёд', SPU[0] - 70, SPU[1] - 124, m('fl', 1), { size: 17, fill: MAN, anchor: 'middle', weight: 700 });
+    prog(q => sg.set({ flex: 8 * cyc(q, 2) }), m('fl', 1.5), 5, lin);
+    const fx = G(p, { o: 0 }); arw(fx, SPU[0] - 110, SPU[1] - 40, SPU[0] - 110, SPU[1] + 30, ME, null); show(fx, m('ex', 1));
+    prog(q => sg.set({ flex: -8 * cyc(q, 2) }), m('ex', 1.5), 4, lin);
+    const vt = vertTop(p, 670, 660, .62, m('rot'));
+    const tp = thumb(p, m('rot', 1)); put(tp, { x: 670 + 76 * .62, y: 660 - 8, r: 90 });
+    prog(q => vt.set(-14 * cyc(q, 2)), m('rot', 2), 5, lin);
+    txt(p, 'вид сверху', 670, 760, m('rot'), { size: 16, fill: COL.dim, anchor: 'middle', weight: 600 });
+    infoCard(p, 800, 90, 760, 210, 'положение', 'лёжа на животе, руки вдоль тела, подушка под ключицы — нейтральный шейно-грудной изгиб; работают с верхним позвонком ограниченного трёхсуставного комплекса', MAN, m('pos'), { size: 19 });
+    infoCard(p, 800, 315, 760, 180, 'сгибание', 'терапевт сбоку лицом к голове; два больших пальца на остистом отростке — сдвиг к голове и вперёд', MAN, m('fl'), { size: 19 });
+    infoCard(p, 800, 510, 760, 160, 'разгибание', 'терапевт у изголовья лицом к ногам; остистый отросток — вниз и назад', ME, m('ex'), { size: 19 });
+    infoCard(p, 800, 685, 760, 185, 'поворот', 'большие пальцы на поперечном отростке верхнего позвонка, чтобы он поворачивался к ограничению; вверх, вперёд и к середине', SP, m('rot'), { size: 19 });
+  }],
+
+  ['sup', 'Скольжения фасеток', (m, D) => {
+    const p = panel(0);
+    txt(p, 'лёжа на спине: скольжение фасетки вверх и вниз', 800, 56, m('pos'), { size: 28, weight: 700, anchor: 'middle', fill: MAN });
+    const fz = facet45(p, 400, 470, 1.1, m('pos'));
+    pill(p, 'схема, сбоку; плоскость фасеток 45°', 400, 110, m('pos'), { col: COL.dim, size: 15 });
+    const mcp = G(p, { o: 0 }); mk('circle', { r: 16, fill: mix(ANAT.skin, '#c08060', .3), stroke: BL, 'stroke-width': 2 }, mcp); show(mcp, m('pos', 6));
+    lab(p, 'второй пястно-фаланговый сустав', 80, 200, 400 - 120, 470 - 40, ME, m('pos', 6), { anchor: 'start' });
+    put(mcp, { x: 280, y: 430 });
+    prog(q => fz.set(q), m('up', 1), 2);
+    const tu = txt(p, 'вверх: вперёд, вверх, к середине — отверстие шире', 400, 800, m('up', 1), { size: 19, fill: COL.good, anchor: 'middle', weight: 700 });
+    hide(tu, m('dn'));
+    prog(q => fz.set(1 - 2 * q), m('dn', 1), 2.5);
+    txt(p, 'вниз: вниз и к середине — отверстие уже', 400, 800, m('dn', 1), { size: 19, fill: COL.bad, anchor: 'middle', weight: 700 });
+    infoCard(p, 800, 90, 760, 230, 'положение', 'терапевт у изголовья; рука со стороны, противоположной ограничению, держит голову; второй пястно-фаланговый сустав другой руки — на краю фасетки и суставного столба', MAN, m('pos'), { size: 19 });
+    infoCard(p, 800, 335, 760, 260, 'скольжение вверх', 'сгибание, поворот и наклон в противоположную сторону до нужного сегмента; сдвиг вперёд, вверх и к середине под 45°; отверстие на своей стороне шире — как при повороте и наклоне в другую сторону', COL.good, m('up'), { size: 19 });
+    infoCard(p, 800, 610, 760, 260, 'скольжение вниз', 'разгибание, поворот и наклон в свою сторону; сдвиг вниз и к середине под 45°; отверстие на своей стороне уже', COL.bad, m('dn'), { size: 19 });
+  }],
+
+  ['me', 'Мышечная энергия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'мышечная энергия: три–пять секунд, три–пять раз', 800, 56, m('def'), { size: 28, weight: 700, anchor: 'middle', fill: ME });
+    const X0 = 110, X1 = 700, Y0 = 560, gx = k => X0 + (X1 - X0) * k, ax = G(p, { o: 0 });
+    path(ax, `M${X0} ${Y0}H${X1}M${X0} ${Y0}V${Y0 - 380}`, { stroke: COL.dim, 'stroke-width': 3 });
+    T(ax, 'время', { x: X1, y: Y0 + 30, size: 16, fill: COL.dim, anchor: 'end', weight: 600 });
+    T(ax, 'объём', { x: X0 - 10, y: Y0 - 390, size: 16, fill: COL.dim, anchor: 'end', weight: 600 });
+    show(ax, m('def'));
+    let d = `M${X0} ${Y0 - 120}`;
+    for (let i = 0; i < 4; i++) { const a = gx(i * .25), b = gx(i * .25 + .14), c = gx((i + 1) * .25), yy = Y0 - 120 - i * 60; d += `L${f1(b)} ${yy}L${f1(c)} ${yy - 60}`; const box = mk('rect', { x: a, y: Y0 - 380, width: b - a, height: 380, fill: ME, 'fill-opacity': .12, opacity: 0 }, p); show(box, m('def', 4 + i * 1.6)); }
+    const line = path(p, d, { stroke: MAN, 'stroke-width': 5 }, { d: 0 }); draw(line, m('def', 4), 7);
+    pill(p, 'напряжение 3–5 с', 260, 610, m('def', 4), { col: ME, size: 16 });
+    pill(p, 'расслабление → новый объём', 540, 610, m('def', 6), { col: MAN, size: 16 });
+    pill(p, 'схема', 650, 130, m('def'), { col: COL.dim, size: 15 });
+    infoCard(p, 800, 90, 760, 330, 'что это', 'мягкие неполные изометрические сокращения мышц, чья тяга даёт нужное дополнительное движение; удержание против дозированного сопротивления 3–5 с, затем расслабление; 3–5 повторов; безопасно и подходит на любой стадии заживления', ME, m('def'), { size: 20 });
+    infoCard(p, 800, 440, 760, 280, 'позвоночная артерия', 'не пережать её: проверить заранее; изменилась чувствительность в руке, головокружение или «лёгкость» в голове при подготовке — приём не делать', COL.bad, m('pre'), { size: 20 });
+  }],
+
+  ['mef', 'Сгибание вверху шеи', (m, D) => {
+    const p = panel(0);
+    txt(p, 'мышечная энергия: сгибание в краниовертебральном отделе', 800, 56, m('f1'), { size: 28, weight: 700, anchor: 'middle', fill: ME });
+    matLine(p, 60, 760, 520, m('f1'));
+    const f = lieFig(p, 790, 520, .8, m('f1'), 'supine');
+    const so = f.mus('subocc', { w: 10 });
+    const O = f.at('occ'), Fh = f.at('head');
+    const h1 = G(p, { o: 0 }); mk('ellipse', { rx: 36, ry: 16, fill: mix(ANAT.skin, '#c08060', .3), stroke: BL, 'stroke-width': 2 }, h1); put(h1, { x: O[0] - 6, y: O[1] + 8 }); p.insertBefore(h1, f.g); show(h1, m('f1', 3));
+    const h2 = G(p, { o: 0 }); mk('ellipse', { rx: 36, ry: 14, fill: mix(ANAT.skin, '#c08060', .3), stroke: BL, 'stroke-width': 2 }, h2); put(h2, { x: Fh[0] - 10, y: Fh[1] - 48 }); show(h2, m('f1', 3));
+    const st = txt(p, '', 400, 600, m('f1', 7), { size: 20, fill: ME, anchor: 'middle', weight: 700 });
+    prog(q => { const n = q * 3, i = Math.floor(n), fr = n - i, base = 6 * Math.min(i, 3); f.set({ hd: base + (fr > .55 ? 6 * (fr - .55) / .45 : 0) }); st.textContent = fr <= .55 ? 'взгляд вверх — лёгкое напряжение' : 'расслабился — кивок в новый объём'; }, m('f1', 7), 12, lin);
+    hide(h2, m('f2'));
+    const c2 = G(p, { o: 0 }); const C2 = f.unit(22, -24); mk('circle', { cx: C2[0], cy: C2[1], r: 12, fill: mix(ANAT.skin, '#c08060', .3), stroke: BL, 'stroke-width': 2 }, c2); show(c2, m('f2', 2));
+    lab(p, 'второй шейный фиксирован', 80, 420, ...C2, ME, m('f2', 2), { anchor: 'start' });
+    pill(p, 'глаза вверх → малая задняя прямая мышца головы', 400, 690, m('f2', 8), { col: ME, size: 17 });
+    infoCard(p, 800, 90, 760, 250, 'вариант 1', 'на спине; рука под затылком, другая поперёк лба; пациент мягко смотрит вверх, как бы кивая назад, — сопротивление у затылка; расслабился — пассивный кивок в новый объём', ME, m('f1'), { size: 19 });
+    infoCard(p, 800, 355, 760, 280, 'вариант 2', 'терапевт сидит, предплечья на столе; второй шейный — между большим и указательным; пассивный кивок до натяжения; пациент поднимает глаза вверх, 3–5 с, расслабился — новый объём; 3–5 раз', ME, m('f2'), { size: 19 });
+    infoCard(p, 800, 650, 760, 220, 'только затылок — второй позвонок', 'сокращение очень мягкое, чтобы не включились длинные разгибатели и верхняя трапециевидная', SP, m('only'), { size: 19 });
+  }],
+
+  ['mer', 'Поворот вверху шеи', (m, D) => {
+    const p = panel(0);
+    txt(p, 'мышечная энергия: поворот в краниовертебральном отделе', 800, 56, m('r1'), { size: 28, weight: 700, anchor: 'middle', fill: ME });
+    const hd = headTop(p, 400, 470, 1.4, m('r1'));
+    txt(p, 'голова сверху, лицо вверху', 400, 200, m('r1'), { size: 17, fill: COL.dim, anchor: 'middle', weight: 600 });
+    prog(q => hd.set(-50 * q), m('r1', 6), 2);
+    const res = G(p, { o: 0 }); mk('ellipse', { rx: 18, ry: 40, fill: mix(ANAT.skin, '#c08060', .3), stroke: BL, 'stroke-width': 2 }, res); show(res, m('r2'));
+    put(res, { x: 400 + 150, y: 430 });
+    arw(p, 470, 290, 600, 290, MAN, m('r2', .5));
+    txt(p, 'взгляд вправо', 610, 270, m('r2', .5), { size: 18, fill: MAN, weight: 700 });
+    txt(p, '3–5 с напряжения — без движения', 400, 700, m('r2', 1), { size: 19, fill: ME, anchor: 'middle', weight: 700 });
+    prog(q => hd.set(-50 - 12 * q), m('r2', 5), 1.5);
+    txt(p, 'расслабился — дальше влево', 400, 750, m('r2', 5), { size: 19, fill: COL.good, anchor: 'middle', weight: 700 });
+    infoCard(p, 800, 90, 760, 300, 'установка', 'на спине; терапевт обхватывает голову с боков, пальцы под затылком; голову сгибают до конца, затем поворачивают в сторону ограничения до предела — например, влево', ME, m('r1'), { size: 20 });
+    infoCard(p, 800, 410, 760, 300, 'сокращение', 'пациент смотрит в противоположную сторону — вправо; терапевт мягко сопротивляется сбоку головы; через 3–5 с расслабление и больший поворот; повторять по необходимости', ME, m('r2'), { size: 20 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Мышечная энергия — максимальное усилие пациента'], ans: ['f'], why: 'Неверно: мягкое неполное сокращение.' },
+      { parts: ['Удержание 3–5 секунд, 3–5 повторов'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Перед приёмом проверяют позвоночную артерию'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Скольжение фасетки вниз расширяет отверстие на своей стороне'], ans: ['f'], why: 'Неверно: сужает.' },
+      { parts: ['Толчок пятой степени повторяют несколько раз'], ans: ['f'], why: 'Неверно: один раз.' },
+    ], [['t', 'Верно', COL.good], ['f', 'Неверно', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['I и II — от боли, III и IV — для объёма, V — однократный толчок.', 'w1'],
+     ['Изменение чувствительности, отдающая боль или головокружение — остановиться.', 'w2'],
+     ['Скольжение фасетки вверх расширяет отверстие на своей стороне, вниз — сужает.', 'w3'],
+     ['Мышечная энергия: 3–5 с мягкого напряжения, 3–5 раз, с проверкой артерии.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SP }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-stop', prompt: ['После третьей манипуляции пациент говорит, что закружилась голова и покалывает руку. Что делать?'],
+    build: choice([
+      ['Прекратить манипуляции'],
+      ['Перейти к толчку'],
+      ['Увеличить амплитуду'],
+      ['Сделать мышечную энергию в повороте'],
+    ], 0, 'Изменение чувствительности и головокружение — сигнал больше не манипулировать.',
+    [null, 'Толчок здесь опаснее.', 'Это не решает проблему.', 'При головокружении мышечную энергию тоже не делают.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-merot', prompt: ['Хроническая стадия, ограничен поворот вверху шеи влево, артерия проверена. Что подходит?'],
+    build: choice([
+      ['Голова согнута и повёрнута влево до предела; взгляд вправо против мягкого сопротивления, затем дальше влево'],
+      ['Сильный толчок с поворотом без подготовки'],
+      ['Манипуляция первой степени ради объёма'],
+      ['Растяжка без фиксации и проверки'],
+    ], 0, 'Мышечная энергия для краниовертебрального поворота: 3–5 с мягкого напряжения, затем новый объём.',
+    [null, 'Толчок без подготовки опасен.', 'Первая степень — от боли, не для объёма.', 'Нужны точная установка и проверка артерии.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

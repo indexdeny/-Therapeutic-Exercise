@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мобилизация плеча — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 49, title: 'Мобилизация: плечевой комплекс', minutes: 9, language: 'ru', next: '../ch050/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch049/cards.ru.json
+const CARDS_SHORT = {
+  "положение покоя\nотведение 55°, горизонтальное приведение 30°, предплечье горизонтально — плоскость лопатки": "плоскость лопатки, 55°",
+  "стабилизация\nлопатку фиксируют ремнём или помощник": "лопатку — ремнём",
+  "скольжение вниз\nотведение; головка стоит слишком высоко": "головка слишком высоко",
+  "прогрессия\nу конца отведения; после 90° — наружная ротация": "> 90° — наружная ротация",
+  "прогрессия подъёма\n> 90°: головку скользят всё больше вперёд, против нижних складок капсулы": "> 90°: головку вперёд",
+  "назад\nсгибание, внутренняя ротация": "сгибание",
+  "тракция I\nрука прижата к туловищу терапевта": "рука прижата",
+  "вперёд\nразгибание, наружная ротация": "разгибание",
+  "положение\nсильное ограничение: на животе → на боку, лицом к терапевту; рука свисает через руку терапевта": "на животе → на боку, лицом к терапевту",
+  "руки\nверхняя — поперёк акромиона; пальцы нижней — под медиальным краем и нижним углом": "акромион + медиальный край и угол",
+};
+// cards-short end
+
+const HAND = '#b9cfe0';
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const gripOval = (p, k = 1) => { const e = mk('ellipse', { rx: 24 * k, ry: 16 * k, fill: HAND, 'fill-opacity': .9, stroke: '#7d93a3', 'stroke-width': 2 }, p); put(e, { o: 0 }); return e; };
+// The glenohumeral joint in close-up: the glenoid on the left, the humerus to the right. view 'front' — up is superior
+// (caudal glides), 'top' — up is anterior (anterior and posterior glides). tilt: the humerus below the horizontal.
+function ghJoint49(p, x, y, s, view, t0, tilt = 35) {
+  const j = jointGlide(p, { x, y, s, r: -90, movAng: -tilt, shaft: 190, t0 });
+  const [up, down] = view === 'front' ? ['вверх', 'вниз'] : ['вперёд', 'назад'];
+  const g = G(p, { o: 0 });
+  T(g, view === 'front' ? 'вид спереди' : 'вид сверху', { x, y: y - 200 * s, size: 21, fill: COL.dim, anchor: 'middle' });
+  T(g, '↑ ' + up, { x: x - 200 * s, y: y - 150 * s, size: 20, fill: COL.dim, anchor: 'middle' });
+  T(g, '↓ ' + down, { x: x - 200 * s, y: y + 165 * s, size: 20, fill: COL.dim, anchor: 'middle' });
+  T(g, 'впадина', { x: x - 75 * s, y: y - 108 * s, size: 20, fill: COL.whole, anchor: 'middle' });
+  show(g, t0);
+  return j;
+}
+// A point on the near arm of a flatFig: k units along it from the shoulder, off units toward the trunk side (+) or out (−).
+const armPt = (f, k, off) => { const S = f.S, u = f.pts.u, n = [-u[1], u[0]]; return f.stage([S[0] + u[0] * k + n[0] * off, S[1] + u[1] * k + n[1] * off]); };
+// Move the whole near arm of a flatFig (the shoulder point shifts by dx, dy) — a translatory glide seen from above.
+const shiftArm = (f, dx, dy) => { f.S = [84 + dx, -168 + dy]; f.arm(f.th); };
+// A grip that stays at armPt(f, k, off).
+function gripArm(p, f, k, off, sz = 1.1) {
+  const e = gripOval(p, sz), upd = () => { const P = armPt(f, k, off); put(e, { x: P[0], y: P[1], r: 90 - f.th }); };
+  f.onSet.push(upd); upd();
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Плечевой комплекс', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 5 · Урок 49', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Мобилизация:', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'плечевой комплекс', { x: 800, y: 380, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'плечевой, акромиально-ключичный, грудино-ключичный суставы, лопатка', 800, 460, m('sub'), { size: 27, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), gf = girdleFront(art, 700, 560, .8, 0);
+    show(art, m('sub', .2));
+    prog(q => gf.set(150 * wave(q, 1)), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['girdle', 'Плечевой пояс', (m) => {
+    const p = panel(0), gf = girdleFront(p, 380, 330, 1.15, .2);
+    // the labels name the joints at rest; they fade when the arm starts to rise
+    const labs = G(p, {});
+    const lab = (key, str, dx, dy, t0, col = COL.whole) => {
+      const P = gf.stage(gf.pts[key]);
+      mk('circle', { cx: P[0], cy: P[1], r: 7, fill: col, opacity: 0 }, labs);
+      show(labs.lastChild, t0);
+      txt(labs, str, P[0] + dx, P[1] + dy, t0, { size: 22, weight: 700, fill: col, anchor: dx < 0 ? 'end' : 'start' });
+    };
+    lab('SC', 'грудино-ключичный', -40, -30, m('sh', 1));
+    lab('AC', 'акромиально-ключичный', 30, -40, m('sh', 2));
+    lab('H', 'плечевой', 50, 10, m('sh', 3));
+    lab('inf', 'лопаточно-грудное', -30, 30, m('sh', 4.5), COL.real);
+    txt(p, 'вид спереди, правое плечо', 380, 820, .2, { size: 20, fill: COL.dim, anchor: 'middle' });
+    tw(labs, { o: .25 }, m('need', .6), .5);
+    prog(q => gf.set(130 * io(q)), m('need', 1), 3, lin);
+    ['ключица поднимается и вращается', 'лопатка поворачивается вверх', 'плечевая кость — наружная ротация', 'достаточная суставная игра'].forEach((str, i) =>
+      pill(p, str, 1180, 300 + i * 80, m('need', 1 + i * 1.5), { col: [COL.whole, COL.real, COL.task, ANAT.taut][i], size: 23 }));
+    txt(p, 'чтобы поднять руку полностью', 1180, 210, m('need'), { size: 26, weight: 700, fill: COL.chalk, anchor: 'middle' });
+  }],
+
+  ['gh', 'Плечевой сустав', (m) => {
+    const p = panel(0), cx = 300, cy = 470, s = .72;
+    tableTop(p, cx, cy, s, .2);
+    const f = flatFig(p, cx, cy, s, .2);
+    f.face(true);
+    prog(q => f.arm(lerp(6, 55, io(q))), m('rest', .5), 1.6, lin);
+    const arc = path(p, '', { stroke: COL.task, 'stroke-width': 4 }, { o: 0 });
+    prog(q => { const S = f.stage(f.S); arc.setAttribute('d', romArc(S, 120, 0, lerp(6, 55, io(q)), 90, -1)); put(arc, { o: 1 }); }, m('rest', .5), 1.6, lin);
+    txt(p, '55°', cx + 145, cy - 60, m('rest', 2), { size: 28, weight: 700, fill: COL.task });
+    txt(p, 'вид сверху, на спине', cx, 80, .2, { size: 20, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 540, 110, 420, 240, 'положение покоя', 'отведение 55°, горизонтальное приведение 30°, предплечье горизонтально — плоскость лопатки', COL.task, m('rest'), { size: 21 });
+    // the strap fixing the scapula
+    const belt = mk('rect', { x: -40, y: -180, width: 210, height: 30, rx: 10, fill: COL.real, 'fill-opacity': .85, stroke: COL.board, 'stroke-width': 2, opacity: 0 }, f.top);
+    show(belt, m('stab'));
+    infoCard(p, 540, 380, 420, 160, 'стабилизация', 'лопатку фиксируют ремнём или помощник', COL.real, m('stab'), { size: 21 });
+    const j = ghJoint49(p, 1250, 450, 1, 'front', m('gh'));
+    txt(p, 'вогнутая впадина · выпуклая головка', 1250, 110, m('gh'), { size: 23, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    show(j.tp, m('tp'));
+    txt(p, 'плоскость лечения — во впадине', 1250, 770, m('tp'), { size: 22, weight: 700, fill: COL.task, anchor: 'middle' });
+    // the plane turns with the scapula
+    prog(q => put(j.g, { r: -90 - 22 * Math.sin(Math.PI * q) }), m('tp', 2), 3, lin);
+    txt(p, 'и поворачивается вместе с лопаткой', 1250, 810, m('tp', 2), { size: 21, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['dist', 'Тракция', (m) => {
+    const p = panel(0), cx = 300, cy = 500, s = .72;
+    ['проверка', 'первая процедура: II', 'боль: колебания I–II', 'подвижность: III'].forEach((str, i) => pill(p, str, 220 + i * 290, 100, m('dist', .5 + i * .8), { col: COL.whole, size: 21 }));
+    tableTop(p, cx, cy, s, .2);
+    const f = flatFig(p, cx, cy, s, .2);
+    f.face(true); f.arm(55);
+    const gA = gripArm(p, f, 30, 26), gL = gripArm(p, f, 85, -24);
+    show(gA, m('hand')); show(gL, m('hand', 4));
+    const S0 = f.stage(f.S);
+    txt(p, 'в подмышке', S0[0] - 10, S0[1] + 62, m('hand'), { size: 20, fill: HAND, anchor: 'end' });
+    prog(q => shiftArm(f, 16 * io(q), 0), m('force', .5), 1.2, lin);
+    arrowTo(p, [S0[0] + 50, S0[1] - 22], [S0[0] + 130, S0[1] - 22], m('force', .5), { col: COL.good, w: 5 });
+    txt(p, 'наружу', S0[0] + 140, S0[1] - 14, m('force', .5), { size: 21, weight: 700, fill: COL.good });
+    const j = ghJoint49(p, 1150, 470, 1.05, 'front', m('pos'));
+    show(j.tp, m('pos'));
+    prog(q => j.set({ n: 11 * io(q) }), m('force', .5), 1.2, lin);
+    const C = j.stage([0, 0]);
+    arrowTo(p, [C[0] + 110, C[1]], [C[0] + 200, C[1]], m('force', .5), { col: COL.good, w: 6 });
+    labelBox(p, 1150, 790, 640, ['⊥ впадине — с поправкой на поворот лопатки', 'капсула натягивается со всех сторон'], ANAT.taut, m('note'), { size: 23 });
+  }],
+
+  ['caud', 'Скольжение вниз', (m) => {
+    const p = panel(0), cx = 260, cy = 500, s = .7;
+    tableTop(p, cx, cy, s, .2);
+    const f = flatFig(p, cx, cy, s, .2);
+    f.face(true); f.arm(55);
+    const gA = gripArm(p, f, 28, 26, 1), gW = gripArm(p, f, 12, -22, 1);
+    show(gA, m('hand', .5)); show(gW, m('hand', 3));
+    const S0 = f.stage(f.S);
+    const lb = txt(p, 'ниже акромиона', S0[0] + 40, S0[1] - 60, m('hand', 3), { size: 20, fill: HAND });
+    hide(lb, m('lat'), .3);
+    prog(q => shiftArm(f, 0, 14 * io(q)), m('force', .5), 1.2, lin);
+    arrowTo(p, [S0[0] + 30, S0[1] - 50], [S0[0] + 30, S0[1] + 10], m('force', .5), { col: COL.whole, w: 5 });
+    // the long-axis variant: both hands on the distal arm pull toward the feet
+    const gD1 = gripArm(p, f, 95, 0, 1);
+    show(gD1, m('lat')); hide(gW, m('lat'), .3);
+    prog(q => shiftArm(f, 0, lerp(14, 22, io(q))), m('lat', 1), 1, lin);
+    // progression: abduction to the end of the range, then the glide
+    prog(q => { shiftArm(f, 0, 0); f.arm(lerp(55, 125, io(q))); }, m('prog', .5), 1.8, lin);
+    pill(p, 'после 90° — наружная ротация', cx, 860, m('prog', 2), { col: COL.task, size: 21 });
+    const j = ghJoint49(p, 900, 470, .95, 'front', m('caud'));
+    show(j.tp, m('caud'));
+    prog(q => j.set({ d: -13 * io(q) }), m('force', .5), 1.2, lin);
+    const C = j.stage([0, 0]);
+    arrowTo(p, [C[0] + 140, C[1] - 40], [C[0] + 140, C[1] + 40], m('force', .5), { col: COL.whole, w: 6 });
+    txt(p, 'подмышечный карман натянут', C[0], C[1] + 220, m('force', 1.5), { size: 22, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    NOTE(p, C[0], C[1] + 262, m('force', 1.5));
+    prog(q => j.set({ d: -13, a: 40 * io(q) }), m('prog', .5), 1.8, lin);
+    infoCard(p, 1180, 110, 370, 220, 'скольжение вниз', 'отведение; головка стоит слишком высоко', COL.whole, m('caud'), { size: 21 });
+    infoCard(p, 1180, 360, 370, 200, 'прогрессия', 'у конца отведения; после 90° — наружная ротация', COL.task, m('prog'), { size: 21 });
+    infoCard(p, 1180, 590, 370, 260, 'прогрессия подъёма', '> 90°: головку скользят всё больше вперёд, против нижних складок капсулы', ANAT.taut, m('elev'), { size: 21 });
+  }],
+
+  ['post', 'Скольжение назад', (m) => {
+    const p = panel(0);
+    let ant = () => [0, 0];
+    const sc = tableScene(p, { hx: 420, top: 420, s: .95, t0: .2, hands: [() => ant(), 'EN'], pose: { aN: 35, eN: 70 }, follow: 'Sh', dx: 75 });
+    ant = () => { const S = onStage(sc.pt, 'Sh'); return [S[0] + 6, S[1] - 26 * .95]; };
+    sc.pt.set({});
+    txt(p, 'на спине, вид сбоку', 420, 100, .2, { size: 20, fill: COL.dim, anchor: 'middle' });
+    const S = onStage(sc.pt, 'Sh');
+    arrowTo(p, [S[0] - 50, S[1] - 110], [S[0] - 50, S[1] - 40], m('force', .5), { col: COL.whole, w: 5 });
+    txt(p, 'назад', S[0] - 64, S[1] - 85, m('force', .5), { size: 21, weight: 700, fill: COL.whole, anchor: 'end' });
+    // progression: flexion 90°, internal rotation, push at the elbow along the humerus
+    prog(q => sc.pt.set({ aN: lerp(35, 90, io(q)), eN: lerp(70, 95, io(q)) }), m('prog', .5), 1.6, lin);
+    pill(p, 'валик под лопатку', 420, 760, m('prog', 2.5), { col: COL.real, size: 21 });
+    pill(p, 'давление на локоть вдоль плечевой кости', 420, 815, m('prog', 4), { col: COL.whole, size: 21 });
+    const j = ghJoint49(p, 1040, 450, .9, 'top', m('post'), 0);
+    show(j.tp, m('post'));
+    prog(q => j.set({ d: -13 * io(q) }), m('force', .5), 1.2, lin);
+    const C = j.stage([0, 0]);
+    arrowTo(p, [C[0] + 150, C[1] - 40], [C[0] + 150, C[1] + 40], m('force', .5), { col: COL.whole, w: 6 });
+    txt(p, 'задняя капсула натянута', C[0], C[1] + 220, m('force', 1.5), { size: 22, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    NOTE(p, C[0], C[1] + 262, m('force', 1.5));
+    infoCard(p, 1300, 120, 260, 230, 'назад', 'сгибание, внутренняя ротация', COL.whole, m('post'), { size: 21 });
+    infoCard(p, 1300, 560, 260, 230, 'тракция I', 'рука прижата к туловищу терапевта', COL.dim, m('how', 3), { size: 21 });
+  }],
+
+  ['ant', 'Скольжение вперёд', (m) => {
+    const p = panel(0);
+    let post = () => [0, 0];
+    const sc = tableScene(p, { hx: 420, top: 420, s: .95, t0: .2, prone: true, hands: [() => post(), 'WN'], pose: { aN: 85, eN: 10 }, follow: 'Sh', dx: 75 });
+    post = () => { const S = onStage(sc.pt, 'Sh'); return [S[0] - 4, S[1] - 28 * .95]; };
+    sc.pt.set({});
+    txt(p, 'на животе, рука за краем стола', 420, 100, .2, { size: 20, fill: COL.dim, anchor: 'middle' });
+    const S = onStage(sc.pt, 'Sh');
+    mk('rect', { x: S[0] - 26, y: S[1] + 12, width: 52, height: 16, rx: 6, fill: COL.real, opacity: 0 }, p);
+    show(p.lastChild, m('how', 3));
+    arrowTo(p, [S[0] - 4, S[1] - 125], [S[0] - 4, S[1] - 55], m('force', .5), { col: COL.whole, w: 5 });
+    txt(p, 'вперёд', S[0] + 12, S[1] - 105, m('force', .5), { size: 21, weight: 700, fill: COL.whole });
+    const j = ghJoint49(p, 1020, 430, .9, 'top', m('ant'), 0);
+    show(j.tp, m('ant'));
+    prog(q => j.set({ d: 13 * io(q) }), m('force', .5), 1.2, lin);
+    const C = j.stage([0, 0]);
+    txt(p, 'передняя капсула натянута', C[0], C[1] - 230, m('force', 1.5), { size: 22, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    NOTE(p, C[0], C[1] - 272, m('force', 1.5));
+    // the danger: lifting at the elbow tips the head forward out of the socket
+    prog(q => j.set({ a: -26 * io(q), d: lerp(13, 26, io(q)), raw: true }), m('prec', 1), 1.2, lin);
+    cross(p, C[0] + 190, C[1] - 120, 22, m('prec', 2));
+    labelBox(p, 1100, 740, 760, ['не поднимать руку за локоть', 'не наращивать наружную ротацию этим приёмом'], COL.bad, m('prec'), { size: 23 });
+    prog(q => j.set({ a: 0, d: 0, raw: false }), m('er'), .6, lin);
+    labelBox(p, 420, 845, 760, ['наружная ротация: тракция при макс. НР или прогрессия подъёма;', 'скольжение назад — если головка смещена вперёд'], COL.good, m('er'), { size: 22 });
+    infoCard(p, 1300, 120, 260, 230, 'вперёд', 'разгибание, наружная ротация', COL.whole, m('ant'), { size: 21 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-gh', prompt: ['Какое скольжение головки плечевой кости?'],
+    build: grid([
+      { parts: ['Увеличить отведение'], ans: ['c'], why: 'Скольжение вниз: натягивает подмышечный карман.' },
+      { parts: ['Увеличить сгибание'], ans: ['p'], why: 'Скольжение назад.' },
+      { parts: ['Увеличить внутреннюю ротацию'], ans: ['p'], why: 'Скольжение назад.' },
+      { parts: ['Увеличить разгибание'], ans: ['a'], why: 'Скольжение вперёд — осторожно, без подъёма за локоть.' },
+    ], [['c', 'Вниз', COL.whole], ['p', 'Назад', COL.task], ['a', 'Вперёд', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['acsc', 'Ключица', (m) => {
+    const p = panel(0), defs = mk('defs', {}, p), line = mix(ANAT.bone, '#000000', .5);
+    // acromioclavicular joint, seen from above (front at the bottom)
+    txt(p, 'акромиально-ключичный · вид сверху', 400, 100, m('ac'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const acG = G(p, { o: 0 }), clv = G(acG, {});
+    limbEl(clv, defs, ANAT.bone, 15, 13, line).set([120, 330], [520, 300]);
+    mk('path', { d: 'M530 270Q640 250 680 300Q650 350 540 330Z', fill: ANAT.bone, stroke: line, 'stroke-width': 2 }, acG);
+    T(acG, 'ключица', { x: 300, y: 380, size: 20, fill: COL.dim, anchor: 'middle' });
+    T(acG, 'акромион', { x: 610, y: 380, size: 20, fill: COL.dim, anchor: 'middle' });
+    T(acG, 'сзади', { x: 80, y: 220, size: 19, fill: COL.dim }); T(acG, 'спереди', { x: 80, y: 460, size: 19, fill: COL.dim });
+    show(acG, m('ac'));
+    const stab = gripOval(p, 1.2); put(stab, { x: 625, y: 300 });
+    show(stab, m('ac', 2));
+    const th = gripOval(p, .6); put(th, { x: 470, y: 270 });
+    show(th, m('ac', 4));
+    arrowTo(p, [470, 225], [470, 265], m('ac', 4), { col: COL.whole, w: 5 });
+    prog(q => put(clv, { y: 12 * io(q), x: 0, r: 0 }), m('ac', 6), 1.2, lin);
+    pill(p, 'ключицу — вперёд, акромион держат', 400, 530, m('ac', 6), { col: COL.whole, size: 21 });
+    // sternoclavicular joint: front view for up / down, top view for forward / back
+    txt(p, 'грудино-ключичный', 1180, 100, m('sc'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const scF = G(p, { o: 0 });
+    mk('rect', { x: 890, y: 180, width: 70, height: 160, rx: 18, fill: ANAT.bone, stroke: line, 'stroke-width': 2 }, scF);
+    const cF = G(scF, {});
+    limbEl(cF, defs, ANAT.bone, 15, 13, line).set([970, 200], [1300, 180]);
+    T(scF, 'спереди', { x: 1130, y: 290, size: 19, fill: COL.dim, anchor: 'middle' });
+    show(scF, m('sc'));
+    const scT = G(p, { o: 0 });
+    mk('rect', { x: 890, y: 420, width: 70, height: 60, rx: 14, fill: ANAT.bone, stroke: line, 'stroke-width': 2 }, scT);
+    const cT = G(scT, {});
+    limbEl(cT, defs, ANAT.bone, 15, 13, line).set([970, 450], [1300, 430]);
+    T(scT, 'сверху', { x: 1130, y: 530, size: 19, fill: COL.dim, anchor: 'middle' });
+    T(scT, 'сзади ↑', { x: 1330, y: 410, size: 19, fill: COL.dim }); T(scT, 'спереди ↓', { x: 1330, y: 485, size: 19, fill: COL.dim });
+    show(scT, m('sc', 3));
+    pill(p, 'вверх-вниз: ключица выпуклая', 1180, 360, m('sc', 1.5), { col: COL.task, size: 20 });
+    pill(p, 'вперёд-назад: ключица вогнутая', 1180, 590, m('sc', 3.5), { col: COL.whole, size: 20 });
+    // the glides and what each one increases
+    prog(q => put(cT, { y: -10 * Math.sin(Math.PI * q) }), m('g1', .3), 1.4, lin);
+    prog(q => put(cF, { y: -10 * Math.sin(Math.PI * q) }), m('g1', 2.5), 1.4, lin);
+    prog(q => put(cT, { y: 10 * Math.sin(Math.PI * q) }), m('g2', .3), 1.4, lin);
+    prog(q => put(cF, { y: 10 * Math.sin(Math.PI * q) }), m('g2', 2.5), 1.4, lin);
+    [['назад → ретракция', 'g1', 0], ['вверх → опускание', 'g1', 2.5], ['вперёд → протракция', 'g2', 0], ['вниз → подъём', 'g2', 2.5]].forEach(([str, mk0, d], i) =>
+      pill(p, str, 980 + (i % 2) * 320, 680 + Math.floor(i / 2) * 64, m(mk0, d), { col: i % 2 ? COL.task : COL.whole, size: 21 }));
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-sc', prompt: ['Грудино-ключичный сустав: какое скольжение ключицы увеличит это движение?'],
+    build: grid([
+      { parts: ['Ретракция'], ans: ['p'], why: 'Назад: вогнутая поверхность скользит вместе с движением.' },
+      { parts: ['Опускание ключицы'], ans: ['s'], why: 'Вверх: выпуклая поверхность скользит против движения.' },
+      { parts: ['Протракция'], ans: ['a'], why: 'Вперёд.' },
+      { parts: ['Подъём ключицы'], ans: ['i'], why: 'Вниз.' },
+    ], [['p', 'Назад', COL.whole], ['s', 'Вверх', COL.task], ['a', 'Вперёд', COL.good], ['i', 'Вниз', COL.real]], { multi: false, text: true }),
+  }], done) }],
+
+  ['scap', 'Лопатка', (m) => {
+    const p = panel(0), cx = 480, cy = 470, line = mix(ANAT.bone, '#000000', .5);
+    txt(p, 'вид сзади', cx, 90, .2, { size: 20, fill: COL.dim, anchor: 'middle' });
+    path(p, `M${cx - 250} 200Q${cx} 150 ${cx + 250} 200L${cx + 230} 800Q${cx} 840 ${cx - 230} 800Z`, { stroke: COL.faint, 'stroke-width': 3 });
+    path(p, `M${cx} 170V820`, { stroke: COL.faint, 'stroke-width': 3, 'stroke-dasharray': '8 8' });
+    const sg = G(p, { x: cx + 120, y: 360, o: 0 });
+    mk('path', { d: 'M-70 -90L80 -100L-40 160Z', fill: ANAT.bone, 'fill-opacity': .8, stroke: line, 'stroke-width': 2, 'stroke-linejoin': 'round' }, sg);
+    path(sg, 'M-62 -50L90 -78', { stroke: line, 'stroke-width': 6 });
+    show(sg, .3);
+    const gT = gripOval(sg, 1.1), gB = gripOval(sg, 1.1);
+    put(gT, { x: 80, y: -105 }); put(gB, { x: -48, y: 150 });
+    show(gT, m('hand')); show(gB, m('hand', 1.5));
+    const moves = [['подъём', { y: 300 }], ['опускание', { y: 420 }], ['вперёд', { x: cx + 175 }], ['назад', { x: cx + 75 }], ['поворот вверх', { r: -18 }], ['поворот вниз', { r: 14 }], ['отхождение', { s: 1.08 }]];
+    moves.forEach(([str, to], i) => {
+      const t = m('scap', 1 + i * 1.3), base = { x: cx + 120, y: 360, r: 0, s: 1 };
+      prog(q => { const v = Math.sin(Math.PI * q), o = {}; for (const k in to) o[k] = lerp(base[k], to[k], v); put(sg, o); }, t, 1.2, lin);
+      pill(p, str, 1000 + (i % 2) * 260, 160 + Math.floor(i / 2) * 64, t, { col: COL.real, size: 21 });
+    });
+    infoCard(p, 880, 450, 660, 180, 'положение', 'сильное ограничение: на животе → на боку, лицом к терапевту; рука свисает через руку терапевта', COL.whole, m('pos'), { size: 21 });
+    infoCard(p, 880, 660, 660, 180, 'руки', 'верхняя — поперёк акромиона; пальцы нижней — под медиальным краем и нижним углом', HAND, m('hand'), { size: 21 });
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Плечевой сустав: вогнутая впадина, выпуклая головка; покой — 55° отведения, 30° горизонтального приведения; лопатку фиксируют.', 'w1'],
+     ['Тракция ⊥ впадине; вниз — отведение; назад — сгибание и внутренняя ротация; вперёд — разгибание и наружная ротация.', 'w2'],
+     ['Наружную ротацию наращивают тракцией при макс. НР или прогрессией подъёма, а не скольжением вперёд.', 'w3'],
+     ['Ключица: для подъёма и опускания — выпуклая, для протракции и ретракции — вогнутая.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-er', prompt: ['После иммобилизации плеча ограничена наружная ротация. Что предлагает книга?'],
+    build: choice([
+      ['Тракцию в положении покоя при максимальной наружной ротации'],
+      ['Скольжение вперёд при 90° отведения и наружной ротации'],
+      ['Поднять руку за локоть, растягивая угол'],
+      ['Скольжение вниз'],
+    ], 0, 'Тракция у конца наружной ротации или прогрессия подъёма; при смещённой вперёд головке — и скольжение назад.',
+    [null, 'Так возможен передний подвывих.', 'Угловое движение опасно: передний подвывих.', 'Скольжение вниз увеличивает отведение.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Положение покоя плеча — отведение 55°, горизонтальное приведение 30°.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Плоскость лечения плечевого сустава лежит в головке плечевой кости.'], ans: ['f'], why: 'Неверно: во впадине, в вогнутой кости.' },
+      { parts: ['Скольжение назад увеличивает сгибание и внутреннюю ротацию.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Для протракции ключицы плоскость лечения — в грудине.'], ans: ['f'], why: 'Неверно: в ключице; для подъёма и опускания — в грудине.' },
+      { parts: ['При скольжении вперёд руку можно поднимать за локоть.'], ans: ['f'], why: 'Неверно: риск переднего подвывиха.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

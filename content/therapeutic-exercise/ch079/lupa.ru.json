@@ -1,0 +1,11 @@
+[
+ {
+  "beat": "eff",
+  "fig": 1,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает rectus, фигура ×0.7",
+  "from": "bike"
+ }
+]

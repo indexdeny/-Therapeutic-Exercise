@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Бег в глубокой воде — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 100, title: 'Аэробная тренировка и бег в глубокой воде', minutes: 8, language: 'ru', next: '../ch101/' };
+// bio begin: places of the biomechanics layer (B switches); made by tools/therapeutic-exercise/bio.py from content/therapeutic-exercise/ch100/bio.ru.json
+const BIO = [
+  {"beat": "form", "fig": 0, "level": "angle", "joint": "hN", "load": {"type": "none"}},
+];
+// bio end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch100/cards.ru.json
+const CARDS_SHORT = {
+  "нет ударной нагрузки\nноги и позвоночник разгружены; можно перед средней глубиной и сушей": "ноги и позвоночник разгружены",
+  "плавание\nнужны положения и объём движений шеи и плеч; пульс, давление и VO₂ — выше, чем при других занятиях в воде; при болезнях позвоночника — сила бедра и туловища": "пульс и VO₂ выше",
+  "осторожно\nплохо плавает + ослабленное сердце → перегрузка": "плохо плавает + ослабленное сердце → перегрузка",
+  "без болезней сердца\nпульс, вентиляция и VO₂max растут меньше, чем при похожих упражнениях на суше": "растут меньше, чем на суше",
+  "кардиологические пациенты\nпри низкой интенсивности нагрузка на сердце ниже; с ростом интенсивности — как на суше": "низкая — ниже; с ростом — как на суше",
+  "тренировочный эффект\nприрост VO₂max переносится на сушу; у здоровых бегунов сохраняются сила ног и VO₂max": "VO₂max переносится на сушу",
+  "новичкам нужно учиться\nкривая обучения заметная": "кривая обучения заметная",
+  "туловище слегка вперёд\nруки — вдоль тела": "руки — вдоль тела",
+  "бедро сгибается до ≈ 80°\nколено при этом прямое": "колено при этом прямое",
+  "бедро разгибается до 0°\nколено при этом сгибается": "колено при этом сгибается",
+  "особое внимание\nновичкам и пациентам с болезнями сердца, лёгких, периферических сосудов; у новичков RPE и VO₂ в воде бывают выше, чем на суше": "новичкам и при болезнях сердца",
+  "меньше поплавков → интенсивнее\nменьше пояс, меньше нудлов — сильнее работать, чтобы держаться на воде": "меньше пояс → сильнее работать",
+  "средняя глубина\nноски для бега — защищают кожу стоп; бег против течения или на эластичной привязи; нудлы вокруг пояса или доска в руках → больше сопротивление": "носки, течение, нудлы, доска",
+};
+// cards-short end
+
+const AQ = COL.whole, ACT = '#ff5a3c', HR_C = '#e2574c';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const GLUT = [['H', 'Sh', 8, -24], ['H', 'KN', 36, 14]];
+// A deep-water runner (side view, facing right), held up by its floats: f.run(ph) — ph in cycles. Each hip flexes to
+// ≈ 80° with the knee straight, then extends to neutral as the knee bends; the legs are half a cycle apart.
+function dwRunner(p, x, hipY, s, t0, { dev = { belt: 'back' }, lean = 8, style = 'run' } = {}) {
+  const f = fig(p, { x, y: hipY, s, o: 0, pose: { ...STAND, t: lean, aN: 12, eN: 75, aF: -8, eF: 75 } });
+  f.dev = floats(f, dev);
+  const leg = u => { const tri = u < .5 ? 2 * u : 2 * (1 - u), e = io(tri); return [80 * e, 90 * (1 - e)]; };
+  f.run = ph => {
+    const w = 2 * Math.PI * ph;
+    if (style === 'ski') { const a = 32 * Math.sin(w); f.set({ hN: a, kN: 4, hF: -a, kF: 4, aN: -a * 1.2 + 10, eN: 10, aF: a * 1.2 + 10, eF: 10, fN: -30, fF: -30 }); return f; }
+    if (style === 'march') { const u = ph % 1, v = (ph + .5) % 1, k = x2 => Math.max(0, Math.sin(2 * Math.PI * x2)); f.set({ hN: 95 * k(u), kN: 95 * k(u) + 4, hF: 95 * k(v), kF: 95 * k(v) + 4, aN: 20 - 30 * Math.sin(w), eN: 80, aF: 20 + 30 * Math.sin(w), eF: 80, fN: -20, fF: -20 }); return f; }
+    const [hN, kN] = leg(ph % 1), [hF, kF] = leg((ph + .5) % 1);
+    f.set({ hN, kN, hF, kF, fN: -25, fF: -25, aN: 12 + 22 * Math.sin(w), aF: 12 - 22 * Math.sin(w), eN: 75, eF: 75 });
+    return f;
+  };
+  f.run(0);
+  if (t0 !== null) show(f.g, t0);
+  return f;
+}
+// A crawl swimmer (prone, head to the right): s.set(ph).
+function swimmer(p, x, y, s, t0) {
+  const f = fig(p, { x, y, s, r: 90, o: 0, pose: { ...STAND, aN: 170, aF: 10, eN: 10, eF: 10, hd: -20 } });
+  f.swim = ph => { const w = 2 * Math.PI * ph, u = ph % 1; f.set({ aN: (u * 360 + 170) % 360, aF: ((u + .5) * 360 + 170) % 360, eN: 10, eF: 10, hN: 12 * Math.sin(w * 3), hF: -12 * Math.sin(w * 3), kN: 12, kF: 12, fN: -40, fF: -40 }); return f; };
+  f.swim(0);
+  if (t0 !== null) show(f.g, t0);
+  return f;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Бег в глубокой воде', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 9 · Урок 100', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Аэробная тренировка в воде', { x: 800, y: 215, size: 54, weight: 600, anchor: 'middle' });
+    T(g, 'и бег в глубокой воде', { x: 800, y: 278, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'варианты · ответ организма · техника · контроль · снаряжение', 800, 356, m('sub'), { size: 28, fill: AQ, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const w = pool(art, 420, 1180, 560, 870, null, { rim: 40 });
+    w.wave(.3, D, 4);
+    const f = dwRunner(w.mid, 800, 560 + 125 * .85, .85, null); put(f.g, { o: 1 });
+    prog(q => f.run(q * D / 1.6), .3, Math.max(3, D - .3), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['aer', 'Где тренировать выносливость', (m, D) => {
+    const p = panel(0);
+    txt(p, 'аэробная тренировка в воде', 800, 56, m('aer'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const SY = 300, S = .8;
+    const w = pool(p, 60, 1540, SY, 840, m('aer'), { floor: [[60, 840], [800, 840], [880, 640], [1540, 640]], rim: 40 });
+    w.wave(m('aer'), Math.max(3, D - m('aer')), 4);
+    const r = dwRunner(w.mid, 420, SY + 125 * S, S, m('deep'));
+    prog(q => r.run(q * D / 1.6), m('deep'), Math.max(3, D - m('deep')), lin);
+    txt(p, 'глубоко: вертикально, дна не касается', 420, 760, m('deep'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const j = fig(w.mid, { s: .9, o: 0 }); plant(j, 'AN', 1030, 640); show(j.g, m('mid'));
+    walk(j, m('mid'), Math.max(2, D - m('mid')), { cycles: Math.max(1, Math.round((D - m('mid')) / .9)), running: true });
+    const tm = treadmill(w.mid, 1400, 640, .5, m('mid', 1));
+    prog(q => tm.set({ ph: q * 10, run: true }), m('mid', 1), Math.max(3, D - m('mid', 1)), lin);
+    txt(p, 'средняя глубина ≈ 1,2–1,8 м', 1210, 220, m('mid'), { size: 22, weight: 700, fill: AQ, anchor: 'middle' });
+    txt(p, '(в книге — 4–6 футов)', 1210, 250, m('mid'), { size: 17, fill: COL.dim, anchor: 'middle' });
+    pillRow(p, ['бег трусцой', 'плавание', 'велотренажёр', 'дорожка'], 1210, 720, m('mid', .5), { col: AQ, size: 19, gap: .5, space: 10 });
+    pillRow(p, ['варианты', 'ответ организма', 'контроль', 'техника', 'снаряжение'], 800, 140, m('know'), { col: COL.good, size: 19, gap: .4, space: 10 });
+  }],
+
+  ['dwr', 'Бег на глубине', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ходьба и бег в глубокой воде', 800, 56, m('dwr'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    txt(p, 'самые частые вертикальные упражнения на выносливость на глубине', 800, 96, m('dwr', .5), { size: 20, fill: COL.dim, anchor: 'middle' });
+    const SY = 330, S = .78;
+    const w = pool(p, 60, 1540, SY, 850, m('dwr'), { rim: 40 });
+    w.wave(m('dwr'), Math.max(3, D - m('dwr')), 4);
+    const runs = [[300, 'run', 'бег', m('dwr')], [800, 'ski', 'как на беговых лыжах', m('alt')], [1280, 'march', 'высокие колени', m('alt', 1.6)]].map(([x, style, lab, t0]) => {
+      const f = dwRunner(w.mid, x, SY + 125 * S, S, t0, { style });
+      prog(q => f.run(q * D / (style === 'run' ? 1.6 : 1.8)), t0, Math.max(3, D - t0), lin);
+      txt(p, lab, x, 760, t0, { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      return f;
+    });
+    infoCard(p, 60, 120, 640, 150, 'нет ударной нагрузки', 'ноги и позвоночник разгружены; можно перед средней глубиной и сушей', COL.good, m('pre'), { size: 20 });
+    // a tether to the pool edge and a jet
+    const te = G(p, { o: 0 }); path(te, `M1540 ${SY - 8}L${1280 - 22} ${SY + 120}`, { stroke: COL.task, 'stroke-width': 3, 'stroke-dasharray': '10 6' });
+    T(te, 'привязь к бортику', { x: 1400, y: SY - 30, size: 19, weight: 700, fill: COL.task, anchor: 'middle' }); show(te, m('teth'));
+    const jet = G(p, { o: 0 }); [0, 1, 2].forEach(i => fArrow(jet, 1080 - i * 10, SY + 80 + i * 40, -150, 0, DRAG_C, { w: 5, head: 13 })); show(jet, m('teth', 2));
+    txt(p, 'струи в небольших ваннах', 1000, SY + 300, m('teth', 2), { size: 19, weight: 700, fill: DRAG_C, anchor: 'middle' });
+  }],
+
+  ['mid', 'Средняя глубина и плавание', (m, D) => {
+    const p = panel(0);
+    txt(p, 'средняя глубина, снаряды, плавание', 800, 56, m('mid'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    // midwater running: shallower and shallower — more weight on the legs
+    const GY = 700, w = pool(p, 60, 760, 440, GY, m('mid'), { rim: 40 });
+    const f = fig(w.mid, { s: .95, o: 0 }); plant(f, 'AN', 380, GY); show(f.g, m('mid'));
+    walk(f, m('mid'), Math.max(2, D - m('mid')), { cycles: Math.max(1, Math.round((D - m('mid')) / .9)), running: true });
+    const HIP = GY - 182 * .95;
+    prog(q => w.set({ y: lerp(HIP - IMM.xiph * .95, HIP - IMM.asis * .95, io(clamp(q * 1.3, 0, 1))) }), m('shal'), 3);
+    const wb = txt(p, '', 410, 260, m('shal'), { size: 26, weight: 700, fill: COL.task, anchor: 'middle' });
+    prog(q => { wb.textContent = q < .8 ? 'по мечевидный отросток: 33 % веса' : 'до ASIS: 50 % веса'; }, m('shal'), 3, lin);
+    txt(p, 'мельче → больше нагрузка весом и сходство с функцией', 410, 760, m('shal'), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const tb = G(p, { o: 0 }); path(tb, `M60 520C140 540 220 520 ${380 - 30} 540`, { stroke: COL.task, 'stroke-width': 5 }); T(tb, 'эластичная привязь', { x: 90, y: 500, size: 18, weight: 700, fill: COL.task }); show(tb, m('tube'));
+    prog(q => { const [hx, hy] = onStage(f, 'H'); tb.firstChild.setAttribute('d', `M60 ${hy - 10}C140 ${hy} 220 ${hy - 20} ${hx - 20} ${hy - 10}`); }, m('tube'), Math.max(2, D - m('tube')), lin);
+    pillRow(p, ['велотренажёр', 'беговая дорожка', 'ручной эргометр'], 410, 820, m('equip'), { col: AQ, size: 19, gap: .5, space: 10 });
+    // swimming
+    const w2 = pool(p, 820, 1540, 300, 520, m('swim'), { rim: 40 });
+    const sw = swimmer(w2.mid, 1180, 300 + 6, .8, m('swim'));
+    prog(q => sw.swim(q * D / 1.4), m('swim'), Math.max(3, D - m('swim')), lin);
+    infoCard(p, 820, 560, 720, 170, 'плавание', 'нужны положения и объём движений шеи и плеч; пульс, давление и VO₂ — выше, чем при других занятиях в воде; при болезнях позвоночника — сила бедра и туловища', AQ, m('swim'), { size: 19 });
+    infoCard(p, 820, 745, 720, 110, 'осторожно', 'плохо плавает + ослабленное сердце → перегрузка', COL.bad, m('prec'), { size: 20 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-where', prompt: ['Глубокая вода или средняя глубина?'],
+    build: grid([
+      { parts: ['Ударной нагрузки на ноги нет совсем'], ans: ['d'], why: 'На глубине пациент не касается дна.' },
+      { parts: ['Бег по подводной беговой дорожке'], ans: ['m'], why: 'Это бег на средней глубине.' },
+      { parts: ['Переходят на всё более мелкую воду — растёт нагрузка весом'], ans: ['m'], why: 'Прогрессия бега на средней глубине.' },
+      { parts: ['Пояс-поплавок сзади, ноги не касаются дна'], ans: ['d'], why: 'Самое частое снаряжение для бега на глубине.' },
+      { parts: ['Специальные носки защищают кожу стоп'], ans: ['m'], why: 'На средней глубине стопы ударяются о дно.' },
+    ], [['d', 'Глубокая вода', AQ], ['m', 'Средняя глубина', COL.task]], { multi: false, text: true }),
+  }], done) }],
+
+  ['phys', 'Ответ организма', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ответ организма на бег в глубокой воде', 800, 56, m('phys'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const x0 = 140, y0 = 760, W = 760, H = 520;
+    chartAxes(p, x0, y0, W, H, 'пульс, вентиляция, VO₂', 'интенсивность →', m('damp'));
+    const land = path(p, fnPath(x0, y0, W - 30, H - 40, x => .18 + .8 * x), { stroke: COL.chalk, 'stroke-width': 4 }, { d: 0 });
+    const water = path(p, fnPath(x0, y0, W - 30, H - 40, x => .18 + .8 * x - .2 * (1 - x) ** 1.4), { stroke: AQ, 'stroke-width': 5 }, { d: 0 });
+    draw(land, m('damp', .3)); draw(water, m('damp', 1));
+    txt(p, 'суша', x0 + 380, y0 - 300, m('damp', .3), { size: 20, weight: 700, fill: COL.chalk });
+    txt(p, 'вода', x0 + 440, y0 - 196, m('damp', 1), { size: 20, weight: 700, fill: AQ });
+    const lo = G(p, { o: 0 }); mk('ellipse', { cx: x0 + 120, cy: y0 - 140, rx: 90, ry: 60, fill: 'none', stroke: COL.good, 'stroke-width': 3, 'stroke-dasharray': '7 6' }, lo); T(lo, 'низкая интенсивность:', { x: x0 + 220, y: y0 - 170, size: 18, weight: 700, fill: COL.good }); T(lo, 'сердцу легче', { x: x0 + 220, y: y0 - 146, size: 18, weight: 700, fill: COL.good }); show(lo, m('card'));
+    const hi = G(p, { o: 0 }); mk('ellipse', { cx: x0 + W - 110, cy: y0 - H + 70, rx: 90, ry: 60, fill: 'none', stroke: COL.bad, 'stroke-width': 3, 'stroke-dasharray': '7 6' }, hi); T(hi, 'высокая: как на суше', { x: x0 + W - 230, y: y0 - H + 160, size: 18, weight: 700, fill: COL.bad }); show(hi, m('conv'));
+    pill(p, 'схема', x0 + 360, y0 - H + 10, m('damp'), { col: COL.dim, size: 17 });
+    infoCard(p, 960, 140, 590, 200, 'без болезней сердца', 'пульс, вентиляция и VO₂max растут меньше, чем при похожих упражнениях на суше', AQ, m('damp'), { size: 21 });
+    infoCard(p, 960, 360, 590, 190, 'кардиологические пациенты', 'при низкой интенсивности нагрузка на сердце ниже; с ростом интенсивности — как на суше', COL.task, m('card'), { size: 21 });
+    infoCard(p, 960, 570, 590, 220, 'тренировочный эффект', 'прирост VO₂max переносится на сушу; у здоровых бегунов сохраняются сила ног и VO₂max', COL.good, m('train'), { size: 21 });
+  }],
+
+  ['form', 'Техника', (m, D) => {
+    const p = panel(0);
+    txt(p, 'правильная техника бега на глубине', 800, 56, m('form'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const SY = 290, S = 1.25;
+    const w = pool(p, 60, 900, SY, 860, m('form'), { rim: 40, alpha: .32 });
+    w.wave(m('form'), Math.max(3, D - m('form')), 3);
+    const f = dwRunner(w.mid, 470, SY + 128 * S, S, m('form'));
+    const ip = muscleOn(f, ...MUSCLE.iliopsoas, { w: 13, after: 'torso' }), gl = muscleOn(f, ...GLUT, { w: 15, after: 'thN' });
+    const T0 = m('legs'), per = 2.4;
+    prog(q => {
+      const T = q * D, ph = T < T0 ? 0 : (T - T0) / per; f.run(ph);
+      const u = ph % 1, flexing = T >= T0 && u < .5;
+      ip.act(flexing ? .9 : 0); gl.act(T >= T0 && !flexing ? .9 : 0);
+    }, 0, D, lin);
+    const neck = G(p, { o: 0 }); path(neck, 'M0 0', { stroke: COL.good, 'stroke-width': 4, 'stroke-dasharray': '8 6' }); show(neck, m('neck'));
+    prog(q => { const [hx, hy] = onStage(f, 'Hc'), [sx, sy] = onStage(f, 'Sh'), [px, py] = onStage(f, 'H'); neck.firstChild.setAttribute('d', `M${hx.toFixed(1)} ${(hy - 30).toFixed(1)}L${sx.toFixed(1)} ${sy.toFixed(1)}L${px.toFixed(1)} ${py.toFixed(1)}`); }, m('neck'), Math.max(2, D - m('neck')), lin);
+    const hipA = txt(p, '', 470, 230, m('legs'), { size: 26, weight: 700, fill: COL.task, anchor: 'middle' });
+    prog(q => { hipA.textContent = 'бедро ≈ ' + Math.round(f.pose.hN / 5) * 5 + '°, колено ≈ ' + Math.round(f.pose.kN / 5) * 5 + '°'; }, m('legs'), Math.max(2, D - m('legs')), lin);
+    infoCard(p, 940, 120, 610, 110, 'новичкам нужно учиться', 'кривая обучения заметная', COL.task, m('form'), { size: 21 });
+    infoCard(p, 940, 250, 610, 90, 'шея — нейтрально', null, COL.good, m('neck'));
+    infoCard(p, 940, 355, 610, 120, 'туловище слегка вперёд', 'руки — вдоль тела', COL.good, m('trunk'), { size: 21 });
+    infoCard(p, 940, 495, 610, 140, 'бедро сгибается до ≈ 80°', 'колено при этом прямое', COL.task, m('legs'), { size: 21 });
+    infoCard(p, 940, 655, 610, 140, 'бедро разгибается до 0°', 'колено при этом сгибается', COL.task, m('back'), { size: 21 });
+    txt(p, 'работают сгибатели и разгибатели бедра (по очереди)', 470, 820, m('legs', 1), { size: 19, weight: 700, fill: ACT, anchor: 'middle' });
+    NOTE(p, 470, 854, m('legs', 1));
+  }],
+
+  ['pop', 'Подстройка техники', (m, D) => {
+    const p = panel(0);
+    txt(p, 'подстройка под пациента', 800, 56, m('pop'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const SY = 320, S = .95, w = pool(p, 60, 1540, SY, 860, m('pop'), { rim: 40 });
+    w.wave(m('pop'), Math.max(3, D - m('pop')), 3);
+    const a = dwRunner(w.mid, 330, SY + 126 * S, S, m('belt'), { dev: { belt: 'back' }, lean: 14 });
+    const b = dwRunner(w.mid, 800, SY + 126 * S, S, m('vest'), { dev: { vest: true }, lean: -4 });
+    prog(q => a.run(q * D / 1.8), m('belt'), Math.max(3, D - m('belt')), lin);
+    prog(q => b.run(q * D / 1.8 + .3), m('vest'), Math.max(3, D - m('vest')), lin);
+    txt(p, 'боль в спине, зависящая от положения:', 560, 150, m('belt'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'пояс сзади → небольшой наклон вперёд', 330, 770, m('belt'), { size: 20, weight: 700, fill: FLOAT_C, anchor: 'middle' });
+    txt(p, 'жилет → прямее, позвоночник разогнут', 800, 770, m('vest'), { size: 20, weight: 700, fill: FLOAT_C, anchor: 'middle' });
+    // amputation: a front view with the float on the side opposite the amputation
+    const fr = frontStand(w.mid, 1270, SY + 300, .95, m('amp'), { muscles: false, pose: { aL: 40, aR: 40, eL: 30, eR: 30 } });
+    // the patient's right leg (screen left) ends below the knee: hide its shank and foot, round off the stump
+    const kids = fr.g.children; put(kids[4], { o: 0 }); put(kids[1], { o: 0 });
+    const K = fr.at(fr.pts.legs[0][0]); mk('ellipse', { cx: K[0], cy: K[1] + 10, rx: 13, ry: 17, fill: '#d8d1c1', stroke: mix('#d8d1c1', COL.board, .62), 'stroke-width': 2 }, w.mid);
+    const P = fr.at([60, -214]);
+    const fl = mk('rect', { x: P[0] - 6, y: P[1] - 34, width: 30, height: 68, rx: 14, fill: FLOAT_C, stroke: mix(FLOAT_C, '#000000', .42), 'stroke-width': 2 }, w.mid); put(fl, { o: 0 }); show(fl, m('amp', 1.5));
+    txt(p, 'ампутация одной ноги:', 1270, 150, m('amp'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'пояс сбоку — на стороне,', 1270, 770, m('amp', 1.5), { size: 20, weight: 700, fill: FLOAT_C, anchor: 'middle' });
+    txt(p, 'противоположной ампутации', 1270, 798, m('amp', 1.5), { size: 20, weight: 700, fill: FLOAT_C, anchor: 'middle' });
+    txt(p, '(вид спереди)', 1270, 180, m('amp'), { size: 17, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['mon', 'Контроль нагрузки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'контроль интенсивности', 800, 56, m('mon'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    pillRow(p, ['оценка усилия (RPE)', 'пульс'], 800, 104, m('mon', .5), { col: AQ, size: 21, gap: .8 });
+    // a perceived-exertion scale
+    const sc = G(p, { o: 0 }); show(sc, m('rpe'));
+    ['очень легко', 'легко', 'умеренно', 'тяжело', 'очень тяжело'].forEach((s, i) => { const y = 690 - i * 100; mk('rect', { x: 100, y: y - 40, width: 300, height: 80, rx: 12, fill: mix([COL.good, COL.irr, COL.int, COL.task, COL.bad][i], COL.board, .55), stroke: [COL.good, COL.irr, COL.int, COL.task, COL.bad][i], 'stroke-width': 2 }, sc); T(sc, s, { x: 250, y: y + 8, size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' }); });
+    pill(p, 'схема', 250, 160, m('rpe'), { col: COL.dim, size: 16 });
+    txt(p, 'у новичков шкала может врать:', 250, 790, m('rpe'), { size: 17, fill: COL.task, anchor: 'middle' });
+    txt(p, 'техника зависит от навыка', 250, 812, m('rpe'), { size: 17, fill: COL.task, anchor: 'middle' });
+    txt(p, 'но в целом RPE в воде', 250, 846, m('rpe', 3), { size: 17, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'соответствует пульсу', 250, 868, m('rpe', 3), { size: 17, weight: 700, fill: COL.good, anchor: 'middle' });
+    // heart rate: lower the maximum by 7–20 beats per minute
+    const ht = heartEl(p, 650, 360, .5, m('hr'));
+    prog(q => ht.beat(cyc(q * D * 2, 1)), m('hr'), Math.max(3, D - m('hr')), lin);
+    const big = G(p, { o: 0 }); T(big, 'ЧСС макс в воде:', { x: 800, y: 300, size: 26, weight: 700, fill: COL.chalk }); T(big, '− 7…20 уд/мин', { x: 800, y: 370, size: 52, weight: 700, fill: HR_C }); T(big, 'для почти максимальной нагрузки (погружение по шею)', { x: 800, y: 410, size: 18, fill: COL.dim }); show(big, m('hr'));
+    const watch = G(p, { x: 720, y: 560, o: 0 });
+    path(watch, 'M-20 -70V-40M-20 40V70M20 -70V-40M20 40V70', { stroke: '#5d7068', 'stroke-width': 14 });
+    mk('rect', { x: -44, y: -44, width: 88, height: 88, rx: 22, fill: '#22322d', stroke: AQ, 'stroke-width': 4 }, watch);
+    const hrT = T(watch, '142', { x: 0, y: 12, size: 30, weight: 700, fill: HR_C, anchor: 'middle' });
+    show(watch, m('dev'));
+    prog(q => { hrT.textContent = String(138 + Math.round(4 * Math.sin(q * 20))); }, m('dev'), Math.max(2, D - m('dev')), lin);
+    txt(p, 'вручную или водонепроницаемым пульсометром', 960, 560, m('dev'), { size: 20, weight: 700, fill: COL.chalk });
+    infoCard(p, 800, 640, 750, 200, 'особое внимание', 'новичкам и пациентам с болезнями сердца, лёгких, периферических сосудов; у новичков RPE и VO₂ в воде бывают выше, чем на суше', COL.bad, m('nov'), { size: 20 });
+  }],
+
+  ['equip', 'Снаряжение', (m, D) => {
+    const p = panel(0);
+    txt(p, 'снаряжение', 800, 56, m('equip'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    txt(p, 'выбор — по позе, удобству и планируемой интенсивности', 800, 96, m('equip', .5), { size: 20, fill: COL.dim, anchor: 'middle' });
+    const SY = 330, S = .8, w = pool(p, 60, 1000, SY, 860, m('belt'), { rim: 40 });
+    w.wave(m('belt'), Math.max(3, D - m('belt')), 3);
+    const a = dwRunner(w.mid, 230, SY + 126 * S, S, m('belt'));
+    const b = dwRunner(w.mid, 520, SY + 126 * S, S, m('alt'), { dev: { vest: true }, lean: 2 });
+    const c = dwRunner(w.mid, 810, SY + 126 * S, S, m('res'), { dev: { belt: 'back' } });
+    // fins on c and dumbbells in its hands
+    const finEl = mk('path', { fill: '#4fb38a', stroke: mix('#4fb38a', '#000000', .45), 'stroke-width': 2 }, c.g), finF = mk('path', { fill: mix('#4fb38a', COL.board, .35), stroke: mix('#4fb38a', '#000000', .45), 'stroke-width': 2 }, c.g);
+    c.g.insertBefore(finF, c.parts.thN.e);
+    const db = floats(c, { bar: true });
+    const finD = (heel, toe) => { const ux = toe[0] - heel[0], uy = toe[1] - heel[1], L = Math.hypot(ux, uy) || 1, tx = ux / L, ty = uy / L, nx = -ty, ny = tx, f2 = v => v.toFixed(1); const P = (a2, b2) => `${f2(toe[0] + tx * a2 + nx * b2)} ${f2(toe[1] + ty * a2 + ny * b2)}`; return `M${P(-14, -6)}L${P(48, -16)}L${P(52, 14)}L${P(-14, 8)}Z`; };
+    c.onSet.push(() => { finEl.setAttribute('d', finD(c.pts.heelN, c.pts.toeN)); finF.setAttribute('d', finD(c.pts.heelF, c.pts.toeF)); });
+    [a, b, c].forEach((f, i) => prog(q => f.run(q * D / 1.7 + i * .3), m(['belt', 'alt', 'res'][i]), Math.max(3, D - m(['belt', 'alt', 'res'][i])), lin));
+    txt(p, 'пояс сзади — чаще всего', 230, 770, m('belt'), { size: 19, weight: 700, fill: FLOAT_C, anchor: 'middle' });
+    txt(p, 'жилет, гантели, нудлы —', 520, 770, m('alt'), { size: 19, weight: 700, fill: FLOAT_C, anchor: 'middle' });
+    txt(p, 'если туловище чувствительно', 520, 798, m('alt'), { size: 18, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'ласты, ботинки, гантели —', 810, 770, m('res'), { size: 19, weight: 700, fill: DRAG_C, anchor: 'middle' });
+    txt(p, 'больше сопротивление', 810, 798, m('res'), { size: 18, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 1040, 130, 510, 200, 'меньше поплавков → интенсивнее', 'меньше пояс, меньше нудлов — сильнее работать, чтобы держаться на воде', COL.task, m('small'), { size: 20 });
+    infoCard(p, 1040, 350, 510, 400, 'средняя глубина', 'носки для бега — защищают кожу стоп; бег против течения или на эластичной привязи; нудлы вокруг пояса или доска в руках → больше сопротивление', AQ, m('midq'), { size: 20 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-hr', prompt: ['Расчётная максимальная ЧСС бегуна на суше — 180 уд/мин. Какой максимум взять для почти максимальной нагрузки в глубокой воде?'],
+    build: blanks([
+      { parts: ['Если снизить на 20 уд/мин: ', { box: '160' }], why: '180 − 20 = 160.' },
+      { parts: ['Если снизить на 7 уд/мин: ', { box: '173' }], why: '180 − 7 = 173.' },
+    ]),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 100, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Глубоко — вертикально без касания дна; средняя глубина — бег, дорожка, велотренажёр; плавание.', 'w1'],
+     ['В воде пульс и VO₂ ниже, чем на суше, но с ростом интенсивности сближаются; эффект — и на суше.', 'w2'],
+     ['Техника: шея нейтрально, туловище чуть вперёд, бедро до ≈ 80° с прямым коленом.', 'w3'],
+     ['Максимальный пульс в воде — на 7–20 уд/мин ниже; новичков и сердечных пациентов контролируют.', 'w4'],
+     ['Меньше поплавков — интенсивнее; ласты, ботинки и гантели — сопротивление.', 'w5']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 190 + i * 135, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: AQ }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 28, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-calf', prompt: ['Марафонка с надрывом икроножной мышцы: пока можно нагружать ногу лишь на 25 % веса, а форму нужно сохранить. Что подойдёт для выносливости?'],
+    build: choice([
+      ['Бег в глубокой воде с поясом-поплавком сзади, без касания дна; пульс — с поправкой на воду'],
+      ['Обычный бег на дорожке на суше в прежнем объёме'],
+      ['Бег по мелкой воде по колено'],
+      ['Только плавание кролем с максимальной скоростью'],
+    ], 0, 'На глубине ударной нагрузки нет, а выносливость поддерживается; интенсивность контролируют по пульсу с поправкой.',
+    [null, 'На суше нагрузка весом полная — сейчас нельзя.', 'По колено на ногу приходится почти весь вес.', 'Плавание возможно, но «только и на максимуме» — не план; к тому же пульс в воде нужно контролировать.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-back', prompt: ['У пациента боль в спине зависит от положения: в небольшом наклоне вперёд ему легче. Что выбрать для бега на глубине?'],
+    build: choice([
+      ['Пояс-поплавок сзади: он удерживает небольшой наклон вперёд'],
+      ['Жилет: он держит туловище прямее, позвоночник разогнут'],
+      ['Пояс сбоку на одной стороне'],
+      ['Бег без поплавков — так интенсивнее'],
+    ], 0, 'Поплавок сзади поддерживает небольшое сгибание туловища вперёд.',
+    [null, 'Жилет подходит тем, кому легче в разгибании.', 'Боковой пояс — для пациента с ампутацией одной ноги.', 'Меньше поплавков — интенсивнее, но здесь задача — удобная поза.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

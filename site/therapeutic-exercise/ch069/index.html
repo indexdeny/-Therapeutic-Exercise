@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ручное сопротивление: рука — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 69, title: 'Ручное сопротивление: правила и верхняя конечность', minutes: 9, language: 'ru', next: '../ch070/' };
+// bio begin: places of the biomechanics layer (B switches); made by tools/therapeutic-exercise/bio.py from content/therapeutic-exercise/ch069/bio.ru.json
+const BIO = [
+  {"beat": "sh", "fig": 1, "level": "angle", "joint": "aN", "load": {"type": "none"}},
+  {"beat": "el", "fig": 1, "level": "angle", "joint": "eN", "load": {"type": "none"}},
+];
+// bio end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch069/cards.ru.json
+const CARDS_SHORT = {
+  "отдельная мышца\nсопротивление её действию — как при мануальном мышечном тестировании": "как при мануальном тестировании",
+  "механика тела\nстол по высоте, близко к пациенту, широкая опора, вес — вслед за движением": "близко к пациенту, широкая опора",
+  "по силе мышцы\nнагрузить, но не пересилить; прикладывать и снимать постепенно": "нагрузить, но не пересилить",
+  "конечность — близко к себе\nчасть силы — вес тела": "часть силы — вес тела",
+  "чередующаяся изометрия\nруки не отрывать, без расслабления": "руки не отрывать, без расслабления",
+  "повторения\nпо реакции пациента — и по силе и выносливости терапевта; после 8–12 устают оба → отдых": "после 8–12 устают оба → отдых",
+  "стрелка = направление R\nпри эксцентрике движение — в обратную сторону": "эксцентрика — в обратную сторону",
+  "чередовать противоположные\nсила и контроль агонистов и антагонистов; умение плавно и быстро менять направление": "плавно и быстро менять направление",
+  "вращение\nлокоть 90°, плечо между приведением и отведением 90° (полотенце); R — на нижнюю часть предплечья": "локоть 90°, R — нижняя часть предплечья",
+  "стабилизация\nвнутреннее — у ключицы; наружное — лопатку держит стол; можно и в отведении 90°": "внутреннее — у ключицы, наружное — стол",
+  "горизонтальное отведение и приведение\nплечо и локоть 90°, R — над локтем": "плечо и локоть 90°, R — над локтем",
+  "лопатка\nподнимание — R сверху над ключицей · опускание — тянуться к стопе, давя в ладонь; позже — поднять тело на руках сидя · протракция и ретракция — R на головку плеча спереди или сзади; туловище не поворачивается": "поднимание, опускание, протракция, ретракция",
+};
+// cards-short end
+
+const RES = COL.whole, STABC = COL.good, SKIN = '#d8d1c1', HANDC = '#b9cfe0';
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A supine patient raising the near arm (shoulder flexion) against the therapist's hands at the distal arm.
+function shoulderScene(p, hx, top, s, t0) {
+  const sc = tableScene(p, { hx, top, s, hands: ['EN', 'EN'], thx: -40, t0 });
+  const dl = muscleOn(sc.pt, ['Sh', 'H', 4, -14], ['Sh', 'EN', 38, -9], { after: 'hdN', w: 10 });
+  const R = rArrow(p, RES, 80);
+  sc.pt.onSet.push(() => { const E = onStage(sc.pt, 'EN'), S = onStage(sc.pt, 'Sh'), dx = E[0] - S[0], dy = E[1] - S[1]; R.at(E, -dy, dx); });   // across the arm, toward extension
+  sc.pt.set({});
+  return { sc, dl, R };
+}
+// The upper body of a supine patient seen from above, the near arm abducting (th 0 = along the body); the elbow is
+// flexed 90°, so the forearm points to the ceiling and is seen end-on. Returns { set(th), E, S }.
+function topArm(p, cx, cy, s, t0) {
+  const g = G(p, { x: cx, y: cy, s, o: 0 }), defs = mk('defs', {}, g), line = mix(SKIN, COL.board, .62);
+  mk('rect', { x: -150, y: -300, width: 300, height: 420, rx: 16, fill: PANEL, stroke: COL.dim, 'stroke-width': 3 }, g);
+  limbEl(g, defs, SKIN, 56, 64, line).set([0, 80], [0, -150]);
+  limbEl(g, defs, SKIN, 24, 24, line).set([-84, -160], [84, -160]);
+  const hg = mk('radialGradient', { id: 'ta' + (++SHADE_ID), cx: .38, cy: .32, r: .78 }, defs);
+  [[0, mix(SKIN, '#ffffff', .5)], [.55, SKIN], [1, mix(SKIN, '#000000', .45)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, hg));
+  mk('circle', { cx: 0, cy: -240, r: 40, fill: `url(#${hg.id})`, stroke: line, 'stroke-width': 2 }, g);
+  limbEl(g, defs, mix(SKIN, COL.board, .3), 15, 12, line).set([-84, -160], [-96, -40]);
+  const up = limbEl(g, defs, SKIN, 16, 13, line);
+  const fa = mk('circle', { r: 17, fill: `url(#${hg.id})`, stroke: line, 'stroke-width': 2 }, g);
+  const o = { g, S: [84, -160] };
+  o.set = th => { const a = rad(th), E = [84 + 120 * Math.sin(a), -160 + 120 * Math.cos(a)]; up.set(o.S, E); fa.setAttribute('cx', E[0].toFixed(1)); fa.setAttribute('cy', E[1].toFixed(1)); o.E = [cx + E[0] * s, cy + E[1] * s]; o.n = [Math.cos(a), -Math.sin(a)]; o.Sst = [cx + 84 * s, cy - 160 * s]; };
+  o.set(5);
+  if (t0 !== null) show(g, t0);
+  return o;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Ручное сопротивление', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 69', { x: 800, y: 170, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Ручное сопротивление', { x: 800, y: 255, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'правила и верхняя конечность', { x: 800, y: 320, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'рука терапевта как тренажёр', 800, 400, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const s = shoulderScene(art, 820, 620, .85, 0);
+    show(s.R, .6);
+    prog(q => { s.sc.pt.set({ aN: lerp(6, 150, cyc(q, 2)) }); s.dl.act(.9); }, .5, Math.max(4, D - 1.2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['def', 'Что это', (m) => {
+    const p = panel(0);
+    txt(p, 'ручное сопротивление (manual resistance)', 800, 76, m('def'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const s = shoulderScene(p, 450, 520, 1, m('def', .5));
+    show(s.R, m('rom'));
+    prog(q => { s.sc.pt.set({ aN: lerp(6, 160, cyc(q, 1.5)) }); s.dl.act(.9); }, m('rom', .3), 5, lin);
+    txt(p, 'по всему доступному объёму', 450, 760, m('rom'), { size: 23, fill: RES, anchor: 'middle', weight: 600 });
+    ['анатомические плоскости', 'диагонали ПНФ', 'как в функции'].forEach((s2, i) => pill(p, s2, 1180, 200 + i * 64, m('planes', i * .6), { col: COL.task, size: 25 }));
+    infoCard(p, 900, 410, 640, 150, 'отдельная мышца', 'сопротивление её действию — как при мануальном мышечном тестировании', COL.whole, m('mmt'), { size: 23 });
+    const ch = G(p, { o: 0 });
+    ['с помощью', 'активные', 'ручное сопротивление'].forEach((s2, i) => { mk('rect', { x: 900 + i * 220, y: 620, width: 200, height: 70, rx: 14, fill: PANEL, stroke: i === 2 ? RES : COL.dim, 'stroke-width': 2.5 }, ch); put(para(ch, s2, 1000 + i * 220, 650, null, { size: 21, maxW: 180, anchor: 'middle' }), { o: 1 }); if (i) path(ch, `M${880 + i * 220} 655h18`, { stroke: COL.dim, 'stroke-width': 3 }); });
+    show(ch, m('cont'));
+  }],
+
+  ['box', 'Плюсы и минусы', (m) => {
+    const p = panel(0);
+    txt(p, 'преимущества', 420, 76, m('adv'), { size: 30, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'недостатки', 1200, 76, m('dis'), { size: 30, weight: 700, fill: COL.bad, anchor: 'middle' });
+    const A = ['начало реабилитации, мышцы ≤ 4/5; переход к механическому', 'тонкая дозировка, подстройка по объёму и болезненной дуге; максимум везде', 'точный контроль объёма: защита тканей, обход нестабильной части', 'динамика и статика; ручная стабилизация; разные положения; постоянный контроль'];
+    const B = ['нагрузка субъективна, не измерить', 'ограничена силой терапевта', 'медленно или средне — перенос ограничен', 'не самостоятельно; дома — с помощником; трудоёмко; не для выносливости'];
+    A.forEach((s, i) => { const g = G(p, { o: 0 }), y = 120 + i * 180; mk('rect', { x: 60, y, width: 720, height: 160, rx: 16, fill: PANEL, stroke: COL.good, 'stroke-width': 2.5 }, g); put(para(g, s, 85, y + 60, null, { size: 24, maxW: 670 }), { o: 1 }); show(g, m('a' + (i + 1))); });
+    B.forEach((s, i) => { const g = G(p, { o: 0 }), y = 120 + i * 180; mk('rect', { x: 820, y, width: 720, height: 160, rx: 16, fill: PANEL, stroke: COL.bad, 'stroke-width': 2.5 }, g); put(para(g, s, 845, y + 60, null, { size: 24, maxW: 670 }), { o: 1 }); show(g, m('d' + (i + 1))); });
+  }],
+
+  ['guide', 'Правила', (m) => {
+    const p = panel(0);
+    txt(p, 'как давать ручное сопротивление', 800, 76, m('guide'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // elbow flexion: the near hand resists at the wrist, the far hand holds the upper arm
+    let holdArm = () => [440, 400];
+    const sc = tableScene(p, { hx: 440, top: 470, s: 1.05, hands: ['WN', () => holdArm()], t0: m('guide', .3) });
+    holdArm = () => { const S = onStage(sc.pt, 'Sh'), E = onStage(sc.pt, 'EN'); return [lerp(S[0], E[0], .35), lerp(S[1], E[1], .35) - 8]; };
+    sc.pt.set({});
+    const bic = muscleOn(sc.pt, ...MUSCLE.biceps, { after: 'hdN', w: 10 });
+    const R = rArrow(p, RES, 80);
+    sc.pt.onSet.push(() => { const W = onStage(sc.pt, 'WN'), E = onStage(sc.pt, 'EN'), dx = W[0] - E[0], dy = W[1] - E[1]; R.at(W, -dy, dx); });
+    sc.pt.set({});
+    show(R, m('hands', .5));
+    prog(q => { sc.pt.set({ eN: lerp(6, 110, cyc(q, 2)) }); bic.act(.9); }, m('hands', .5), 6, lin);
+    const ring = put(mk('circle', { r: 28, fill: 'none', stroke: STABC, 'stroke-width': 5 }, p), { o: 0 });
+    sc.pt.onSet.push(() => { const [x, y] = holdArm(); put(ring, { x, y }); });
+    sc.pt.set({});
+    show(ring, m('hands', 1));
+    txt(p, 'кольцо — стабилизация проксимально', 400, 760, m('hands', 1), { size: 22, fill: STABC, weight: 600, anchor: 'middle' });
+    txt(p, 'стрелка R — сопротивление дистально', 400, 720, m('hands', .5), { size: 22, fill: RES, weight: 600, anchor: 'middle' });
+    infoCard(p, 920, 120, 620, 170, 'механика тела', 'стол по высоте, близко к пациенту, широкая опора, вес — вслед за движением', COL.task, m('body'), { size: 22 });
+    infoCard(p, 920, 305, 620, 140, 'захваты подсказывают направление', null, COL.whole, m('hands', 2), { size: 22 });
+    infoCard(p, 920, 460, 620, 150, 'по силе мышцы', 'нагрузить, но не пересилить; прикладывать и снимать постепенно', COL.good, m('grade'), { size: 22 });
+    infoCard(p, 920, 625, 620, 110, 'конечность — близко к себе', 'часть силы — вес тела', COL.task, m('close'), { size: 22 });
+    infoCard(p, 920, 750, 620, 110, 'чередующаяся изометрия', 'руки не отрывать, без расслабления', COL.real, m('alt'), { size: 22 });
+  }],
+
+  ['cmd', 'Команды', (m) => {
+    const p = panel(0);
+    txt(p, 'команды', 800, 76, m('cmd'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'простые, прямые, вовремя — вместе с сопротивлением', 800, 120, m('cmd', 1), { size: 23, fill: COL.dim, anchor: 'middle' });
+    const bub = (x, y, lines, col, t0, head) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x, y, width: 460, height: 60 + lines.length * 46, rx: 30, fill: PANEL, stroke: col, 'stroke-width': 3 }, g);
+      T(g, head, { x: x + 230, y: y + 44, size: 25, weight: 700, fill: col, anchor: 'middle' });
+      lines.forEach((l, i) => T(g, l, { x: x + 230, y: y + 92 + i * 46, size: 24, fill: COL.chalk, anchor: 'middle' }));
+      show(g, t0);
+    };
+    bub(60, 190, ['«Держите»', '«Не дайте мне сдвинуть»', '«Удерживайте против меня»'], COL.whole, m('iso'), 'изометрия');
+    bub(570, 190, ['«Толкайте»', '«Тяните»'], COL.nat, m('con'), 'концентрически');
+    bub(1080, 190, ['«Медленно уступайте,', 'пока я давлю»'], COL.task, m('ecc'), 'эксцентрически');
+    infoCard(p, 200, 560, 1200, 170, 'повторения', 'по реакции пациента — и по силе и выносливости терапевта; после 8–12 устают оба → отдых', COL.good, m('reps'), { size: 24 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-cmd', prompt: ['Какое сокращение вызывает команда?'],
+    build: grid([
+      { parts: ['«Не дайте мне сдвинуть руку»'], ans: ['i'], why: 'Изометрия.' },
+      { parts: ['«Тяните ко мне»'], ans: ['c'], why: 'Концентрическое.' },
+      { parts: ['«Медленно уступайте, пока я давлю»'], ans: ['e'], why: 'Эксцентрическое.' },
+      { parts: ['«Держите»'], ans: ['i'], why: 'Изометрия.' },
+      { parts: ['«Толкайте»'], ans: ['c'], why: 'Концентрическое.' },
+    ], [['i', 'Изометрическое', COL.whole], ['c', 'Концентрическое', COL.nat], ['e', 'Эксцентрическое', COL.task]], { multi: false, text: true }),
+  }], done) }],
+
+  ['bg', 'Техники: общее', (m) => {
+    const p = panel(0);
+    txt(p, 'техники: концентрически, в анатомических плоскостях, без опоры', 800, 76, m('bg'), { size: 28, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const s = shoulderScene(p, 520, 520, 1, m('bg', .5));
+    show(s.R, m('bg', 1));
+    const lab = txt(p, '', 520, 760, m('recip'), { size: 25, weight: 700, fill: RES, anchor: 'middle' });
+    const ext = muscleOn(s.sc.pt, ['Sh', 'H', 4, 14], ['Sh', 'EN', 34, 9], { after: 'hdN', w: 10 });
+    // reciprocal: flexion against R on the front, then extension against R on the back
+    prog(q => { const u = (q * 2) % 1, up = u < .5, e = up ? io(u * 2) : 1 - io(u * 2 - 1); s.sc.pt.set({ aN: lerp(6, 140, e) }); s.dl.act(up ? .9 : .1); ext.act(up ? .1 : .9); const E = onStage(s.sc.pt, 'EN'), S = onStage(s.sc.pt, 'Sh'), dx = E[0] - S[0], dy = E[1] - S[1]; s.R.at(E, up ? -dy : dy, up ? dx : -dx); lab.textContent = up ? 'сгибание — R спереди' : 'разгибание — R сзади'; }, m('recip', .3), 7, lin);
+    infoCard(p, 1000, 140, 540, 230, 'стрелка = направление R', 'при эксцентрике движение — в обратную сторону', RES, m('bg', 1), { size: 23 });
+    infoCard(p, 1000, 390, 540, 250, 'чередовать противоположные', 'сила и контроль агонистов и антагонистов; умение плавно и быстро менять направление', COL.good, m('recip'), { size: 23 });
+  }],
+
+  ['sh', 'Плечо', (m) => {
+    const p = panel(0);
+    txt(p, 'плечо: сгибание, разгибание, отведение', 800, 70, m('sh'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const s = shoulderScene(p, 400, 470, .95, m('sh', .3));
+    show(s.R, m('flex'));
+    prog(q => { s.sc.pt.set({ aN: lerp(6, 160, cyc(q, 1.5)) }); s.dl.act(.9); }, m('flex', .3), 5, lin);
+    txt(p, 'сгибание: R спереди на нижнюю часть плеча; стол держит лопатку', 400, 690, m('flex', .5), { size: 21, fill: RES, anchor: 'middle', weight: 600 });
+    txt(p, 'разгибание — R сзади; переразгибание — у края стола, на боку или на животе', 400, 730, m('ext'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    // abduction seen from above: elbow at 90°, R on the outer side of the arm, the top of the shoulder held
+    const ta = topArm(p, 1080, 430, .85, m('abd'));
+    const R = rArrow(p, RES, 80), stab = put(mk('circle', { r: 24, fill: 'none', stroke: STABC, 'stroke-width': 5 }, p), { o: 0 });
+    const upd = th => { ta.set(th); R.at(ta.E, -ta.n[0], -ta.n[1]); put(stab, { x: ta.Sst[0] + 6, y: ta.Sst[1] - 26 }); };
+    upd(5); show(R, m('abd', .5)); show(stab, m('abd', 1.5));
+    prog(q => upd(lerp(5, 100, cyc(q, 1.5))), m('abd', .5), 5, lin);
+    txt(p, 'вид сверху · локоть 90°', 1080, 160, m('abd'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'надплечье — стабилизация', 1260, 270, m('abd', 1.5), { size: 21, fill: STABC, weight: 600 });
+    infoCard(p, 820, 650, 720, 110, 'выше 90° — дать плечу вращаться наружу (ущемление!)', null, COL.bad, m('abd', 3), { size: 22 });
+    // the plane of the scapula: 30–40° in front of the frontal plane (seen from above)
+    const sp = G(p, { o: 0 });
+    mk('ellipse', { cx: 300, cy: 830, rx: 120, ry: 40, fill: PANEL, stroke: COL.dim, 'stroke-width': 3 }, sp);
+    path(sp, 'M140 830H460', { stroke: COL.dim, 'stroke-width': 2, 'stroke-dasharray': '7 6' });
+    path(sp, `M410 830L${410 + 140 * Math.cos(rad(35))} ${830 + 140 * Math.sin(rad(35))}`, { stroke: COL.task, 'stroke-width': 7 });
+    T(sp, '30–40°', { x: 560, y: 870, size: 22, fill: COL.task, weight: 700 });
+    T(sp, 'плоскость лопатки (вид сверху)', { x: 300, y: 790, size: 20, fill: COL.dim, anchor: 'middle' });
+    show(sp, m('scap'));
+    infoCard(p, 820, 780, 720, 90, 'в плоскости лопатки — устойчивее, меньше ущемления', null, COL.good, m('scap', 1), { size: 22 });
+  }],
+
+  ['rot', 'Вращение и лопатка', (m) => {
+    const p = panel(0);
+    txt(p, 'вращение плеча, горизонтальные движения, лопатка', 800, 70, m('rot'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // rotation: looking along the humerus, the forearm swings about it; R on the distal forearm
+    const cx = 330, cy = 520, g = G(p, { o: 0 });
+    const hb = mk('circle', { cx, cy, r: 30, fill: ANAT.bone, stroke: COL.dim, 'stroke-width': 3 }, g);
+    const defs = mk('defs', {}, g), fa = limbEl(g, defs, SKIN, 22, 16, mix(SKIN, COL.board, .62));
+    mk('circle', { cx, cy, r: 30, fill: 'none', stroke: COL.dim, 'stroke-width': 3 }, g);
+    T(g, 'плечевая кость — смотрим вдоль неё', { x: cx, y: cy + 80, size: 21, fill: COL.dim, anchor: 'middle' });
+    show(g, m('r1'));
+    const R = rArrow(p, RES, 80);
+    const setR = (ph, dir) => { const a = rad(ph), W = [cx + 230 * Math.sin(a), cy - 230 * Math.cos(a)]; fa.set([cx, cy], W); const t = [Math.cos(a), Math.sin(a)]; R.at(W, -dir * t[0], -dir * t[1]); };
+    setR(0, 1); show(R, m('r1', 1));
+    const lab = txt(p, '', cx, 200, m('r1', 1), { size: 24, weight: 700, fill: RES, anchor: 'middle' });
+    prog(q => { const u = (q * 2) % 1, ext = u < .5, e = ext ? io(u * 2) : io(u * 2 - 1); const ph = ext ? lerp(0, -60, e) : lerp(-60, 50, e); setR(ph, ext ? -1 : 1); lab.textContent = ext ? 'наружное вращение' : 'внутреннее вращение'; }, m('r1', 1.2), 7, lin);
+    infoCard(p, 640, 130, 900, 160, 'вращение', 'локоть 90°, плечо между приведением и отведением 90° (полотенце); R — на нижнюю часть предплечья', RES, m('r1'), { size: 22 });
+    infoCard(p, 640, 305, 900, 130, 'стабилизация', 'внутреннее — у ключицы; наружное — лопатку держит стол; можно и в отведении 90°', STABC, m('r2'), { size: 22 });
+    infoCard(p, 640, 450, 900, 130, 'горизонтальное отведение и приведение', 'плечо и локоть 90°, R — над локтем', COL.task, m('hz'), { size: 22 });
+    infoCard(p, 640, 595, 900, 260, 'лопатка', 'поднимание — R сверху над ключицей · опускание — тянуться к стопе, давя в ладонь; позже — поднять тело на руках сидя · протракция и ретракция — R на головку плеча спереди или сзади; туловище не поворачивается', COL.real, m('scp'), { size: 22 });
+  }],
+
+  ['el', 'Локоть, предплечье, запястье', (m) => {
+    const p = panel(0);
+    txt(p, 'локоть, предплечье, запястье', 800, 70, m('el'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // elbow flexion
+    let holdArm = () => [400, 300];
+    const sc = tableScene(p, { hx: 400, top: 360, s: .8, hands: ['WN', () => holdArm()], t0: m('flex') });
+    holdArm = () => { const S = onStage(sc.pt, 'Sh'), E = onStage(sc.pt, 'EN'); return [lerp(S[0], E[0], .3), lerp(S[1], E[1], .3) - 6]; };
+    sc.pt.set({});
+    const bic = muscleOn(sc.pt, ...MUSCLE.biceps, { after: 'hdN', w: 9 }), tri = muscleOn(sc.pt, ...MUSCLE.triceps, { after: 'hdN', w: 9 });
+    const R = rArrow(p, RES, 60);
+    let flex = true;
+    sc.pt.onSet.push(() => { const W = onStage(sc.pt, 'WN'), E = onStage(sc.pt, 'EN'), dx = W[0] - E[0], dy = W[1] - E[1]; R.at(W, flex ? -dy : dy, flex ? dx : -dx); });
+    sc.pt.set({});
+    show(R, m('flex', .5));
+    prog(q => { flex = true; sc.pt.set({ eN: lerp(6, 110, io(q)) }); bic.act(.9); tri.act(0); }, m('flex', .5), 2.5, lin);
+    prog(q => { flex = false; sc.pt.set({ eN: lerp(110, 10, io(q)) }); bic.act(0); tri.act(.9); }, m('ext', .3), 2.5, lin);
+    txt(p, 'сгибатели: R спереди на предплечье; разгибатели: R сзади', 400, 560, m('flex', .5), { size: 21, fill: RES, anchor: 'middle', weight: 600 });
+    txt(p, 'стабилизация — верхняя часть плеча', 400, 595, m('flex', 1), { size: 21, fill: STABC, anchor: 'middle' });
+    ['супинация', 'пронация', 'среднее'].forEach((s2, i) => pill(p, s2, 950 + i * 190, 160, m('flex', 2 + i * .5), { col: COL.task, size: 22 }));
+    txt(p, 'положение предплечья — разные сгибатели', 1140, 220, m('flex', 3), { size: 21, fill: COL.dim, anchor: 'middle' });
+    // pronation: R on the distal radius, not on the hand
+    const fx = 300, fy = 760, g = G(p, { o: 0 });
+    mk('circle', { cx: fx, cy: fy, r: 80, fill: mix(SKIN, COL.board, .5), stroke: SKIN, 'stroke-width': 3 }, g);
+    mk('circle', { cx: fx - 30, cy: fy + 10, r: 15, fill: ANAT.bone }, g);
+    const rad1 = mk('circle', { r: 18, fill: ANAT.bone, stroke: COL.task, 'stroke-width': 3 }, g);
+    T(g, 'локтевая', { x: fx - 30, y: fy + 52, size: 18, fill: COL.dim, anchor: 'middle' });
+    show(g, m('pro'));
+    const Rp = rArrow(p, RES, 60);
+    prog(q => { const a = rad(lerp(-20, 120, cyc(q, 1.5))), P = [fx - 30 + 60 * Math.cos(a), fy + 10 - 60 * Math.sin(a)]; rad1.setAttribute('cx', P[0].toFixed(1)); rad1.setAttribute('cy', P[1].toFixed(1)); Rp.at(P, Math.sin(a), Math.cos(a)); }, m('pro', .3), 5, lin);
+    show(Rp, m('pro', .3));
+    txt(p, 'R — на лучевую кость, локоть 90°', fx + 110, fy - 60, m('pro', .5), { size: 21, fill: RES, weight: 600 });
+    txt(p, 'не на кисть', fx + 110, fy - 20, m('pro', 2), { size: 22, fill: COL.bad, weight: 700 });
+    cross(p, fx + 250, fy - 28, 14, m('pro', 2.2), 6);
+    // wrist flexion and extension
+    const h = handSide(p, 1160, 700, 1.2, {});
+    show(h.g, m('wr'));
+    const Rw = rArrow(p, RES, 60);
+    prog(q => { const u = (q * 2) % 1, fl = u < .5, e = fl ? io(u * 2) : io(u * 2 - 1); h.set({ w: fl ? lerp(0, 50, e) : lerp(50, -40, e) }); const A = handAt(h, 0, .6, fl ? 16 : -16), ph = rad(h.phis[0]); Rw.at(A, (fl ? 1 : -1) * Math.sin(ph), (fl ? -1 : 1) * Math.cos(ph)); }, m('wr', .3), 6, lin);
+    show(Rw, m('wr', .3));
+    const stw = put(mk('circle', { cx: 1040, cy: 700, r: 26, fill: 'none', stroke: STABC, 'stroke-width': 5 }, p), { o: 0 });
+    show(stw, m('wr', .8));
+    txt(p, 'запястье: R на ладонь или тыл у пястных; стабилизация — предплечье', 1180, 860, m('wr', .5), { size: 21, fill: RES, anchor: 'middle', weight: 600 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-place', prompt: ['Куда прикладывать сопротивление?'],
+    build: grid([
+      { parts: ['Сгибание плеча'], ans: ['arm'], why: 'Спереди на нижнюю часть плеча (или предплечье, если локоть здоров).' },
+      { parts: ['Пронация предплечья'], ans: ['rad'], why: 'На лучевую кость у запястья, не на кисть.' },
+      { parts: ['Разгибание запястья'], ans: ['meta'], why: 'На тыльную поверхность кисти у пястных костей.' },
+      { parts: ['Поднимание лопатки'], ans: ['top'], why: 'Сверху на надплечье, над ключицей.' },
+    ], [['arm', 'Нижняя часть плеча', RES], ['rad', 'Лучевая кость', COL.task], ['meta', 'Пястные кости', COL.good], ['top', 'Надплечье', COL.real]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Ручное сопротивление — для слабых мышц и начала: тонко и под контролем, но не измеримо и ограничено силой терапевта.', 'w1'],
+     ['Механика тела; стабилизация проксимально, R дистально, постепенно, конечность близко к себе.', 'w2'],
+     ['«Держите» — изометрия, «Толкайте» — концентрика, «Медленно уступайте» — эксцентрика; 8–12 раз.', 'w3'],
+     ['Плечо: R на нижнюю часть плеча, выше 90° — с наружным вращением; пронация — на лучевую кость.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-manual', prompt: ['Преимущество или недостаток ручного сопротивления?'],
+    build: grid([
+      { parts: ['Сопротивление подстраивается под болезненную дугу'], ans: ['a'], why: 'Преимущество.' },
+      { parts: ['Нагрузку нельзя измерить и записать'], ans: ['d'], why: 'Недостаток.' },
+      { parts: ['Терапевт точно ограничивает объём движения'], ans: ['a'], why: 'Преимущество.' },
+      { parts: ['Мало для сильных мышц'], ans: ['d'], why: 'Ограничено силой терапевта.' },
+      { parts: ['Не подходит для тренировки выносливости'], ans: ['d'], why: 'Слишком долго и трудоёмко.' },
+    ], [['a', 'Преимущество', COL.good], ['d', 'Недостаток', COL.bad]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-abd', prompt: ['Вы сопротивляетесь отведению плеча. Пациент начинает движение, поднимая надплечье, а выше 90° ему больно. Что сделать?'],
+    build: choice([
+      ['Стабилизировать надплечье и выше 90° позволить плечу вращаться наружу'],
+      ['Увеличить сопротивление'],
+      ['Давать сопротивление на кисть'],
+      ['Продолжать: так мышца сильнее работает'],
+    ], 0, 'Стабилизация надплечья убирает обходное поднимание лопатки, а наружное вращение выше 90° защищает от ущемления.',
+    [null, 'Большее сопротивление усилит обходное движение.', 'Сопротивление — на нижнюю часть плеча, а не на кисть.', 'Боль и обходные движения — повод изменить технику.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

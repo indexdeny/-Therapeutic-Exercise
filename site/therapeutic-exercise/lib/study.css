@@ -1,0 +1,68 @@
+/* The study pages (review, glossary): the contents' colours and type, the top bar, buttons, the search and filter menus,
+   and the lesson-moment player of lib/moment.js. */
+:root {
+  --page: #0f1613; --board: #1d2b27; --panel: #22322d; --edge: #3a5047;
+  --chalk: #ece8dc; --dim: #9aaba3; --faint: #5d7068; --task: #f0b45a; --quiz: #86c9e8; --good: #8fd6b0; --bad: #f08a7a;
+  --ui: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --book: "Iowan Old Style", Palatino, Georgia, serif;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; min-height: 100svh; background: var(--board); color: var(--chalk); font: 16px/1.45 var(--ui); }
+.top { position: sticky; top: 0; z-index: 3; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 12px 24px;
+  background: rgba(22, 33, 29, .92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid #2a3b35; }
+.top h1 { margin: 0; font: 500 26px/1.1 var(--book); }
+.top .sp { margin-left: auto; }
+.back { color: var(--dim); font-size: 14px; text-decoration: none; border: 1px solid var(--edge); border-radius: 999px; padding: 4px 12px; white-space: nowrap; }
+.back:hover { color: var(--chalk); }
+.btn { display: inline-block; padding: 6px 14px; border: 1px solid var(--edge); border-radius: 999px; background: none;
+  color: var(--chalk); font: 14px var(--ui); text-decoration: none; white-space: nowrap; cursor: pointer; }
+.btn:hover:not(:disabled) { border-color: var(--faint); }
+.btn.go { background: var(--quiz); border-color: var(--quiz); color: #10242e; font-weight: 600; }
+.btn.quiet { color: var(--dim); }
+.btn.big { padding: 10px 24px; font-size: 17px; }
+kbd { padding: 0 5px; border: 1px solid currentColor; border-radius: 5px; font: 600 12px var(--ui); opacity: .7; }
+.btn kbd { margin-left: 8px; vertical-align: 1px; }
+.chip { display: inline-block; padding: 1px 9px; border: 1px solid var(--edge); border-radius: 999px; color: var(--dim); font-size: 12px; }
+.pill { display: inline-block; padding: 0 8px; border: 1px dashed var(--faint); border-radius: 999px; color: var(--dim); font-size: 11px; }
+.note { margin: 0 0 6px; color: var(--dim); font-size: 14px; }
+/* Search and filter menus, as in the atlas. */
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 24px; }
+.search { flex: 0 1 340px; min-width: 0; padding: 7px 14px; border: 1px solid var(--edge); border-radius: 999px; background: var(--panel); color: var(--chalk); font: 15px var(--ui); }
+.search::placeholder { color: var(--faint); }
+details.f { position: relative; }
+details.f > summary { list-style: none; padding: 6px 13px; border: 1px solid var(--edge); border-radius: 999px; background: var(--panel); color: var(--dim);
+  font-size: 14px; white-space: nowrap; cursor: pointer; user-select: none; }
+details.f > summary::-webkit-details-marker { display: none; }
+details.f > summary b { color: var(--chalk); font-weight: 600; }
+details.f.on > summary { border-color: var(--good); }
+details.f[open] > summary { border-color: var(--task); }
+.menu { position: absolute; z-index: 4; top: calc(100% + 6px); left: 0; min-width: 260px; max-height: 60vh; overflow-y: auto; padding: 6px;
+  background: var(--panel); border: 1px solid var(--edge); border-radius: 12px; box-shadow: 0 16px 40px rgba(0, 0, 0, .45); }
+.menu label { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; font-size: 15px; white-space: nowrap; cursor: pointer; }
+.menu label:hover { background: rgba(255, 255, 255, .05); }
+.menu small { margin-left: auto; padding-left: 12px; color: var(--faint); }
+.menu input { accent-color: var(--task); }
+.reset { padding: 6px 4px; border: 0; background: none; color: var(--task); font: 14px var(--ui); cursor: pointer; }
+.count { margin-left: auto; color: var(--dim); font-size: 14px; white-space: nowrap; }
+/* The lesson-moment player (lib/moment.js). */
+.pv-frame { position: relative; aspect-ratio: 16 / 9; background: #18231f; }
+.pv-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+.pv-sound { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 10px 20px; border: 0; border-radius: 999px;
+  background: var(--chalk); color: var(--board); font: 600 15px var(--ui); cursor: pointer; }
+.pv-ctl { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #16211d; color: var(--dim); font-size: 13px; font-variant-numeric: tabular-nums; }
+.pv-play { flex: none; width: 30px; height: 30px; border: 0; border-radius: 50%; background: var(--chalk); color: var(--board); font-size: 12px; cursor: pointer; }
+.pv-bar { flex: 1; height: 4px; border-radius: 2px; background: #2c3d37; overflow: hidden; }
+.pv-bar i { display: block; width: 0; height: 100%; background: var(--task); }
+button:focus-visible, a:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px solid var(--task); outline-offset: 2px; }
+@media (max-width: 1099px) { .top, .filters { padding-left: 16px; padding-right: 16px; } }
+@media (max-width: 559px) {
+  .search { flex-basis: 100%; }
+  .menu { position: static; margin-top: 6px; box-shadow: none; }
+  .count { margin-left: 0; }
+  .wide { display: none; }
+}
+/* The pages opt in to the cross-fade themselves (see review/index.html); here only its reduced-motion form. */
+@media (prefers-reduced-motion: reduce) { ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; } }

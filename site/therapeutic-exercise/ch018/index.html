@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Осознанность — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 18, title: 'Осознанность', minutes: 6, language: 'ru', next: '../ch019/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch018/cards.ru.json
+const CARDS_SHORT = {
+  "рука на верх груди\nподнимаются грудь и рёбра — верхнегрудное, поверхностное дыхание": "верхнегрудное, поверхностное",
+  "рука на живот, у пупка\nна вдохе живот выталкивает руку вперёд, нижние рёбра расходятся — диафрагмальное, брюшное дыхание": "диафрагмальное, брюшное дыхание",
+};
+// cards-short end
+
+const Q7 = [['настоящий момент', 'быть здесь и сейчас'], ['доброта к себе', 'дружелюбие к себе'], ['без оценки', 'не «хорошо — плохо»'], ['принятие', 'мысли и чувства как есть'], ['без усилий', 'не менять, а осознавать'], ['ум новичка', 'отложить ожидания'], ['отпускание', 'жизнь — это изменения']];
+// Breathing: upper chest — orange, diaphragmatic — green.
+const BR = { chest: COL.task, belly: COL.good };
+let HANDS = null;   // stage boxes of the chest and belly in the q2 figure
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+// A figure sitting upright on a chair, feet planted at (ax, GY).
+function seated(p, ax, GY, s, t0, pose = {}) {
+  const f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...SIT, t: 6, aF: 12, eF: 75, ...pose } });   // far hand rests on the thigh
+  plant(f, 'AN', ax, GY);
+  const [hx, hy] = onStage(f, 'H');
+  chair(p, hx, hy + 9 * s / .5, GY, t0);
+  show(f.g, t0);
+  return f;
+}
+// Points on the front of the trunk: the upper chest and the belly at the navel (stage coordinates).
+function trunkPts(f) {
+  const [sx, sy] = onStage(f, 'Sh'), [hx, hy] = onStage(f, 'H'), dx = sx - hx, dy = sy - hy, L = Math.hypot(dx, dy);
+  const ux = dx / L, uy = dy / L, nx = -uy * f.dir, ny = ux * f.dir, fw = 1;   // forward = perpendicular to the trunk
+  const at = (k, off) => [hx + dx * k + nx * fw * off * f.s, hy + dy * k + ny * fw * off * f.s];
+  return { chest: at(.72, 30), belly: at(.25, 34) };
+}
+// A breathing swell on the chest or the belly; amp(t) gives its size 0..1.
+function swell(p, f, part, col) {
+  const e = mk('ellipse', { rx: 1, ry: 1, fill: col, 'fill-opacity': .35, stroke: col, 'stroke-width': 2.5 }, p);
+  put(e, { o: 0 });
+  const set = v => { const [x, y] = trunkPts(f)[part]; e.setAttribute('cx', x.toFixed(1)); e.setAttribute('cy', y.toFixed(1)); e.setAttribute('rx', (8 + 16 * v).toFixed(1)); e.setAttribute('ry', (12 + 18 * v).toFixed(1)); };
+  set(0);
+  e.breathe = (t0, dur, n, amp = 1) => prog(q => set(amp * (1 - Math.cos(2 * Math.PI * n * q)) / 2), t0, dur, lin);
+  return e;
+}
+// Arm angles that put the palm on the upper chest or on the belly of the seated figure (trunk lean 6°),
+// found with the law of cosines for the rig's upper arm (72) and forearm (66).
+const CHEST_ARM = { aN: -50, eN: 152 }, BELLY_ARM = { aN: -36, eN: 96 };
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Осознанность', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 2 · Урок 18', { x: 800, y: 250, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Осознанность', { x: 800, y: 345, size: 70, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'внимание к настоящему моменту — без оценки', 800, 440, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 800;
+    path(art, `M680 ${GY}H940`, { stroke: COL.faint, 'stroke-width': 3 });
+    const f = seated(art, 840, GY, .5, 0, BELLY_ARM);
+    const b = swell(art, f, 'belly', BR.belly);
+    show(art, m('sub', .2)); show(b, m('sub', .2));
+    b.breathe(m('sub', .3), Math.max(1.5, D - m('sub', .3) - 1), 2);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['why', 'Зачем осознанность', (m) => {
+    const p = panel(0);
+    // nervous system: brain, cord and peripheral nerves, glowing where it changes
+    const ns = G(p, { o: 0 });
+    mk('ellipse', { cx: 250, cy: 170, rx: 90, ry: 66, fill: COL.real, 'fill-opacity': .2, stroke: COL.real, 'stroke-width': 3 }, ns);
+    path(ns, 'M250 236V560', { stroke: COL.real, 'stroke-width': 8 });
+    [300, 380, 460, 540].forEach((y, i) => { path(ns, `M250 ${y}Q${170} ${y + 30} ${110} ${y + 70}`, { stroke: COL.real, 'stroke-width': 3 }); path(ns, `M250 ${y}Q${330} ${y + 30} ${390} ${y + 70}`, { stroke: COL.real, 'stroke-width': 3 }); });
+    show(ns, m('chr'));
+    txt(p, 'хроническая боль меняет', 250, 650, m('ns'), { size: 24, weight: 700, fill: COL.bad, anchor: 'middle' });
+    para(p, 'периферическую и центральную нервную систему', 250, 686, m('ns'), { size: 21, fill: COL.dim, anchor: 'middle', maxW: 380 });
+    pulse(ns, m('ns', .3), 1.06);
+    pill(p, 'осознанность', 650, 160, m('mix'), { col: COL.good, size: 27 });
+    txt(p, '+', 800, 168, m('mix', .3), { size: 34, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pill(p, 'упражнения', 930, 160, m('mix', .3), { col: COL.task, size: 27 });
+    arrowTo(p, [1040, 160], [1140, 160], m('mix', .8), { col: COL.dim, w: 4 });
+    pill(p, 'меньше стресса и тревоги', 1320, 160, m('mix', 1), { col: COL.good, size: 25 });
+    labelBox(p, 980, 290, 760, ['осознание тела и движения', '+ внимательное наблюдение'], COL.whole, m('aw'), { size: 26 });
+    // the self and the illness as separate circles
+    const sp = G(p, { o: 0 });
+    mk('circle', { cx: 860, cy: 470, r: 70, fill: COL.good, 'fill-opacity': .2, stroke: COL.good, 'stroke-width': 3 }, sp);
+    T(sp, 'я', { x: 860, y: 482, size: 34, weight: 700, fill: COL.good, anchor: 'middle' });
+    mk('circle', { cx: 1100, cy: 470, r: 54, fill: COL.bad, 'fill-opacity': .15, stroke: COL.bad, 'stroke-width': 3, 'stroke-dasharray': '8 6' }, sp);
+    T(sp, 'болезнь', { x: 1100, y: 478, size: 22, weight: 700, fill: COL.bad, anchor: 'middle' });
+    show(sp, m('sep'));
+    txt(p, 'отделить себя от болезни', 980, 580, m('sep', .4), { size: 25, weight: 700, fill: COL.good, anchor: 'middle' });
+    ['профилактика травм', 'реабилитация', 'переносимость неприятных процедур'].forEach((s, i) => pill(p, s, [700, 960, 1290][i], 680, m('app', .3 + i * .5), { col: COL.whole, size: 23 }));
+  }],
+
+  ['def', 'Определение', (m) => {
+    const p = panel(0);
+    txt(p, 'осознанность — это внимание', 800, 100, m('d1'), { size: 34, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    [['намеренное', COL.task], ['в настоящем моменте', COL.good], ['без оценки', COL.whole]].forEach(([s, c], i) => labelBox(p, 330 + i * 470, 190, 400, [s], c, m('d1', .8 + i * .7), { size: 30 }));
+    // a stream of experiences that passes without labels
+    const items = [['мысль', COL.chalk], ['ощущение', COL.task], ['эмоция', COL.rat], ['мысль', COL.chalk], ['звук', COL.whole]];
+    items.forEach(([s, c], i) => {
+      const g = pill(p, s, -100, 420, m('d2', .2 + i * .8), { col: c, size: 25 });
+      prog(q => put(g, { x: lerp(-100, 1700, q) }), m('d2', .2 + i * .8), 6, lin);
+    });
+    path(p, 'M0 470H1600', { stroke: COL.faint, 'stroke-width': 2, 'stroke-dasharray': '6 10' });
+    ['хорошо', 'плохо', 'полезно', 'вредно'].forEach((s, i) => {
+      const x = 300 + i * 330;
+      txt(p, s, x, 560, m('d2', 2 + i * .4), { size: 26, weight: 700, fill: COL.dim, anchor: 'middle' });
+      const ln = path(p, `M${x - 60} 552H${x + 60}`, { stroke: COL.bad, 'stroke-width': 4 }, { d: 0 });
+      draw(ln, m('d2', 2.3 + i * .4), .3);
+    });
+    txt(p, 'замечаем, но не судим', 800, 630, m('d2', 4), { size: 28, weight: 700, fill: COL.whole, anchor: 'middle' });
+    labelBox(p, 470, 730, 620, ['ответ на постоянные отвлечения'], COL.chalk, m('dist'), { size: 25 });
+    labelBox(p, 1150, 730, 600, ['человек — целый, а не «сломанный»'], COL.good, m('whole'), { size: 25 });
+  }],
+
+  ['qual', 'Семь качеств', (m) => {
+    const p = panel(0);
+    head(p, 'Семь качеств осознанного внимания (бокс 2.6)', .2, 70, COL.chalk);
+    Q7.forEach(([h, s], i) => {
+      const row = i < 4 ? 0 : 1, col = i < 4 ? i : i - 4, x = (row ? 280 : 90) + col * 360, y = 140 + row * 260;
+      const g = G(p, { o: 0 });
+      roundBox(g, x, y, 340, 220, COL.good, PANEL, 2.5);
+      T(g, String(i + 1), { x: x + 24, y: y + 56, size: 40, weight: 700, fill: COL.good });
+      put(para(g, h, x + 70, y + 50, null, { size: 27, weight: 700, maxW: 250, fill: COL.good }), { o: 1 });
+      put(para(g, s, x + 24, y + 140, null, { size: 23, maxW: 290 }), { o: 1 });
+      show(g, m('q' + (i + 1)));
+    });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-qual', prompt: ['Какое это качество осознанности? (примеры не из книги)'],
+    build: grid([
+      { parts: ['Замечаю боль и не называю её ни плохой, ни хорошей'], ans: ['j'], why: 'Без оценки.' },
+      { parts: ['Делаю привычное упражнение так, будто впервые'], ans: ['b'], why: 'Ум новичка: отложить ожидания.' },
+      { parts: ['Принимаю свою усталость такой, какая она есть'], ans: ['a'], why: 'Принятие.' },
+      { parts: ['Возвращаю внимание к тому, что делаю сейчас'], ans: ['p'], why: 'Настоящий момент.' },
+      { parts: ['Признаю, что всё меняется, и не держусь за прежнее'], ans: ['l'], why: 'Отпускание.' },
+    ], [['p', 'Настоящий момент', COL.good], ['j', 'Без оценки', COL.whole], ['a', 'Принятие', COL.task], ['b', 'Ум новичка', COL.real], ['l', 'Отпускание', COL.int]], { multi: false, text: true }),
+  }], done) }],
+
+  ['med', 'Медитация осознанности', (m) => {
+    const p = panel(0);
+    labelBox(p, 800, 100, 1000, ['медитация осознанности — тренировка внимания к настоящему моменту'], COL.good, m('med'), { size: 27 });
+    const tl = G(p, { o: 0 });
+    path(tl, 'M160 300H1440', { stroke: COL.faint, 'stroke-width': 4 });
+    mk('circle', { cx: 300, cy: 300, r: 14, fill: COL.task }, tl);
+    T(tl, '1979', { x: 300, y: 270, size: 34, weight: 700, fill: COL.task, anchor: 'middle' });
+    T(tl, 'Джон Кабат-Зинн', { x: 300, y: 350, size: 25, weight: 700, anchor: 'middle' });
+    T(tl, 'программа снижения стресса', { x: 300, y: 385, size: 22, fill: COL.dim, anchor: 'middle' });
+    T(tl, 'на основе осознанности', { x: 300, y: 413, size: 22, fill: COL.dim, anchor: 'middle' });
+    show(tl, m('mbsr'));
+    const pt = G(p, { o: 0 });
+    roundBox(pt, 620, 240, 380, 120, COL.whole, PANEL, 3);
+    T(pt, 'сначала — кафедра', { x: 810, y: 290, size: 25, weight: 700, fill: COL.whole, anchor: 'middle' });
+    T(pt, 'физической терапии', { x: 810, y: 326, size: 25, weight: 700, fill: COL.whole, anchor: 'middle' });
+    show(pt, m('pt'));
+    arrowTo(p, [1010, 320], [1120, 350], m('pt', 1.4), { col: COL.dim, w: 3 });
+    txt(p, 'затем — медицинский колледж', 1270, 360, m('pt', 1.6), { size: 23, fill: COL.dim, anchor: 'middle' });
+    ['хроническая боль', 'рассеянный склероз', 'депрессия и тревога', 'рак', 'псориаз', 'спортсмены'].forEach((s, i) => pill(p, s, 300 + (i % 3) * 500, 560 + Math.floor(i / 3) * 80, m('stud', .3 + i * .4), { col: COL.real, size: 25 }));
+    txt(p, 'где изучали', 800, 500, m('stud'), { size: 24, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['eff', 'Эффекты', (m) => {
+    const p = panel(0);
+    head(p, 'Что даёт медитация осознанности', .2, 70, COL.chalk);
+    const up = (x, y, s, t0, c = COL.good) => { pill(p, '↑ ' + s, x, y, t0, { col: c, size: 25 }); };
+    const dn = (x, y, s, t0, c = COL.good) => { pill(p, '↓ ' + s, x, y, t0, { col: c, size: 25 }); };
+    up(330, 160, 'регуляция внимания', m('att', .2)); up(800, 160, 'осознание тела', m('att', .8)); up(1260, 160, 'регуляция эмоций', m('att', 1.4));
+    up(330, 270, 'иммунный ответ', m('phys', .2)); dn(800, 270, 'стрессовая реакция', m('phys', .9)); dn(1260, 270, 'кортизол', m('phys', 1.5));
+    dn(560, 350, 'пульс', m('phys', 2.2)); dn(1030, 350, 'давление', m('phys', 2.6));
+    labelBox(p, 800, 470, 760, ['↓ субъективное переживание боли'], COL.task, m('pain'), { size: 28 });
+    txt(p, 'при стойкой боли', 800, 580, m('chr'), { size: 24, fill: COL.dim, anchor: 'middle' });
+    dn(330, 640, 'стресс, тревога, депрессия', m('chr', .3)); up(800, 640, 'принятие боли', m('chr', 1.2)); pill(p, 'перспективна при центральной сенситизации', 1220, 720, m('chr', 2.2), { col: COL.real, size: 24 });
+  }],
+
+  ['breath', 'Осознанное дыхание', (m) => {
+    const p = panel(0), GY = 560;
+    // holding the breath during a hard movement
+    ground(p, 120, 560, GY, m('hold', -.2));
+    const f = fig(p, { x: 330, y: GY - 182 * .6, s: .6, o: 0 }); show(f.g, m('hold', -.2));
+    repeatPose(f, { ...SQUAT, aN: 80, aF: 80 }, m('hold'), 4, 1, ['AN', onStage(f, 'AN')[0], GY]);
+    const wave = (y, amp, c, t0, label, flatFrom = null) => {
+      const ln = mk('path', { fill: 'none', stroke: c, 'stroke-width': 4 }, p);
+      put(ln, { o: 0 }); show(ln, t0);
+      let d = '';
+      for (let i = 0; i <= 120; i++) {
+        const x = 700 + i * 6.5, a = flatFrom !== null && i > flatFrom && i < flatFrom + 40 ? 0 : amp;
+        d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + (y - a * Math.sin(i / 120 * Math.PI * 8)).toFixed(1);
+      }
+      ln.setAttribute('d', d);
+      txt(p, label, 700, y - 60, t0, { size: 24, weight: 700, fill: c });
+    };
+    wave(220, 30, COL.bad, m('hold', .5), 'дыхание задержано на трудном движении', 40);
+    wave(420, 34, COL.good, m('every'), 'осознанное дыхание: замечаем и дышим глубоко');
+    pill(p, 'медитация 15–60 минут', 900, 600, m('how', 1.4), { col: COL.real, size: 25 });
+    pill(p, 'короткая практика — 5 минут', 1300, 600, m('how', 2.2), { col: COL.real, size: 25 });
+    labelBox(p, 1100, 720, 760, ['в каждую программу благополучия'], COL.good, m('every', .6), { size: 27 });
+  }],
+
+  ['belly', 'Грудь и живот', (m) => {
+    const p = panel(0), GY = 650, s = .95;
+    ground(p, 120, 640, GY, .2);
+    const f = seated(p, 470, GY, s, .2);
+    const ch = swell(p, f, 'chest', BR.chest), bl = swell(p, f, 'belly', BR.belly);
+    // sit tall and just watch the breath
+    labelBox(p, 1100, 150, 700, ['сидеть прямо: плечи над тазом, стопы на полу'], COL.chalk, m('sit'), { size: 25 });
+    show(ch, m('sit', 1)); ch.breathe(m('sit', 1), m('chest') - m('sit', 1), 3, .5);
+    poseTo(f, CHEST_ARM, m('chest'), .8);
+    ch.breathe(m('chest', .8), m('abd') - m('chest', .8), 3, 1);
+    infoCard(p, 820, 260, 560, 170, 'рука на верх груди', 'поднимаются грудь и рёбра — верхнегрудное, поверхностное дыхание', BR.chest, m('chest', .4), { size: 23 });
+    hide(ch, m('abd'), .4);
+    poseTo(f, BELLY_ARM, m('abd'), .8);
+    show(bl, m('abd', .6)); bl.breathe(m('abd', .8), 9, 4, 1);
+    infoCard(p, 820, 460, 560, 200, 'рука на живот, у пупка', 'на вдохе живот выталкивает руку вперёд, нижние рёбра расходятся — диафрагмальное, брюшное дыхание', BR.belly, m('abd', .4), { size: 23 });
+  }],
+
+  ['posture', 'Осанка и дыхание', (m) => {
+    const p = panel(0), GY = 650, s = .95;
+    ground(p, 120, 640, GY, .2);
+    const f = seated(p, 470, GY, s, .2, BELLY_ARM);
+    const bl = swell(p, f, 'belly', BR.belly);
+    show(bl, .3);
+    poseTo(f, { t: 30, hd: 22 }, Math.max(.3, m('slump')), 1);
+    bl.breathe(Math.max(1.3, m('slump', 1)), m('up') - Math.max(1.3, m('slump', 1)), 3, .4);
+    poseTo(f, { t: 2, hd: -4 }, m('up'), 1);
+    bl.breathe(m('up', 1), 12, 4, 1);
+    const meter = (y, v, c, s2, t0) => {
+      const g = G(p, { o: 0 });
+      T(g, s2, { x: 860, y: y - 14, size: 25, weight: 700, fill: c });
+      mk('rect', { x: 860, y, width: 520, height: 26, rx: 13, fill: COL.faint, 'fill-opacity': .35 }, g);
+      mk('rect', { x: 860, y, width: 520 * v, height: 26, rx: 13, fill: c }, g);
+      show(g, t0);
+    };
+    txt(p, 'глубина дыхания (схема)', 1120, 160, m('slump'), { size: 24, fill: COL.dim, anchor: 'middle' });
+    meter(250, .4, COL.bad, 'ссутулившись', m('slump', 1.4));
+    meter(380, .85, COL.good, 'прямо: лопатки назад и вниз, грудь чуть вверх', m('up', 1.4));
+    labelBox(p, 1120, 560, 560, ['заметить, как меняется дыхание'], COL.chalk, m('up', 2.6), { size: 26 });
+    txt(p, 'и вернуться к естественному дыханию', 1120, 660, m('back'), { size: 25, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['eat', 'Изюминка', (m) => {
+    const p = panel(0);
+    head(p, 'Осознанная еда: изюминка, около 5 минут', m('rais'), 70, COL.chalk);
+    const S5 = [['рассмотреть', 'цвет и детали', 'look', 0], ['откуда она', 'от посадки до урожая', 'look', 1.6], ['текстура и запах', 'слюна, желудок', 'feel', 0], ['во рту, жевать', 'вкус и ощущения', 'mouth', 0], ['проглотить', 'и обдумать опыт', 'mouth', 2]];
+    S5.forEach(([h, s, k, off], i) => {
+      const x = 110 + i * 285, g = G(p, { o: 0 });
+      roundBox(g, x, 180, 260, 210, COL.real, PANEL, 2.5);
+      mk('ellipse', { cx: x + 130, cy: 240, rx: 22, ry: 16, fill: '#6b3d4f', stroke: COL.rat, 'stroke-width': 2 }, g);
+      put(para(g, h, x + 130, 300, null, { size: 25, weight: 700, maxW: 230, anchor: 'middle', fill: COL.real }), { o: 1 });
+      put(para(g, s, x + 130, 345, null, { size: 21, maxW: 230, anchor: 'middle', fill: COL.dim }), { o: 1 });
+      show(g, m(k, off));
+      if (i < 4) arrowTo(p, [x + 262, 285], [x + 283, 285], m(k, off + .4), { col: COL.dim, w: 3 });
+    });
+    // the mind wanders and is gently brought back
+    const lp = G(p, { o: 0 });
+    path(lp, 'M600 600C600 500 1000 500 1000 600', { stroke: COL.dim, 'stroke-width': 3, 'stroke-dasharray': '8 8' });
+    path(lp, 'M1000 600C1000 700 600 700 600 600', { stroke: COL.good, 'stroke-width': 4 });
+    path(lp, 'M612 588L600 604L586 590', { stroke: COL.good, 'stroke-width': 4 });
+    T(lp, 'ум отвлёкся', { x: 800, y: 515, size: 24, fill: COL.dim, anchor: 'middle' });
+    T(lp, 'мягко вернуть внимание', { x: 800, y: 735, size: 26, weight: 700, fill: COL.good, anchor: 'middle' });
+    show(lp, m('ret'));
+  }],
+
+  ['q2', 'Быстрая проверка', () => {
+    const p = panel(0), GY = 700, s = .95;
+    ground(p, 120, 600, GY, .1);
+    const f = seated(p, 420, GY, s, .1);
+    const P = trunkPts(f);
+    HANDS = [['верх груди', P.chest, BR.chest], ['живот у пупка', P.belly, BR.belly]].map(([label, [x, y], c]) => {
+      const g = G(p, { o: 0 });
+      mk('circle', { cx: x, cy: y, r: 30, fill: 'none', stroke: c, 'stroke-width': 3, 'stroke-dasharray': '6 6' }, g);
+      T(g, label, { x: x + 46, y: y + 8, size: 22, weight: 700, fill: c });
+      show(g, .3);
+      return { el: g, box: [x - 40, y - 40, 230, 80], label };
+    });
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-hand', prompt: ['Куда положить руку, чтобы почувствовать диафрагмальное дыхание? Нажмите на место.'],
+    build: pickEls(HANDS, 1, 'Рука на животе у пупка: на вдохе живот выталкивает её вперёд.',
+      () => 'Рука на верхе груди чувствует верхнегрудное, поверхностное дыхание.'),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Осознанность — намеренное внимание к настоящему моменту без оценки.', 'w1'],
+     ['Семь качеств: момент, доброта к себе, без оценки, принятие, без усилий, ум новичка, отпускание.', 'w2'],
+     ['Медитация осознанности снижает стресс и помогает при стойкой боли.', 'w3'],
+     ['Осознанное дыхание: верхнегрудное и диафрагмальное; осанка меняет дыхание.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-apply', prompt: ['Пациент задерживает дыхание на трудном упражнении и злится, что «опять не получается». Что из урока поможет?'],
+    build: choice([
+      ['Осознанное дыхание: заметить задержку и дышать глубоко; наблюдать мысли без оценки'],
+      ['Попросить задерживать дыхание ещё дольше'],
+      ['Сказать, что злиться — плохо, и продолжать'],
+      ['Отменить все трудные упражнения'],
+    ], 0, 'Осознанное дыхание и наблюдение без оценки помогают справиться со стрессом во время движения.',
+    [null, 'Задержка дыхания — как раз то, что стоит заметить и сменить глубоким дыханием.', 'Оценка «плохо» запускает автоматические реакции; осознанность — наблюдать без оценки.', 'Цель — справиться со стрессом, а не убрать нагрузку.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Осознанность — это оценивать каждую мысль как полезную или вредную.'], ans: ['f'], why: 'Неверно: замечать без оценки.' },
+      { parts: ['Программа снижения стресса на основе осознанности сначала размещалась на кафедре физической терапии.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['При диафрагмальном дыхании на вдохе живот выходит вперёд.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Сутулость не влияет на дыхание.'], ans: ['f'], why: 'Неверно: в упражнении предлагают заметить, как она меняет дыхание.' },
+      { parts: ['Медитация осознанности может уменьшать переживание боли.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

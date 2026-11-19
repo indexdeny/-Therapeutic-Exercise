@@ -1,0 +1,1973 @@
+{
+  "region": "shoulder",
+  "exercises": [
+    {
+      "id": "wand",
+      "ru": "Упражнения с палкой лёжа",
+      "en": "wand exercises",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "supine",
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "stick"
+      ],
+      "key": [
+        "здоровая рука ведёт больную",
+        "лёжа — лопатка стабилизирована",
+        "при соударении — ладони вверх"
+      ],
+      "warn": "после шва капсулы или губы — сложенное полотенце под плечо, рука чуть впереди тела",
+      "page": 594,
+      "moments": [
+        {
+          "n": 166,
+          "beat": "wand",
+          "mark": "sup",
+          "to": "sup2"
+        },
+        {
+          "n": 162,
+          "beat": "ph1",
+          "mark": "rom"
+        },
+        {
+          "n": 165,
+          "beat": "ph1",
+          "mark": "rom"
+        },
+        {
+          "n": 163,
+          "beat": "ph1",
+          "mark": "ex"
+        },
+        {
+          "n": 26,
+          "beat": "wand",
+          "mark": "wand",
+          "to": "ext"
+        }
+      ],
+      "sand": "j=shoulder&m=flex&pos=supine"
+    },
+    {
+      "id": "table-slide",
+      "ru": "Катание мяча по столу",
+      "en": "ball rolling, table top dusting",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "ball",
+        "roll"
+      ],
+      "key": [
+        "рука на столе в плоскости лопатки",
+        "сначала мяч катает корпус",
+        "потом мяч двигает само плечо"
+      ],
+      "page": 595,
+      "moments": [
+        {
+          "n": 166,
+          "beat": "ball",
+          "mark": "ball"
+        },
+        {
+          "n": 159,
+          "beat": "ph1",
+          "mark": "ex"
+        }
+      ]
+    },
+    {
+      "id": "wall-wash",
+      "ru": "Мытьё окна",
+      "en": "wall (window) washing",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "roll",
+        "ball"
+      ],
+      "key": [
+        "кисть прижимает полотенце к стене",
+        "круги в обе стороны",
+        "выше и в сторону — пока нет симптомов"
+      ],
+      "page": 595,
+      "moments": [
+        {
+          "n": 166,
+          "beat": "ball",
+          "mark": "wall",
+          "shot": 7,
+          "crop": [
+            280,
+            380,
+            520,
+            520
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gear-shift",
+      "ru": "Переключение передач",
+      "en": "gear shift exercise",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "stick"
+      ],
+      "key": [
+        "палка упирается в пол",
+        "палка несёт вес руки",
+        "вперёд-назад, наружу и внутрь"
+      ],
+      "page": 596,
+      "moments": [
+        {
+          "n": 166,
+          "beat": "ball",
+          "mark": "gear",
+          "shot": 7,
+          "crop": [
+            0,
+            500,
+            400,
+            400
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pendulum",
+      "ru": "Маятник Кодмана",
+      "en": "pendulum (Codman) exercises",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "stand",
+        "prone"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "корпус наклонён примерно на 90°",
+        "руку качает корпус, плечо расслаблено",
+        "маленькие мягкие дуги"
+      ],
+      "warn": "кружится голова — сесть; не при отёке руки; груз — только при фиксированной лопатке",
+      "page": 595,
+      "moments": [
+        {
+          "n": 166,
+          "beat": "pend",
+          "mark": "pos",
+          "to": "help"
+        },
+        {
+          "n": 158,
+          "beat": "prot",
+          "mark": "pend"
+        },
+        {
+          "n": 166,
+          "beat": "pend",
+          "mark": "wt",
+          "to": "pre"
+        },
+        {
+          "n": 163,
+          "beat": "ph1",
+          "mark": "ex"
+        },
+        {
+          "n": 165,
+          "beat": "ph1",
+          "mark": "rom"
+        },
+        {
+          "n": 37,
+          "beat": "other",
+          "mark": "tr"
+        },
+        {
+          "n": 253,
+          "beat": "arm",
+          "mark": "ue"
+        }
+      ]
+    },
+    {
+      "id": "scap-early",
+      "ru": "Движения лопатки",
+      "en": "early scapular motion",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "mobility",
+        "control"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "side",
+        "sit"
+      ],
+      "gear": [
+        "none",
+        "manual"
+      ],
+      "key": [
+        "в острой фазе — лёжа на боку",
+        "поднять, опустить, выдвинуть, свести",
+        "сам — сидя"
+      ],
+      "page": 596,
+      "moments": [
+        {
+          "n": 166,
+          "beat": "scap",
+          "mark": "side"
+        },
+        {
+          "n": 165,
+          "beat": "ph1",
+          "mark": "sit"
+        },
+        {
+          "n": 159,
+          "beat": "ph1",
+          "mark": "ex"
+        }
+      ]
+    },
+    {
+      "id": "cuff-iso",
+      "ru": "Многоугловая изометрия плеча",
+      "en": "multiple-angle isometrics",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "supine",
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "manual",
+        "none"
+      ],
+      "key": [
+        "мягко, без боли, под разными углами",
+        "сопротивление — на предплечье",
+        "сам — другой рукой или в косяк"
+      ],
+      "page": 603,
+      "moments": [
+        {
+          "n": 168,
+          "beat": "gh",
+          "mark": "gh",
+          "to": "abd",
+          "shot": 23
+        },
+        {
+          "n": 168,
+          "beat": "gh",
+          "mark": "self"
+        },
+        {
+          "n": 166,
+          "beat": "scap",
+          "mark": "set"
+        },
+        {
+          "n": 161,
+          "beat": "prot",
+          "mark": "rom"
+        },
+        {
+          "n": 162,
+          "beat": "ph1",
+          "mark": "iso"
+        },
+        {
+          "n": 163,
+          "beat": "ph1",
+          "mark": "iso"
+        },
+        {
+          "n": 164,
+          "beat": "prot",
+          "mark": "rom"
+        },
+        {
+          "n": 165,
+          "beat": "ph1",
+          "mark": "iso"
+        }
+      ],
+      "sand": "j=shoulder&m=rot&pos=stand"
+    },
+    {
+      "id": "scap-iso",
+      "ru": "Изометрия мышц лопатки",
+      "en": "scapular isometrics",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "side",
+        "prone",
+        "sit"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "давление прямо на лопатку",
+        "опускание, выдвижение, сведение",
+        "что тренировать — по нарушению"
+      ],
+      "page": 603,
+      "moments": [
+        {
+          "n": 168,
+          "beat": "scap",
+          "mark": "pos",
+          "to": "ret"
+        }
+      ]
+    },
+    {
+      "id": "scap-rs",
+      "ru": "Стабилизация лопатки лёжа на боку",
+      "en": "scapular alternating isometrics",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "control"
+      ],
+      "pos": [
+        "side",
+        "sit"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "рука лежит на плече терапевта",
+        "руки терапевта — вокруг лопатки",
+        "сначала медленно и с подсказкой"
+      ],
+      "page": 605,
+      "moments": [
+        {
+          "n": 168,
+          "beat": "open",
+          "mark": "side"
+        },
+        {
+          "n": 168,
+          "beat": "open",
+          "mark": "alt"
+        },
+        {
+          "n": 161,
+          "beat": "bal",
+          "mark": "iso"
+        }
+      ]
+    },
+    {
+      "id": "rod-rs",
+      "ru": "Стабилизация с палкой над грудью",
+      "en": "rhythmic stabilization holding a rod",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "control"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "supine",
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "stick",
+        "ball",
+        "manual"
+      ],
+      "key": [
+        "руки прямые, держат палку",
+        "терапевт толкает и поворачивает",
+        "потом — одной больной рукой"
+      ],
+      "page": 605,
+      "moments": [
+        {
+          "n": 168,
+          "beat": "open",
+          "mark": "rod"
+        },
+        {
+          "n": 165,
+          "beat": "ph23",
+          "mark": "ph2"
+        }
+      ]
+    },
+    {
+      "id": "wb-arm",
+      "ru": "Опора на руки",
+      "en": "closed-chain weight bearing",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "control"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "sit",
+        "stand",
+        "quad"
+      ],
+      "gear": [
+        "none",
+        "ball",
+        "board"
+      ],
+      "key": [
+        "сначала сидя, опора на стол",
+        "потом стена, мяч, четвереньки",
+        "лопатка отходит крылом — облегчить"
+      ],
+      "warn": "после шва манжеты — без опоры на руку 6 недель, после реверсивного протеза — 12",
+      "page": 606,
+      "moments": [
+        {
+          "n": 168,
+          "beat": "closed",
+          "mark": "wb"
+        },
+        {
+          "n": 168,
+          "beat": "closed",
+          "mark": "tech",
+          "to": "prog"
+        },
+        {
+          "n": 166,
+          "beat": "scap",
+          "mark": "wb"
+        },
+        {
+          "n": 161,
+          "beat": "bal",
+          "mark": "cc"
+        },
+        {
+          "n": 159,
+          "beat": "ph23",
+          "mark": "ph2"
+        }
+      ]
+    },
+    {
+      "id": "dyn-stab",
+      "ru": "Перенос веса на руках",
+      "en": "dynamic closed-chain stabilization",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "control"
+      ],
+      "pos": [
+        "stand",
+        "quad"
+      ],
+      "gear": [
+        "none",
+        "board",
+        "ball"
+      ],
+      "key": [
+        "кисти на стене или на столе",
+        "с руки на руку, потом на одной",
+        "на четвереньках — подъём ноги"
+      ],
+      "page": 607,
+      "moments": [
+        {
+          "n": 168,
+          "beat": "dyn",
+          "mark": "shift",
+          "to": "quad",
+          "shot": 24.5
+        },
+        {
+          "n": 171,
+          "beat": "eq",
+          "mark": "bal"
+        }
+      ]
+    },
+    {
+      "id": "cross-body",
+      "ru": "Рука поперёк груди",
+      "en": "cross-chest stretch",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "рука через грудь",
+        "другой рукой — мягко и долго",
+        "тянет задние структуры"
+      ],
+      "page": 597,
+      "moments": [
+        {
+          "n": 167,
+          "beat": "horiz",
+          "mark": "cross"
+        },
+        {
+          "n": 162,
+          "beat": "ph1",
+          "mark": "rom"
+        },
+        {
+          "n": 165,
+          "beat": "ph23",
+          "mark": "ph2"
+        }
+      ]
+    },
+    {
+      "id": "sleeper",
+      "ru": "Растяжка «спящего»",
+      "en": "sleeper stretch",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "side"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "лёжа на больном боку",
+        "плечо и локоть по 90°",
+        "предплечье — вниз к кушетке"
+      ],
+      "page": 597,
+      "moments": [
+        {
+          "n": 167,
+          "beat": "horiz",
+          "mark": "sleep"
+        }
+      ]
+    },
+    {
+      "id": "table-flex",
+      "ru": "Сгибание и отведение у стола",
+      "en": "self-stretch into flexion and elevation",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "предплечье на краю стола",
+        "сдвигать руку, наклоняя корпус",
+        "голова опускается к руке"
+      ],
+      "page": 597,
+      "moments": [
+        {
+          "n": 167,
+          "beat": "flex",
+          "mark": "flex",
+          "to": "abd"
+        }
+      ]
+    },
+    {
+      "id": "door-rot",
+      "ru": "Ротации в дверном проёме",
+      "en": "doorway rotation self-stretch",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "stand",
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "локоть 90°, плечо у тела",
+        "наружу — корпус от кисти",
+        "внутрь — тыл кисти на косяке"
+      ],
+      "warn": "вариант сидя у стола — нельзя при передней нестабильности",
+      "page": 597,
+      "moments": [
+        {
+          "n": 167,
+          "beat": "flex",
+          "mark": "er",
+          "to": "pre"
+        },
+        {
+          "n": 167,
+          "beat": "flex",
+          "mark": "ir"
+        }
+      ],
+      "sand": "j=shoulder&m=rot&pos=stand"
+    },
+    {
+      "id": "table-ext",
+      "ru": "Разгибание спиной к столу",
+      "en": "extension self-stretch at a table",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "стоя спиной к столу",
+        "кисти держат край, пальцы вперёд",
+        "приседать, сгибая локти"
+      ],
+      "warn": "нельзя при склонности к переднему подвывиху и вывиху",
+      "page": 598,
+      "moments": [
+        {
+          "n": 167,
+          "beat": "ext",
+          "mark": "ext",
+          "to": "pre"
+        }
+      ]
+    },
+    {
+      "id": "towel-back",
+      "ru": "Полотенце за спиной",
+      "en": "towel stretch behind the back",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "roll",
+        "stick"
+      ],
+      "key": [
+        "одна рука над головой",
+        "растягиваемая — за поясницей",
+        "верхняя рука тянет вверх"
+      ],
+      "warn": "при передней нестабильности и после передней стабилизации — только в конце реабилитации",
+      "page": 599,
+      "moments": [
+        {
+          "n": 167,
+          "beat": "ext",
+          "mark": "back",
+          "to": "pre2"
+        }
+      ]
+    },
+    {
+      "id": "lat-stretch",
+      "ru": "Растяжка широчайшей",
+      "en": "latissimus dorsi stretch",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "supine",
+        "stand"
+      ],
+      "gear": [
+        "manual",
+        "none"
+      ],
+      "key": [
+        "таз в заднем наклоне",
+        "руки над головой, большие пальцы к полу",
+        "поясница не прогибается"
+      ],
+      "page": 599,
+      "moments": [
+        {
+          "n": 167,
+          "beat": "lat",
+          "mark": "man",
+          "to": "self"
+        }
+      ]
+    },
+    {
+      "id": "pec-stretch",
+      "ru": "Растяжка большой грудной",
+      "en": "pectoralis major stretch",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "manual",
+        "none",
+        "stick"
+      ],
+      "key": [
+        "в углу: руки в стороны или выше",
+        "наклон всем телом от голеностопов",
+        "палка за головой — держать на выдохе"
+      ],
+      "page": 599,
+      "moments": [
+        {
+          "n": 167,
+          "beat": "pec",
+          "mark": "maj",
+          "to": "corner"
+        }
+      ]
+    },
+    {
+      "id": "pec-minor",
+      "ru": "Растяжка малой грудной",
+      "en": "pectoralis minor stretch",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "manual",
+        "none"
+      ],
+      "key": [
+        "лопатка — назад и вверх",
+        "на вдохе наклон, на выдохе держать",
+        "сам — предплечье на косяке"
+      ],
+      "warn": "самостоятельный вариант — не при передней нестабильности",
+      "page": 600,
+      "moments": [
+        {
+          "n": 167,
+          "beat": "pec",
+          "mark": "min"
+        }
+      ]
+    },
+    {
+      "id": "levator",
+      "ru": "Растяжка мышцы, поднимающей лопатку",
+      "en": "levator scapulae stretch",
+      "joint": [
+        "shoulder",
+        "neck"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "manual",
+        "none"
+      ],
+      "key": [
+        "голова от тугой стороны и вперёд",
+        "тянут лопатку вниз, а не голову",
+        "сам — локоть скользит по стене вверх"
+      ],
+      "warn": "не растягивать, насильно вращая голову",
+      "page": 601,
+      "moments": [
+        {
+          "n": 167,
+          "beat": "neck",
+          "mark": "lev",
+          "to": "selfl"
+        }
+      ]
+    },
+    {
+      "id": "uptrap",
+      "ru": "Растяжка верхней трапециевидной",
+      "en": "upper trapezius stretch",
+      "joint": [
+        "shoulder",
+        "neck"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "кисть за спиной держит лопатку",
+        "голову повернуть к тугой стороне",
+        "наклонить от неё и вперёд"
+      ],
+      "warn": "давить рукой на голову нельзя при шейных симптомах",
+      "page": 601,
+      "moments": [
+        {
+          "n": 167,
+          "beat": "neck",
+          "mark": "trap",
+          "to": "pre"
+        }
+      ]
+    },
+    {
+      "id": "self-mob",
+      "ru": "Самомобилизация плеча",
+      "en": "shoulder self-mobilization",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "sit",
+        "prone"
+      ],
+      "gear": [
+        "chair",
+        "none"
+      ],
+      "key": [
+        "вниз — отклониться от руки",
+        "вперёд — вес между руками сзади",
+        "назад — лёжа на локтях"
+      ],
+      "page": 555,
+      "moments": [
+        {
+          "n": 158,
+          "beat": "self",
+          "mark": "cau",
+          "to": "post"
+        }
+      ]
+    },
+    {
+      "id": "balance-pt",
+      "ru": "Точка равновесия",
+      "en": "balance point: active control at 90° in supine",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "control"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "лёжа, рука поднята на 90°",
+        "тяжесть почти не грузит плечо",
+        "маленькие дуги и круги"
+      ],
+      "page": 581,
+      "moments": [
+        {
+          "n": 163,
+          "beat": "ph1",
+          "mark": "bal"
+        }
+      ],
+      "sand": "j=shoulder&m=flex&pos=supine&mode=active"
+    },
+    {
+      "id": "scap-squeeze",
+      "ru": "Сведение лопаток",
+      "en": "scapular retraction",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "sit",
+        "stand",
+        "prone"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "сцепить кисти за поясницей",
+        "удержать, опуская руки",
+        "потом — без движения рук"
+      ],
+      "page": 607,
+      "moments": [
+        {
+          "n": 169,
+          "beat": "ret",
+          "mark": "clasp"
+        },
+        {
+          "n": 162,
+          "beat": "ph1",
+          "mark": "post"
+        },
+        {
+          "n": 165,
+          "beat": "ph1",
+          "mark": "sit"
+        },
+        {
+          "n": 133,
+          "beat": "drills",
+          "mark": "sr"
+        },
+        {
+          "n": 247,
+          "beat": "limbs",
+          "mark": "flex"
+        }
+      ]
+    },
+    {
+      "id": "prone-row",
+      "ru": "Тяга лёжа на животе",
+      "en": "prone row",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "prone"
+      ],
+      "gear": [
+        "weight"
+      ],
+      "key": [
+        "рука свешивается с гантелью",
+        "сначала свести лопатки",
+        "потом тяга лёжа"
+      ],
+      "page": 608,
+      "moments": [
+        {
+          "n": 169,
+          "beat": "ret",
+          "mark": "pinch"
+        }
+      ]
+    },
+    {
+      "id": "band-row",
+      "ru": "Гребля с лентой",
+      "en": "rowing against elastic resistance",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength",
+        "function"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "band",
+        "machine"
+      ],
+      "key": [
+        "тянуть, сводя лопатки",
+        "лента под стопами — как вёслами",
+        "менять ширину хвата"
+      ],
+      "page": 615,
+      "moments": [
+        {
+          "n": 171,
+          "beat": "ex",
+          "mark": "row"
+        },
+        {
+          "n": 169,
+          "beat": "ret",
+          "mark": "band"
+        },
+        {
+          "n": 171,
+          "beat": "eq",
+          "mark": "rower"
+        }
+      ]
+    },
+    {
+      "id": "prone-hab",
+      "ru": "Горизонтальное отведение лёжа",
+      "en": "prone horizontal abduction",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "prone"
+      ],
+      "gear": [
+        "none",
+        "weight"
+      ],
+      "key": [
+        "плечи 90°, локти согнуты",
+        "развести руки, сводя лопатки",
+        "прямые локти — тяжелее"
+      ],
+      "page": 608,
+      "moments": [
+        {
+          "n": 169,
+          "beat": "comb",
+          "mark": "hab"
+        }
+      ]
+    },
+    {
+      "id": "sh-er-prone",
+      "ru": "Наружная ротация «90 на 90»",
+      "en": "prone external rotation at 90/90",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "prone",
+        "stand"
+      ],
+      "gear": [
+        "weight",
+        "band"
+      ],
+      "key": [
+        "лёжа, плечо и локоть по 90°",
+        "приподнять — лопатки сводятся",
+        "стоя — лента спереди выше плеч"
+      ],
+      "page": 608,
+      "moments": [
+        {
+          "n": 169,
+          "beat": "comb",
+          "mark": "ninety"
+        },
+        {
+          "n": 169,
+          "beat": "emg",
+          "mark": "er"
+        }
+      ]
+    },
+    {
+      "id": "sh-er-band",
+      "ru": "Наружная ротация с лентой",
+      "en": "external rotation with elastic resistance",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "band",
+        "roll"
+      ],
+      "key": [
+        "локоть у тела под 90°",
+        "поворачивается плечо, локоть не уходит",
+        "полотенце под локтем — напоминание"
+      ],
+      "warn": "после шва надостной или подостной — осторожно с сопротивлением наружной ротации",
+      "page": 611,
+      "moments": [
+        {
+          "n": 170,
+          "beat": "er",
+          "mark": "tech"
+        },
+        {
+          "n": 164,
+          "beat": "ctrl",
+          "mark": "str"
+        },
+        {
+          "n": 161,
+          "beat": "bal",
+          "mark": "cuff"
+        },
+        {
+          "n": 163,
+          "beat": "ph2",
+          "mark": "str"
+        },
+        {
+          "n": 163,
+          "beat": "ph2",
+          "mark": "rules"
+        }
+      ],
+      "sand": "j=shoulder&m=rot&pos=stand&mode=active"
+    },
+    {
+      "id": "sh-er-side",
+      "ru": "Наружная ротация лёжа на боку",
+      "en": "side-lying external rotation",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "side",
+        "prone",
+        "sit"
+      ],
+      "gear": [
+        "weight",
+        "roll"
+      ],
+      "key": [
+        "лёжа на здоровом боку",
+        "валик под локтем",
+        "поднять гантель поворотом плеча"
+      ],
+      "page": 611,
+      "moments": [
+        {
+          "n": 170,
+          "beat": "er",
+          "mark": "best",
+          "to": "var"
+        }
+      ]
+    },
+    {
+      "id": "sh-ir",
+      "ru": "Внутренняя ротация",
+      "en": "internal rotation strengthening",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "side",
+        "stand"
+      ],
+      "gear": [
+        "weight",
+        "band"
+      ],
+      "key": [
+        "лёжа на больном боку",
+        "поднять гантель от стола",
+        "стоя — лента поперёк живота"
+      ],
+      "warn": "после передней стабилизации — не начинать из полной наружной ротации при отведении 90°",
+      "page": 612,
+      "moments": [
+        {
+          "n": 170,
+          "beat": "er",
+          "mark": "ir"
+        },
+        {
+          "n": 164,
+          "beat": "ctrl",
+          "mark": "str"
+        },
+        {
+          "n": 165,
+          "beat": "ph23",
+          "mark": "pre"
+        }
+      ]
+    },
+    {
+      "id": "push-plus",
+      "ru": "Отжимание «с плюсом»",
+      "en": "push-up with a plus",
+      "joint": [
+        "shoulder",
+        "elbow",
+        "trunk"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "stand",
+        "quad",
+        "prone"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "оттолкнуться — и ещё «дожать»",
+        "стена → стол → колени → носки",
+        "на четвереньках — с подъёмом ноги"
+      ],
+      "page": 609,
+      "moments": [
+        {
+          "n": 169,
+          "beat": "pro",
+          "mark": "plus",
+          "to": "quad"
+        },
+        {
+          "n": 169,
+          "beat": "emg",
+          "mark": "sa"
+        },
+        {
+          "n": 178,
+          "beat": "func",
+          "mark": "push"
+        },
+        {
+          "n": 155,
+          "beat": "prep",
+          "mark": "pu"
+        },
+        {
+          "n": 247,
+          "beat": "limbs",
+          "mark": "wall"
+        }
+      ]
+    },
+    {
+      "id": "punch",
+      "ru": "Толчок вперёд",
+      "en": "scapular protraction (serratus punch)",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "stand",
+        "supine"
+      ],
+      "gear": [
+        "band",
+        "weight"
+      ],
+      "key": [
+        "прямая рука вперёд на 90°",
+        "«толкать», не поворачивая корпус",
+        "лёжа — выталкивать гантель вверх"
+      ],
+      "page": 609,
+      "moments": [
+        {
+          "n": 169,
+          "beat": "pro",
+          "mark": "push",
+          "to": "tip"
+        }
+      ]
+    },
+    {
+      "id": "seated-press",
+      "ru": "Отжимание сидя",
+      "en": "seated press-up",
+      "joint": [
+        "shoulder",
+        "elbow"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "chair"
+      ],
+      "key": [
+        "кисти на подлокотниках",
+        "выпрямить локти, поднять тело",
+        "и ещё опустить лопатки"
+      ],
+      "page": 610,
+      "moments": [
+        {
+          "n": 169,
+          "beat": "dep",
+          "mark": "press"
+        },
+        {
+          "n": 169,
+          "beat": "dep",
+          "mark": "man"
+        }
+      ]
+    },
+    {
+      "id": "arm-wall-slide",
+      "ru": "Скольжение рук по стене",
+      "en": "arm slide against a wall",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "control",
+        "strength"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "спина и таз прижаты к стене",
+        "локти 90°, тыл рук на стене",
+        "скользить вверх, не отрывая спины"
+      ],
+      "page": 610,
+      "moments": [
+        {
+          "n": 169,
+          "beat": "dep",
+          "mark": "wall"
+        }
+      ]
+    },
+    {
+      "id": "superman",
+      "ru": "«Супермен»",
+      "en": "superman",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "prone",
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "band"
+      ],
+      "key": [
+        "рука вытянута над головой",
+        "чуть приподнять её",
+        "стоя — лента сверху спереди"
+      ],
+      "warn": "при тугом плече или соударении может быть недоступен",
+      "page": 610,
+      "moments": [
+        {
+          "n": 169,
+          "beat": "dep",
+          "mark": "super"
+        },
+        {
+          "n": 169,
+          "beat": "emg",
+          "mark": "sup"
+        }
+      ]
+    },
+    {
+      "id": "full-can",
+      "ru": "«Полная банка»",
+      "en": "full can (scaption)",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "stand",
+        "sit",
+        "side"
+      ],
+      "gear": [
+        "weight",
+        "band"
+      ],
+      "key": [
+        "большой палец вверх",
+        "подъём в плоскости лопатки",
+        "выше 90° — с наружной ротацией"
+      ],
+      "warn": "выше плеча — только без подъёма лопатки; при соударении — без болезненной дуги",
+      "page": 612,
+      "moments": [
+        {
+          "n": 170,
+          "beat": "abd",
+          "mark": "full"
+        },
+        {
+          "n": 170,
+          "beat": "abd",
+          "mark": "plane",
+          "to": "var"
+        },
+        {
+          "n": 162,
+          "beat": "ph2",
+          "mark": "pre"
+        },
+        {
+          "n": 163,
+          "beat": "ph2",
+          "mark": "str"
+        }
+      ],
+      "sand": "j=shoulder&m=abd&pos=stand&mode=active"
+    },
+    {
+      "id": "sh-flex",
+      "ru": "Сгибание плеча с гантелью",
+      "en": "resisted shoulder flexion",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "stand",
+        "supine"
+      ],
+      "gear": [
+        "weight"
+      ],
+      "key": [
+        "локоть прямой, большой палец вперёд",
+        "лёжа — тяжелее всего в начале",
+        "стоя — на 90°"
+      ],
+      "page": 613,
+      "moments": [
+        {
+          "n": 170,
+          "beat": "flex",
+          "mark": "flex"
+        },
+        {
+          "n": 75,
+          "beat": "pos",
+          "mark": "stand",
+          "to": "sup"
+        }
+      ],
+      "sand": "j=shoulder&m=flex&pos=stand&mode=active"
+    },
+    {
+      "id": "ohp",
+      "ru": "Жим вверх",
+      "en": "military press-up",
+      "joint": [
+        "shoulder",
+        "elbow"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "weight"
+      ],
+      "key": [
+        "плечо у тела, локоть согнут",
+        "большой палец назад",
+        "поднять гантель вертикально"
+      ],
+      "page": 613,
+      "moments": [
+        {
+          "n": 170,
+          "beat": "flex",
+          "mark": "press",
+          "shot": 6,
+          "crop": [
+            255,
+            150,
+            370,
+            370
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lat-pull",
+      "ru": "Тяга сверху вниз",
+      "en": "shoulder adduction pull-down",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "sit",
+        "stand",
+        "supine"
+      ],
+      "gear": [
+        "band",
+        "machine",
+        "weight"
+      ],
+      "key": [
+        "лента или блок сверху",
+        "тянуть руку вниз к телу",
+        "лёжа — горизонтальное приведение"
+      ],
+      "page": 614,
+      "moments": [
+        {
+          "n": 170,
+          "beat": "flex",
+          "mark": "add",
+          "shot": 9,
+          "crop": [
+            420,
+            100,
+            380,
+            380
+          ]
+        }
+      ]
+    },
+    {
+      "id": "prone-ext",
+      "ru": "Разгибание плеча лёжа на животе",
+      "en": "prone shoulder extension",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "prone",
+        "stand"
+      ],
+      "gear": [
+        "weight",
+        "band"
+      ],
+      "key": [
+        "рука свешивается с края",
+        "поднять гантель назад",
+        "прямой локоть — тяжелее"
+      ],
+      "page": 614,
+      "moments": [
+        {
+          "n": 170,
+          "beat": "flex",
+          "mark": "ext"
+        }
+      ]
+    },
+    {
+      "id": "pnf-arm",
+      "ru": "Диагонали ПНФ для руки",
+      "en": "PNF diagonal patterns (D2 flexion)",
+      "joint": [
+        "shoulder",
+        "elbow"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "stand",
+        "supine"
+      ],
+      "gear": [
+        "manual",
+        "band",
+        "weight"
+      ],
+      "key": [
+        "сгибание, отведение, наружная ротация",
+        "сначала — руками терапевта",
+        "потом сам с лентой или гантелью"
+      ],
+      "page": 614,
+      "moments": [
+        {
+          "n": 170,
+          "beat": "bic",
+          "mark": "pnf"
+        },
+        {
+          "n": 178,
+          "beat": "func",
+          "mark": "pnf"
+        },
+        {
+          "n": 165,
+          "beat": "ph23",
+          "mark": "ph2"
+        },
+        {
+          "n": 71,
+          "beat": "ue",
+          "mark": "ue",
+          "to": "d2e"
+        }
+      ]
+    },
+    {
+      "id": "mower",
+      "ru": "«Запуск газонокосилки»",
+      "en": "lawnmower pull",
+      "joint": [
+        "shoulder",
+        "elbow"
+      ],
+      "goal": [
+        "function",
+        "strength"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "band",
+        "weight"
+      ],
+      "key": [
+        "бёдра согнуты, здоровая рука на столе",
+        "лента под стопой здоровой стороны",
+        "тянуть по диагонали вверх"
+      ],
+      "page": 615,
+      "moments": [
+        {
+          "n": 171,
+          "beat": "ex",
+          "mark": "mower"
+        },
+        {
+          "n": 178,
+          "beat": "func",
+          "mark": "pull"
+        }
+      ]
+    },
+    {
+      "id": "cart",
+      "ru": "Тележка с грузом",
+      "en": "pushing a weighted cart",
+      "joint": [
+        "shoulder",
+        "body"
+      ],
+      "goal": [
+        "function"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "weight"
+      ],
+      "key": [
+        "устойчивая стойка, лёгкий груз",
+        "сначала двумя руками, потом одной",
+        "чередовать толкание и тягу"
+      ],
+      "page": 615,
+      "moments": [
+        {
+          "n": 171,
+          "beat": "ex",
+          "mark": "cart",
+          "crop": [
+            0,
+            460,
+            440,
+            440
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arm-erg",
+      "ru": "Ручной эргометр",
+      "en": "upper body ergometer",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "endurance"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "machine"
+      ],
+      "key": [
+        "вращение вперёд и назад",
+        "при соударении — больше назад",
+        "после декомпрессии — стоя"
+      ],
+      "page": 616,
+      "moments": [
+        {
+          "n": 171,
+          "beat": "eq",
+          "mark": "erg",
+          "crop": [
+            900,
+            340,
+            520,
+            520
+          ]
+        },
+        {
+          "n": 162,
+          "beat": "ph2",
+          "mark": "str"
+        },
+        {
+          "n": 159,
+          "beat": "ph23",
+          "mark": "ph2"
+        },
+        {
+          "n": 163,
+          "beat": "ph2",
+          "mark": "str"
+        },
+        {
+          "n": 154,
+          "beat": "act",
+          "mark": "erg"
+        },
+        {
+          "n": 26,
+          "beat": "other",
+          "mark": "rec"
+        },
+        {
+          "n": 77,
+          "beat": "recip",
+          "mark": "erg"
+        },
+        {
+          "n": 84,
+          "beat": "adapt",
+          "mark": "test"
+        },
+        {
+          "n": 253,
+          "beat": "comp",
+          "mark": "cv"
+        }
+      ]
+    }
+  ]
+}

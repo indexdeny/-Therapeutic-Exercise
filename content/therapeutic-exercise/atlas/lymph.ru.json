@@ -1,0 +1,242 @@
+{
+  "region": "lymph",
+  "exercises": [
+    {
+      "id": "post-mast",
+      "ru": "Плечо после операции на груди",
+      "en": "shoulder after breast cancer surgery",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "supine",
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "ball"
+      ],
+      "key": [
+        "до снятия дренажей — не выше 90°",
+        "потом полный объём и осанка",
+        "рубец не натягивать до побледнения"
+      ],
+      "warn": "нагрузка умеренная — никогда до ноющей боли, пульсации или тяжести в руке",
+      "page": 1031,
+      "moments": [
+        {
+          "n": 252,
+          "beat": "mgmt",
+          "mark": "rom"
+        },
+        {
+          "n": 252,
+          "beat": "mgmt",
+          "mark": "early"
+        },
+        {
+          "n": 252,
+          "beat": "mgmt",
+          "mark": "ex"
+        },
+        {
+          "n": 252,
+          "beat": "mgmt",
+          "mark": "prec"
+        },
+        {
+          "n": 252,
+          "beat": "shoulder",
+          "mark": "aws"
+        },
+        {
+          "n": 252,
+          "beat": "mgmt",
+          "mark": "edu"
+        }
+      ]
+    },
+    {
+      "id": "lymph-program",
+      "ru": "Программа упражнений при лимфедеме",
+      "en": "exercise program for lymphedema",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "endurance",
+        "strength",
+        "stretch"
+      ],
+      "pos": [
+        "supine",
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "band",
+        "weight",
+        "machine"
+      ],
+      "key": [
+        "дыхание, растяжка, сила, аэробика",
+        "груз — начиная с 0,5–1 кг",
+        "в бинтах или компрессионном изделии"
+      ],
+      "warn": "покраснение, рост отёка, ноющая боль или пульсация — нагрузка была слишком большой",
+      "page": 1034,
+      "moments": [
+        {
+          "n": 253,
+          "beat": "why",
+          "mark": "box",
+          "to": "none"
+        },
+        {
+          "n": 253,
+          "beat": "comp",
+          "mark": "flex",
+          "to": "ev"
+        },
+        {
+          "n": 253,
+          "beat": "rules",
+          "mark": "prep",
+          "to": "after"
+        },
+        {
+          "n": 251,
+          "beat": "comp",
+          "mark": "ex"
+        }
+      ]
+    },
+    {
+      "id": "lymph-breath",
+      "ru": "Дыхание и центральные упражнения при лимфедеме",
+      "en": "diaphragmatic breathing and central clearing",
+      "joint": [
+        "trunk",
+        "neck"
+      ],
+      "goal": [
+        "control",
+        "mobility"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "ладони на животе, вдох носом",
+        "выдох как через соломинку",
+        "колено к груди — освобождает пах"
+      ],
+      "page": 1036,
+      "moments": [
+        {
+          "n": 253,
+          "beat": "common",
+          "mark": "com"
+        },
+        {
+          "n": 253,
+          "beat": "common",
+          "mark": "seq"
+        },
+        {
+          "n": 253,
+          "beat": "comp",
+          "mark": "br"
+        },
+        {
+          "n": 253,
+          "beat": "common",
+          "mark": "neck"
+        }
+      ]
+    },
+    {
+      "id": "lymph-arm",
+      "ru": "Дренажные упражнения для руки",
+      "en": "lymphatic drainage exercises for the arm",
+      "joint": [
+        "shoulder",
+        "elbow",
+        "wrist"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "supine",
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "roll",
+        "wedge",
+        "stick"
+      ],
+      "key": [
+        "от плеча к пальцам",
+        "круги поднятой рукой",
+        "в конце — рука на подушках 30 минут"
+      ],
+      "warn": "круги и маятник опущенной рукой не делают; покраснение, рост отёка, ноющая боль или пульсация — нагрузка была слишком большой",
+      "page": 1037,
+      "moments": [
+        {
+          "n": 253,
+          "beat": "arm",
+          "mark": "ue",
+          "to": "wall",
+          "shot": 23.8
+        }
+      ]
+    },
+    {
+      "id": "lymph-leg",
+      "ru": "Дренажные упражнения для ноги",
+      "en": "lymphatic drainage exercises for the leg",
+      "joint": [
+        "hip",
+        "knee",
+        "ankle"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "wedge",
+        "none"
+      ],
+      "key": [
+        "ноги на стене или клине",
+        "пятку к ягодице, круги стопой",
+        "«велосипед» и «ножницы» в воздухе"
+      ],
+      "warn": "покраснение, рост отёка, ноющая боль или пульсация — нагрузка была слишком большой",
+      "page": 1038,
+      "moments": [
+        {
+          "n": 253,
+          "beat": "leg",
+          "mark": "le",
+          "to": "rest",
+          "shot": 26.4
+        }
+      ]
+    }
+  ]
+}

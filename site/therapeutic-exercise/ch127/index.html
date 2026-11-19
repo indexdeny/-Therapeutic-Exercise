@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Межпозвонковый диск и отверстия — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 127, title: 'Межпозвонковый диск и отверстия', minutes: 7, language: 'ru', next: '../ch128/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch127/cards.ru.json
+const CARDS_SHORT = {
+  "трёхсуставной комплекс\nдиск + два фасеточных сустава между двумя позвонками": "диск + два фасеточных сустава",
+  "держит, как сложная связка\nпрочно прикреплено к позвонкам; слои связаны; внутренние волокна вплетаются в ядро": "слои связаны, волокна вплетаются в ядро",
+  "протеогликаны\nсильно притягивают воду": "сильно притягивают воду",
+  "гидравлика\nдавление распределяется равномерно по диску и от позвонка к позвонку": "давление распределяется равномерно",
+  "насос питания\nразгрузка — ядро впитывает воду; сжатие — отдаёт её; движение жидкости переносит питательные вещества": "разгрузка — впитывает, сжатие — отдаёт",
+  "через отверстие выходят\nсмешанный спинномозговой нерв, сосуды и возвратные менингеальные (синувертебральные) нервы": "нерв, сосуды, менингеальные нервы",
+  "больше\nнаклон вперёд; наклон в противоположную сторону": "наклон вперёд или в противоположную",
+  "меньше\nразгибание; наклон в ту же сторону": "разгибание; наклон в ту же сторону",
+};
+// cards-short end
+
+const SP = '#8fd6b0', ANN = '#7fb0cc', WATER = '#7fd0f0', NUT = '#9fe0a0', PAIN = '#ff5a3c', BIG = COL.good, SMALL = '#f0a04b';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const swing = (q, n) => Math.sin(2 * Math.PI * n * q);
+const f1 = v => v.toFixed(1);
+const BN = ANAT.bone, BL = mix(ANAT.bone, '#000000', .45);
+let CLIP = 0;
+// The disc from above (anterior up): rings of the annulus round the nucleus. set({ nx, ny }) moves the nucleus
+// (distortion); glow(a0, a1, t0) — the outer fibres between two angles (0 = anterior, clockwise) light up as stretched.
+function discTop(p, x, y, s, t0, { lumbar = true } = {}) {
+  const g = G(p, { x, y, s, o: 0 });
+  mk('ellipse', { rx: 170, ry: 120, fill: ANN, stroke: mix(ANN, '#000000', .35), 'stroke-width': 2.5 }, g);
+  [150, 130, 110, 90].forEach((r, i) => mk('ellipse', { rx: r, ry: r * .7, fill: 'none', stroke: mix(ANN, i % 2 ? '#ffffff' : '#000000', .25), 'stroke-width': 2 }, g));
+  const ny0 = lumbar ? 18 : 0;
+  const nuc = mk('ellipse', { cx: 0, cy: ny0, rx: 62, ry: 44, fill: NUC_C, stroke: mix(DISC_C, '#000000', .3), 'stroke-width': 2 }, g);
+  T(g, 'вперёд ↑', { x: 0, y: -132, size: 17, fill: COL.dim, weight: 600, anchor: 'middle' });
+  const e = { g, nuc };
+  e.set = ({ nx = 0, ny = 0, sq = 0 }) => { nuc.setAttribute('cx', f1(nx)); nuc.setAttribute('cy', f1(ny0 + ny)); nuc.setAttribute('rx', f1(62 + 10 * sq)); nuc.setAttribute('ry', f1(44 - 8 * sq)); return e; };
+  e.glow = (a0, a1, t) => {
+    const P = a => [170 * Math.sin(rad(a)), -120 * Math.cos(rad(a))];
+    const arc = path(g, `M${f1(P(a0)[0])} ${f1(P(a0)[1])}A170 120 0 0 1 ${f1(P(a1)[0])} ${f1(P(a1)[1])}`, { stroke: ANAT.taut, 'stroke-width': 12, 'stroke-opacity': .7 }, { o: 0 });
+    show(arc, t); return arc;
+  };
+  e.at = (px, py) => { const s0 = st(g); return [s0.x + px * s0.s, s0.y + py * s0.s]; };
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// Three lamellae of the annulus unrolled side by side: parallel fibres at about 60° to the spine axis, the tilt
+// alternating from layer to layer. set({ rot }) — a twist: the fibres of one tilt straighten and glow, the others slacken.
+function lamellae(p, x, y, w, h, t0) {
+  const g = G(p, { x, y, o: 0 }), defs = mk('defs', {}, g), bw = w / 3, layers = [];
+  for (let i = 0; i < 3; i++) {
+    const id = 'lam' + (++CLIP), cp = mk('clipPath', { id }, defs);
+    mk('rect', { x: i * bw + 4, y: 0, width: bw - 8, height: h, rx: 10 }, cp);
+    mk('rect', { x: i * bw + 4, y: 0, width: bw - 8, height: h, rx: 10, fill: mix(ANN, COL.board, .25 + i * .1), stroke: mix(ANN, '#000000', .3), 'stroke-width': 2 }, g);
+    const k = i % 2 ? -1 : 1, dx = Math.tan(rad(62)) * h;   // 62° from the vertical axis
+    let d = '';
+    for (let j = -32; j < 36; j++) { const x0 = i * bw + j * 22; d += `M${f1(x0)} ${h}L${f1(x0 + k * dx)} 0`; }
+    const fl = path(g, d, { stroke: mix(ANN, '#ffffff', .55), 'stroke-width': 3, 'clip-path': `url(#${id})` });
+    layers.push({ fl, k });
+    T(g, `слой ${i + 1}`, { x: i * bw + bw / 2, y: h + 34, size: 18, fill: COL.dim, weight: 600, anchor: 'middle' });
+  }
+  const e = { g, layers };
+  e.set = ({ rot = 0 }) => {
+    layers.forEach(({ fl, k }) => {
+      const on = clamp(rot * k, 0, 1), off = clamp(-rot * k, 0, 1);
+      fl.setAttribute('stroke', mix(mix(ANN, '#ffffff', .55), ANAT.taut, on));
+      fl.setAttribute('stroke-width', f1(3 + 2.5 * on - 1.2 * off));
+      fl.setAttribute('stroke-opacity', f1(1 - .5 * off));
+    });
+    return e;
+  };
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// Close-up of the end-plates: two vertebral bodies (marrow dots), the cartilage end-plates with the bony ring at the
+// edge, the inner annulus fibres turning into the plates and the nucleus. feed(t0, dur) runs nutrients from the
+// marrow through the plates into the disc.
+function plateView(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g);
+  [-1, 1].forEach(k => {
+    mk('path', { d: k < 0 ? 'M-300 -260H300V-60H-300Z' : 'M-300 60H300V260H-300Z', fill: mix(BN, COL.board, .12), stroke: BL, 'stroke-width': 2 }, g);
+    for (let i = 0; i < 26; i++) mk('circle', { cx: -270 + (i % 13) * 45 + (i > 12 ? 20 : 0), cy: k * (110 + (i > 12 ? 80 : 0)), r: 7, fill: '#d98c7a', 'fill-opacity': .55 }, g);
+    [-1, 1].forEach(j => mk('path', { d: `M${j * 300} ${k * 60}L${j * 300} ${k * 96}L${j * 262} ${k * 96}L${j * 250} ${k * 60}Z`, fill: mix(BN, '#000000', .1), stroke: BL, 'stroke-width': 2 }, g));
+  });
+  mk('rect', { x: -300, y: -60, width: 600, height: 120, fill: ANN, stroke: mix(ANN, '#000000', .3), 'stroke-width': 2 }, g);
+  const plates = [-1, 1].map(k => mk('rect', { x: -250, y: k < 0 ? -66 : 54, width: 500, height: 12, rx: 4, fill: EP_C }, g));
+  const fib = path(g, [-1, 1].map(j => [0, 1, 2].map(i => `M${j * (290 - i * 14)} -54Q${j * (250 - i * 20)} 0 ${j * (290 - i * 14)} 54M${j * (232 - i * 22)} -54Q${j * (200 - i * 20)} -40 ${j * (170 - i * 18)} -54M${j * (232 - i * 22)} 54Q${j * (200 - i * 20)} 40 ${j * (170 - i * 18)} 54`).join('')).join(''), { stroke: mix(ANN, '#ffffff', .55), 'stroke-width': 3 });
+  const nuc = mk('ellipse', { cx: 0, cy: 0, rx: 150, ry: 46, fill: NUC_C, stroke: mix(DISC_C, '#000000', .3), 'stroke-width': 2 }, g);
+  const dots = [];
+  for (let i = 0; i < 12; i++) dots.push(mk('circle', { r: 6, fill: NUT, opacity: 0 }, g));
+  const e = { g, plates, fib, nuc };
+  e.feed = (t, dur) => prog(q => dots.forEach((d, i) => {
+    const k = i % 2 ? 1 : -1, ph = (q * 3 + i / 12) % 1, xx = -200 + (i * 37) % 400;
+    d.setAttribute('cx', f1(xx)); d.setAttribute('cy', f1(k * (150 - 130 * ph))); d.setAttribute('opacity', f1(Math.sin(Math.PI * ph)));
+  }), t, dur, lin);
+  e.at = (px, py) => { const s0 = st(g); return [s0.x + px * s0.s, s0.y + py * s0.s]; };
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// Two vertebrae from behind with a foramen on each side (between the transverse processes) and its root.
+// set({ sb }) — side bending (+ to the right): the foramina on that side narrow, on the other they widen.
+function foraBack(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 });
+  const body = (par, cy) => {
+    [-1, 1].forEach(k => mk('path', { d: `M${k * 70} ${cy - 24}L${k * 128} ${cy - 30}L${k * 130} ${cy - 10}L${k * 70} ${cy - 2}Z`, fill: BN, stroke: BL, 'stroke-width': 2 }, par));
+    mk('rect', { x: -80, y: cy - 46, width: 160, height: 92, rx: 16, fill: BN, stroke: BL, 'stroke-width': 2 }, par);
+    mk('ellipse', { cx: 0, cy: cy - 4, rx: 13, ry: 22, fill: mix(BN, '#000000', .12), stroke: BL, 'stroke-width': 2 }, par);
+  };
+  const holes = [-1, 1].map(k => mk('ellipse', { cx: k * 102, cy: 0, rx: 22, ry: 28, fill: '#101a17', stroke: '#5c6b68', 'stroke-width': 2 }, g));
+  const roots = [-1, 1].map(k => mk('circle', { cx: k * 102, cy: -4, r: 11, fill: NERVE_C, stroke: '#9b7d24', 'stroke-width': 2 }, g));
+  const low = G(g, {}); body(low, 62);
+  const disc = mk('path', { fill: DISC_C, stroke: mix(DISC_C, '#000000', .35), 'stroke-width': 2 }, g);
+  const up = G(g, {}); body(up, -62);
+  const e = { g };
+  e.set = ({ sb = 0 }) => {
+    put(up, { r: sb });
+    [-1, 1].forEach((k, i) => {
+      const ry = clamp(28 - k * 1.4 * sb, 12, 40), room = clamp((ry - 14) / 14, 0, 1);
+      holes[i].setAttribute('ry', f1(ry)); holes[i].setAttribute('cy', f1(k * sb * .6));
+      roots[i].setAttribute('cy', f1(k * sb * .6 - 2)); roots[i].setAttribute('fill', mix(NERVE_C, PAIN, clamp(1 - room * 1.3, 0, 1)));
+    });
+    const U = P => rotPt(P[0], P[1], sb), a = U([-80, -16]), b = U([80, -16]);
+    disc.setAttribute('d', `M${f1(a[0])} ${f1(a[1])}L${f1(b[0])} ${f1(b[1])}L80 16L-80 16Z`);
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Межпозвонковый диск', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 14 · Урок 127', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Межпозвонковый диск', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и межпозвонковые отверстия', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'нагрузка, питание и место для нерва', 800, 360, m('sub'), { size: 30, fill: SP, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const sg = spineSeg(art, 760, 650, .95, null); put(sg.g, { o: 1 });
+    const dt = discTop(art, 1200, 640, .7, null); put(dt.g, { o: 1 });
+    prog(q => { const c = swing(q, 2); sg.set({ flex: 9 * c }); dt.set({ ny: 10 * c }); }, .6, Math.max(2, D - 1.6), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['disc', 'Строение диска', (m, D) => {
+    const p = panel(0);
+    txt(p, 'диск в двигательном сегменте', 800, 56, m('dsc'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const sg = spineSeg(p, 640, 440, 1.3, m('dsc'));
+    sg.hl('disc', ANN, m('dsc', .5), { a: .45 });
+    sg.hl('nuc', '#ffffff', m('dsc', 1.5), { a: .5 });
+    lab(p, 'фиброзное кольцо', 900, 300, ...sg.at('ant'), ANN, m('dsc', .5));
+    lab(p, 'пульпозное ядро', 820, 620, ...sg.at('nuc'), COL.chalk, m('dsc', 1.5));
+    sg.hl(['sap', 'iap'], SP, m('cx'), { a: .5 });
+    lab(p, 'фасеточный сустав', 200, 690, ...sg.at('facet'), SP, m('cx', .5));
+    sg.hl(['epU', 'epL'], EP_C, m('ep'), { a: .8 });
+    lab(p, 'замыкательные пластинки', 900, 220, ...sg.at('bodyU').map((v, i) => i ? v + 66 : v + 40), EP_C, m('ep', .3));
+    infoCard(p, 1000, 330, 560, 230, 'трёхсуставной комплекс', 'диск + два фасеточных сустава между двумя позвонками', SP, m('cx'), { size: 22 });
+    infoCard(p, 1000, 600, 560, 140, 'строение определяет функцию', null, COL.chalk, m('fn'), { size: 22 });
+  }],
+
+  ['annulus', 'Фиброзное кольцо', (m, D) => {
+    const p = panel(0);
+    txt(p, 'фиброзное кольцо (по мотивам рис. 14.6)', 800, 56, m('an'), { size: 28, weight: 700, anchor: 'middle', fill: ANN });
+    const dt = discTop(p, 330, 300, 1.05, m('an'));
+    txt(p, 'вид сверху: слои коллагена I типа', 330, 470, m('an', .5), { size: 20, fill: COL.chalk, anchor: 'middle', weight: 600 });
+    const lm = lamellae(p, 700, 110, 600, 300, m('ang'));
+    const ax = G(p, { o: 0 }); path(ax, 'M1360 120V400', { stroke: COL.whole, 'stroke-width': 3, 'stroke-dasharray': '8 6' }); T(ax, 'ось', { x: 1376, y: 140, size: 18, fill: COL.whole, weight: 600 }); show(ax, m('ang'));
+    txt(p, 'волокна ≈ 60–65° к оси, наклон чередуется', 1000, 480, m('ang', 1), { size: 21, fill: COL.chalk, anchor: 'middle', weight: 700 });
+    pillRow(p, ['растяжение', 'поворот', 'изгиб'], 1000, 560, m('ten', 1), { col: ANAT.taut, size: 20 });
+    prog(q => lm.set({ rot: swing(q, 1.25) }), m('ten', 2.5), Math.max(2, m('att') - m('ten', 2.5)), lin);
+    NOTE(p, 1000, 610, m('ten', 2.5));
+    txt(p, 'при повороте натягиваются волокна одного наклона', 1000, 652, m('ten', 2.5), { size: 18, fill: COL.dim, anchor: 'middle', weight: 600 });
+    infoCard(p, 40, 520, 560, 210, 'держит, как сложная связка', 'прочно прикреплено к позвонкам; слои связаны; внутренние волокна вплетаются в ядро', ANN, m('att'), { size: 20 });
+    const sg = spineSeg(p, 980, 790, .55, m('lig'), { root: false });
+    lab(p, 'передняя продольная', 1290, 730, ...sg.at('all'), ANAT.tendon, m('lig', .4), { size: 18 });
+    lab(p, 'задняя продольная', 680, 870, ...sg.at('pll'), ANAT.tendon, m('lig', .8), { size: 18 });
+    dt.set({});
+  }],
+
+  ['nucleus', 'Пульпозное ядро', (m, D) => {
+    const p = panel(0);
+    txt(p, 'пульпозное ядро', 800, 56, m('nu'), { size: 28, weight: 700, anchor: 'middle', fill: COL.chalk });
+    const a = discTop(p, 220, 290, .62, m('pos'), { lumbar: false }), b = discTop(p, 520, 290, .62, m('pos', .6));
+    txt(p, 'шея, грудь: в центре', 220, 400, m('pos'), { size: 18, fill: COL.dim, anchor: 'middle', weight: 600 });
+    txt(p, 'поясница: ближе к заду', 520, 400, m('pos', .6), { size: 18, fill: COL.dim, anchor: 'middle', weight: 600 });
+    infoCard(p, 40, 90, 640, 90, 'студенистое; коллаген II типа сливается с кольцом', null, COL.chalk, m('nu'), { size: 20 });
+    infoCard(p, 40, 430, 640, 140, 'протеогликаны', 'сильно притягивают воду', WATER, m('pg'), { size: 21 });
+    infoCard(p, 40, 600, 640, 140, 'гидравлика', 'давление распределяется равномерно по диску и от позвонка к позвонку', COL.whole, m('pr'), { size: 20 });
+    const sg = spineSeg(p, 1150, 430, 1.25, m('nu'), { root: false });
+    // pressure arrows from the nucleus in every direction
+    const pr = G(p, { o: 0 });
+    for (let i = 0; i < 8; i++) { const a2 = i * 45, c = sg.at('nuc'), ux = Math.cos(rad(a2)), uy = Math.sin(rad(a2)) * .55; path(pr, `M${f1(c[0] + ux * 50)} ${f1(c[1] + uy * 30)}L${f1(c[0] + ux * 95)} ${f1(c[1] + uy * 58)}`, { stroke: COL.whole, 'stroke-width': 3.5 }); }
+    show(pr, m('pr', .5)); hide(pr, m('pump'));
+    // water: in when the load is off, out under load
+    const drops = [];
+    for (let i = 0; i < 14; i++) drops.push(mk('circle', { r: 6, fill: WATER, opacity: 0 }, p));
+    const N = sg.at('nuc');
+    prog(q => {
+      const c = cyc(q, 2.25);
+      sg.set({ comp: 9 * c });
+      drops.forEach((d, i) => { const a2 = i / 14 * 2 * Math.PI, r = 30 + 90 * c; d.setAttribute('cx', f1(N[0] + Math.cos(a2) * r * 1.3)); d.setAttribute('cy', f1(N[1] + Math.sin(a2) * r * .55)); d.setAttribute('opacity', '.9'); });
+    }, m('pump'), Math.max(2, D - m('pump') - .3), lin);
+    const ld = G(p, { o: 0 }); path(ld, 'M1150 200V250M1136 236L1150 252L1164 236', { stroke: COL.bad, 'stroke-width': 5 }); T(ld, 'нагрузка', { x: 1180, y: 230, size: 19, fill: COL.bad, weight: 700 }); show(ld, m('pump'));
+    infoCard(p, 820, 650, 740, 210, 'насос питания', 'разгрузка — ядро впитывает воду; сжатие — отдаёт её; движение жидкости переносит питательные вещества', WATER, m('pump'), { size: 21 });
+    a.set({}); b.set({});
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-part', prompt: ['Какая это часть диска?'],
+    build: grid([
+      { parts: ['Слои коллагена первого типа, наклон волокон чередуется'], ans: ['a'], why: 'Фиброзное кольцо.' },
+      { parts: ['Притягивает воду и распределяет давление по диску'], ans: ['n'], why: 'Пульпозное ядро.' },
+      { parts: ['Закрывает диск сверху и снизу'], ans: ['e'], why: 'Хрящевые замыкательные пластинки.' },
+      { parts: ['Сдерживает растяжение, поворот и изгиб, как сложная связка'], ans: ['a'], why: 'Фиброзное кольцо.' },
+      { parts: ['Впитывает воду, когда нагрузка снижается'], ans: ['n'], why: 'Пульпозное ядро.' },
+    ], [['a', 'Кольцо', ANN], ['n', 'Ядро', COL.chalk], ['e', 'Пластинка', EP_C]], { multi: false, text: true }),
+  }], done) }],
+
+  ['flex', 'Диск при сгибании', (m, D) => {
+    const p = panel(0);
+    txt(p, 'диск при сгибании', 800, 56, m('fl'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const sg = spineSeg(p, 520, 420, 1.2, m('fl'), { root: false });
+    prog(q => sg.set({ flex: 12 * Math.min(1, q * 2) }), m('fl', .5), 2.5);
+    txt(p, 'спереди сжат', 760, 300, m('fl', 1.5), { size: 22, fill: COL.bad, weight: 700 });
+    txt(p, 'сзади растянут', 120, 610, m('fl', 2), { size: 22, fill: ANAT.taut, weight: 700 });
+    txt(p, 'ядро почти не смещается, лишь деформируется', 400, 700, m('nm'), { size: 21, fill: COL.chalk, anchor: 'middle', weight: 600 });
+    const dt = discTop(p, 1220, 380, 1.05, m('asy'));
+    const ld = G(p, { o: 0 }); path(ld, 'M1330 170L1300 230M1290 212L1298 234L1318 222', { stroke: COL.bad, 'stroke-width': 5 }); T(ld, 'нагрузка спереди справа', { x: 1340, y: 160, size: 18, fill: COL.bad, weight: 700 }); show(ld, m('asy', .5));
+    prog(q => dt.set({ nx: -34 * q, ny: 26 * q, sq: .3 * q }), m('asy', 1), 2);
+    dt.glow(200, 250, m('asy', 2.5));
+    txt(p, 'ядро → к противоположному заднебоковому углу,', 1220, 590, m('asy', 2), { size: 20, fill: COL.chalk, anchor: 'middle', weight: 700 });
+    txt(p, 'где волокна кольца растянуты сильнее', 1220, 620, m('asy', 2), { size: 20, fill: ANAT.taut, anchor: 'middle', weight: 700 });
+    pill(p, 'пример: наклон вперёд и вправо', 1220, 680, m('asy', 3), { col: COL.dim, size: 17 });
+  }],
+
+  ['plates', 'Замыкательные пластинки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'хрящевые замыкательные пластинки', 800, 56, m('pl'), { size: 28, weight: 700, anchor: 'middle', fill: EP_C });
+    const pv = plateView(p, 560, 450, 1.05, m('pl'));
+    pv.plates.forEach(e => pulse(e, m('pl', 1)));
+    lab(p, 'пластинка', 1000, 330, ...pv.at(200, -60), EP_C, m('pl', .5));
+    lab(p, 'апофизарное кольцо', 1000, 230, ...pv.at(275, -78), BN, m('pl', 1.5));
+    tw(pv.fib, { c_stroke: ANAT.taut }, m('ins'), .6);
+    lab(p, 'волокна кольца входят в пластинку', 1000, 590, ...pv.at(230, 50), ANAT.taut, m('ins', .3));
+    pv.feed(m('nut'), Math.max(2, m('hold') - m('nut')));
+    lab(p, 'питание из костного мозга', 1000, 760, ...pv.at(-100, 150), NUT, m('nut', .3));
+    const hold = G(p, { o: 0 });
+    [-1, 1].forEach(k => { const c = pv.at(0, k * 50); path(hold, `M${c[0]} ${c[1] + k * 4}V${c[1] + k * 50}`, { stroke: COL.whole, 'stroke-width': 5 }); cross(hold, c[0], c[1] + k * 64, 14, m('hold', .6), 6); });
+    show(hold, m('hold'));
+    pill(p, 'ядро не уходит вверх и вниз', 560, 840, m('hold', 1), { col: COL.whole, size: 20 });
+  }],
+
+  ['foramen', 'Межпозвонковое отверстие', (m, D) => {
+    const p = panel(0);
+    txt(p, 'межпозвонковое отверстие', 800, 56, m('fo'), { size: 28, weight: 700, anchor: 'middle', fill: NERVE_C });
+    const sg = spineSeg(p, 640, 400, 1.3, m('fo'));
+    sg.hl('disc', ANN, m('bd'), { a: .4 });
+    lab(p, 'диск — спереди', 940, 520, ...sg.at('post'), ANN, m('bd'));
+    sg.hl(['sap', 'iap'], SP, m('bd', 1), { a: .5 });
+    lab(p, 'фасеточный сустав — сзади', 470, 640, ...sg.at('facet'), SP, m('bd', 1));
+    sg.hl(['pedU', 'pedL'], COL.task, m('bd', 2), { a: .5 });
+    lab(p, 'ножки — сверху и снизу', 440, 150, ...sg.at('pedU'), COL.task, m('bd', 2));
+    const ves = G(p, { o: 0 }); show(ves, m('ct', .8));
+    const vd = mk('circle', { r: 6, fill: '#e2574c' }, ves), sv = path(ves, '', { stroke: NERVE_C, 'stroke-width': 2.5, 'stroke-dasharray': '4 4' });
+    prog(() => { const r = sg.at('root'); vd.setAttribute('cx', f1(r[0] + 22)); vd.setAttribute('cy', f1(r[1] + 18)); sv.setAttribute('d', `M${f1(r[0] - 6)} ${f1(r[1] + 12)}Q${f1(r[0] + 10)} ${f1(r[1] + 60)} ${f1(r[0] + 60)} ${f1(r[1] + 70)}`); }, m('fo'), Math.max(.5, D - m('fo')), lin);
+    lab(p, 'спинномозговой нерв', 420, 300, ...sg.at('root'), NERVE_C, m('ct'));
+    infoCard(p, 40, 700, 700, 170, 'через отверстие выходят', 'смешанный спинномозговой нерв, сосуды и возвратные менингеальные (синувертебральные) нервы', NERVE_C, m('ct'), { size: 20 });
+    // the size with motion: flexion and the other side widen, extension and the same side narrow
+    const fb = foraBack(p, 1240, 400, 1, m('sz'));
+    txt(p, 'вид сзади', 1240, 230, m('sz'), { size: 18, fill: COL.dim, anchor: 'middle', weight: 600 });
+    txt(p, 'правое отверстие', 1350, 290, m('sz'), { size: 17, fill: NERVE_C, anchor: 'start', weight: 600 });
+    prog(q => { sg.set({ flex: 12 * q }); fb.set({ sb: -12 * q }); }, m('big', .2), 1.5);
+    infoCard(p, 960, 560, 600, 130, 'больше', 'наклон вперёд; наклон в противоположную сторону', BIG, m('big'), { size: 20 });
+    prog(q => { sg.set({ flex: lerp(12, -11, q) }); fb.set({ sb: lerp(-12, 12, q) }); }, m('small', .2), 1.8);
+    infoCard(p, 960, 710, 600, 130, 'меньше', 'разгибание; наклон в ту же сторону', SMALL, m('small'), { size: 20 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-size', prompt: ['Правое межпозвонковое отверстие станет больше или меньше?'],
+    build: grid([
+      { parts: ['Наклон вперёд'], ans: ['b'], why: 'Больше: сгибание расширяет отверстие.' },
+      { parts: ['Разгибание'], ans: ['s'], why: 'Меньше.' },
+      { parts: ['Наклон вправо'], ans: ['s'], why: 'Меньше: наклон в ту же сторону.' },
+      { parts: ['Наклон влево'], ans: ['b'], why: 'Больше: наклон в противоположную сторону.' },
+      { parts: ['Разгибание с наклоном вправо'], ans: ['s'], why: 'Меньше: оба движения сужают правое отверстие.' },
+    ], [['b', 'Больше', BIG], ['s', 'Меньше', SMALL]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Фиброзное кольцо — слои коллагена под углом 60–65° с чередующимся наклоном: держит растяжение, поворот и изгиб.', 'w1'],
+     ['Ядро притягивает воду и распределяет давление; впитывает воду при разгрузке и отдаёт при сжатии — так диск питается.', 'w2'],
+     ['Замыкательные пластинки удерживают ядро и пропускают питание из тел позвонков.', 'w3'],
+     ['Межпозвонковое отверстие шире при сгибании и наклоне в другую сторону, уже — при разгибании и наклоне в свою.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SP }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-root', prompt: ['У пациента раздражён корешок справа на уровне поясницы. При каких движениях места в правом межпозвонковом отверстии станет больше?'],
+    build: choice([
+      ['Наклон вперёд и наклон влево'],
+      ['Разгибание и наклон вправо'],
+      ['Разгибание и наклон влево'],
+      ['Наклон вправо'],
+    ], 0, 'Отверстие больше при сгибании и при наклоне в противоположную сторону.',
+    [null, 'Оба движения сужают правое отверстие.', 'Разгибание сужает отверстие.', 'Наклон в ту же сторону сужает отверстие.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-nuc', prompt: ['Человек наклоняется вперёд и вправо — диск нагружен несимметрично, спереди справа. Куда деформируется ядро?'],
+    build: choice([
+      ['К левому заднебоковому углу, где волокна кольца растянуты сильнее'],
+      ['Вперёд и вправо, к сжатой стороне'],
+      ['К правому заднебоковому углу'],
+      ['Ядро не меняет формы'],
+    ], 0, 'При несимметричной нагрузке в сгибании ядро деформируется к противоположному заднебоковому углу.',
+    [null, 'Ядро уходит от сжатой стороны.', 'Угол противоположный — левый.', 'В здоровом диске ядро почти не смещается, но деформироваться может.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

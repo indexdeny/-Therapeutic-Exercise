@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Практика: части и целое, блоки и случайный порядок — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 11, title: 'Практика: части и целое, блоки и случайный порядок', minutes: 9, language: 'ru', next: '../ch012/' };
+
+// One colour per order of practice.
+const ORD = { bl: COL.rat, rnd: COL.int, rb: COL.real };
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+function bubble(p, x, y, w, str, col, t0, { size = 24 } = {}) {
+  const g = G(p, { o: 0 }), tt = para(g, str, x + 18, y + 36, null, { size, maxW: w - 36 }), h = tt._h + 24;
+  put(tt, { o: 1 });
+  const r = mk('path', { d: `M${x + 16} ${y}H${x + w - 16}Q${x + w} ${y} ${x + w} ${y + 16}V${y + h - 16}Q${x + w} ${y + h} ${x + w - 16} ${y + h}H${x + 56}L${x + 24} ${y + h + 26}L${x + 34} ${y + h}H${x + 16}Q${x} ${y + h} ${x} ${y + h - 16}V${y + 16}Q${x} ${y} ${x + 16} ${y}Z`, fill: PANEL, stroke: col, 'stroke-width': 2.5 }, g);
+  g.insertBefore(r, g.firstChild);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// A seated figure with its feet planted at (ax, GY) and a chair under its hips.
+function seated(p, ax, GY, s, t0, col) {
+  const f = fig(p, { x: 0, y: 0, s, o: 0, pose: SIT, col });
+  plant(f, 'AN', ax, GY);
+  const [hx, hy] = onStage(f, 'H');
+  chair(p, hx, hy + 22 * s / .5 * .32, GY, t0);
+  show(f.g, t0);
+  return f;
+}
+// n sit-to-stand repetitions; the trunk leans forward as the hips leave the seat.
+function sitStand(f, t0, dur, n, ax, GY) {
+  prog(q => {
+    const e = (1 - Math.cos(2 * Math.PI * n * q)) / 2, p = {};
+    for (const k in SIT) p[k] = lerp(SIT[k], STAND[k], e);
+    p.t += 26 * Math.sin(Math.PI * e);
+    p.aN += 30 * Math.sin(Math.PI * e); p.aF += 30 * Math.sin(Math.PI * e);
+    f.set(p); plant(f, 'AN', ax, GY);
+  }, t0, dur, lin);
+}
+// A small chair icon; h is the seat height.
+function miniChair(p, x, y, h, col, t0) {
+  const e = path(p, `M${x - 14} ${y - h - 26}V${y - h}H${x + 14}M${x - 12} ${y - h}V${y}M${x + 12} ${y - h}V${y}`, { stroke: col, 'stroke-width': 4 }, { o: 0 });
+  show(e, t0, .25);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Практика', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 1 · Урок 11', { x: 800, y: 250, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Практика: части и целое,', { x: 800, y: 335, size: 58, weight: 600, anchor: 'middle' });
+    T(g, 'блоки и случайный порядок', { x: 800, y: 405, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как построить тренировку навыка', 800, 490, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 800;
+    path(art, `M660 ${GY}H940`, { stroke: COL.faint, 'stroke-width': 3 });
+    const f = seated(art, 830, GY, .5, 0);
+    show(art, m('sub', .2));
+    sitStand(f, m('sub', .5), Math.max(2, D - m('sub', .5) - 1.2), 2, 830, GY);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['practice', 'Практика', (m) => {
+    const p = panel(0);
+    labelBox(p, 800, 110, 960, ['практика — главная переменная моторного обучения'], COL.task, m('main'), { size: 30 });
+    ['объём', 'вид', 'вариативность'].forEach((s, i) => pill(p, s, 240, 260 + i * 80, m('amt', .3 + i * .4), { col: COL.task, size: 27 }));
+    // more practice → better learning (schematic)
+    const X0 = 460, Y0 = 520, gr = G(p, { o: 0 });
+    path(gr, `M${X0} ${Y0 - 280}V${Y0}H${X0 + 420}`, { stroke: COL.dim, 'stroke-width': 3 });
+    T(gr, 'навык', { x: X0 - 10, y: Y0 - 290, size: 22, fill: COL.dim, anchor: 'end' });
+    T(gr, 'объём практики', { x: X0 + 420, y: Y0 + 36, size: 22, fill: COL.dim, anchor: 'end' });
+    show(gr, m('amt', 1.2));
+    draw(path(p, `M${X0} ${Y0 - 20}C${X0 + 120} ${Y0 - 140} ${X0 + 260} ${Y0 - 230} ${X0 + 410} ${Y0 - 250}`, { stroke: COL.good, 'stroke-width': 5 }, { d: 0 }), m('amt', 1.6), 1.4);
+    pill(p, 'схема', X0 + 330, Y0 - 120, m('amt', 2), { col: COL.dim, size: 20 });
+    // most practice happens at home
+    const hm = G(p, { x: 1220, y: 520, o: 0 });
+    path(hm, 'M-170 0V-180L0 -300L170 -180V0Z', { stroke: COL.whole, 'stroke-width': 5, fill: PANEL });
+    show(hm, m('home'));
+    const f = fig(p, { x: 1220, y: 520 - 182 * .5, s: .5, o: 0 }); show(f.g, m('home', .3));
+    repeatPose(f, { ...SQUAT, aN: 80, aF: 80 }, m('home', .8), 4, 2, ['AN', onStage(f, 'AN')[0], 520]);
+    para(p, 'терапевт заранее задаёт условия и объясняет, как усложнять', 1220, 600, m('home', 2.4), { size: 25, maxW: 520, anchor: 'middle', fill: COL.whole });
+  }],
+
+  ['partwhole', 'Части и целое', (m) => {
+    const p = panel(0);
+    txt(p, 'по частям', 420, 90, m('part'), { size: 34, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'целиком', 1180, 90, m('whole'), { size: 34, weight: 700, fill: COL.good, anchor: 'middle' });
+    show(path(p, 'M800 60V780', { stroke: COL.faint, 'stroke-width': 2 }, { o: 0 }), m('whole', -.3));
+    para(p, 'начало обучения сложным серийным навыкам: трудные части — отдельно, потом соединить', 420, 150, m('part', .4), { size: 24, maxW: 640, anchor: 'middle', fill: COL.dim });
+    txt(p, 'пересаживание из кресла-коляски', 420, 290, m('ex'), { size: 25, weight: 700, anchor: 'middle' });
+    const P3 = [['сдвинуться вперёд', true], ['развернуться', true], ['сесть', false]];
+    P3.forEach(([s, hard], i) => {
+      const x = 170 + i * 250;
+      labelBox(p, x, 370, 230, [s], hard ? COL.task : COL.faint, m('ex', .4 + i * .4), { size: 22 });
+      if (hard) pill(p, 'трудно', x, 440, m('ex', 1.8), { col: COL.bad, size: 20 });
+    });
+    [0, 1].forEach(i => { const g = G(p, { o: 0 }); path(g, `M${170 + i * 250 + 115} 370H${170 + (i + 1) * 250 - 115}`, { stroke: COL.task, 'stroke-width': 5 }); show(g, m('ex', 3)); });
+    txt(p, 'отработать → соединить', 420, 520, m('ex', 3), { size: 25, weight: 700, fill: COL.task, anchor: 'middle' });
+    // whole: walking, a rhythmic serial task and a discrete movement
+    const GY = 360;
+    ground(p, 900, 1120, GY, m('whole'));
+    const w1 = fig(p, { x: 940, y: GY - 182 * .45, s: .45, o: 0 }); show(w1.g, m('whole'));
+    walk(w1, m('whole', .3), 4, { cycles: 3, dx: 140 });
+    txt(p, 'непрерывные навыки', 1010, 410, m('whole', .3), { size: 23, fill: COL.good, anchor: 'middle' });
+    txt(p, 'ходьба, лестница', 1010, 444, m('whole', .6), { size: 21, fill: COL.dim, anchor: 'middle' });
+    ground(p, 1240, 1440, GY, m('mom'));
+    const w2 = seated(p, 1350, GY, .45, m('mom'));
+    sitStand(w2, m('mom', .3), 4, 2, 1350, GY);
+    txt(p, 'ритм и инерция', 1340, 410, m('mom', .3), { size: 23, fill: COL.good, anchor: 'middle' });
+    labelBox(p, 1180, 560, 560, ['дискретные упражнения', 'одно повторяющееся движение'], COL.good, m('disc'), { size: 25 });
+  }],
+
+  ['order', 'Порядок практики', (m) => {
+    const p = panel(0);
+    head(p, 'Порядок практики: вставать со стула', .2, 70, COL.chalk);
+    const Hs = { A: 26, B: 40, C: 54 }, CC = { A: COL.good, B: COL.whole, C: COL.task };
+    const rows = [['блоковая', 'одна задача, одни условия, предсказуемо', 'AAAAAAAAA', 'bl'], ['случайная', 'вариации в непредсказуемом порядке', 'BACACBABC', 'rnd'], ['случайно-блоковая', 'случайный порядок, но каждая — хотя бы дважды', 'BBAACCAABB', 'rb']];
+    rows.forEach(([name, sub, seq, k], i) => {
+      const y = 230 + i * 200, g = G(p, { o: 0 });
+      roundBox(g, 80, y - 90, 1440, 170, ORD[k], PANEL, 3);
+      T(g, name, { x: 110, y: y - 40, size: 30, weight: 700, fill: ORD[k] });
+      put(para(g, sub, 110, y + 2, null, { size: 22, maxW: 420, fill: COL.dim }), { o: 1 });
+      show(g, m(k));
+      [...seq].forEach((c, j) => miniChair(p, 640 + j * 88, y + 46, Hs[c], CC[c], m(k, .5 + j * .22)));
+    });
+  }],
+
+  ['effects', 'Что даёт каждый порядок', (m) => {
+    const p = panel(0), X0 = 150, Y0 = 640;
+    head(p, 'Освоение и сохранение навыка', .2, 70, COL.chalk);
+    const ax = G(p, { o: 0 });
+    path(ax, `M${X0} ${Y0 - 440}V${Y0}H${X0 + 800}`, { stroke: COL.dim, 'stroke-width': 3 });
+    path(ax, `M${X0 + 620} ${Y0 - 440}V${Y0}`, { stroke: COL.faint, 'stroke-width': 2, 'stroke-dasharray': '8 8' });
+    T(ax, 'выполнение', { x: X0 - 10, y: Y0 - 450, size: 22, fill: COL.dim });
+    T(ax, 'тренировка', { x: X0 + 300, y: Y0 + 38, size: 23, fill: COL.dim, anchor: 'middle' });
+    T(ax, 'проверка позже', { x: X0 + 710, y: Y0 + 38, size: 23, fill: COL.dim, anchor: 'middle' });
+    show(ax, .3);
+    pill(p, 'схема', X0 + 90, Y0 - 410, .4, { col: COL.dim, size: 20 });
+    const curve = (d, ret, col, k, off) => {
+      draw(path(p, d, { stroke: col, 'stroke-width': 5 }, { d: 0 }), m(k, off), 1.4);
+      draw(path(p, ret, { stroke: col, 'stroke-width': 4, 'stroke-dasharray': '10 8' }, { d: 0 }), m(k, off + 1.4), .7);
+    };
+    curve(`M${X0} ${Y0 - 30}C${X0 + 80} ${Y0 - 300} ${X0 + 260} ${Y0 - 360} ${X0 + 600} ${Y0 - 370}`, `M${X0 + 600} ${Y0 - 370}L${X0 + 710} ${Y0 - 170}`, ORD.bl, 'acq', .2);
+    curve(`M${X0} ${Y0 - 30}C${X0 + 220} ${Y0 - 80} ${X0 + 420} ${Y0 - 250} ${X0 + 600} ${Y0 - 290}`, `M${X0 + 600} ${Y0 - 290}L${X0 + 710} ${Y0 - 280}`, ORD.rnd, 'ret', .2);
+    curve(`M${X0} ${Y0 - 30}C${X0 + 140} ${Y0 - 200} ${X0 + 320} ${Y0 - 310} ${X0 + 600} ${Y0 - 330}`, `M${X0 + 600} ${Y0 - 330}L${X0 + 710} ${Y0 - 250}`, ORD.rb, 'rb', .2);
+    const R = [['блоковая', 'быстрее улучшает выполнение на тренировке', ORD.bl, 'acq'], ['случайная', 'лучше сохраняет навык и переносит его на новые условия', ORD.rnd, 'ret'], ['случайно-блоковая', 'быстрее случайной, сохраняется лучше блоковой', ORD.rb, 'rb']];
+    R.forEach(([h, s, c, k], i) => {
+      const g = G(p, { o: 0 }), y = 150 + i * 150;
+      roundBox(g, 1010, y, 520, 130, c, PANEL, 3);
+      T(g, h, { x: 1036, y: y + 42, size: 27, weight: 700, fill: c });
+      put(para(g, s, 1036, y + 82, null, { size: 22, maxW: 470 }), { o: 1 });
+      show(g, m(k, 1.6));
+    });
+    labelBox(p, 1270, 700, 520, ['когнитивные нарушения', 'блоковая может быть лучше'], COL.chalk, m('cog'), { size: 25 });
+  }],
+
+  ['variab', 'Вариативность', (m) => {
+    const p = panel(0), GY = 470;
+    head(p, 'Вариативность практики — небольшие изменения условий', .2, 76, COL.chalk);
+    const sofa = G(p, { o: 0 });
+    mk('rect', { x: 740, y: GY - 58, width: 110, height: 22, rx: 12, fill: COL.whole, 'fill-opacity': .3, stroke: COL.whole, 'stroke-width': 3 }, sofa);
+    show(sofa, m('def', .8));
+    const S = [[300, .45, 'жёсткий стул', COL.good], [800, .45, 'мягкий диван', COL.whole], [1300, .45, 'другая обстановка', COL.task]];
+    S.forEach(([x, s, lab, c], i) => {
+      ground(p, x - 160, x + 160, GY, m('def', .3 + i * .5));
+      const f = seated(p, x + 40, GY, s, m('def', .3 + i * .5));
+      sitStand(f, m('def', .6 + i * .5), 4, 2, x + 40, GY);
+      txt(p, lab, x, GY + 50, m('def', .3 + i * .5), { size: 24, fill: c, weight: 700, anchor: 'middle' });
+    });
+    const tl = G(p, { o: 0 });
+    [[ORD.bl, 'блоковая'], [ORD.rb, 'случайно-блоковая'], [ORD.rnd, 'случайная']].forEach(([c, s], i) => { mk('rect', { x: 260 + i * 370, y: 640, width: 340, height: 18, rx: 9, fill: c, 'fill-opacity': .8 }, tl); T(tl, s, { x: 430 + i * 370, y: 700, size: 24, fill: c, weight: 700, anchor: 'middle' }); });
+    show(tl, m('when'));
+    arrowTo(p, [260, 610], [1330, 610], m('when', .4), { col: COL.chalk, w: 4 });
+    txt(p, 'переходить как можно раньше', 800, 590, m('when', .8), { size: 26, weight: 700, anchor: 'middle' });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-order', prompt: ['Какой это порядок практики?'],
+    build: grid([
+      { parts: ['10 раз встать с одного и того же стула'], ans: ['b'], why: 'Одна задача, одни условия — блоковая.' },
+      { parts: ['Стулья разной высоты вразнобой, каждый по одному разу'], ans: ['r'], why: 'Непредсказуемые вариации — случайная.' },
+      { parts: ['Стулья в случайном порядке, но с каждого — по 2 раза подряд'], ans: ['m'], why: 'Случайный порядок, каждая вариация хотя бы дважды — случайно-блоковая.' },
+      { parts: ['Бросать мяч в одну цель с одного места'], ans: ['b'], why: 'Без вариаций — блоковая.' },
+      { parts: ['Ступеньки разной высоты в непредсказуемом порядке'], ans: ['r'], why: 'Вариации вразнобой — случайная.' },
+    ], [['b', 'Блоковая', ORD.bl], ['r', 'Случайная', ORD.rnd], ['m', 'Случайно-блоковая', ORD.rb]], { multi: false, text: true }),
+  }], done) }],
+
+  ['mental', 'Мысленная практика', (m) => {
+    const p = panel(0), GY = 520;
+    ground(p, 120, 520, GY, m('phys', -.2));
+    const a = fig(p, { x: 320, y: GY - 182 * .6, s: .6, o: 0 }); show(a.g, m('phys', -.2));
+    repeatPose(a, REACH, m('phys', .2), 3, 2);
+    txt(p, 'физическая', 320, 590, m('phys'), { size: 28, weight: 700, fill: COL.task, anchor: 'middle' });
+    ground(p, 620, 1020, GY, m('ment', -.2));
+    const b = fig(p, { x: 760, y: GY - 182 * .6, s: .6, o: 0 }); show(b.g, m('ment', -.2));
+    const th = G(p, { o: 0 });
+    mk('ellipse', { cx: 900, cy: 220, rx: 120, ry: 90, fill: PANEL, stroke: COL.real, 'stroke-width': 3 }, th);
+    [[820, 300, 10], [800, 330, 7]].forEach(([x, y, r]) => mk('circle', { cx: x, cy: y, r, fill: PANEL, stroke: COL.real, 'stroke-width': 3 }, th));
+    const ghost = fig(th, { x: 900, y: 214, s: .3, col: '#bba8ee' });
+    show(th, m('ment', .3));
+    repeatPose(ghost, REACH, m('ment', .6), 3, 2);
+    txt(p, 'мысленная', 820, 590, m('ment'), { size: 28, weight: 700, fill: COL.real, anchor: 'middle' });
+    txt(p, 'визуализация, моторные представления', 820, 630, m('ment', 1.6), { size: 22, fill: COL.dim, anchor: 'middle' });
+    // speed of learning (schematic)
+    const B = [['только мысленная', .35, COL.real, 'alone'], ['только физическая', .62, COL.task, 'alone'], ['физическая + мысленная', .9, COL.good, 'both']];
+    txt(p, 'скорость освоения', 1310, 200, m('alone', -.2), { size: 24, fill: COL.dim, anchor: 'middle' });
+    pill(p, 'схема', 1470, 160, m('alone', -.2), { col: COL.dim, size: 20 });
+    B.forEach(([s, v, c, k], i) => {
+      const y = 280 + i * 120;
+      txt(p, s, 1090, y - 14, m(k, i === 1 ? .6 : .2), { size: 23, fill: c, weight: 700 });
+      const r = mk('rect', { x: 1090, y, width: 1, height: 30, rx: 8, fill: c }, p);
+      put(r, { o: 0 }); show(r, m(k, i === 1 ? .6 : .2), .2);
+      prog(q => r.setAttribute('width', (440 * v * q).toFixed(1)), m(k, i === 1 ? .7 : .3), 1, out);
+    });
+  }],
+
+  ['q2', 'Быстрая проверка', () => {
+    const p = panel(0), GY = 640;
+    ground(p, 120, 520, GY, .1);
+    fig(p, { x: 320, y: GY - 182 * .6, s: .6 });
+    bubble(p, 360, 260, 230, 'представляю движение', COL.real, .3, { size: 22 });
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-mental', prompt: ['Что известно о мысленной практике?'],
+    build: choice([['Одна полностью заменяет физическую'], ['Вместе с физической ускоряет освоение навыка'], ['Не влияет на обучение']], 1,
+      'Мысленная практика полезна вместе с физической.',
+      ['Одна мысленная практика уступает физической.', null, 'Она укрепляет понимание того, что и как делать.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Практика — главная переменная обучения: объём, вид и вариативность.', 'w1'],
+     ['По частям — трудные части сложных серийных задач; целиком — непрерывные и ритмичные.', 'w2'],
+     ['Блоковая быстрее улучшает выполнение, случайная лучше сохраняет; случайно-блоковая — между ними.', 'w3'],
+     ['Мысленная практика полезна вместе с физической.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-order', prompt: ['У пациента выраженные когнитивные нарушения; он только начинает учиться вставать со стула. Какой порядок практики выбрать в начале?'],
+    build: choice([['Блоковую'], ['Случайную'], ['Случайно-блоковую'], ['Только мысленную']], 0,
+      'При когнитивных нарушениях блоковая практика может быть предпочтительнее: случайная окажется слишком трудной.',
+      [null, 'Случайная требует больше решать задачи — для этого пациента это может быть слишком трудно.', 'Позже можно перейти и к ней, но в начале — блоковая.', 'Мысленная практика уступает физической и одна её не заменяет.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Блоковая практика быстрее улучшает выполнение во время тренировки.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Случайная практика лучше сохраняет навык и переносит его на новые условия.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['При случайно-блоковой практике каждая вариация выполняется один раз.'], ans: ['f'], why: 'Неверно: хотя бы дважды подряд.' },
+      { parts: ['Ходьбу лучше отрабатывать по частям.'], ans: ['f'], why: 'Неверно: непрерывные навыки практикуют целиком.' },
+      { parts: ['Мысленная практика полностью заменяет физическую.'], ans: ['f'], why: 'Неверно: одна она уступает физической.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROM: плечо и лопатка — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 22, title: 'ROM: плечо и лопатка', minutes: 8, language: 'ru', next: '../ch023/' };
+// bio begin: places of the biomechanics layer (B switches); made by tools/therapeutic-exercise/bio.py from content/therapeutic-exercise/ch022/bio.ru.json
+const BIO = [
+  {"beat": "rot", "fig": null, "level": "angle", "joint": "shRot", "load": {"type": "none"}},
+];
+// bio end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch022/cards.ru.json
+const CARDS_SHORT = {
+  "тот же захват, рука в сторону\nлокоть можно согнуть, чтобы легче пройти дугу": "локоть согнуть → легче дуга",
+  "поворот лопатки вверх\nлопатка (фиолетовая) поворачивается": "лопатка (фиолетовая) поворачивается",
+  "плечо у края стола\nиначе полного горизонтального отведения нет; старт — рука приведена или отведена на 90°": "иначе нет полного отведения",
+  "терапевт\nзахват как при сгибании; лицом к голове пациента": "лицом к голове пациента",
+};
+// cards-short end
+
+const SKIN = '#d8d1c1', HAND = '#b9cfe0';
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+// Supine patient on a table, therapist behind it; the therapist's lower hand holds the elbow, the upper hand the wrist.
+// The therapist steps along the table with the elbow, so the hands always reach.
+function armScene(p, hx, TOP, s, t0) {
+  const legH = 155 * s;
+  const th = fig(p, { x: hx, y: TOP + legH - 182 * s, s, dir: -1, col: HAND, o: 0, pose: { t: 24, hN: 26, hF: 22, kN: 8, kF: 8 } });
+  bench(p, hx - 330 * s, hx + 280 * s, TOP, t0, COL.dim, legH);
+  const pt = supine(p, hx, TOP, s, t0);
+  show(th.g, t0);
+  pt.onSet.push(() => put(th.g, { x: Math.min(hx - 10 * s, onStage(pt, 'EN')[0] + 95 * s) }));
+  holdHand(th, 'N', pt, () => onStage(pt, 'EN'));
+  holdHand(th, 'F', pt, () => onStage(pt, 'WN'));
+  pt.set({});
+  return { pt, th };
+}
+// A capsule between two stage points (for the schematic views).
+function seg(p, col, w) {
+  const e = mk('path', { fill: col, stroke: mix(col, '#000000', .35), 'stroke-width': 1.5 }, p);
+  return { e, set(A, B) { e.setAttribute('d', capsuleD(A, B, w, w * .8)); } };
+}
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Плечо и лопатка', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 3 · Урок 22', { x: 800, y: 240, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Объём движений: плечо и лопатка', { x: 800, y: 335, size: 60, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'техники пассивных движений — и как делать их правильно', 800, 430, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const sc = armScene(art, 880, 690, .55, 0);
+    show(art, m('sub', .2));
+    prog(q => sc.pt.set({ aN: lerp(4, 165, (1 - Math.cos(2 * Math.PI * q)) / 2), eN: 6 }), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['flex', 'Сгибание', (m, D) => {
+    const p = panel(0), TOP = 540, s = 1.2;
+    const sc = armScene(p, 900, TOP, s, .2), pt = sc.pt;
+    // latissimus dorsi: from the lower back to the humerus; it lengthens as the arm goes overhead
+    const lat = muscleOn(pt, ['H', 'Sh', 40, -12], ['Sh', 'EN', 26, 2], { w: 12, slack: 1.8, after: 'torso' });
+    put(lat.g, { o: 0 });
+    pill(p, 'верхняя рука — к голове пациента', 430, 110, m('sup', 6.2), { col: HAND, size: 23 });
+    pill(p, 'нижняя рука — к стопам', 1150, 110, m('sup', 6.8), { col: HAND, size: 23 });
+    pill(p, 'нижняя рука: под локтем', 1150, 180, m('grip'), { col: COL.whole, size: 22 });
+    pill(p, 'верхняя рука: запястье и ладонь', 1150, 236, m('grip', 1.2), { col: COL.whole, size: 22 });
+    const up = q => pt.set({ aN: lerp(4, 170, q), eN: 6 });
+    prog(q => up(io(q)), m('lift'), 2.6, lin);
+    prog(q => up(1 - io(q)), D - 2.4, 2, lin);
+    labelBox(p, 1150, 340, 600, ['лопатка свободно поворачивается вверх', 'только плечевой сустав — стабилизировать лопатку'], COL.int, m('scap'), { size: 24 });
+    show(lat.g, m('lift', 1.4));
+    txt(p, 'широчайшая мышца спины растягивается', 900, 850, m('lift', 1.6), { size: 23, weight: 700, fill: ANAT.stretch, anchor: 'middle' });
+    NOTE(p, 1330, 850, m('lift', 1.6));
+  }],
+
+  ['ext', 'Разгибание за ноль', (m) => {
+    const p = panel(0), TOP = 470, s = 1.25;
+    bench(p, 820 - 330 * s, 820 + 280 * s, TOP, .2, COL.dim, 155 * s);
+    const pt = supine(p, 820, TOP, s, .2);
+    const bic = muscleOn(pt, ...MUSCLE.biceps, { w: 11 });
+    put(bic.g, { o: 0 });
+    prog(q => pt.set({ aN: lerp(4, -50, io(q)), eN: 6 }), m('edge', .6), 1.8, lin);
+    txt(p, 'плечо у края кровати: рука уходит ниже края', 800, 110, m('edge'), { size: 27, weight: 700, fill: COL.whole, anchor: 'middle' });
+    ['на боку', 'на животе', 'сидя'].forEach((str, i) => pill(p, str, 520 + i * 280, 780, m('side', .3 + i * .5), { col: COL.whole, size: 27 }));
+    show(bic.g, m('edge', 1.6));
+    txt(p, 'двуглавая мышца плеча растягивается', 800, 190, m('edge', 2), { size: 23, weight: 700, fill: ANAT.stretch, anchor: 'middle' });
+    NOTE(p, 800, 236, m('edge', 2));
+  }],
+
+  ['abd', 'Отведение', (m) => {
+    const p = panel(0), cx = 470, cy = 540, s = .78;
+    txt(p, 'вид сверху: пациент лёжа на спине', cx, 76, .2, { size: 23, fill: COL.dim, anchor: 'middle' });
+    tableTop(p, cx, cy, s, .2);
+    const f = flatFig(p, cx, cy, s, .2);
+    // the scapula lies behind the ribs (dashed); it turns upward as the arm rises
+    const sg = G(f.mid, { x: 52, y: -128 });
+    mk('path', { d: 'M30 -36L-28 -38L-20 80Z', fill: COL.real, 'fill-opacity': .35, stroke: COL.real, 'stroke-width': 3, 'stroke-dasharray': '8 5' }, sg);
+    // the inferior capsule: slack (folded) with the arm down, taut overhead
+    const cap = ligEl(f.top, { rest: 50, w: 5 });
+    const rotArrow = path(f.top, '', { stroke: COL.good, 'stroke-width': 5 }, { o: 0 });
+    f.onSet.push(() => {
+      const S = f.S, u = f.pts.u, n = [-u[1], u[0]];
+      cap.set([S[0] - 14, S[1] + 16], [S[0] + 30 * u[0] + 14 * n[0], S[1] + 30 * u[1] + 14 * n[1]]);
+      put(sg, { x: 52, y: -128, r: -f.th / 4 });
+      const M = [S[0] + 70 * u[0], S[1] + 70 * u[1]];
+      rotArrow.setAttribute('d', `M${M[0] - 24 * n[0]} ${M[1] - 24 * n[1]}Q${M[0] + 34 * u[0]} ${M[1] + 34 * u[1]} ${M[0] + 24 * n[0]} ${M[1] + 24 * n[1]}`);
+    });
+    f.arm(6);
+    prog(q => f.arm(lerp(6, 175, io(q))), m('abd', .6), m('er') - m('abd', .6), lin);
+    show(rotArrow, m('er'));
+    infoCard(p, 880, 130, 620, 150, 'тот же захват, рука в сторону', 'локоть можно согнуть, чтобы легче пройти дугу', COL.whole, m('abd'), { size: 23 });
+    infoCard(p, 880, 310, 620, 80, 'наружная ротация плечевой кости', null, COL.good, m('er'), { size: 24 });
+    infoCard(p, 880, 450, 620, 140, 'поворот лопатки вверх', 'лопатка (фиолетовая) поворачивается', COL.real, m('ur'), { size: 24 });
+    txt(p, 'без них полного отведения нет', 1190, 640, m('ur', 1.2), { size: 25, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'нижняя часть капсулы натягивается', 1190, 740, m('abd', 3), { size: 23, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    NOTE(p, 1190, 786, m('abd', 3));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-abd', prompt: ['Что нужно для полного отведения плеча?'],
+    build: choice([
+      ['Наружная ротация плечевой кости и поворот лопатки вверх'],
+      ['Внутренняя ротация плечевой кости'],
+      ['Неподвижная, стабилизированная лопатка'],
+      ['Полностью разогнутый локоть'],
+    ], 0, 'Для полного отведения нужны наружная ротация плечевой кости и поворот лопатки вверх.',
+    [null, 'Нужна наружная, а не внутренняя ротация.', 'Лопатка должна поворачиваться вверх.', 'Локоть, наоборот, можно согнуть для удобства.']),
+  }], done) }],
+
+  ['rot', 'Ротация 90/90', (m) => {
+    const p = panel(0), TOP = 520, s = 1.15;
+    const th = fig(p, { x: 760, y: TOP + 155 * s - 182 * s, s, dir: -1, col: HAND, o: 0, pose: { t: 24, hN: 26, hF: 22, kN: 8, kF: 8 } });
+    bench(p, 900 - 330 * s, 900 + 280 * s, TOP, .2, COL.dim, 155 * s);
+    const pt = supine(p, 900, TOP, s, .2, { aN: 0, eN: 0 });
+    ['uaN', 'faN', 'hdN'].forEach(k => pt.parts[k].e.setAttribute('opacity', 0));
+    show(th.g, .2);
+    // the upper arm points at the viewer (90° abduction), so the elbow sits over the shoulder; the forearm is a spoke
+    const [sx, sy] = onStage(pt, 'Sh'), E = [sx, sy - 8], R = (RIG.fa + RIG.hand) * s;
+    const arc = path(p, `M${E[0] - R - 22} ${E[1]}A${R + 22} ${R + 22} 0 0 1 ${E[0] + (R + 22) * Math.sin(rad(70))} ${E[1] - (R + 22) * Math.cos(rad(70))}`,
+      { stroke: COL.dim, 'stroke-width': 3, 'stroke-dasharray': '6 8' }, { o: 0 });
+    const fore = seg(p, SKIN, 10 * s);
+    const end = mk('circle', { cx: E[0], cy: E[1], r: 13 * s, fill: SKIN, stroke: '#8a8476', 'stroke-width': 2 }, p);
+    let W = [E[0], E[1] - R];
+    const setRot = ang => { W = [E[0] + R * Math.sin(rad(ang)), E[1] - R * Math.cos(rad(ang))]; fore.set(E, W); };
+    setRot(0);
+    bioJoint('shRot', p, () => ({ C: E, end: W, zero: [0, -1], prox: [0, -1], k: 1, seg: 'fa', range: [-90, 90], abs: true }), fore.e);   // rotation both ways: the forearm toward the feet is +
+    put(end, { o: 0 }); show(end, .2); put(fore.e, { o: 0 }); show(fore.e, .2);
+    const holder = { onSet: [] };
+    holdHand(th, 'N', holder, () => [E[0] + 6, E[1] + 8]);
+    holdHand(th, 'F', holder, () => W);
+    // the therapist stands behind the table; his hands are drawn over the patient's forearm and elbow
+    const grip = () => { const e = mk('ellipse', { rx: 15 * s, ry: 11 * s, fill: HAND, stroke: '#7d93a3', 'stroke-width': 2, opacity: 0 }, p); show(e, .2); return e; };
+    const gE = grip(), gW = grip();
+    holder.onSet.push(() => { put(gE, { x: E[0] + 6, y: E[1] + 12 }); put(gW, { x: W[0], y: W[1] }); });
+    holder.onSet.forEach(fn => fn());
+    // which structures tighten at each end of the turn (not from the book)
+    const erTxt = txt(p, 'к голове: натягиваются передняя капсула и подлопаточная мышца', 800, 250, null, { size: 22, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    const irTxt = txt(p, 'к стопам: натягиваются задняя капсула и подостная мышца', 800, 250, null, { size: 22, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    put(erTxt, { o: 0 }); put(irTxt, { o: 0 });
+    const spin = m('spoke', 7) - m('spoke');
+    prog(q => {
+      const v = Math.sin(2 * Math.PI * 2 * q), a = v > 0 ? 70 * v : 90 * v, noteOn = q * spin > .9 ? 1 : 0;
+      setRot(a); holder.onSet.forEach(fn => fn());
+      put(erTxt, { o: noteOn * clamp((-a - 55) / 25, 0, 1) }); put(irTxt, { o: noteOn * clamp((a - 45) / 20, 0, 1) });
+    }, m('spoke'), spin, lin);
+    show(arc, m('spoke', .2));
+    txt(p, 'внутренняя → к стопам', E[0] + 110, E[1] - R - 50, m('spoke', .5), { size: 23, weight: 700, fill: COL.task });
+    txt(p, 'наружная → к голове', E[0] - 110, E[1] - R - 50, m('spoke', 1.5), { size: 23, weight: 700, fill: COL.good, anchor: 'end' });
+    labelBox(p, 800, 100, 960, ['плечо отведено 90°, локоть согнут 90°, предплечье в среднем положении'], COL.whole, m('pos'), { size: 25 });
+    pill(p, 'рука у туловища: полной внутренней ротации нет', 800, 175, m('side'), { col: COL.int, size: 22 });
+    txt(p, '«как спица колеса»', 800, 760, m('spoke', .2), { size: 28, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pill(p, 'одна рука — кисть и запястье, другая — локоть', 800, 815, m('grip'), { col: HAND, size: 23 });
+    NOTE(p, 1340, 815, m('spoke', .9));
+  }],
+
+  ['horiz', 'Горизонтальные движения', (m) => {
+    const p = panel(0), TOP = 560, cx = 560;
+    txt(p, 'вид со стороны головы пациента', cx, 110, .2, { size: 24, fill: COL.dim, anchor: 'middle' });
+    const tb = G(p, { o: 0 }), defs = mk('defs', {}, tb), line = mix(SKIN, COL.board, .62);
+    mk('rect', { x: cx - 300, y: TOP, width: 440, height: 22, rx: 6, fill: PANEL, stroke: COL.dim, 'stroke-width': 3 }, tb);
+    path(tb, `M${cx - 270} ${TOP + 22}V${TOP + 200}M${cx + 110} ${TOP + 22}V${TOP + 200}`, { stroke: COL.dim, 'stroke-width': 5 });
+    const rg = (id, c) => { const gr = mk('radialGradient', { id, cx: .38, cy: .3, r: .8 }, defs); [[0, mix(c, '#ffffff', .45)], [.55, c], [1, mix(c, '#000000', .45)]].forEach(([o, cc]) => mk('stop', { offset: o, 'stop-color': cc }, gr)); return `url(#${id})`; };
+    mk('ellipse', { cx: cx - 80, cy: TOP - 62, rx: 160, ry: 62, fill: rg('hzT', SKIN), stroke: line, 'stroke-width': 2 }, tb);   // chest in cross-section
+    mk('ellipse', { cx: cx - 262, cy: TOP - 20, rx: 25, ry: 20, fill: rg('hzA', SKIN), stroke: line, 'stroke-width': 2 }, tb);           // the far arm lying along the body
+    mk('circle', { cx: cx - 80, cy: TOP - 70, r: 52, fill: rg('hzH', SKIN), stroke: line, 'stroke-width': 2 }, tb);            // the head, nearest to us
+    T(tb, 'край стола', { x: cx + 96, y: TOP + 60, size: 21, fill: COL.dim, anchor: 'end' });
+    show(tb, .2);
+    const S = [cx + 70, TOP - 66], ua = limbEl(p, defs, SKIN, 17, 13, line), fa = limbEl(p, defs, SKIN, 13, 10, line), hd = limbEl(p, defs, SKIN, 10, 9, line);
+    const set = a => {
+      const r = rad(a), u = [Math.cos(r), -Math.sin(r)], at = d => [S[0] + d * u[0], S[1] + d * u[1]];
+      ua.set(S, at(104)); fa.set(at(104), at(196)); hd.set(at(196), at(232));
+    };
+    set(0); [ua, fa, hd].forEach(l => { put(l.e, { o: 0 }); show(l.e, .3); });
+    const R = 262, arcPt = a => `${(S[0] + R * Math.cos(rad(a))).toFixed(1)} ${(S[1] - R * Math.sin(rad(a))).toFixed(1)}`;
+    const arc = path(p, `M${arcPt(-40)}A${R} ${R} 0 0 0 ${arcPt(150)}`, { stroke: COL.dim, 'stroke-width': 3, 'stroke-dasharray': '6 8' }, { o: 0 });
+    show(arc, m('move', .2));
+    prog(q => { const v = Math.sin(2 * Math.PI * 2 * q); set(v < 0 ? 40 * v : 150 * v); }, m('move'), m('move', 6.4) - m('move'), lin);
+    txt(p, 'отведение: ниже края стола', S[0] + 120, TOP + 150, m('move', .4), { size: 23, weight: 700, fill: COL.whole });
+    txt(p, 'приведение: поперёк тела', cx - 300, TOP - 330, m('move', 1.4), { size: 23, weight: 700, fill: COL.task });
+    infoCard(p, 1060, 140, 450, 230, 'плечо у края стола', 'иначе полного горизонтального отведения нет; старт — рука приведена или отведена на 90°', COL.whole, m('edge'), { size: 22 });
+    infoCard(p, 1060, 400, 450, 170, 'терапевт', 'захват как при сгибании; лицом к голове пациента', HAND, m('move'), { size: 22 });
+  }],
+
+  ['scap', 'Лопатка', (m) => {
+    const p = panel(0), cx = 470, cy = 470, s = .95;
+    txt(p, 'вид сверху: пациент лёжа на животе', cx, 76, .2, { size: 23, fill: COL.dim, anchor: 'middle' });
+    tableTop(p, cx, cy, s, .2);
+    const f = flatFig(p, cx, cy, s, .2);
+    path(f.mid, 'M0 -205V-10', { stroke: mix(SKIN, '#000000', .45), 'stroke-width': 4, 'stroke-dasharray': '10 8' });
+    T(G(f.mid, { x: -12, y: -60, r: -90 }), 'позвоночник', { x: 0, y: 0, size: 18, fill: COL.board, anchor: 'middle', weight: 700 });
+    // the scapula on the back; the therapist's hands on the acromion and the inferior angle move with it
+    const base = { x: 52, y: -128, r: 0 }, sg = G(f.top, { ...base, o: 0 });
+    mk('path', { d: 'M30 -36L-28 -38L-20 80Z', fill: COL.real, 'fill-opacity': .55, stroke: COL.real, 'stroke-width': 3 }, sg);
+    const hand = (x, y) => { const e = mk('ellipse', { cx: x, cy: y, rx: 24, ry: 19, fill: HAND, 'fill-opacity': .85, stroke: '#7d93a3', 'stroke-width': 2 }, sg); put(e, { o: 0 }); return e; };
+    const acr = hand(30, -40), ang = hand(-20, 84);
+    show(sg, m('pos'));
+    show(acr, m('grip')); show(ang, m('grip', .8));
+    const [ax, ay] = f.stage([82, -168]), [ix, iy] = f.stage([32, -44]);
+    txt(p, 'акромион', ax + 40, ay - 26, m('grip'), { size: 22, weight: 700, fill: HAND });
+    txt(p, 'нижний угол', ix + 96, iy + 34, m('grip', .8), { size: 22, weight: 700, fill: HAND });
+    const moves = [{ y: -40 }, { y: 32 }, { x: 40 }, { x: -24 }];
+    moves.forEach((mv, i) => { tw(sg, { ...base, ...mv }, m('tr', .4 + i * 1.2), .5); tw(sg, base, m('tr', .9 + i * 1.2), .5); });
+    ['вверх', 'вниз', 'вперёд (от позвоночника)', 'назад (к позвоночнику)'].forEach((str, i) => pill(p, str, 1130, 200 + i * 60, m('tr', .4 + i * 1.2), { col: COL.real, size: 23 }));
+    tw(sg, { ...base, r: -25 }, m('rot', .8), 1);
+    tw(sg, base, m('rot', 4), 1);
+    arrowTo(p, [ix + 4, iy - 2], [ix + 70, iy - 26], m('rot', .4), { col: COL.good, w: 5 });
+    arrowTo(p, [ax + 30, ay - 6], [ax - 24, ay - 28], m('rot', .4), { col: COL.good, w: 5 });
+    labelBox(p, 1130, 560, 620, ['поворот: нижний угол и акромион', 'в противоположные стороны — пара сил'], COL.good, m('rot', .6), { size: 25 });
+    txt(p, 'ключица движется вместе с лопаткой', 1130, 470, m('tr', 2), { size: 23, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'или на боку лицом к терапевту', 1130, 120, m('pos', 1), { size: 23, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-scap', prompt: ['Куда направить усилие при движении лопатки?'],
+    build: grid([
+      { parts: ['Поднимание лопатки'], ans: ['a'], why: 'Через акромион.' },
+      { parts: ['Опускание лопатки'], ans: ['a'], why: 'Через акромион.' },
+      { parts: ['Поворот лопатки вверх'], ans: ['c'], why: 'Нижний угол и акромион в противоположные стороны — пара сил.' },
+      { parts: ['Вынос лопатки вперёд'], ans: ['a'], why: 'Через акромион.' },
+      { parts: ['Поворот лопатки вниз'], ans: ['c'], why: 'Пара сил.' },
+    ], [['a', 'Через акромион', COL.real], ['c', 'Пара сил', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Сгибание: нижняя рука под локтем, верхняя на запястье и ладони; лопатка свободна.', 'w1'],
+     ['Разгибание за ноль — у края кровати, на боку, на животе или сидя.', 'w2'],
+     ['Полное отведение — с наружной ротацией и поворотом лопатки вверх; ротация 90/90 — «спица колеса».', 'w3'],
+     ['Лопатку двигают через акромион, а поворачивают парой сил.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-key', prompt: ['Что здесь главное?'],
+    build: grid([
+      { parts: ['Полное горизонтальное отведение'], ans: ['e'], why: 'Плечо у края стола.' },
+      { parts: ['Ротация плеча в положении 90/90'], ans: ['s'], why: 'Предплечье движется как спица колеса.' },
+      { parts: ['Поворот лопатки вверх'], ans: ['c'], why: 'Пара сил: нижний угол и акромион.' },
+      { parts: ['Сгибание плеча с нормальным ритмом'], ans: ['f'], why: 'Лопатка свободно поворачивается вверх.' },
+      { parts: ['Разгибание плеча за ноль лёжа на спине'], ans: ['e'], why: 'Плечо у края кровати.' },
+    ], [['e', 'Край стола', COL.whole], ['s', 'Спица колеса', COL.task], ['c', 'Пара сил', COL.good], ['f', 'Лопатка свободна', COL.real]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Для полной внутренней ротации лучше держать руку у туловища.'], ans: ['f'], why: 'Неверно: у туловища полной внутренней ротации нет.' },
+      { parts: ['При сгибании плеча лопатка должна свободно поворачиваться вверх.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['При ротации плечевую кость вращают, двигая предплечье как спицу колеса.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Верхняя рука терапевта — та, что ближе к стопам пациента.'], ans: ['f'], why: 'Неверно: ближе к голове.' },
+      { parts: ['При поднимании лопатки ключица тоже двигается.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

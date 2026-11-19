@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Возраст и мышцы — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 58, title: 'Возраст и мышечная сила', minutes: 8, language: 'ru', next: '../ch059/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch058/cards.ru.json
+const CARDS_SHORT = {
+  "при рождении\nмышцы ≈ 25% массы тела; число волокон — до рождения или вскоре после; типы волокон — к концу 1-го года": "мышцы ≈ 25% массы тела",
+  "до полового созревания\nсила и выносливость растут линейно — за счёт мышечной массы": "растут за счёт массы",
+  "мальчики ≈ на 10% сильнее\nбольше относительная мышечная масса; возможно, и ожидания общества": "больше мышечная масса",
+  "сила растёт сверх роста\nдо полового созревания — в основном нервная система, без заметной гипертрофии; прирост как у молодых взрослых; без тренировок — к исходному": "в основном нервная система, без гипертрофии",
+  "первое десятилетие\nсвободная игра и подходящая активность — отдых и двигательные навыки": "свободная игра и двигательные навыки",
+  "доказательства\nснижение травм и рост спортивного результата не доказаны; плюсы — сердце и лёгкие, меньше жиров в крови, самочувствие": "травмы и результат — не доказаны",
+  "если программа нужна\nмалые грузы, мало повторений, достаточный отдых, тщательный присмотр": "малые грузы, мало повторений, присмотр",
+  "юноши\nсила ≈ +30% в год (10–16 лет); масса — пик раньше силы": "сила ≈ +30% в год",
+  "девушки\nпик силы — раньше пика массы": "пик силы — раньше пика массы",
+  "тренировка в период созревания\n+30–40% сверх роста; относительный прирост сопоставим, гипертрофия больше у юношей": "+30–40% сверх роста",
+  "подросток-спортсмен\nвне сезона: аэробная + силовая малой интенсивности; в сезоне — интенсивнее, под свой спорт": "в сезоне — интенсивнее",
+  "мышечная масса\n≈ 40% массы тела в молодости": "≈ 40% массы тела в молодости",
+  "возможности высоки\nсиловая тренировка или умеренно нагрузочные занятия несколько раз в неделю": "несколько раз в неделю",
+  "к 80 годам\nмышечная масса ≈ 50% пиковой": "мышечная масса ≈ 50% пиковой",
+  "часть потерь — бездействие\nу очень активных пожилых снижение гораздо меньше": "у активных снижение меньше",
+  "ноги и туловище слабеют\nхуже повседневные функции, чаще падения (70, 80 лет и старше)": "чаще падения",
+  "меньше волокон I и II типа\nбольше соединительной ткани": "больше соединительной ткани",
+  "длина — напряжение меняется\nбольше из-за потери гибкости, чем из-за нервной регуляции": "из-за потери гибкости",
+  "медленнее\nсокращение, восстановление после утомления; дольше развить усилие и расслабиться": "сокращение и восстановление после утомления",
+  "падает мощность\nвстать с низкого стула, поймать равновесие": "встать с низкого стула, поймать равновесие",
+  "мощность ↔ функция\nсвязь с ограничениями и инвалидностью сильнее, чем у силы": "связь с инвалидностью сильнее, чем у силы",
+  "выносливость\nменьше капилляров и митохондрий, ферменты, транспорт глюкозы → быстрее устаёт; у активных — почти до 80 лет мало": "меньше капилляров → быстрее устаёт",
+  "тренировка помогает и в старости\nсила, мощность, выносливость · глава 24": "сила, мощность, выносливость · глава 24",
+};
+// cards-short end
+
+const T1 = '#c2564a', T2 = '#f6d2c6', CT = '#8a958f';
+// Strength over the life span relative to the peak at 30 (a scheme from the book's rates); ACTIVE: an active old age.
+const LIFE = a => a <= 10 ? .06 + .024 * a : a <= 18 ? .3 + (a - 10) * .07 : a <= 30 ? .86 + (a - 18) * .14 / 12
+  : a <= 60 ? 1 - .008 * (a - 30) : a <= 80 ? .76 * (1 - .0175 * (a - 60)) : .494 * (1 - .03 * (a - 80));
+const ACTIVE = a => .76 * (1 - .003 * (a - 60));
+// The chart: axes with ages 0–90; seg(a0, a1, t0, dur) draws the curve between two ages (dur 0: at once).
+function lifeChart(p, t0, { x0 = 110, y0 = 620, W = 880, H = 430 } = {}) {
+  const g = G(p, { o: 0 }), X = a => x0 + a / 90 * W, Y = v => y0 - v * H;
+  path(g, `M${x0} ${y0 - H - 20}V${y0}H${x0 + W + 20}`, { stroke: COL.dim, 'stroke-width': 3 });
+  for (let a = 0; a <= 90; a += 10) { path(g, `M${X(a)} ${y0}V${y0 + 8}`, { stroke: COL.dim, 'stroke-width': 2 }); T(g, String(a), { x: X(a), y: y0 + 32, size: 19, fill: COL.dim, anchor: 'middle' }); }
+  T(g, 'сила', { x: x0 + 12, y: y0 - H - 4, size: 21, fill: COL.dim });
+  T(g, 'возраст, лет', { x: x0 + W + 10, y: y0 + 62, size: 20, fill: COL.dim, anchor: 'end' });
+  show(g, t0);
+  pill(p, 'схема', x0 + W - 30, y0 - H - 10, t0, { col: COL.dim, size: 19 });
+  const curve = (fn, a0, a1, col, t, dur, dash) => {
+    let d = '';
+    for (let i = 0; i <= 60; i++) { const a = lerp(a0, a1, i / 60); d += `${i ? 'L' : 'M'}${X(a).toFixed(1)} ${Y(fn(a)).toFixed(1)}`; }
+    const e = path(p, d, { stroke: col, 'stroke-width': 5, 'stroke-dasharray': dash || 'none' }, dash ? { o: 0 } : { d: 0 });
+    if (dash) show(e, t, Math.max(.2, dur)); else draw(e, t, Math.max(.05, dur));
+    return e;
+  };
+  return { X, Y, seg: (a0, a1, t, dur = 1.5, col = ANAT.muscle) => curve(LIFE, a0, a1, col, t, dur), curve };
+}
+// A small figure standing on the line under the chart at an age.
+function ageFig(p, ch, a, s, t0, pose = {}, y = 875) {
+  const f = fig(p, { x: ch.X(a), y: y - 182 * s, s, o: 0, pose });
+  plant(f, 'AN', ch.X(a), y);
+  show(f.g, t0);
+  return f;
+}
+// A muscle cross-section: fibres of type I and II and connective tissue between them.
+function ageSection(p, cx, cy, r, old, t0) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx, cy, r, fill: old ? mix(CT, COL.board, .3) : mix(ANAT.muscle, COL.board, .6), stroke: ANAT.muscle, 'stroke-width': 3 }, g);
+  let k = 0;
+  const step = 31;
+  for (let y = -r; y <= r; y += step * .87) for (let x = -r; x <= r; x += step) {
+    const xx = x + ((Math.round((y + r) / (step * .87)) % 2) ? step / 2 : 0), i = k++;
+    if (Math.hypot(xx, y) > r - 16) continue;
+    if (old && (i * 7) % 10 < 3) continue;   // fewer fibres
+    const t2 = i % 2 === 0, fr = t2 ? (old ? 8 : 14) : (old ? 11 : 12);
+    mk('circle', { cx: cx + xx, cy: cy + y, r: fr, fill: t2 ? T2 : T1, stroke: mix(ANAT.muscle, '#000000', .35), 'stroke-width': 1.2 }, g);
+  }
+  show(g, t0);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Возраст и мышцы', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 58', { x: 800, y: 180, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Возраст и мышечная', { x: 800, y: 265, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'работоспособность', { x: 800, y: 330, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'от рождения до старости', 800, 405, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 820;
+    path(art, `M380 ${GY}H1220`, { stroke: COL.faint, 'stroke-width': 3 });
+    [[480, .32, {}], [660, .46, {}], [860, .56, {}], [1080, .53, { t: 16, hd: 12, kN: 12, kF: 12, hN: 14, hF: 8, aN: 20, eN: 30 }]].forEach(([x, s, pose], i) => {
+      const f = fig(art, { x, y: GY - 182 * s, s, o: 0, pose });
+      plant(f, 'AN', x, GY); show(f.g, .5 + i * .4);
+    });
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['child', 'Детство', (m) => {
+    const p = panel(0);
+    txt(p, 'детство и предподростковый возраст', 800, 80, m('child'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const ch = lifeChart(p, m('child', 1));
+    ch.seg(0, 12, m('lin', .3), 2.5);
+    ageFig(p, ch, 7, .32, m('lin'));
+    infoCard(p, 1050, 140, 490, 260, 'при рождении', 'мышцы ≈ 25% массы тела; число волокон — до рождения или вскоре после; типы волокон — к концу 1-го года', COL.whole, m('birth'), { size: 22 });
+    infoCard(p, 1050, 420, 490, 180, 'до полового созревания', 'сила и выносливость растут линейно — за счёт мышечной массы', ANAT.muscle, m('lin'), { size: 22 });
+    infoCard(p, 1050, 620, 490, 200, 'мальчики ≈ на 10% сильнее', 'больше относительная мышечная масса; возможно, и ожидания общества', COL.task, m('sex'), { size: 22 });
+  }],
+
+  ['ctrain', 'Силовая тренировка детей', (m, D) => {
+    const p = panel(0), GY = 640;
+    txt(p, 'силовая тренировка у детей', 340, 86, m('ctrain'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ground(p, 80, 600, GY, .3);
+    const kid = fig(p, { x: 230, y: GY - 182 * .5, s: .5, o: 0 });
+    show(kid.g, .3);
+    const SQ = { ...STAND, t: 25, hN: 70, kN: 80, fN: 25, hF: 70, kF: 80, fF: 25, aN: 80, aF: 80, eN: 10, eF: 10 };
+    const [kx] = onStage(kid, 'AN');
+    prog(q => { kid.set(blendPose(STAND, SQ, (1 - Math.cos(2 * Math.PI * 4 * q)) / 2)); plant(kid, 'AN', kx, GY); }, m('how', -1), Math.max(4, D - m('how', -1) - .4), lin);
+    const coach = fig(p, { x: 440, y: GY - 182 * .78, s: .78, dir: -1, o: 0, col: '#b9cfe0', pose: { aN: 40, eN: 60, aF: 10 } });
+    show(coach.g, .3);
+    txt(p, 'вес тела или лёгкий груз · присмотр', 340, 700, m('how', .5), { size: 23, fill: COL.good, anchor: 'middle', weight: 600 });
+    infoCard(p, 640, 110, 900, 165, 'сила растёт сверх роста', 'до полового созревания — в основном нервная система, без заметной гипертрофии; прирост как у молодых взрослых; без тренировок — к исходному', ANAT.muscle, m('gain'), { size: 21 });
+    infoCard(p, 640, 290, 900, 105, 'риск: переломы зоны роста, отрывные переломы', null, COL.bad, m('risk'), { size: 21 });
+    infoCard(p, 640, 410, 900, 135, 'первое десятилетие', 'свободная игра и подходящая активность — отдых и двигательные навыки', COL.good, m('play'), { size: 21 });
+    infoCard(p, 640, 560, 900, 140, 'доказательства', 'снижение травм и рост спортивного результата не доказаны; плюсы — сердце и лёгкие, меньше жиров в крови, самочувствие', COL.whole, m('ev'), { size: 21 });
+    infoCard(p, 640, 715, 900, 140, 'если программа нужна', 'малые грузы, мало повторений, достаточный отдых, тщательный присмотр', COL.good, m('how'), { size: 22 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-kids', prompt: ['Верно или нет?'],
+    build: grid([
+      { parts: ['Дошкольникам лучше свободная игра, чем структурная силовая программа'], ans: ['t'], why: 'В первое десятилетие — игра и двигательные навыки.' },
+      { parts: ['До полового созревания сила от тренировки растёт в основном за счёт роста мышц'], ans: ['f'], why: 'В основном за счёт нервной системы, без заметной гипертрофии.' },
+      { parts: ['Доказано, что силовая программа снижает спортивные травмы у детей'], ans: ['f'], why: 'Доказательств недостаточно.' },
+      { parts: ['Детям — малые грузы, отдых и тщательный присмотр'], ans: ['t'], why: 'Так программа может быть полезна.' },
+      { parts: ['Если ребёнок бросил тренировки, сила постепенно возвращается к исходной'], ans: ['t'], why: 'Как у взрослых — обратимость.' },
+    ], TF, { multi: false, text: true }),
+  }], done) }],
+
+  ['adol', 'Подростки', (m) => {
+    const p = panel(0);
+    txt(p, 'подростковый возраст', 800, 80, m('adol'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const ch = lifeChart(p, .2);
+    ch.seg(0, 12, .2, 0);
+    ch.seg(12, 20, m('adol', 1), 2, COL.task);
+    ageFig(p, ch, 16, .44, m('adol', 1));
+    infoCard(p, 1050, 120, 490, 170, 'юноши', 'сила ≈ +30% в год (10–16 лет); масса — пик раньше силы', COL.whole, m('boys'), { size: 22 });
+    infoCard(p, 1050, 305, 490, 140, 'девушки', 'пик силы — раньше пика массы', COL.real, m('girls'), { size: 22 });
+    infoCard(p, 1050, 460, 490, 200, 'тренировка в период созревания', '+30–40% сверх роста; относительный прирост сопоставим, гипертрофия больше у юношей', COL.task, m('train'), { size: 22 });
+    infoCard(p, 1050, 675, 490, 190, 'подросток-спортсмен', 'вне сезона: аэробная + силовая малой интенсивности; в сезоне — интенсивнее, под свой спорт', COL.good, m('sport'), { size: 21 });
+  }],
+
+  ['adult', 'Взрослые', (m) => {
+    const p = panel(0);
+    txt(p, 'молодой и средний возраст', 800, 80, m('adult'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const ch = lifeChart(p, .2);
+    ch.seg(0, 20, .2, 0);
+    ch.seg(20, 30, m('adult', .5), 1, COL.task);
+    const pk = G(p, { o: 0 });
+    mk('circle', { cx: ch.X(30), cy: ch.Y(1), r: 10, fill: COL.task }, pk);
+    T(pk, 'пик силы', { x: ch.X(30), y: ch.Y(1) - 50, size: 22, fill: COL.task, weight: 700, anchor: 'middle' });
+    T(pk, 'женщины — 2-е десятилетие, мужчины — к 30', { x: ch.X(30), y: ch.Y(1) - 22, size: 21, fill: COL.task, weight: 600, anchor: 'middle' });
+    show(pk, m('adult', 1.5));
+    ch.seg(30, 60, m('dec', .3), 2.5);
+    txt(p, '−1% в год ≈ −8% за десятилетие', ch.X(47), ch.Y(.8) + 40, m('dec', 1), { size: 21, fill: ANAT.muscle, weight: 600, anchor: 'middle' });
+    const mn = G(p, { o: 0 });
+    path(mn, `M${ch.X(30)} ${ch.Y(.6)}H${ch.X(50)}`, { stroke: COL.good, 'stroke-width': 3 });
+    T(mn, 'до 50 — немного', { x: ch.X(40), y: ch.Y(.6) + 30, size: 21, fill: COL.good, anchor: 'middle' });
+    show(mn, m('minor'));
+    ch.curve(a => 1 - .004 * (a - 30), 30, 60, COL.good, m('active', .3), .8, '10 8');
+    txt(p, 'активные — позже и медленнее', ch.X(61), ch.Y(.88) + 7, m('active', .8), { size: 21, fill: COL.good, weight: 600 });
+    ageFig(p, ch, 35, .47, m('adult', 1));
+    infoCard(p, 1050, 140, 490, 160, 'мышечная масса', '≈ 40% массы тела в молодости', ANAT.muscle, m('adult', 3), { size: 22 });
+    infoCard(p, 1050, 320, 490, 220, 'возможности высоки', 'силовая тренировка или умеренно нагрузочные занятия несколько раз в неделю', COL.good, m('pot'), { size: 22 });
+  }],
+
+  ['late', 'Пожилой возраст', (m) => {
+    const p = panel(0);
+    txt(p, 'пожилой возраст', 800, 80, m('late'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const ch = lifeChart(p, .2);
+    ch.seg(0, 60, .2, 0);
+    ch.seg(60, 80, m('late', .5), 2, COL.bad);
+    txt(p, '−15–20% за десятилетие', ch.X(60), ch.Y(.27), m('late', 1.5), { size: 21, fill: COL.bad, weight: 600 });
+    ch.seg(80, 90, m('thirty', .2), 1, COL.bad);
+    txt(p, '−30%', ch.X(86), ch.Y(.42) + 50, m('thirty', 1), { size: 21, fill: COL.bad, weight: 700, anchor: 'middle' });
+    ch.curve(ACTIVE, 60, 90, COL.good, m('act', .3), 1, '10 8');
+    txt(p, 'активные: ≈ −0,3% в год', ch.X(66), ch.Y(.82) - 10, m('act', 1), { size: 21, fill: COL.good, weight: 600 });
+    ageFig(p, ch, 78, .45, m('late', 1), { t: 16, hd: 12, kN: 12, kF: 12, hN: 14, hF: 8, aN: 20, eN: 30 });
+    infoCard(p, 1050, 140, 490, 150, 'к 80 годам', 'мышечная масса ≈ 50% пиковой', ANAT.muscle, m('mass'), { size: 22 });
+    infoCard(p, 1050, 310, 490, 170, 'часть потерь — бездействие', 'у очень активных пожилых снижение гораздо меньше', COL.good, m('act'), { size: 22 });
+    infoCard(p, 1050, 500, 490, 200, 'ноги и туловище слабеют', 'хуже повседневные функции, чаще падения (70, 80 лет и старше)', COL.bad, m('falls'), { size: 22 });
+  }],
+
+  ['why', 'Изменения в мышце', (m) => {
+    const p = panel(0);
+    txt(p, 'что меняется в мышце с возрастом', 800, 80, m('why'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ageSection(p, 290, 380, 190, false, m('atr', -1));
+    txt(p, 'молодая мышца', 290, 610, m('atr', -1), { size: 24, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const old = ageSection(p, 760, 400, 160, true, m('atr'));
+    txt(p, 'пожилая', 760, 610, m('atr'), { size: 24, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    [['тип I', T1], ['тип II', T2], ['соединительная ткань', CT]].forEach(([s, c], i) => { const g = G(p, { o: 0 }); mk('circle', { cx: 150 + i * 200, cy: 680, r: 12, fill: c }, g); T(g, s, { x: 170 + i * 200, y: 688, size: 21, fill: COL.dim }); show(g, m('num')); });
+    pill(p, 'схема', 520, 160, m('atr', -1), { col: COL.dim, size: 19 });
+    infoCard(p, 1000, 120, 540, 120, 'меньше масса и поперечник', null, ANAT.muscle, m('atr'), { size: 22 });
+    infoCard(p, 1000, 255, 540, 150, 'меньше волокон I и II типа', 'больше соединительной ткани', CT, m('num'), { size: 22 });
+    infoCard(p, 1000, 420, 540, 120, 'избирательно атрофируются волокна II типа', null, T2, m('sel'), { size: 22 });
+    infoCard(p, 1000, 555, 540, 160, 'длина — напряжение меняется', 'больше из-за потери гибкости, чем из-за нервной регуляции', ANAT.taut, m('lt'), { size: 22 });
+    infoCard(p, 1000, 730, 540, 120, 'после 60 — меньше двигательных единиц', null, COL.whole, m('mu'), { size: 22 });
+    txt(p, 'причина или следствие — трудно сказать', 520, 760, m('why', 1.5), { size: 22, fill: COL.dim, anchor: 'middle', italic: true });
+  }],
+
+  ['power', 'Скорость и мощность', (m) => {
+    const p = panel(0), x0 = 110, y0 = 440, W = 560, H = 270;
+    txt(p, 'скорость, мощность, выносливость', 800, 80, m('power'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    chartAxes(p, x0, y0, W, H, 'усилие', 'время →', m('slow'));
+    const yng = t => t < .55 ? .9 * (1 - Math.exp(-t / .05)) : .9 * Math.exp(-(t - .55) / .04), eld = t => t < .55 ? .9 * (1 - Math.exp(-t / .16)) : .9 * (1 - Math.exp(-.55 / .16)) * Math.exp(-(t - .55) / .13);
+    draw(path(p, fnPath(x0, y0, W, H, yng), { stroke: COL.whole, 'stroke-width': 5 }, { d: 0 }), m('slow', .4), 1.2);
+    draw(path(p, fnPath(x0, y0, W, H, eld), { stroke: COL.task, 'stroke-width': 5 }, { d: 0 }), m('slow', 1.4), 1.6);
+    txt(p, 'молодой', x0 + .12 * W, y0 - .93 * H, m('slow', .8), { size: 21, fill: COL.whole, weight: 600 });
+    txt(p, 'пожилой: дольше нарастает и расслабляется', x0 + .2 * W, y0 - .5 * H, m('slow', 2.5), { size: 21, fill: COL.task, weight: 600 });
+    pill(p, 'схема', x0 + W - 30, y0 - H - 10, m('slow'), { col: COL.dim, size: 19 });
+    // rising from a low chair needs power
+    const GY = 830, s = .7, f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...SIT, t: 30, hN: 115, kN: 110, hF: 115, kF: 110, fN: 20, fF: 20, aN: 40, aF: 40 } });
+    plant(f, 'AN', 380, GY);
+    const hip = onStage(f, 'H');
+    chair(p, hip[0], hip[1] + 7, GY, m('pw'));
+    p.appendChild(f.g);
+    show(f.g, m('pw'));
+    poseTo(f, { ...STAND, t: 6, aN: 20, aF: 20 }, m('pw', 1.5), 2.6, io, ['AN', 380, GY]);
+    ground(p, 150, 620, GY, m('pw'));
+    txt(p, 'встать с низкого стула', 380, 520, m('pw', .5), { size: 23, fill: COL.task, anchor: 'middle', weight: 600 });
+    infoCard(p, 740, 130, 800, 140, 'медленнее', 'сокращение, восстановление после утомления; дольше развить усилие и расслабиться', COL.task, m('power', 1), { size: 22 });
+    infoCard(p, 740, 285, 800, 120, 'падает мощность', 'встать с низкого стула, поймать равновесие', COL.task, m('pw'), { size: 22 });
+    infoCard(p, 740, 420, 800, 120, 'мощность ↔ функция', 'связь с ограничениями и инвалидностью сильнее, чем у силы', COL.bad, m('key'), { size: 22 });
+    infoCard(p, 740, 555, 800, 160, 'выносливость', 'меньше капилляров и митохондрий, ферменты, транспорт глюкозы → быстрее устаёт; у активных — почти до 80 лет мало', COL.real, m('end'), { size: 21 });
+    infoCard(p, 740, 730, 800, 125, 'тренировка помогает и в старости', 'сила, мощность, выносливость · глава 24', COL.good, m('can'), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-power', prompt: ['Что у пожилых сильнее связано с ограничениями функции и инвалидностью?'],
+    build: choice([['Снижение мышечной мощности'], ['Снижение наибольшей силы'], ['Снижение роста'], ['Число волокон первого типа']], 0,
+      'Мощность — сила и скорость вместе — нужна, чтобы быстро встать или поймать равновесие.',
+      [null, 'Сила тоже снижается, но с ограничениями функции сильнее связана мощность.', 'Об этом в книге речи нет.', 'Связь с функцией в книге описана для мощности.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Детство: сила растёт линейно; силовая программа — малые грузы, отдых, присмотр.', 'w1'],
+     ['Подростки: резкий рост, особенно у юношей; пик силы — к 20–30 годам.', 'w2'],
+     ['Потом −8% за десятилетие, после 60 — −15–20%, после 80 — −30%; у активных — меньше.', 'w3'],
+     ['У пожилых особенно падает мощность — она сильнее всего связана с функцией.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-decline', prompt: ['Посчитайте (сила в процентах от пика).'],
+    build: blanks([
+      { parts: ['От пика 100% за десятилетие −8%: ', { box: '92' }, ' %'], why: '100 − 8 = 92.' },
+      { parts: ['Было 80%, за десятилетие после 60 лет −20% от этого: ', { box: '64' }, ' %'], why: '80 × 0,8 = 64.' },
+      { parts: ['Активный пожилой: −0,3% в год × 10 лет = −', { box: '3' }, ' %'], why: '0,3 × 10 = 3.' },
+    ]),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-elder', prompt: ['Женщина 78 лет: сила ног снижена, ей трудно быстро встать с низкого дивана, недавно чуть не упала. Что верно?'],
+    build: choice([
+      ['Силовая тренировка в её возрасте может значительно улучшить силу, мощность и выносливость'],
+      ['В 78 лет упражнения с сопротивлением бесполезны'],
+      ['Важна только наибольшая сила, скорость движения не имеет значения'],
+      ['Потеря силы с возрастом не связана с падениями'],
+    ], 0, 'Значительный прирост возможен и в пожилом возрасте; особенно важна мощность — быстро встать, поймать равновесие.',
+    [null, 'Книга: в пожилом возрасте возможен значительный прирост.', 'Мощность сильнее связана с ограничениями функции.', 'Слабость ног и туловища связана с более частыми падениями.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

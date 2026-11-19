@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Оценка, диагноз, прогноз и план лечения — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 7, title: 'Оценка, диагноз, прогноз и план лечения', minutes: 9, language: 'ru', next: '../ch008/' };
+
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+const PLAN = [['goal', 'Цель', COL.good], ['int', 'Вмешательство', COL.whole], ['freq', 'Частота', COL.int], ['dis', 'Выписка', COL.real], ['out', 'Результат', COL.task]];
+// A speech bubble with a tail at the lower left (stage coordinates).
+function bubble(p, x, y, w, str, col, t0, { size = 24 } = {}) {
+  const g = G(p, { o: 0 }), tt = para(g, str, x + 18, y + 36, null, { size, maxW: w - 36 }), h = tt._h + 24;
+  put(tt, { o: 1 });
+  const r = mk('path', { d: `M${x + 16} ${y}H${x + w - 16}Q${x + w} ${y} ${x + w} ${y + 16}V${y + h - 16}Q${x + w} ${y + h} ${x + w - 16} ${y + h}H${x + 56}L${x + 24} ${y + h + 26}L${x + 34} ${y + h}H${x + 16}Q${x} ${y + h} ${x} ${y + h - 16}V${y + 16}Q${x} ${y} ${x + 16} ${y}Z`, fill: PANEL, stroke: col, 'stroke-width': 2.5 }, g);
+  g.insertBefore(r, g.firstChild);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Оценка, диагноз, прогноз', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 1 · Урок 7', { x: 800, y: 250, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Оценка, диагноз, прогноз и план лечения', { x: 800, y: 345, size: 60, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как из собранных данных сложить решение', 800, 440, m('sub'), { size: 32, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    path(art, 'M560 790H1040M560 790V560', { stroke: COL.faint, 'stroke-width': 3 });
+    const cv = path(art, 'M560 760C700 750 780 640 1010 600', { stroke: COL.good, 'stroke-width': 5 }, { d: 0 });
+    show(art, m('sub', .2)); draw(cv, m('sub', .4), 1.4);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['eval', 'Оценка', (m) => {
+    const p = panel(0);
+    para(p, 'Оценка — интерпретация данных: из них складываются диагноз, прогноз и план', 800, 72, m('def'), { size: 28, weight: 700, maxW: 1300, anchor: 'middle' });
+    const D6 = ['анамнез', 'обзор систем', 'тесты', 'жалобы', 'среда', 'поддержка'];
+    const frame = mk('rect', { x: 560, y: 260, width: 480, height: 270, rx: 18, fill: 'none', stroke: COL.task, 'stroke-width': 3, 'stroke-dasharray': '10 8' }, p);
+    put(frame, { o: 0 }); show(frame, m('def', 1));
+    D6.forEach((s, i) => {
+      const tx = 650 + (i % 3) * 150, ty = 330 + Math.floor(i / 3) * 120, sx = [180, 1400, 260, 1330, 220, 1380][i], sy = [220, 230, 470, 470, 680, 690][i];
+      const c = labelBox(p, sx, sy, 140, [s], COL.whole, .2 + i * .1, { size: 20 });
+      tw(c, { x: tx - sx, y: ty - sy }, m('def', 1.2 + i * .15), .8);
+    });
+    txt(p, 'на всём пути — от обследования до результатов', 800, 600, m('all'), { size: 26, weight: 600, fill: COL.task, anchor: 'middle' });
+    const Q8 = ['общее здоровье', 'острота и тяжесть', 'выраженность нарушений', 'нарушение → ограничение', 'сейчас и нужно', 'эмоции', 'среда', 'поддержка близких'];
+    Q8.forEach((s, i) => pill(p, s, 220 + (i % 4) * 390, 690 + Math.floor(i / 4) * 70, m('q', .3 + i * .5), { col: COL.chalk, size: 22 }));
+  }],
+
+  ['refer', 'Направление', (m) => {
+    const p = panel(0), GY = 640;
+    ground(p, 120, 420, GY, .2);
+    fig(p, { x: 270, y: GY - 182 * .55, s: .55, pose: { hd: 12 } });
+    bubble(p, 90, 160, 380, 'эпизоды боли в плече', ICF_COL.body, m('ex'));
+    bubble(p, 120, 290, 420, 'депрессия мешает работать и общаться', COL.real, m('ex', 2.5));
+    arrowTo(p, [560, 330], [720, 400], m('ref'), { col: COL.real, w: 4 });
+    labelBox(p, 900, 420, 330, ['консультация', 'психолога'], COL.real, m('ref', .3), { size: 28 });
+    arrowTo(p, [1070, 420], [1190, 420], m('why'), { col: COL.good, w: 4 });
+    labelBox(p, 1360, 420, 300, ['успех', 'физической терапии'], COL.good, m('why', .3), { size: 26 });
+  }],
+
+  ['links', 'Связи между уровнями', (m) => {
+    const p = panel(0), Y = 360;
+    head(p, 'Связи между уровнями бывают непрямыми', .2, 86, COL.chalk);
+    txt(p, 'шейный отдел (исследование)', 800, 200, m('cerv'), { size: 26, fill: COL.dim, anchor: 'middle' });
+    labelBox(p, 260, Y, 330, ['нарушения', 'боль, объём, сила'], ICF_COL.body, m('cerv', .3), { size: 26 });
+    labelBox(p, 800, Y, 330, ['ограничения', 'функции'], ICF_COL.act, m('cerv', .5), { size: 26 });
+    labelBox(p, 1340, Y, 340, ['ощущаемая', 'инвалидность'], ICF_COL.part, m('cerv', .7), { size: 26 });
+    draw(path(p, `M428 ${Y}H632`, { stroke: COL.good, 'stroke-width': 14 }, { d: 0 }), m('strong'), .6);
+    txt(p, 'сильная связь', 530, Y + 70, m('strong', .4), { size: 24, weight: 700, fill: COL.good, anchor: 'middle' });
+    draw(path(p, `M968 ${Y}H1168`, { stroke: COL.int, 'stroke-width': 3, 'stroke-dasharray': '8 10' }, { d: 0 }), m('weak'), .6);
+    txt(p, 'слабая связь', 1068, Y + 70, m('weak', .4), { size: 24, weight: 700, fill: COL.int, anchor: 'middle' });
+    labelBox(p, 470, 590, 380, ['объём движений', 'в плече'], ICF_COL.body, m('sh'), { size: 26 });
+    labelBox(p, 1130, 590, 380, ['трудности', 'самообслуживания'], ICF_COL.act, m('sh', .2), { size: 26 });
+    draw(path(p, 'M660 590H940', { stroke: COL.good, 'stroke-width': 14 }, { d: 0 }), m('sh', .5), .6);
+    para(p, 'сила связей помогает точнее предсказать прогноз', 800, 760, m('prog'), { size: 28, weight: 700, fill: COL.task, maxW: 1100, anchor: 'middle' });
+  }],
+
+  ['q1', 'Быстрая проверка', () => {
+    const p = panel(0);
+    labelBox(p, 300, 280, 300, ['ограничения', 'функции'], ICF_COL.act, .1);
+    labelBox(p, 300, 520, 300, ['ощущаемая', 'инвалидность'], ICF_COL.part, .1);
+    path(p, 'M300 330V470', { stroke: COL.int, 'stroke-width': 3, 'stroke-dasharray': '8 10' });
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-links', prompt: ['У пациентов с проблемами шейного отдела ограничения функции слабо связаны с тем, насколько они ощущают себя инвалидами. Что из этого следует?'],
+    build: choice([['Связи между уровнями непрямые: ощущаемую инвалидность нужно оценивать отдельно'], ['Ограничения функции не стоит измерять вовсе'], ['Ощущения пациента не важны для прогноза']], 0,
+      'Улучшение одного уровня не гарантирует изменения другого; поэтому оценивают все уровни, а сила связей помогает с прогнозом.',
+      [null, 'Измерять нужно все уровни — и именно их сравнение показывает силу связей.', 'Наоборот: ощущаемая инвалидность — часть картины и влияет на исход.']),
+  }], done) }],
+
+  ['dx', 'Диагноз', (m) => {
+    const p = panel(0);
+    pill(p, 'процесс', 640, 110, m('two'), { col: COL.task, size: 28 });
+    pill(p, 'категория (ярлык)', 960, 110, m('two', .9), { col: COL.task, size: 28 });
+    [['1 · сбор данных', 'обследование', 's1'], ['2 · анализ, гипотезы', 'оценка', 's2'], ['3 · кластеры → гипотеза', 'классификация', 's3']].forEach(([a, b, k], i) => {
+      labelBox(p, 300 + i * 500, 300, 400, [a, b], COL.whole, m(k), { size: 27 });
+      if (i) arrowTo(p, [300 + (i - 1) * 500 + 205, 300], [300 + i * 500 - 205, 300], m(k, -.2), { col: COL.faint });
+    });
+    labelBox(p, 470, 500, 420, ['врач', '→ болезнь'], COL.chalk, m('who'), { size: 28 });
+    labelBox(p, 1130, 500, 520, ['физический терапевт', '→ нарушения системы движения'], COL.whole, m('who', 1.5), { size: 28 });
+    [['сейчас', 230, COL.int], ['нужно пациенту', 520, COL.good], ['можно достичь', 420, COL.whole]].forEach(([s, w, c], i) => {
+      txt(p, s, 380, 666 + i * 54, m('gap', .3 + i * .3), { size: 24, anchor: 'end' });
+      const bar = mk('rect', { x: 400, y: 646 + i * 54, width: 0, height: 26, rx: 13, fill: c }, p);
+      prog(q => bar.setAttribute('width', w * q), m('gap', .3 + i * .3), .7);
+    });
+    para(p, 'диагноз терапевта — разница между этими уровнями', 1250, 690, m('gap', 1.4), { size: 26, weight: 600, fill: COL.task, maxW: 400, anchor: 'middle' });
+  }],
+
+  ['dxcat', 'Диагностическая категория', (m) => {
+    const p = panel(0);
+    head(p, 'Диагностическая категория');
+    const pts = [[180, 220], [260, 290], [210, 360], [330, 230], [300, 400], [420, 300], [380, 200], [460, 380], [520, 260], [240, 450]];
+    pts.forEach(([x, y], i) => { const d = mk('circle', { cx: x, cy: y, r: 13, fill: COL.whole }, p); put(d, { o: 0 }); show(d, .3 + i * .05); });
+    const cl = mk('ellipse', { cx: 340, cy: 310, rx: 230, ry: 170, fill: 'none', stroke: COL.task, 'stroke-width': 3, 'stroke-dasharray': '10 8' }, p);
+    put(cl, { o: 0 }); show(cl, m('cat'));
+    arrowTo(p, [580, 310], [700, 310], m('cat', .5), { col: COL.task });
+    labelBox(p, 900, 310, 380, ['ярлык → прогноз и план', 'влияние на движение целиком'], COL.task, m('cat', .7), { size: 25 });
+    txt(p, 'единой официальной системы нет · рекомендована МКФ', 800, 520, m('none'), { size: 27, weight: 600, anchor: 'middle' });
+    ['в рамках закона и одобрения общества', 'подтверждается принятыми тестами', 'проблема в пределах права терапевта лечить'].forEach((s, i) => {
+      checkMark(p, 260, 590 + i * 50, m('crit', .3 + i * .6), COL.good, .8);
+      txt(p, s, 290, 598 + i * 50, m('crit', .3 + i * .6), { size: 24 });
+    });
+    labelBox(p, 1240, 610, 420, ['одной МКБ мало', 'она описывает патологию'], COL.int, m('icd'), { size: 25 });
+    para(p, 'клинические рекомендации: МКФ + МКБ; но выбор вмешательств пока не всегда следует из диагноза', 1240, 740, m('cpg'), { size: 23, fill: COL.dim, maxW: 520, anchor: 'middle' });
+  }],
+
+  ['prog', 'Прогноз', (m) => {
+    const p = panel(0), X0 = 150, X1 = 880, Y0 = 640, Y1 = 220;
+    para(p, 'Прогноз — ожидаемый оптимальный уровень функции и время, нужное для него', 800, 74, m('def'), { size: 28, weight: 700, maxW: 1300, anchor: 'middle' });
+    show(path(p, `M${X0} ${Y1}V${Y0}H${X1}`, { stroke: COL.dim, 'stroke-width': 3 }, { o: 0 }), .3);
+    txt(p, 'функция', X0 - 12, Y1 - 14, .4, { size: 22, fill: COL.dim });
+    txt(p, 'время', X1, Y0 + 36, .4, { size: 22, fill: COL.dim, anchor: 'end' });
+    const easy = path(p, `M${X0} ${Y0 - 40}C${X0 + 200} ${Y0 - 50} ${X0 + 300} ${Y1 + 90} ${X0 + 520} ${Y1 + 70}`, { stroke: COL.good, 'stroke-width': 5 }, { d: 0 });
+    draw(easy, m('easy'), 1.6);
+    show(path(p, `M${X0 + 520} ${Y1 + 40}V${Y0 + 10}`, { stroke: COL.good, 'stroke-width': 2, 'stroke-dasharray': '6 6' }, { o: 0 }), m('easy', 1.4));
+    txt(p, 'эндопротез колена: срок ясен', X0 + 510, Y1 + 22, m('easy', 1.4), { size: 22, fill: COL.good, anchor: 'end' });
+    const hard = G(p, { o: 0 });
+    mk('path', { d: `M${X0} ${Y0 - 20}L${X0 + 180} ${Y0 - 70}L${X0 + 380} ${Y0 - 170}L${X0 + 620} ${Y0 - 300}L${X0 + 620} ${Y0 - 150}L${X0 + 380} ${Y0 - 100}L${X0 + 180} ${Y0 - 40}Z`, fill: COL.int, 'fill-opacity': .18, stroke: 'none' }, hard);
+    mk('path', { d: `M${X0} ${Y0 - 20}L${X0 + 180} ${Y0 - 55}L${X0 + 380} ${Y0 - 135}L${X0 + 620} ${Y0 - 225}`, stroke: COL.int, 'stroke-width': 4, fill: 'none', 'stroke-dasharray': '10 8' }, hard);
+    show(hard, m('hard'));
+    txt(p, 'множественные переломы: только поэтапно', X0 + 180, Y0 + 80, m('hard', .5), { size: 22, fill: COL.int });
+    txt(p, 'Факторы (бокс 1.13)', 1220, 200, m('f'), { size: 27, weight: 700, fill: COL.task, anchor: 'middle' });
+    ['тяжесть и течение', 'сопутствующие болезни', 'прежний уровень', 'среда', 'цели', 'мотивация', 'безопасность', 'поддержка', 'грамотность'].forEach((s, i) => pill(p, s, 1080 + (i % 2) * 280, 260 + Math.floor(i / 2) * 64, m('f', .3 + i * .4), { col: COL.task, size: 22 }));
+    para(p, 'точность прогноза: знание состояния и операции · сроки заживления тканей · опыт · эффективность тестов и вмешательств', 800, 800, m('acc'), { size: 24, fill: COL.dim, maxW: 1360, anchor: 'middle' });
+  }],
+
+  ['plan', 'План лечения', (m) => {
+    const p = panel(0);
+    const sheet = G(p, { o: 0 });
+    roundBox(sheet, 380, 110, 840, 700, COL.chalk, PANEL, 3);
+    mk('rect', { x: 720, y: 92, width: 160, height: 38, rx: 10, fill: COL.dim }, sheet);
+    T(sheet, 'План лечения', { x: 800, y: 180, size: 34, weight: 700, anchor: 'middle' });
+    show(sheet, .2);
+    [['цели: функциональные, со сроком', COL.good], ['результаты: значимые, практичные, устойчивые, измеримые', COL.task], ['насколько улучшится и за какое время', COL.whole], ['конкретные вмешательства', COL.whole], ['частота и продолжительность', COL.int], ['план выписки', COL.real]].forEach(([s, c], i) => {
+      const y = 250 + i * 92;
+      checkMark(p, 430, y + 6, m('p' + (i + 1)), c, .9);
+      show(para(p, s, 470, y + 14, null, { size: 27, maxW: 700, fill: c, weight: 600 }), m('p' + (i + 1)));
+    });
+  }],
+
+  ['goals', 'Цели вместе', (m) => {
+    const p = panel(0), GY = 760;
+    ground(p, 100, 560, GY, .2);
+    fig(p, { x: 200, y: GY - 182 * .5, s: .5 });
+    fig(p, { x: 440, y: GY - 182 * .5, s: .5, dir: -1, col: '#c9dfe9' });
+    txt(p, 'вместе', 320, GY + 40, m('collab'), { size: 26, weight: 700, fill: COL.good, anchor: 'middle' });
+    bubble(p, 100, 150, 520, 'Какие дела для вас важнее всего?', COL.whole, m('q', .2));
+    bubble(p, 100, 285, 520, 'С чем нужна помощь, а хотелось бы самому?', COL.whole, m('q', 1.8));
+    bubble(p, 100, 420, 520, 'Что для вас будет признаком прогресса?', COL.whole, m('q', 3.8));
+    labelBox(p, 1000, 230, 520, ['Цель', 'ожидаемое влияние + срок'], COL.good, m('gvo'), { size: 28 });
+    labelBox(p, 1000, 370, 520, ['Результат', 'что вышло — по тем же тестам'], COL.task, m('gvo', 2.2), { size: 28 });
+    [['краткосрочная', 820, 700], ['краткосрочная', 1030, 640], ['долгосрочная', 1260, 570]].forEach(([s, x, y], i) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x: x - 100, y, width: 200, height: 780 - y, rx: 10, fill: COL.good, 'fill-opacity': .12 + i * .08, stroke: COL.good, 'stroke-width': 2.5 }, g);
+      T(g, s, { x, y: y + 36, size: 21, weight: 600, fill: COL.good, anchor: 'middle' });
+      show(g, m('ladder', .3 + i * .4));
+    });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-goals', prompt: ['Хорошо ли поставлена цель? (функциональная, со сроком, измеримая)'],
+    build: grid([
+      { parts: ['Через 4 недели сам поднимается на 2-й этаж к себе домой'], ans: ['ok'], why: 'Функциональная, есть срок, легко проверить.' },
+      { parts: ['Увеличить силу'], ans: ['bad'], why: 'Нет срока и связи с делами пациента.' },
+      { parts: ['Через 6 недель вернуться к теннису раз в неделю'], ans: ['ok'], why: 'Значимая для пациента, со сроком, измеримая.' },
+      { parts: ['Чувствовать себя лучше'], ans: ['bad'], why: 'Нельзя измерить и нет срока.' },
+      { parts: ['Через 2 недели одеваться без помощи'], ans: ['ok'], why: 'Функциональная, со сроком, проверяемая.' },
+    ], [['ok', 'Хорошая цель', COL.good], ['bad', 'Доработать', COL.int]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Оценка превращает данные в решения и идёт на всём пути; связи между уровнями непрямые.', 'w1'],
+     ['Терапевт ставит диагноз нарушений движения: процесс из трёх шагов и категория.', 'w2'],
+     ['Прогноз — ожидаемый уровень функции и срок; на него влияют многие факторы.', 'w3'],
+     ['План — с пациентом: цели со сроками, измеримые результаты, вмешательства, частота, выписка.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-plan', prompt: ['Какая это часть плана лечения?'],
+    build: grid([
+      { parts: ['Через 6 недель сам ходит по лестнице'], ans: ['goal'], why: 'Функциональная цель со сроком.' },
+      { parts: ['Упражнения с сопротивлением для четырёхглавой мышцы'], ans: ['int'], why: 'Конкретное вмешательство.' },
+      { parts: ['3 раза в неделю по 45 минут, 6 недель'], ans: ['freq'], why: 'Частота и продолжительность.' },
+      { parts: ['Выписка, когда ходит по лестнице и выполняет домашнюю программу'], ans: ['dis'], why: 'Критерии выписки.' },
+      { parts: ['Скорость ходьбы выросла с 0,6 до 0,9 м/с'], ans: ['out'], why: 'Фактическое изменение по тесту — результат.' },
+    ], PLAN, { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Оценка проводится один раз — сразу после обследования.'], ans: ['f'], why: 'Неверно: она идёт на всех этапах ведения.' },
+      { parts: ['Физический терапевт определяет нарушения движения, врач — болезнь.'], ans: ['t'], why: 'Верно: в этом разница двух диагнозов.' },
+      { parts: ['Прогноз включает ожидаемый уровень функции и время для его достижения.'], ans: ['t'], why: 'Верно: и уровень, и срок.' },
+      { parts: ['Цели в плане терапевт ставит сам, без пациента.'], ans: ['f'], why: 'Неверно: цели ставят вместе, они должны быть важны пациенту.' },
+      { parts: ['Сопутствующие болезни, например диабет, влияют на прогноз.'], ans: ['t'], why: 'Верно: это один из факторов бокса 1.13.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

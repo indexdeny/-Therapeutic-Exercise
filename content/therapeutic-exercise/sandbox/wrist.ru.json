@@ -1,0 +1,505 @@
+{
+  "joint": "wrist",
+  "title": "запястье",
+  "structures": {
+    "flx": {
+      "ru": "сгибатели запястья и пальцев",
+      "en": "wrist and finger flexors",
+      "kind": "muscle",
+      "limb": "flx"
+    },
+    "ext": {
+      "ru": "разгибатели запястья и пальцев",
+      "en": "wrist and finger extensors",
+      "kind": "muscle",
+      "limb": "ext"
+    },
+    "fdp": {
+      "ru": "глубокий сгибатель пальцев",
+      "en": "flexor digitorum profundus",
+      "kind": "muscle",
+      "close": "fdpM"
+    },
+    "fds": {
+      "ru": "поверхностный сгибатель пальцев",
+      "en": "flexor digitorum superficialis",
+      "kind": "muscle",
+      "close": "fdsM"
+    },
+    "ed": {
+      "ru": "разгибатель пальцев",
+      "en": "extensor digitorum",
+      "kind": "muscle",
+      "close": "edM"
+    },
+    "wflx": {
+      "ru": "сгибатели запястья",
+      "en": "wrist flexors",
+      "kind": "muscle",
+      "close": "wflx"
+    },
+    "wext": {
+      "ru": "разгибатели запястья",
+      "en": "wrist extensors",
+      "kind": "muscle",
+      "close": "wext"
+    },
+    "vpMP": {
+      "ru": "ладонная пластинка пястно-фалангового сустава",
+      "en": "volar plate of the MP joint",
+      "kind": "lig",
+      "close": "vpMP"
+    },
+    "vpPIP": {
+      "ru": "ладонная пластинка межфалангового сустава",
+      "en": "volar plate of the PIP joint",
+      "kind": "lig",
+      "close": "vpPIP"
+    },
+    "clMP": {
+      "ru": "боковая связка пястно-фалангового сустава",
+      "en": "collateral ligament of the MP joint",
+      "kind": "lig",
+      "close": "clMP"
+    },
+    "endFlex": {
+      "ru": "запястье: конец сгибания",
+      "en": "end of wrist flexion",
+      "kind": "contact"
+    },
+    "endExt": {
+      "ru": "запястье: конец разгибания",
+      "en": "end of wrist extension",
+      "kind": "contact"
+    },
+    "fistEnd": {
+      "ru": "пальцы согнуты до конца",
+      "en": "full finger flexion",
+      "kind": "contact"
+    },
+    "fingEnd": {
+      "ru": "пальцы разогнуты до конца",
+      "en": "full finger extension",
+      "kind": "contact"
+    },
+    "endRad": {
+      "ru": "ладьевидная упёрлась в шиловидный отросток лучевой",
+      "en": "scaphoid against the radial styloid",
+      "kind": "contact"
+    },
+    "endUln": {
+      "ru": "конец локтевого отклонения",
+      "en": "end of ulnar deviation",
+      "kind": "contact"
+    }
+  },
+  "motions": [
+    {
+      "id": "flex",
+      "title": "сгибание — разгибание",
+      "chip": "сгибание",
+      "ids": ["flx", "ext", "fdp", "fds", "ed", "wflx", "wext", "vpMP", "vpPIP", "clMP", "endFlex", "endExt", "fistEnd", "fingEnd"],
+      "limb": {
+        "model": "armSide",
+        "muscles": ["flx", "ext"]
+      },
+      "close": {
+        "model": "handSag"
+      },
+      "main": "wr",
+      "dof": [
+        {
+          "key": "wr",
+          "ru": "запястье",
+          "act": "сгибание запястья",
+          "range": [-85, 90],
+          "norm": [-70, 80],
+          "normNote": true,
+          "handle": {
+            "limb": 0.5,
+            "close": 0.6
+          }
+        },
+        {
+          "key": "fg",
+          "ru": "пальцы",
+          "act": "сгибание пальцев",
+          "range": [0, 90],
+          "norm": [0, 90],
+          "normNote": true,
+          "handle": {
+            "close": 0.6
+          }
+        }
+      ],
+      "groups": [
+        {
+          "id": "wflex",
+          "dof": "wr",
+          "dir": 1,
+          "ids": ["flx", "wflx"]
+        },
+        {
+          "id": "wextG",
+          "dof": "wr",
+          "dir": -1,
+          "ids": ["ext", "wext"]
+        },
+        {
+          "id": "fflex",
+          "dof": "fg",
+          "dir": 1,
+          "ids": ["fdp", "fds"]
+        },
+        {
+          "id": "fext",
+          "dof": "fg",
+          "dir": -1,
+          "ids": ["ed"]
+        }
+      ],
+      "positions": {
+        "palmDown": {
+          "r": 0,
+          "q0": {
+            "fl": 0,
+            "el": 90,
+            "pro": 1,
+            "wr": 0,
+            "fg": 15
+          },
+          "above": [],
+          "tableX": [60, 470],
+          "table": true,
+          "limb": [120, 300, 0.75],
+          "close": [790, 430, 1.0]
+        },
+        "palmUp": {
+          "r": 0,
+          "q0": {
+            "fl": 0,
+            "el": 90,
+            "pro": 0,
+            "wr": 0,
+            "fg": 15
+          },
+          "above": [],
+          "tableX": [60, 470],
+          "table": true,
+          "limb": [120, 300, 0.75],
+          "close": [790, 430, 1.0],
+          "closeOpt": {
+            "flip": true
+          }
+        }
+      },
+      "stops": [
+        {
+          "id": "fds",
+          "max": 0.06,
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "id": "ed",
+          "max": 0.165,
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "wr",
+          "max": 85,
+          "ids": ["endFlex"],
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "wr",
+          "min": -75,
+          "ids": ["endExt"],
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "fg",
+          "max": 90,
+          "ids": ["fistEnd"],
+          "feel": "soft"
+        },
+        {
+          "dof": "fg",
+          "min": 0,
+          "ids": ["fingEnd"],
+          "feel": "firm"
+        }
+      ],
+      "refs": [
+        {
+          "pos": "palmDown",
+          "q": {
+            "wr": 0,
+            "fg": 0
+          },
+          "dof": "wr",
+          "to": -85,
+          "expect": -56,
+          "by": "fds",
+          "src": "note"
+        },
+        {
+          "pos": "palmDown",
+          "q": {
+            "wr": 0,
+            "fg": 90
+          },
+          "dof": "wr",
+          "to": -85,
+          "expect": -75,
+          "by": "endExt",
+          "src": "note"
+        },
+        {
+          "pos": "palmDown",
+          "q": {
+            "wr": 0,
+            "fg": 90
+          },
+          "dof": "wr",
+          "to": 90,
+          "expect": 50,
+          "by": "ed",
+          "src": "note"
+        },
+        {
+          "pos": "palmDown",
+          "q": {
+            "wr": 0,
+            "fg": 0
+          },
+          "dof": "wr",
+          "to": 90,
+          "expect": 85,
+          "by": "endFlex",
+          "src": "note"
+        }
+      ],
+      "marks": [
+        {
+          "dof": "wr",
+          "at": 0,
+          "short": "покой",
+          "ru": "положение покоя",
+          "page": 150
+        }
+      ]
+    },
+    {
+      "id": "dev",
+      "title": "лучевое — локтевое отклонение",
+      "chip": "отклонение",
+      "ids": ["endRad", "endUln"],
+      "close": {
+        "model": "handFront"
+      },
+      "main": "dev",
+      "dof": [
+        {
+          "key": "dev",
+          "ru": "кисть",
+          "act": "локтевое отклонение",
+          "range": [-30, 45],
+          "norm": [-20, 35],
+          "normNote": true,
+          "handle": {
+            "close": 0.8
+          }
+        }
+      ],
+      "groups": [],
+      "positions": {
+        "palmDown": {
+          "r": 0,
+          "q0": {
+            "dev": 0
+          },
+          "above": [],
+          "gravity": false,
+          "close": [520, 560, 1.15]
+        }
+      },
+      "stops": [
+        {
+          "dof": "dev",
+          "max": 35,
+          "ids": ["endUln"],
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "dev",
+          "min": -20,
+          "ids": ["endRad"],
+          "feel": "hard",
+          "note": true
+        }
+      ],
+      "refs": [
+        {
+          "pos": "palmDown",
+          "q": {
+            "dev": 0
+          },
+          "dof": "dev",
+          "to": 45,
+          "expect": 35,
+          "by": "endUln",
+          "src": "note"
+        }
+      ],
+      "marks": [
+        {
+          "dof": "dev",
+          "at": 5,
+          "short": "покой",
+          "ru": "положение покоя",
+          "page": 150
+        }
+      ]
+    }
+  ],
+  "facts": [
+    {
+      "ru": "Положение покоя лучезапястного сустава — прямая линия через лучевую и третью пястную кость с лёгким локтевым отклонением.",
+      "page": 150
+    },
+    {
+      "motion": "flex",
+      "ru": "Длинные мышцы пальцев многосуставные: их натяжение зависит сразу от запястья и от пальцев.",
+      "page": 117
+    },
+    {
+      "motion": "flex",
+      "ru": "При сильном хвате запястье разгибается: так длинные сгибатели пальцев удлиняются через запястье и тянут сильнее.",
+      "page": 661
+    }
+  ],
+  "tasks": [
+    {
+      "id": "rest",
+      "text": "Поставьте кисть в положение покоя по отклонению.",
+      "when": {
+        "motion": "dev",
+        "q": {
+          "dev": [0, 10]
+        }
+      },
+      "hint": "Слегка отведите кисть в сторону мизинца — к метке «покой».",
+      "show": {
+        "motion": "dev",
+        "pos": "palmDown",
+        "q": {
+          "dev": 5
+        }
+      },
+      "why": "Положение покоя лучезапястного сустава — прямая линия с лёгким локтевым отклонением.",
+      "page": 150
+    },
+    {
+      "id": "extFds",
+      "text": "Разогните запястье при прямых пальцах. Что останавливает движение?",
+      "when": {
+        "motion": "flex",
+        "stop": "fds"
+      },
+      "hint": "Сначала выпрямите пальцы, потом тяните кисть вверх.",
+      "show": {
+        "motion": "flex",
+        "pos": "palmDown",
+        "path": [
+          {
+            "fg": 0
+          }
+        ],
+        "q": {
+          "wr": -85
+        }
+      },
+      "why": "Длинные сгибатели пальцев проходят через запястье и пальцы: при прямых пальцах они раньше останавливают разгибание запястья.",
+      "page": 117
+    },
+    {
+      "id": "flexEd",
+      "text": "Согните запястье, сжав кулак. Что мешает?",
+      "when": {
+        "motion": "flex",
+        "stop": "ed"
+      },
+      "hint": "Сначала согните пальцы до конца, потом сгибайте запястье.",
+      "show": {
+        "motion": "flex",
+        "pos": "palmDown",
+        "path": [
+          {
+            "fg": 90
+          }
+        ],
+        "q": {
+          "wr": 90
+        }
+      },
+      "why": "Разгибатель пальцев проходит через запястье и пальцы: при кулаке он натягивается раньше и останавливает сгибание запястья.",
+      "page": 117
+    },
+    {
+      "id": "grip",
+      "text": "Сожмите кулак и разогните запястье примерно на 30°. Почему так хват сильнее?",
+      "when": {
+        "motion": "flex",
+        "q": {
+          "fg": [70, 90],
+          "wr": [-45, -20]
+        }
+      },
+      "hint": "Пальцы — к 80–90°, запястье — к −30°.",
+      "show": {
+        "motion": "flex",
+        "pos": "palmDown",
+        "path": [
+          {
+            "fg": 85
+          }
+        ],
+        "q": {
+          "wr": -30
+        }
+      },
+      "why": "При сильном хвате запястье разгибается: длинные сгибатели пальцев удлиняются через запястье и сокращаются сильнее.",
+      "page": 661
+    },
+    {
+      "id": "activeDown",
+      "text": "Ладонью вниз в активном режиме поднимите кисть. Кто работает?",
+      "when": {
+        "motion": "flex",
+        "pos": "palmDown",
+        "mode": "active",
+        "work": {
+          "wextG": "con"
+        }
+      },
+      "hint": "Медленно тяните кисть вверх.",
+      "show": {
+        "motion": "flex",
+        "pos": "palmDown",
+        "mode": "active",
+        "q": {
+          "wr": -40
+        },
+        "dur": 2.2
+      },
+      "hold": 0.6,
+      "why": "Ладонью вниз вес кисти сгибает запястье, и поднимают её разгибатели, укорачиваясь.",
+      "page": 224
+    }
+  ]
+}

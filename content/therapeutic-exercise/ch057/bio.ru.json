@@ -1,0 +1,14 @@
+[
+ {
+  "beat": "signs",
+  "fig": 0,
+  "joint": "eN",
+  "level": "full",
+  "load": {
+   "type": "none"
+  },
+  "enabled": false,
+  "keep": [],
+  "why": "«И на изокинетическом тесте падает пиковый момент силы.»"
+ }
+]

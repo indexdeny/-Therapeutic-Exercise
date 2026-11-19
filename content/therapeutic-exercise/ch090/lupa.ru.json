@@ -1,0 +1,11 @@
+[
+ {
+  "beat": "stages",
+  "fig": 0,
+  "target": "gastroc",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает gastroc, фигура ×0.55",
+  "off": "места для лупы нет"
+ }
+]

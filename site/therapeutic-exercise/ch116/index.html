@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Доступы, трансплантаты, мягкие ткани — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 116, title: 'Доступы, трансплантаты и операции на мягких тканях', minutes: 10, language: 'ru', next: '../ch117/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch116/cards.ru.json
+const CARDS_SHORT = {
+  "перед программой упражнений\nдетали операции — из протокола и от хирурга: сроки иммобилизации, интенсивность и прогрессия зависят от техники, взглядов хирурга и ответа пациента": "детали — из протокола и от хирурга",
+  "аутотрансплантат\nсвоя ткань из донорского места: связку надколенника больше 40 лет используют для пластики крестообразных связок. Минусы — две операции и донорское место": "своя ткань; минус — две операции",
+  "аллотрансплантат\nткань другого человека, обычно трупного донора — если своя не удалась или недоступна. Риски: передача болезни, меньшая прочность после стерилизации, отторжение; для хряща не годится — заморозка убивает клетки": "ткань донора: болезнь, отторжение",
+  "разрыв мышцы — редкость\nот удара по сокращённой мышце или её насильственного растяжения; сразу не шьют — воспалённая ткань плохо держит швы: шов через 48–72 часа": "шов не сразу — через 48–72 часа",
+  "полный разрыв\nслабость при небольшой боли": "слабость при небольшой боли",
+  "частичный\nсильная боль при сокращении или растяжении": "сильная боль при сокращении",
+  "после операции\nсразу — установочное напряжение · через несколько дней — пассивные движения или сокращение антагонистов в защищённом объёме · против силы тяжести — через несколько недель · на руке тяжёлый подъём нельзя 6–8 недель · интенсивная растяжка и сопротивление — не раньше 8 недель": "напряжение → движения; растяжка не раньше 8 недель",
+  "шов или пластика связки\nчаще колено, голеностоп, локоть; сустав держат там, где связка натянута безопасно. Реабилитация — раннее защищённое движение, укрепление и нагрузка весом": "раннее защищённое движение + укрепление",
+  "после операции на капсуле\nактивные движения в защищённом объёме, осторожно с натяжением ушитой части; укрепление динамических стабилизаторов": "движения в защищённом объёме + стабилизаторы",
+  "после операции\nраннее установочное напряжение и защищённые движения для скольжения; осторожное сопротивление; новому действию учат биологической обратной связью и электростимуляцией": "скольжение + обратная связь, электростимуляция",
+};
+// cards-short end
+
+const HEAD = COL.whole, PAIN = '#ff5a3c', SURG = '#7fc8c2', SKIN = '#e7c3ae', FAT = '#f0d98a', FASC = '#e9e3d4', CAPS = '#b9a6d6';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// Layers over a joint in section (x … x + w, from y down): skin, fat, fascia, muscle, capsule, the joint space and bone.
+// cut(kind, t0): 'open' — a wide wedge through every layer; 'scope' — two small portals with a camera and an instrument;
+// 'mini' — one short opening plus a portal.
+function layers(p, x, y, w, t0) {
+  const g = G(p, { o: 0 }), H = [[SKIN, 26], [FAT, 30], [FASC, 10], [ANAT.muscle, 56], [CAPS, 12], ['#22312c', 28], [ANAT.bone, 60]];
+  let yy = y;
+  H.forEach(([c, h]) => { mk('rect', { x, y: yy, width: w, height: h, fill: c, 'fill-opacity': c === '#22312c' ? 1 : .9 }, g); yy += h; });
+  mk('rect', { x, y, width: w, height: yy - y, rx: 10, fill: 'none', stroke: COL.dim, 'stroke-width': 2 }, g);
+  const depth = 26 + 30 + 10 + 56 + 12;
+  const L = { g, depth, cut(kind, t) {
+    const cx = x + w / 2, cg = G(p, { o: 0 });
+    if (kind === 'open') path(cg, `M${cx - 110} ${y}L${cx - 40} ${y + depth + 6}H${cx + 40}L${cx + 110} ${y}Z`, { fill: '#2a1a1a', stroke: '#a2584c', 'stroke-width': 3 });
+    else {
+      const portal = (px, ang, col) => { path(cg, `M${px - 7} ${y}L${px - 4} ${y + depth + 4}H${px + 4}L${px + 7} ${y}Z`, { fill: '#2a1a1a', stroke: '#a2584c', 'stroke-width': 2 });
+        const a = rad(ang), L2 = 190; path(cg, `M${px + Math.sin(a) * 40} ${y + depth + 18}L${px - Math.sin(a) * L2} ${y - Math.cos(a) * L2 + 40}`, { stroke: col, 'stroke-width': 7 }); };
+      if (kind === 'mini') path(cg, `M${cx - 40} ${y}L${cx - 18} ${y + depth + 6}H${cx + 18}L${cx + 40} ${y}Z`, { fill: '#2a1a1a', stroke: '#a2584c', 'stroke-width': 3 });
+      portal(kind === 'mini' ? cx - 90 : cx - 60, 28, '#9fb0bf');
+      if (kind === 'scope') portal(cx + 60, -28, '#c9d2d8');
+      mk('circle', { cx: (kind === 'mini' ? cx - 90 : cx - 60) - Math.sin(rad(28)) * 190, cy: y - Math.cos(rad(28)) * 190 + 40, r: 12, fill: '#3d4a52', stroke: '#9fb0bf', 'stroke-width': 3 }, cg);
+    }
+    show(cg, t);
+    return cg;
+  } };
+  if (t0 !== null) show(g, t0);
+  return L;
+}
+// A shoulder in section: humeral head in a shallow socket with a capsule round it. set({ lax, tight }): lax 0..1 — the
+// capsule bulges and the head slips down; tight 0..1 — part of the capsule is folded over and sutured (capsulorrhaphy).
+function shoulderCap(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), f = v => v.toFixed(1);
+  const sh = shadeGrad(defs, ANAT.bone);
+  mk('path', { d: 'M-150 -40Q-100 -60 -70 -40L-60 60Q-100 80 -150 60Z', fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 2 }, g);
+  const cup = mk('path', { d: 'M-70 -60Q-30 0 -70 60', stroke: '#a8d4e0', 'stroke-width': 8, fill: 'none' }, g);
+  const capsule = mk('path', { fill: 'none', stroke: CAPS, 'stroke-width': 7, 'stroke-linecap': 'round' }, g);
+  const head = G(g, {});
+  mk('circle', { cx: 0, cy: 0, r: 62, fill: sh.url, stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 2 }, head);
+  mk('path', { d: 'M30 50L120 170L170 140L60 20', fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 2 }, head);
+  sh.aim([-62, 0], [62, 0], 62);
+  const fold = G(g, { o: 0 }); path(fold, 'M-74 70Q-40 112 -6 102', { stroke: CAPS, 'stroke-width': 12, fill: 'none' });
+  [0, 1, 2].forEach(i => path(fold, `M${-60 + i * 22} ${78 + i * 8}l10 14`, { stroke: '#3d4a52', 'stroke-width': 3 }));
+  const S0 = { lax: 0, tight: 0 }, e = { g, st: S0 };
+  e.set = o => {
+    Object.assign(S0, o);
+    const drop = 26 * S0.lax * (1 - S0.tight), bulge = 70 * S0.lax * (1 - S0.tight);
+    put(head, { y: drop });
+    capsule.setAttribute('d', `M-70 -60C-10 -120 90 -90 96 ${f(-10 + drop)}M-70 60C${f(-60 - bulge * .3)} ${f(120 + bulge)} ${f(40 + bulge * .3)} ${f(140 + bulge)} 96 ${f(70 + drop)}`);
+    put(fold, { o: S0.tight });
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Доступы и операции на мягких тканях', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 12 · Урок 116', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Доступы и трансплантаты', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'операции на мышцах, сухожилиях, связках и капсуле', { x: 800, y: 280, size: 36, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как оперируют — и что это значит для реабилитации', 800, 360, m('sub'), { size: 30, fill: SURG, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const l1 = layers(art, 300, 560, 440, null); put(l1.g, { o: 1 }); l1.cut('open', 1);
+    const l2 = layers(art, 860, 560, 440, null); put(l2.g, { o: 1 }); l2.cut('scope', 1.8);
+    T(art, 'открытый доступ', { x: 520, y: 520, size: 22, weight: 700, fill: COL.bad, anchor: 'middle' });
+    T(art, 'артроскопия', { x: 1080, y: 520, size: 22, weight: 700, fill: COL.good, anchor: 'middle' });
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['cat', 'Виды операций', (m, D) => {
+    const p = panel(0);
+    txt(p, 'виды ортопедических операций (табл. 12.1)', 800, 56, m('cat'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const R = [['восстановление', 'шов сухожилия, мениска, связки, хряща', COL.good], ['рассечение, декомпрессия', 'мышцы, сухожилия, фасции, капсулы; удлинение; декомпрессия', COL.task],
+      ['удаление', 'синовиальной оболочки, мениска, капсулы; санация', COL.bad], ['смещение, стабилизация', 'пересадка сухожилия, ушивание капсулы, остеотомия', COL.whole],
+      ['реконструкция, замещение', 'пластика связки, губы и капсулы, хряща; эндопротезирование', COL.real], ['сращение, фиксация', 'артродез, открытая репозиция с внутренней фиксацией', COL.dim]];
+    R.forEach(([h, s, c], i) => {
+      const y = 100 + i * 82, g0 = G(p, { o: 0 });
+      roundBox(g0, 60, y, 1480, 70, c, PANEL, 2);
+      T(g0, h, { x: 90, y: y + 45, size: 24, weight: 700, fill: c });
+      T(g0, s, { x: 520, y: y + 45, size: 21, fill: COL.chalk });
+      show(g0, m('t' + (i + 1)));
+    });
+    infoCard(p, 60, 610, 1480, 230, 'перед программой упражнений', 'детали операции — из протокола и от хирурга: сроки иммобилизации, интенсивность и прогрессия зависят от техники, взглядов хирурга и ответа пациента', COL.chalk, m('know'), { size: 23 });
+  }],
+
+  ['appr', 'Доступы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'хирургические доступы', 800, 56, m('open'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const A = [['открытый', 'open', 'open', COL.bad, 'разрез через кожу, фасцию, мышцы и капсулу (артротомия): эндопротез, артродез, остеосинтез, часть швов связок и сухожилий → мягкие ткани страдают сильно, реабилитация долгая'],
+      ['артроскопия', 'scope', 'arth', COL.good, 'камера и инструменты через маленькие проколы; амбулаторно, часто под местной анестезией; плечо, колено, всё чаще — тазобедренный → реабилитация обычно быстрее'],
+      ['мини-открытый', 'mini', 'mini', COL.task, 'артроскопия плюс небольшой открытый разрез']];
+    A.forEach(([h, kind, k, c, s], i) => {
+      const x = 60 + i * 500, L = layers(p, x + 20, 300, 440, m(k));
+      L.cut(kind, m(k, .8));
+      T(p, h, { x: x + 240, y: 120, size: 26, weight: 700, fill: c, anchor: 'middle', o: 0 }); show(p.lastChild, m(k));
+      put(para(p, s, x + 10, 560, m(k, 1.2), { size: 19, maxW: 460 }), {});
+      if (i === 0) {
+        ['кожа', 'жир', 'фасция', 'мышца', 'капсула', 'полость сустава', 'кость'].forEach((t, j) => {
+          const ys = [313, 341, 361, 394, 428, 448, 490][j];
+          T(p, t, { x: x + 16, y: ys + 6, size: 14, fill: COL.board, weight: 700, o: 0 }); show(p.lastChild, m(k, .4));
+        });
+      }
+    });
+  }],
+
+  ['graft', 'Трансплантаты', (m, D) => {
+    const p = panel(0);
+    txt(p, 'трансплантаты', 800, 56, m('graft'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const f = frontStand(p, 330, 640, 1.05, m('auto'), { muscles: false }), q = f.pts;
+    const kn = f.at(q.legs[1][0]), don = [kn[0] + 2, kn[1] + 28];
+    const knee = G(p, { o: 0 }); mk('circle', { cx: kn[0], cy: kn[1], r: 16, fill: 'none', stroke: COL.good, 'stroke-width': 3 }, knee); show(knee, m('auto', .8));
+    const loop = G(p, { o: 0 }); path(loop, `M${don[0] + 10} ${don[1]}C${don[0] + 120} ${don[1] + 40} ${kn[0] + 120} ${kn[1] - 60} ${kn[0] + 18} ${kn[1] - 6}m4 -16l-4 16l16 -2`, { stroke: COL.good, 'stroke-width': 3.5, fill: 'none' }); show(loop, m('auto', 1.2));
+    T(p, 'своя ткань', { x: kn[0] + 130, y: kn[1] - 50, size: 19, weight: 700, fill: COL.good, o: 0 }); show(p.lastChild, m('auto', 1.2));
+    const d2 = frontStand(p, 110, 640, .85, m('allo'), { muscles: false, col: '#9aa3a0' });
+    const ar = G(p, { o: 0 }); path(ar, `M160 420C220 380 260 400 ${kn[0] - 20} ${kn[1] - 10}m-14 -10l14 10l-16 6`, { stroke: COL.task, 'stroke-width': 3.5, fill: 'none' }); show(ar, m('allo', .8));
+    T(p, 'донор', { x: 110, y: 270, size: 19, weight: 700, fill: COL.task, anchor: 'middle', o: 0 }); show(p.lastChild, m('allo'));
+    infoCard(p, 640, 100, 900, 220, 'аутотрансплантат', 'своя ткань из донорского места: связку надколенника больше 40 лет используют для пластики крестообразных связок. Минусы — две операции и донорское место', COL.good, m('auto'), { size: 21 });
+    infoCard(p, 640, 340, 900, 240, 'аллотрансплантат', 'ткань другого человека, обычно трупного донора — если своя не удалась или недоступна. Риски: передача болезни, меньшая прочность после стерилизации, отторжение; для хряща не годится — заморозка убивает клетки', COL.task, m('allo'), { size: 21 });
+    infoCard(p, 640, 600, 900, 170, 'синтетический', 'связки колена из синтетики часто разрушались и вызывали хронический синовит', COL.bad, m('syn'), { size: 21, textW: 760 });   // text stops short of the fibres at x 1440
+    const br = G(p, { o: 0 }); for (let i = 0; i < 6; i++) path(br, `M${1440 + i * 8} 640C${1460 + i * 8} 680 ${1420 + i * 8} 720 ${1440 + i * 8} 760`, { stroke: '#9fb0bf', 'stroke-width': 4, fill: 'none' }); show(br, m('syn'));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-graft', prompt: ['Какой это трансплантат?'],
+    build: grid([
+      { parts: ['Часть своей связки надколенника для пластики передней крестообразной'], ans: ['a'], why: 'Аутотрансплантат.' },
+      { parts: ['Ткань трупного донора после неудачной первой операции'], ans: ['b'], why: 'Аллотрансплантат.' },
+      { parts: ['Искусственный материал для связки колена'], ans: ['c'], why: 'Синтетический.' },
+      { parts: ['Нужны две операции, страдает донорское место'], ans: ['a'], why: 'Аутотрансплантат.' },
+      { parts: ['Риск передачи болезни и отторжения'], ans: ['b'], why: 'Аллотрансплантат.' },
+    ], [['a', 'Ауто', COL.good], ['b', 'Алло', COL.task], ['c', 'Синтетика', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['muscle', 'Шов мышцы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'шов мышцы', 800, 56, m('mus'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const el = elbowModel(p, { x: 160, y: 330, s: 1.5 }); put(el.g, { o: 0 }); show(el.g, m('mus'));
+    prog(q => { el.set(150 - 80 * q); }, m('late', 2), 1.2);
+    const [bx, by] = [160 + el.pts.biceps[0] * 1.5, 330 + el.pts.biceps[1] * 1.5];
+    const stitch = G(p, { o: 0 }); [0, 1, 2].forEach(i => path(stitch, `M${bx - 14 + i * 14} ${by - 16}v32`, { stroke: '#3d4a52', 'stroke-width': 3 })); show(stitch, m('late', 1));
+    prog(q => el.act('biceps', .6 * cyc(q, 4)), m('mp'), 4, lin);
+    lab(p, 'шов', bx - 60, by - 60, bx - 10, by - 18, COL.chalk, m('late', 1));
+    txt(p, 'укороченное положение', 300, 520, m('late', 2.4), { size: 21, weight: 700, fill: COL.task, anchor: 'middle' });
+    infoCard(p, 640, 100, 900, 200, 'разрыв мышцы — редкость', 'от удара по сокращённой мышце или её насильственного растяжения; сразу не шьют — воспалённая ткань плохо держит швы: шов через 48–72 часа', COL.bad, m('mus'), { size: 21 });
+    // the timeline after surgery
+    const AX = 120, AW = 1360, X = wk => AX + wk / 9 * AW;
+    const ax = G(p, { o: 0 }); path(ax, `M${AX} 640H${AX + AW + 20}m-12 -8l12 8l-12 8`, { stroke: COL.dim, 'stroke-width': 2.5 });
+    [0, 2, 4, 6, 8].forEach(v => { path(ax, `M${X(v)} 634V646`, { stroke: COL.dim, 'stroke-width': 2 }); T(ax, v ? `${v} нед.` : 'операция', { x: X(v), y: 672, size: 17, fill: COL.dim, anchor: 'middle' }); });
+    show(ax, m('mp'));
+    const st = [[0, 'установочное напряжение', COL.whole, 0], [1.5, 'активные движения в защищённом объёме', COL.task, 2.2], [3, 'малая нагрузка, много повторений — без боли', COL.good, 4.4], [6, 'интенсивная растяжка и полная нагрузка — не раньше 6–8 недель', COL.bad, 7.4]];
+    st.forEach(([wk, s, c, t], i) => { const g0 = G(p, { o: 0 }); mk('circle', { cx: X(wk), cy: 640, r: 10, fill: c }, g0); put(para(g0, s, X(wk) - 6, i % 2 ? 586 : 712, null, { size: 19, maxW: 330, fill: c, weight: 600 }), { o: 1 }); show(g0, m('mp', t)); });
+    txt(p, 'опора ограничена, пока мышца не станет достаточно сильной и гибкой', 800, 360, m('mp', 3.5), { size: 21, weight: 700, fill: COL.chalk, anchor: 'start' });
+  }],
+
+  ['tendon', 'Шов сухожилия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'шов сухожилия', 800, 56, m('ten'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    pillRow(p, ['молодые — сильная травма', 'пожилые — дегенерация', 'двуглавая плеча, ахиллово', 'разгибатели кисти при теносиновите', 'сгибатели пальцев — рана ладони'], 800, 116, m('ten', .5), { col: COL.dim, size: 18, gap: 1, space: 10 });
+    infoCard(p, 60, 160, 720, 150, 'полный разрыв', 'слабость при небольшой боли', COL.task, m('sym'), { size: 22 });
+    infoCard(p, 820, 160, 720, 150, 'частичный', 'сильная боль при сокращении или растяжении', COL.bad, m('sym', 2.5), { size: 22 });
+    const ts = tendonSheath(p, 200, 450, 1200, m('rep'));
+    const knot = G(p, { o: 0 }); [0, 1, 2, 3].forEach(i => path(knot, `M${780 + i * 14} 424v52`, { stroke: '#3d4a52', 'stroke-width': 3 })); show(knot, m('rep'));
+    prog(q => ts.set({ adh: q }), m('rep', 3), 2);
+    prog(q => ts.set({ adh: 1 - q, glide: 30 * Math.sin(q * 30) }), m('rep', 6), 2.5, lin);
+    txt(p, 'без движения — спайки со влагалищем', 800, 380, m('rep', 3), { size: 20, weight: 700, fill: COL.bad, anchor: 'middle' });
+    txt(p, 'раннее небольшое натяжение — сухожилие скользит', 800, 540, m('rep', 6), { size: 20, weight: 700, fill: COL.good, anchor: 'middle' });
+    infoCard(p, 60, 590, 1480, 270, 'после операции', 'сразу — установочное напряжение · через несколько дней — пассивные движения или сокращение антагонистов в защищённом объёме · против силы тяжести — через несколько недель · на руке тяжёлый подъём нельзя 6–8 недель · интенсивная растяжка и сопротивление — не раньше 8 недель', COL.good, m('tp'), { size: 22 });
+  }],
+
+  ['lig', 'Связки и капсула', (m, D) => {
+    const p = panel(0);
+    txt(p, 'связки и капсула', 800, 56, m('lig'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    infoCard(p, 60, 96, 720, 230, 'шов или пластика связки', 'чаще колено, голеностоп, локоть; сустав держат там, где связка натянута безопасно. Реабилитация — раннее защищённое движение, укрепление и нагрузка весом', COL.whole, m('lig'), { size: 20 });
+    // bone–tendon–bone vs hamstring graft
+    const btb = G(p, { o: 0 }); mk('rect', { x: 120, y: 380, width: 60, height: 40, rx: 8, fill: ANAT.bone }, btb); mk('rect', { x: 180, y: 386, width: 180, height: 28, rx: 10, fill: ANAT.tendon }, btb); mk('rect', { x: 360, y: 380, width: 60, height: 40, rx: 8, fill: ANAT.bone }, btb);
+    T(btb, 'связка надколенника с костными блоками', { x: 270, y: 452, size: 18, fill: COL.chalk, anchor: 'middle' }); T(btb, 'быстрее', { x: 270, y: 362, size: 20, weight: 700, fill: COL.good, anchor: 'middle' });
+    show(btb, m('lp', 1));
+    const ham = G(p, { o: 0 }); [0, 1, 2, 3].forEach(i => path(ham, `M480 ${384 + i * 10}C560 ${376 + i * 10} 640 ${394 + i * 10} 720 ${384 + i * 10}`, { stroke: ANAT.tendon, 'stroke-width': 7, fill: 'none' }));
+    T(ham, 'сухожилия задней группы бедра', { x: 600, y: 452, size: 18, fill: COL.chalk, anchor: 'middle' }); T(ham, 'медленнее', { x: 600, y: 362, size: 20, weight: 700, fill: COL.task, anchor: 'middle' });
+    show(ham, m('lp', 2.5));
+    pill(p, 'нестабильный сустав: ортез, ограничение опоры', 420, 506, m('lp', 5), { col: COL.task, size: 18 });
+    pill(p, 'тяжёлый труд и спорт — через 6–12 месяцев', 420, 556, m('lp', 6.5), { col: COL.whole, size: 18 });
+    // the shoulder capsule
+    const sc = shoulderCap(p, 1080, 380, 1.15, m('cap'));
+    prog(q => sc.set({ lax: q }), m('cap', .5), 1.2);
+    prog(q => sc.set({ tight: q }), m('cap', 4), 1.4);
+    txt(p, 'растянутая капсула — нестабильность', 1180, 130, m('cap', .5), { size: 21, weight: 700, fill: COL.bad, anchor: 'middle' });
+    txt(p, 'капсулорафия: ушить с нахлёстом', 1180, 160, m('cap', 4), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    pillRow(p, ['ушить с нахлёстом', 'подшить губу с капсулой', 'сжать теплом'], 1150, 640, m('cap', 4.5), { col: CAPS, size: 18, gap: .8, space: 10 });
+    infoCard(p, 60, 690, 1480, 170, 'после операции на капсуле', 'активные движения в защищённом объёме, осторожно с натяжением ушитой части; укрепление динамических стабилизаторов', COL.good, m('cp'), { size: 22 });
+  }],
+
+  ['transfer', 'Пересадка сухожилия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'смещение и пересадка сухожилия', 800, 56, m('tr'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    txt(p, 'меняется линия тяги мышцы', 800, 100, m('tr'), { size: 22, fill: COL.dim, anchor: 'middle' });
+    // realignment: the patella moves medially; the quadriceps still extends the knee
+    const kg = G(p, { o: 0 });
+    mk('path', { d: 'M260 160C250 260 250 360 270 440H430C450 360 450 260 440 160Z', fill: '#e7c3ae', 'fill-opacity': .35, stroke: '#b98c78', 'stroke-width': 2 }, kg);
+    const pat = mk('ellipse', { cx: 380, cy: 470, rx: 34, ry: 42, fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 2 }, kg);
+    const qd = mk('path', { d: '', stroke: ANAT.muscle, 'stroke-width': 26, 'stroke-linecap': 'round', fill: 'none', 'stroke-opacity': .85 }, kg);
+    const pt = mk('path', { d: '', stroke: ANAT.tendon, 'stroke-width': 10, fill: 'none' }, kg);
+    mk('path', { d: 'M260 560H440V720H260Z', fill: '#e7c3ae', 'fill-opacity': .35, stroke: '#b98c78', 'stroke-width': 2 }, kg);
+    const setPat = k => { const px = 380 - 30 * k; pat.setAttribute('cx', px.toFixed(1)); qd.setAttribute('d', `M350 180L${px} 430`); pt.setAttribute('d', `M${px} 512L${350 - 10 * k} 620`); };
+    setPat(0); show(kg, m('realign'));
+    prog(q => setPat(q), m('realign', 1.5), 1.2);
+    txt(p, 'надколенник смещён — четырёхглавая остаётся разгибателем', 350, 780, m('realign', 2), { size: 19, weight: 700, fill: COL.good, anchor: 'middle' });
+    // transfer: a wrist flexor moved to the back of the wrist becomes an extensor
+    const h = handSide(p, 1060, 430, 1.25, { tendons: false });
+    show(h.g, m('move'));
+    const fcu = mk('path', { d: '', stroke: ANAT.muscle, 'stroke-width': 9, 'stroke-linecap': 'round', fill: 'none', opacity: 0 }, p);
+    const placeFcu = (back, w) => { const W = h.J[0], ph = rad(w), side = back ? -1 : 1, ins = [W[0] + 60 * Math.cos(ph) - side * Math.sin(ph) * 16, W[1] + 60 * Math.sin(ph) + side * Math.cos(ph) * 16];
+      fcu.setAttribute('d', `M${W[0] - 280} ${W[1] + 18 * side}C${W[0] - 120} ${W[1] + 24 * side} ${W[0] - 40} ${W[1] + 20 * side} ${ins[0].toFixed(1)} ${ins[1].toFixed(1)}`); };
+    placeFcu(false, 0); show(fcu, m('move', .5));
+    prog(q => { h.set({ w: 25 * cyc(q, 2) }); placeFcu(false, 25 * cyc(q, 2)); }, m('move', .8), 2.4, lin);
+    prog(q => { placeFcu(q > .5, 0); fcu.setAttribute('stroke', q > .5 ? COL.task : ANAT.muscle); }, m('move', 3.4), .6, lin);
+    prog(q => { const w = -30 * cyc(q, 2); h.set({ w }); placeFcu(true, w); }, m('move', 4.2), Math.max(2, m('tp') - m('move', 4.2)), lin);
+    txt(p, 'локтевой сгибатель запястья', 1000, 300, m('move', .5), { size: 20, weight: 700, fill: ANAT.muscle, anchor: 'middle' });
+    txt(p, '→ на тыл: теперь разгибает запястье', 1000, 600, m('move', 3.6), { size: 20, weight: 700, fill: COL.task, anchor: 'middle' });
+    infoCard(p, 820, 650, 720, 210, 'после операции', 'раннее установочное напряжение и защищённые движения для скольжения; осторожное сопротивление; новому действию учат биологической обратной связью и электростимуляцией', COL.good, m('tp'), { size: 20 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-times', prompt: ['Сроки из книги:'],
+    build: blanks([
+      { parts: ['Отсроченный шов мышцы — через ', { box: '48' }, '–', { box: '72' }, ' часа'], why: 'Воспалённая ткань плохо держит швы: лучше через 48–72 часа.' },
+      { parts: ['Интенсивная растяжка после шва мышцы — не раньше ', { box: '6' }, '–', { box: '8' }, ' недель'], why: '6–8 недель.' },
+      { parts: ['Интенсивная растяжка и сопротивление после шва сухожилия — не раньше ', { box: '8' }, ' недель'], why: 'Не раньше 8 недель.' },
+    ]),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Открытый доступ сильнее травмирует мягкие ткани, чем артроскопия, — реабилитация дольше.', 'w1'],
+     ['Ауто — своя ткань и донорское место; алло — донорская ткань, риск болезни и отторжения.', 'w2'],
+     ['Шитые мышцы и сухожилия держат укороченными, рано дают установочное напряжение; интенсивная растяжка — с 6–8 недель для мышцы и с 8 для сухожилия.', 'w3'],
+     ['Связки и капсула — защищённое движение и стабилизаторы; пересадка сухожилия может изменить действие мышцы.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SURG }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-achilles', prompt: ['Шов ахиллова сухожилия, вторая неделя, нога в ортезе. Что подходит?'],
+    build: choice([
+      ['Установочное напряжение и движения в защищённом объёме; интенсивная растяжка — не раньше 8 недель'],
+      ['Растяжка икроножной стоя у стены'],
+      ['Полная неподвижность без упражнений 3 месяца'],
+      ['Прыжки, чтобы укрепить сухожилие'],
+    ], 0, 'Ранние установочное напряжение и защищённое движение предупреждают спайки; интенсивную растяжку и сопротивление откладывают минимум до 8 недель.',
+    [null, 'Это интенсивная растяжка шва — рано.', 'Без движения сухожилие спаивается со влагалищем.', 'Большая нагрузка на незаживший шов недопустима.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-fcu', prompt: ['Ребёнку с ДЦП пересадили локтевой сгибатель запястья на тыл. Он не может «найти» новое движение. Что поможет?'],
+    build: choice([
+      ['Биологическая обратная связь и электростимуляция при попытке разогнуть запястье'],
+      ['Интенсивная растяжка мышцы'],
+      ['Ждать: само придёт'],
+      ['Упражнения на сгибание запястья'],
+    ], 0, 'После пересадки, меняющей действие мышцы, новому действию учат биологической обратной связью и электростимуляцией.',
+    [null, 'Растяжка не учит новому действию и рискованна для шва.', 'Книга советует активно учить новому действию.', 'Мышца теперь разгибатель — тренируют разгибание.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Концентрическая и эксцентрическая — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 64, title: 'Концентрическая и эксцентрическая работа', minutes: 9, language: 'ru', next: '../ch065/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch064/cards.ru.json
+const CARDS_SHORT = {
+  "концентрическое — поднимает\nнапряжение ≥ груза, мышца укорачивается": "напряжение ≥ груза, мышца укорачивается",
+  "эксцентрическое — опускает\nнапряжение < груза, мышца удлиняется и контролирует его": "мышца удлиняется и контролирует",
+  "эксцентрические — тормозят\nи поглощают энергию при ударных нагрузках": "и поглощают энергию при ударных нагрузках",
+  "зачем\nпосле травм и операций; снизить риск травмы при торможении, смене направления, повторной эксцентрике; спорт": "риск травмы при торможении",
+  "традиционно — поздно\nэксцентрическая изокинетика, плиометрика": "эксцентрическая изокинетика, плиометрика",
+  "сейчас — рано и постепенно\nбезопасность ещё изучают": "безопасность ещё изучают",
+  "груз для подъёма ≠ груз для опускания\nконцентрически нужно больше единиц — труднее": "концентрически нужно больше единиц — труднее",
+  "больше прирост\nэксцентрическая тренировка растит эксцентрическую силу сильнее — груз больше": "эксцентрическая сила растёт сильнее",
+  "мышца слабее 3/5\nначать с медленного опускания против одной силы тяжести: опускать легче, чем поднимать": "начать с медленного опускания",
+  "внимание: сердце и сосуды\nпри эксцентрике пульс и давление выше → ритмичное дыхание": "пульс и давление выше → ритмичное дыхание",
+  "экономнее\nменьше кислорода и энергии, меньше утомление → бег под гору может эффективнее развивать выносливость": "меньше кислорода и утомление",
+  "специфичнее\nэксцентрическая — сильнее к режиму и скорости; выбирать упражнения, похожие на функцию": "упражнения, похожие на функцию",
+  "перекрёстный эффект\nу обоих видов — немного сильнее другая сторона; влияние на функцию не доказано": "немного сильнее другая сторона",
+  "отсроченная боль (DOMS)\nчаще и сильнее после непривычной, быстро наращиваемой интенсивной эксцентрики": "после непривычной интенсивной эксцентрики",
+  "но\nпри равных интенсивности и объёме — разницы нет; постепенное наращивание эксцентрики — без отсроченной боли": "при равных интенсивности и объёме — разницы нет",
+};
+// cards-short end
+
+const CON = COL.nat, ECC = COL.task;
+// An elbow model with a dumbbell of size k in the hand; setA(a) bends the elbow, setK(k) changes the dumbbell.
+function armWithDb(p, x, y, s, k, t0) {
+  const arm = elbowModel(p, { x, y, s });
+  const db = G(p), inner = G(db);
+  dumbbell(inner, 1);
+  arm.setK = kk => put(inner, { s: kk });
+  arm.setK(k);
+  arm.setA = a => { arm.set(a); const { E, W, hand } = arm.pts; put(db, { x: x + hand[0] * s, y: y + hand[1] * s, r: Math.atan2(W[1] - E[1], W[0] - E[0]) * 180 / Math.PI + 90, s: s * .8 }); };
+  arm.setA(150);
+  [arm.g, db].forEach(e => { put(e, { o: 0 }); show(e, t0); });
+  return arm;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Концентрическая и эксцентрическая', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 64', { x: 800, y: 180, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Концентрическая', { x: 800, y: 265, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и эксцентрическая работа', { x: 800, y: 330, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'поднимать и опускать — не одно и то же', 800, 410, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const a = armWithDb(art, 560, 700, 1.4, 1, 0);
+    const lab = T(art, '', { x: 800, y: 820, size: 28, weight: 700, fill: CON, anchor: 'middle' });
+    prog(q => { const u = (q * 2) % 1, up = u < .5; a.setA(up ? lerp(165, 60, io(u * 2)) : lerp(60, 165, io(u * 2 - 1))); a.act('biceps', 1); lab.textContent = up ? 'поднимает — концентрически' : 'опускает — эксцентрически'; lab.setAttribute('fill', up ? CON : ECC); }, .4, Math.max(4, D - 1.2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['dyn', 'Два вида динамики', (m) => {
+    const p = panel(0);
+    txt(p, 'динамическая работа', 800, 76, m('dyn'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const A = armWithDb(p, 90, 470, 1.25, 1.1, m('con')), B = armWithDb(p, 860, 470, 1.25, 1.1, m('ecc'));
+    prog(q => { A.setA(lerp(165, 55, io((q * 1.5) % 1))); A.act('biceps', 1); }, m('con', .4), 4.5, lin);
+    prog(q => { B.setA(lerp(55, 165, io((q * 1.5) % 1))); B.act('biceps', 1); }, m('ecc', .4), 4.5, lin);
+    arrowTo(p, [380, 380], [380, 220], m('con', .3), { col: CON, w: 6 });
+    arrowTo(p, [1150, 220], [1150, 380], m('ecc', .3), { col: ECC, w: 6 });
+    infoCard(p, 80, 560, 680, 150, 'концентрическое — поднимает', 'напряжение ≥ груза, мышца укорачивается', CON, m('con'), { size: 23 });
+    infoCard(p, 840, 560, 680, 150, 'эксцентрическое — опускает', 'напряжение < груза, мышца удлиняется и контролирует его', ECC, m('ecc'), { size: 23 });
+    const rg = G(p, { o: 0 });
+    ['постоянное: вес тела, свободный груз, блок', 'переменное: тренажёр, эластичная лента', 'изокинетическое: прибор держит скорость'].forEach((s, i) => T(rg, '• ' + s, { x: 100, y: 760 + i * 36, size: 23, fill: COL.chalk }));
+    show(rg, m('res'));
+    const ig = G(p, { o: 0 });
+    roundBox(ig, 900, 735, 620, 130, COL.bad, PANEL, 2.5);
+    T(ig, '«изотонический» — неточно', { x: 922, y: 775, size: 25, weight: 700, fill: COL.bad });
+    put(para(ig, 'напряжение меняется: длина мышцы и момент груза', 922, 812, null, { size: 22, maxW: 580 }), { o: 1 });
+    show(ig, m('iso'));
+  }],
+
+  ['why', 'Разгон и торможение', (m) => {
+    const p = panel(0), GY = 760, s = 1.15;
+    txt(p, 'зачем оба вида', 800, 76, m('why'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...SIT, t: 22, aN: 40, eN: 30, aF: 40, eF: 30 } });
+    plant(f, 'AN', 330, GY);
+    const hip = onStage(f, 'H');
+    chair(p, hip[0], hip[1] + 7, GY, m('why', .5));
+    p.appendChild(f.g);
+    const q4 = muscleOn(f, ...MUSCLE.rectus, { after: 'ftN', w: 14 });
+    show(f.g, m('why', .5));
+    ground(p, 100, 560, GY, m('why', .5));
+    const SITP = { ...SIT, t: 22, aN: 40, eN: 30, aF: 40, eF: 30 }, UP = { ...STAND, aN: 20, aF: 20 };
+    const lab = txt(p, '', 330, 830, m('sit'), { size: 26, weight: 700, fill: CON, anchor: 'middle' });
+    prog(q => { f.set(blendPose(SITP, UP, io(q))); plant(f, 'AN', 330, GY); q4.act(.9); lab.textContent = 'встаёт: концентрически'; }, m('sit'), 2.2, lin);
+    prog(q => { f.set(blendPose(UP, SITP, io(q))); plant(f, 'AN', 330, GY); q4.act(.9); lab.textContent = 'садится: эксцентрически'; lab.setAttribute('fill', ECC); }, m('down'), 2.6, lin);
+    infoCard(p, 640, 130, 900, 120, 'концентрические — разгоняют', null, CON, m('acc'), { size: 23 });
+    infoCard(p, 640, 265, 900, 160, 'эксцентрические — тормозят', 'и поглощают энергию при ударных нагрузках', ECC, m('dec'), { size: 23 });
+    ['склон вверх и вниз', 'лестница вверх и вниз', 'встать и сесть', 'поднять и поставить'].forEach((t, i) => pill(p, t, 830 + (i % 2) * 380, 480 + Math.floor(i / 2) * 64, m('daily', .4 + i * .6), { col: COL.whole, size: 24 }));
+    infoCard(p, 640, 640, 900, 120, 'в программе — и те, и другие', null, COL.good, m('mix'), { size: 23 });
+  }],
+
+  ['eccT', 'Эксцентрическая тренировка', (m) => {
+    const p = panel(0);
+    txt(p, 'эксцентрическая тренировка', 800, 76, m('eccT'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 80, 120, 700, 200, 'зачем', 'после травм и операций; снизить риск травмы при торможении, смене направления, повторной эксцентрике; спорт', ECC, m('eccT', .5), { size: 22 });
+    infoCard(p, 80, 335, 700, 140, 'традиционно — поздно', 'эксцентрическая изокинетика, плиометрика', COL.dim, m('late'), { size: 22 });
+    infoCard(p, 80, 490, 700, 140, 'сейчас — рано и постепенно', 'безопасность ещё изучают', COL.good, m('early'), { size: 22 });
+    // Gerber et al.: eccentric ergometer vs a standard cycle after ACL reconstruction (scheme, no values)
+    const g = G(p, { o: 0 });
+    roundBox(g, 830, 120, 710, 740, COL.whole, PANEL, 2.5);
+    T(g, 'Гербер и соавт.: после реконструкции ПКС', { x: 852, y: 162, size: 24, weight: 700, fill: COL.whole });
+    T(g, 'с 2–3-й недели, 12 недель', { x: 852, y: 196, size: 22, fill: COL.dim });
+    [[ECC, 'эксцентрический эргометр'], [COL.dim, 'обычный велотренажёр']].forEach(([c, s], i) => { mk('rect', { x: 860, y: 222 + i * 34, width: 22, height: 22, rx: 5, fill: c }, g); T(g, s, { x: 892, y: 240 + i * 34, size: 21, fill: COL.chalk }); });
+    show(g, m('gerb'));
+    const groups = [['боль, выпот, стабильность', .45, .45, 'same'], ['сила четырёхглавой', .85, .5, 'res'], ['прыжок на одной ноге', .8, .5, 'res']];
+    groups.forEach(([s, a, b, k], i) => {
+      const x = 900 + i * 215, gg = G(p, { o: 0 });
+      [a, b].forEach((v, j) => mk('rect', { x: x + j * 70, y: 760 - v * 380, width: 60, height: v * 380, rx: 6, fill: j ? COL.dim : ECC }, gg));
+      put(para(gg, s, x + 65, 795, null, { size: 19, maxW: 190, anchor: 'middle' }), { o: 1 });
+      show(gg, m(k, i === 2 ? 1 : 0));
+    });
+    txt(p, '=', 1000, 520, m('same', .5), { size: 40, fill: COL.chalk, anchor: 'middle', weight: 700 });
+    txt(p, 'и через год', 1300, 300, m('res', 3), { size: 23, fill: ECC, anchor: 'middle', weight: 700 });
+    pill(p, 'схема', 1460, 300, m('gerb'), { col: COL.dim, size: 19 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-ecc', prompt: ['Верно или нет?'],
+    build: grid([
+      { parts: ['Эксцентрически можно контролировать больший груз, чем поднять'], ans: ['t'], why: 'Опустить можно больше, чем поднять.' },
+      { parts: ['«Изотонический» точно описывает упражнение с гантелью'], ans: ['f'], why: 'Напряжение по ходу движения меняется.' },
+      { parts: ['У Гербера ранняя эксцентрическая тренировка усилила боль и выпот'], ans: ['f'], why: 'Различий по боли и выпоту не было.' },
+      { parts: ['Эксцентрические сокращения тормозят сегменты тела'], ans: ['t'], why: 'И поглощают энергию.' },
+    ], TF, { multi: false, text: true }),
+  }], done) }],
+
+  ['load', 'Груз и усилие', (m) => {
+    const p = panel(0);
+    txt(p, 'сколько можно поднять и опустить', 800, 76, m('load'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const bg = G(p, { o: 0 });
+    [['макс. концентрически', .62, CON], ['макс. эксцентрически', 1, ECC]].forEach(([s, v, c], i) => {
+      T(bg, s, { x: 90, y: 160 + i * 70, size: 23, fill: COL.chalk, weight: 600 });
+      mk('rect', { x: 380, y: 140 + i * 70, width: 360 * v, height: 30, rx: 9, fill: c }, bg);
+    });
+    show(bg, m('load', .5));
+    txt(p, 'сократительные + соединительная ткань', 90, 300, m('why'), { size: 22, fill: ECC, weight: 600 });
+    // motor units for the same load
+    const mu = (x, n, col, t0, lab) => {
+      const g = G(p, { o: 0 });
+      for (let i = 0; i < 8; i++) mk('circle', { cx: x + (i % 4) * 46, cy: 370 + Math.floor(i / 4) * 46, r: 16, fill: i < n ? col : COL.faint }, g);
+      T(g, lab, { x: x + 70, y: 470, size: 21, fill: col, anchor: 'middle', weight: 600 });
+      show(g, t0);
+    };
+    mu(110, 6, CON, m('mu'), 'поднять: 6 единиц');
+    mu(430, 3, ECC, m('mu', .8), 'опустить: 3');
+    txt(p, 'тот же груз', 560, 345, m('mu', 1.2), { size: 21, fill: COL.dim, anchor: 'middle', italic: true });
+    pill(p, 'схема', 700, 360, m('mu'), { col: COL.dim, size: 19 });
+    // a very weak quadriceps: lowering the leg against gravity
+    const f = fig(p, { x: 0, y: 0, s: .95, o: 0, pose: { ...SIT, t: 4, kN: 8, aN: 20, eN: 30, aF: 20, eF: 30 } });
+    plant(f, 'H', 300, 640);
+    bench(p, 190, 360, 648, m('weak'), COL.dim, 170);
+    p.appendChild(f.g);
+    const q4 = muscleOn(f, ...MUSCLE.rectus, { after: 'ftN', w: 13 });
+    show(f.g, m('weak'));
+    prog(q => { f.set({ kN: lerp(8, 90, (q * 2) % 1) }); q4.act(.7); }, m('weak', .5), 6, lin);
+    txt(p, 'медленно опускает', 300, 860, m('weak', .5), { size: 22, fill: ECC, anchor: 'middle', weight: 600 });
+    infoCard(p, 820, 120, 720, 150, 'груз для подъёма ≠ груз для опускания', 'концентрически нужно больше единиц — труднее', CON, m('mu'), { size: 22 });
+    infoCard(p, 820, 285, 720, 150, 'больше прирост', 'эксцентрическая тренировка растит эксцентрическую силу сильнее — груз больше', ECC, m('gain'), { size: 22 });
+    infoCard(p, 820, 450, 720, 200, 'мышца слабее 3/5', 'начать с медленного опускания против одной силы тяжести: опускать легче, чем поднимать', COL.good, m('weak'), { size: 22 });
+    infoCard(p, 820, 665, 720, 170, 'внимание: сердце и сосуды', 'при эксцентрике пульс и давление выше → ритмичное дыхание', COL.bad, m('cv'), { size: 22 });
+  }],
+
+  ['vel', 'Груз и скорость', (m) => {
+    const p = panel(0), cx = 1130, y0 = 640, W = 380, H = 460;
+    txt(p, 'груз определяет скорость', 800, 76, m('vel'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const a = armWithDb(p, 120, 520, 1.35, 1, m('vel', .3));
+    const g = G(p, { o: 0 });
+    path(g, `M${cx - W} ${y0}H${cx + W + 10}M${cx} ${y0 + 10}V${y0 - H - 10}`, { stroke: COL.dim, 'stroke-width': 3 });
+    T(g, 'напряжение', { x: cx + 12, y: y0 - H, size: 20, fill: COL.dim });
+    T(g, 'поднимает →', { x: cx + W, y: y0 + 34, size: 19, fill: COL.dim, anchor: 'end' });
+    T(g, '← опускает', { x: cx - W, y: y0 + 34, size: 19, fill: COL.dim });
+    show(g, m('vel', .3));
+    const Fc = v => .55 * (1 - v) / (1 + 3 * v), Fe = v => .55 + .32 * (1 - Math.exp(-v * 7));
+    path(p, fnPath(cx, y0, W, H, Fc), { stroke: CON, 'stroke-width': 4, 'stroke-opacity': .6 }, { o: 0 }); show(p.lastChild, m('vel', .3));
+    path(p, fnPath(cx - W, y0, W, H, v => Fe(1 - v)), { stroke: ECC, 'stroke-width': 4, 'stroke-opacity': .6 }, { o: 0 }); show(p.lastChild, m('vel', .3));
+    const dot = put(mk('circle', { r: 14, fill: COL.chalk, stroke: COL.board, 'stroke-width': 3 }, p), { o: 0 });
+    show(dot, m('iso'));
+    const lab = txt(p, '', 440, 760, m('iso'), { size: 26, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // each phase: the load (dumbbell size), the movement of the arm, the point on the curve
+    const phase = (k, kk, v, dir, txt0, col, dur = 2.5) => prog(q => {
+      a.setK(kk);
+      const sp = Math.abs(v), base = 110;
+      a.setA(dir === 0 ? base + 2 * Math.sin(q * 40) : dir > 0 ? lerp(165, 60, (q * (.4 + sp)) % 1) : lerp(60, 165, (q * (.4 + sp)) % 1));
+      a.act('biceps', 1);
+      put(dot, { x: cx + v * W, y: y0 - (v >= 0 ? Fc(v) : Fe(-v)) * H });
+      lab.textContent = txt0; lab.setAttribute('fill', col);
+    }, m(k, .2), dur, lin);
+    phase('iso', 1.2, 0, 0, 'груз удерживается: скорость 0', COL.chalk);
+    phase('c1', 1.1, .15, 1, 'чуть меньше — медленно вверх', CON);
+    phase('c2', .8, .55, 1, 'ещё меньше — быстро вверх', CON);
+    phase('e1', 1.3, -.15, -1, 'чуть больше — медленно вниз', ECC);
+    phase('e2', 1.55, -.7, -1, 'ещё больше — быстрее, сила на плато', ECC, 2.5);
+    infoCard(p, 80, 790, 1440, 90, 'заблуждение: «медленное опускание того же груза даёт больше напряжения» — нет, меньше', null, COL.bad, m('myth'), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-myth', prompt: ['Пациент поднимает гантель быстро и опускает медленно: «медленное опускание даёт больше напряжения». Так ли это?'],
+    build: choice([
+      ['Нет: при том же грузе в фазе опускания напряжение меньше'],
+      ['Да: эксцентрическая фаза всегда даёт больше напряжения'],
+      ['Да, если опускать очень медленно'],
+      ['Напряжение одинаковое в обеих фазах'],
+    ], 0, 'Больше напряжения в эксцентрике — только с большим грузом на фазе опускания (с помощником), и это не для пациентов после травм.',
+    [null, 'Больше груз можно опустить — но тот же груз требует меньшего напряжения.', 'Медленнее — не значит больше напряжения при том же грузе.', 'Эксцентрически тот же груз контролируют меньшим числом единиц.']),
+  }], done) }],
+
+  ['more', 'Ещё различия', (m) => {
+    const p = panel(0);
+    txt(p, 'эксцентрическая и концентрическая: ещё различия', 800, 76, m('more'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 80, 120, 700, 200, 'экономнее', 'меньше кислорода и энергии, меньше утомление → бег под гору может эффективнее развивать выносливость', ECC, m('en'), { size: 22 });
+    infoCard(p, 820, 120, 700, 200, 'специфичнее', 'эксцентрическая — сильнее к режиму и скорости; выбирать упражнения, похожие на функцию', COL.whole, m('spec'), { size: 22 });
+    infoCard(p, 80, 340, 700, 200, 'перекрёстный эффект', 'у обоих видов — немного сильнее другая сторона; влияние на функцию не доказано', COL.dim, m('cross'), { size: 22 });
+    infoCard(p, 820, 340, 700, 200, 'отсроченная боль (DOMS)', 'чаще и сильнее после непривычной, быстро наращиваемой интенсивной эксцентрики', COL.bad, m('doms'), { size: 22 });
+    infoCard(p, 80, 560, 1440, 140, 'но', 'при равных интенсивности и объёме — разницы нет; постепенное наращивание эксцентрики — без отсроченной боли', COL.good, m('eq'), { size: 23 });
+    // the ramp: a sudden jump in eccentric load vs a gradual one (scheme)
+    const g = G(p, { o: 0 });
+    path(g, 'M120 840H520V760H700', { stroke: COL.bad, 'stroke-width': 5 });
+    path(g, 'M820 840Q1100 840 1160 800T1500 760', { stroke: COL.good, 'stroke-width': 5 });
+    T(g, 'резко — боль', { x: 410, y: 880, size: 21, fill: COL.bad, anchor: 'middle' });
+    T(g, 'постепенно — без боли', { x: 1160, y: 880, size: 21, fill: COL.good, anchor: 'middle' });
+    show(g, m('eq', 1));
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Концентрически — поднимают и разгоняют, эксцентрически — опускают, тормозят, поглощают энергию.', 'w1'],
+     ['Эксцентрически контролируют больший груз меньшим числом единиц; слабой мышце легче опускать.', 'w2'],
+     ['Медленное опускание того же груза не даёт большего напряжения.', 'w3'],
+     ['Эксцентрика экономнее и специфичнее; резкий рост — отсроченная боль, постепенный — безопасно.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-phase', prompt: ['Концентрическая или эксцентрическая работа указанной мышцы?'],
+    build: grid([
+      { parts: ['Встать со стула — четырёхглавая'], ans: ['c'], why: 'Укорачивается, разгибая колено.' },
+      { parts: ['Сесть на стул — четырёхглавая'], ans: ['e'], why: 'Удлиняется, тормозя посадку.' },
+      { parts: ['Спуск по лестнице — четырёхглавая опорной ноги'], ans: ['e'], why: 'Тормозит сгибание колена.' },
+      { parts: ['Поднести стакан ко рту — двуглавая'], ans: ['c'], why: 'Сгибает локоть, укорачиваясь.' },
+      { parts: ['Опустить стакан на стол — двуглавая'], ans: ['e'], why: 'Контролирует разгибание, удлиняясь.' },
+    ], [['c', 'Концентрическая', CON], ['e', 'Эксцентрическая', ECC]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-weak', prompt: ['Четырёхглавая мышца оценена на 2 балла из 5: пациент не может разогнуть колено сидя против силы тяжести. С чего можно начать?'],
+    build: choice([
+      ['Колено разгибают пассивно, а пациент медленно опускает голень сам — эксцентрически'],
+      ['Тяжёлая манжета и подъёмы до отказа'],
+      ['Быстрые концентрические подъёмы с лентой'],
+      ['Ждать, пока мышца окрепнет сама'],
+    ], 0, 'Эксцентрически нужно меньше двигательных единиц: опускать против силы тяжести легче, чем поднимать.',
+    [null, 'Мышца слабее 3/5 не справится, а груз небезопасен.', 'Концентрически поднять против силы тяжести она пока не может.', 'Без нагрузки сила не растёт.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

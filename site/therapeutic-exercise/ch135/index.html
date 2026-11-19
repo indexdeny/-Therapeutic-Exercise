@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дегенерация, фасеточные суставы, нестабильность — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 135, title: 'Дегенерация, фасеточные суставы, нестабильность', minutes: 9, language: 'ru', next: '../ch136/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch135/cards.ru.json
+const CARDS_SHORT = {
+  "трёхсуставной комплекс\nдиск и две фасетки: травма диска меняет движения всего сегмента": "травма диска меняет сегмент",
+  "дегенеративная болезнь диска\nменьше воды и высоты; отверстия и канал уже": "отверстия и канал уже",
+  "контроль мышц нарушен\nотёк и боль тормозят стабилизаторы; сдвиг нагружает связки": "отёк и боль тормозят стабилизаторы",
+  "спондилёз = остеоартрит\nостеофиты, тугоподвижность, стеноз": "остеофиты, тугоподвижность, стеноз",
+  "клиническая нестабильность\nплохой контроль в нейтральной зоне: мышцы не справляются": "мышцы не справляются",
+  "стеноз\nцентральный, канала корешка или отверстия: протрузия, рубцы, отёк, остеофиты, спондилолистез, осанка; разгибание усиливает": "протрузия, остеофиты; разгибание усиливает",
+  "корешок\nпротрузия; низкий диск или сдвиг — между верхушкой суставного отростка и ножкой; отёк, остеофиты, спондилолистез, рубцы и спайки": "протрузия, остеофиты, рубцы",
+  "синовиальный сустав\nотвечает на травму и артрит, как периферический": "как периферический",
+  "менискоидные складки\nвыросты капсулы с жиром и сосудами; могут ущемиться; Богдук: складка не возвращается в полость, растягивает капсулу и мешает разогнуться": "складка мешает разогнуться",
+  "растяжение (после травмы)\nвыпот, ограничение, защитное напряжение; отёк может сузить отверстие": "выпот, защитное напряжение",
+  "спондилёз (остеоартрит)\nдиск и фасетки: сначала гипермобильность, потом остеофиты, тугоподвижность, костный стеноз; корешок — при разгибании и наклоне; рядом — компенсаторная гипермобильность; боль при движении и скованность после покоя": "гипермобильность → остеофиты → стеноз",
+  "шея при ревматоидном артрите\nхрупкие ткани, разрушение кости, некроз связок; чаще подвывих C1–C2 и вывихи C4–C5, C5–C6; нестабильность исключают снимками": "подвывих C1–C2; исключают снимками",
+  "манипуляция на шее — нельзя\nугроза спинному мозгу и позвоночной артерии": "угроза спинному мозгу и позвоночной артерии",
+  "ущемление (блок)\nвнезапно при наклоне с поворотом; движения заблокированы и болезненны, в покое не болит; без истинных неврологических признаков; со временем — нагрузка на другую фасетку и диск": "в покое не болит",
+  "меньше пассивной стабильности — больше работы мышцам\nклинически середину объёма называют нейтральным положением позвоночника": "нейтральное положение позвоночника",
+  "спондилодез\nпри тяжёлых симптомах, избыточном движении на снимках и неудаче лечения": "тяжёлые симптомы + неудача лечения",
+  "почему сегмент движется больше\nдегенерация диска, спондилолиз, спондилолистез, разболтанные связки — или глубокие мышцы: усталость, иной порядок включения, торможение болью; боль — при аномальном движении или нагрузке в конце объёма": "дегенерация или глубокие мышцы",
+  "данные\nпри боли в пояснице поперечная запаздывает и работает фазно, многораздельная атрофируется; тренировка глубоких мышц улучшает исходы при острой и хронической боли в пояснице, тазовой боли после беременности; в шее — меньше шейной головной боли": "тренировка глубоких мышц улучшает исходы",
+};
+// cards-short end
+
+const SP = '#8fd6b0', PAIN = '#ff5a3c', OSTEO = '#d9cfb8', MEN = '#e8a0a8', STAB = COL.good, UNST = COL.bad, CORD = '#86c9e8';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19, anchor = null } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x, an = anchor || (right ? 'end' : 'start');
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: an });
+  const lx = an === 'start' && right ? x + uiW(str, size) + 8 : x + (right ? 8 : -8);
+  path(g, `M${lx} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const swing = (q, n) => Math.sin(2 * Math.PI * n * q);
+const f1 = v => v.toFixed(1);
+const BN = ANAT.bone, BL = mix(ANAT.bone, '#000000', .45);
+// A facet joint in close-up (side view): the inferior process of the upper vertebra above, the superior process of the
+// lower one below, cartilage, joint space, capsule and a meniscoid fold. set({ trap, swell, osteo, glide }):
+// trap 0..1 — the fold is caught between the surfaces (pain, guarding); swell — effusion bulges the capsule;
+// osteo — spurs at the margins; glide — the upper process slides (+ up, as in flexion).
+function facetZoom(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), a = { fill: BN, stroke: BL, 'stroke-width': 2.5, 'stroke-linejoin': 'round' };
+  const low = G(g, {});
+  mk('path', { d: 'M-170 220L-150 40Q-140 18 -110 14L110 14Q140 18 150 40L170 220Z', ...a }, low);
+  const cartL = mk('path', { d: 'M-118 20Q0 4 118 20', fill: 'none', stroke: CART, 'stroke-width': 12, 'stroke-linecap': 'round' }, low);
+  const up = G(g, {});
+  mk('path', { d: 'M-170 -220L-150 -40Q-140 -18 -110 -14L110 -14Q140 -18 150 -40L170 -220Z', ...a }, up);
+  mk('path', { d: 'M-118 -20Q0 -4 118 -20', fill: 'none', stroke: CART, 'stroke-width': 12, 'stroke-linecap': 'round' }, up);
+  const fluid = mk('ellipse', { cx: 0, cy: 0, rx: 120, ry: 6, fill: '#7fc4e8', opacity: .6 }, g);
+  const cap = [-1, 1].map(() => path(g, '', { stroke: ANAT.tendon, 'stroke-width': 6 }));
+  const men = mk('path', { fill: MEN, stroke: mix(MEN, '#000000', .3), 'stroke-width': 2 }, g);
+  const spur = mk('path', { fill: OSTEO, stroke: BL, 'stroke-width': 2, opacity: 0 }, g);
+  const pain = G(g, { o: 0 }); mk('circle', { r: 26, fill: PAIN, 'fill-opacity': .35, stroke: PAIN, 'stroke-width': 4 }, pain);
+  const S = { trap: 0, swell: 0, osteo: 0, glide: 0 }, e = { g, cap };
+  e.set = o => {
+    Object.assign(S, o);
+    const gy = -30 * S.glide;
+    put(up, { y: gy });
+    const sw = 40 * S.swell;
+    [-1, 1].forEach((k, i) => {
+      cap[i].setAttribute('d', `M${k * 150} ${f1(-60 + gy)}Q${f1(k * (176 + sw))} 0 ${k * 150} 60`);
+      cap[i].setAttribute('stroke', mix(ANAT.tendon, ANAT.taut, clamp(S.swell + S.trap, 0, 1)));
+    });
+    fluid.setAttribute('rx', f1(120 + 30 * S.swell)); fluid.setAttribute('ry', f1(6 + 12 * S.swell)); fluid.setAttribute('cy', f1(gy / 2));
+    // the fold: at rest in the recess at the right margin, trapped it is pulled in between the cartilage surfaces
+    const tx = lerp(190, 110, S.trap);
+    men.setAttribute('d', `M${f1(176 + sw)} -18Q${f1(tx)} ${f1(-12 + gy / 2)} ${f1(tx - 26 * S.trap)} ${f1(gy / 2)}Q${f1(tx)} ${f1(12 + gy / 2)} ${f1(176 + sw)} 18Z`);
+    const k = S.osteo;
+    spur.setAttribute('d', `M150 40L${f1(150 + 30 * k)} ${f1(30 - 6 * k)}L${f1(144 + 10 * k)} 70ZM-150 40L${f1(-150 - 30 * k)} ${f1(30 - 6 * k)}L${f1(-144 - 10 * k)} 70ZM150 -40L${f1(150 + 28 * k)} ${f1(-30 + 6 * k)}L144 -70ZM-150 -40L${f1(-150 - 28 * k)} ${f1(-30 + 6 * k)}L-144 -70Z`);
+    spur.setAttribute('opacity', f1(clamp(k * 4, 0, 1)));
+    put(pain, { x: 150, y: 0, o: clamp(S.trap * 1.2 + S.swell * .8, 0, 1) });
+    return e;
+  };
+  e.at = (px, py) => { const s0 = st(g); return [s0.x + px * s0.s, s0.y + py * s0.s]; };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// Atlas and axis from the side (anterior to the right): the dens behind the anterior arch of the atlas, held by the
+// transverse ligament; the cord behind. set({ slip }) — rheumatoid laxity: the atlas slides forward, the gap behind
+// the dens closes on the cord.
+function atlantoAxial(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), a = { fill: BN, stroke: BL, 'stroke-width': 2.5, 'stroke-linejoin': 'round' };
+  mk('path', { d: 'M-40 40L60 40L70 160L-30 160ZM-40 40L-34 -60Q-16 -86 4 -60L14 40Z', ...a }, g);
+  T(g, 'C2', { x: 20, y: 120, size: 22, fill: COL.board, weight: 700, anchor: 'middle' });
+  const cord = mk('path', { fill: CORD, 'fill-opacity': .55, stroke: CORD, 'stroke-width': 2 }, g);
+  const at = G(g, {});
+  mk('path', { d: 'M30 -70Q52 -72 60 -46Q62 -20 40 -18L28 -20Z', ...a }, at);
+  mk('path', { d: 'M-90 -64L-150 -80L-160 -40L-100 -30Z', ...a }, at);
+  path(at, 'M28 -44Q-40 -60 -96 -48', { stroke: BN, 'stroke-width': 6, 'stroke-opacity': .5 });
+  T(at, 'C1', { x: 60, y: -86, size: 22, fill: COL.chalk, weight: 700, anchor: 'middle' });
+  const tl = path(g, '', { stroke: ANAT.tendon, 'stroke-width': 7 });
+  const S = { slip: 0 }, e = { g };
+  e.set = o => {
+    Object.assign(S, o);
+    const dx = 34 * S.slip;
+    put(at, { x: dx });
+    tl.setAttribute('d', `M${f1(36 + dx)} -40Q${f1(-40 + dx * .4)} ${f1(-36 + 10 * S.slip)} ${f1(-70 + dx)} -46`);
+    tl.setAttribute('stroke', mix(ANAT.tendon, '#ff5a3c', S.slip));
+    const back = -70 + dx;
+    cord.setAttribute('d', `M-130 -140Q${f1(back - 20)} -40 -110 60L-80 160L-60 160L-70 60Q${f1(Math.max(-60, back + 6))} -40 -90 -140Z`);
+    cord.setAttribute('fill', mix(CORD, '#ff5a3c', clamp(S.slip * 1.3 - .3, 0, 1)));
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// The neutral zone as a ball in a bowl (Fig. 15.3, side view): depth sets how far the ball rolls after a nudge.
+function bowl(p, x, y, w, depth, t0, { col = COL.chalk } = {}) {
+  const g = G(p, { x, y, o: 0 });
+  path(g, `M${-w / 2} ${-depth}Q0 ${depth * 1.1} ${w / 2} ${-depth}`, { stroke: col, 'stroke-width': 6 });
+  const ball = mk('circle', { r: 18, fill: COL.task, stroke: COL.board, 'stroke-width': 2 }, g);
+  const e = { g, ball };
+  e.set = u => {   // u: −1..1 along the bowl
+    const bx = u * w / 2 * .8;
+    ball.setAttribute('cx', f1(bx));
+    ball.setAttribute('cy', f1(-depth + (depth * 1.05) * (1 - (bx / (w / 2)) ** 2) - 18));
+    return e;
+  };
+  e.set(0);
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Дегенерация и нестабильность', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 15 · Урок 135', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Дегенерация, фасеточные суставы', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и нестабильность', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'трёхсуставной комплекс стареет вместе', 800, 360, m('sub'), { size: 30, fill: SP, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const sg = spineSeg(art, 640, 640, .9, null); put(sg.g, { o: 1 });
+    const fz = facetZoom(art, 1120, 650, .7, null); put(fz.g, { o: 1 });
+    prog(q => { const k = Math.min(1, q * 1.4); sg.set({ comp: 7 * k, osteo: k }); fz.set({ osteo: k, glide: .3 * swing(q, 1.5) }); }, .6, Math.max(2, D - 1.6), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['cascade', 'Дегенеративный каскад', (m, D) => {
+    const p = panel(0);
+    txt(p, 'диск и фасетки: дегенерация', 800, 56, m('cx'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const sg = spineSeg(p, 600, 430, 1.4, m('cx'));
+    sg.hl(['disc', 'sap', 'iap'], SP, m('cx', .5), { a: .3 });
+    prog(q => sg.set({ comp: 8 * q }), m('ddd', .5), 1.5);
+    lab(p, 'диск ниже, отверстие уже', 160, 760, ...sg.at('for'), COL.task, m('ddd', 1.5), { size: 20, anchor: 'start' });
+    prog(q => sg.set({ shear: 9 * swing(q, 2.25) }), m('early', .5), Math.max(1.5, m('bone') - m('early', .5)), lin);
+    txt(p, 'слабина: лишний сдвиг', 600, 170, m('early', 1), { size: 20, fill: COL.bad, anchor: 'middle', weight: 700 });
+    prog(q => sg.set({ shear: 0, osteo: q }), m('bone'), 1.8);
+    lab(p, 'остеофиты', 1000, 260, ...sg.at('ant').map((v, i) => i ? v - 70 : v + 6), OSTEO, m('bone', 1), { size: 20 });
+    infoCard(p, 1040, 300, 520, 160, 'трёхсуставной комплекс', 'диск и две фасетки: травма диска меняет движения всего сегмента', SP, m('cx'), { size: 19 });
+    infoCard(p, 1040, 475, 520, 120, 'дегенеративная болезнь диска', 'меньше воды и высоты; отверстия и канал уже', COL.task, m('ddd'), { size: 18 });
+    infoCard(p, 1040, 610, 520, 130, 'контроль мышц нарушен', 'отёк и боль тормозят стабилизаторы; сдвиг нагружает связки', COL.bad, m('ctrl'), { size: 18 });
+    infoCard(p, 1040, 755, 520, 120, 'спондилёз = остеоартрит', 'остеофиты, тугоподвижность, стеноз', OSTEO, m('bone'), { size: 18 });
+  }],
+
+  ['relat', 'Нестабильность, стеноз, корешок', (m, D) => {
+    const p = panel(0);
+    txt(p, 'связанные состояния', 800, 56, m('ins'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const sg = spineSeg(p, 470, 380, 1.15, m('ins'));
+    prog(q => sg.set({ flex: 10 * Math.sin(2 * Math.PI * 2 * q) + 4 * Math.sign(Math.sin(2 * Math.PI * 6 * q)) * (q > .2 ? 1 : 0) }), m('ins', .5), Math.max(1.5, m('sten') - m('ins', .5)), lin);
+    txt(p, 'движение «запинается» в середине', 470, 160, m('ins', 1), { size: 19, fill: COL.bad, anchor: 'middle', weight: 700 });
+    prog(q => sg.set({ flex: -12 * q, osteo: .7 * q }), m('sten', .5), 1.5);
+    txt(p, 'разгибание сужает', 470, 600, m('sten', 1.5), { size: 19, fill: COL.bad, anchor: 'middle', weight: 700 });
+    infoCard(p, 820, 90, 740, 150, 'клиническая нестабильность', 'плохой контроль в нейтральной зоне: мышцы не справляются', COL.bad, m('ins'), { size: 19 });
+    infoCard(p, 820, 255, 740, 160, 'стеноз', 'центральный, канала корешка или отверстия: протрузия, рубцы, отёк, остеофиты, спондилолистез, осанка; разгибание усиливает', COL.task, m('sten'), { size: 19 });
+    const ev = G(p, { o: 0 }); show(ev, m('ev'));
+    roundBox(ev, 820, 430, 740, 240, CORD, PANEL, 2.5);
+    T(ev, 'центральный стеноз: 4 из 5 → специфичность 0,98', { x: 842, y: 470, size: 20, fill: CORD, weight: 700 });
+    ['симптомы в обеих ногах', 'нога болит сильнее спины', 'боль при ходьбе или стоянии', 'облегчение сидя', 'старше 48 лет'].forEach((s, i) => { const r = G(p, { o: 0 }); checkMark(r, 860, 506 + i * 33, m('ev', .5 + i * .5), CORD, .8); T(r, s, { x: 884, y: 512 + i * 33, size: 18, fill: COL.chalk, weight: 600 }); show(r, m('ev', .5 + i * .5)); });
+    infoCard(p, 820, 685, 740, 190, 'корешок', 'протрузия; низкий диск или сдвиг — между верхушкой суставного отростка и ножкой; отёк, остеофиты, спондилолистез, рубцы и спайки', NERVE_C, m('rad'), { size: 18 });
+    const cyc0 = G(p, { o: 0 }); show(cyc0, m('cyc'));
+    const L = [['травма', 120], ['боль', 260], ['напряжение', 400]];
+    L.forEach(([s, x]) => { roundBox(cyc0, x - 60, 760, 120, 50, COL.bad, PANEL, 2); T(cyc0, s, { x, y: 793, size: 18, fill: COL.bad, weight: 700, anchor: 'middle' }); });
+    arrowTo(p, [182, 785], [198, 785], m('cyc', .3), { col: COL.bad }); arrowTo(p, [322, 785], [338, 785], m('cyc', .6), { col: COL.bad });
+    arrowTo(p, [400, 812], [120, 812], m('cyc', 1), { c: [260, 870], col: COL.bad });
+  }],
+
+  ['facet', 'Фасеточные суставы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'фасеточный сустав крупно', 800, 56, m('fj'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const fz = facetZoom(p, 420, 460, 1.3, m('fj'));
+    lab(p, 'капсула', 120, 200, ...fz.at(-160, -40), ANAT.tendon, m('fj', .8), { size: 20 });
+    lab(p, 'хрящ', 120, 300, ...fz.at(-60, 14), CART, m('fj', 1.2), { size: 20 });
+    lab(p, 'менискоидная складка', 560, 150, ...fz.at(180, 0), MEN, m('men'), { size: 20 });
+    prog(q => fz.set({ trap: q, glide: -.4 * q }), m('men', 2.5), 1.6);
+    prog(q => fz.set({ trap: 1 - q, glide: -.4 * (1 - q), swell: q }), m('spr'), 1.5);
+    prog(q => fz.set({ swell: 1 - q, osteo: q }), m('oa'), 1.8);
+    lab(p, 'остеофиты', 700, 760, ...fz.at(170, 50), OSTEO, m('oa', 1), { size: 20 });
+    infoCard(p, 820, 90, 740, 120, 'синовиальный сустав', 'отвечает на травму и артрит, как периферический', SP, m('fj'), { size: 19 });
+    infoCard(p, 820, 225, 740, 190, 'менискоидные складки', 'выросты капсулы с жиром и сосудами; могут ущемиться; Богдук: складка не возвращается в полость, растягивает капсулу и мешает разогнуться', MEN, m('men'), { size: 18 });
+    infoCard(p, 820, 430, 740, 150, 'растяжение (после травмы)', 'выпот, ограничение, защитное напряжение; отёк может сузить отверстие', COL.task, m('spr'), { size: 18 });
+    infoCard(p, 820, 595, 740, 280, 'спондилёз (остеоартрит)', 'диск и фасетки: сначала гипермобильность, потом остеофиты, тугоподвижность, костный стеноз; корешок — при разгибании и наклоне; рядом — компенсаторная гипермобильность; боль при движении и скованность после покоя', OSTEO, m('oa'), { size: 18 });
+  }],
+
+  ['ra', 'Ревматоидный артрит и блок', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ревматоидный артрит и ущемление фасетки', 800, 56, m('ra'), { size: 28, weight: 700, anchor: 'middle', fill: COL.bad });
+    const aa = atlantoAxial(p, 330, 420, 1.35, m('ra'));
+    prog(q => aa.set({ slip: q }), m('ra', 3), 2);
+    lab(p, 'поперечная связка', 440, 200, 330 - 20 * 1.35, 420 - 40 * 1.35, ANAT.tendon, m('ra', 1), { size: 19 });
+    lab(p, 'спинной мозг', 60, 700, 330 - 85 * 1.35, 420 + 60 * 1.35, CORD, m('ra', 1.5), { size: 19, anchor: 'start' });
+    txt(p, 'подвывих C1 вперёд', 330, 720, m('ra', 4), { size: 21, fill: COL.bad, anchor: 'middle', weight: 700 });
+    infoCard(p, 680, 90, 880, 220, 'шея при ревматоидном артрите', 'хрупкие ткани, разрушение кости, некроз связок; чаще подвывих C1–C2 и вывихи C4–C5, C5–C6; нестабильность исключают снимками', COL.bad, m('ra'), { size: 19 });
+    infoCard(p, 680, 330, 880, 140, 'манипуляция на шее — нельзя', 'угроза спинному мозгу и позвоночной артерии', COL.bad, m('pre'), { size: 20 });
+    const fz = facetZoom(p, 1010, 690, .62, m('imp'));
+    prog(q => fz.set({ trap: q, glide: -.4 * q }), m('imp', 1), 1.4);
+    infoCard(p, 1220, 500, 340, 370, 'ущемление (блок)', 'внезапно при наклоне с поворотом; движения заблокированы и болезненны, в покое не болит; без истинных неврологических признаков; со временем — нагрузка на другую фасетку и диск', MEN, m('imp'), { size: 17 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-facet', prompt: ['Какое это поражение фасеток?'],
+    build: grid([
+      { parts: ['Началось внезапно при наклоне с поворотом; в покое не болит'], ans: ['b'], why: 'Ущемление (блок).' },
+      { parts: ['После аварии: выпот, ограничение движений, защитное напряжение'], ans: ['s'], why: 'Растяжение фасетки.' },
+      { parts: ['Остеофиты, скованность после покоя, корешок при разгибании'], ans: ['o'], why: 'Спондилёз, или остеоартрит.' },
+      { parts: ['Определённые движения заблокированы и болезненны'], ans: ['b'], why: 'Ущемление менискоидной складки.' },
+      { parts: ['Сначала гипермобильность, потом тугоподвижность и костный стеноз'], ans: ['o'], why: 'Течение остеоартрита.' },
+    ], [['s', 'Растяжение', COL.task], ['o', 'Остеоартрит', OSTEO], ['b', 'Ущемление', MEN]], { multi: false, text: true }),
+  }], done) }],
+
+  ['zone', 'Шарик в чаше', (m, D) => {
+    const p = panel(0);
+    txt(p, 'нейтральная зона (по мотивам рис. 15.3)', 800, 56, m('nz'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    infoCard(p, 60, 90, 1480, 110, 'середина объёма: пассивные ткани не нагружены; всего несколько градусов; держат глубокие мышцы', null, SP, m('nz'), { size: 20 });
+    const b1 = bowl(p, 380, 470, 440, 120, m('bowl')), b2 = bowl(p, 960, 470, 440, 40, m('bowl', 2));
+    txt(p, 'глубокая чаша — стабильно', 380, 560, m('bowl', .5), { size: 22, fill: STAB, anchor: 'middle', weight: 700 });
+    txt(p, 'мелкая чаша — подвижно, нестабильно', 960, 560, m('bowl', 2.5), { size: 22, fill: UNST, anchor: 'middle', weight: 700 });
+    prog(q => { const d = Math.exp(-3 * q); b1.set(.25 * d * Math.sin(2 * Math.PI * 3 * q)); b2.set(.8 * d * Math.sin(2 * Math.PI * 2 * q)); }, m('bowl', 3), 4, lin);
+    // view from above with bungee cords
+    const top = G(p, { x: 1360, y: 470, o: 0 }); show(top, m('cord'));
+    mk('circle', { r: 120, fill: 'none', stroke: COL.chalk, 'stroke-width': 5 }, top);
+    const cords = [0, 1, 2, 3].map(i => path(top, '', { stroke: COL.muscle || ANAT.muscle, 'stroke-width': 5 }));
+    const ball = mk('circle', { r: 18, fill: COL.task, stroke: COL.board, 'stroke-width': 2 }, top);
+    prog(q => { const d = Math.exp(-3 * q), bx = 40 * d * Math.sin(2 * Math.PI * 3 * q), by = 30 * d * Math.cos(2 * Math.PI * 2.4 * q); ball.setAttribute('cx', f1(bx)); ball.setAttribute('cy', f1(by)); cords.forEach((c, i) => { const a = i * Math.PI / 2 + Math.PI / 4; c.setAttribute('d', `M${f1(bx)} ${f1(by)}L${f1(120 * Math.cos(a))} ${f1(120 * Math.sin(a))}`); }); }, m('cord', .5), 4, lin);
+    txt(p, 'вид сверху: мышцы — резинки', 1360, 640, m('cord'), { size: 20, fill: ANAT.muscle, anchor: 'middle', weight: 700 });
+    infoCard(p, 60, 690, 1480, 150, 'меньше пассивной стабильности — больше работы мышцам', 'клинически середину объёма называют нейтральным положением позвоночника', COL.whole, m('cord', 3), { size: 20 });
+  }],
+
+  ['inst', 'Нестабильность', (m, D) => {
+    const p = panel(0);
+    txt(p, 'нестабильность — увеличенная нейтральная зона', 800, 56, m('gr'), { size: 28, weight: 700, anchor: 'middle', fill: UNST });
+    const b = bowl(p, 330, 330, 420, 50, m('gr'));
+    prog(q => b.set(.8 * Math.sin(2 * Math.PI * 1.25 * q)), m('gr', .5), Math.max(2, D - m('gr', .5) - .3), lin);
+    infoCard(p, 60, 440, 560, 200, 'спондилодез', 'при тяжёлых симптомах, избыточном движении на снимках и неудаче лечения', COL.dim, m('gr'), { size: 19 });
+    infoCard(p, 660, 100, 900, 290, 'почему сегмент движется больше', 'дегенерация диска, спондилолиз, спондилолистез, разболтанные связки — или глубокие мышцы: усталость, иной порядок включения, торможение болью; боль — при аномальном движении или нагрузке в конце объёма', UNST, m('why'), { size: 19 });
+    infoCard(p, 660, 410, 900, 260, 'данные', 'при боли в пояснице поперечная запаздывает и работает фазно, многораздельная атрофируется; тренировка глубоких мышц улучшает исходы при острой и хронической боли в пояснице, тазовой боли после беременности; в шее — меньше шейной головной боли', STAB, m('ev'), { size: 19 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-stab', prompt: ['Стабильнее или нестабильнее?'],
+    build: grid([
+      { parts: ['Глубокая чаша: шарик быстро успокаивается'], ans: ['s'], why: 'Стабильнее.' },
+      { parts: ['Мелкая чаша: шарик катается далеко'], ans: ['u'], why: 'Нестабильнее.' },
+      { parts: ['Разболтанные связки сегмента'], ans: ['u'], why: 'Больше нейтральная зона.' },
+      { parts: ['Глубокие мышцы включаются вовремя и выносливы'], ans: ['s'], why: 'Стабильнее: резинки держат шарик.' },
+      { parts: ['Боль рефлекторно тормозит многораздельную мышцу'], ans: ['u'], why: 'Нестабильнее.' },
+    ], [['s', 'Стабильнее', STAB], ['u', 'Нестабильнее', UNST]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Дегенерация диска: сначала избыточная подвижность, потом остеофиты, тугоподвижность и стеноз.', 'w1'],
+     ['Стеноз и сужение отверстий усиливаются при разгибании.', 'w2'],
+     ['Фасетки болят от растяжения, артроза, ущемления складки; при ревматоидном артрите шея нестабильна — манипуляции запрещены.', 'w3'],
+     ['Нестабильность — увеличенная нейтральная зона; её держат глубокие мышцы.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SP }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-sten', prompt: ['Мужчина 67 лет: ноют обе ноги при ходьбе и долгом стоянии, сидя проходит; ноги болят сильнее спины. О чём думать и какое движение обострит симптомы?'],
+    build: choice([
+      ['Центральный стеноз; разгибание усиливает симптомы'],
+      ['Острая протрузия; сгибание сидя опасно, лучше прогибы'],
+      ['Ущемление фасетки; поможет поворот с наклоном'],
+      ['Растяжение мышцы; нужна растяжка'],
+    ], 0, 'Все пять признаков из исследования — две ноги, нога сильнее спины, боль при ходьбе и стоянии, облегчение сидя, возраст за 48 — указывают на центральный стеноз; разгибание сужает канал.',
+    [null, 'Острые протрузии у пожилых редки, а облегчение сидя типично для стеноза.', 'Блок начинается внезапно и не даёт картину двух ног.', 'Картина неврогенная, а не мышечная.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-ra', prompt: ['Пациентка с ревматоидным артритом жалуется на боль в шее и просит «вправить» её. Как поступить?'],
+    build: choice([
+      ['Отказаться от манипуляции; нестабильность должна быть исключена снимками, работать осторожно'],
+      ['Сделать высокоскоростной толчок — это быстро облегчит боль'],
+      ['Назначить сильную тракцию шеи'],
+      ['Растянуть шею в крайние положения'],
+    ], 0, 'При ревматоидном артрите возможны подвывих C1–C2 и некроз связок: манипуляция может повредить спинной мозг или позвоночную артерию.',
+    [null, 'Это может быть смертельно опасно.', 'Тракция тоже опасна при нестабильности.', 'Крайние положения нагружают нестабильные сегменты.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

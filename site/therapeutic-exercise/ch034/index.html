@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Скорость, частота, способы — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 34, title: 'Скорость, частота и способы растяжки', minutes: 9, language: 'ru', next: '../ch035/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch034/cards.ru.json
+const CARDS_SHORT = {
+  "гибкость — как от статической\nно больше травма тканей и боль после": "но больше травма и боль",
+  "не рекомендуют\nпожилым, малоподвижным, при патологии и хронических контрактурах: ослабленные ткани легко травмируются, плотная ткань становится хрупкой и рвётся": "пожилым, малоподвижным, при контрактурах",
+  "динамическая растяжка\nтоже через весь объём — но медленно и с малой силой": "медленно и с малой силой",
+  "всегда\nмышца расслаблена; ткани разогреты лёгкой активной нагрузкой или теплом": "мышца расслаблена, ткани разогреты",
+  "лучшего способа нет\nвыбирают по пациенту": "выбирают по пациенту",
+  "эффективность спорна\nособенно при давних контрактурах": "при давних контрактурах",
+  "упражнения на объём\nв пределах доступной длины тканей — сохранить подвижность": "сохранить подвижность",
+  "растяжка\nза пределы доступной длины — увеличить объём": "за пределы → увеличить объём",
+  "время\nот 15–30 минут до 8–10 часов или почти весь день; гипсы — дни и недели": "от 15–30 минут до 8–10 часов",
+};
+// cards-short end
+
+const BONE = ANAT.bone, HAND = '#b9cfe0', METAL = '#8fa3ad';
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Скорость и способы', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 4 · Урок 34', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Скорость, частота', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и способы растяжки', { x: 800, y: 380, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'медленно или быстро, как часто и кто прикладывает силу', 800, 460, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const sc = tableScene(art, { hx: 820, top: 680, s: .55, t0: 0 });
+    muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 13 });
+    show(art, m('sub', .2));
+    prog(q => sc.pt.set({ hN: 80 * wave(q, 1) }), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['speed', 'Медленно', (m) => {
+    const p = panel(0);
+    // the same hamstring stretch done slowly (the muscle yields) and fast (the stretch reflex tightens it)
+    const slow = tableScene(p, { hx: 420, top: 520, s: .85, t0: .2 }), fast = tableScene(p, { hx: 1180, top: 520, s: .85, t0: .2 });
+    const hs = muscleOn(slow.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 13 }), hf = muscleOn(fast.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 13 });
+    txt(p, 'медленно', 420, 140, .2, { size: 28, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'быстро', 1180, 140, .2, { size: 28, weight: 700, fill: COL.bad, anchor: 'middle' });
+    prog(q => slow.pt.set({ hN: 70 * io(q) }), m('slow', .4), 4, lin);
+    prog(q => { fast.pt.set({ hN: 70 * Math.min(1, q * 6) }); hf.act(q > .2 ? .85 : 0); }, m('slow', .4), 4, lin);
+    txt(p, 'мышца уступает', 420, 720, m('slow', 2), { size: 23, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'рефлекс: мышца напрягается', 1180, 720, m('slow', 2), { size: 23, weight: 700, fill: COL.bad, anchor: 'middle' });
+    ['меньше риск травмы и боли после', 'ткани податливее', 'легче контролировать'].forEach((str, i) => pill(p, str, 400 + i * 400, 820, [m('slow', 3), m('ve'), m('ctrl')][i], { col: COL.good, size: 22 }));
+  }],
+
+  ['ball', 'Баллистическая растяжка', (m) => {
+    const p = panel(0), s = 1.2, GY = 800;
+    ground(p, 120, 620, GY, .2);
+    const f = fig(p, { x: 360, y: GY - 182 * s, s, o: 0, pose: { aN: 20, aF: -10 } });
+    const ham = muscleOn(f, ...MUSCLE.hamstrings, { after: 'ftN', w: 13 });
+    show(f.g, .2);
+    // a fast straight-leg kick: the stretched muscle flashes red
+    prog(q => { const v = Math.sin(Math.PI * Math.min(1, (q * 4) % 1)); f.set({ hN: 95 * v, kN: 0 }); ham.act(v > .7 ? .9 : 0); }, m('ball', .3), 4, lin);
+    txt(p, 'быстро и сильно', 360, 130, m('ball'), { size: 27, weight: 700, fill: COL.bad, anchor: 'middle' });
+    infoCard(p, 720, 130, 800, 150, 'гибкость — как от статической', 'но больше травма тканей и боль после', COL.int, m('eq'), { size: 23 });
+    infoCard(p, 720, 310, 800, 230, 'не рекомендуют', 'пожилым, малоподвижным, при патологии и хронических контрактурах: ослабленные ткани легко травмируются, плотная ткань становится хрупкой и рвётся', COL.bad, m('no'), { size: 23 });
+    infoCard(p, 720, 570, 800, 160, 'динамическая растяжка', 'тоже через весь объём — но медленно и с малой силой', COL.good, m('dyn'), { size: 23 });
+    prog(q => { f.set({ hN: 70 * wave(q, 2), kN: 0 }); ham.act(0); }, m('dyn', .5), 5, lin);
+  }],
+
+  ['hv', 'Прогрессия', (m) => {
+    const p = panel(0);
+    ['гимнастам', 'в конце реабилитации — перед прыжками'].forEach((str, i) => pill(p, str, 520 + i * 520, 110, m('who', .3 + i * .8), { col: COL.real, size: 23 }));
+    const steps = [['статическая', COL.good], ['медленно в конце объёма', COL.good], ['медленно во всём объёме', COL.int], ['быстро в конце объёма', COL.nat], ['быстро во всём объёме', COL.bad]];
+    steps.forEach(([str, col], i) => {
+      const g = G(p, { o: 0 }), x = 120 + i * 280, y = 640 - i * 90;
+      mk('rect', { x, y, width: 260, height: 70 + i * 90, rx: 12, fill: col, 'fill-opacity': .15, stroke: col, 'stroke-width': 3 }, g);
+      T(g, String(i + 1), { x: x + 24, y: y + 44, size: 30, weight: 700, fill: col });
+      put(para(g, str, x + 56, y + 40, null, { size: 22, weight: 700, fill: col, maxW: 196 }), { o: 1 });
+      show(g, m('prog', .3 + i * 1.2));
+    });
+    labelBox(p, 800, 820, 900, ['движение начинает сокращение противоположной мышцы'], COL.whole, m('ag'), { size: 24 });
+  }],
+
+  ['freq', 'Частота', (m) => {
+    const p = panel(0);
+    txt(p, 'обычно 2–5 сеансов в неделю', 800, 120, m('freq'), { size: 30, weight: 700, fill: COL.good, anchor: 'middle' });
+    const days = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'], on = [1, 0, 1, 0, 1, 0, 0];
+    days.forEach((d, i) => {
+      const g = G(p, { o: 0 }), x = 420 + i * 110;
+      mk('rect', { x, y: 180, width: 90, height: 90, rx: 14, fill: on[i] ? COL.good : 'none', 'fill-opacity': .45, stroke: COL.good, 'stroke-width': 3 }, g);
+      T(g, d, { x: x + 45, y: 236, size: 26, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      show(g, m('freq', .5 + i * .15));
+    });
+    txt(p, 'перерывы — на заживление и восстановление', 800, 320, m('freq', 2), { size: 23, fill: COL.dim, anchor: 'middle' });
+    // a warning sign: the range goes down instead of up
+    const X0 = 400, Y0 = 760, W = 800, H = 300;
+    chartAxes(p, X0, Y0, W + 20, H + 20, 'объём', 'недели', m('sign'));
+    const cv = path(p, `M${X0} ${Y0 - 160}C${X0 + 200} ${Y0 - 200} ${X0 + 400} ${Y0 - 150} ${X0 + 780} ${Y0 - 60}`, { stroke: COL.bad, 'stroke-width': 6 }, { d: 0 });
+    draw(cv, m('sign', .5), 2);
+    put(para(p, 'объём уменьшается — хроническое воспаление, лишний рубец', X0 + 560, Y0 - 230, null, { size: 22, maxW: 360, fill: COL.bad, anchor: 'middle' }), { o: 0 });
+    show(p.lastChild, m('sign', 2));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-prog', prompt: ['Расставьте этапы прогрессии по порядку.'],
+    build: grid([
+      { parts: ['Быстрая во всём объёме'], ans: ['5'], why: 'Последний этап.' },
+      { parts: ['Статическая'], ans: ['1'], why: 'Начало.' },
+      { parts: ['Медленная в конце объёма'], ans: ['2'], why: 'Второй этап.' },
+      { parts: ['Быстрая в конце объёма'], ans: ['4'], why: 'Четвёртый.' },
+      { parts: ['Медленная во всём объёме'], ans: ['3'], why: 'Третий.' },
+    ], [['1', '1', COL.good], ['2', '2', COL.good], ['3', '3', COL.int], ['4', '4', COL.nat], ['5', '5', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['mode', 'Способы', (m) => {
+    const p = panel(0);
+    txt(p, 'кто прикладывает силу', 420, 130, m('mode'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'как участвует пациент', 1180, 130, m('mode', 1.5), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ['ручная', 'механическая', 'самостоятельная'].forEach((str, i) => pill(p, str, 420, 210 + i * 70, m('mode', .5 + i * .4), { col: COL.task, size: 25 }));
+    ['пассивная', 'ассистированная', 'активная'].forEach((str, i) => pill(p, str, 1180, 210 + i * 70, m('mode', 2 + i * .4), { col: COL.whole, size: 25 }));
+    infoCard(p, 120, 470, 640, 200, 'всегда', 'мышца расслаблена; ткани разогреты лёгкой активной нагрузкой или теплом', COL.good, m('warm'), { size: 23 });
+    infoCard(p, 840, 470, 640, 200, 'лучшего способа нет', 'выбирают по пациенту', COL.int, m('nobest'), { size: 23 });
+  }],
+
+  ['man', 'Ручная растяжка', (m) => {
+    const p = panel(0);
+    const sc = tableScene(p, { hx: 560, top: 560, s: 1.1, t0: .2 });
+    const ham = muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 13 }), rf = muscleOn(sc.pt, ...MUSCLE.rectus, { after: 'ftN', w: 13 });
+    prog(q => sc.pt.set({ hN: 75 * io(q) }), m('man', .5), 2, lin);
+    // a hold timer: 15–60 s
+    const ring = G(p, { x: 1060, y: 300, o: 0 });
+    mk('circle', { r: 70, fill: 'none', stroke: EDGE, 'stroke-width': 12 }, ring);
+    const arc = path(ring, 'M0 -70A70 70 0 1 1 -0.1 -70', { stroke: COL.task, 'stroke-width': 12 }, { d: 0 });
+    T(ring, '15–60 с', { x: 0, y: 10, size: 26, weight: 700, fill: COL.task, anchor: 'middle' });
+    show(ring, m('man', 1));
+    prog(q => put(arc, { d: q }), m('man', 1), 6, lin);
+    infoCard(p, 1160, 200, 360, 200, 'эффективность спорна', 'особенно при давних контрактурах', COL.int, m('eff'), { size: 22 });
+    ['в начале: понять реакцию пациента', 'когда важна стабилизация', 'пациент не управляет сегментом сам'].forEach((str, i) => pill(p, str, 1160, 460 + i * 60, m('when', i * .9), { col: COL.whole, size: 21 }));
+    // the patient helps: the opposite muscle contracts
+    prog(q => rf.act(.8 * Math.sin(Math.PI * q)), m('help', .5), 3, lin);
+    pill(p, 'пациент помогает: напрягает противоположную мышцу', 800, 820, m('help'), { col: COL.nat, size: 22 });
+  }],
+
+  ['rom', 'Растяжка ≠ объём', (m) => {
+    const p = panel(0);
+    const C = [480, 560], R = 300;
+    const g = G(p, { o: 0 });
+    path(g, romArc(C, R, 0, 90), { stroke: COL.good, 'stroke-width': 18 });
+    path(g, romArc(C, R, 90, 104), { stroke: COL.task, 'stroke-width': 18 });
+    path(g, `M${C[0]} ${C[1]}L${C[0] + R + 40} ${C[1]}`, { stroke: COL.dim, 'stroke-width': 4 });
+    path(g, `M${C[0] + (R - 30) * Math.cos(rad(-90))} ${C[1] + (R - 30) * Math.sin(rad(-90))}L${C[0] + (R + 30) * Math.cos(rad(-90))} ${C[1] + (R + 30) * Math.sin(rad(-90))}`, { stroke: COL.chalk, 'stroke-width': 6 });
+    T(g, 'граница доступной длины', { x: C[0] + 20, y: C[1] - R - 50, size: 22, weight: 700, fill: COL.chalk });
+    show(g, m('rom'));
+    infoCard(p, 900, 200, 620, 160, 'упражнения на объём', 'в пределах доступной длины тканей — сохранить подвижность', COL.good, m('rom', 1), { size: 23 });
+    infoCard(p, 900, 400, 620, 160, 'растяжка', 'за пределы доступной длины — увеличить объём', COL.task, m('rom', 3), { size: 23 });
+  }],
+
+  ['self', 'Самостоятельная', (m) => {
+    const p = panel(0), s = 1.15, GY = 790;
+    txt(p, 'самостоятельная растяжка: статически, по 30–60 с', 800, 100, m('self'), { size: 27, weight: 700, fill: COL.good, anchor: 'middle' });
+    // body weight over a fixed foot: the calf stretch at a wall
+    path(p, `M1080 ${GY}V200`, { stroke: COL.dim, 'stroke-width': 10 });
+    ground(p, 560, 1080, GY, .2);
+    const f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...STAND, t: 18, aN: 75, eN: 10, aF: 75, eF: 10, hN: 40, kN: 40, fN: 20, hF: -22, kF: 0, fF: 26 } });
+    const gas = muscleOn(f, ...MUSCLE.gastroc.map(([a, b, al, of]) => [a.replace('N', 'F'), b.replace('N', 'F'), al, of]), { w: 11 });
+    plant(f, 'AF', 760, GY);
+    show(f.g, m('w2'));
+    prog(q => { f.set({ t: lerp(10, 22, wave(q, 1)), hF: lerp(-12, -26, wave(q, 1)), fF: lerp(14, 30, wave(q, 1)) }); plant(f, 'AF', 760, GY); }, m('w2', .5), 5, lin);
+    txt(p, 'вес тела над зафиксированной стопой — икроножная', 820, 850, m('w2', 1), { size: 22, weight: 700, fill: ANAT.stretch, anchor: 'middle' });
+    ['руками двигать дистальный сегмент, проксимальный стабилизирован', 'вес тела над зафиксированным дистальным сегментом', 'приёмы ПНФ или короткие сокращения противоположной мышцы'].forEach((str, i) =>
+      put(para(p, `${i + 1}. ${str}`, 120, 220 + i * 120, null, { size: 23, weight: 600, maxW: 420, fill: COL.chalk }), { o: 0 }) && show(p.lastChild, m('w' + (i + 1))));
+  }],
+
+  ['mech', 'Механическая растяжка', (m) => {
+    const p = panel(0);
+    // a cuff weight stretches the elbow flexors (low load, long time)
+    const el = elbowModel(p, { x: 120, y: 330, s: 1.3 });
+    put(el.g, { o: 0 }); show(el.g, m('mech'));
+    const wt = G(p, { o: 0 });
+    path(wt, 'M0 0V40', { stroke: COL.dim, 'stroke-width': 3 });
+    mk('rect', { x: -26, y: 40, width: 52, height: 44, rx: 8, fill: COL.dim }, wt);
+    const elSet = el.set;
+    el.set = a => { elSet(a); const W = el.pts.W; put(wt, { x: 120 + W[0] * 1.3, y: 330 + W[1] * 1.3 }); return el; };
+    el.set(150);
+    show(wt, m('mech', .5));
+    prog(q => el.set(lerp(150, 168, io(q))), m('mech', 1), 5, lin);
+    txt(p, 'манжета с грузом', 330, 520, m('mech', .5), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ['ортез с постепенным растяжением', 'ортез с постоянной нагрузкой', 'серийные гипсы'].forEach((str, i) => pill(p, str, 330, 590 + i * 60, m('mech', 2.5 + i * .8), { col: METAL, size: 21 }));
+    infoCard(p, 680, 100, 840, 140, 'время', 'от 15–30 минут до 8–10 часов или почти весь день; гипсы — дни и недели', COL.task, m('dur'), { size: 22 });
+    // Light and colleagues: mechanical vs manual stretch, total time
+    const bar = (y, w, col, label, t0) => { const r = mk('rect', { x: 700, y, width: w, height: 44, rx: 8, fill: col, 'fill-opacity': .85 }, p); put(r, { o: 0 }); show(r, t0); txt(p, label, 710 + w + 10, y + 31, t0, { size: 21, weight: 700, fill: col }); };
+    txt(p, 'контрактуры коленей у пожилых: общее время растяжения', 700, 300, m('light'), { size: 22, weight: 700, fill: COL.chalk });
+    bar(320, 600, COL.good, 'груз ≈ 2–5,5 кг: 40 ч', m('light', .6));
+    txt(p, 'в книге — 5–12 фунтов', 1310, 378, m('light', .9), { size: 16, fill: COL.dim });
+    bar(380, 30, COL.int, 'вручную: 2 ч', m('light', 1.4));
+    txt(p, 'груз — эффективнее и удобнее', 700, 470, m('light', 3), { size: 22, weight: 700, fill: COL.good });
+    pill(p, '«постоянное» удлинение в рекламе — может держаться лишь дни', 1100, 540, m('care'), { col: COL.bad, size: 21 });
+    ['подобрать и проверить посадку', 'научить надевать и регулировать', 'осматривать кожу, вести дневник', 'дополнить активными упражнениями'].forEach((str, i) => pill(p, str, 900 + (i % 2) * 400, 640 + (i / 2 | 0) * 60, m('box', .4 + i * .7), { col: COL.whole, size: 21 }));
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-mode', prompt: ['Какой способ подойдёт?'],
+    build: grid([
+      { parts: ['Первое знакомство: как пациент реагирует на растяжение'], ans: ['m'], why: 'Ручная.' },
+      { parts: ['Домашняя программа, пациент хорошо управляет движением'], ans: ['s'], why: 'Самостоятельная.' },
+      { parts: ['Давняя фиброзная контрактура'], ans: ['d'], why: 'Механическая: малая сила очень долго.' },
+      { parts: ['Пациент не управляет сегментом и сам растянуть не может'], ans: ['m'], why: 'Ручная.' },
+      { parts: ['Сохранять новый объём между визитами'], ans: ['s'], why: 'Самостоятельная.' },
+    ], [['m', 'Ручная', COL.task], ['s', 'Самостоятельная', COL.good], ['d', 'Механическая', METAL]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Растягивают медленно; баллистика — только подготовленным, по прогрессии.', 'w1'],
+     ['Обычно 2–5 сеансов в неделю; если объём уменьшается — это перегрузка.', 'w2'],
+     ['Ручная — в начале и когда пациент не может сам; самостоятельная — дома, по 30–60 с.', 'w3'],
+     ['Механическая — малая сила очень долго, лучше всего при давних контрактурах.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-mech', prompt: ['Пациентке 80 лет, давняя сгибательная контрактура колена, живёт в доме престарелых. Что эффективнее?'],
+    build: choice([
+      ['Длительное растяжение небольшим грузом или ортезом'],
+      ['Три растяжения руками по минуте'],
+      ['Быстрые махи ногой'],
+      ['Растяжка раз в неделю'],
+    ], 0, 'При давних контрактурах малая сила очень долго эффективнее и удобнее.',
+    [null, 'Это работало хуже груза в исследовании у пожилых.', 'Баллистика противопоказана при контрактурах и у пожилых.', 'При патологии тканей растягивать нужно чаще.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Баллистическая растяжка увеличивает гибкость, но сильнее травмирует ткани.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Обычная частота — 2–5 сеансов в неделю.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Упражнения на объём движений и растяжка — одно и то же.'], ans: ['f'], why: 'Неверно: растяжка выходит за доступную длину.' },
+      { parts: ['Самая безопасная самостоятельная растяжка — статическая по 30–60 с.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['«Постоянное» удлинение в рекламе прибора всегда означает годы.'], ans: ['f'], why: 'Неверно: может держаться лишь дни.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

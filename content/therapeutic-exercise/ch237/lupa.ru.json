@@ -1,0 +1,10 @@
+[
+ {
+  "beat": "multi",
+  "fig": 2,
+  "target": "quads",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает quads, фигура ×0.75"
+ }
+]

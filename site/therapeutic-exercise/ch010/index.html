@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Стадии моторного обучения — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 10, title: 'Стадии моторного обучения', minutes: 7, language: 'ru', next: '../ch011/' };
+
+// One colour per stage, kept through lessons 10–12.
+const SKILL_C = { cog: COL.whole, assoc: COL.task, auto: COL.good };
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+function bubble(p, x, y, w, str, col, t0, { size = 24 } = {}) {
+  const g = G(p, { o: 0 }), tt = para(g, str, x + 18, y + 36, null, { size, maxW: w - 36 }), h = tt._h + 24;
+  put(tt, { o: 1 });
+  const r = mk('path', { d: `M${x + 16} ${y}H${x + w - 16}Q${x + w} ${y} ${x + w} ${y + 16}V${y + h - 16}Q${x + w} ${y + h} ${x + w - 16} ${y + h}H${x + 56}L${x + 24} ${y + h + 26}L${x + 34} ${y + h}H${x + 16}Q${x} ${y + h} ${x} ${y + h - 16}V${y + 16}Q${x} ${y} ${x + 16} ${y}Z`, fill: PANEL, stroke: col, 'stroke-width': 2.5 }, g);
+  g.insertBefore(r, g.firstChild);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+function holdIn(p, f, draw0) {
+  const c = G(p);
+  draw0(c);
+  const upd = () => { const [x, y] = onStage(f, 'WN'); put(c, { x, y }); };
+  f.onSet.push(upd); upd();
+  return c;
+}
+const cup = c => {
+  mk('path', { d: 'M-6 -26H18L15 0H-3Z', fill: COL.chalk, stroke: COL.dim, 'stroke-width': 2 }, c);
+  mk('path', { d: 'M17 -20Q26 -16 16 -7', fill: 'none', stroke: COL.dim, 'stroke-width': 2.5 }, c);
+};
+// A numbered strategy card.
+function stratCard(p, x, y, w, i, str, col, t0) {
+  const g = G(p, { o: 0 });
+  roundBox(g, x, y, w, 104, EDGE, PANEL, 2);
+  mk('circle', { cx: x + 40, cy: y + 52, r: 20, fill: col }, g);
+  T(g, String(i), { x: x + 40, y: y + 61, size: 24, fill: COL.board, weight: 700, anchor: 'middle' });
+  put(para(g, str, x + 76, y + 44, null, { size: 24, maxW: w - 100 }), { o: 1 });
+  show(g, t0);
+  return g;
+}
+// Attempts around a target: spread shrinks as the skill is refined.
+function target(p, cx, cy, t0, spread, n, col, dur = 2) {
+  const g = G(p, { o: 0 });
+  [60, 40, 20].forEach((r, i) => mk('circle', { cx, cy, r, fill: 'none', stroke: i === 2 ? col : COL.faint, 'stroke-width': 3 }, g));
+  show(g, t0);
+  for (let i = 0; i < n; i++) {
+    const a = i * 2.39996, r = spread * Math.sqrt((i + .5) / n);
+    const d = mk('circle', { cx: cx + r * Math.cos(a), cy: cy + r * Math.sin(a), r: 6, fill: r > 40 ? COL.bad : col }, p);
+    put(d, { o: 0 }); show(d, t0 + .3 + i * dur / n, .2);
+  }
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Стадии моторного обучения', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 1 · Урок 10', { x: 800, y: 250, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Стадии моторного обучения', { x: 800, y: 345, size: 66, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как меняется ученик и как должен меняться учитель', 800, 440, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 790;
+    path(art, `M560 ${GY}H1040`, { stroke: COL.faint, 'stroke-width': 3 });
+    [[620, SKILL_C.cog], [800, SKILL_C.assoc], [980, SKILL_C.auto]].forEach(([x, c]) => mk('circle', { cx: x, cy: GY + 22, r: 9, fill: c }, art));
+    const f = fig(art, { x: 600, y: GY - 182 * .5, s: .5 });
+    show(art, m('sub', .2));
+    walk(f, m('sub', .4), D - m('sub', .4) - 1, { cycles: 4, dx: 380 });
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['overview', 'Три стадии', (m) => {
+    const p = panel(0);
+    head(p, 'Три стадии моторного обучения', .2, 86, COL.chalk);
+    const S = [['когнитивная', 'понять задачу', SKILL_C.cog, 's1', 9, 1], ['ассоциативная', 'шлифовать навык', SKILL_C.assoc, 's2', 4, .55], ['автономная', 'движение автоматично', SKILL_C.auto, 's3', 0, .18]];
+    S.forEach(([name, sub, c, k, errs, att], i) => {
+      const x = 120 + i * 470, g = G(p, { o: 0 });
+      roundBox(g, x, 160, 420, 440, c, PANEL, 3);
+      T(g, String(i + 1), { x: x + 40, y: 222, size: 40, weight: 700, fill: c });
+      T(g, name, { x: x + 84, y: 218, size: 32, weight: 700, fill: c });
+      T(g, sub, { x: x + 40, y: 270, size: 25, fill: COL.dim });
+      T(g, 'внимание к движению', { x: x + 40, y: 340, size: 22, fill: COL.dim });
+      mk('rect', { x: x + 40, y: 356, width: 340, height: 18, rx: 9, fill: COL.faint, 'fill-opacity': .4 }, g);
+      mk('rect', { x: x + 40, y: 356, width: 340 * att, height: 18, rx: 9, fill: c }, g);
+      T(g, 'ошибки', { x: x + 40, y: 430, size: 22, fill: COL.dim });
+      for (let j = 0; j < errs; j++) mk('circle', { cx: x + 52 + (j % 9) * 36, cy: 470, r: 10, fill: COL.bad }, g);
+      if (!errs) checkMark(g, x + 60, 470, 0, COL.good, 1.2);
+      show(g, m(k));
+      if (i < 2) arrowTo(p, [x + 426, 380], [x + 464, 380], m(S[i + 1][3], -.3), { col: COL.dim, w: 4 });
+    });
+    labelBox(p, 800, 700, 1180, ['ученик на каждой стадии разный — значит, и учить нужно по-разному'], COL.chalk, m('why'), { size: 26 });
+  }],
+
+  ['cog', 'Когнитивная стадия', (m) => {
+    const p = panel(0), GY = 640, c = SKILL_C.cog;
+    txt(p, '1 · когнитивная стадия', 800, 80, .2, { size: 32, weight: 700, fill: c, anchor: 'middle' });
+    ground(p, 120, 520, GY, .3);
+    const f = fig(p, { x: 320, y: GY - 182 * .6, s: .6, o: 0 }); show(f.g, .3);
+    // hesitant reach: overshoots and corrects
+    prog(q => { const w = Math.sin(Math.PI * 2 * 3 * q) * (1 - q); f.set({ aN: 70 + 22 * w, eN: 30 - 14 * w, t: 4 * w }); }, m('think', -.2), 6, lin);
+    pill(p, 'что делать?', 650, 200, m('goal', .2), { col: c, size: 26 });
+    pill(p, 'как правильно и безопасно?', 1000, 200, m('goal', 3), { col: c, size: 26 });
+    ['как стоять?', 'как далеко?', 'с какой силой?', 'как быстро?'].forEach((s, i) => bubble(p, 560 + (i % 2) * 300, 270 + Math.floor(i / 2) * 110, 260, s, c, m('think', .3 + i * .5), { size: 24 }));
+    const noise = G(p, { o: 0 });
+    [[1260, 300], [1380, 360], [1300, 420]].forEach(([x, y]) => { mk('path', { d: `M${x - 30} ${y}q10 -18 20 0q10 18 20 0q10 -18 20 0`, fill: 'none', stroke: COL.dim, 'stroke-width': 4 }, noise); });
+    T(noise, 'шумный зал мешает', { x: 1320, y: 490, size: 24, fill: COL.bad, weight: 700, anchor: 'middle' });
+    show(noise, m('dist'));
+    cross(p, 1320, 360, 70, m('dist', .6), 6);
+    for (let i = 0; i < 8; i++) { const d = mk('circle', { cx: 640 + i * 46, cy: 560, r: 11, fill: COL.bad }, p); put(d, { o: 0 }); show(d, m('err', .1 + i * .12), .2); }
+    txt(p, 'много ошибок', 800, 610, m('err', .5), { size: 25, fill: COL.bad, weight: 700, anchor: 'middle' });
+    labelBox(p, 800, 700, 620, ['частая обратная связь терапевта'], c, m('err', 1.6), { size: 25 });
+    arrowTo(p, [1110, 700], [1220, 700], m('err', 3.4), { col: COL.good, w: 4 });
+    txt(p, 'потом — самооценка', 1380, 708, m('err', 3.6), { size: 25, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['cogstr', 'Стратегии: когнитивная', (m) => {
+    const p = panel(0), c = SKILL_C.cog;
+    head(p, 'Когнитивная стадия: что делает терапевт', .2, 76, c);
+    const S7 = ['Тихая, закрытая обстановка', 'Объяснить цель упражнения и пользу в жизни', 'Показать правильное выполнение', 'Вести руками — и перестать, когда пациент контролирует движение', 'Сложное — по частям; мало упражнений и повторений', 'Частая конкретная обратная связь → потом переменная и отсроченная', 'Блоковая практика; безопасные ошибки допустимы'];
+    S7.forEach((s, i) => { const col = i < 4 ? 0 : 1, row = i < 4 ? i : i - 4; stratCard(p, 100 + col * 720, 130 + row * 130, 680, i + 1, s, c, m('c' + (i + 1))); });
+  }],
+
+  ['assoc', 'Ассоциативная стадия', (m) => {
+    const p = panel(0), c = SKILL_C.assoc;
+    txt(p, '2 · ассоциативная стадия', 800, 80, .2, { size: 32, weight: 700, fill: c, anchor: 'middle' });
+    txt(p, 'попытки', 300, 160, m('ch'), { size: 24, fill: COL.dim, anchor: 'middle' });
+    target(p, 300, 300, m('ch', .3), 95, 10, SKILL_C.cog, 1.4);
+    arrowTo(p, [400, 300], [500, 300], m('ch', 2.2), { col: COL.dim, w: 4 });
+    target(p, 600, 300, m('ch', 2.6), 34, 10, c, 1.4);
+    txt(p, 'стабильнее и экономнее', 450, 430, m('ch', 4), { size: 25, weight: 700, fill: c, anchor: 'middle' });
+    ['разные условия', 'замечает', 'исправляет', 'предвидит'].forEach((s, i) => pill(p, s, i ? 120 + i * 190 : 450, i ? 590 : 510, m(i ? 'self' : 'var', i ? .3 + (i - 1) * .7 : .2), { col: i ? COL.good : c, size: 24 }));
+    [0, 1].forEach(i => arrowTo(p, [390 + i * 190, 590], [418 + i * 190, 590], m('self', .6 + i * .7), { col: COL.good, w: 3 }));
+    const R = [['усложнять задачу, менять порядок', 'str'], ['заниматься самостоятельно', 'str'], ['имитация бытовых задач', 'str'], ['ручное ведение — не нужно', 'fb'], ['связь: отсроченная, переменная, суммарная', 'fb'], ['отвлекающие факторы, занятия дома', 'home']];
+    R.forEach(([s, k], i) => {
+      const g = G(p, { o: 0 }), y = 150 + i * 105;
+      roundBox(g, 860, y, 640, 84, k === 'fb' ? COL.whole : k === 'home' ? COL.good : c, PANEL, 2);
+      put(para(g, s, 890, y + 50, null, { size: 24, maxW: 590 }), { o: 1 });
+      show(g, m(k, .2 + (k === 'str' ? i : k === 'fb' ? i - 3 : 0) * .9));
+    });
+    cross(p, 1440, 192 + 3 * 105, 22, m('fb', .6), 5);
+  }],
+
+  ['auto', 'Автономная стадия', (m) => {
+    const p = panel(0), c = SKILL_C.auto, GY = 520;
+    txt(p, '3 · автономная стадия', 800, 80, .2, { size: 32, weight: 700, fill: c, anchor: 'middle' });
+    ground(p, 120, 760, GY, .3);
+    const f = fig(p, { x: 200, y: GY - 182 * .6, s: .6, o: 0, pose: { aN: 70, eN: 70 } });
+    const cp = holdIn(p, f, cup); put(cp, { o: 0 });
+    show(f.g, .3); show(cp, .3);
+    const fr = fig(p, { x: 110, y: GY - 182 * .6, s: .6, o: 0, col: '#b9cfe0' }); show(fr.g, .3);
+    prog(q => { const w = 2 * Math.PI * 5 * q, e = Math.min(1, q * 10, (1 - q) * 10), gp = gaitPose(w, e, false); put(f.g, { x: 200 + 380 * q }); put(fr.g, { x: 110 + 380 * q }); f.set({ ...gp, aN: 70, eN: 70 }); fr.set(gaitPose(w + Math.PI, e, false)); }, m('ch', .2), 7, lin);
+    bubble(p, 560, 200, 240, 'и разговаривает', c, m('ch', 1.2), { size: 24 });
+    txt(p, 'движение автоматично', 440, 600, m('ch', .6), { size: 27, weight: 700, fill: c, anchor: 'middle' });
+    txt(p, 'двойные задачи · новые условия', 440, 645, m('ch', 2), { size: 24, fill: COL.dim, anchor: 'middle' });
+    ['быстрее', 'дальше', 'сложнее'].forEach((s, i) => pill(p, s, 1000 + i * 180, 200, m('str', .2 + i * .4), { col: c, size: 26 }));
+    ['жизнь', 'фитнес', 'спорт'].forEach((s, i) => pill(p, s, 1000 + i * 180, 290, m('str', 2.4 + i * .4), { col: COL.whole, size: 26 }));
+    txt(p, 'обратной связи почти нет', 1180, 380, m('str', 4.4), { size: 25, fill: COL.dim, anchor: 'middle' });
+    // a timeline of the stages: discharge usually comes before the autonomous stage
+    const TL = G(p, { o: 0 }), Y = 740;
+    [[200, 650, SKILL_C.cog], [650, 1050, SKILL_C.assoc], [1050, 1400, SKILL_C.auto]].forEach(([a, b, cc]) => mk('rect', { x: a, y: Y - 10, width: b - a - 6, height: 20, rx: 10, fill: cc, 'fill-opacity': .7 }, TL));
+    show(TL, m('disch'));
+    const dm = G(p, { o: 0 });
+    path(dm, `M930 ${Y - 60}V${Y + 30}`, { stroke: COL.bad, 'stroke-width': 4 });
+    T(dm, 'чаще всего выписка — здесь', { x: 930, y: Y - 74, size: 24, weight: 700, fill: COL.bad, anchor: 'middle' });
+    show(dm, m('disch', .8));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-stage', prompt: ['Какая это стадия моторного обучения?'],
+    build: grid([
+      { parts: ['Пациент думает о каждом шаге и часто ошибается'], ans: ['c'], why: 'Много внимания к деталям и много ошибок — когнитивная.' },
+      { parts: ['Пациент сам замечает и исправляет ошибку'], ans: ['a'], why: 'Самоисправление — ассоциативная.' },
+      { parts: ['Пациент выполняет упражнение и одновременно разговаривает'], ans: ['u'], why: 'Двойная задача без потери качества — автономная.' },
+      { parts: ['Пациенту мешает шум в зале'], ans: ['c'], why: 'Всё внимание занято движением — когнитивная.' },
+      { parts: ['Ошибок мало; пациент уточняет время и амплитуду'], ans: ['a'], why: 'Шлифовка навыка — ассоциативная.' },
+    ], [['c', 'Когнитивная', SKILL_C.cog], ['a', 'Ассоциативная', SKILL_C.assoc], ['u', 'Автономная', SKILL_C.auto]], { multi: false, text: true }),
+  }], done) }],
+
+  ['pre', 'До практики', (m) => {
+    const p = panel(0), GY = 470;
+    head(p, 'Что важно до практики', .2, 76, COL.chalk);
+    const g1 = G(p, { o: 0 });
+    [50, 32, 14].forEach((r, i) => mk('circle', { cx: 220, cy: 200, r, fill: 'none', stroke: i === 2 ? COL.task : COL.faint, 'stroke-width': 4 }, g1));
+    T(g1, 'значимая задача', { x: 300, y: 196, size: 27, weight: 700, fill: COL.task });
+    T(g1, 'понятна цель, есть интерес', { x: 300, y: 232, size: 23, fill: COL.dim });
+    show(g1, m('mean'));
+    txt(p, 'внимание без отвлечений', 300, 320, m('att'), { size: 27, weight: 700, fill: COL.whole });
+    // demonstration: one figure shows, the other watches
+    ground(p, 160, 640, GY + 170, m('demo', -.2));
+    const d1 = fig(p, { x: 300, y: GY + 170 - 182 * .5, s: .5, o: 0, col: '#b9cfe0' }), d2 = fig(p, { x: 520, y: GY + 170 - 182 * .5, s: .5, o: 0, dir: -1 });
+    [d1, d2].forEach(f => show(f.g, m('demo', -.2)));
+    repeatPose(d1, REACH, m('demo', .3), 3, 2);
+    txt(p, 'показ перед практикой', 400, 700, m('demo', .4), { size: 25, weight: 700, fill: COL.whole, anchor: 'middle' });
+    // attention: outcome vs details
+    pill(p, 'пояснение: пример, не из книги', 1180, 150, m('ext'), { col: COL.dim, size: 20 });
+    const good = G(p, { o: 0 });
+    roundBox(good, 820, 190, 720, 130, COL.good, PANEL, 3);
+    T(good, 'на результат', { x: 850, y: 236, size: 25, weight: 700, fill: COL.good });
+    T(good, '«Поставьте чашку на верхнюю полку»', { x: 850, y: 282, size: 25 });
+    show(good, m('ext', .4));
+    const bad = G(p, { o: 0 });
+    roundBox(bad, 820, 350, 720, 130, COL.faint, PANEL, 2);
+    T(bad, 'на детали', { x: 850, y: 396, size: 25, weight: 700, fill: COL.dim });
+    T(bad, '«Согните плечо, разогните локоть, кисть…»', { x: 850, y: 442, size: 25, fill: COL.dim });
+    show(bad, m('ext', 1.2));
+    checkMark(p, 1500, 236, m('ext', 2.4), COL.good, 1.4);
+    labelBox(p, 1180, 600, 560, ['инструкции — кратко'], COL.int, m('short'), { size: 28 });
+    txt(p, 'много сведений в начале запутает', 1180, 680, m('short', .6), { size: 24, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => {
+    const p = panel(0), GY = 640;
+    ground(p, 120, 520, GY, .1);
+    const f = fig(p, { x: 320, y: GY - 182 * .6, s: .6 });
+    repeatPose(f, REACH, .3, 3, 1);
+    pill(p, 'пояснение: пример, не из книги', 320, 230, .3, { col: COL.dim, size: 20 });
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-instr', prompt: ['Пациент учится ставить чашку на полку. Какая инструкция перед практикой лучше?'],
+    build: choice([['«Поставьте чашку на верхнюю полку»'], ['«Напрягите живот, поднимите плечо на 90°, разогните локоть, поверните кисть, затем…»'], ['Ничего не говорить и не показывать']], 0,
+      'Кратко и с вниманием на результат — так обучение идёт лучше.',
+      [null, 'Слишком много деталей в начале скорее запутает.', 'Пациенту нужно понимать цель; помогает и показ.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Когнитивная: понять задачу, много ошибок, тихая обстановка, частая обратная связь.', 'w1', SKILL_C.cog],
+     ['Ассоциативная: шлифовка, вариации, самоисправление, меньше и позже обратной связи.', 'w2', SKILL_C.assoc],
+     ['Автономная: автоматизм, двойные задачи, применение в жизни.', 'w3', SKILL_C.auto],
+     ['До практики: значимая задача, внимание на результат, показ и краткие инструкции.', 'w4', COL.task]].forEach(([str, mark, c], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: c }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-strat', prompt: ['Для какой стадии эта стратегия?'],
+    build: grid([
+      { parts: ['Тихая закрытая обстановка, ведение руками'], ans: ['c'], why: 'Начало обучения — когнитивная стадия.' },
+      { parts: ['Отвлекающие факторы и подготовка к занятиям дома'], ans: ['a'], why: 'Ассоциативная стадия.' },
+      { parts: ['Быстрее, дальше, сложнее; спорт и фитнес'], ans: ['u'], why: 'Автономная стадия.' },
+      { parts: ['Частая конкретная обратная связь'], ans: ['c'], why: 'Когнитивная стадия.' },
+      { parts: ['Суммарная и отсроченная обратная связь, самостоятельные занятия'], ans: ['a'], why: 'Ассоциативная стадия.' },
+    ], [['c', 'Когнитивная', SKILL_C.cog], ['a', 'Ассоциативная', SKILL_C.assoc], ['u', 'Автономная', SKILL_C.auto]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['На когнитивной стадии ошибок мало.'], ans: ['f'], why: 'Неверно: ошибок много.' },
+      { parts: ['На ассоциативной стадии ручное ведение уже не нужно.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Большинство пациентов доходят до автономной стадии ещё до выписки.'], ans: ['f'], why: 'Неверно: обычно их выписывают раньше.' },
+      { parts: ['Внимание лучше направлять на результат движения, а не на его детали.'], ans: ['t'], why: 'Верно: так показали исследования на здоровых людях.' },
+      { parts: ['Чем подробнее устная инструкция перед практикой, тем лучше.'], ans: ['f'], why: 'Неверно: инструкции должны быть краткими.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>anat sandbox</title><link rel="stylesheet" href="../lib/engine.css"></head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script>
+const CHAPTER = { number: 999, title: 'anat sandbox', minutes: 1, language: 'ru', anat: !location.search.includes('anat=0') };
+</script>
+<script>
+// Sandbox tests for the live-anatomy layer: each test returns true/false or { ok, detail }.
+const near = (a, b, e = 1e-6) => Math.abs(a - b) <= e;
+const lerpP = (a, b, q) => { const o = {}; for (const k in a) o[k] = a[k] + (b[k] - a[k]) * q; return o; };
+const SQ = { ...SQUAT, aN: 90, aF: 90, eN: 4, eF: 4 };
+const BEND = { ...STAND, t: 78, hd: 10, hN: 78, hF: 78, kN: 0, kF: 0, aN: 74, eN: 6, aF: 70, eF: 6 };
+const squatAt = t => lerpP(STAND, SQ, t < 2 ? t / 2 : t < 3 ? 1 : t < 5 ? 1 - (t - 3) / 2 : 0);
+function run(f, poseAt, t0, t1, dt = 1 / 60) { for (let t = t0; t <= t1 + 1e-9; t += dt) { f.set(poseAt(t)); evalTo(t); } }
+function freshFig(o = {}) { scene.replaceChildren(); TW = []; return fig(scene, { x: 800, y: 500, s: 1, ...o }); }
+const shape = (f, name) => f.anat.shapes.find(s => s.name === name);
+window.TESTS = {
+  levels: () => [1, .6, .59, .15, .14, 0].map(ANAT3.lvl).join() === '1,1,2,2,3,3',
+  sense: () => {
+    const s = {}; let L = 100;
+    for (let i = 0; i <= 60; i++) { L = 100 - 10 * i / 60; anatSense(s, L, i / 60, 100); }
+    const a = s.mode;
+    for (let i = 1; i <= 6; i++) anatSense(s, L, 1 + i / 60, 100);
+    const b = s.mode;
+    for (let i = 7; i <= 18; i++) anatSense(s, L, 1 + i / 60, 100);
+    const c = s.mode;
+    for (let i = 1; i <= 30; i++) { L += .2; anatSense(s, L, 1.3 + i / 60, 100); }
+    const d = s.mode, e = anatSense(s, L, 9, 100), g = anatSense(s, L, 9, 100);
+    return { ok: [a, b, c, d, e, g].join() === 'con,con,iso,ecc,ecc,ecc', detail: [a, b, c, d, e, g].join() };
+  },
+  style: () => {
+    const C = ANAT3.col, l = x => x.toLowerCase();
+    const s1 = anatStyle(1, 'con', 0), s2 = anatStyle(2, 'ecc', 0), s3 = anatStyle(3, 'iso', .14), s0 = anatStyle(3, 'iso', 0), sf = anatStyle(1, 'con', 0, true);
+    const ok = l(s1.fill) === l(C.con) && s1.dash === null && s1.key === 'con' && s2.dash === '4 3' && l(s2.fill) === l(mix(C.ecc, COL.board, ANAT3.synMix)) &&
+      s3.key === 'str' && near(s3.op, ANAT3.strOp) && s0.key === 'rest' && near(s0.op, ANAT3.restOp) && near(sf.op, ANAT3.far) &&
+      s1.amp === .25 && s2.amp === .16 && s0.amp === .15 && sf.amp === .15;
+    return { ok, detail: JSON.stringify([s1, s2, s3, s0, sf]) };
+  },
+  thickness: () => near(anatK(.5, .25), .75) && near(anatK(-.5, .25), 1.25) && near(anatK(0, .25), 1) && near(anatK(.5, .16), .84),
+  sensorOnly: () => { const f = freshFig(), q = muscleOn(f, ...MUSCLE.quads); return [...q.g.querySelectorAll('path')].every(e => e.getAttribute('display') === 'none'); },
+  ribbon: () => {
+    const f = freshFig(), r = muscleOn(f, ['H', 'Sh', 10, -18], ['KN', 'H', 40, -12], { after: 'thN' });
+    const belly = r.g.children[2];
+    const inPlane = f.anat.groups.some(g => g.contains(r.g) && g.contains(f.parts.thN.e) === false);
+    return { ok: r.shape === 'ribbon' && belly.getAttribute('display') !== 'none' && (belly.getAttribute('d') || '').length > 40 && inPlane, detail: r.shape + ' ' + inPlane };
+  },
+  layers: () => {
+    const f = freshFig(); muscleOn(f, ...MUSCLE.quads);
+    const P = f.parts, kids = [...f.g.children], anchors = [P.hdF.e, P.ftF.e, f.nose, P.ftN.e, P.hdN.e];
+    const ok = f.anat.groups.length === 5 && f.anat.groups.every((g, i) => kids[kids.indexOf(anchors[i]) + 1] === g && g.children.length === (ANAT3.under > 0 ? 4 : 3)) &&
+      Object.values(P).every(p => p.e.getAttribute('visibility') === 'hidden');
+    return { ok, detail: f.anat.groups.map(g => kids.indexOf(g)).join() };
+  },
+  squatModes: () => {
+    const f = freshFig(), q = muscleOn(f, ...MUSCLE.quads), gm = muscleOn(f, ...MUSCLE.glutMax); q.act(.9); gm.act(.9);
+    const sh = shape(f, 'quads'), seen = [];
+    run(f, squatAt, 0, 1.2); seen.push(sh.s.mode, sh.lv);
+    run(f, squatAt, 1.2 + 1 / 60, 2.8); seen.push(sh.s.mode);
+    run(f, squatAt, 2.8 + 1 / 60, 4.2); seen.push(sh.s.mode);
+    return { ok: seen.join() === 'ecc,1,iso,con', detail: seen.join() };
+  },
+  bendStretch: () => {
+    const f = freshFig(); anatFig(f);
+    run(f, t => lerpP(STAND, BEND, Math.min(1, t / 1.5)), 0, 2.5);
+    const h = shape(f, 'hamstrings');
+    return { ok: h.lv === 3 && h.key === 'str', detail: h.lv + ' ' + h.key };
+  },
+  hideToRest: () => {
+    const f = freshFig(), ham = muscleOn(f, ...MUSCLE.hamstrings); ham.act(.9);
+    evalTo(0); evalTo(.05); const a = shape(f, 'hamstrings').lv;
+    put(ham.g, { o: 0 }); evalTo(.1); const b = shape(f, 'hamstrings').lv;
+    return { ok: a === 1 && b === 3, detail: a + ' ' + b };
+  },
+  focus: () => {
+    const f = freshFig(), ham = muscleOn(f, ...MUSCLE.hamstrings); evalTo(0);
+    const h = shape(f, 'hamstrings').body.getAttribute('fill-opacity'), q = shape(f, 'quads').body.getAttribute('fill-opacity');
+    const hf = shape(f, 'hamstrings').body.getAttribute('fill').toLowerCase(), hk = shape(f, 'hamstrings').key;
+    return { ok: +h === 1 && near(+q, ANAT3.restOp, .01) && hf === ANAT3.col.focus.toLowerCase() && hk === 'focus', detail: [h, q, hf, hk].join() };
+  },
+  belly: () => {
+    scene.replaceChildren(); TW = [];
+    const b = bellyEl(scene, { w: 30 }), P = L => [[400, 400], [400 + L, 400]];
+    b.set(P(200)); b.act(1); evalTo(0);
+    const fill0 = b.g.children[2].getAttribute('fill'), glow0 = +b.g.children[0].getAttribute('stroke-opacity');
+    for (let i = 1; i <= 30; i++) { b.set(P(200 - i * 2)); evalTo(i / 60); }
+    const fill1 = b.g.children[2].getAttribute('fill').toLowerCase(), k1 = b.k;
+    b.act(0); for (let i = 31; i <= 60; i++) { b.set(P(140 + (i - 30) * 4)); evalTo(i / 60); }
+    const fill2 = b.g.children[2].getAttribute('fill').toLowerCase();
+    b.hurt = 1; b.set(...b.last); const glow2 = +b.g.children[0].getAttribute('stroke-opacity');
+    const rgb = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)), close = (x, y, d) => rgb(x).every((v, i) => Math.abs(v - rgb(y)[i]) <= d);
+    const ok = !!fill0 && glow0 === 0 && close(fill1, ANAT3.col.con, 12) && k1 > 1.05 && close(fill2, mix(ANAT3.col.focus, ANAT3.col.str, .5), 140) && glow2 > .4;
+    return { ok, detail: [fill0, glow0, fill1, k1.toFixed(2), fill2, glow2].join() };
+  },
+  stretchCol: () => ANAT.stretch === ANAT3.col.str,
+  role: () => { const f = freshFig(); anatRole(f, 'tibAnt', 1); evalTo(0); return shape(f, 'tibAnt').lv === 1; },
+  quadGroup: () => {
+    const f = freshFig(), r = muscleOn(f, ...MUSCLE.rectus); r.act(.9); evalTo(0);
+    const a = [shape(f, 'rectFem').lv, shape(f, 'quads').lv];
+    const g = freshFig(), r2 = muscleOn(g, ...MUSCLE.rectus), q2 = muscleOn(g, ...MUSCLE.quads); r2.act(.9); q2.act(0); evalTo(0);
+    const b = [shape(g, 'rectFem').lv, shape(g, 'quads').lv];
+    return { ok: a.join() === '1,1' && b.join() === '1,3', detail: a + ' | ' + b };
+  },
+  autoSyn: () => {
+    const f = freshFig(), q = muscleOn(f, ...MUSCLE.glutMax); q.act(.9);
+    CHAPTER.anatSyn = true; evalTo(0); const a = shape(f, 'hamstrings').lv;
+    CHAPTER.anatSyn = false; evalTo(.05); const b = shape(f, 'hamstrings').lv;
+    return { ok: a === 2 && b === 3, detail: a + ' ' + b };
+  },
+  scaleWidths: () => {
+    const f = freshFig({ s: .5 }); anatFig(f); evalTo(0);
+    const w = parseFloat(f.anat.skins.find(s => !s.under).o.getAttribute('stroke-width'));
+    return { ok: near(w, ANAT3.skinLine / .5, .05), detail: w };
+  },
+  legend: () => {
+    const f = freshFig(), q = muscleOn(f, ...MUSCLE.quads), gm = muscleOn(f, ...MUSCLE.glutMax); q.act(.9); gm.act(.9);
+    run(f, squatAt, 0, 1.2);
+    const a = document.getElementById('anatLegend').textContent;
+    const so = muscleOn(f, ...MUSCLE.soleus); so.act(.4);
+    run(f, squatAt, 1.2 + 1 / 60, 1.4);
+    const b = document.getElementById('anatLegend').textContent;
+    return { ok: a.includes('удлиняется') && !a.includes('укорачивается') && !a.includes('синергист') && b.includes('пунктир — синергист'), detail: a + ' | ' + b };
+  },
+  legendPlace: () => {
+    const f = freshFig(), q = muscleOn(f, ...MUSCLE.quads); q.act(.9);
+    const lab = mk('text', { x: 40, y: 880, 'font-size': 26, fill: '#fff' }, scene); lab.textContent = 'подпись внизу слева, мешает полоске';
+    ANAT_LEGSIG = ''; evalTo(0); evalTo(.05);
+    const tr = document.getElementById('anatLegend').getAttribute('transform') || '';
+    return { ok: /translate\((?!0 0)/.test(tr) && !tr.startsWith('translate(0 0'), detail: tr };
+  },
+  keyA: () => {
+    const f = freshFig(); evalTo(0);
+    const fire = el => el.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyA', key: 'a', bubbles: true }));
+    fire(document); const a = ANAT_ALL && !!f.anat && f.anat.on;
+    fire(document); const b = !ANAT_ALL && f.anat.on === false;
+    const inp = document.createElement('input'); document.body.appendChild(inp); inp.focus(); fire(inp); const c = ANAT_ALL === false; inp.remove();
+    anatAll(false);
+    return { ok: a && b && c, detail: [a, b, c].join() };
+  },
+};
+window.TESTS_OFF = {
+  off: () => anatEnabled() === false && ANAT.taut === '#ffd75e',
+  legacyColour: () => {
+    const f = freshFig(), q = muscleOn(f, ...MUSCLE.quads); q.act(1);
+    const fill = q.g.children[2].getAttribute('fill');
+    return { ok: !f.anat && fill === mix(mix(ANAT.muscle, '#ffd2c4', 0), '#ff5a3c', .75) && q.g.children[0].getAttribute('display') === null, detail: fill };
+  },
+};
+</script>
+</body></html>

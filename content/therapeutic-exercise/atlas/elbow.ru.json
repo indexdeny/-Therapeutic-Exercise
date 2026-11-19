@@ -1,0 +1,706 @@
+{
+  "region": "elbow",
+  "exercises": [
+    {
+      "id": "elb-ext-stretch",
+      "ru": "Растяжка в разгибание локтя",
+      "en": "low-load prolonged stretch into elbow extension",
+      "joint": [
+        "elbow"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "weight",
+        "roll"
+      ],
+      "key": [
+        "полотенце под плечом — опора",
+        "лёгкая манжета на предплечье",
+        "пронация, нейтраль, супинация"
+      ],
+      "warn": "после травмы — без интенсивной растяжки сгибателей: можно вызвать гетеротопическую кость",
+      "page": 645,
+      "moments": [
+        {
+          "n": 177,
+          "beat": "ext",
+          "mark": "mech",
+          "to": "pos"
+        },
+        {
+          "n": 177,
+          "beat": "ext",
+          "mark": "self"
+        },
+        {
+          "n": 173,
+          "beat": "stretch",
+          "mark": "man"
+        },
+        {
+          "n": 174,
+          "beat": "post2",
+          "mark": "p2"
+        },
+        {
+          "n": 173,
+          "beat": "ctrl",
+          "mark": "flexors"
+        }
+      ],
+      "sand": "j=elbow&m=flex&pos=supine"
+    },
+    {
+      "id": "biceps-stretch",
+      "ru": "Растяжка двуглавой",
+      "en": "biceps brachii stretch",
+      "joint": [
+        "elbow",
+        "shoulder"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "prone",
+        "supine",
+        "stand"
+      ],
+      "gear": [
+        "manual",
+        "weight",
+        "none"
+      ],
+      "key": [
+        "локоть разогнут, пронация",
+        "плюс разгибание плеча",
+        "сам — шагать вперёд от стола"
+      ],
+      "page": 646,
+      "moments": [
+        {
+          "n": 177,
+          "beat": "bic",
+          "mark": "man",
+          "to": "self"
+        },
+        {
+          "n": 177,
+          "beat": "ext",
+          "mark": "tip"
+        }
+      ]
+    },
+    {
+      "id": "elb-flex-stretch",
+      "ru": "Растяжка в сгибание локтя",
+      "en": "self-stretch into elbow flexion",
+      "joint": [
+        "elbow"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "prone",
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "на локтях — опускать грудь",
+        "сидя — давить на предплечье",
+        "или наклон над предплечьем"
+      ],
+      "page": 646,
+      "moments": [
+        {
+          "n": 177,
+          "beat": "flex",
+          "mark": "prone",
+          "to": "sit"
+        }
+      ]
+    },
+    {
+      "id": "triceps-stretch",
+      "ru": "Растяжка длинной головки трёхглавой",
+      "en": "long head of triceps self-stretch",
+      "joint": [
+        "elbow",
+        "shoulder"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "согнуть локоть и плечо до конца",
+        "другой рукой дожать",
+        "держать, сколько переносится"
+      ],
+      "page": 646,
+      "moments": [
+        {
+          "n": 177,
+          "beat": "flex",
+          "mark": "tri"
+        }
+      ]
+    },
+    {
+      "id": "pro-sup-stretch",
+      "ru": "Растяжка в пронацию и супинацию",
+      "en": "self-stretch into pronation and supination",
+      "joint": [
+        "elbow",
+        "wrist"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "локоть 90° прижат к телу",
+        "ладонь — на лучевую кость",
+        "держать в конце движения"
+      ],
+      "warn": "силу — на лучевую кость, не на кисть: иначе травмируется запястье",
+      "page": 646,
+      "moments": [
+        {
+          "n": 177,
+          "beat": "rot",
+          "mark": "pos",
+          "to": "rad"
+        }
+      ],
+      "sand": "j=elbow&m=rot&pos=stand"
+    },
+    {
+      "id": "wrist-ext-stretch",
+      "ru": "Растяжка разгибателей запястья",
+      "en": "wrist extensor stretch",
+      "joint": [
+        "elbow",
+        "wrist"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "локоть прямой, пронация",
+        "согнуть запястье и пальцы",
+        "у стены — тыл кисти, пальцы вниз"
+      ],
+      "page": 647,
+      "moments": [
+        {
+          "n": 177,
+          "beat": "epi",
+          "mark": "ext",
+          "to": "wall"
+        },
+        {
+          "n": 176,
+          "beat": "prot",
+          "mark": "pass"
+        },
+        {
+          "n": 188,
+          "beat": "stretch",
+          "mark": "wf"
+        }
+      ]
+    },
+    {
+      "id": "wrist-flex-stretch",
+      "ru": "Растяжка сгибателей запястья",
+      "en": "wrist flexor stretch",
+      "joint": [
+        "elbow",
+        "wrist"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "локоть прямой, супинация",
+        "разогнуть запястье и пальцы",
+        "или ладонь на стене, пальцы вниз"
+      ],
+      "page": 647,
+      "moments": [
+        {
+          "n": 177,
+          "beat": "epi",
+          "mark": "flx"
+        },
+        {
+          "n": 188,
+          "beat": "stretch",
+          "mark": "we"
+        },
+        {
+          "n": 176,
+          "beat": "prot",
+          "mark": "pass"
+        }
+      ]
+    },
+    {
+      "id": "elb-iso",
+      "ru": "Многоугловая изометрия локтя",
+      "en": "multiple-angle isometrics",
+      "joint": [
+        "elbow"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max",
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit",
+        "supine"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "сопротивление — на предплечье",
+        "сгибание, разгибание, ротации",
+        "под задачу — нужный угол"
+      ],
+      "page": 647,
+      "moments": [
+        {
+          "n": 178,
+          "beat": "iso",
+          "mark": "multi",
+          "to": "angle"
+        },
+        {
+          "n": 173,
+          "beat": "prot",
+          "mark": "rom"
+        },
+        {
+          "n": 174,
+          "beat": "post",
+          "mark": "pron"
+        },
+        {
+          "n": 175,
+          "beat": "p1",
+          "mark": "iso"
+        },
+        {
+          "n": 175,
+          "beat": "p2",
+          "mark": "str"
+        }
+      ]
+    },
+    {
+      "id": "elb-stab",
+      "ru": "Ритмическая стабилизация локтя",
+      "en": "alternating isometrics and rhythmic stabilization",
+      "joint": [
+        "elbow",
+        "shoulder"
+      ],
+      "goal": [
+        "control"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit",
+        "stand",
+        "quad"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "плечо фиксировано, давят на предплечье",
+        "в упоре — держать угол в локте",
+        "толчки на плечи и туловище"
+      ],
+      "page": 648,
+      "moments": [
+        {
+          "n": 178,
+          "beat": "iso",
+          "mark": "alt",
+          "to": "closed"
+        }
+      ]
+    },
+    {
+      "id": "biceps-curl",
+      "ru": "Сгибание локтя с гантелью",
+      "en": "biceps curl",
+      "joint": [
+        "elbow",
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit",
+        "stand",
+        "supine"
+      ],
+      "gear": [
+        "weight",
+        "band"
+      ],
+      "key": [
+        "плечо вдоль туловища",
+        "в супинации, пронации и нейтрально",
+        "медленно опускать"
+      ],
+      "page": 648,
+      "moments": [
+        {
+          "n": 178,
+          "beat": "flex",
+          "mark": "curl",
+          "to": "bic"
+        },
+        {
+          "n": 170,
+          "beat": "bic",
+          "mark": "curl",
+          "to": "why"
+        },
+        {
+          "n": 175,
+          "beat": "p2",
+          "mark": "dyn"
+        },
+        {
+          "n": 174,
+          "beat": "post2",
+          "mark": "str"
+        }
+      ],
+      "sand": "j=elbow&m=flex&pos=stand&mode=active"
+    },
+    {
+      "id": "tri-ext",
+      "ru": "Разгибание локтя лёжа",
+      "en": "triceps extension lying",
+      "joint": [
+        "elbow"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "prone",
+        "supine"
+      ],
+      "gear": [
+        "weight"
+      ],
+      "key": [
+        "плечо на валике или вертикально",
+        "разогнуть локоть с гантелью",
+        "медленно опустить"
+      ],
+      "page": 648,
+      "moments": [
+        {
+          "n": 178,
+          "beat": "ext",
+          "mark": "prone",
+          "to": "sup"
+        }
+      ]
+    },
+    {
+      "id": "overhead-tri",
+      "ru": "Разгибание локтя из-за головы",
+      "en": "overhead triceps extension",
+      "joint": [
+        "elbow",
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "weight"
+      ],
+      "key": [
+        "плечо поднято до конца",
+        "гантель у плеча — поднять вверх",
+        "другой рукой поддержать плечо"
+      ],
+      "warn": "только если плечо хорошо контролируется",
+      "page": 649,
+      "moments": [
+        {
+          "n": 178,
+          "beat": "ext",
+          "mark": "over"
+        }
+      ],
+      "sand": "j=elbow&m=flex&pos=up&mode=active"
+    },
+    {
+      "id": "pro-sup",
+      "ru": "Пронация и супинация против сопротивления",
+      "en": "resisted pronation and supination",
+      "joint": [
+        "elbow",
+        "wrist"
+      ],
+      "goal": [
+        "strength",
+        "function"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "stick",
+        "band"
+      ],
+      "key": [
+        "локоть 90° прижат к телу",
+        "груз — с одной стороны кисти",
+        "дверная ручка — функционально"
+      ],
+      "page": 649,
+      "moments": [
+        {
+          "n": 178,
+          "beat": "rot",
+          "mark": "pos",
+          "to": "knob",
+          "shot": 38.8
+        }
+      ],
+      "sand": "j=elbow&m=rot&pos=stand&mode=active"
+    },
+    {
+      "id": "ecc-wrist",
+      "ru": "Уступающее разгибание запястья",
+      "en": "eccentric wrist extension",
+      "joint": [
+        "elbow",
+        "wrist"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "weight",
+        "band"
+      ],
+      "key": [
+        "опускает больная рука",
+        "поднимает здоровая",
+        "сначала быстрее, потом тяжелее"
+      ],
+      "page": 644,
+      "moments": [
+        {
+          "n": 176,
+          "beat": "ecc",
+          "mark": "ecc",
+          "to": "prog"
+        }
+      ]
+    },
+    {
+      "id": "plyo-arm",
+      "ru": "Плиометрика для руки",
+      "en": "upper extremity plyometrics",
+      "joint": [
+        "elbow",
+        "shoulder"
+      ],
+      "goal": [
+        "function"
+      ],
+      "phase": [
+        "min"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "ball",
+        "band"
+      ],
+      "key": [
+        "поймать утяжелённый мяч — сразу бросить",
+        "из-за головы, от груди, сбоку",
+        "лента — быстрое сгибание и разгибание"
+      ],
+      "page": 652,
+      "moments": [
+        {
+          "n": 178,
+          "beat": "plyo",
+          "mark": "plyo"
+        },
+        {
+          "n": 176,
+          "beat": "ecc",
+          "mark": "func"
+        },
+        {
+          "n": 162,
+          "beat": "ph3",
+          "mark": "ph"
+        },
+        {
+          "n": 165,
+          "beat": "ph23",
+          "mark": "ph3"
+        },
+        {
+          "n": 232,
+          "beat": "ueb",
+          "mark": "diag",
+          "to": "hand"
+        },
+        {
+          "n": 232,
+          "beat": "uee",
+          "mark": "elb",
+          "to": "sport"
+        },
+        {
+          "n": 231,
+          "beat": "box1",
+          "mark": "ue"
+        }
+      ]
+    },
+    {
+      "id": "task-sim",
+      "ru": "Имитация реальных задач",
+      "en": "simulated functional tasks",
+      "joint": [
+        "elbow",
+        "shoulder",
+        "wrist"
+      ],
+      "goal": [
+        "function"
+      ],
+      "phase": [
+        "min"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "machine",
+        "weight"
+      ],
+      "key": [
+        "разобрать движение на части",
+        "отработать его целиком",
+        "теннис — удары на настенном блоке"
+      ],
+      "page": 652,
+      "moments": [
+        {
+          "n": 178,
+          "beat": "plyo",
+          "mark": "sim"
+        },
+        {
+          "n": 171,
+          "beat": "integ",
+          "mark": "task",
+          "to": "sup"
+        },
+        {
+          "n": 165,
+          "beat": "ph23",
+          "mark": "ph3"
+        }
+      ]
+    }
+  ]
+}

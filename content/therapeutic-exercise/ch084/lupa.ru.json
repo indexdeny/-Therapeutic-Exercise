@@ -1,0 +1,27 @@
+[
+ {
+  "beat": "intro",
+  "fig": 0,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает rectus, фигура ×0.75"
+ },
+ {
+  "beat": "outpt",
+  "fig": 0,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает rectus, фигура ×0.62",
+  "off": "лупа видна меньше 2 с — мелькает"
+ },
+ {
+  "beat": "arm",
+  "fig": 1,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает rectus, фигура ×0.6"
+ }
+]

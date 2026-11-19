@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Нижнегрудной и пояснично-тазовый отделы — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 141, title: 'Нижнегрудной и пояснично-тазовый отделы: диагнозы', minutes: 9, language: 'ru', next: '../ch142/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch141/cards.ru.json
+const CARDS_SHORT = {
+  "где и как\nгрудопоясничный отдел; падение, травма или обычный наклон вперёд; боль может отдавать в поясницу или живот; кифоз и лордоз нарастают": "грудопоясничный; кифоз нарастает",
+  "лечение\nстабилизация нейтрального грудопоясничного перехода и лопаток; растяжка горизонтальных приводящих и внутренних ротаторов плеча, сгибателей и внутренних ротаторов бедра; правильный подъём": "стабилизация + растяжка + подъём",
+  "противопоказано\nнаклоны вперёд с грузом, касание пальцами ног, скручивания с подъёмом корпуса": "наклоны с грузом, скручивания",
+  "степени\nI — до 25 %, II — 26–50 %, III — 51–75 %, IV — больше 75 % глубины нижнего позвонка": "I — до 25 %, IV — больше 75 %",
+  "причины\nнестабильность сегмента: врождённый дефект межсуставной части дужки, перелом дужки, возрастная дегенерация и ожирение": "дефект дужки, дегенерация",
+  "лечение\nсгибательный подход; сегментарная и глобальная стабилизация; растяжка сгибателей бедра; мягкие мобилизации I–II от боли — без высокоскоростного толчка": "сгибательный подход + стабилизация",
+  "главное — поза до сращения\nлордоз: спать на животе, сидеть с валиком за поясницей; мягкие мобилизации несросшихся сегментов; обязательная стабилизация туловища и лопаток; растяжка для разгибания бёдер и сгибания плеч": "лордоз; стабилизация обязательна",
+  "что происходит\nкак грыжа, но ядро проходит через ослабленную замыкательную пластинку вверх или вниз; обычно T10–L2; возможен некроз кости и узлы Шморля": "через пластинку вверх или вниз",
+  "лечение по признакам\nбез сжимающих нагрузок; стабилизация; растяжка укороченных мышц; обучение осанке; с высокоскоростными техниками — осторожно": "без сжимающих нагрузок",
+  "растяжение или смещение\nскручивание (выгрузить багажник, удар клюшкой), травма, долгий сильный кашель; возможна межрёберная боль": "скручивание, травма, кашель",
+  "ребро застряло сзади\nсидя; рука снаружи от угла ребра; пациент приводит плечо против сопротивления другой руки; во время сокращения ребро — вперёд и внутрь, 3–5 с × 3–5": "ребро вперёд и внутрь",
+  "ребро застряло спереди\nрука внутри от угла; сопротивление отведению плеча; смещение назад и наружу": "ребро назад и наружу",
+  "растяжение: 10–33 % пациентов\nболь локальная, иногда по ходу седалищного нерва; легче в покое и при разгрузке": "легче в покое",
+  "смещения безымянной кости\nпередняя ротация: задняя ость выше, передняя ниже; задняя ротация — наоборот; смещение вверх: все ориентиры на этой стороне выше": "передняя, задняя ротация, вверх",
+};
+// cards-short end
+
+const SP = '#8fd6b0', CFX = '#f0a04b', SPL = '#c9b8e8', ASC = '#86c9e8', SCH = '#e8a0a8', RIB = '#f0c060', SIJ = '#8fd6b0', PAIN = '#ff5a3c';
+const BN = ANAT.bone, BL = mix(ANAT.bone, '#000000', .45);
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, t = Array.isArray(t0) ? t0[i] : t0 === null ? null : t0 + i * gap, g = pill(p, s, x + ws[i] / 2, y, t, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19, anchor = null } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x, an = anchor || (right ? 'end' : 'start');
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: an });
+  const lx = an === 'start' && right ? x + uiW(str, size) + 8 : x + (right ? 8 : -8);
+  path(g, `M${lx} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+function numLine(p, n, str, x, y, col, t0, { size = 19, maxW = 640 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 16, cy: y - 7, r: 15, fill: col }, g);
+  T(g, String(n), { x: x + 16, y: y, size: 18, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 44, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+function lying(p, x, y, s, t0, kind, pose = {}) {
+  const f = postureFig(p, 0, 0, s, t0, { pose });
+  put(f.g, kind === 'supine' ? { x, y: y - 75 * s, r: -90 } : { x, y: y - 78 * s, r: 90 });
+  return f;
+}
+const table = (p, x1, x2, y, t0) => show(path(p, `M${x1} ${y}H${x2}`, { stroke: COL.dim, 'stroke-width': 6 }, { o: 0 }), t0);
+// Supine leg pose with the hip kept in place: thigh and shank are the figure's absolute segment angles
+// (hip flexion φ → thigh −φ; knee flexion → shank − thigh). x0, y0: where the figure was laid.
+function legPose(f, x0, y0, s, thigh, shank) {
+  f.set({ thigh, shank });
+  const Hx = -12 + 221 * Math.sin(rad(shank)) + 216 * Math.sin(rad(thigh)), Hy = -41 - 221 * Math.cos(rad(shank)) - 216 * Math.cos(rad(thigh));
+  put(f.g, { x: x0 + (-478 - Hy) * s, y: y0 - 75 * s + (Hx + 12) * s });
+}
+// Three vertebral bodies in side view (anterior to the right); set(k): the middle one collapses in front (wedge),
+// the one above tips forward.
+function wedgeStack(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), sh = shadeGrad(mk('defs', {}, g), BN);
+  const body = (par, d) => mk('path', { d, fill: sh.url, stroke: BL, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, par);
+  sh.aim([0, -48], [0, 48], 70);
+  const disc = d => mk('path', { d, fill: DISC_C, stroke: mix(DISC_C, '#000000', .35), 'stroke-width': 2 }, g);
+  body(g, 'M-70 76H66Q72 124 66 172H-70Q-64 124 -70 76Z');
+  disc('M-68 48H64V76H-68Z');
+  const mid = body(g, '');
+  const up = G(g, {}), d2 = mk('path', { fill: DISC_C, stroke: mix(DISC_C, '#000000', .35), 'stroke-width': 2 }, up);
+  d2.setAttribute('d', 'M-68 -76H64V-48H-68Z');
+  body(up, 'M-70 -172H66Q72 -124 66 -76H-70Q-64 -124 -70 -172Z');
+  const crack = path(g, '', { stroke: '#3a2a20', 'stroke-width': 2.5, opacity: 0 });
+  const e = { g, set: k => {
+    const t = -48 + 24 * k, b = 48 - 20 * k;
+    mid.setAttribute('d', `M-70 -48L66 ${f1(t)}Q70 0 66 ${f1(b)}L-70 48Q-64 0 -70 -48Z`);
+    crack.setAttribute('d', `M66 ${f1(t + 8)}L40 ${f1(t + 22)}L52 ${f1(t + 34)}L24 ${f1(t + 46)}`); crack.setAttribute('opacity', f1(clamp(k * 3, 0, 1)));
+    up.setAttribute('transform', `rotate(${f1(10 * k)} -70 -48)`);
+    return e;
+  } };
+  e.set(0);
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Регионарные диагнозы', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 15 · Урок 141', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Нижнегрудной и пояснично-тазовый', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'отделы: диагнозы', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'перелом, листез, спондилит, Шейерман, рёбра, крестцово-подвздошный сустав', 800, 360, m('sub'), { size: 28, fill: SP, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const f = postureFig(art, 800, 860, .5, null, { regions: true }); put(f.g, { o: 1 });
+    f.to({ kyph: 66, fh: .8 }, 1.5, 3);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['frac', 'Компрессионный перелом', (m, D) => {
+    const p = panel(0);
+    txt(p, 'компрессионный перелом при остеопорозе', 800, 56, m('fx'), { size: 28, weight: 700, anchor: 'middle', fill: CFX });
+    const ws = wedgeStack(p, 260, 330, 1, m('fx'));
+    prog(q => ws.set(q), m('fx', 4), 2);
+    lab(p, 'передняя часть тела', 400, 120, 330, 330 - 30, CFX, m('fx', 5), { anchor: 'start' });
+    pill(p, 'схема · вперёд →', 260, 560, m('fx'), { col: COL.dim, size: 15 });
+    const f = postureFig(p, 600, 860, .62, m('fx', 13.8));
+    prog(q => f.set({ kyph: 42 + 30 * q, lord: 46 + 16 * q, fh: .9 * q }), m('fx', 14.5), 3);
+    txt(p, '«вдовий горб»', 600, 300, m('fx', 15), { size: 19, fill: CFX, anchor: 'middle', weight: 700 });
+    pillRow(p, ['грудопоясничный отдел', '6–7-й десяток'], 260, 600, [m('fx'), m('fx', 4)], { col: CFX, size: 15, space: 10 });
+    pill(p, 'вертебропластика — в тяжёлых случаях', 260, 645, m('fx', 21.4), { col: CFX, size: 15 });
+    pill(p, 'серьёзные причины — < 1 %', 260, 700, m('rf'), { col: COL.dim, size: 17 });
+    infoCard(p, 800, 90, 760, 160, 'где и как', 'грудопоясничный отдел; падение, травма или обычный наклон вперёд; боль может отдавать в поясницу или живот; кифоз и лордоз нарастают', CFX, m('fx'), { size: 19 });
+    infoCard(p, 800, 265, 760, 290, 'Хенске: ≥ 3 признаков → перелом с вероятностью 52 %', '', COL.bad, m('rf', 7.6));
+    ['старше 70 лет', 'женский пол', 'серьёзная травма', 'долгий приём кортикостероидов'].forEach((s, i) => numLine(p, i + 1, s, 830, 380 + i * 44, COL.bad, m('rf', 8 + i * .7)));
+    infoCard(p, 800, 570, 760, 160, 'лечение', 'стабилизация нейтрального грудопоясничного перехода и лопаток; растяжка горизонтальных приводящих и внутренних ротаторов плеча, сгибателей и внутренних ротаторов бедра; правильный подъём', SP, m('int'), { size: 18 });
+    infoCard(p, 800, 745, 760, 125, 'противопоказано', 'наклоны вперёд с грузом, касание пальцами ног, скручивания с подъёмом корпуса', COL.bad, m('ci'), { size: 18 });
+  }],
+
+  ['sp', 'Спондилолистез', (m, D) => {
+    const p = panel(0);
+    txt(p, 'спондилолистез: степени по смещению', 800, 56, m('def'), { size: 28, weight: 700, anchor: 'middle', fill: SPL });
+    const X = 420, Y = 450, S = 1.25;
+    const sg = spineSeg(p, X, Y, S, m('def'), { ligs: false });
+    // a ruler on top of the lower body: quarters of its depth
+    const rl = G(p, { o: 0 }), y0 = Y + 14 * S;
+    [0, .25, .5, .75, 1].forEach(k => { const x = X + (-70 + 136 * k) * S; path(rl, `M${f1(x)} ${f1(y0 + 4)}V${f1(y0 + 150)}`, { stroke: COL.dim, 'stroke-width': 2, 'stroke-dasharray': '5 5' }); if (k < 1) T(rl, ['I', 'II', 'III', 'IV'][k * 4], { x: x + 17 * S, y: y0 + 176, size: 20, fill: SPL, weight: 700, anchor: 'middle' }); });
+    T(rl, '25 %', { x: X + (-70 + 34) * S, y: y0 + 208, size: 15, fill: COL.dim, anchor: 'middle' });
+    T(rl, '50 %', { x: X + (-70 + 68) * S, y: y0 + 208, size: 15, fill: COL.dim, anchor: 'middle' });
+    T(rl, '75 %', { x: X + (-70 + 102) * S, y: y0 + 208, size: 15, fill: COL.dim, anchor: 'middle' });
+    show(rl, m('def', 4));
+    const mark = G(p, { o: 0 }); mk('circle', { r: 9, fill: SPL, stroke: COL.board, 'stroke-width': 2 }, mark); show(mark, m('def', 4));
+    const setSh = v => { sg.set({ shear: v }); put(mark, { x: X + (-70 + v) * S, y: y0 + 4 }); };
+    setSh(0);
+    [[4.5, 20], [6.5, 50], [8.4, 86], [10.5, 116]].forEach(([dt, v], i, a) => { const from = i ? a[i - 1][1] : 0; prog(q => setSh(lerp(from, v, q)), m('def', dt), 1.2); });
+    pill(p, 'схема: задний край верхнего тела по отношению к нижнему', 420, 130, m('def', 4), { col: COL.dim, size: 15 });
+    infoCard(p, 800, 90, 760, 250, 'степени', 'I — до 25 %, II — 26–50 %, III — 51–75 %, IV — больше 75 % глубины нижнего позвонка', SPL, m('def', 4), { size: 21 });
+    infoCard(p, 800, 360, 760, 220, 'причины', 'нестабильность сегмента: врождённый дефект межсуставной части дужки, перелом дужки, возрастная дегенерация и ожирение', SPL, m('cause'), { size: 20 });
+    infoCard(p, 800, 600, 760, 270, 'лечение', 'сгибательный подход; сегментарная и глобальная стабилизация; растяжка сгибателей бедра; мягкие мобилизации I–II от боли — без высокоскоростного толчка', SP, m('int'), { size: 20 });
+  }],
+
+  ['as', 'Анкилозирующий спондилит', (m, D) => {
+    const p = panel(0);
+    txt(p, 'анкилозирующий спондилит', 800, 56, m('as'), { size: 28, weight: 700, anchor: 'middle', fill: ASC });
+    const f = postureFig(p, 260, 860, .82, m('as'), { regions: false });
+    // the longitudinal ligaments ossify: a bony stripe along the front and the back of the column
+    const stripe = (k, t0) => {
+      const pts = []; for (let u = 0; u <= 24; u += .5) pts.push(f.unit(u, SEG_W[Math.min(23, Math.floor(u))] * k));
+      const e = path(p, 'M' + pts.map(P => f1(P[0]) + ' ' + f1(P[1])).join('L'), { stroke: BN, 'stroke-width': 6, 'stroke-linecap': 'round', 'stroke-opacity': .95 }, { o: 0 });
+      show(e, t0, 1.2);
+      return e;
+    };
+    const s1 = stripe(.7, m('as', 4.5)), s2 = stripe(-.7, m('as', 5.5));
+    lab(p, '«бамбуковый» позвоночник', 420, 180, ...f.unit(14, SEG_W[14] * .7), ASC, m('as', 6), { anchor: 'start' });
+    pillRow(p, ['1–3 на 1000', 'диагноз — чаще в 20 с небольшим'], 540, 260, m('as', 11.3), { col: ASC, size: 16, space: 10 });
+    pill(p, 'крестцово-подвздошные суставы — почти всегда', 560, 310, m('as', 16.8), { col: ASC, size: 15 });
+    pill(p, 'затем шея, пояснично-крестцовый отдел, бёдра, пятки', 560, 350, m('as', 18), { col: ASC, size: 15 });
+    // without postural care the spine fuses in a flexed curve; the goal is to fuse with a lordosis
+    [s1, s2].forEach(e => hide(e, m('int', .3), .3));
+    prog(q => f.set({ lord: 46 - 30 * q, kyph: 42 + 26 * q, fh: q }), m('int', .5), 2.5);
+    const st1 = txt(p, 'без обучения — срастается дугой', 560, 410, m('int', .5), { size: 19, fill: COL.bad, anchor: 'middle', weight: 700 });
+    hide(st1, m('int', 4.5));
+    prog(q => f.set({ lord: lerp(16, 52, q), kyph: lerp(68, 40, q), fh: 1 - q }), m('int', 4.5), 2.5);
+    txt(p, 'цель — срастись с лордозом', 560, 410, m('int', 5), { size: 19, fill: COL.good, anchor: 'middle', weight: 700 });
+    pill(p, 'шея: атлантоосевой подвывих — крайняя осторожность', 560, 820, m('pre'), { col: COL.bad, size: 16 });
+    infoCard(p, 800, 90, 760, 330, 'Рудвалайт: 3 признака из 4 → ОПП+ = 12,4', '', ASC, m('rud'));
+    ['скованность дольше 30 минут', 'боль уменьшается от упражнений, не от покоя', 'будит во второй половине ночи', 'чередующаяся боль в ягодицах'].forEach((s, i) => numLine(p, i + 1, s, 830, 200 + i * 52, ASC, m('rud', .8 + i * 2.2)));
+    pill(p, 'ОПП — отношение правдоподобия', 1180, 395, m('rud', 9.5), { col: COL.dim, size: 15 });
+    infoCard(p, 800, 440, 760, 430, 'главное — поза до сращения', 'лордоз: спать на животе, сидеть с валиком за поясницей; мягкие мобилизации несросшихся сегментов; обязательная стабилизация туловища и лопаток; растяжка для разгибания бёдер и сгибания плеч', SP, m('int'), { size: 21 });
+  }],
+
+  ['sch', 'Болезнь Шейермана', (m, D) => {
+    const p = panel(0);
+    txt(p, 'болезнь Шейермана: ядро уходит вверх или вниз', 800, 56, m('sch'), { size: 28, weight: 700, anchor: 'middle', fill: SCH });
+    const X = 420, Y = 470, S = 1.4;
+    const sg = spineSeg(p, X, Y, S, m('sch'), { ligs: false, root: false });
+    sg.hl(['epU'], PAIN, m('sch', 3), { a: .8 });
+    const node = G(p, { x: X, y: Y, s: S, o: 0 });
+    const nd = mk('path', { fill: NUC_C, stroke: mix(DISC_C, '#000000', .35), 'stroke-width': 1.8 }, node);
+    const cr = path(node, 'M-40 -16L-30 -10L-20 -18L-8 -11L6 -17', { stroke: '#3a2a20', 'stroke-width': 2.5 });
+    show(node, m('sch', 3));
+    prog(q => nd.setAttribute('d', `M-26 -4Q-30 ${f1(-14 - 30 * q)} -10 ${f1(-16 - 36 * q)}Q10 ${f1(-14 - 30 * q)} 6 -4Z`), m('sch', 3.5), 2.5);
+    lab(p, 'узел Шморля', 120, 230, X - 10 * S, Y - 40 * S, SCH, m('sch', 11.4), { anchor: 'start' });
+    lab(p, 'треснувшая пластинка', 120, 760, X - 20 * S, Y - 14 * S, PAIN, m('sch', 5), { anchor: 'start' });
+    pill(p, 'схема', 700, 130, m('sch'), { col: COL.dim, size: 15 });
+    infoCard(p, 800, 90, 760, 330, 'что происходит', 'как грыжа, но ядро проходит через ослабленную замыкательную пластинку вверх или вниз; обычно T10–L2; возможен некроз кости и узлы Шморля', SCH, m('sch'), { size: 21 });
+    pillRow(p, ['второе десятилетие', 'похоже на «боли роста»', 'корешковых симптомов нет'], 1180, 450, [m('sch', 14.4), m('sch', 15.5), m('sch', 19.7)], { col: SCH, size: 16, space: 10 });
+    infoCard(p, 800, 500, 760, 370, 'лечение по признакам', 'без сжимающих нагрузок; стабилизация; растяжка укороченных мышц; обучение осанке; с высокоскоростными техниками — осторожно', SP, m('int'), { size: 21 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-dx', prompt: ['Какой это диагноз?'],
+    build: grid([
+      { parts: ['Женщина 74 лет, долго на кортикостероидах, боль после наклона'], ans: ['f'], why: 'Признаки Хенске — компрессионный перелом.' },
+      { parts: ['Утренняя скованность > 30 мин, после упражнений легче'], ans: ['a'], why: 'Признаки Рудвалайта — анкилозирующий спондилит.' },
+      { parts: ['Подросток, «боли роста», узлы Шморля'], ans: ['s'], why: 'Болезнь Шейермана.' },
+      { parts: ['Позвонок соскользнул вперёд на 40 %'], ans: ['l'], why: 'Спондилолистез II степени.' },
+      { parts: ['Будит под утро, боль то в одной, то в другой ягодице'], ans: ['a'], why: 'Анкилозирующий спондилит.' },
+    ], [['f', 'Перелом', CFX], ['l', 'Листез', SPL], ['a', 'Спондилит', ASC], ['s', 'Шейерман', SCH]], { multi: false, text: true }),
+  }], done) }],
+
+  ['rib', 'Рёбра', (m, D) => {
+    const p = panel(0);
+    txt(p, 'рёберно-позвоночные суставы: техника мышечной энергии', 800, 56, m('rib'), { size: 28, weight: 700, anchor: 'middle', fill: RIB });
+    // a thoracic vertebra and one rib seen from above (front up)
+    const X = 400, Y = 430, ax = G(p, { x: X, y: Y, o: 0 });
+    mk('ellipse', { cx: 0, cy: -40, rx: 58, ry: 46, fill: BN, stroke: BL, 'stroke-width': 2.5 }, ax);
+    mk('path', { d: 'M-34 0L-50 40L-20 70L-8 150L8 150L20 70L50 40L34 0', fill: BN, stroke: BL, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, ax);
+    mk('ellipse', { cx: 0, cy: 40, rx: 22, ry: 16, fill: '#101a17', stroke: BL, 'stroke-width': 1.5 }, ax);
+    T(ax, 'вперёд ↑', { x: 0, y: -110, size: 16, fill: COL.dim, anchor: 'middle', weight: 600 });
+    const rib = G(ax, {});
+    mk('path', { d: 'M48 20C110 40 210 60 250 -10C280 -80 230 -200 120 -250', fill: 'none', stroke: BN, 'stroke-width': 20, 'stroke-linecap': 'round' }, rib);
+    mk('path', { d: 'M48 20C110 40 210 60 250 -10C280 -80 230 -200 120 -250', fill: 'none', stroke: BL, 'stroke-width': 2, 'stroke-dasharray': '2 0' }, rib);
+    show(ax, m('rib'));
+    const ang = [X + 200, Y + 50];
+    lab(p, 'угол ребра', 560, 680, ...ang, RIB, m('post', 4.4), { anchor: 'start' });
+    pill(p, 'схема, вид сверху', 400, 130, m('rib'), { col: COL.dim, size: 15 });
+    // posterior rib: hand lateral to the angle, push forward and in; anterior rib: hand medial, push back and out
+    const hand = (x, y, t0, t1) => { const g = G(p, { x, y, o: 0 }); mk('ellipse', { rx: 26, ry: 16, fill: mix(ANAT.skin, '#c08060', .3), stroke: BL, 'stroke-width': 2 }, g); show(g, t0); if (t1) hide(g, t1); return g; };
+    hand(ang[0] + 34, ang[1] + 14, m('post', 4.4), m('ant'));
+    arrowTo(p, [ang[0] + 40, ang[1] + 50], [ang[0] + 10, ang[1] - 20], m('post', 12.8), { col: COL.good, w: 5 });
+    const pT = txt(p, 'вперёд и внутрь', ang[0] + 60, ang[1] + 80, m('post', 12.8), { size: 18, fill: COL.good, weight: 700 }); hide(pT, m('ant'));
+    hand(ang[0] - 46, ang[1] + 4, m('ant'));
+    arrowTo(p, [ang[0] - 46, ang[1] - 30], [ang[0] - 16, ang[1] + 40], m('ant', 1.5), { col: ASC, w: 5 });
+    txt(p, 'назад и наружу', ang[0] - 20, ang[1] + 120, m('ant', 1.5), { size: 18, fill: ASC, weight: 700, anchor: 'middle' });
+    infoCard(p, 800, 90, 760, 190, 'растяжение или смещение', 'скручивание (выгрузить багажник, удар клюшкой), травма, долгий сильный кашель; возможна межрёберная боль', RIB, m('rib'), { size: 19 });
+    infoCard(p, 800, 300, 760, 270, 'ребро застряло сзади', 'сидя; рука снаружи от угла ребра; пациент приводит плечо против сопротивления другой руки; во время сокращения ребро — вперёд и внутрь, 3–5 с × 3–5', COL.good, m('post'), { size: 19 });
+    infoCard(p, 800, 590, 760, 190, 'ребро застряло спереди', 'рука внутри от угла; сопротивление отведению плеча; смещение назад и наружу', ASC, m('ant'), { size: 19 });
+    pill(p, 'проверить грудные сегменты и мышцы лопатки', 1180, 830, m('ant', 7.8), { col: SP, size: 17 });
+  }],
+
+  ['si', 'Крестцово-подвздошный сустав', (m, D) => {
+    const p = panel(0);
+    txt(p, 'крестцово-подвздошный сустав и безымянная кость', 800, 56, m('si'), { size: 28, weight: 700, anchor: 'middle', fill: SIJ });
+    infoCard(p, 60, 90, 700, 170, 'растяжение: 10–33 % пациентов', 'боль локальная, иногда по ходу седалищного нерва; легче в покое и при разгрузке', SIJ, m('si'), { size: 19 });
+    // back view: crests and PSIS; marching on the spot
+    const fs = frontStand(p, 220, 860, 1.05, m('obs'), { muscles: false });
+    txt(p, 'вид сзади', 220, 300, m('obs'), { size: 17, fill: COL.dim, anchor: 'middle', weight: 600 });
+    const mkDot = col => { const g = G(p, { o: 0 }); mk('circle', { r: 7, fill: col, stroke: COL.board, 'stroke-width': 2 }, g); return g; };
+    const dots = [[-40, -46, RIB], [40, -46, RIB], [-16, -20, SIJ], [16, -20, SIJ]].map(([dx, dy, c]) => ({ dx, dy, g: mkDot(c) }));
+    const place = () => { const P = fs.pts.P, t = fs.pose.tilt; dots.forEach(d => { const [rx, ry] = rotPt(d.dx, d.dy, t); put(d.g, { x: fs.at([P[0] + rx, P[1] + ry])[0], y: fs.at([P[0] + rx, P[1] + ry])[1] }); }); };
+    fs.onSet.push(place); place();
+    dots.forEach((d, i) => show(d.g, m('obs', i < 2 ? .5 : 2)));
+    pillRow(p, ['гребни', 'задние ости'], 220, 390, [m('obs', .5), m('obs', 2)], { col: [RIB, SIJ], size: 15, space: 10 });
+    prog(q => fs.set({ liftR: 70 * Math.sin(Math.PI * q), tilt: -6 * Math.sin(Math.PI * q) }), m('obs', 4.6), 3);
+    txt(p, 'марш: таз «поднимается» на ограниченной стороне', 220, 340, m('obs', 4.6), { size: 16, fill: SIJ, anchor: 'middle', weight: 700 });
+    // side view: innominate rotations
+    const sv = postureFig(p, 560, 860, .5, m('obs', 9.3), { arm: false });
+    const markS = (k, col) => { const g = G(p, { o: 0 }); mk('circle', { r: 7, fill: col, stroke: COL.board, 'stroke-width': 2 }, g); const upd = () => { const P = sv.at(k); put(g, { x: P[0], y: P[1] }); }; return { g, upd }; };
+    const mA = markS('ASIS', RIB), mP = markS('PSIS', SIJ);
+    const updS = () => { mA.upd(); mP.upd(); };
+    updS(); show(mA.g, m('obs', 9.3)); show(mP.g, m('obs', 9.3));
+    prog(q => { sv.set({ tilt: 14 * Math.sin(Math.PI * Math.min(1, q * 2)) * (q < .5 ? 1 : 0) - 14 * Math.sin(Math.PI * Math.max(0, q * 2 - 1)) * (q >= .5 ? 1 : 0) }); updS(); }, m('obs', 9.8), 6, lin);
+    const tA = txt(p, 'передняя ротация', 560, 300, m('obs', 9.8), { size: 17, fill: RIB, anchor: 'middle', weight: 700 }); hide(tA, m('obs', 12.8), .3);
+    txt(p, 'задняя ротация', 560, 300, m('obs', 12.8), { size: 17, fill: SIJ, anchor: 'middle', weight: 700 });
+    pillRow(p, ['передняя ость', 'задняя ость'], 580, 345, m('obs', 9.3), { col: [RIB, SIJ], size: 15, space: 8 });
+    infoCard(p, 800, 90, 760, 300, 'смещения безымянной кости', 'передняя ротация: задняя ость выше, передняя ниже; задняя ротация — наоборот; смещение вверх: все ориентиры на этой стороне выше', SIJ, m('obs', 9.3), { size: 20 });
+    infoCard(p, 800, 410, 760, 460, 'техники', '', SP, m('tech'));
+    [['«дробовик»: лёжа с согнутыми ногами — попеременно отводить и сводить бёдра против сопротивления (симфиз, гипомобильный сустав)', 0],
+     ['передняя ротация → большая ягодичная: изометрическое разгибание бедра из сгибания', 8.3],
+     ['задняя ротация → прямая мышца бедра: изометрическое сгибание из разгибания, лёжа на животе', 11],
+     ['смещение вверх → высокоскоростной рывок за лодыжку на выдохе', 18.3]].forEach(([s, dt], i) => numLine(p, i + 1, s, 830, 510 + i * 90, SP, m('tech', dt), { size: 18, maxW: 660 }));
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-inn', prompt: ['Какое это смещение безымянной кости?'],
+    build: grid([
+      { parts: ['Задняя ость выше, передняя ниже'], ans: ['a'], why: 'Передняя ротация.' },
+      { parts: ['Передняя ость выше, задняя ниже'], ans: ['p'], why: 'Задняя ротация.' },
+      { parts: ['Все ориентиры на одной стороне выше'], ans: ['u'], why: 'Смещение вверх.' },
+      { parts: ['Исправляют изометрическим разгибанием бедра из сгибания'], ans: ['a'], why: 'Большая ягодичная тянет безымянную кость назад.' },
+      { parts: ['Исправляют рывком за лодыжку на выдохе'], ans: ['u'], why: 'Смещение вверх.' },
+    ], [['a', 'Передняя ротация', RIB], ['p', 'Задняя ротация', SIJ], ['u', 'Смещение вверх', ASC]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Компрессионный перелом: без наклонов с грузом и скручиваний; стабилизация и осанка.', 'w1'],
+     ['Спондилолистез: сгибательный подход и стабилизация, без высокоскоростного толчка.', 'w2'],
+     ['Анкилозирующий спондилит: главное — функциональная поза до сращения.', 'w3'],
+     ['Рёбра и безымянные кости — техники мышечной энергии; смещение вверх — рывок.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SP }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-fx', prompt: ['Женщине 72 года, она годами принимает кортикостероиды; после наклона за сумкой — боль в грудопоясничном отделе. Что противопоказано?'],
+    build: choice([
+      ['Наклоны вперёд с грузом и скручивания с подъёмом корпуса'],
+      ['Стабилизация лопаток'],
+      ['Растяжка внутренних ротаторов плеча'],
+      ['Обучение правильному подъёму'],
+    ], 0, 'При компрессионном переломе исключают наклоны с грузом, касание пальцами ног и скручивания с подъёмом корпуса.',
+    [null, 'Это часть лечения — против нарастания кифоза.', 'Это часть лечения.', 'Это часть лечения.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-as', prompt: ['Мужчине 24 года: утренняя скованность больше получаса, боль будит под утро, после зарядки легче. Что главное в программе?'],
+    build: choice([
+      ['Обучение позе с лордозом: спать на животе, валик за поясницей'],
+      ['Сгибательные упражнения весь день'],
+      ['Высокоскоростная манипуляция шеи'],
+      ['Полный покой, пока боль не утихнет'],
+    ], 0, 'Три признака Рудвалайта — вероятен спондилит; главное — функциональная поза до сращения.',
+    [null, 'Позвоночник срастётся дугой в сгибании.', 'Атлантоосевой подвывих — манипуляция опасна.', 'Боль уменьшается от упражнений, а не от покоя.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Объём, частота и отдых — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 61, title: 'Объём, порядок, частота, отдых', minutes: 8, language: 'ru', next: '../ch062/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch061/lupa.ru.json
+const LUPA = [
+  {"beat": "goals", "fig": 0, "target": "biceps", "to": "pow", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch061/cards.ru.json
+const CARDS_SHORT = {
+  "обратная связь\nбольше сопротивление → меньше повторений и подходов; и наоборот": "больше сопротивление → меньше повторений",
+  "повторения (repetitions)\nсколько раз подряд — через весь объём против заданного груза": "сколько раз подряд через весь объём",
+  "оптимума нет\nприрост силы описан от 2–3ПМ до 15ПМ; на практике — диапазон (зона ПМ)": "от 2–3ПМ до 15ПМ — диапазон",
+  "один подход, малая интенсивность\nсамое начало программы или поддерживающая программа": "начало или поддерживающая программа",
+  "несколько подходов\nдля прогрессии; на продвинутом этапе — эффективнее одного": "для прогрессии — эффективнее",
+  "сила\nДелорм: 3 × 10ПМ · 60–80% от 1ПМ, утомление на 8–12-м повторении, 2–3 подхода · нет утомления → груз больше": "3 × 10ПМ, 60–80% от 1ПМ",
+  "мощность\n20–70% от 1ПМ, движения взрывные · обзор 350+ работ: ≈ 3,8 × 6,4 быстро при 81% · 3–4 раза в неделю": "20–70% от 1ПМ, взрывные",
+  "выносливость\n3–5 × 40–50 повторений с лёгким сопротивлением · или всё дольше изометрия · можно очень рано": "3–5 × 40–50 лёгких повторений",
+  "после иммобилизации\nволокна I типа атрофируются быстрее, часть медленных становится быстрыми → антигравитационные мышцы теряют больше → выносливость — рано": "волокна I атрофируются быстрее → выносливость рано",
+  "от чего зависит\nинтенсивность и объём, цели, здоровье, опыт, реакция; больше нагрузка → больше времени на восстановление": "нагрузка ↑ → восстановление ↑",
+  "перетренированность\nслишком часто, мало отдыха, накопленное утомление": "часто, мало отдыха",
+  "эксцентрические высокой интенсивности\nбольше микротравм и отсроченной боли → реже": "больше микротравм → реже",
+  "месяц-два\nодним пациентам достаточно, чтобы вернуться к функции": "вернуться к функции",
+  "всю жизнь\nдругим — чтобы сохранять функцию": "другим — чтобы сохранять функцию",
+  "пока группа отдыхает\nдругая группа той же конечности или та же группа другой": "другая группа или другая конечность",
+  "легко утомляются, дети, пожилые\n≥ 3 мин между подходами — активно: лёгкий велосипед, другая конечность": "≥ 3 мин между подходами, активно",
+};
+// cards-short end
+
+const STR = COL.nat, POW = COL.task, END = COL.real, REST = COL.dim;
+// A strip of sets and rests: blocks [[kind, width, label]], kind 's' (a set: rep ticks) or 'r' (rest).
+function setStrip(p, x, y, blocks, t0, { h = 50, n = 9 } = {}) {
+  const g = G(p, { o: 0 });
+  let cx = x;
+  blocks.forEach(([k, w, lab]) => {
+    if (k === 's') {
+      mk('rect', { x: cx, y, width: w, height: h, rx: 10, fill: mix(STR, COL.board, .6), stroke: STR, 'stroke-width': 2 }, g);
+      for (let i = 0; i < n; i++) path(g, `M${cx + (i + .5) * w / n} ${y + 10}V${y + h - 10}`, { stroke: STR, 'stroke-width': 4 });
+    } else {
+      mk('rect', { x: cx + 4, y: y + h / 2 - 3, width: w - 8, height: 6, rx: 3, fill: REST }, g);
+    }
+    if (lab) T(g, lab, { x: cx + w / 2, y: y + h + 28, size: 20, fill: k === 's' ? STR : REST, anchor: 'middle' });
+    cx += w;
+  });
+  show(g, t0);
+  return g;
+}
+// A week of seven day cells; marks[i]: 0 empty, a colour, or [colour, n] for n small sessions in a day.
+function weekRow(p, x, y, marks, t0, label, col) {
+  const g = G(p, { o: 0 });
+  ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].forEach((d, i) => {
+    const cx = x + i * 58;
+    mk('rect', { x: cx, y, width: 50, height: 50, rx: 9, fill: PANEL, stroke: EDGE, 'stroke-width': 2 }, g);
+    T(g, d, { x: cx + 25, y: y + 72, size: 17, fill: COL.dim, anchor: 'middle' });
+    const mkd = marks[i];
+    if (Array.isArray(mkd)) for (let k = 0; k < mkd[1]; k++) mk('circle', { cx: cx + 12 + (k % 3) * 13, cy: y + 16 + Math.floor(k / 3) * 17, r: 5, fill: mkd[0] }, g);
+    else if (mkd) mk('rect', { x: cx + 6, y: y + 6, width: 38, height: 38, rx: 7, fill: mkd }, g);
+  });
+  T(g, label, { x: x + 420, y: y + 33, size: 22, fill: col || COL.chalk, weight: 600 });
+  show(g, t0);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Объём, частота и отдых', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 61', { x: 800, y: 190, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Объём, порядок,', { x: 800, y: 275, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'частота и отдых', { x: 800, y: 340, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'сколько повторений, подходов и дней', 800, 420, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    setStrip(art, 380, 640, [['s', 200, 'подход'], ['r', 120, 'отдых'], ['s', 200, 'подход'], ['r', 120, 'отдых'], ['s', 200, 'подход']], .5);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['base', 'Исходная нагрузка', (m) => {
+    const p = panel(0), GY = 760;
+    txt(p, 'исходная нагрузка: другие способы', 800, 82, m('base'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ground(p, 80, 360, GY, .3);
+    const c = curlFig(p, 220, GY, 1.05, 1.25, .3);
+    const cnt = txt(p, '', 220, 300, m('base', 1), { size: 28, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // six full repetitions, then the seventh stops short of the full range
+    prog(q => { const k = q * 6.5, i = Math.floor(k), e = (1 - Math.cos(2 * Math.PI * (k % 1))) / 2, top = i >= 6 ? 70 : 122; c.f.set({ aN: 6, eN: lerp(10, top, e) }); c.mu.act(.6 + .4 * q); cnt.textContent = 'повторений: ' + Math.min(6, i + (e > .9 ? 1 : 0)); }, m('base', 1), Math.max(4, m('six') - m('base', 1) + 1.5), lin);
+    pill(p, '6ПМ', 220, 360, m('six'), { col: STR, size: 30 });
+    txt(p, 'не весь объём — утомление', 220, 820, m('six', 1), { size: 21, fill: COL.bad, anchor: 'middle', weight: 600 });
+    ['кабельная тензиометрия', 'изокинетический динамометр', 'ручной динамометр'].forEach((s, i) => pill(p, s, 680, 160 + i * 62, m('alt', .3 + i * .5), { col: COL.whole, size: 23 }));
+    // a percentage of body weight (advanced rehabilitation, 10 repetitions)
+    const rows = [['жим лёжа на тренажёре', 30], ['разгибание голени', 20], ['сгибание голени', 12.5, '10–15'], ['жим ногами', 50]];
+    txt(p, '% массы тела (10 повторений, поздняя реабилитация)', 680, 400, m('bw'), { size: 22, fill: COL.task, anchor: 'middle', weight: 700 });
+    rows.forEach(([s, v, lab], i) => {
+      const y = 450 + i * 70, g = G(p, { o: 0 });
+      T(g, s, { x: 420, y: y + 8, size: 22, fill: COL.chalk });
+      mk('rect', { x: 700, y: y - 12, width: v * 5, height: 26, rx: 7, fill: COL.task }, g);
+      T(g, (lab || v) + '%', { x: 712 + v * 5, y: y + 8, size: 22, fill: COL.task, weight: 700 });
+      show(g, m('bw', .8 + i * .9));
+    });
+    // Borg CR10
+    const bg = G(p, { o: 0 }), sc = [[0, 'совсем ничего'], [.5, 'крайне слабо'], [1, 'очень слабо'], [2, 'слабо, легко'], [3, 'умеренно'], [5, 'сильно, тяжело'], [7, 'очень сильно'], [10, 'крайне сильно, «максимум»']];
+    roundBox(bg, 1080, 130, 460, 730, COL.real, PANEL, 2.5);
+    T(bg, 'шкала Борга CR10', { x: 1310, y: 175, size: 25, weight: 700, fill: COL.real, anchor: 'middle' });
+    const Y = v => 820 - v * 58;
+    const grad = mk('linearGradient', { id: 'borg', x1: 0, y1: 1, x2: 0, y2: 0 }, mk('defs', {}, bg));
+    [[0, COL.good], [.5, COL.int], [1, COL.bad]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, grad));
+    mk('rect', { x: 1110, y: Y(10), width: 18, height: Y(0) - Y(10), rx: 9, fill: 'url(#borg)' }, bg);
+    sc.forEach(([v, s]) => { T(bg, String(v).replace('.', ','), { x: 1170, y: Y(v) + 8, size: 22, weight: 700, fill: COL.chalk, anchor: 'end' }); T(bg, s, { x: 1185, y: Y(v) + 8, size: 21, fill: COL.dim }); });
+    show(bg, m('borg'));
+  }],
+
+  ['zone', 'Тренировочная зона', (m) => {
+    const p = panel(0), x0 = 140, W = 1320, X = v => x0 + v / 100 * W;
+    txt(p, 'тренировочная зона: % от 1ПМ', 800, 82, m('zone'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const g = G(p, { o: 0 });
+    mk('rect', { x: x0, y: 200, width: W, height: 30, rx: 15, fill: 'url(#zg)' }, g);
+    const grad = mk('linearGradient', { id: 'zg' }, mk('defs', {}, g));
+    [[0, mix(COL.good, COL.board, .3)], [1, mix(COL.bad, COL.board, .3)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, grad));
+    for (let v = 0; v <= 100; v += 10) { path(g, `M${X(v)} 236V250`, { stroke: COL.dim, 'stroke-width': 2 }); T(g, v + '%', { x: X(v), y: 276, size: 20, fill: COL.dim, anchor: 'middle' }); }
+    show(g, m('zone', .5));
+    const band = (a, b, y, col, lab, t0) => {
+      const bg = G(p, { o: 0 });
+      mk('rect', { x: X(a), y, width: X(b) - X(a), height: 54, rx: 12, fill: col, 'fill-opacity': .25, stroke: col, 'stroke-width': 3 }, bg);
+      path(bg, `M${X(a)} ${y}V250M${X(b)} ${y}V250`, { stroke: col, 'stroke-width': 2, 'stroke-dasharray': '5 6' });
+      T(bg, `${a}–${b}%`, { x: X((a + b) / 2), y: y + 35, size: 22, weight: 700, fill: col, anchor: 'middle' });
+      T(bg, lab, { x: X(b) + 18, y: y + 35, size: 22, fill: COL.chalk });
+      show(bg, t0);
+    };
+    band(30, 40, 320, COL.good, 'малоподвижные, нетренированные', m('low'));
+    const hb = G(p, { o: 0 });
+    mk('rect', { x: X(80), y: 400, width: X(100) - X(80), height: 54, rx: 12, fill: COL.bad, 'fill-opacity': .25, stroke: COL.bad, 'stroke-width': 3 }, hb);
+    T(hb, '> 80%', { x: X(90), y: 435, size: 22, weight: 700, fill: COL.bad, anchor: 'middle' });
+    T(hb, 'хорошо тренированные', { x: X(80) - 18, y: 435, size: 22, fill: COL.chalk, anchor: 'end' });
+    show(hb, m('high'));
+    band(40, 70, 480, COL.task, 'здоровые нетренированные', m('mid'));
+    txt(p, 'вначале — нижняя часть зоны: форма и техника', X(40), 580, m('mid', 2), { size: 22, fill: COL.task });
+    pill(p, 'дети и пожилые: малый или умеренный %', 480, 650, m('kids'), { col: COL.whole, size: 24 });
+    band(30, 50, 700, END, 'выраженная слабость; выносливость', m('weak'));
+  }],
+
+  ['vol', 'Объём и повторения', (m) => {
+    const p = panel(0), x0 = 150, y0 = 700, W = 640, H = 420, X = v => x0 + (v - 50) / 50 * W, Y = r => y0 - r / 20 * H;
+    txt(p, 'объём = повторения × подходы × интенсивность', 800, 82, m('vol'), { size: 30, weight: 700, fill: COL.task, anchor: 'middle' });
+    const g = G(p, { o: 0 });
+    path(g, `M${x0} ${y0 - H - 10}V${y0}H${x0 + W + 20}`, { stroke: COL.dim, 'stroke-width': 3 });
+    [50, 60, 70, 80, 90, 100].forEach(v => T(g, v + '%', { x: X(v), y: y0 + 30, size: 19, fill: COL.dim, anchor: 'middle' }));
+    [0, 5, 10, 15, 20].forEach(r => T(g, String(r), { x: x0 - 12, y: Y(r) + 7, size: 19, fill: COL.dim, anchor: 'end' }));
+    T(g, 'повторений до утомления', { x: x0 + 10, y: y0 - H - 16, size: 21, fill: COL.dim });
+    T(g, '% от 1ПМ →', { x: x0 + W + 10, y: y0 + 62, size: 21, fill: COL.dim, anchor: 'end' });
+    show(g, m('inv'));
+    const reps = v => 15 * Math.exp(-(v - 60) / 25.5) ;
+    draw(path(p, fnPath(x0, y0, W, H, t => reps(50 + 50 * t) / 20, .1, .9), { stroke: COL.task, 'stroke-width': 4, 'stroke-dasharray': '10 8' }, { d: 0 }), m('inv', .5), 1.5);
+    [[60, 15, 'pct'], [75, 10, 'pct'], [90, 4.5, 'pct']].forEach(([v, r, k], i) => {
+      const d = G(p, { o: 0 });
+      mk('circle', { cx: X(v), cy: Y(r), r: 12, fill: COL.task, stroke: COL.board, 'stroke-width': 3 }, d);
+      T(d, `${v}% → ${String(r).replace('.5', '–5').replace('4–5', '4–5')}`, { x: X(v) + 18, y: Y(r) - 14, size: 22, weight: 700, fill: COL.chalk });
+      show(d, m(k, 1 + i * 2.2));
+    });
+    const zb = G(p, { o: 0 });
+    mk('rect', { x: x0, y: Y(10), width: W, height: Y(8) - Y(10), fill: COL.good, 'fill-opacity': .2 }, zb);
+    T(zb, 'зона 8–10 ПМ', { x: x0 + W - 10, y: Y(10) - 8, size: 21, fill: COL.good, anchor: 'end', weight: 700 });
+    show(zb, m('zone'));
+    pill(p, 'схема', x0 + W - 40, y0 - H - 30, m('inv'), { col: COL.dim, size: 19 });
+    infoCard(p, 880, 140, 660, 170, 'обратная связь', 'больше сопротивление → меньше повторений и подходов; и наоборот', COL.task, m('inv'), { size: 23 });
+    infoCard(p, 880, 330, 660, 170, 'повторения (repetitions)', 'сколько раз подряд — через весь объём против заданного груза', STR, m('reps'), { size: 23 });
+    infoCard(p, 880, 520, 660, 200, 'оптимума нет', 'прирост силы описан от 2–3ПМ до 15ПМ; на практике — диапазон (зона ПМ)', COL.good, m('zone', 1), { size: 23 });
+  }],
+
+  ['sets', 'Подходы', (m) => {
+    const p = panel(0);
+    txt(p, 'подходы (sets)', 800, 82, m('sets'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    setStrip(p, 250, 180, [['s', 360, '8–10 повторений'], ['r', 200, 'отдых'], ['s', 360, '8–10 повторений']], m('sets', 1));
+    txt(p, '= 2 подхода по 8–10ПМ', 800, 320, m('sets', 3), { size: 28, weight: 700, fill: STR, anchor: 'middle' });
+    [1, 2, 3, 4, 5, 6].forEach(n => {
+      const g = G(p, { o: 0 }), x = 260 + (n - 1) * 190, on = n >= 2 && n <= 4;
+      for (let i = 0; i < n; i++) mk('rect', { x: x - 60 + (i % 3) * 42, y: 400 + Math.floor(i / 3) * 42, width: 34, height: 34, rx: 7, fill: on ? STR : mix(STR, COL.board, .6) }, g);
+      T(g, n + (n === 1 ? ' подход' : n < 5 ? ' подхода' : ' подходов'), { x: x + 2, y: 520, size: 21, fill: on ? STR : COL.dim, anchor: 'middle', weight: on ? 700 : 500 });
+      show(g, m('n', .3 + n * .3));
+    });
+    txt(p, 'обычно 2–4 · эффект — от 1 до 6', 800, 580, m('n', 2.5), { size: 25, fill: COL.chalk, anchor: 'middle', weight: 600 });
+    infoCard(p, 140, 640, 640, 200, 'один подход, малая интенсивность', 'самое начало программы или поддерживающая программа', COL.whole, m('one'), { size: 23 });
+    infoCard(p, 820, 640, 640, 200, 'несколько подходов', 'для прогрессии; на продвинутом этапе — эффективнее одного', STR, m('multi'), { size: 23 });
+  }],
+
+  ['goals', 'Сила, мощность, выносливость', (m) => {
+    const p = panel(0), GY = 330;
+    txt(p, 'схема под цель', 800, 70, m('goals'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    [[300, STR], [800, POW], [1300, END]].forEach(([x]) => ground(p, x - 150, x + 150, GY, m('goals')));
+    const a = curlFig(p, 300, GY, .55, 1.6, m('str'));
+    curls(a, m('str', .5), 6, 2.5, { top: 120 });
+    const b = fig(p, { x: 800, y: GY - 182 * .55, s: .55, o: 0, pose: { aN: 30, eN: 110, aF: 30, eF: 110 } });
+    const bx = carry(p, b, c => boxProp(c, 56, 40), { turn: false, along: 14 });
+    put(bx, { o: 0 }); show(b.g, m('pow')); show(bx, m('pow'));
+    prog(q => { const u = (q * 4) % 1, e = u < .2 ? io(u / .2) : u < .5 ? 1 : 1 - io((u - .5) / .5); b.set(blendPose({ aN: 30, eN: 110, aF: 30, eF: 110 }, { aN: 170, eN: 8, aF: 170, eF: 8 }, e)); }, m('pow', .5), 6, lin);
+    const c = curlFig(p, 1300, GY, .55, .8, m('end'));
+    curls(c, m('end', .3), 8, 12.5, { top: 100, lvl: .5 });
+    infoCard(p, 60, 360, 480, 340, 'сила', 'Делорм: 3 × 10ПМ · 60–80% от 1ПМ, утомление на 8–12-м повторении, 2–3 подхода · нет утомления → груз больше', STR, m('str'), { size: 23 });
+    infoCard(p, 560, 360, 480, 340, 'мощность', '20–70% от 1ПМ, движения взрывные · обзор 350+ работ: ≈ 3,8 × 6,4 быстро при 81% · 3–4 раза в неделю', POW, m('pow'), { size: 23 });
+    infoCard(p, 1060, 360, 480, 340, 'выносливость', '3–5 × 40–50 повторений с лёгким сопротивлением · или всё дольше изометрия · можно очень рано', END, m('end'), { size: 23 });
+    infoCard(p, 60, 720, 1480, 140, 'после иммобилизации', 'волокна I типа атрофируются быстрее, часть медленных становится быстрыми → антигравитационные мышцы теряют больше → выносливость — рано', COL.bad, m('tip'), { size: 22 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-goal', prompt: ['Какая цель у этой схемы?'],
+    build: grid([
+      { parts: ['60–80% от 1ПМ, утомление на 8–12-м повторении, 2–3 подхода'], ans: ['s'], why: 'Силовая схема.' },
+      { parts: ['3–5 подходов по 40–50 повторений с лёгкой лентой'], ans: ['e'], why: 'Выносливость.' },
+      { parts: ['20–70% от 1ПМ, движения взрывные'], ans: ['p'], why: 'Мощность.' },
+      { parts: ['Изометрическое удержание всё дольше'], ans: ['e'], why: 'Выносливость.' },
+      { parts: ['Три подхода десятиповторного максимума (Делорм)'], ans: ['s'], why: 'Сила.' },
+    ], [['s', 'Сила', STR], ['p', 'Мощность', POW], ['e', 'Выносливость', END]], { multi: false, text: true }),
+  }], done) }],
+
+  ['order', 'Порядок', (m) => {
+    const p = panel(0), GY = 520;
+    txt(p, 'порядок упражнений (exercise order)', 800, 82, m('order'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ground(p, 200, 560, GY, m('big'));
+    const sq = fig(p, { x: 380, y: GY - 182 * .9, s: .9, o: 0 });
+    const q4 = muscleOn(sq, ...MUSCLE.rectus, { after: 'ftN', w: 13 }), gl = muscleOn(sq, ['H', 'Sh', 10, -18], ['KN', 'H', 40, -12], { after: 'thN', w: 14 });
+    show(sq.g, m('big'));
+    const [ax] = onStage(sq, 'AN');
+    prog(q => { const e = (1 - Math.cos(2 * Math.PI * 2 * q)) / 2; sq.set(blendPose(STAND, { ...SQUAT, aN: 90, aF: 90 }, e * .8)); plant(sq, 'AN', ax, GY); q4.act(.9); gl.act(.9); }, m('big', .5), 5, lin);
+    txt(p, 'приседание: крупные мышцы, многосуставное', 380, 580, m('big', .3), { size: 22, fill: COL.good, anchor: 'middle', weight: 600 });
+    arrowTo(p, [640, 360], [880, 360], m('big', 1.5), { col: COL.good, w: 6 });
+    txt(p, 'раньше', 760, 335, m('big', 1.5), { size: 23, fill: COL.good, anchor: 'middle', weight: 700 });
+    ground(p, 960, 1300, GY, m('big', 2));
+    const c = curlFig(p, 1130, GY, .9, 1, m('big', 2));
+    curls(c, m('big', 2.5), 4, 2.5);
+    txt(p, 'сгибание локтя: мелкие, односуставное', 1130, 580, m('big', 2.3), { size: 22, fill: COL.dim, anchor: 'middle', weight: 600 });
+    labelBox(p, 800, 660, 1100, ['крупные группы → мелкие'], COL.good, m('big'), { size: 28 });
+    labelBox(p, 800, 740, 1100, ['многосуставные → односуставные'], COL.good, m('multi'), { size: 28 });
+    labelBox(p, 800, 820, 1100, ['после разминки: интенсивнее → легче'], COL.task, m('int'), { size: 28 });
+  }],
+
+  ['freq', 'Частота', (m) => {
+    const p = panel(0);
+    txt(p, 'частота (frequency)', 800, 82, m('freq'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    weekRow(p, 80, 140, Array(7).fill([COL.whole, 4]), m('early'), 'после операции: несколько раз в день', COL.whole);
+    weekRow(p, 80, 250, [STR, 0, STR, 0, STR, 0, 0], m('mid'), '2–3 раза, через день', STR);
+    weekRow(p, 80, 360, [STR, END, STR, END, STR, 0, 0], m('mid', 3), 'до 5: руки / ноги — 48 ч', COL.chalk);
+    weekRow(p, 80, 470, [0, COL.good, 0, 0, COL.good, 0, 0], m('keep'), 'поддержка — 2 раза', COL.good);
+    weekRow(p, 80, 580, [COL.task, 0, COL.task, 0, COL.task, 0, 0], m('keep', 3), 'дети, очень пожилые — ≤ 2–3', COL.task);
+    weekRow(p, 80, 690, [COL.bad, COL.bad, COL.bad, COL.bad, COL.bad, COL.bad, 0], m('ath'), 'атлеты — до 6 дней', COL.bad);
+    infoCard(p, 960, 140, 580, 230, 'от чего зависит', 'интенсивность и объём, цели, здоровье, опыт, реакция; больше нагрузка → больше времени на восстановление', COL.whole, m('freq', 1), { size: 22 });
+    infoCard(p, 960, 390, 580, 160, 'перетренированность', 'слишком часто, мало отдыха, накопленное утомление', COL.bad, m('over'), { size: 22 });
+    infoCard(p, 960, 570, 580, 200, 'эксцентрические высокой интенсивности', 'больше микротравм и отсроченной боли → реже', COL.task, m('ecc'), { size: 22 });
+  }],
+
+  ['dur', 'Длительность', (m) => {
+    const p = panel(0), x0 = 140, W = 1300, X = w => x0 + w / 16 * W;
+    txt(p, 'длительность (duration)', 800, 82, m('dur'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const g = G(p, { o: 0 });
+    path(g, `M${x0} 480H${x0 + W}`, { stroke: COL.dim, 'stroke-width': 3 });
+    for (let w = 0; w <= 16; w += 2) { path(g, `M${X(w)} 472V488`, { stroke: COL.dim, 'stroke-width': 2 }); T(g, String(w), { x: X(w), y: 516, size: 19, fill: COL.dim, anchor: 'middle' }); }
+    T(g, 'недели →', { x: x0 + W, y: 550, size: 20, fill: COL.dim, anchor: 'end' });
+    show(g, m('dur', .5));
+    const band = (a, b, y, col, lab, t0) => { const bg = G(p, { o: 0 }); mk('rect', { x: X(a), y, width: X(b) - X(a), height: 60, rx: 14, fill: col, 'fill-opacity': .3, stroke: col, 'stroke-width': 3 }, bg); T(bg, lab, { x: (X(a) + X(b)) / 2, y: y + 39, size: 23, weight: 700, fill: col, anchor: 'middle' }); show(bg, t0); };
+    band(0, 3, 330, ANAT.taut, '2–3 нед.: нервная', m('neur'));
+    band(6, 12, 400, STR, '≥ 6–12 нед.: гипертрофия, сосуды', m('musc'));
+    infoCard(p, 140, 620, 620, 160, 'месяц-два', 'одним пациентам достаточно, чтобы вернуться к функции', COL.whole, m('dur', 1.5), { size: 23 });
+    infoCard(p, 820, 620, 620, 160, 'всю жизнь', 'другим — чтобы сохранять функцию', COL.good, m('dur', 3), { size: 23 });
+  }],
+
+  ['rest', 'Отдых', (m) => {
+    const p = panel(0);
+    txt(p, 'отдых (rest interval)', 800, 82, m('rest'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'восстановиться после утомления, избежать отсроченной боли; прогресс = нагрузка + отдых', 800, 124, m('rest', 1), { size: 22, fill: COL.dim, anchor: 'middle' });
+    setStrip(p, 120, 190, [['s', 200], ['r', 80, 'короче'], ['s', 200]], m('set', 2), { n: 12 });
+    txt(p, 'малая интенсивность', 120, 175, m('set', 2), { size: 21, fill: COL.whole, weight: 700 });
+    setStrip(p, 120, 320, [['s', 200], ['r', 220, '2–3 мин'], ['s', 200]], m('set', .5), { n: 9 });
+    txt(p, 'умеренная', 120, 305, m('set', .5), { size: 21, fill: COL.task, weight: 700 });
+    setStrip(p, 120, 450, [['s', 200], ['r', 330, '> 3 мин'], ['s', 200]], m('set', 3.5), { n: 5 });
+    txt(p, 'высокая, крупные многосуставные', 120, 435, m('set', 3.5), { size: 21, fill: COL.bad, weight: 700 });
+    infoCard(p, 900, 170, 640, 160, 'пока группа отдыхает', 'другая группа той же конечности или та же группа другой', COL.whole, m('alt'), { size: 23 });
+    infoCard(p, 900, 350, 640, 200, 'легко утомляются, дети, пожилые', '≥ 3 мин между подходами — активно: лёгкий велосипед, другая конечность', COL.good, m('frail'), { size: 23 });
+    weekRow(p, 120, 640, [STR, 0, STR, 0, STR, 0, 0], m('sess'), '48 ч: через день', STR);
+    txt(p, 'между занятиями при умеренной интенсивности', 120, 615, m('sess'), { size: 22, fill: COL.dim });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-dose', prompt: ['Верно или нет?'],
+    build: grid([
+      { parts: ['Крупные группы мышц тренируют раньше мелких'], ans: ['t'], why: 'Да.' },
+      { parts: ['Односуставные упражнения делают раньше многосуставных'], ans: ['f'], why: 'Наоборот: многосуставные раньше.' },
+      { parts: ['Эксцентрические упражнения высокой интенсивности делают чаще концентрических'], ans: ['f'], why: 'Реже: больше микротравм и отсроченной боли.' },
+      { parts: ['При умеренной интенсивности отдых между подходами 2–3 минуты'], ans: ['t'], why: 'Да.' },
+      { parts: ['Поддерживающая программа — обычно 2 раза в неделю'], ans: ['t'], why: 'Да.' },
+    ], TF, { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Исходная нагрузка: ПМ, % массы тела, шкала Борга; зона — 40–70% от 1ПМ.', 'w1'],
+     ['Больше груз — меньше повторений: 75% ≈ 10; подходов обычно 2–4.', 'w2'],
+     ['Сила — 60–80%, 8–12 повторений; выносливость — много повторений малым грузом, рано.', 'w3'],
+     ['Крупные и многосуставные — раньше; 2–3 раза в неделю; отдых 2–3 мин и 48 ч.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-load', prompt: ['Посчитайте.'],
+    build: blanks([
+      { parts: ['Масса тела 80 кг. Жим ногами — 50% массы тела: ', { box: '40' }, ' кг'], why: '80 × 0,5 = 40 кг.' },
+      { parts: ['1ПМ = 20 кг. Зона 40–70%: от ', { box: '8' }, ' до ', { box: '14' }, ' кг'], why: '20 × 0,4 = 8; 20 × 0,7 = 14.' },
+      { parts: ['Груз 75% от 1ПМ — примерно ', { box: '10' }, ' повторений'], why: 'У среднего нетренированного взрослого.' },
+    ]),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-immob', prompt: ['Голень была шесть недель в гипсе. Какие мышцы обычно теряют массу быстрее и что начать рано?'],
+    build: choice([
+      ['Антигравитационные (много волокон I типа) — рано начать тренировку выносливости малым грузом'],
+      ['Их антагонисты — сразу тяжёлые подходы до отказа'],
+      ['Все одинаково — ждать полного заживления'],
+      ['Только волокна II типа — начинать с прыжков'],
+    ], 0, 'При иммобилизации волокна I типа атрофируются быстрее → антигравитационные мышцы теряют больше; выносливость малым грузом можно начинать очень рано.',
+    [null, 'Быстрее теряют массу антигравитационные; тяжёлые подходы рано опасны для заживающих тканей.', 'Различия есть, а тренировку выносливости можно начинать рано без риска для тканей.', 'Быстрее атрофируются волокна I типа.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

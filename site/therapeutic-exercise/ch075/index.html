@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Веса, блоки, тренажёры — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 75, title: 'Свободные веса, блоки и тренажёры', minutes: 11, language: 'ru', next: '../ch076/' };
+// bio begin: places of the biomechanics layer (B switches); made by tools/therapeutic-exercise/bio.py from content/therapeutic-exercise/ch075/bio.ru.json
+const BIO = [
+  {"beat": "pos", "fig": 0, "from": "stand", "to": "pulley", "level": "full", "joint": "aN", "load": {"type": "weight", "at": "WN", "w": 1}, "curve": true, "range": [0, 180], "bars": [40, 478], "gon": "compact"},
+  {"beat": "pos", "fig": 1, "from": "sup", "to": "pulley", "level": "full", "joint": "aN", "load": {"type": "weight", "at": "WN", "w": 1}, "curve": true, "range": [0, 180], "bars": [905, 478], "gon": "compact"},
+];
+// bio end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch075/cards.ru.json
+const CARDS_SHORT = {
+  "от простого до сложного\nклиника и дом: гантели, манжеты, эластичное сопротивление; продвинутый уровень — тренажёры с переменным сопротивлением": "гантели, манжеты, эластик → тренажёры",
+  "для чего\nстатика и динамика, концентрика и эксцентрика, открытая и закрытая цепь; сила, мощность, выносливость, устойчивость и контроль, выносливость сердца и лёгких": "сила, мощность, выносливость, контроль",
+  "как выбрать\nнужды, возможности и цели человека; доступность, цена покупки и обслуживания, простота, универсальность, место": "цели, цена, место",
+  "постоянная нагрузка\nмаксимум — лишь в одной части объёма, и её задаёт положение пациента; груз не больше, чем мышца удержит в этой точке; болезненную дугу не обойти": "максимум — в одной части объёма; дугу не обойти",
+  "терапевт выбирает положение\nпо тому, где в объёме нужна сила": "по тому, где в объёме нужна сила",
+  "плюс и минус\nстабилизаторы тренируются, но груза контролируют меньше, чем на тренажёре, и технике учиться дольше": "стабилизаторы тренируются, но контроль меньше",
+  "плюсы\nмного положений; динамика, изометрия, упражнения с опорой; одна или несколько плоскостей, движения как в функции; с набором гантелей — очень малые шаги нагрузки": "много положений, малые шаги нагрузки",
+  "минусы\nу блоков шаг ≥ 2,3 кг (в книге — 5 фунтов); медленно — без инерции и рывков в конце объёма, но хуже перенос на быстрые движения; сборка разборных гантелей; штанга двумя руками — со страхующим": "шаг ≥ 2,3 кг; хуже перенос на быстрые",
+  "эксцентрик (кулачок)\nрассчитан на «среднего» человека — точность спорна; одна группа мышц: концентрика и эксцентрика; медленно": "на «среднего» человека — точность спорна",
+  "гидравлика и пневматика\nконцентрически агонисты ↔ антагонисты; на некоторых — управляемый эксцентрический возврат; безопасно на средних и отчасти быстрых скоростях; болезненную дугу можно обойти, уменьшив усилие": "агонисты ↔ антагонисты, безопасно",
+  "плюсы\nпочти максимальная нагрузка во многих точках объёма; подгонка под рост; внешняя стабилизация — проще научиться, выравнивание держится без присмотра": "нагрузка во многих точках, проще научиться",
+  "минусы\nобычно одна группа мышц → 8–10 тренажёров и больше: дорого, обслуживание, место; чаще одна плоскость (новые модели с двумя осями — несколько плоскостей)": "одна группа → 8–10 тренажёров, дорого",
+};
+// cards-short end
+
+const LOAD = COL.task, FLEX = '#ff7a5c', EXT = COL.real, METAL = '#9fb0bf', SKIN = '#d8d1c1';
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// The anterior deltoid (flexor) and the posterior shoulder (extensors) on the near arm of a figure: the shared muscles, whose
+// length follows the shoulder angle (own straight attachments read the extensors as shortening above 90° of flexion).
+const shoulderMuscles = f => ({ fl: muscleOn(f, ...MUSCLE.deltA, { after: 'hdN', w: 11, col: ANAT.muscle }), ex: muscleOn(f, ...MUSCLE.deltP, { after: 'hdN', w: 11 }) });
+// An arrow from A along unit u with length L.
+const arrowD = (A, u, L) => { const B = [A[0] + u[0] * L, A[1] + u[1] * L], f = v => v.toFixed(1); return `M${f(A[0])} ${f(A[1])}L${f(B[0])} ${f(B[1])}M${f(B[0] - u[0] * 14 - u[1] * 9)} ${f(B[1] - u[1] * 14 + u[0] * 9)}L${f(B[0])} ${f(B[1])}L${f(B[0] - u[0] * 14 + u[1] * 9)} ${f(B[1] - u[1] * 14 - u[0] * 9)}`; };
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Веса, блоки, тренажёры', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 75', { x: 800, y: 170, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Свободные веса, блоки, тренажёры', { x: 800, y: 255, size: 54, weight: 600, anchor: 'middle' });
+    T(g, 'постоянное и переменное сопротивление', { x: 800, y: 320, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'где груз нагружает мышцу сильнее всего', 800, 400, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const f = fig(art, { x: 800, y: 800 - 182 * .9, s: .9, pose: { aN: 0, eN: 4 } });
+    const mu = shoulderMuscles(f);
+    carry(art, f, c => dumbbell(c, 1.2));
+    ground(art, 680, 920, 800, 0);
+    prog(q => { const a = 170 * cyc(q, 2); f.set({ aN: a }); mu.fl.act(Math.sin(rad(a))); }, .4, Math.max(4, D - 1.4), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['eq', 'Оборудование', (m) => {
+    const p = panel(0);
+    txt(p, 'оборудование для силовой тренировки', 800, 66, m('eq'), { size: 28, weight: 700, anchor: 'middle' });
+    infoCard(p, 60, 110, 700, 200, 'от простого до сложного', 'клиника и дом: гантели, манжеты, эластичное сопротивление; продвинутый уровень — тренажёры с переменным сопротивлением', COL.chalk, m('eq'), { size: 22 });
+    // load-resisting versus load-assisting: a pulley with a counterweight takes part of the arm's weight
+    const g = G(p, { o: 0 }), defs = mk('defs', {}, g), E = [250, 600], ang = rad(-30), W = [E[0] + 190 * Math.cos(ang), E[1] + 190 * Math.sin(ang)];
+    limbEl(g, defs, SKIN, 22, 16, mix(SKIN, COL.board, .6)).set([E[0] - 150, E[1] - 30], E);
+    limbEl(g, defs, SKIN, 18, 13, mix(SKIN, COL.board, .6)).set(E, W);
+    show(g, m('load'));
+    arrowTo(p, [W[0], W[1] + 10], [W[0], W[1] + 100], m('load', .5), { col: COL.bad, w: 5 });
+    txt(p, 'тяжесть', W[0] + 16, W[1] + 90, m('load', .5), { size: 20, fill: COL.bad, weight: 700 });
+    arrowTo(p, [W[0] + 12, W[1] - 10], [W[0] + 12, W[1] - 110], m('load', 2), { col: COL.good, w: 5 });
+    txt(p, 'помощь (противовес)', W[0] + 28, W[1] - 90, m('load', 2), { size: 20, fill: COL.good, weight: 700 });
+    infoCard(p, 60, 760, 700, 110, 'обычно — против тяжести; иногда — в помощь слабым мышцам', null, COL.good, m('load'), { size: 22 });
+    infoCard(p, 820, 110, 720, 260, 'для чего', 'статика и динамика, концентрика и эксцентрика, открытая и закрытая цепь; сила, мощность, выносливость, устойчивость и контроль, выносливость сердца и лёгких', COL.whole, m('use'), { size: 22 });
+    infoCard(p, 820, 400, 720, 220, 'как выбрать', 'нужды, возможности и цели человека; доступность, цена покупки и обслуживания, простота, универсальность, место', LOAD, m('choice'), { size: 22 });
+  }],
+
+  ['rules', 'Правила', (m) => {
+    const p = panel(0);
+    txt(p, 'общие правила работы со снарядами', 800, 66, m('rules'), { size: 28, weight: 700, anchor: 'middle' });
+    const R = [['по обследованию', 'когда ввести, изменить, отменить; можно ли пациенту одному', 'r1'],
+      ['сначала техника', 'без нагрузки → под присмотром → самостоятельно', 'r2'],
+      ['всё закреплено и подогнано', 'манжеты, замки, ремни; подкладка на костные выступы; стабилизация; ограничители объёма', 'r3'],
+      ['инструкции', 'на тренажёре и для дома: как и когда повышать; при смене снаряда — сопоставимый момент силы', 'r4'],
+      ['после занятия', 'освободить и оставить в порядке; сломанное убрать; регулярные проверки', 'r5']];
+    R.forEach(([t, b, k], i) => {
+      const g = G(p, { o: 0 }), y = 120 + i * 150;
+      mk('rect', { x: 160, y, width: 1280, height: 130, rx: 18, fill: PANEL, stroke: COL.good, 'stroke-width': 2.5 }, g);
+      T(g, t, { x: 250, y: y + 50, size: 27, weight: 700, fill: COL.good });
+      put(para(g, b, 250, y + 92, null, { size: 23, maxW: 1150 }), { o: 1 });
+      show(g, m(k));
+      checkMark(p, 205, y + 66, m(k, .4), COL.good, 1.6);
+    });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-equip', prompt: ['Работа со снарядами. Верно или нет?'],
+    build: grid([
+      { parts: ['Сначала дают нагрузку, а технику отрабатывают потом.'], ans: ['f'], why: 'Наоборот: сначала техника без нагрузки.' },
+      { parts: ['На костные выступы под манжету — мягкая подкладка.'], ans: ['t'], why: 'Для удобства.' },
+      { parts: ['При смене снаряда момент силы должен быть сопоставим.'], ans: ['t'], why: 'Чтобы нагрузка не оказалась слишком малой или большой.' },
+      { parts: ['Сломанный снаряд можно оставить — пусть пациент будет осторожен.'], ans: ['f'], why: 'Неисправное оборудование убирают.' },
+      { parts: ['Ограничители объёма защищают заживающие ткани.'], ans: ['t'], why: 'Когда объём надо ограничить.' },
+    ], TF, { multi: false, text: true }),
+  }], done) }],
+
+  ['free', 'Свободные веса и блоки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'свободные веса и простые блоки', 800, 66, m('free'), { size: 28, weight: 700, anchor: 'middle' });
+    // a gallery of free weights
+    const items = [['гантели', c => { dumbbell(G(c, { x: -40 }), 1.1); dumbbell(G(c, { x: 50 }), .8); }],
+      ['штанга', c => { mk('rect', { x: -110, y: -4, width: 220, height: 8, rx: 3, fill: METAL }, c); [-1, 1].forEach(k => [0, 1].forEach(j => mk('rect', { x: k * (80 + j * 14) - 6, y: -36 + j * 6, width: 12, height: 72 - j * 12, rx: 3, fill: mix(METAL, '#000000', .2 + j * .1) }, c))); }],
+      ['утяжелённый мяч', c => { const id = 'mb' + (++SHADE_ID), gr = mk('radialGradient', { id, cx: .38, cy: .32, r: .8 }, mk('defs', {}, c)); [[0, '#e8a080'], [.6, '#b05a40'], [1, '#5a2a1e']].forEach(([o, cc]) => mk('stop', { offset: o, 'stop-color': cc }, gr)); mk('circle', { r: 46, fill: `url(#${id})` }, c); }],
+      ['манжета', c => { mk('rect', { x: -40, y: -22, width: 80, height: 44, rx: 14, fill: '#5b6b78', stroke: '#2c353d', 'stroke-width': 2 }, c); mk('rect', { x: -40, y: -5, width: 80, height: 10, fill: '#7f909c' }, c); }],
+      ['жилет', c => { path(c, 'M-45 -40L-20 -50Q0 -36 20 -50L45 -40L50 45H-50Z', { fill: '#4f6070', stroke: '#2c353d', 'stroke-width': 2 }); [-1, 0, 1].forEach(k => mk('rect', { x: -40, y: -10 + k * 22, width: 80, height: 9, rx: 3, fill: '#6b7d8c' }, c)); }],
+      ['мешок с песком', c => { path(c, 'M-55 10Q-60 -30 -20 -34Q0 -40 20 -34Q60 -30 55 10Q50 34 0 36Q-50 34 -55 10Z', { fill: '#b89a6a', stroke: '#6a5534', 'stroke-width': 2 }); }]];
+    items.forEach(([lab, dr], i) => {
+      const x = 140 + (i % 3) * 230, y = 210 + Math.floor(i / 3) * 190, g = G(p, { x, y, o: 0 });
+      dr(g); T(g, lab, { x: 0, y: 86, size: 21, fill: COL.chalk, anchor: 'middle', weight: 600 });
+      show(g, m('free', .5 + i * .45));
+    });
+    txt(p, 'дома — из подручных предметов', 370, 560, m('free', 4), { size: 21, fill: COL.dim, anchor: 'middle' });
+    // a weight-pulley column: one pin picks the plates
+    const cx = 1080, GY = 560, col = G(p, { o: 0 });
+    mk('rect', { x: cx - 40, y: GY - 400, width: 80, height: 400, rx: 6, fill: 'none', stroke: COL.dim, 'stroke-width': 4 }, col);
+    mk('circle', { cx, cy: GY - 380, r: 16, fill: 'none', stroke: COL.dim, 'stroke-width': 4 }, col);
+    const plates = [];
+    for (let i = 0; i < 9; i++) plates.push(mk('rect', { x: cx - 30, y: GY - 28 - i * 24, width: 60, height: 20, rx: 3, fill: LOAD, 'fill-opacity': .45 }, col));
+    const pin = mk('rect', { x: cx + 26, y: 0, width: 26, height: 7, rx: 3, fill: COL.chalk }, col);
+    show(col, m('pul'));
+    prog(q => { const n = 2 + Math.floor(cyc(q, 2) * 6); plates.forEach((pl, i) => pl.setAttribute('fill-opacity', i < n ? .95 : .3)); pin.setAttribute('y', (GY - 28 - (n - 1) * 24 + 7).toFixed(1)); }, m('pul', .5), 6, lin);
+    txt(p, 'штифт выбирает число пластин', cx + 70, GY - 200, m('pul', .8), { size: 21, fill: COL.chalk, weight: 600 });
+    txt(p, 'шаг ≈ 2–4,5 кг', cx + 70, GY - 165, m('pul', 1.2), { size: 21, fill: LOAD, weight: 700 });
+    txt(p, 'в книге — 5–10 фунтов', cx + 70, GY - 140, m('pul', 1.5), { size: 16, fill: COL.dim });
+    infoCard(p, 60, 640, 1480, 200, 'постоянная нагрузка', 'максимум — лишь в одной части объёма, и её задаёт положение пациента; груз не больше, чем мышца удержит в этой точке; болезненную дугу не обойти', COL.bad, m('const'), { size: 23 });
+  }],
+
+  ['pos', 'Положение решает', (m, D) => {
+    const p = panel(0);
+    txt(p, 'сгибание плеча с гантелью: где момент максимален?', 800, 62, m('pos'), { size: 28, weight: 700, anchor: 'middle' });
+    // standing
+    txt(p, 'стоя', 330, 120, m('stand'), { size: 26, weight: 700, fill: FLEX, anchor: 'middle' });
+    const f = fig(p, { x: 330, y: 470 - 182 * .9, s: .9, o: 0, pose: { aN: 0, eN: 4 } });
+    const mu = shoulderMuscles(f), db = carry(p, f, c => dumbbell(c, 1.1)); put(db, { o: 0 });
+    ground(p, 210, 450, 470, m('stand')); show(f.g, m('stand')); show(db, m('stand'));
+    const tS = m('stand', .6), dS = Math.max(4, m('sup') - tS - .3);
+    prog(q => { const x = cyc(q, 2) ; f.set({ aN: 180 * x }); mu.fl.act(Math.sin(Math.PI * x)); mu.ex.act(0); }, tS, dS, lin);
+    txt(p, 'внизу — тракция, вверху — сжатие', 330, 712, m('stand', 4), { size: 20, fill: COL.dim, anchor: 'middle' });
+    // supine
+    const sgp = G(p, {});
+    txt(sgp, 'лёжа на спине', 1130, 120, m('sup'), { size: 26, weight: 700, fill: EXT, anchor: 'middle' });
+    const sc = tableScene(sgp, { hx: 1150, top: 400, s: .8, hands: null, t0: m('sup') });
+    const mu2 = shoulderMuscles(sc.pt), db2 = carry(sgp, sc.pt, c => dumbbell(c, 1)); put(db2, { o: 0 }); show(db2, m('sup'));
+    const lab = txt(sgp, '', 1130, 712, m('sup', .5), { size: 21, weight: 700, fill: FLEX, anchor: 'middle' });
+    hide(sgp, m('pulley'), .4);
+    prog(q => { const x = cyc(q, 2), c = Math.cos(Math.PI * x); sc.pt.set({ aN: 180 * x }); mu2.fl.act(Math.max(0, c)); mu2.ex.act(Math.max(0, -c)); const up = Math.sin(4 * Math.PI * q) >= 0; lab.textContent = c >= 0 ? (up ? 'сгибатели: концентрически' : 'сгибатели: эксцентрически') : (up ? 'разгибатели: эксцентрически' : 'разгибатели: концентрически'); lab.setAttribute('fill', c >= 0 ? FLEX : EXT); }, m('sup', .6), Math.max(4, m('why') - m('sup', .9)), lin);
+    infoCard(p, 60, 750, 700, 120, 'терапевт выбирает положение', 'по тому, где в объёме нужна сила', COL.good, m('why'), { size: 22 });
+    // the pulley: resistance is greatest when the cable is at right angles to the bone
+    const E = [1000, 560], L0 = 210, P = [E[0] + L0, 300], pg = G(p, { o: 0 }), defs = mk('defs', {}, pg);
+    limbEl(pg, defs, SKIN, 20, 16, mix(SKIN, COL.board, .6)).set([E[0] - 150, E[1] - 60], E);
+    const fa = limbEl(pg, defs, SKIN, 16, 12, mix(SKIN, COL.board, .6));
+    mk('circle', { cx: P[0], cy: P[1], r: 14, fill: 'none', stroke: COL.dim, 'stroke-width': 4 }, pg);
+    const cab = path(pg, '', { stroke: COL.chalk, 'stroke-width': 2.5 }), aP = path(pg, '', { stroke: COL.whole, 'stroke-width': 5 }), aC = path(pg, '', { stroke: COL.bad, 'stroke-width': 5 });
+    show(pg, m('pulley', .4));
+    const plab = txt(p, '', 1150, 820, m('pulley', .4), { size: 21, weight: 700, fill: COL.whole, anchor: 'middle' });
+    prog(q => {
+      const phi = rad(48 * cyc(q, 1.5)), u = [Math.cos(phi), Math.sin(phi)], W = [E[0] + L0 * u[0], E[1] + L0 * u[1]];
+      fa.set(E, W); cab.setAttribute('d', `M${W[0].toFixed(1)} ${W[1].toFixed(1)}L${P[0]} ${P[1]}`);
+      const c = [P[0] - W[0], P[1] - W[1]], cl = Math.hypot(...c), cu = [c[0] / cl, c[1] / cl], along = cu[0] * u[0] + cu[1] * u[1], n = [-u[1], u[0]], perpC = cu[0] * n[0] + cu[1] * n[1];
+      aP.setAttribute('d', arrowD(W, [n[0] * Math.sign(perpC), n[1] * Math.sign(perpC)], 20 + 90 * Math.abs(perpC)));
+      aC.setAttribute('d', Math.abs(along) > .08 ? arrowD(W, [u[0] * Math.sign(along), u[1] * Math.sign(along)], 15 + 90 * Math.abs(along)) : '');
+      plab.textContent = Math.abs(along) < .2 ? 'трос ⟂ кости: сопротивление максимально' : 'угол острее: больше сжатие, меньше сопротивление';
+      plab.setAttribute('fill', Math.abs(along) < .2 ? COL.whole : COL.bad);
+    }, m('pulley', .3), Math.max(4, D - m('pulley', .6)), lin);
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-torquepos', prompt: ['Сгибание плеча с гантелью. При каком угле?'],
+    build: grid([
+      { parts: ['Стоя: момент от груза максимален'], ans: ['90'], why: 'Рука горизонтальна — плечо рычага наибольшее.' },
+      { parts: ['Лёжа на спине: момент максимален'], ans: ['0'], why: 'Рука лежит горизонтально вдоль тела.' },
+      { parts: ['Стоя: момента от груза нет'], ans: ['0'], why: 'Рука висит вертикально.' },
+      { parts: ['Лёжа на спине: момента нет'], ans: ['90'], why: 'Рука смотрит в потолок.' },
+    ], [['0', '0°', FLEX], ['90', '90°', LOAD], ['180', '180°', EXT]], { multi: false, text: true }),
+  }], done) }],
+
+  ['stab', 'Стабилизация', (m, D) => {
+    const p = panel(0);
+    txt(p, 'без внешней стабилизации', 800, 66, m('stab'), { size: 28, weight: 700, anchor: 'middle' });
+    const f = fig(p, { x: 300, y: 760 - 182 * 1.15, s: 1.15, o: 0, pose: { aN: 0, eN: 4 } });
+    const mu = shoulderMuscles(f), cuff = muscleOn(f, ['Sh', 'H', -4, 2], ['Sh', 'EN', 16, 0], { after: 'hdN', w: 13, col: ANAT.muscleDeep });
+    const db = carry(p, f, c => dumbbell(c, 1.2)); put(db, { o: 0 });
+    show(f.g, m('stab')); show(db, m('stab')); ground(p, 160, 440, 760, m('stab'));
+    prog(q => { const x = cyc(q, 2), a = 175 * x; f.set({ aN: a }); mu.fl.act(.5 + .5 * Math.sin(rad(a))); mu.ex.act(.45); cuff.act(.9); }, m('stab', .4), Math.max(4, D - m('stab', .7)), lin);
+    // the arm must be kept in its plane
+    txt(p, 'удержать руку в плоскости движения', 300, 250, m('stab', 2), { size: 21, fill: COL.task, anchor: 'middle', weight: 700 });
+    txt(p, 'мышцы лопатки, отводящие, приводящие, вращатели', 300, 820, m('stab', 3), { size: 21, fill: '#ff7a5c', anchor: 'middle', weight: 600 });
+    infoCard(p, 760, 120, 790, 170, 'плюс и минус', 'стабилизаторы тренируются, но груза контролируют меньше, чем на тренажёре, и технике учиться дольше', LOAD, m('pm'), { size: 22 });
+    infoCard(p, 760, 310, 790, 270, 'плюсы', 'много положений; динамика, изометрия, упражнения с опорой; одна или несколько плоскостей, движения как в функции; с набором гантелей — очень малые шаги нагрузки', COL.good, m('pros'), { size: 22 });
+    infoCard(p, 760, 600, 790, 270, 'минусы', 'у блоков шаг ≥ 2,3 кг (в книге — 5 фунтов); медленно — без инерции и рывков в конце объёма, но хуже перенос на быстрые движения; сборка разборных гантелей; штанга двумя руками — со страхующим', COL.bad, m('cons'), { size: 22 });
+  }],
+
+  ['var', 'Переменное сопротивление', (m, D) => {
+    const p = panel(0);
+    txt(p, 'переменное сопротивление', 800, 66, m('var'), { size: 28, weight: 700, anchor: 'middle' });
+    // a cam: the weight stays the same, the lever arm (and so the torque) changes as it turns
+    const cx = 330, cy = 330, cam = G(p, { o: 0 }), camG = G(cam, { x: cx, y: cy });
+    let d = '';
+    for (let i = 0; i <= 72; i++) { const a = i / 72 * 2 * Math.PI, r = 70 + 38 * Math.cos(a) + 12 * Math.cos(2 * a); d += `${i ? 'L' : 'M'}${(r * Math.cos(a)).toFixed(1)} ${(r * Math.sin(a)).toFixed(1)}`; }
+    mk('path', { d: d + 'Z', fill: mix(METAL, COL.board, .2), stroke: '#2c353d', 'stroke-width': 2.5 }, camG);
+    mk('circle', { cx: 0, cy: 0, r: 8, fill: COL.chalk }, camG);
+    const cable = path(cam, '', { stroke: COL.chalk, 'stroke-width': 3 }), lever = path(cam, '', { stroke: LOAD, 'stroke-width': 5 });
+    const stack = G(cam, {});
+    for (let i = 0; i < 4; i++) mk('rect', { x: -30, y: 600 - i * 22, width: 60, height: 18, rx: 3, fill: LOAD, 'fill-opacity': .85 }, stack);
+    const tq = mk('rect', { x: 520, y: 0, width: 36, height: 0, rx: 6, fill: LOAD }, cam);
+    T(cam, 'момент', { x: 538, y: 520, size: 19, fill: COL.dim, anchor: 'middle' });
+    show(cam, m('cam'));
+    prog(q => {
+      const psi = 220 * cyc(q, 1.5);
+      put(camG, { x: cx, y: cy, r: psi });
+      let best = -1e9, by = 0;
+      for (let i = 0; i < 180; i++) { const a = i / 180 * 2 * Math.PI, r = 70 + 38 * Math.cos(a) + 12 * Math.cos(2 * a), [x, y] = rotPt(r * Math.cos(a), r * Math.sin(a), psi); if (x > best) { best = x; by = y; } }
+      cable.setAttribute('d', `M${(cx + best).toFixed(1)} ${(cy + by).toFixed(1)}V${560}`);
+      lever.setAttribute('d', `M${cx} ${cy}L${(cx + best).toFixed(1)} ${cy}`);
+      put(stack, { x: cx + best, y: -40 });
+      const h = best * 2.6; tq.setAttribute('y', (500 - h).toFixed(1)); tq.setAttribute('height', h.toFixed(1));
+    }, m('cam', .3), Math.max(4, m('hyd') - m('cam', .6)), lin);
+    txt(p, 'плечо рычага', cx + 60, cy - 18, m('cam', .6), { size: 20, fill: LOAD, anchor: 'middle', weight: 700 });
+    txt(p, 'груз тот же — момент меняется', 330, 640, m('cam', 1), { size: 22, fill: COL.chalk, anchor: 'middle', weight: 700 });
+    // hydraulics: the faster the piston, the greater the resistance
+    const hx = 760, hy = 330, hyd = G(p, { o: 0 });
+    mk('rect', { x: hx, y: hy - 50, width: 360, height: 100, rx: 14, fill: 'none', stroke: COL.dim, 'stroke-width': 4 }, hyd);
+    mk('rect', { x: hx + 250, y: hy - 50, width: 8, height: 38, fill: COL.dim }, hyd); mk('rect', { x: hx + 250, y: hy + 12, width: 8, height: 38, fill: COL.dim }, hyd);
+    const fluid = mk('rect', { x: hx, y: hy - 46, width: 0, height: 92, fill: '#7fc4e8', 'fill-opacity': .35 }, hyd);
+    const piston = mk('rect', { x: 0, y: hy - 46, width: 18, height: 92, rx: 4, fill: METAL }, hyd), rod = path(hyd, '', { stroke: METAL, 'stroke-width': 8 });
+    const rA = path(hyd, '', { stroke: COL.bad, 'stroke-width': 6 });
+    show(hyd, m('hyd'));
+    const hl = txt(p, '', hx + 180, hy + 110, m('hyd', .3), { size: 22, weight: 700, fill: COL.bad, anchor: 'middle' });
+    prog(q => {
+      const u = (q * 2) % 1, fast = q * 2 >= 1, e = fast ? Math.min(1, u * 1.6) : u, x = hx + 20 + 200 * e;
+      piston.setAttribute('x', x.toFixed(1)); rod.setAttribute('d', `M${hx - 80} ${hy}L${x} ${hy}`);
+      fluid.setAttribute('x', x.toFixed(1)); fluid.setAttribute('width', Math.max(0, hx + 250 - x).toFixed(1));
+      const L = fast ? 110 : 40; rA.setAttribute('d', arrowD([x + 30 + L, hy - 80], [-1, 0], L));
+      hl.textContent = fast ? 'быстро — сопротивление больше' : 'медленно — сопротивление меньше';
+    }, m('hyd', .3), Math.max(4, D - m('hyd', .6)), lin);
+    txt(p, 'поршень гонит жидкость или воздух через узкое отверстие', hx + 180, 200, m('hyd'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 60, 700, 700, 170, 'эксцентрик (кулачок)', 'рассчитан на «среднего» человека — точность спорна; одна группа мышц: концентрика и эксцентрика; медленно', LOAD, m('cam', 2), { size: 22 });
+    infoCard(p, 800, 560, 740, 310, 'гидравлика и пневматика', 'концентрически агонисты ↔ антагонисты; на некоторых — управляемый эксцентрический возврат; безопасно на средних и отчасти быстрых скоростях; болезненную дугу можно обойти, уменьшив усилие', COL.whole, m('hyd', 2), { size: 22 });
+  }],
+
+  ['mach', 'Тренажёры: плюсы и минусы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'тренажёры: плюсы и минусы', 800, 66, m('mach'), { size: 28, weight: 700, anchor: 'middle' });
+    // a leg-extension machine: seat back, thigh strap, shin pad on the lever
+    const s = 1.1, f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...SIT, t: -6, kN: 90, aN: 10, eN: 60, aF: 10, eF: 60 } });
+    plant(f, 'H', 330, 470);
+    const mg = G(p, { o: 0 });
+    mk('rect', { x: 180, y: 470 + 8, width: 210, height: 24, rx: 8, fill: '#3d4a52', stroke: COL.dim, 'stroke-width': 2 }, mg);
+    mk('rect', { x: 170, y: 250, width: 30, height: 240, rx: 8, fill: '#3d4a52', stroke: COL.dim, 'stroke-width': 2 }, mg);
+    path(mg, 'M280 502V700M210 502V700M150 700H440', { stroke: COL.dim, 'stroke-width': 6 });
+    p.appendChild(mg); p.appendChild(f.g);
+    const q4 = muscleOn(f, ...MUSCLE.rectus, { after: 'ftN', w: 14 });
+    const strap = mk('rect', { x: 0, y: 0, width: 30, height: 40, rx: 6, fill: COL.good, 'fill-opacity': .8 }, p), pad = mk('circle', { r: 17, fill: '#3d4a52', stroke: COL.dim, 'stroke-width': 2 }, p), lev = path(p, '', { stroke: METAL, 'stroke-width': 8 });
+    put(strap, { o: 0 }); put(pad, { o: 0 }); put(lev, { o: 0 });
+    const upd = () => { const K = onStage(f, 'KN'), A = onStage(f, 'AN'), H0 = onStage(f, 'H'); strap.setAttribute('x', (lerp(H0[0], K[0], .55) - 15).toFixed(1)); strap.setAttribute('y', (lerp(H0[1], K[1], .55) - 34).toFixed(1)); const P0 = [lerp(K[0], A[0], .85), lerp(K[1], A[1], .85)]; pad.setAttribute('cx', (P0[0] + 14).toFixed(1)); pad.setAttribute('cy', P0[1].toFixed(1)); lev.setAttribute('d', `M${K[0].toFixed(1)} ${(K[1]).toFixed(1)}L${(P0[0] + 14).toFixed(1)} ${P0[1].toFixed(1)}`); };
+    f.onSet.push(upd); upd();
+    [f.g, mg, strap, pad, lev].forEach(e => show(e, m('mach', .3)));
+    prog(q => { f.set({ kN: lerp(90, 5, cyc(q, Math.max(2, Math.round((D - m('mach')) / 3)))) }); q4.act(.9); }, m('mach', .6), Math.max(4, D - m('mach', .9)), lin);
+    txt(p, 'ремень и спинка — внешняя стабилизация', 310, 760, m('mach', 1), { size: 21, fill: COL.good, anchor: 'middle', weight: 700 });
+    infoCard(p, 680, 120, 860, 300, 'плюсы', 'почти максимальная нагрузка во многих точках объёма; подгонка под рост; внешняя стабилизация — проще научиться, выравнивание держится без присмотра', COL.good, m('mach'), { size: 23 });
+    infoCard(p, 680, 450, 860, 330, 'минусы', 'обычно одна группа мышц → 8–10 тренажёров и больше: дорого, обслуживание, место; чаще одна плоскость (новые модели с двумя осями — несколько плоскостей)', COL.bad, m('mcons'), { size: 23 });
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Снаряд — по обследованию и целям; сначала техника, потом нагрузка; всё закреплено и подогнано.', 'w1'],
+     ['Свободный вес и блок: максимум в одной части объёма, её задаёт положение; блок — сильнее всего под прямым углом к кости.', 'w2'],
+     ['Без внешней стабилизации работают стабилизаторы, но груз меньше и учиться дольше.', 'w3'],
+     ['Тренажёры с эксцентриком, гидравликой, пневматикой меняют сопротивление и стабилизируют, но дороги и изолируют.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 150, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-poschoice', prompt: ['Как настроить упражнение?'],
+    build: grid([
+      { parts: ['Сгибатели плеча слабы около 90°'], ans: ['stand'], why: 'Стоя момент от груза максимален при 90°.' },
+      { parts: ['Нужна сила сгибателей в начале объёма, около 0°'], ans: ['sup'], why: 'Лёжа на спине максимум — при 0°.' },
+      { parts: ['Нагрузить эксцентрически разгибатели плеча'], ans: ['sup'], why: 'Лёжа на спине от 90° до 180° разгибатели тормозят опускание.' },
+      { parts: ['Блок должен давать максимум сопротивления'], ans: ['perp'], why: 'Трос под прямым углом к движущейся кости.' },
+    ], [['stand', 'Стоя', FLEX], ['sup', 'Лёжа на спине', EXT], ['perp', 'Трос ⟂ кости', COL.whole]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-painarc', prompt: ['У пациента болезненная дуга в середине объёма отведения плеча. Что подойдёт для силовой работы?'],
+    build: choice([
+      ['Гидравлический или пневматический тренажёр — на болезненной дуге можно уменьшить усилие'],
+      ['Гантель стоя с наибольшим весом'],
+      ['Блок, трос под прямым углом как раз в болезненной части'],
+      ['Штанга двумя руками без страховки'],
+    ], 0, 'Постоянная нагрузка болезненную дугу не обходит; гидравлика и пневматика позволяют уменьшить усилие на ней.',
+    [null, 'Постоянный груз не обходит болезненную дугу.', 'Так максимум сопротивления придётся именно на болезненную часть.', 'Небезопасно и тоже не обходит болезненную дугу.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

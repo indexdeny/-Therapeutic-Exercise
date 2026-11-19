@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Возрастные особенности — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 85, title: 'Возрастные особенности', minutes: 9, language: 'ru', next: '../ch086/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch085/cards.ru.json
+const CARDS_SHORT = {
+  "пульс\nпокоя у младенцев > 125 (девочки 126, мальчики 135), к пубертату — как у взрослых; максимальный — 220 − возраст": "максимальный — 220 − возраст",
+  "ударный объём и выброс\nУО 30–40 мл в 5–16 лет; выброс зависит от размеров, но его прирост на единицу прироста VO₂ такой же, как у взрослого": "УО 30–40 мл в 5–16 лет",
+  "анаэробные возможности ограничены\nмолочной кислоты меньше — возможно, из-за ограниченного гликолиза": "молочной кислоты меньше",
+  "пульс\nпокоя 60–65 к 17–18 годам (сидя ≈ 75); макс. ≈ 190": "покоя 60–65, макс. ≈ 190",
+  "ударный объём\n60–80 мл; 75 в покое, 100 на максимуме": "60–80 мл",
+  "мышцы\nгипертрофия при тренировке (миофибриллы, актин и миозин, саркоплазма, соединительная ткань); нервные факторы: больше двигательных единиц, меньше торможения от сухожильных органов Гольджи; анаэробная тренировка: ферменты гликолиза, АТФ и КФ, буферная ёмкость ↑": "гипертрофия + нервные факторы",
+  "мышцы: масса и сила ↓ вместе с активностью\nсинтез белка ↓, быстрых волокон меньше, нервная система отвечает медленнее; продолжая тренироваться, человек уменьшает влияние старения": "продолжая тренироваться — меньше старения",
+};
+// cards-short end
+
+const KID = COL.good, YNG = COL.whole, OLD = COL.real, O2C = '#9fe0f0';
+const OLDPOSE = { t: 10, hd: 8, kN: 8, kF: 8, hN: 8, hF: 4 };
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+function row(p, x, y, w, s, col, t0, { size = 21, h = 64 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x, y, width: w, height: h, rx: 12, fill: PANEL, stroke: col, 'stroke-width': 2 }, g);
+  mk('circle', { cx: x + 24, cy: y + h / 2, r: 8, fill: col }, g);
+  const t = para(g, s, x + 44, y + h / 2 + size * .35, null, { size, maxW: w - 60 });
+  put(t, { o: 1, y: -(t._h - size * 1.32) / 2 });
+  show(g, t0);
+  return g;
+}
+// A small line chart: points [[x, y]] in data units, ranges xr, yr; returns the path element and a mapper.
+function lineChart(p, x0, y0, w, h, xr, yr, pts, col, t0, { dash = null, wdt = 5, dur = 1.4 } = {}) {
+  const X = v => x0 + (v - xr[0]) / (xr[1] - xr[0]) * w, Y = v => y0 - (v - yr[0]) / (yr[1] - yr[0]) * h;
+  const e = path(p, pts.map(([a, b], i) => `${i ? 'L' : 'M'}${X(a).toFixed(1)} ${Y(b).toFixed(1)}`).join(''), { stroke: col, 'stroke-width': wdt, ...(dash ? { 'stroke-dasharray': dash } : {}) }, { d: 0 });
+  draw(e, t0, dur);
+  return { e, X, Y };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Возрастные особенности', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 7 · Урок 85', { x: 800, y: 150, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Возрастные особенности', { x: 800, y: 235, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'дети, молодые, пожилые', { x: 800, y: 300, size: 44, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'чем различается ответ на нагрузку', 800, 380, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const fs = [[560, .5, {}], [800, .8, {}], [1040, .78, OLDPOSE]].map(([x, s, pose]) => { const f = fig(art, { x, y: 0, s, pose: { ...STAND, ...pose } }); plant(f, 'AN', x, 850); return f; });
+    ground(art, 460, 1140, 850, 0);
+    prog(q => fs.forEach((f, i) => { f.set({ aN: 10 + 12 * Math.sin(2 * Math.PI * (q * 2 + i / 3)) }); }), .4, Math.max(4, D - 1.4), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['kids', 'Дети: сердце и кислород', (m, D) => {
+    const p = panel(0);
+    txt(p, 'дети: растёт тело — растут возможности', 800, 52, m('kids'), { size: 28, weight: 700, anchor: 'middle' });
+    // from 5 to 15 years: three times more
+    const f = fig(p, { x: 0, y: 0, s: .42, o: 0 });
+    plant(f, 'AN', 150, 440); show(f.g, m('kids'));
+    prog(q => { put(f.g, { s: lerp(.42, .7, q) }); f.s = lerp(.42, .7, q); plant(f, 'AN', 150, 440); }, m('kids', .5), 2.5);
+    const age = txt(p, '', 150, 480, m('kids', .5), { size: 22, weight: 700, fill: KID, anchor: 'middle' });
+    prog(q => { age.textContent = `${Math.round(lerp(5, 15, q))} лет`; }, m('kids', .5), 2.5);
+    ground(p, 80, 230, 440, m('kids'));
+    ['масса тела', 'объём лёгких', 'объём сердца', 'VO₂max'].forEach((s, i) => {
+      const y = 140 + i * 78, g = G(p, { o: 0 });
+      T(g, s, { x: 270, y: y + 26, size: 21, weight: 700 });
+      const b = mk('rect', { x: 460, y: y + 6, width: 90, height: 28, rx: 8, fill: KID }, g);
+      show(g, m('kids', .5 + i * .3));
+      prog(q => b.setAttribute('width', (90 * (1 + 2 * q)).toFixed(1)), m('kids', 1 + i * .3), 2);
+    });
+    txt(p, '× 3 между 5 и 15 годами', 560, 470, m('kids', 3), { size: 24, weight: 700, fill: KID, anchor: 'middle' });
+    infoCard(p, 820, 100, 720, 190, 'пульс', 'покоя у младенцев > 125 (девочки 126, мальчики 135), к пубертату — как у взрослых; максимальный — 220 − возраст', KID, m('hr'), { size: 21 });
+    infoCard(p, 820, 310, 720, 190, 'ударный объём и выброс', 'УО 30–40 мл в 5–16 лет; выброс зависит от размеров, но его прирост на единицу прироста VO₂ такой же, как у взрослого', YNG, m('sv'), { size: 21 });
+    // the a-vO2 difference: larger in children
+    const av = (x, art, ven, lab, col, t0) => { const g = G(p, { o: 0 });
+      mk('rect', { x, y: 820 - 200 * art, width: 60, height: 200 * art, rx: 8, fill: BLOOD_A }, g);
+      mk('rect', { x: x + 70, y: 820 - 200 * ven, width: 60, height: 200 * ven, rx: 8, fill: mix(BLOOD_A, BLOOD_V, .55) }, g);
+      path(g, `M${x + 145} ${820 - 200 * art}V${820 - 200 * ven}M${x + 135} ${820 - 200 * art}H${x + 155}M${x + 135} ${820 - 200 * ven}H${x + 155}`, { stroke: COL.task, 'stroke-width': 4 });
+      T(g, lab, { x: x + 65, y: 850, size: 21, weight: 700, fill: col, anchor: 'middle' }); show(g, t0); };
+    txt(p, 'артериовенозная разница по O₂', 400, 560, m('avo'), { size: 23, weight: 700, fill: COL.task, anchor: 'middle' });
+    av(130, 1, .3, 'ребёнок', KID, m('avo', .5)); av(420, 1, .55, 'взрослый', YNG, m('avo', 1));
+    pill(p, 'схема', 680, 600, m('avo'), { col: COL.dim, size: 18 });
+    txt(p, 'больше разница — восполняет малый УО', 400, 600 + 0, m('avo', 2), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    // VO2max in L/min rises to 20 years (shape only)
+    const x0 = 880, y0 = 830, w = 620, h = 250;
+    chartAxes(p, x0, y0, w, h, 'VO₂max, л/мин', 'возраст', m('vo2'));
+    [5, 10, 15, 20].forEach(a => txt(p, String(a), x0 + (a - 5) / 20 * w, y0 + 28, m('vo2'), { size: 18, fill: COL.dim, anchor: 'middle' }));
+    lineChart(p, x0, y0, w, h, [5, 25], [0, 1], [[5, .25], [8, .32], [11, .42], [12.5, .5], [15, .68], [18, .85], [20, .92], [25, .93]], YNG, m('vo2', .5));
+    lineChart(p, x0, y0, w, h, [5, 25], [0, 1], [[12.5, .5], [15, .58], [18, .65], [20, .67], [25, .67]], COL.rat, m('vo2', 2), { dash: '10 8' });
+    txt(p, 'до пубертата мальчики = девочки', x0 + 20, y0 - h * .75, m('vo2', 2), { size: 19, fill: COL.chalk });
+    txt(p, 'выносливость растёт до 17–18 лет', x0 + w, y0 + 56, m('vo2', 4), { size: 19, fill: COL.dim, anchor: 'end' });
+    pill(p, 'схема', x0 + w - 30, y0 - h + 20, m('vo2'), { col: COL.dim, size: 18 });
+  }],
+
+  ['kids2', 'Дети: давление, дыхание, мышцы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'дети: давление, дыхание, мышцы', 800, 52, m('bp'), { size: 28, weight: 700, anchor: 'middle' });
+    // blood pressure with age (shape only between the book's points)
+    const x0 = 120, y0 = 420, w = 600, h = 300;
+    chartAxes(p, x0, y0, w, h, 'АД, мм рт. ст.', 'возраст, лет', m('bp'));
+    [0, 4, 8, 12].forEach(a => txt(p, String(a), x0 + a / 18 * w, y0 + 28, m('bp'), { size: 18, fill: COL.dim, anchor: 'middle' }));
+    const s = lineChart(p, x0, y0, w, h, [0, 18], [30, 130], [[0, 40], [.08, 80], [9, 100], [13, 120], [18, 120]], COL.bad, m('bp', .5), { dur: 2.5 });
+    lineChart(p, x0, y0, w, h, [0, 18], [30, 130], [[4, 55], [14, 70], [18, 72]], COL.whole, m('bp', 4.5), { dur: 1.5 });
+    [[0, 40, '40'], [.08, 80, '80 — к месяцу'], [9, 100, '100'], [13, 120, 'взрослое — к пубертату']].forEach(([a, v, lab], i) => txt(p, lab, s.X(a) + 12, s.Y(v) + (i === 1 ? 28 : -10), m('bp', .8 + i * .8), { size: 18, fill: COL.bad, weight: 700 }));
+    txt(p, 'диастолическое 55 → 70 (4–14 лет)', s.X(5), s.Y(45), m('bp', 4.8), { size: 18, fill: COL.whole, weight: 700 });
+    pill(p, 'схема', x0 + w - 30, y0 - h - 10, m('bp'), { col: COL.dim, size: 18 });
+    // breathing rate
+    const r0 = 900, rw = 560;
+    chartAxes(p, r0, y0, rw, h, 'дыханий в минуту', 'возраст, лет', m('rr'));
+    const r = lineChart(p, r0, y0, rw, h, [0, 18], [0, 35], [[0, 30], [4, 24], [9, 20], [14, 17], [18, 16]], O2C, m('rr', .5));
+    txt(p, '30', r.X(0) + 14, r.Y(30), m('rr', .5), { size: 19, fill: O2C, weight: 700 });
+    txt(p, '16 к 17–18 годам', r.X(18) - 4, r.Y(16) - 16, m('rr', 1.5), { size: 19, fill: O2C, weight: 700, anchor: 'end' });
+    txt(p, 'ЖЕЛ и максимальная вентиляция — по росту', r0 + rw / 2, y0 + 60, m('rr', 3), { size: 19, fill: COL.dim, anchor: 'middle' });
+    // muscle: sarcomeres added at the musculotendinous junction
+    txt(p, 'мышечная масса растёт весь подростковый период', 400, 530, m('mm'), { size: 22, weight: 700, fill: ANAT.muscle, anchor: 'middle' });
+    const mg = G(p, { o: 0 }), sx = 120, sy = 620, sw = 36;
+    path(mg, `M${sx - 70} ${sy + 20}H${sx}`, { stroke: ANAT.tendon, 'stroke-width': 10 });
+    const sarc = [...Array(12)].map((_, i) => { const e = mk('rect', { x: sx + i * sw, y: sy, width: sw - 4, height: 40, rx: 6, fill: ANAT.muscle, stroke: mix(ANAT.muscle, '#000000', .4), 'stroke-width': 1.5, opacity: i < 8 ? 1 : 0 }, mg); return e; });
+    const tend = path(mg, '', { stroke: ANAT.tendon, 'stroke-width': 10 });
+    show(mg, m('mm'));
+    prog(q => { const n = 8 + Math.floor(q * 4.99); sarc.forEach((e, i) => e.setAttribute('opacity', i < n ? 1 : 0)); tend.setAttribute('d', `M${sx + n * sw} ${sy + 20}H${sx + n * sw + 70}`); sarc.forEach((e, i) => e.setAttribute('fill', i >= 8 && i < n ? COL.good : ANAT.muscle)); }, m('mm', 1), 3);
+    txt(p, 'новые саркомеры — у мышечно-сухожильного перехода', 400, 700, m('mm', 2), { size: 19, fill: COL.good, anchor: 'middle' });
+    txt(p, '+ гипертрофия волокон; сила — с массой и созреванием нервной системы', 400, 735, m('mm', 3), { size: 18, fill: COL.chalk, anchor: 'middle' });
+    // peak muscle mass
+    const ax = 120, aw = 600, Xa = v => ax + (v - 10) / 20 * aw;
+    const pg = G(p, { o: 0 });
+    path(pg, `M${ax} 840H${ax + aw}`, { stroke: COL.dim, 'stroke-width': 2 });
+    [10, 15, 20, 25, 30].forEach(v => T(pg, String(v), { x: Xa(v), y: 866, size: 17, fill: COL.dim, anchor: 'middle' }));
+    mk('rect', { x: Xa(16), y: 780, width: Xa(20) - Xa(16), height: 22, rx: 8, fill: COL.rat }, pg); T(pg, 'девушки 16–20', { x: Xa(16) - 8, y: 797, size: 17, fill: COL.rat, anchor: 'end', weight: 700 });
+    mk('rect', { x: Xa(18), y: 808, width: Xa(25) - Xa(18), height: 22, rx: 8, fill: COL.whole }, pg); T(pg, 'юноши 18–25', { x: Xa(25) + 8, y: 825, size: 17, fill: COL.whole, weight: 700 });
+    T(pg, 'пик мышечной массы', { x: ax, y: 770, size: 18, fill: COL.dim });
+    show(pg, m('mm', 5));
+    infoCard(p, 840, 560, 700, 200, 'анаэробные возможности ограничены', 'молочной кислоты меньше — возможно, из-за ограниченного гликолиза', COL.int, m('an'), { size: 22 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-kid', prompt: ['Это о ребёнке, о взрослом или об обоих?'],
+    build: grid([
+      { parts: ['Пульс покоя выше 125'], ans: ['kid'], why: 'У младенцев: 126 у девочек, 135 у мальчиков.' },
+      { parts: ['Большая артериовенозная разница восполняет малый ударный объём'], ans: ['kid'], why: 'Дети переносят большую a-v разницу.' },
+      { parts: ['Ударный объём 60–80 мл'], ans: ['adult'], why: 'У детей 5–16 лет — 30–40 мл.' },
+      { parts: ['Меньше молочной кислоты, ограниченный гликолиз'], ans: ['kid'], why: 'Анаэробные возможности детей ограничены.' },
+      { parts: ['Прирост выброса на единицу прироста потребления O₂'], ans: ['both'], why: 'Он постоянен всю жизнь.' },
+    ], [['kid', 'Ребёнок', KID], ['adult', 'Взрослый', YNG], ['both', 'Оба одинаково', COL.int]], { multi: false, text: true }),
+  }], done) }],
+
+  ['young', 'Молодые взрослые', (m, D) => {
+    const p = panel(0);
+    txt(p, 'молодые взрослые (малоподвижный мужчина — пример книги)', 800, 52, m('young'), { size: 27, weight: 700, anchor: 'middle' });
+    const ht = heartEl(p, 200, 300, .95, m('young'));
+    const bpm = [75, 190];
+    let mode = 0;
+    prog(q => ht.beat(cyc(q, mode ? 40 : 15)), m('young'), Math.max(4, D - m('young')), lin);
+    whenAt(m('co', 4), () => { mode = 1; });
+    infoCard(p, 380, 95, 380, 170, 'пульс', 'покоя 60–65 к 17–18 годам (сидя ≈ 75); макс. ≈ 190', YNG, m('young', .5), { size: 20 });
+    infoCard(p, 380, 280, 380, 150, 'ударный объём', '60–80 мл; 75 в покое, 100 на максимуме', YNG, m('sv'), { size: 20 });
+    // cardiac output = HR × SV
+    const co = [['покой', '75 × 75 мл ≈ 5,6 л/мин', 'co'], ['максимум', '190 × 100 мл = 19 л/мин', 'co']];
+    co.forEach(([a, b, k], i) => { txt(p, a, 80, 500 + i * 56, m(k, i * 4), { size: 22, weight: 700, fill: COL.dim }); txt(p, b, 230, 500 + i * 56, m(k, i * 4), { size: 28, weight: 700, fill: COL.task }); });
+    txt(p, 'выброс = ЧСС × ударный объём', 80, 450, m('co'), { size: 21, fill: COL.chalk });
+    // a-vO2 at rest and at maximum
+    txt(p, 'артериовенозная разница по O₂', 1180, 120, m('avo'), { size: 23, weight: 700, fill: COL.task, anchor: 'middle' });
+    const ag = G(p, { o: 0 });
+    mk('rect', { x: 900, y: 440 - 260 * 5.2 / 16, width: 120, height: 260 * 5.2 / 16, rx: 10, fill: COL.task, 'fill-opacity': .55 }, ag);
+    T(ag, '5,2', { x: 960, y: 440 - 260 * 5.2 / 16 - 12, size: 26, weight: 700, fill: COL.task, anchor: 'middle' });
+    T(ag, 'покой', { x: 960, y: 470, size: 20, fill: COL.dim, anchor: 'middle' });
+    show(ag, m('avo', .5));
+    const ag2 = G(p, { o: 0 });
+    mk('rect', { x: 1100, y: 440 - 260 * 15.8 / 16, width: 120, height: 260 * 15.8 / 16, rx: 10, fill: COL.task }, ag2);
+    T(ag2, '15,8', { x: 1160, y: 440 - 260 * 15.8 / 16 - 12, size: 26, weight: 700, fill: COL.task, anchor: 'middle' });
+    T(ag2, 'нагрузка', { x: 1160, y: 470, size: 20, fill: COL.dim, anchor: 'middle' });
+    show(ag2, m('avo', 2.5));
+    txt(p, 'мл O₂ на дл крови · × 3', 1400, 300, m('avo', 2.5), { size: 20, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'в покое ткани берут 25–30 % O₂', 1400, 340, m('avo', .5), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    // VO2max, BP, breathing
+    row(p, 60, 640, 700, 'VO₂max: 3000 мл/мин (покой 300); разница полов — наибольшая, на безжировую массу — почти нет', O2C, m('vo2'), { h: 84, size: 19 });
+    row(p, 60, 735, 700, 'АД 120/80; на пике систолическое 190–240, диастолическое почти не меняется; дыхание 12–15/мин; ЖЕЛ 4800 мл', COL.bad, m('bp'), { h: 104, size: 19 });
+    infoCard(p, 820, 560, 720, 300, 'мышцы', 'гипертрофия при тренировке (миофибриллы, актин и миозин, саркоплазма, соединительная ткань); нервные факторы: больше двигательных единиц, меньше торможения от сухожильных органов Гольджи; анаэробная тренировка: ферменты гликолиза, АТФ и КФ, буферная ёмкость ↑', ANAT.muscle, m('mm'), { size: 20 });
+  }],
+
+  ['old', 'Пожилые', (m, D) => {
+    const p = panel(0);
+    txt(p, 'пожилые', 800, 52, m('old'), { size: 28, weight: 700, anchor: 'middle' });
+    // maximal HR: 190 at 20–29, 164 at 60–69; the resting HR does not change
+    const hb = (x, v, lab, col, t0) => { const g = G(p, { o: 0 }); mk('rect', { x, y: 380 - 1.15 * v, width: 110, height: 1.15 * v, rx: 10, fill: col }, g); T(g, String(v), { x: x + 55, y: 380 - 1.15 * v - 12, size: 26, weight: 700, fill: col, anchor: 'middle' }); T(g, lab, { x: x + 55, y: 410, size: 19, fill: COL.dim, anchor: 'middle' }); show(g, t0); };
+    txt(p, 'максимальный пульс ↓', 235, 110, m('old'), { size: 23, weight: 700, fill: COL.bad, anchor: 'middle' });
+    hb(100, 190, '20–29 лет', YNG, m('old', 1)); hb(260, 164, '60–69 лет', OLD, m('old', 2));
+    txt(p, 'пульс покоя — без изменений', 540, 200, m('old', 3), { size: 20, fill: COL.chalk });
+    txt(p, 'прирост пульса на нагрузку ↓', 540, 240, m('old', 4), { size: 20, fill: COL.chalk });
+    row(p, 60, 450, 700, 'ударный объём и выброс ↓; a-v разница ↓ (меньше безжировая масса и кислородная ёмкость)', OLD, m('sv'), { h: 84, size: 20 });
+    // VO2max against age: −10 % per decade in sedentary men; athletes lose less
+    const x0 = 900, y0 = 520, w = 600, h = 380;
+    chartAxes(p, x0, y0, w, h, 'VO₂max, мл/кг/мин', 'возраст', m('vo2'));
+    [25, 35, 45, 55, 65].forEach(a => txt(p, String(a), x0 + (a - 25) / 50 * w, y0 + 28, m('vo2'), { size: 18, fill: COL.dim, anchor: 'middle' }));
+    const c = lineChart(p, x0, y0, w, h, [25, 75], [0, 55], [[25, 47.7], [35, 43], [45, 38.6], [55, 34.8], [65, 30], [75, 25.5]], OLD, m('vo2', 4), { dur: 2 });
+    txt(p, '47,7', c.X(25) + 12, c.Y(47.7) - 10, m('vo2', 4), { size: 21, weight: 700, fill: OLD });
+    txt(p, '25,5', c.X(75) - 8, c.Y(25.5) + 30, m('vo2', 6), { size: 21, weight: 700, fill: OLD, anchor: 'end' });
+    txt(p, 'малоподвижные мужчины: ≈ −10 % за десятилетие', x0 + w / 2, y0 + 64, m('vo2', 5), { size: 19, fill: OLD, anchor: 'middle', weight: 700 });
+    lineChart(p, x0, y0, w, h, [25, 75], [0, 55], [[35, 52], [45, 50], [55, 47], [65, 44]], COL.good, m('ath'), { dash: '10 8' });
+    txt(p, 'продолжают тренироваться', c.X(45), c.Y(52) - 10, m('ath', .5), { size: 19, weight: 700, fill: COL.good });
+    pill(p, 'промежуточные точки — схема', x0 + w - 150, y0 + 100, m('vo2', 4), { col: COL.dim, size: 17 });
+    // average fitness bands: 31–37 at 20–29, 18–23 at 60–69
+    const band = (a, lo, hi, t0) => show(put(mk('rect', { x: c.X(a) - 18, y: c.Y(hi), width: 36, height: c.Y(lo) - c.Y(hi), rx: 6, fill: COL.int, 'fill-opacity': .5, stroke: COL.int, 'stroke-width': 2 }, p), { o: 0 }), t0);
+    band(27, 31, 37, m('vo2', 1)); band(65, 18, 23, m('vo2', 2));
+    txt(p, 'средняя форма: 31–37 и 18–23', c.X(50), c.Y(12), m('vo2', 2.5), { size: 19, fill: COL.int, weight: 700, anchor: 'middle' });
+    row(p, 60, 550, 700, 'АД ↑ (≈ 150/90) — периферическое сопротивление растёт', COL.bad, m('bp'), { h: 70, size: 20 });
+    row(p, 60, 630, 700, 'дыхание чаще; ЖЕЛ ↓ на 25 % (50–60 против 20–30 лет); макс. вентиляция ↓', O2C, m('bp', 4), { h: 84, size: 20 });
+    infoCard(p, 60, 730, 1480, 130, 'мышцы: масса и сила ↓ вместе с активностью', 'синтез белка ↓, быстрых волокон меньше, нервная система отвечает медленнее; продолжая тренироваться, человек уменьшает влияние старения', ANAT.muscle, m('mm'), { size: 20 });
+    const of = fig(p, { x: 0, y: 0, s: .55, o: 0, pose: { ...STAND, ...OLDPOSE } });
+    plant(of, 'AN', 450, 400); show(of.g, m('old'));
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-old', prompt: ['Как это меняется с возрастом у пожилых?'],
+    build: grid([
+      { parts: ['Пульс покоя'], ans: ['eq'], why: 'От возраста не зависит.' },
+      { parts: ['Максимальный пульс'], ans: ['dn'], why: '190 в 20–29 лет, 164 в 60–69.' },
+      { parts: ['Артериальное давление'], ans: ['up'], why: 'Растёт периферическое сопротивление; в среднем 150/90.' },
+      { parts: ['Жизненная ёмкость лёгких'], ans: ['dn'], why: 'В 50–60 лет на 25 % меньше, чем в 20–30.' },
+      { parts: ['Частота дыхания'], ans: ['up'], why: 'С возрастом растёт.' },
+    ], [['dn', '↓ снижается', COL.whole], ['eq', '= не меняется', COL.int], ['up', '↑ растёт', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Дети: малый ударный объём восполняет большая a-v разница; пульс покоя высокий, анаэробные возможности ограничены.', 'w1'],
+     ['Молодые взрослые: выброс = ЧСС × УО — от ≈ 5,6 л/мин в покое до 19 на максимуме.', 'w2'],
+     ['Пожилые: ниже максимальный пульс, УО и VO₂max; выше АД, меньше ЖЕЛ.', 'w3'],
+     ['Снижение во многом связано с бездействием: тренировки его замедляют.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-co85', prompt: ['Посчитайте.'],
+    build: blanks([
+      { parts: ['Максимальный пульс 65-летнего по формуле: ', { box: '155' }], why: '220 − 65.' },
+      { parts: ['Выброс при ЧСС 75 и ударном объёме 80 мл: ', { box: '6000' }, ' мл/мин'], why: '75 × 80 = 6000 мл, то есть 6 л в минуту.' },
+      { parts: ['Выброс при ЧСС 150 и ударном объёме 100 мл: ', { box: '15000' }, ' мл/мин'], why: '150 × 100 = 15 000 мл — 15 л в минуту.' },
+    ]),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-child', prompt: ['Мальчик 10 лет крутит педали велоэргометра. Чем его ответ на нагрузку отличается от ответа взрослого?'],
+    build: choice([
+      ['Ударный объём меньше, и это восполняет большая артериовенозная разница'],
+      ['Молочной кислоты образуется больше'],
+      ['Прирост выброса на единицу прироста потребления O₂ больше'],
+      ['Максимальное потребление O₂ выше, чем у девочки того же возраста'],
+    ], 0, 'У детей малый ударный объём (30–40 мл), а большая a-v разница его восполняет.',
+    [null, 'Наоборот: анаэробные возможности детей ограничены, лактата меньше.', 'Этот прирост одинаков в любом возрасте.', 'До пубертата у мальчиков и девочек VO₂max не различается.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

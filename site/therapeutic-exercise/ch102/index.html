@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Стадии воспаления и восстановления — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 102, title: 'Стадии воспаления и восстановления', minutes: 9, language: 'ru', next: '../ch103/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch102/cards.ru.json
+const CARDS_SHORT = {
+  "механическая травма\nв том числе операция": "в том числе операция",
+  "раздражимость (irritability)\nчувствительность ткани — следствие этого ответа сосудов и клеток": "чувствительность ткани",
+  "когда больно\nтолько если новую ткань нагружают сверх её возможностей или растягивают укороченную ткань": "только при нагрузке сверх возможностей",
+  "мышцы\nпри проверке бывают слабыми; функция ограничена ослабленной тканью": "слабые, функция ограничена",
+  "объём ограничивают\nконтрактуры или спайки": "контрактуры или спайки",
+  "ткань продолжает крепнуть\nи перестраивается под действием нагрузок": "и перестраивается под действием нагрузок",
+  "функцию ограничивают\nслабость, низкая выносливость, плохой нервно-мышечный контроль": "слабость, низкая выносливость, плохой нервно-мышечный контроль",
+  "хроническое воспаление\nткань постоянно нагружают сверх её способности восстанавливаться": "нагрузка сверх способности восстанавливаться",
+};
+// cards-short end
+
+const HEAD = COL.nat, PAIN = '#ff5a3c';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function painMark(p, x, y, r = 22) {
+  const g = G(p, { x, y, o: 0 });
+  mk('circle', { r: r * 1.6, fill: PAIN, 'fill-opacity': .2 }, g);
+  let d = '';
+  for (let i = 0; i < 16; i++) { const a = i / 16 * 2 * Math.PI, rr = i % 2 ? r * .45 : r; d += `${i ? 'L' : 'M'}${(rr * Math.cos(a)).toFixed(1)} ${(rr * Math.sin(a)).toFixed(1)}`; }
+  mk('path', { d: d + 'Z', fill: PAIN, stroke: '#ffd2c4', 'stroke-width': 2 }, g);
+  const pm = { g, x, y };
+  pm.at = (X, Y) => { pm.x = X; pm.y = Y; return pm; };
+  pm.set = k => put(g, { x: pm.x, y: pm.y, o: clamp(k * 1.6, 0, 1), s: .35 + .65 * clamp(k, 0, 1) });
+  return pm;
+}
+// A numbered line: a badge and a paragraph.
+function numLine(p, n, str, x, y, col, t0, { size = 22, maxW = 860 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 20, cy: y - 8, r: 19, fill: col }, g);
+  T(g, String(n), { x: x + 20, y: y, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 54, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+
+// A log-scale day axis from x to x + w at y; X(day) maps a day to x. Ticks: 1 д … 1 год.
+function dayAxis(p, x, y, w, t0, { d0 = .5, d1 = 400 } = {}) {
+  const X = d => x + w * (Math.log(d) - Math.log(d0)) / (Math.log(d1) - Math.log(d0));
+  const g = G(p, { o: 0 });
+  path(g, `M${x} ${y}H${x + w}`, { stroke: COL.dim, 'stroke-width': 3 });
+  [[1, '1 д'], [3, '3 д'], [7, '1 нед'], [21, '3 нед'], [42, '6 нед'], [182, '6 мес'], [365, '1 год']].forEach(([d, s]) => {
+    path(g, `M${X(d).toFixed(1)} ${y - 7}V${y + 7}`, { stroke: COL.dim, 'stroke-width': 2.5 });
+    T(g, s, { x: X(d), y: y + 32, size: 18, fill: COL.dim, anchor: 'middle' });
+  });
+  if (t0 !== null) show(g, t0);
+  return { g, X };
+}
+// Three overlapping bands over a day axis (schematic): inflammation, repair, maturation and remodeling.
+function stageBands(p, x, y, w, h, t0) {
+  const ax = dayAxis(p, x, y, w, t0);
+  const L = Math.log, B = [[L(2), .62, .9], [L(11), .72, .8], [L(90), 1.15, .72]];
+  const bands = B.map(([c, sg, k], i) => {
+    let d = `M${x} ${y}`;
+    for (let j = 0; j <= 90; j++) { const X = x + w * j / 90, dd = Math.exp(L(.5) + (L(400) - L(.5)) * j / 90), v = Math.exp(-(((L(dd) - c) / sg) ** 2)); d += `L${X.toFixed(1)} ${(y - h * k * v).toFixed(1)}`; }
+    const e = path(p, d + `L${x + w} ${y}Z`, { fill: STG[i], 'fill-opacity': .32, stroke: STG[i], 'stroke-width': 3 }, { o: 0 });
+    return e;
+  });
+  return { ax, bands, X: ax.X };
+}
+// One row of fig. 10.2: the range from its beginning (x0) to the anatomic limit (x1), tissue resistance from xr (a
+// wavy line); a marker moves along it, and a zigzag of pain rises behind the marker from painX with height amp.
+function romRow(p, x0, xr, x1, y, t0, { lab = null, col = COL.chalk } = {}) {
+  const g = G(p, { o: 0 }), f = v => v.toFixed(1);
+  path(g, `M${x0} ${y}H${xr}`, { stroke: COL.dim, 'stroke-width': 3 });
+  let d = `M${xr} ${y}`;
+  for (let xx = xr + 6, k = 0; xx <= x1; xx += 6, k++) d += `L${xx} ${y + (k % 2 ? 5 : -5)}`;
+  path(g, d, { stroke: COL.task, 'stroke-width': 2.5 });
+  path(g, `M${x0} ${y - 13}V${y + 13}M${x1} ${y - 18}V${y + 18}`, { stroke: COL.chalk, 'stroke-width': 3 });
+  path(g, `M${xr} ${y - 16}V${y + 16}`, { stroke: COL.task, 'stroke-width': 3 });
+  if (lab) T(g, lab, { x: x0 - 26, y: y + 9, size: 30, weight: 700, fill: col, anchor: 'end' });
+  const pain = path(g, '', { stroke: PAIN, 'stroke-width': 3.5, 'stroke-linejoin': 'round' });
+  const dot = mk('circle', { r: 11, cx: x0, cy: y, fill: COL.whole, stroke: COL.board, 'stroke-width': 2.5 }, g);
+  const rr = { g };
+  rr.set = (pos, painX, amp) => {
+    dot.setAttribute('cx', f(pos));
+    if (pos <= painX) { pain.setAttribute('d', ''); return rr; }
+    let pd = `M${f(painX)} ${y}`;
+    for (let xx = painX + 9, k = 0; xx <= pos; xx += 9, k++) { const hh = amp * Math.min(1, (xx - painX) / 110) * (k % 2 ? .55 : 1); pd += `L${f(xx)} ${f(y - 8 - hh)}`; }
+    pain.setAttribute('d', pd);
+    return rr;
+  };
+  if (t0 !== null) show(g, t0);
+  return rr;
+}
+// Five small icons of inflammation (centre cx, cy).
+function signIcon(p, i, cx, cy) {
+  const g = G(p, { x: cx, y: cy }), L = (d, c = COL.chalk, w = 4) => path(g, d, { stroke: c, 'stroke-width': w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  if (i === 0) { mk('ellipse', { rx: 26, ry: 20, fill: mix(FLUID, COL.board, .4), stroke: FLUID, 'stroke-width': 3 }, g); [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([a, b]) => L(`M${a * 32} ${b * 26}l${a * 10} ${b * 8}`, FLUID, 3)); }
+  if (i === 1) { mk('circle', { r: 30, fill: PAIN, 'fill-opacity': .2 }, g); mk('circle', { r: 19, fill: '#e2574c' }, g); }
+  if (i === 2) { mk('rect', { x: -7, y: -32, width: 14, height: 46, rx: 7, fill: PANEL, stroke: COL.chalk, 'stroke-width': 2.5 }, g); mk('circle', { cy: 20, r: 12, fill: COL.bad, stroke: COL.chalk, 'stroke-width': 2.5 }, g); mk('rect', { x: -3, y: -20, width: 6, height: 38, fill: COL.bad }, g); }
+  if (i === 3) { let d = ''; for (let k = 0; k < 16; k++) { const a = k / 16 * 2 * Math.PI, r = k % 2 ? 9 : 22; d += `${k ? 'L' : 'M'}${(r * Math.cos(a)).toFixed(1)} ${(r * Math.sin(a)).toFixed(1)}`; } mk('path', { d: d + 'Z', fill: PAIN }, g); T(g, 'z', { x: 22, y: -14, size: 18, fill: COL.dim, weight: 700 }); }
+  if (i === 4) { L('M-24 18L0 -6L24 18', COL.chalk, 6); mk('circle', { cy: -6, r: 6, fill: COL.chalk }, g); mk('circle', { r: 30, fill: 'none', stroke: COL.bad, 'stroke-width': 4 }, g); L('M-21 21L21 -21', COL.bad, 4); }
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Стадии воспаления и восстановления', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 10 · Урок 102', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Стадии воспаления', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и восстановления', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как заживает ткань и как узнать стадию', 800, 360, m('sub'), { size: 30, fill: HEAD, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const hv = healView(art, 560, 420, 480, 300, null); put(hv.g, { o: 1 });
+    const chips = stageChips(art, 800, 780, -1, null); chips.forEach(c => put(c, { o: 1 }));
+    prog(q => {
+      const a = clamp(q * 3, 0, 1), b = clamp(q * 3 - 1, 0, 1), c = clamp(q * 3 - 2, 0, 1);
+      hv.set({ exud: 1 - b, clot: 1 - b, debris: 1 - a, cells: a * (1 - b), cap: b * (1 - c * .6), fib: b * (1 - c * .7), coll: b, align: c, thick: c, shrink: c * .4 });
+      chips.forEach((ch, i) => put(ch, { o: [1 - b * .7, .3 + .7 * Math.min(b, 1 - c), .3 + .7 * c][i] }));
+    }, .5, D - 1.5, lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['same', 'Три перекрывающиеся стадии', (m, D) => {
+    const p = panel(0);
+    txt(p, 'раздражимость ткани и три стадии', 800, 56, m('same'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    // any insult → the same vascular and cellular response
+    infoCard(p, 60, 110, 440, 150, 'механическая травма', 'в том числе операция', COL.whole, m('same'), { size: 22 });
+    infoCard(p, 60, 280, 440, 120, 'химическое раздражение', null, COL.real, m('same', 1));
+    arrowTo(p, [510, 230], [610, 260], m('same', 2), { col: COL.dim });
+    const hv = healView(p, 620, 120, 400, 250, m('same', 2)); hv.set({ exud: 1, clot: 1, debris: 1, cells: 1 });
+    txt(p, 'сосуды и клетки отвечают похоже', 820, 405, m('same', 2.5), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 1060, 120, 480, 250, 'раздражимость (irritability)', 'чувствительность ткани — следствие этого ответа сосудов и клеток', COL.task, m('irr'), { size: 22 });
+    // the stages over time
+    const SB = stageBands(p, 160, 760, 1300, 260, m('three'));
+    pill(p, 'схема', 1480, 470, m('three'), { col: COL.dim, size: 18 });
+    const NM = [['воспаление', 2], ['восстановление', 12], ['созревание и перестройка', 120]];
+    SB.bands.forEach((b, i) => { show(b, m('three', .4 + i * .7)); txt(p, NM[i][0], SB.X(NM[i][1]), [520, 560, 600][i], m('three', .6 + i * .7), { size: 22, weight: 700, fill: STG[i], anchor: 'middle' }); });
+    stageChips(p, 800, 850, -1, m('clin'));
+  }],
+
+  ['acute', 'Острая стадия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'острая стадия (acute): реакция и воспаление', 800, 56, m('acute'), { size: 28, weight: 700, anchor: 'middle', fill: STG[0] });
+    const SIG = ['отёк', 'покраснение', 'жар', 'боль в покое', 'потеря функции'];
+    SIG.forEach((s, i) => {
+      const g = G(p, { o: 0, y: 10 }), x = 830 + i * 145;
+      roundBox(g, x - 64, 110, 128, 168, STG[0], PANEL, 2);
+      signIcon(g, i, x, 170);
+      put(para(g, s, x, 230, null, { size: 19, weight: 600, maxW: 112, anchor: 'middle' }), { o: 1 });
+      tw(g, { o: 1, y: 0 }, m('signs', i * .55), .4);
+    });
+    // passive knee flexion: pain early, the quadriceps guards and stops the movement
+    const sc = tableScene(p, { hx: 400, top: 470, s: .92, t0: .2 }), pt = sc.pt;
+    const qd = muscleOn(pt, ...MUSCLE.quads, { after: 'ftN', w: 13 });
+    const pm = painMark(p, 0, 0, 20);
+    const tR = m('rom');
+    prog(q => {
+      const T = q * (m('why') - tR), k = io(clamp(T / 2.2, 0, 1)), stopAt = .55;
+      const v = Math.min(k, stopAt) + (k > stopAt ? .02 * Math.sin(T * 30) : 0);
+      pt.set({ hN: 60 * v, kN: 110 * v });
+      const pain = clamp((k - .25) / .25, 0, 1); qd.act(clamp((k - .45) / .1, 0, 1) * .9);
+      const [kx, ky] = onStage(pt, 'KN'); pm.at(kx, ky - 40).set(pain * (.85 + .15 * Math.sin(T * 9)));
+    }, tR, Math.max(2.5, m('why') - tR), lin);
+    txt(p, 'движение болезненно —', 400, 130, m('rom', .5), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'пациент останавливает его до конца объёма', 400, 162, m('rom', .5), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'защитное напряжение мышц', 400, 205, m('rom', 2), { size: 21, weight: 700, fill: '#ff5a3c', anchor: 'middle' });
+    // where the pain comes from
+    txt(p, 'откуда боль и ограничение:', 800, 340, m('why'), { size: 22, weight: 700, fill: COL.chalk });
+    numLine(p, 1, 'изменённая химическая среда раздражает нервные окончания', 800, 390, STG[0], m('why', .3), { size: 21, maxW: 680 });
+    numLine(p, 2, 'натяжение тканей: отёк или выпот в суставе', 800, 460, STG[0], m('why', 3), { size: 21, maxW: 680 });
+    numLine(p, 3, 'защитное напряжение мышц — тело обездвиживает больное место', 800, 530, STG[0], m('why', 5), { size: 21, maxW: 680 });
+    labelBox(p, 1150, 690, 420, ['обычно 4–6 дней', 'если повреждение не повторяется'], STG[0], m('dur'), { size: 26 });
+  }],
+
+  ['fig', 'Боль и сопротивление ткани', (m, D) => {
+    const p = panel(0);
+    txt(p, 'боль при проверке объёма движений (рис. 10.2)', 800, 56, m('fig'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    const X0 = 260, XR = 1040, X1 = 1240;
+    const rows = [[m('a'), 260, STG[0], 'A', 'острая'], [m('b'), 450, STG[1], 'B', 'ранняя подострая'], [m('c'), 640, STG[2], 'C', 'поздняя подострая и хроническая']];
+    const R = rows.map(([t, y, c, L]) => romRow(p, X0, XR, X1, y, m('range'), { lab: L, col: c }));
+    rows.forEach(([t, y, c, L, name]) => para(p, name, X1 + 30, y + 8, t, { size: 21, weight: 700, fill: c, maxW: 250 }));
+    // labels under the chart
+    const lb = G(p, { o: 0 });
+    T(lb, 'начало объёма', { x: X0, y: 730, size: 19, fill: COL.chalk, anchor: 'middle' });
+    T(lb, 'сопротивление ткани', { x: XR, y: 730, size: 19, fill: COL.task, anchor: 'middle' });
+    T(lb, 'анатомический предел', { x: X1, y: 162, size: 19, fill: COL.chalk, anchor: 'middle' });
+    path(lb, `M${X0} 770H${XR}M${X0} 770l14 -8M${X0} 770l14 8M${XR} 770l-14 -8M${XR} 770l-14 8`, { stroke: COL.dim, 'stroke-width': 2.5 });
+    T(lb, 'объём движений', { x: (X0 + XR) / 2, y: 760, size: 19, fill: COL.dim, anchor: 'middle' });
+    path(lb, `M${X0} 830H${X1}M${X1} 830l-14 -8M${X1} 830l-14 8`, { stroke: COL.dim, 'stroke-width': 2.5 });
+    T(lb, 'объём с дополнительным давлением', { x: (X0 + X1) / 2, y: 820, size: 19, fill: COL.dim, anchor: 'middle' });
+    show(lb, m('range', .5));
+    // each row: the marker moves and pain rises (A before resistance, B with it, C after it)
+    const P = [[X0 + .5 * (XR - X0), X0 + .62 * (XR - X0), 90], [XR - 4, XR + 34, 52], [XR + .55 * (X1 - XR), X1 - 8, 30]];
+    rows.forEach(([t], i) => {
+      const [px, stop, amp] = P[i];
+      prog(q => R[i].set(lerp(X0, stop, io(q)), px, amp), t + .2, 2.4);
+    });
+    txt(p, 'боль', P[0][0] + 50, 150, m('a', 1.5), { size: 20, weight: 700, fill: PAIN });
+  }],
+
+  ['sub', 'Подострая стадия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'подострая стадия (subacute): пролиферация, восстановление, заживление', 800, 56, m('sub'), { size: 28, weight: 700, anchor: 'middle', fill: STG[1] });
+    const hv = healView(p, 60, 110, 520, 300, m('sub'));
+    prog(q => hv.set({ exud: .5 * (1 - q), cells: .4 * (1 - q), cap: q, fib: q, coll: .8 * q }), m('sub', .5), 2.5);
+    txt(p, 'воспаление уменьшается', 320, 450, m('sub', 1), { size: 22, weight: 700, fill: STG[1], anchor: 'middle' });
+    const rr = romRow(p, 120, 470, 560, 560, m('sync'), { lab: 'B', col: STG[1] });
+    prog(q => rr.set(lerp(120, 480, io(q)), 470, 46), m('sync', .3), 2);
+    txt(p, 'боль одновременно с сопротивлением ткани', 340, 640, m('sync', .5), { size: 20, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 640, 110, 900, 190, 'когда больно', 'только если новую ткань нагружают сверх её возможностей или растягивают укороченную ткань', COL.task, m('only'), { size: 22 });
+    infoCard(p, 640, 320, 900, 150, 'мышцы', 'при проверке бывают слабыми; функция ограничена ослабленной тканью', COL.nat, m('weak'), { size: 22 });
+    // duration on a day axis
+    const ax = dayAxis(p, 700, 700, 800, m('dur'));
+    const bar = (d0, d1, y, c, t0, o = 1) => { const e = mk('rect', { x: ax.X(d0), y, width: ax.X(d1) - ax.X(d0), height: 22, rx: 11, fill: c, opacity: 0 }, p); tw(e, { o }, t0, .5); return e; };
+    bar(4, 21, 640, STG[1], m('dur', .4));
+    txt(p, 'ещё 10–17 дней: до 14–21-го дня после травмы', 1100, 620, m('dur', .4), { size: 20, weight: 700, fill: STG[1], anchor: 'middle' });
+    bar(21, 42, 640, STG[1], m('tend'), .45);
+    txt(p, 'сухожилия — до 6 недель', ax.X(30), 790, m('tend'), { size: 20, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'бедное кровоснабжение', ax.X(30), 818, m('tend', .4), { size: 18, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['chr', 'Хроническая стадия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'хроническая стадия (chronic): созревание и перестройка', 800, 56, m('chr'), { size: 28, weight: 700, anchor: 'middle', fill: STG[2] });
+    const hv = healView(p, 60, 110, 520, 300, m('chr')); hv.set({ coll: 1, fib: .3, align: .3, thick: .4 });
+    txt(p, 'признаков воспаления нет', 320, 450, m('chr', .6), { size: 22, weight: 700, fill: STG[2], anchor: 'middle' });
+    prog(q => hv.set({ shrink: .4 * q, adhere: q }), m('lim'), 1.2);
+    // remodeling: the fibres line up with the load
+    const A1 = fArrow(p, 0, 0, 0, 0, COL.whole, { w: 6, head: 15 }), A2 = fArrow(p, 0, 0, 0, 0, COL.whole, { w: 6, head: 15 });
+    prog(q => { const k = io(q); hv.set({ align: lerp(.3, 1, k), thick: lerp(.4, 1, k) }); A1.set(56, 250, -40 * k, 0); A2.set(584, 250, 40 * k, 0); }, m('remod'), 2);
+    const rr = romRow(p, 120, 450, 560, 560, m('pain'), { lab: 'C', col: STG[2] });
+    prog(q => rr.set(lerp(120, 552, io(q)), 500, 26), m('pain', .3), 2.2);
+    txt(p, 'боль растяжения в конце доступного объёма', 340, 640, m('pain', .5), { size: 20, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 640, 110, 900, 160, 'объём ограничивают', 'контрактуры или спайки', COL.nat, m('lim'), { size: 22 });
+    infoCard(p, 640, 290, 900, 160, 'ткань продолжает крепнуть', 'и перестраивается под действием нагрузок', COL.whole, m('remod'), { size: 22 });
+    infoCard(p, 640, 470, 900, 160, 'функцию ограничивают', 'слабость, низкая выносливость, плохой нервно-мышечный контроль', COL.task, m('func'), { size: 22 });
+    labelBox(p, 1090, 730, 600, ['от 6 месяцев до года', 'зависит от ткани и объёма повреждения'], STG[2], m('dur'), { size: 26 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-stage', prompt: ['Какая это стадия?'],
+    build: grid([
+      { parts: ['При проверке объёма боль появляется раньше сопротивления ткани'], ans: ['a'], why: 'Острая стадия (рис. 10.2 A).' },
+      { parts: ['Боль появляется вместе с сопротивлением в конце доступного объёма'], ans: ['s'], why: 'Подострая стадия (рис. 10.2 B).' },
+      { parts: ['Больно только при растяжении после сопротивления ткани'], ans: ['c'], why: 'Поздняя подострая или хроническая стадия (рис. 10.2 C).' },
+      { parts: ['Отёк, покраснение, жар, боль в покое'], ans: ['a'], why: 'Признаки воспаления — острая стадия.' },
+      { parts: ['Воспаления нет, объём ограничивает контрактура'], ans: ['c'], why: 'Хроническая стадия.' },
+    ], [['a', 'Острая', STG[0]], ['s', 'Подострая', STG[1]], ['c', 'Хроническая', STG[2]]], { multi: false, text: true }),
+  }], done) }],
+
+  ['table', 'Что происходит в ткани', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ответ ткани на каждой стадии (табл. 10.1)', 800, 56, m('table'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    const COLS = [
+      ['t1', ['изменения сосудов', 'выход клеток и химических веществ', 'сгусток', 'фагоцитоз, обезвреживание раздражителей', 'начало работы фибробластов'],
+        q => ({ exud: clamp(q * 3, 0, 1), clot: clamp(q * 3 - .6, 0, 1), cells: clamp(q * 3 - 1, 0, 1), debris: 1 - clamp(q * 3 - 1.8, 0, 1) * .8, fib: clamp(q * 3 - 2.4, 0, 1) * .3 })],
+      ['t2', ['вредные раздражители удалены', 'врастают капилляры', 'образуется коллаген', 'грануляционная ткань', 'очень хрупкая, легко повреждается'],
+        q => ({ exud: .3 * (1 - q), cells: .3 * (1 - q), cap: clamp(q * 2, 0, 1), fib: clamp(q * 2 - .3, 0, 1), coll: clamp(q * 2 - .6, 0, 1) * .8 })],
+      ['t3', ['созревание соединительной ткани', 'рубец сокращается', 'перестройка рубца', 'коллаген выстраивается по нагрузке'],
+        q => ({ coll: 1, fib: .5 * (1 - q), cap: .5 * (1 - q), shrink: .4 * clamp(q * 2, 0, 1), align: clamp(q * 2 - .6, 0, 1), thick: clamp(q * 2 - .6, 0, 1) })],
+    ];
+    COLS.forEach(([k, lines, st], i) => {
+      const x = 60 + i * 500;
+      txt(p, STG_N[i] + ' стадия', x + 230, 120, m(k), { size: 24, weight: 700, fill: STG[i], anchor: 'middle' });
+      const hv = healView(p, x, 140, 460, 270, m(k));
+      if (i === 2) hv.set(COLS[1][2](1));
+      prog(q => hv.set(st(q)), m(k, .3), Math.max(3, (COLS[i + 1] ? m(COLS[i + 1][0]) : D) - m(k, .3) - .5));
+      lines.forEach((s, j) => {
+        const g = G(p, { o: 0 });
+        mk('circle', { cx: x + 14, cy: 452 + j * 62, r: 6, fill: STG[i] }, g);
+        put(para(g, s, x + 32, 460 + j * 62, null, { size: 21, maxW: 420 }), { o: 1 });
+        show(g, m(k, .6 + j * 1.1));
+      });
+    });
+    pill(p, 'схема', 1480, 120, m('t1'), { col: COL.dim, size: 18 });
+  }],
+
+  ['phases', 'Три фазы реабилитации', (m, D) => {
+    const p = panel(0);
+    txt(p, 'фазы реабилитации', 800, 56, m('phases'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    const PH = [['p1', 'фаза I', 'максимальная защита', [['справиться с последствиями воспаления', 'избирательный покой, холод, компрессия, возвышенное положение'], ['предотвратить вред покоя', 'щадящие движения: пассивный объём, массаж, осторожное напряжение мышц']]],
+      ['p2', 'фаза II', 'умеренная защита, контролируемое движение', [['сделать рубец подвижным', 'избирательная растяжка, мобилизация ограничений'], ['помочь заживлению', 'щадящие активные упражнения и с сопротивлением, открытая и закрытая цепь, стабилизация, выносливость мышц и сердца — с осторожным ростом']]],
+      ['p3', 'фаза III', 'минимальная защита или без неё, возврат к функции', [['повысить прочность рубца', 'нарастающие силовые упражнения и упражнения на выносливость'], ['функциональная независимость', 'функциональные упражнения и специальные тренировки']]]];
+    PH.forEach(([k, nm, sub, items], i) => {
+      const x = 60 + i * 500, g = G(p, { o: 0 });
+      roundBox(g, x, 100, 470, 760, STG[i], PANEL, 3);
+      T(g, nm, { x: x + 235, y: 150, size: 34, weight: 700, fill: STG[i], anchor: 'middle' });
+      put(para(g, sub, x + 235, 190, null, { size: 22, weight: 600, maxW: 420, anchor: 'middle', fill: COL.chalk }), { o: 1 });
+      show(g, m(k));
+      items.forEach(([goal, how], j) => {
+        const gi = G(p, { o: 0 }), y0 = 290 + j * 280;
+        mk('rect', { x: x + 20, y: y0 - 34, width: 430, height: 250, rx: 16, fill: mix(STG[i], COL.board, .86) }, gi);
+        put(para(gi, goal, x + 40, y0, null, { size: 23, weight: 700, fill: STG[i], maxW: 390 }), { o: 1 });
+        put(para(gi, how, x + 40, y0 + 70, null, { size: 21, fill: COL.chalk, maxW: 390 }), { o: 1 });
+        show(gi, j ? m(k + 'b') : m(k, .8));
+      });
+    });
+  }],
+
+  ['chinf', 'Хроническое воспаление', (m, D) => {
+    const p = panel(0);
+    txt(p, 'хроническое воспаление и хронический болевой синдром', 800, 56, m('chinf'), { size: 28, weight: 700, anchor: 'middle', fill: COL.bad });
+    infoCard(p, 60, 100, 700, 140, 'хроническое воспаление', 'ткань постоянно нагружают сверх её способности восстанавливаться', COL.bad, m('chinf'), { size: 22 });
+    // a schematic week: after every session symptoms last for hours and the range falls
+    const X0 = 120, Y0 = 760, W = 640, H = 380;
+    chartAxes(p, X0, Y0, W, H, '', 'дни с нагрузкой →', m('s1'));
+    pill(p, 'схема', 190, 805, m('s1'), { col: COL.dim, size: 18 });
+    const sess = [0, 1, 2, 3, 4].map(i => X0 + 40 + i * 125);
+    sess.forEach((x, i) => { const e = path(p, `M${x} ${Y0}V${Y0 - 22}`, { stroke: COL.whole, 'stroke-width': 5 }, { o: 0 }); show(e, m('s1', .3 + i * .15)); });
+    txt(p, 'занятие', sess[0] + 10, Y0 - 30, m('s1', .3), { size: 17, fill: COL.whole });
+    const sym = x => { let v = 0; sess.forEach((s, i) => { if (x >= s) v += (40 + 18 * i) * Math.exp(-(x - s) / 70); }); return v; };
+    const symD = fnPath(X0, Y0, W, H, u => sym(X0 + u * W) / H * 2.2, 0, 1, 160);
+    const sc = path(p, symD, { stroke: PAIN, 'stroke-width': 4 }, { d: 0 }); draw(sc, m('s1', .5), 2);
+    txt(p, 'боль, отёк, напряжение', 330, 430, m('s1', 1.5), { size: 20, weight: 700, fill: PAIN });
+    const rom = x => { let v = 300; sess.forEach((s, i) => { if (x >= s + 60) v -= 32; }); return v; };
+    const romD = fnPath(X0, Y0, W, H, u => rom(X0 + u * W) / H, 0, 1, 160);
+    const rl = path(p, romD, { stroke: COL.good, 'stroke-width': 4 }, { d: 0 }); draw(rl, m('s2'), 2);
+    txt(p, 'объём движений', 600, 410, m('s2'), { size: 20, weight: 700, fill: COL.good });
+    numLine(p, 1, 'боль, отёк, защитное напряжение сильнее и держатся дольше нескольких часов после нагрузки', 820, 150, COL.bad, m('s1'), { size: 21, maxW: 650 });
+    numLine(p, 2, 'после отдыха скованность больше; через сутки после нагрузки объём меньше', 820, 260, COL.bad, m('s2'), { size: 21, maxW: 650 });
+    numLine(p, 3, 'ткань становится всё жёстче, пока раздражение продолжается', 820, 370, COL.bad, m('s3'), { size: 21, maxW: 650 });
+    infoCard(p, 820, 470, 720, 380, 'хронический болевой синдром', 'дольше 6 месяцев; боль нельзя связать с источником раздражения или воспаления; ограничения активности и участия затрагивают многие стороны жизни', COL.real, m('cps'), { size: 22 });
+    pillRow(p, ['активность ↓', 'участие ↓'], 1180, 800, m('cps2'), { col: COL.real, size: 21, gap: .5 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-chinf', prompt: ['После каждой тренировки боль и отёк держатся до вечера, наутро объём меньше, а скованность нарастает от недели к неделе. Что происходит с тканью?'],
+    build: choice([
+      ['Хроническое воспаление: её постоянно нагружают сверх способности восстанавливаться'],
+      ['Обычная подострая стадия: так и должно быть'],
+      ['Хронический болевой синдром'],
+      ['Хроническая стадия созревания рубца'],
+    ], 0, 'Симптомы дольше нескольких часов после нагрузки, потеря объёма через сутки и нарастающая скованность — признаки хронического воспаления.',
+    [null, 'В подострой стадии симптомы с каждым днём уменьшаются, а не нарастают.', 'Болевой синдром длится дольше шести месяцев, и боль нельзя связать с источником воспаления; здесь источник очевиден — нагрузка.', 'В хронической стадии признаков воспаления нет.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 100, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Ответ на любое повреждение похож: воспаление, восстановление, созревание и перестройка — стадии перекрываются.', 'w1', HEAD],
+     ['Острая: признаки воспаления, боль раньше сопротивления ткани; 4–6 дней.', 'w2', STG[0]],
+     ['Подострая: воспаление стихает, боль вместе с сопротивлением; до 14–21-го дня, в сухожилиях до 6 недель.', 'w3', STG[1]],
+     ['Хроническая: без воспаления, боль после сопротивления; от 6 месяцев до года.', 'w4', STG[2]],
+     ['Фазы: максимальная защита → контролируемое движение → возврат к функции.', 'w5', HEAD]].forEach(([str, mark, c], i) => {
+      const g = G(p, { x: -16, y: 190 + i * 135, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: c }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-ankle', prompt: ['Третий день после растяжения связок голеностопа: отёк, жар, боль в покое; при проверке объёма пациентка напрягается и останавливает движение задолго до конца. Стадия и фаза реабилитации?'],
+    build: choice([
+      ['Острая стадия; фаза I — максимальная защита'],
+      ['Подострая стадия; фаза II — контролируемое движение'],
+      ['Хроническая стадия; фаза III — возврат к функции'],
+      ['Хроническое воспаление; сразу фаза III'],
+    ], 0, 'Признаки воспаления и боль раньше сопротивления ткани на третий день — острая стадия, фаза максимальной защиты.',
+    [null, 'В подострой стадии воспаление уже стихает, а боль совпадает с сопротивлением ткани.', 'В хронической стадии признаков воспаления нет.', 'Хроническое воспаление — затянувшееся; здесь третий день после травмы.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tendon', prompt: ['Пять недель после травмы сухожилия. Воспаление стихло, боль появляется вместе с сопротивлением ткани в конце объёма. Подострая стадия затянулась?'],
+    build: choice([
+      ['Не обязательно: в сухожилиях с бедным кровоснабжением она может длиться до 6 недель'],
+      ['Да: подострая стадия всегда заканчивается к 21-му дню'],
+      ['Да: значит, это уже хронический болевой синдром'],
+      ['Нет: это острая стадия, она длится 4–6 недель'],
+    ], 0, 'Обычно подострая стадия заканчивается к 14–21-му дню, но в тканях с бедным кровоснабжением, например в сухожилиях, — до 6 недель.',
+    [null, 'Обычно так, но в сухожилиях стадия может длиться до 6 недель.', 'Болевой синдром — дольше 6 месяцев и без связи с источником боли.', 'Острая стадия длится 4–6 дней, а не недель.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

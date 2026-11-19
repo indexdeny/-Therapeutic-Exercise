@@ -1,0 +1,820 @@
+{
+  "region": "wrist",
+  "exercises": [
+    {
+      "id": "tendon-glide",
+      "ru": "Скольжение сухожилий: пять положений",
+      "en": "flexor tendon-gliding exercises",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "прямая кисть → крючок → кулак",
+        "положение стола → прямой кулак",
+        "сначала запястье нейтрально"
+      ],
+      "page": 702,
+      "moments": [
+        {
+          "n": 188,
+          "beat": "glide",
+          "mark": "five",
+          "to": "prog",
+          "shot": 14.8,
+          "crop": [
+            0,
+            60,
+            600,
+            600
+          ]
+        },
+        {
+          "n": 181,
+          "beat": "protect",
+          "mark": "glide"
+        },
+        {
+          "n": 186,
+          "beat": "phases",
+          "mark": "mod"
+        }
+      ]
+    },
+    {
+      "id": "place-hold",
+      "ru": "«Поставить и удержать»",
+      "en": "place-and-hold exercises",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "control"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "сустав ставят пассивно",
+        "удержать 5 секунд минимальным усилием",
+        "учиться на здоровой руке"
+      ],
+      "warn": "после шва сухожилия — только по протоколу хирурга и в ортезе",
+      "page": 701,
+      "moments": [
+        {
+          "n": 188,
+          "beat": "ph",
+          "mark": "def",
+          "to": "learn"
+        },
+        {
+          "n": 186,
+          "beat": "phases",
+          "mark": "ph"
+        }
+      ]
+    },
+    {
+      "id": "blocking",
+      "ru": "Блокирующие упражнения",
+      "en": "tendon-blocking exercises",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "mobility",
+        "control"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "другая рука держит соседний сустав",
+        "каждый палец отдельно",
+        "потом полный кулак"
+      ],
+      "warn": "не рано после шва сгибателей: нагрузка на сухожилие велика",
+      "page": 702,
+      "moments": [
+        {
+          "n": 188,
+          "beat": "block",
+          "mark": "what",
+          "to": "fist",
+          "shot": 33.5,
+          "crop": [
+            0,
+            200,
+            640,
+            640
+          ]
+        },
+        {
+          "n": 186,
+          "beat": "phases",
+          "mark": "mod"
+        }
+      ]
+    },
+    {
+      "id": "ext-lag",
+      "ru": "Против отставания разгибания пальцев",
+      "en": "exercises to reduce an extensor lag",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "из кулака — в кулак-крючок",
+        "из кулака — в положение стола",
+        "конечное разгибание на столе"
+      ],
+      "page": 703,
+      "moments": [
+        {
+          "n": 188,
+          "beat": "lag",
+          "mark": "mp",
+          "to": "eg",
+          "shot": 4,
+          "crop": [
+            0,
+            60,
+            600,
+            600
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finger-flex-stretch",
+      "ru": "Растяжка сгибателей пальцев",
+      "en": "self-stretch of the long finger flexors",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "ладонь на столе",
+        "разогнуть пальцы от кончиков",
+        "поднимать предплечье над кистью"
+      ],
+      "page": 706,
+      "moments": [
+        {
+          "n": 188,
+          "beat": "intr",
+          "mark": "ff"
+        },
+        {
+          "n": 188,
+          "beat": "intr",
+          "mark": "ext"
+        }
+      ]
+    },
+    {
+      "id": "intrinsic-stretch",
+      "ru": "Растяжка червеобразных и межкостных",
+      "en": "lumbrical and interossei self-stretch",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "пястно-фаланговые разогнуть",
+        "межфаланговые согнуть",
+        "в конце надавить другой рукой"
+      ],
+      "page": 705,
+      "moments": [
+        {
+          "n": 188,
+          "beat": "intr",
+          "mark": "lum",
+          "to": "int",
+          "crop": [
+            0,
+            40,
+            560,
+            560
+          ]
+        }
+      ]
+    },
+    {
+      "id": "web-stretch",
+      "ru": "Растяжка первого межпальцевого промежутка",
+      "en": "adductor pollicis self-stretch",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "кисть локтевым краем на столе",
+        "давить на головки пястных",
+        "раскрыть промежуток"
+      ],
+      "warn": "не давить на фаланги: растянется связка пястно-фалангового сустава большого пальца",
+      "page": 705,
+      "moments": [
+        {
+          "n": 188,
+          "beat": "intr",
+          "mark": "add"
+        }
+      ]
+    },
+    {
+      "id": "wrist-curl",
+      "ru": "Сгибание и разгибание запястья",
+      "en": "wrist curls",
+      "joint": [
+        "wrist",
+        "elbow"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "weight",
+        "band"
+      ],
+      "key": [
+        "предплечье на столе, кисть за краем",
+        "пронация — разгибатели",
+        "супинация — сгибатели"
+      ],
+      "page": 650,
+      "moments": [
+        {
+          "n": 178,
+          "beat": "wrist",
+          "mark": "which",
+          "to": "db"
+        },
+        {
+          "n": 189,
+          "beat": "wrist",
+          "mark": "fe",
+          "shot": 5,
+          "crop": [
+            0,
+            150,
+            640,
+            640
+          ]
+        }
+      ],
+      "sand": "j=wrist&m=flex&pos=palmDown&mode=active",
+      "thumb": 1
+    },
+    {
+      "id": "wrist-dev",
+      "ru": "Лучевое и локтевое отклонение",
+      "en": "radial and ulnar deviation with a weighted bar",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "stick",
+        "weight"
+      ],
+      "key": [
+        "палка с грузом на одном конце",
+        "груз с лучевой стороны — лучевое",
+        "с локтевой — локтевое"
+      ],
+      "page": 707,
+      "moments": [
+        {
+          "n": 189,
+          "beat": "wrist",
+          "mark": "dev"
+        }
+      ],
+      "sand": "j=wrist&m=dev&pos=palmDown&mode=active"
+    },
+    {
+      "id": "wrist-roller",
+      "ru": "Роллер для запястий",
+      "en": "wrist roller",
+      "joint": [
+        "wrist",
+        "elbow"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "stick",
+        "weight"
+      ],
+      "key": [
+        "шнур с грузом на палке",
+        "наматывать, вращая запястья",
+        "медленно опускать обратно"
+      ],
+      "page": 650,
+      "moments": [
+        {
+          "n": 178,
+          "beat": "wrist",
+          "mark": "roll",
+          "crop": [
+            300,
+            380,
+            500,
+            500
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lumbrical",
+      "ru": "Укрепление червеобразных",
+      "en": "lumbrical strengthening",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none",
+        "putty",
+        "manual"
+      ],
+      "key": [
+        "пястно-фаланговые согнуты",
+        "выталкивать кончики пальцев вперёд",
+        "давить в ладонь или в пластилин"
+      ],
+      "page": 707,
+      "moments": [
+        {
+          "n": 189,
+          "beat": "intr",
+          "mark": "lum",
+          "to": "tt",
+          "shot": 19.3,
+          "crop": [
+            0,
+            160,
+            600,
+            600
+          ]
+        }
+      ]
+    },
+    {
+      "id": "interossei",
+      "ru": "Разведение и сведение пальцев",
+      "en": "interossei strengthening",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "band",
+        "putty",
+        "manual"
+      ],
+      "key": [
+        "ладонь на столе, по одному пальцу",
+        "сведение — сжать пластилин",
+        "разведение — резинка на два пальца"
+      ],
+      "page": 707,
+      "moments": [
+        {
+          "n": 189,
+          "beat": "intr",
+          "mark": "io"
+        }
+      ]
+    },
+    {
+      "id": "thumb-ex",
+      "ru": "Отведение и противопоставление большого пальца",
+      "en": "thumb abduction and opposition",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "strength",
+        "function"
+      ],
+      "phase": [
+        "max",
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "band",
+        "putty"
+      ],
+      "key": [
+        "тыл кисти на столе — палец вверх",
+        "кончик к кончику каждого пальца",
+        "подушечка к подушечке, не боком"
+      ],
+      "warn": "после операции на основании большого пальца — без сильного щипка и хвата 3 месяца",
+      "page": 708,
+      "moments": [
+        {
+          "n": 189,
+          "beat": "intr",
+          "mark": "abd",
+          "to": "opp"
+        },
+        {
+          "n": 184,
+          "beat": "cmcPost",
+          "mark": "max"
+        },
+        {
+          "n": 184,
+          "beat": "cmcPost",
+          "mark": "mod"
+        },
+        {
+          "n": 183,
+          "beat": "mpEx",
+          "mark": "how"
+        },
+        {
+          "n": 184,
+          "beat": "box196",
+          "mark": "b1",
+          "to": "b3"
+        }
+      ]
+    },
+    {
+      "id": "mp-ext",
+      "ru": "Разгибание пястно-фаланговых с петлёй",
+      "en": "resisted MP extension",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "weight",
+        "band"
+      ],
+      "key": [
+        "ладонь на столе, пальцы за краем",
+        "петля на основную фалангу",
+        "запястье стабилизировано"
+      ],
+      "page": 708,
+      "moments": [
+        {
+          "n": 189,
+          "beat": "extr",
+          "mark": "stab",
+          "to": "mp",
+          "shot": 16.7,
+          "crop": [
+            0,
+            180,
+            640,
+            640
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finger-press",
+      "ru": "Сгибание пальцев против другой руки",
+      "en": "self-resisted finger flexion",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "кисти направлены в разные стороны",
+        "подушечки к подушечкам",
+        "сгибать, преодолевая другую руку"
+      ],
+      "page": 708,
+      "moments": [
+        {
+          "n": 189,
+          "beat": "extr",
+          "mark": "ip"
+        }
+      ]
+    },
+    {
+      "id": "towel-crumple",
+      "ru": "Смять полотенце или газету",
+      "en": "towel or newspaper crumple",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "strength",
+        "function"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "roll"
+      ],
+      "key": [
+        "ладонь на краю полотенца",
+        "смять в кулак, основание не отрывать",
+        "газету — смять и бросить в корзину"
+      ],
+      "page": 708,
+      "moments": [
+        {
+          "n": 189,
+          "beat": "mech",
+          "mark": "towel"
+        }
+      ]
+    },
+    {
+      "id": "disk",
+      "ru": "Удержание диска от штанги",
+      "en": "disk weight resistance",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "weight"
+      ],
+      "key": [
+        "поднять диск кончиками пальцев",
+        "за край — щипком",
+        "на тыле пальцев — разгибатели"
+      ],
+      "page": 708,
+      "moments": [
+        {
+          "n": 189,
+          "beat": "mech",
+          "mark": "disk",
+          "to": "back"
+        }
+      ]
+    },
+    {
+      "id": "putty",
+      "ru": "Пластилин и эспандер",
+      "en": "therapy putty and grippers",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "putty"
+      ],
+      "key": [
+        "плотность — по силе пальцев",
+        "мягкий мяч, пружинный эспандер",
+        "без замещающих движений"
+      ],
+      "page": 708,
+      "moments": [
+        {
+          "n": 189,
+          "beat": "mech",
+          "mark": "other"
+        },
+        {
+          "n": 183,
+          "beat": "mpEx",
+          "mark": "how"
+        },
+        {
+          "n": 183,
+          "beat": "pipEx",
+          "mark": "late"
+        }
+      ]
+    },
+    {
+      "id": "grip-tasks",
+      "ru": "Хват в повседневных делах",
+      "en": "functional grip activities",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "function",
+        "endurance"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "повторный хват",
+        "поднять и отпустить разные предметы",
+        "до усталости стабилизаторов запястья"
+      ],
+      "page": 707,
+      "moments": [
+        {
+          "n": 189,
+          "beat": "wrist",
+          "mark": "func",
+          "to": "tip"
+        }
+      ]
+    },
+    {
+      "id": "fine-motor",
+      "ru": "Мелкая моторика",
+      "en": "fine-finger dexterity",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "function"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "большой палец против 2-го и 3-го",
+        "мелкие предметы, гайки, шнурок",
+        "письмо, клавиатура, флаконы"
+      ],
+      "page": 708,
+      "moments": [
+        {
+          "n": 189,
+          "beat": "dex",
+          "mark": "fine",
+          "to": "func"
+        }
+      ]
+    }
+  ]
+}

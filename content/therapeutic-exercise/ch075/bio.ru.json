@@ -1,0 +1,54 @@
+[
+ {
+  "beat": "pos",
+  "fig": 0,
+  "joint": "aN",
+  "from": "stand",
+  "to": "pulley",
+  "level": "full",
+  "load": {
+   "type": "weight",
+   "at": "WN",
+   "w": 1
+  },
+  "curve": true,
+  "range": [
+   0,
+   180
+  ],
+  "bars": [
+   40,
+   478
+  ],
+  "gon": "compact",
+  "enabled": true,
+  "keep": [],
+  "why": "«Стоя: при нуле градусов момента от груза нет, максимум — при девяноста, а дальше, к ста восьмидесяти, момент снова уменьшается»"
+ },
+ {
+  "beat": "pos",
+  "fig": 1,
+  "joint": "aN",
+  "from": "sup",
+  "to": "pulley",
+  "level": "full",
+  "load": {
+   "type": "weight",
+   "at": "WN",
+   "w": 1
+  },
+  "curve": true,
+  "range": [
+   0,
+   180
+  ],
+  "bars": [
+   905,
+   478
+  ],
+  "gon": "compact",
+  "enabled": true,
+  "keep": [],
+  "why": "«Лёжа на спине: максимум — при нуле градусов, при девяноста момента нет, и груз сжимает конечность»"
+ }
+]

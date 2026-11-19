@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Режим, скорость, периодизация — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 62, title: 'Режим, скорость и периодизация', minutes: 9, language: 'ru', next: '../ch063/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch062/lupa.ru.json
+const LUPA = [
+  {"beat": "intro", "fig": 30, "target": "triceps", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch062/cards.ru.json
+const CARDS_SHORT = {
+  "аккомодирующее (изокинетика)\nдинамометр держит скорость, подстраивая сопротивление под усилие": "динамометр держит скорость",
+  "анаэробные\nвысокая интенсивность, мало повторений — силовые упражнения": "высокая интенсивность, мало повторений",
+  "аэробные\nмалая интенсивность, много повторений, долго — выносливость · глава 7": "малая интенсивность, много повторений",
+  "короткая дуга (short-arc)\nобойти болезненную или нестабильную дугу, защитить заживающие ткани": "обойти болезненную дугу",
+  "режим — как в функции\nвид сокращения и положение — ближе к нужной задаче, когда позволяет заживление": "ближе к нужной задаче",
+  "по другим данным\nэксцентрическая сила от скорости почти не зависит": "эксцентрическая сила от скорости почти не зависит",
+  "от медленных к быстрым\nсвободные грузы — только медленно и средне (контроль); быстро — изокинетика, пневматика и гидравлика, эластичное сопротивление": "быстро — изокинетика",
+  "специфичность скорости\nсила растёт в основном на тренируемых скоростях, перенос ограничен → скорость как в функции": "скорость как в функции",
+  "для кого\nтренированные тяжелоатлеты и пауэрлифтеры": "тяжелоатлеты",
+  "зачем\nпик к соревнованиям; без перетренированности и психологического застоя": "пик к соревнованиям",
+  "доказательства\nограничены; приёмы — для травмированных спортсменов на поздней стадии": "ограничены",
+  "подвижность на фоне устойчивости\nагонисты и антагонисты держат сустав; многие группы мышц — в нужной последовательности": "агонисты и антагонисты держат сустав",
+  "сила, мощность, выносливость — вместе\nмедленно и точно, быстро, повторно, долго держать позу → анализ задач": "медленно, быстро, повторно, долго → анализ задач",
+  "движения самих задач\nплоскости, диагонали, сочетания; толкать, тянуть, поднимать, держать — от малого к большему": "толкать, тянуть, поднимать — от малого к большему",
+  "самостоятельность\nоценивать скорость, силу, длительность усилия и момент": "оценивать скорость, силу, длительность",
+};
+// cards-short end
+
+const STA = COL.whole, CON = COL.nat, ECC = COL.task, ISO = COL.real;
+// An elbow model with a dumbbell in the hand; set(a) bends the elbow and moves the dumbbell.
+function armWithDb(p, x, y, s, k, t0) {
+  const arm = elbowModel(p, { x, y, s });
+  const db = G(p);
+  dumbbell(db, k);
+  arm.setA = a => { arm.set(a); const { E, W, hand } = arm.pts; put(db, { x: x + hand[0] * s, y: y + hand[1] * s, r: Math.atan2(W[1] - E[1], W[0] - E[0]) * 180 / Math.PI + 90, s: s * .8 }); };
+  arm.setA(150);
+  [arm.g, db].forEach(e => { put(e, { o: 0 }); show(e, t0); });
+  arm.db = db;
+  return arm;
+}
+// A push-up on a support: toes planted at (fx, fy), the straight body tilted th degrees forward from upright, hands
+// at arm's length in front of the shoulders. dip(e): 0 up, 1 down — the body turns about the toes and the arms follow.
+function pushFig(p, fx, fy, s, th, t0) {
+  const pose = { ...STAND, hN: 0, hF: 0, kN: 0, kF: 0, fN: th < 25 ? th : -15, fF: th < 25 ? th : -15, aN: 90, eN: 0, aF: 90, eF: 0 };
+  const f = fig(p, { x: 0, y: 0, s, r: th, o: 0, pose });
+  const key = th < 25 ? 'AN' : 'toeN';
+  plant(f, key, fx, fy);
+  const Sh = onStage(f, 'Sh'), L = (RIG.ua + RIG.fa) * s * .97, a = rad(th), H = [Sh[0] + Math.cos(a) * L, Sh[1] + Math.sin(a) * L];
+  const tri = muscleOn(f, ...MUSCLE.triceps, { after: 'hdN', w: 9 });
+  f.H = H;
+  f.dip = e => { put(f.g, { r: th + 8 * e }); plant(f, key, fx, fy); reach(f, 'N', ...H); reach(f, 'F', ...H); tri.act(.85); };
+  f.dip(0);
+  show(f.g, t0);
+  return f;
+}
+// The tilt at which the hands of a push-up from toes at (fx, fy) reach the height hy.
+function tiltFor(fx, fy, s, hy) {
+  let lo = 30, hi = 100;
+  for (let i = 0; i < 30; i++) {
+    const th = (lo + hi) / 2, f = fig(scene, { x: 0, y: 0, s, r: th, o: 0, pose: { ...STAND, hN: 0, hF: 0, kN: 0, kF: 0, fN: -15, fF: -15 } });
+    plant(f, 'toeN', fx, fy);
+    const Sh = onStage(f, 'Sh'), y = Sh[1] + Math.sin(rad(th)) * (RIG.ua + RIG.fa) * s * .97;
+    f.g.remove();
+    if (y < hy) lo = th; else hi = th;
+  }
+  return (lo + hi) / 2;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Режим, скорость, периодизация', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 62', { x: 800, y: 180, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Режим, скорость', { x: 800, y: 265, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и периодизация', { x: 800, y: 330, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как выполнять упражнение, а не только сколько', 800, 410, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 800, s = .55;
+    path(art, `M520 ${GY}H1080`, { stroke: COL.faint, 'stroke-width': 3 });
+    const th = tiltFor(640, GY, s, GY - 8);
+    const pf = pushFig(art, 640, GY, s, th, 0);
+    prog(q => pf.dip((1 - Math.cos(2 * Math.PI * 3 * q)) / 2), .6, Math.max(4, D - 1.2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['mode', 'Виды сокращения', (m) => {
+    const p = panel(0);
+    txt(p, 'режим упражнения (mode): вид сокращения', 800, 76, m('mode'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    labelBox(p, 800, 140, 300, ['сокращение'], COL.chalk, m('stat'), { size: 26 });
+    labelBox(p, 330, 230, 440, ['статическое (изометрия)'], STA, m('stat', .5), { size: 25 });
+    labelBox(p, 1100, 230, 340, ['динамическое'], COL.chalk, m('con'), { size: 25 });
+    labelBox(p, 880, 320, 340, ['концентрическое'], CON, m('con', .5), { size: 25 });
+    labelBox(p, 1320, 320, 340, ['эксцентрическое'], ECC, m('ecc'), { size: 25 });
+    [[[800, 165], [330, 205], m('stat', .3)], [[800, 165], [1100, 205], m('con')], [[1100, 255], [880, 295], m('con', .3)], [[1100, 255], [1320, 295], m('ecc')]].forEach(([a, b, t]) => draw(path(p, `M${a[0]} ${a[1]}L${b[0]} ${b[1]}`, { stroke: COL.dim, 'stroke-width': 3 }, { d: 0 }), t, .4));
+    // three arms: holding against a strap, lifting, lowering
+    const A = armWithDb(p, 110, 560, 1.05, .9, m('stat', 1)), B = armWithDb(p, 640, 620, 1.05, .9, m('con', .8)), Cc = armWithDb(p, 1100, 620, 1.05, .9, m('ecc', .5));
+    A.setA(95); A.act('biceps', .9);
+    const strap = path(p, '', { stroke: '#7a6a52', 'stroke-width': 6 }, { o: 0 });
+    const hw = [110 + A.pts.hand[0] * 1.05, 560 + A.pts.hand[1] * 1.05];
+    strap.setAttribute('d', `M${hw[0]} ${hw[1]}V${hw[1] - 120}`);
+    path(p, `M${hw[0] - 40} ${hw[1] - 120}H${hw[0] + 40}`, { stroke: COL.dim, 'stroke-width': 6 }, { o: 0 });
+    show(strap, m('stat', 1.5)); show(p.lastChild, m('stat', 1.5));
+    txt(p, 'против неподвижного', 260, 700, m('stat', 1.5), { size: 21, fill: STA, anchor: 'middle', weight: 600 });
+    txt(p, 'установочное напряжение — без сопротивления', 260, 732, m('stat', 1), { size: 19, fill: COL.dim, anchor: 'middle' });
+    prog(q => { const u = (q * 2) % 1; B.setA(lerp(165, 60, io(u))); B.act('biceps', 1); }, m('con', .9), 4, lin);
+    txt(p, 'мышца укорачивается', 780, 760, m('con', 1), { size: 21, fill: CON, anchor: 'middle', weight: 600 });
+    prog(q => { const u = (q * 2) % 1; Cc.setA(lerp(60, 165, io(u))); Cc.act('biceps', 1); }, m('ecc', .5), 4, lin);
+    txt(p, 'удлиняется под нагрузкой', 1240, 760, m('ecc', .7), { size: 21, fill: ECC, anchor: 'middle', weight: 600 });
+    infoCard(p, 380, 790, 840, 90, 'изокинетическое: скорость держит прибор', null, ISO, m('iso'), { size: 22 });
+  }],
+
+  ['chain', 'Открытая и закрытая цепь', (m) => {
+    const p = panel(0), GY = 700;
+    txt(p, 'с опорой на конечность или без', 800, 82, m('chain'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // open chain: sitting knee extension, the foot moves freely
+    const sit = fig(p, { x: 0, y: 0, s: 1, o: 0, pose: { ...SIT, t: 4, aN: 20, eN: 30, aF: 20, eF: 30 } });
+    plant(sit, 'H', 360, 470);
+    bench(p, 230, 420, 478, m('open'), COL.dim, GY - 478);
+    p.appendChild(sit.g);
+    const q1 = muscleOn(sit, ...MUSCLE.rectus, { after: 'ftN', w: 13 });
+    show(sit.g, m('open'));
+    prog(q => { sit.set({ kN: lerp(95, 10, (1 - Math.cos(2 * Math.PI * 1.5 * q)) / 2) }); q1.act(.9); }, m('open', .5), 4.5, lin);
+    txt(p, 'открытая цепь: стопа свободна', 380, 770, m('open'), { size: 25, fill: COL.whole, anchor: 'middle', weight: 700 });
+    // closed chain: a squat over the fixed feet
+    ground(p, 1000, 1400, GY, m('closed'));
+    const sq = fig(p, { x: 1200, y: GY - 182, s: 1, o: 0 });
+    const q2 = muscleOn(sq, ...MUSCLE.rectus, { after: 'ftN', w: 13 });
+    show(sq.g, m('closed'));
+    const [ax] = onStage(sq, 'AN');
+    prog(q => { sq.set(blendPose(STAND, { ...SQUAT, aN: 90, aF: 90 }, .75 * (1 - Math.cos(2 * Math.PI * 1.5 * q)) / 2)); plant(sq, 'AN', ax, GY); q2.act(.9); }, m('closed', .5), 4.5, lin);
+    txt(p, 'закрытая цепь: стопа на опоре', 1200, 770, m('closed'), { size: 25, fill: COL.good, anchor: 'middle', weight: 700 });
+    txt(p, 'подробнее — урок 66', 800, 850, m('closed', 3), { size: 22, fill: COL.dim, anchor: 'middle', italic: true });
+  }],
+
+  ['res', 'Виды сопротивления', (m) => {
+    const p = panel(0), GY = 780, s = .55;
+    txt(p, 'вид сопротивления', 800, 76, m('res'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pill(p, 'ручное', 330, 140, m('res', .5), { col: COL.whole, size: 26 });
+    pill(p, 'механическое: постоянное или переменное', 800, 140, m('mech'), { col: COL.task, size: 26 });
+    infoCard(p, 330, 190, 940, 120, 'аккомодирующее (изокинетика)', 'динамометр держит скорость, подстраивая сопротивление под усилие', ISO, m('acc'), { size: 22 });
+    txt(p, 'вес тела: отжимания всё тяжелее', 800, 370, m('bw'), { size: 27, weight: 700, fill: COL.good, anchor: 'middle' });
+    ground(p, 60, 1540, GY, m('bw'));
+    // 1: standing at a wall; 2: against a countertop; 3: on the floor; 4: feet raised on a box
+    const P1 = pushFig(p, 140, GY, s, 18, m('w1'));
+    path(p, `M${P1.H[0] + 8} ${GY}V${P1.H[1] - 120}`, { stroke: COL.dim, 'stroke-width': 6 }, { o: 0 }); show(p.lastChild, m('w1'));
+    const P2 = pushFig(p, 470, GY, s, 40, m('w2'));
+    const ct = G(p, { o: 0 }); mk('rect', { x: P2.H[0] - 30, y: P2.H[1] + 6, width: 110, height: GY - P2.H[1] - 6, fill: PANEL, stroke: COL.dim, 'stroke-width': 3 }, ct); show(ct, m('w2'));
+    const th3 = tiltFor(830, GY, s, GY - 8), P3 = pushFig(p, 830, GY, s, th3, m('w3'));
+    const bxH = 90, th4 = tiltFor(1180, GY - bxH, s, GY - 8);
+    const bx = G(p, { o: 0 }); mk('rect', { x: 1130, y: GY - bxH, width: 90, height: bxH, fill: PANEL, stroke: COL.dim, 'stroke-width': 3 }, bx); show(bx, m('w4'));
+    const P4 = pushFig(p, 1180, GY - bxH, s, th4, m('w4'));
+    [[P1, 'w1'], [P2, 'w2'], [P3, 'w3'], [P4, 'w4']].forEach(([f, k], i) => prog(q => f.dip((1 - Math.cos(2 * Math.PI * 2 * q)) / 2), m(k, .4), 3, lin));
+    [['от стены', 230, 'w1'], ['о столешницу', 560, 'w2'], ['горизонтально', 960, 'w3'], ['ноги выше рук', 1320, 'w4']].forEach(([t, x, k]) => txt(p, t, x, 840, m(k), { size: 23, fill: COL.good, anchor: 'middle', weight: 600 }));
+    txt(p, 'цветом — как работает трёхглавая мышца плеча', 800, 720, m('w2', 1), { size: 21, fill: '#ff7a5c', anchor: 'middle' });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-contraction', prompt: ['Какое это сокращение?'],
+    build: grid([
+      { parts: ['Напрячь четырёхглавую мышцу, не двигая коленом'], ans: ['s'], why: 'Статическое (изометрическое) — установочное напряжение.' },
+      { parts: ['Медленно опускать гантель, сгибатели локтя тормозят'], ans: ['e'], why: 'Мышца удлиняется под нагрузкой — эксцентрическое.' },
+      { parts: ['Поднимать гантель, сгибая локоть'], ans: ['c'], why: 'Мышца укорачивается — концентрическое.' },
+      { parts: ['Скорость движения держит динамометр'], ans: ['i'], why: 'Изокинетическое.' },
+    ], [['s', 'Статическое', STA], ['c', 'Концентрическое', CON], ['e', 'Эксцентрическое', ECC], ['i', 'Изокинетическое', ISO]], { multi: false, text: true }),
+  }], done) }],
+
+  ['arc', 'Энергия и дуга движения', (m) => {
+    const p = panel(0);
+    txt(p, 'энергообеспечение и дуга движения', 800, 76, m('arc'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 80, 120, 700, 150, 'анаэробные', 'высокая интенсивность, мало повторений — силовые упражнения', CON, m('an'), { size: 22 });
+    infoCard(p, 820, 120, 700, 150, 'аэробные', 'малая интенсивность, много повторений, долго — выносливость · глава 7', COL.real, m('aer'), { size: 22 });
+    // knee extension sitting: the full arc and a short arc around a painful zone
+    const sit = fig(p, { x: 0, y: 0, s: 1.1, o: 0, pose: { ...SIT, t: 4, aN: 20, eN: 30, aF: 20, eF: 30 } });
+    plant(sit, 'H', 360, 560);
+    bench(p, 220, 420, 568, m('full', -.5), COL.dim, 230);
+    p.appendChild(sit.g);
+    const q1 = muscleOn(sit, ...MUSCLE.rectus, { after: 'ftN', w: 13 });
+    show(sit.g, m('full', -.5));
+    const K = onStage(sit, 'KN'), R = 200;
+    const arcD = (a0, a1) => { let d = ''; for (let i = 0; i <= 30; i++) { const a = rad(lerp(a0, a1, i / 30)); d += `${i ? 'L' : 'M'}${(K[0] + R * Math.cos(a)).toFixed(1)} ${(K[1] + R * Math.sin(a)).toFixed(1)}`; } return d; };
+    // screen angle of the shank: 90 (down) at full flexion to about 0 (forward) at extension
+    draw(path(p, arcD(85, -2), { stroke: COL.good, 'stroke-width': 6 }, { d: 0 }), m('full', .3), 1.2);
+    txt(p, 'полная дуга', K[0] + R + 20, K[1] + 120, m('full', .5), { size: 23, fill: COL.good, weight: 700 });
+    prog(q => { sit.set({ kN: lerp(95, 5, (1 - Math.cos(2 * Math.PI * q)) / 2) }); q1.act(.9); }, m('full', .3), 3, lin);
+    const pz = path(p, arcD(35, 60), { stroke: COL.bad, 'stroke-width': 18, 'stroke-opacity': .5 }, { o: 0 });
+    show(pz, m('short'));
+    txt(p, 'больно', K[0] + R * Math.cos(rad(48)) + 20, K[1] + R * Math.sin(rad(48)) + 30, m('short'), { size: 22, fill: COL.bad, weight: 700 });
+    draw(path(p, arcD(28, -2), { stroke: COL.task, 'stroke-width': 6 }, { d: 0 }), m('short', .6), .8);
+    txt(p, 'короткая дуга', K[0] + R + 20, K[1] - 30, m('short', .8), { size: 23, fill: COL.task, weight: 700 });
+    prog(q => { sit.set({ kN: lerp(30, 5, (1 - Math.cos(2 * Math.PI * 2 * q)) / 2) }); q1.act(.9); }, m('short', .6), 4, lin);
+    infoCard(p, 900, 330, 620, 200, 'короткая дуга (short-arc)', 'обойти болезненную или нестабильную дугу, защитить заживающие ткани', COL.task, m('short'), { size: 22 });
+    infoCard(p, 900, 560, 620, 200, 'режим — как в функции', 'вид сокращения и положение — ближе к нужной задаче, когда позволяет заживление', COL.good, m('func'), { size: 22 });
+  }],
+
+  ['vel', 'Скорость', (m) => {
+    const p = panel(0), cx = 560, y0 = 620, W = 420, H = 420;
+    txt(p, 'скорость сокращения (velocity)', 800, 76, m('vel'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const g = G(p, { o: 0 });
+    path(g, `M${cx - W} ${y0}H${cx + W + 20}M${cx} ${y0 + 10}V${y0 - H - 20}`, { stroke: COL.dim, 'stroke-width': 3 });
+    T(g, 'сила', { x: cx + 12, y: y0 - H - 8, size: 21, fill: COL.dim });
+    T(g, 'укорочение →', { x: cx + W + 10, y: y0 + 36, size: 20, fill: COL.dim, anchor: 'end' });
+    T(g, '← удлинение', { x: cx - W, y: y0 + 36, size: 20, fill: COL.dim });
+    show(g, m('vel', .5));
+    const Fc = v => .55 * (1 - v) / (1 + 3 * v), Fe = v => .55 + .3 * (1 - Math.exp(-v * 9));
+    draw(path(p, fnPath(cx, y0, W, H, Fc), { stroke: CON, 'stroke-width': 6 }, { d: 0 }), m('con'), 1.4);
+    draw(path(p, fnPath(cx - W, y0, W, H, v => Fe(1 - v)), { stroke: ECC, 'stroke-width': 6 }, { d: 0 }), m('ecc'), 1.4);
+    txt(p, 'концентрическая: быстрее → слабее', cx + 30, y0 - .64 * H, m('con', .8), { size: 21, fill: CON, weight: 600 });
+    txt(p, 'эксцентрическая: растёт, потом плато', cx - W, y0 - .93 * H, m('ecc', .8), { size: 21, fill: ECC, weight: 600 });
+    pill(p, 'схема', cx + W - 40, y0 - H, m('vel', .5), { col: COL.dim, size: 19 });
+    infoCard(p, 80, 690, 920, 170, 'по другим данным', 'эксцентрическая сила от скорости почти не зависит', COL.dim, m('ecc', 6), { size: 22 });
+    infoCard(p, 1060, 120, 480, 330, 'от медленных к быстрым', 'свободные грузы — только медленно и средне (контроль); быстро — изокинетика, пневматика и гидравлика, эластичное сопротивление', COL.whole, m('app'), { size: 22 });
+    infoCard(p, 1060, 470, 480, 300, 'специфичность скорости', 'сила растёт в основном на тренируемых скоростях, перенос ограничен → скорость как в функции', COL.good, m('spec'), { size: 22 });
+  }],
+
+  ['per', 'Периодизация', (m) => {
+    const p = panel(0), x0 = 120, y0 = 640, W = 1000, H = 380;
+    txt(p, 'периодизация (periodization)', 800, 76, m('per'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'отрезки времени с системным изменением нагрузки', 800, 118, m('per', 1), { size: 23, fill: COL.dim, anchor: 'middle' });
+    const g = G(p, { o: 0 });
+    path(g, `M${x0} ${y0 - H}V${y0}H${x0 + W + 20}`, { stroke: COL.dim, 'stroke-width': 3 });
+    T(g, 'год →', { x: x0 + W + 10, y: y0 + 36, size: 20, fill: COL.dim, anchor: 'end' });
+    show(g, m('cyc'));
+    ['подготовка', 'сила', 'мощность', 'пик', 'отдых'].forEach((s, i) => {
+      const w = [.3, .25, .2, .1, .15][i], a = [0, .3, .55, .75, .85][i], bg = G(p, { o: 0 });
+      mk('rect', { x: x0 + a * W + 3, y: y0 + 50, width: w * W - 6, height: 44, rx: 10, fill: [COL.whole, COL.nat, COL.task, COL.bad, COL.good][i], 'fill-opacity': .3 }, bg);
+      T(bg, s, { x: x0 + (a + w / 2) * W, y: y0 + 80, size: 20, fill: COL.chalk, anchor: 'middle' });
+      show(bg, m('cyc', .4 + i * .4));
+    });
+    const vol = t => t < .85 ? .85 - .7 * t : .3, inten = t => t < .85 ? .25 + .75 * t : .4;
+    draw(path(p, fnPath(x0, y0, W, H, vol), { stroke: COL.whole, 'stroke-width': 5 }, { d: 0 }), m('cyc', 2.5), 1.5);
+    draw(path(p, fnPath(x0, y0, W, H, inten), { stroke: COL.nat, 'stroke-width': 5 }, { d: 0 }), m('cyc', 2.5), 1.5);
+    txt(p, 'объём', x0 + 20, y0 - .85 * H - 12, m('cyc', 3), { size: 22, fill: COL.whole, weight: 700 });
+    txt(p, 'интенсивность', x0 + .55 * W, y0 - .7 * H - 16, m('cyc', 3), { size: 22, fill: COL.nat, weight: 700 });
+    const pk = G(p, { o: 0 });
+    path(pk, `M${x0 + .8 * W} ${y0 - H - 10}V${y0}`, { stroke: COL.bad, 'stroke-width': 3, 'stroke-dasharray': '8 6' });
+    T(pk, 'соревнование — пик', { x: x0 + .8 * W, y: y0 - H - 20, size: 22, fill: COL.bad, anchor: 'middle', weight: 700 });
+    show(pk, m('cyc', 3.5));
+    pill(p, 'схема', x0 + 70, y0 - H + 10, m('cyc'), { col: COL.dim, size: 19 });
+    infoCard(p, 1170, 150, 380, 200, 'для кого', 'тренированные тяжелоатлеты и пауэрлифтеры', COL.task, m('ath'), { size: 22 });
+    infoCard(p, 1170, 370, 380, 220, 'зачем', 'пик к соревнованиям; без перетренированности и психологического застоя', COL.good, m('cyc'), { size: 22 });
+    infoCard(p, 1170, 610, 380, 240, 'доказательства', 'ограничены; приёмы — для травмированных спортсменов на поздней стадии', COL.dim, m('ev'), { size: 22 });
+  }],
+
+  ['integ', 'Перенос в функцию', (m) => {
+    const p = panel(0), GY = 760;
+    txt(p, 'перенос в функцию', 800, 76, m('integ'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ground(p, 120, 560, GY, m('stab'));
+    const LO = { aN: 25, eN: 70, aF: 25, eF: 70 }, HI = { aN: 70, eN: 50, aF: 70, eF: 50 };
+    const f = fig(p, { x: 320, y: GY - 182 * 1.1, s: 1.1, o: 0, pose: LO });
+    const bx = carry(p, f, c => boxProp(c, 70, 52), { turn: false, along: 16 });
+    const ext = muscleOn(f, ['H', 'Sh', 20, -14], ['Sh', 'H', 20, 12], { w: 10, after: 'torso' });
+    const abd = muscleOn(f, ['H', 'Sh', 14, 20], ['Sh', 'H', 30, -22], { w: 10, after: 'torso' });
+    const bic = muscleOn(f, ...MUSCLE.biceps, { after: 'hdN', w: 10 });
+    [f.g, bx].forEach(e => { put(e, { o: 0 }); show(e, m('stab')); });
+    prog(q => { f.set(blendPose(LO, HI, (1 - Math.cos(2 * Math.PI * 2.5 * q)) / 2)); ext.act(.8); abd.act(.8); bic.act(.9); }, m('stab', .5), 6, lin);
+    txt(p, 'устойчивость: туловище', 320, 250, m('stab', 2), { size: 22, fill: '#ff7a5c', anchor: 'middle', weight: 600 });
+    txt(p, 'подвижность: руки', 320, 820, m('stab', 3), { size: 22, fill: COL.task, anchor: 'middle', weight: 600 });
+    infoCard(p, 640, 120, 900, 180, 'подвижность на фоне устойчивости', 'агонисты и антагонисты держат сустав; многие группы мышц — в нужной последовательности', COL.whole, m('stab'), { size: 22 });
+    infoCard(p, 640, 315, 900, 160, 'сила, мощность, выносливость — вместе', 'медленно и точно, быстро, повторно, долго держать позу → анализ задач', COL.task, m('bal'), { size: 22 });
+    infoCard(p, 640, 490, 900, 200, 'движения самих задач', 'плоскости, диагонали, сочетания; толкать, тянуть, поднимать, держать — от малого к большему', COL.good, m('task'), { size: 22 });
+    infoCard(p, 640, 705, 900, 150, 'самостоятельность', 'оценивать скорость, силу, длительность усилия и момент', COL.real, m('self'), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-mode', prompt: ['Верно или нет?'],
+    build: grid([
+      { parts: ['Свободные грузы безопасны на любой скорости'], ans: ['f'], why: 'Только на медленной и средней: иначе нет контроля.' },
+      { parts: ['Сила растёт в основном на тех скоростях, на которых тренировались'], ans: ['t'], why: 'Специфичность скорости.' },
+      { parts: ['Короткая дуга помогает обойти болезненную часть объёма'], ans: ['t'], why: 'Да.' },
+      { parts: ['Изометрия — сокращение без движения в суставе'], ans: ['t'], why: 'Да.' },
+      { parts: ['Эффективность периодизации надёжно доказана'], ans: ['f'], why: 'Доказательств немного.' },
+    ], TF, { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Режим: статическое или динамическое, открытая или закрытая цепь, вид сопротивления, полная или короткая дуга.', 'w1'],
+     ['Скорость: концентрическая сила падает, эксцентрическая сначала растёт; эффект специфичен к скорости.', 'w2'],
+     ['Периодизация — циклы с меняющейся нагрузкой; данных о её пользе мало.', 'w3'],
+     ['Перенос в функцию: устойчивость плюс подвижность, движения самих задач.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-mode', prompt: ['Что выбрать?'],
+    build: grid([
+      { parts: ['После операции обойти болезненную часть объёма'], ans: ['short'], why: 'Короткая дуга.' },
+      { parts: ['Развить силу во всём объёме движения'], ans: ['full'], why: 'Полная дуга.' },
+      { parts: ['Подготовить к быстрым повседневным движениям'], ans: ['fast'], why: 'Тренировка на быстрых скоростях.' },
+      { parts: ['Сохранить мышцу, когда сустав обездвижен'], ans: ['iso'], why: 'Изометрия — установочное напряжение.' },
+    ], [['short', 'Короткая дуга', COL.task], ['full', 'Полная дуга', COL.good], ['fast', 'Быстрая скорость', COL.whole], ['iso', 'Изометрия', STA]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-speed', prompt: ['Пожилой пациентке нужно успевать перейти улицу и подхватить себя при спотыкании. Пока она делает только медленные упражнения с гантелями. Что добавить?'],
+    build: choice([
+      ['Тренировку на более высоких скоростях — с эластичным сопротивлением или на изокинетическом тренажёре'],
+      ['Ничего: сила с медленных упражнений переносится на все скорости'],
+      ['Быстрые взмахи свободными гантелями'],
+      ['Только изометрию'],
+    ], 0, 'Эффект специфичен к скорости; быстрые скорости безопасно дают эластика и изокинетика.',
+    [null, 'Перенос на другие скорости ограничен.', 'Со свободными грузами быстро — нет контроля, это небезопасно.', 'Изометрия не тренирует быстрые движения.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

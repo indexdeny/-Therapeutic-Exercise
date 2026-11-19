@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Роль терапевта: изменения, факторы риска, скрининг — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 15, title: 'Роль терапевта: изменения, факторы риска, скрининг', minutes: 8, language: 'ru', next: '../ch016/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch015/cards.ru.json
+const CARDS_SHORT = {
+  "если ответ тревожный\nрекомендации · личный пример · мотивационное интервью": "рекомендации, пример, интервью",
+  "направить\nк другому специалисту, например к диетологу": "к другому специалисту",
+  "выявлять риски\nи снижать риск у людей и сообществ": "и снижать риск",
+  "замедлять спад\nпредупреждать снижение функции при уже поставленном диагнозе": "при поставленном диагнозе",
+  "уменьшать инвалидность\nвозвращать навыки и независимость при хронических болезнях": "навыки и независимость",
+  "много факторов\nк врачу до программы": "к врачу",
+  "мало\nнаблюдать и усложнять": "наблюдать",
+};
+// cards-short end
+
+// Prevention levels — one colour each.
+const PRV = { p1: COL.good, p2: COL.int, p3: COL.whole };
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+function holdIn(p, f, draw0) {
+  const c = G(p);
+  draw0(c);
+  const upd = () => { const [x, y] = onStage(f, 'WN'); put(c, { x, y }); };
+  f.onSet.push(upd); upd();
+  return c;
+}
+const clipboard = c => {
+  mk('rect', { x: -6, y: -40, width: 40, height: 52, rx: 4, fill: COL.chalk, stroke: COL.dim, 'stroke-width': 2 }, c);
+  [-30, -20, -10, 0].forEach(y => mk('path', { d: `M2 ${y}H26`, stroke: COL.faint, 'stroke-width': 2.5 }, c));
+};
+// Small icons for the five habits.
+const ICON = {
+  pa: g => { path(g, 'M-4 -18L4 -2L-6 10M4 -2L14 6M-2 -10L-14 -2', { stroke: COL.good, 'stroke-width': 4 }); mk('circle', { cx: 0, cy: -26, r: 6, fill: COL.good }, g); },
+  nut: g => { mk('circle', { cx: 0, cy: 2, r: 16, fill: COL.bad, 'fill-opacity': .5, stroke: COL.bad, 'stroke-width': 3 }, g); path(g, 'M0 -14Q6 -24 14 -22', { stroke: COL.good, 'stroke-width': 3 }); },
+  smk: g => { mk('rect', { x: -22, y: -4, width: 38, height: 9, rx: 2, fill: COL.chalk }, g); mk('rect', { x: 16, y: -4, width: 8, height: 9, fill: COL.task }, g); path(g, 'M22 -10Q26 -18 20 -24', { stroke: COL.dim, 'stroke-width': 2 }); },
+  slp: g => mk('path', { d: 'M6 -20A20 20 0 1 0 14 12A15 15 0 1 1 6 -20Z', fill: COL.real, 'fill-opacity': .6, stroke: COL.real, 'stroke-width': 2 }, g),
+  str: g => path(g, 'M-20 4L-10 -12L0 8L10 -14L20 6', { stroke: COL.rat, 'stroke-width': 4 }),
+};
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Роль терапевта', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 2 · Урок 15', { x: 800, y: 250, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Роль терапевта:', { x: 800, y: 335, size: 60, weight: 600, anchor: 'middle' });
+    T(g, 'изменения, факторы риска, скрининг', { x: 800, y: 405, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'что терапевт может сделать для здоровья, кроме лечения', 800, 490, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 800;
+    path(art, `M640 ${GY}H960`, { stroke: COL.faint, 'stroke-width': 3 });
+    const t = fig(art, { x: 720, y: GY - 182 * .5, s: .5, col: '#b9cfe0', pose: { aN: 62, eN: 76 } });
+    holdIn(art, t, clipboard);
+    fig(art, { x: 880, y: GY - 182 * .5, s: .5, dir: -1 });
+    show(art, m('sub', .2));
+    [0, 1, 2].forEach(i => checkMark(art, 1010, GY - 150 + i * 40, m('sub', .6 + i * .3), COL.good, 1));
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['move', 'Движение и общество', (m) => {
+    const p = panel(0), GY = 360;
+    txt(p, 'оптимальное движение', 330, 90, m('opt'), { size: 30, weight: 700, fill: COL.good, anchor: 'middle' });
+    ground(p, 120, 540, GY, m('opt'));
+    const f = fig(p, { x: 160, y: GY - 182 * .55, s: .55, o: 0 }); show(f.g, m('opt'));
+    walk(f, m('opt', .3), 5, { cycles: 4, dx: 320 });
+    ['целенаправленное', 'экономное', 'меньше риск травм'].forEach((s, i) => pill(p, s, 330, 430 + i * 64, m('opt', 1 + i * .6), { col: COL.good, size: 24 }));
+    labelBox(p, 330, 680, 480, ['терапевт —', 'специалист по двигательной системе'], COL.task, m('exp'), { size: 26 });
+    // ways to transform society
+    const cx = 1110, cy = 380;
+    const hub = G(p, { o: 0 });
+    mk('circle', { cx, cy, r: 80, fill: PANEL, stroke: COL.task, 'stroke-width': 3 }, hub);
+    T(hub, 'терапевт', { x: cx, y: cy + 9, size: 27, weight: 700, fill: COL.task, anchor: 'middle' });
+    show(hub, m('ways'));
+    const W5 = [['обучение пациентов', 'ways', .8], ['ресурсы сообщества', 'res', .2], ['поддержка в сообществе', 'adv', .2], ['политика', 'adv', 1.6], ['меньше неравенства', 'disp', .2]];
+    W5.forEach(([s, k, off], i) => {
+      const a = rad(-90 + i * 72), x = cx + 250 * Math.cos(a), y = cy + 220 * Math.sin(a);
+      arrowTo(p, [cx + 88 * Math.cos(a), cy + 88 * Math.sin(a)], [cx + 180 * Math.cos(a), cy + 160 * Math.sin(a)], m(k, off), { col: COL.faint, w: 3 });
+      pill(p, s, x, y + 8, m(k, off + .2), { col: COL.whole, size: 24 });
+    });
+    const cal = G(p, { o: 0 });
+    for (let i = 0; i < 12; i++) mk('circle', { cx: 900 + i * 36, cy: 760, r: 9, fill: i % 2 ? COL.faint : COL.good }, cal);
+    T(cal, 'много визитов подолгу → против болезней образа жизни', { x: 1100, y: 720, size: 23, weight: 700, fill: COL.good, anchor: 'middle' });
+    show(cal, m('long'));
+  }],
+
+  ['habits', 'Пять привычек', (m) => {
+    const p = panel(0);
+    head(p, 'О чём спросить в анамнезе', m('ask'), 70, COL.chalk);
+    const H5 = [['pa', 'физическая активность', '«Вы физически активны?»', COL.good], ['nut', 'питание и вес', '«Пять порций овощей и фруктов? 6–8 стаканов воды?»', COL.bad], ['smk', 'курение', '«Вы курите?»', COL.task], ['slp', 'сон', '«Спите 7–8 часов? Хочется спать днём?»', COL.real], ['str', 'стресс', '«Вы чувствуете стресс?»', COL.rat]];
+    H5.forEach(([k, name, q, c], i) => {
+      const y = 160 + i * 112, g = G(p, { o: 0 });
+      roundBox(g, 80, y - 44, 900, 92, c, PANEL, 2);
+      const ic = G(g, { x: 130, y: y + 2 }); ICON[k](ic);
+      T(g, name, { x: 180, y: y - 6, size: 26, weight: 700, fill: c });
+      T(g, q, { x: 180, y: y + 30, size: 22 });
+      show(g, m(k));
+    });
+    infoCard(p, 1030, 120, 480, 290, 'если ответ тревожный', 'рекомендации · личный пример · мотивационное интервью', COL.task, m('guide'), { size: 25 });
+    infoCard(p, 1030, 440, 480, 170, 'направить', 'к другому специалисту, например к диетологу', COL.whole, m('ref'), { size: 25 });
+    txt(p, 'опросник благополучия — до и после', 1270, 680, m('wheel'), { size: 24, weight: 700, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['q1', 'Быстрая проверка', () => {
+    const p = panel(0), GY = 640;
+    ground(p, 120, 520, GY, .1);
+    fig(p, { x: 320, y: GY - 182 * .6, s: .6 });
+    pill(p, '«Вы физически активны?» — «Нет»', 320, 300, .3, { col: COL.good, size: 22 });
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-pa', prompt: ['Пациент отвечает «нет» на вопрос «Вы физически активны?». Что делает терапевт?'],
+    build: choice([['Даёт рекомендации и помогает встроить активность в день'], ['Записывает ответ и переходит к следующей теме'], ['Сразу запрещает любую нагрузку']], 0,
+      'Важно не только спросить, но и дать рекомендации, когда ответ «нет».',
+      [null, 'Вопрос задают, чтобы помочь: при ответе «нет» нужны рекомендации.', 'Запрет не нужен: нужны рекомендации и, при показаниях, скрининг.']),
+  }], done) }],
+
+  ['funcs', 'Функции терапевта', (m) => {
+    const p = panel(0);
+    head(p, 'Функции терапевта в профилактике', m('f'), 70, COL.chalk);
+    infoCard(p, 90, 130, 450, 250, 'выявлять риски', 'и снижать риск у людей и сообществ', COL.bad, m('f1'), { size: 25 });
+    infoCard(p, 575, 130, 450, 250, 'замедлять спад', 'предупреждать снижение функции при уже поставленном диагнозе', COL.int, m('f2'), { size: 25 });
+    infoCard(p, 1060, 130, 450, 250, 'уменьшать инвалидность', 'возвращать навыки и независимость при хронических болезнях', COL.whole, m('f3'), { size: 25 });
+    ['скрининг', 'вмешательство', 'консультирование', 'обучение'].forEach((s, i) => pill(p, s, 250 + i * 370, 470, m('f4', .2 + i * .5), { col: COL.task, size: 26 }));
+    ['критический анализ исследований', 'администрирование: бюджет, люди, помещение'].forEach((s, i) => pill(p, s, 470 + i * 640, 560, m('f5', .2 + i * 1), { col: COL.real, size: 26 }));
+  }],
+
+  ['prev', 'Три вида профилактики', (m) => {
+    const p = panel(0), Y = 230;
+    head(p, 'Три вида профилактики', .2, 70, COL.chalk);
+    // course of a condition: risk → disease → chronic disability
+    const zones = [[120, 560, 'риск', COL.good], [560, 1040, 'болезнь', COL.int], [1040, 1480, 'хроническое, необратимое', COL.whole]];
+    zones.forEach(([a, b, s, c], i) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x: a + 4, y: Y - 18, width: b - a - 8, height: 36, rx: 18, fill: c, 'fill-opacity': .25, stroke: c, 'stroke-width': 2 }, g);
+      T(g, s, { x: (a + b) / 2, y: Y + 9, size: 24, weight: 700, fill: c, anchor: 'middle' });
+      show(g, m('p' + (i + 1), -.4));
+    });
+    const C3 = [['первичная', 'предупредить проблему у людей из группы риска', 'фитнес для детей против ожирения · профилактика травм спины у складских работников', 'p1'], ['вторичная', 'уменьшить длительность и тяжесть болезни', 'силовые упражнения при остеопорозе', 'p2'], ['третичная', 'уменьшить инвалидность, помочь реабилитации', 'фитнес для людей с травмой спинного мозга', 'p3']];
+    C3.forEach(([h, s, ex, k], i) => {
+      const x = 120 + i * 460, g = G(p, { o: 0 });
+      roundBox(g, x, 290, 430, 330, PRV[k], PANEL, 3);
+      T(g, h, { x: x + 24, y: 338, size: 30, weight: 700, fill: PRV[k] });
+      put(para(g, s, x + 24, 384, null, { size: 24, maxW: 380 }), { o: 1 });
+      put(para(g, 'например: ' + ex, x + 24, 500, null, { size: 22, maxW: 380, fill: COL.dim }), { o: 1 });
+      show(g, m(k));
+    });
+    ['листовка о сколиозе', 'риск падений на ярмарке здоровья', 'консультация компании о травмах'].forEach((s, i) => pill(p, s, [300, 800, 1300][i], 690, m('ex', .3 + i * .6), { col: COL.task, size: 23 }));
+  }],
+
+  ['evid', 'Исследование: после родов', (m) => {
+    const p = panel(0);
+    head(p, 'Фокус на доказательствах: женщины после родов', .2, 70, COL.chalk);
+    const gA = G(p, { o: 0 });
+    roundBox(gA, 120, 130, 620, 200, COL.good, PANEL, 3);
+    T(gA, 'упражнения + обучение', { x: 150, y: 180, size: 28, weight: 700, fill: COL.good });
+    T(gA, '8 недель с физическим терапевтом', { x: 150, y: 226, size: 24 });
+    fig(gA, { x: 660, y: 310 - 182 * .45, s: .45, pose: { aN: 100, eN: 10, aF: 90, eF: 10 } });
+    show(gA, m('st'));
+    const gB = G(p, { o: 0 });
+    roundBox(gB, 860, 130, 620, 200, COL.faint, PANEL, 2);
+    T(gB, 'контроль', { x: 890, y: 180, size: 28, weight: 700, fill: COL.dim });
+    T(gB, 'те же материалы по почте', { x: 890, y: 226, size: 24 });
+    mk('rect', { x: 1340, y: 230, width: 80, height: 54, rx: 6, fill: 'none', stroke: COL.dim, 'stroke-width': 3 }, gB);
+    path(gB, 'M1340 230L1380 262L1420 230', { stroke: COL.dim, 'stroke-width': 3 });
+    show(gB, m('ctrl'));
+    const R = [['благополучие', '↑ лучше', COL.good, 'r1', 0], ['риск послеродовой депрессии', '↓ ниже', COL.good, 'r1', 1.2], ['количество физической активности', '= без разницы', COL.dim, 'r2', 0]];
+    R.forEach(([s, v, c, k, off], i) => {
+      const y = 430 + i * 110, g = G(p, { o: 0 });
+      roundBox(g, 220, y - 46, 1160, 84, c, PANEL, 2);
+      T(g, s, { x: 250, y: y + 6, size: 27, weight: 700 });
+      T(g, v, { x: 1350, y: y + 6, size: 27, weight: 700, fill: c, anchor: 'end' });
+      show(g, m(k, off));
+    });
+  }],
+
+  ['screen', 'Скрининг перед занятиями', (m) => {
+    const p = panel(0);
+    head(p, 'Вопросы перед умеренной нагрузкой (бокс 2.1)', m('pre'), 70, COL.chalk);
+    const Q8 = ['диагноз болезни сердца?', 'заниматься только под контролем врача?', 'боль в груди при нагрузке?', 'боль в груди в покое за месяц?', 'артрит, остеопороз, боль в суставах?', 'лекарства от давления или сердца?', 'теряете равновесие или сознание?', 'другая причина не заниматься?'];
+    Q8.forEach((s, i) => {
+      const col = i < 4 ? 0 : 1, row = i % 4, x = 90 + col * 520, y = 150 + row * 100, g = G(p, { o: 0 });
+      roundBox(g, x, y, 490, 80, EDGE, PANEL, 2);
+      mk('rect', { x: x + 18, y: y + 24, width: 32, height: 32, rx: 6, fill: 'none', stroke: COL.dim, 'stroke-width': 2.5 }, g);
+      put(para(g, s, x + 66, y + 34, null, { size: 22, maxW: 410 }), { o: 1 });
+      show(g, m('qs', .2 + i * .8));
+    });
+    // one "yes" is enough
+    const yes = G(p, { o: 0 });
+    path(yes, 'M630 382l9 10l18 -22', { stroke: COL.bad, 'stroke-width': 5 });
+    show(yes, m('yes'));
+    labelBox(p, 1330, 300, 440, ['хотя бы одно «да»', 'дополнительная оценка, иногда — врач'], COL.bad, m('yes', .4), { size: 25 });
+    labelBox(p, 1330, 520, 440, ['скрининг движений', '7 заданий; вариант — при боли'], COL.whole, m('fms'), { size: 25 });
+  }],
+
+  ['risk', 'Факторы риска', (m) => {
+    const p = panel(0);
+    head(p, 'Факторы риска (бокс 2.2)', m('ra'), 70, COL.chalk);
+    txt(p, 'ишемическая болезнь сердца', 390, 140, m('cad'), { size: 27, weight: 700, fill: COL.bad, anchor: 'middle' });
+    ['семейный анамнез', 'курение', 'повышенное давление', 'высокий холестерин', 'глюкоза натощак нарушена', 'ожирение', 'малоподвижность'].forEach((s, i) => pill(p, s, 250 + (i % 2) * 290, 200 + Math.floor(i / 2) * 60, m('cad', .3 + i * .45), { col: COL.bad, size: 23 }));
+    infoCard(p, 90, 470, 300, 160, 'много факторов', 'к врачу до программы', COL.bad, m('many'), { size: 24 });
+    infoCard(p, 410, 470, 300, 160, 'мало', 'наблюдать и усложнять', COL.good, m('few'), { size: 24 });
+    txt(p, 'остеопороз', 1170, 140, m('ost'), { size: 27, weight: 700, fill: COL.whole, anchor: 'middle' });
+    ['низкая плотность кости', 'менопауза', 'семейный анамнез', 'низкий вес', 'малоподвижность', 'мало кальция', 'курение', 'избыток алкоголя', 'долгий постельный режим', 'долгий приём кортикостероидов'].forEach((s, i) => pill(p, s, 985 + (i % 2) * 360, 200 + Math.floor(i / 2) * 60, m('ost', .3 + i * .35), { col: COL.whole, size: 21 }));
+    labelBox(p, 1170, 560, 600, ['проверить равновесие и силу', 'программа, снижающая риск травмы'], COL.whole, m('bal'), { size: 25 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-prev', prompt: ['Какой это вид профилактики?'],
+    build: grid([
+      { parts: ['Фитнес для детей, чтобы предупредить ожирение'], ans: ['1'], why: 'Предупредить проблему у группы риска — первичная.' },
+      { parts: ['Силовые упражнения для людей с остеопорозом'], ans: ['2'], why: 'Уменьшить тяжесть уже имеющейся болезни — вторичная.' },
+      { parts: ['Фитнес для людей с травмой спинного мозга'], ans: ['3'], why: 'Уменьшить инвалидность при необратимом состоянии — третичная.' },
+      { parts: ['Профилактика травм спины у складских работников'], ans: ['1'], why: 'Группа риска, травмы ещё нет — первичная.' },
+      { parts: ['Реабилитация при хронической болезни, чтобы уменьшить инвалидность'], ans: ['3'], why: 'Третичная.' },
+    ], [['1', 'Первичная', PRV.p1], ['2', 'Вторичная', PRV.p2], ['3', 'Третичная', PRV.p3]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Терапевт меняет общество: обучение, ресурсы сообщества, защита интересов, меньше неравенства.', 'w1'],
+     ['Спрашивайте о пяти привычках: активность, питание, курение, сон, стресс.', 'w2'],
+     ['Профилактика бывает первичной, вторичной и третичной.', 'w3'],
+     ['Перед программой — скрининговые вопросы и факторы риска; при многих факторах — к врачу.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-case', prompt: ['Мужчина 55 лет хочет начать ходьбу быстрым шагом. Он курит, давление повышено, у отца был инфаркт, двигается мало. Что делать?'],
+    build: choice([
+      ['Направить к врачу до начала программы'],
+      ['Сразу начать с интенсивной нагрузки'],
+      ['Ничего не уточнять: ходьба безопасна для всех'],
+      ['Навсегда запретить нагрузку'],
+    ], 0, 'Несколько факторов риска ишемической болезни сердца — сначала к врачу.',
+    [null, 'При многих факторах риска нельзя начинать без оценки врача.', 'Скрининг и оценка риска нужны перед любой программой.', 'Цель — безопасно начать, а не запретить: после врача программу подберут.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Если хотя бы на один скрининговый вопрос ответ «да», нужна дополнительная оценка.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Вторичная профилактика предупреждает болезнь у здоровых.'], ans: ['f'], why: 'Неверно: это первичная; вторичная уменьшает тяжесть болезни.' },
+      { parts: ['Низкий вес тела — фактор риска остеопороза.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Программа для женщин после родов увеличила количество их физической активности.'], ans: ['f'], why: 'Неверно: благополучие улучшилось, а количество активности — нет.' },
+      { parts: ['Терапевт может направить пациента к другому специалисту, например к диетологу.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

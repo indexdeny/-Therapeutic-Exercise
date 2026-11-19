@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мобилизация локтя — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 50, title: 'Мобилизация: локоть и предплечье', minutes: 8, language: 'ru', next: '../ch051/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch050/cards.ru.json
+const CARDS_SHORT = {
+  "для полного сгибания и разгибания\nнужны добавочные движения: варус и вальгус — лучевое и локтевое скольжение": "варус и вальгус — добавочные движения",
+  "стабилизация\nплечевая кость — ремнём к столу или помощник; или на боку, плечо держит другая рука": "плечевая — ремнём",
+  "скольжение вниз — «черпак»\nтракция под 45°, затем, не отпуская, сила вдоль длинной оси локтевой → сгибание": "тракция 45° → вдоль оси локтевой",
+  "варус и вальгус\nлучевое скольжение — варус (со сгибанием), локтевое — вальгус (с разгибанием); лёжа на боку": "лучевое — варус, локтевое — вальгус",
+  "скольжения головки лучевой\nтыльное → разгибание · ладонное → сгибание": "тыльное → разгибание · ладонное → сгибание",
+  "подвывих головки лучевой\nвозвышение к возвышению; разгибание запястья + давление по оси лучевой + супинация; острый — толчком": "острый — толчком",
+  "покой: сгибание 70°, супинация 35°\nстабилизировать верхнюю часть локтевой": "стабилизировать верхнюю часть локтевой",
+  "покой: супинация 10°\nвогнутая — лучевая: скользит в ту же сторону; стабилизировать локтевую": "лучевая скользит в ту же сторону",
+};
+// cards-short end
+
+const HAND = '#b9cfe0', LINE = mix(ANAT.bone, '#000000', .5);
+// The humeroulnar joint from the side: the trochlea (convex, humerus above) and the trochlear notch of the ulna
+// (concave, moving), its shaft 45° off the joint axis. a = 25 is the resting position (70° of flexion).
+const huJoint = (p, x, y, s, t0) => { const j = jointGlide(p, { x, y, s, convexMoves: false, movAng: 45, shaft: 200, rest: 25, t0 }); j.set({ a: 25 }); return j; };
+// A forearm cross-section: the end of one bone with a concave notch and the round head of the other in it.
+// side +1: the notch faces right. set(dy): the head (or the notched bone) slides up (dorsal, −) or down (volar, +).
+function crossSec(p, x, y, s, notchMoves, t0) {
+  const g = G(p, { x, y, s, o: 0 }), f = v => v.toFixed(1), R = 44, Rc = 49;
+  const notched = G(g, {}), head = G(g, {});
+  mk('path', { d: `M-150 -70Q-170 0 -150 70Q-60 110 ${f(-Rc * Math.cos(rad(55)))} ${f(Rc * Math.sin(rad(55)))}A${Rc} ${Rc} 0 0 1 ${f(-Rc * Math.cos(rad(55)))} ${f(-Rc * Math.sin(rad(55)))}Q-60 -110 -150 -70Z`, fill: ANAT.bone, stroke: LINE, 'stroke-width': 2 }, notched);
+  path(notched, `M${f(-(Rc - 2) * Math.cos(rad(52)))} ${f((Rc - 2) * Math.sin(rad(52)))}A${Rc - 2} ${Rc - 2} 0 0 1 ${f(-(Rc - 2) * Math.cos(rad(52)))} ${f(-(Rc - 2) * Math.sin(rad(52)))}`, { stroke: CART, 'stroke-width': 5 });
+  const defs = mk('defs', {}, g), id = 'cs' + (++SHADE_ID), gr = mk('radialGradient', { id, cx: .38, cy: .34, r: .75 }, defs);
+  [[0, mix(ANAT.bone, '#ffffff', .55)], [.55, ANAT.bone], [1, mix(ANAT.bone, '#000000', .4)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, gr));
+  mk('circle', { r: R, fill: `url(#${id})`, stroke: LINE, 'stroke-width': 2 }, head);
+  const lig = path(g, '', { stroke: ANAT.tendon, 'stroke-width': 5 });
+  const c = { g, notched, head };
+  c.set = dy => {
+    put(notchMoves ? notched : head, { y: dy });
+    const hy = notchMoves ? 0 : dy;
+    lig.setAttribute('d', `M${f(-Rc * Math.cos(rad(55)))} ${f(-Rc * Math.sin(rad(55)) + (notchMoves ? dy : 0))}A${R + 8} ${R + 8} 0 1 1 ${f(-Rc * Math.cos(rad(55)))} ${f(Rc * Math.sin(rad(55)) + (notchMoves ? dy : 0))}`);
+    lig.setAttribute('stroke', mix(ANAT.tendon, ANAT.taut, clamp(Math.abs(dy) / 14, 0, 1)));
+    return c;
+  };
+  c.set(0);
+  T(g, 'тыльная ↑', { x: 120, y: -110, size: 20, fill: COL.dim, anchor: 'middle' });
+  T(g, 'ладонная ↓', { x: 120, y: 130, size: 20, fill: COL.dim, anchor: 'middle' });
+  if (t0 !== null) show(g, t0);
+  return c;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Локоть и предплечье', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 5 · Урок 50', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Мобилизация:', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'локоть и предплечье', { x: 800, y: 380, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'четыре сустава: сгибание, разгибание, пронация, супинация', 800, 460, m('sub'), { size: 28, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), el = elbowModel(art, { x: 640, y: 680, s: .9 });
+    show(art, m('sub', .2));
+    prog(q => el.set(lerp(170, 60, (1 - Math.cos(2 * Math.PI * q)) / 2)), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['anat', 'Четыре сустава', (m) => {
+    const p = panel(0), defs = mk('defs', {}, p);
+    txt(p, 'вид спереди', 520, 95, .2, { size: 20, fill: COL.dim, anchor: 'middle' });
+    const hum = limbEl(p, defs, ANAT.bone, 26, 30, LINE); hum.set([520, 120], [520, 340]);
+    mk('path', { d: 'M440 330Q520 300 600 330L610 380Q560 410 520 395Q480 410 430 380Z', fill: ANAT.bone, stroke: LINE, 'stroke-width': 2 }, p);
+    const ul = limbEl(p, defs, ANAT.bone, 22, 12, LINE), radius = limbEl(p, defs, ANAT.bone, 14, 22, LINE);
+    ul.set([475, 410], [465, 800]);
+    const rTop = [575, 410];
+    radius.set(rTop, [600, 800]);
+    T(p, 'плечевая', { x: 560, y: 200, size: 20, fill: COL.dim });
+    T(p, 'локтевая', { x: 440, y: 640, size: 20, fill: COL.dim, anchor: 'end' });
+    T(p, 'лучевая', { x: 630, y: 640, size: 20, fill: COL.dim });
+    const lab = (P, str, dx, t0) => { mk('circle', { cx: P[0], cy: P[1], r: 8, fill: COL.task, opacity: 0 }, p); show(p.lastChild, t0); txt(p, str, P[0] + dx, P[1] + 7, t0, { size: 22, weight: 700, fill: COL.task, anchor: dx < 0 ? 'end' : 'start' }); };
+    lab([475, 398], 'плечелоктевой', -40, m('four', 1));
+    lab([575, 398], 'плечелучевой', 40, m('four', 2.5));
+    lab([530, 440], 'проксимальный лучелоктевой', 90, m('four', 4));
+    lab([532, 785], 'дистальный лучелоктевой', 90, m('four', 5.5));
+    // pronation: the radius crosses over the ulna, its head turning in place
+    prog(q => radius.set(rTop, [lerp(600, 450, Math.sin(Math.PI * q)), 800]), m('four', 7), 3, lin);
+    infoCard(p, 960, 300, 570, 260, 'для полного сгибания и разгибания', 'нужны добавочные движения: варус и вальгус — лучевое и локтевое скольжение', COL.whole, m('acc'), { size: 23 });
+  }],
+
+  ['hu', 'Плечелоктевой сустав', (m) => {
+    const p = panel(0);
+    // the whole arm turned like the close-up: the humerus comes down to the elbow, the forearm goes to the right
+    const el = elbowModel(p, { x: 190, y: 250, s: 1.05 });
+    put(el.g, { r: 90 }); el.set(110);
+    txt(p, 'сгибание 70° — положение покоя', 250, 620, m('rest'), { size: 21, weight: 700, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'супинация 10°', 250, 655, m('rest', 1), { size: 21, fill: COL.whole, anchor: 'middle' });
+    const j = huJoint(p, 820, 380, 1.05, .2);
+    txt(p, 'выпуклый блок плечевой', 980, 260, m('hu'), { size: 21, fill: COL.task });
+    txt(p, 'вогнутая вырезка локтевой', 760, 560, m('hu', 1.5), { size: 21, fill: COL.whole, anchor: 'end' });
+    show(j.tp, m('tp'));
+    txt(p, 'плоскость лечения ≈ 45° к оси локтевой', 820, 800, m('tp'), { size: 22, weight: 700, fill: COL.task, anchor: 'middle' });
+    infoCard(p, 1180, 520, 370, 290, 'стабилизация', 'плечевая кость — ремнём к столу или помощник; или на боку, плечо держит другая рука', COL.real, m('stab'), { size: 21 });
+    const belt = mk('rect', { x: -62, y: -(j.R + 150), width: 124, height: 26, rx: 8, fill: COL.real, 'fill-opacity': .85, stroke: COL.board, 'stroke-width': 2, opacity: 0 }, j.g);
+    show(belt, m('stab'));
+  }],
+
+  ['hud', 'Тракция и скольжение вниз', (m) => {
+    const p = panel(0), j = huJoint(p, 560, 360, 1.05, .2);
+    show(j.tp, .2);
+    const gH = gripOn(j, p, [34, 120], 1.1);
+    show(gH, m('hand'));
+    txt(p, 'ладонная сторона локтевой — не касаться лучевой', 560, 820, m('hand'), { size: 21, fill: HAND, anchor: 'middle' });
+    ['проверка · первая процедура', 'боль: I–II', 'сгибание или разгибание: III–IV'].forEach((str, i) => pill(p, str, 1240, 140 + i * 58, m('dist', .5 + i * 1.2), { col: COL.whole, size: 21 }));
+    // distraction at 45° to the shaft (perpendicular to the plane), then the scoop along the ulna
+    prog(q => j.set({ n: 10 * io(q) }), m('force', .5), 1.2, lin);
+    const C = j.stage([0, 0]), v = rotPt(0, 1, -25);
+    arrowTo(p, [C[0] + v[0] * 120, C[1] + v[1] * 120], [C[0] + v[0] * 200, C[1] + v[1] * 200], m('force', .5), { col: COL.good, w: 6 });
+    txt(p, 'тракция ⊥ плоскости', C[0] - 120, C[1] + 210, m('force', 1), { size: 21, weight: 700, fill: COL.good, anchor: 'end' });
+    // progression: the end of flexion, then the scoop
+    prog(q => j.set({ a: lerp(25, 60, io(q)), n: 10 }), m('pos', 2), 1.4, lin);
+    prog(q => j.set({ a: 60, n: 10, d: 10 * io(q) }), m('scoop', 2), 1.6, lin);
+    txt(p, 'задняя капсула натянута', C[0] - 130, C[1] - 40, m('scoop', 3.5), { size: 22, weight: 700, fill: ANAT.taut, anchor: 'end' });
+    NOTE(p, C[0] - 250, C[1] - 85, m('scoop', 3.5));
+    infoCard(p, 960, 330, 580, 220, 'скольжение вниз — «черпак»', 'тракция под 45°, затем, не отпуская, сила вдоль длинной оси локтевой → сгибание', COL.task, m('scoop'), { size: 21 });
+    infoCard(p, 960, 580, 580, 230, 'варус и вальгус', 'лучевое скольжение — варус (со сгибанием), локтевое — вальгус (с разгибанием); лёжа на боку', COL.real, m('varus'), { size: 21 });
+  }],
+
+  ['hr', 'Плечелучевой сустав', (m) => {
+    const p = panel(0);
+    const j = jointGlide(p, { x: 330, y: 380, s: 1, convexMoves: false, shaft: 150, t0: .2 });
+    txt(p, 'выпуклая головчатая возвышенность', 450, 250, m('hr'), { size: 20, fill: COL.task });
+    txt(p, 'вогнутая головка лучевой', 450, 470, m('hr', 1.5), { size: 20, fill: COL.whole });
+    show(j.tp, m('hr', 3));
+    pill(p, 'покой: локоть разогнут, супинация до конца', 330, 100, m('hr', 3), { col: COL.whole, size: 21 });
+    const gR = gripOn(j, p, [0, 230], 1.1);
+    show(gR, m('dist'));
+    prog(q => j.set({ n: 11 * io(q) }), m('dist', 1), 1.2, lin);
+    arrowTo(p, [480, 560], [480, 640], m('dist', 1), { col: COL.good, w: 6 });
+    txt(p, 'тянуть лучевую дистально', 500, 610, m('dist', 1), { size: 21, weight: 700, fill: COL.good });
+    pill(p, '«толкнутый» локоть: лучевая смещена вверх', 330, 830, m('dist', 4), { col: COL.task, size: 20 });
+    prog(q => j.set({ n: 0, d: -11 * Math.sin(Math.PI * q) }), m('dv'), 1.6, lin);
+    prog(q => j.set({ d: 11 * Math.sin(Math.PI * q) }), m('dv', 2), 1.6, lin);
+    infoCard(p, 820, 120, 720, 190, 'скольжения головки лучевой', 'тыльное → разгибание · ладонное → сгибание', COL.whole, m('dv'), { size: 22 });
+    // compression with supination for a subluxed radial head
+    const k = jointGlide(p, { x: 1080, y: 560, s: .65, convexMoves: false, shaft: 140, t0: m('comp') });
+    prog(q => k.set({ n: -7 * io(q) }), m('comp', 2), 1, lin);
+    arcArrowSup(p, 1080, 770, m('comp', 3));
+    infoCard(p, 1250, 360, 300, 450, 'подвывих головки лучевой', 'возвышение к возвышению; разгибание запястья + давление по оси лучевой + супинация; острый — толчком', COL.bad, m('comp'), { size: 20 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-elbow', prompt: ['Какое скольжение?'],
+    build: grid([
+      { parts: ['Увеличить варус (плечелоктевой)'], ans: ['r'], why: 'Лучевое скольжение.' },
+      { parts: ['Увеличить вальгус (плечелоктевой)'], ans: ['u'], why: 'Локтевое скольжение.' },
+      { parts: ['Увеличить разгибание (плечелучевой)'], ans: ['b'], why: 'Тыльное скольжение головки лучевой.' },
+      { parts: ['Увеличить сгибание (плечелучевой)'], ans: ['v'], why: 'Ладонное скольжение головки лучевой.' },
+    ], [['r', 'Лучевое', COL.task], ['u', 'Локтевое', COL.whole], ['b', 'Тыльное', COL.good], ['v', 'Ладонное', COL.real]], { multi: false, text: true }),
+  }], done) }],
+
+  ['ru', 'Лучелоктевые суставы', (m) => {
+    const p = panel(0);
+    txt(p, 'проксимальный — срез на уровне головки лучевой', 400, 100, m('pru'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const A = crossSec(p, 400, 360, 1.2, false, m('pru'));
+    T(A.notched, 'локтевая', { x: -110, y: 8, size: 20, fill: COL.dim, anchor: 'middle' });
+    T(A.head, 'лучевая', { x: 0, y: 8, size: 19, fill: COL.board, anchor: 'middle', weight: 700 });
+    prog(q => A.set(-14 * Math.sin(Math.PI * q)), m('pg', .3), 1.8, lin);
+    prog(q => A.set(14 * Math.sin(Math.PI * q)), m('pg', 2.5), 1.8, lin);
+    pill(p, 'тыльное → пронация', 300, 600, m('pg', .3), { col: COL.good, size: 22 });
+    pill(p, 'ладонное → супинация', 520, 660, m('pg', 2.5), { col: COL.task, size: 22 });
+    infoCard(p, 80, 720, 640, 140, 'покой: сгибание 70°, супинация 35°', 'стабилизировать верхнюю часть локтевой', COL.whole, m('pru', 3), { size: 21 });
+    txt(p, 'дистальный — срез у запястья', 1180, 100, m('dru'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const B = crossSec(p, 1180, 360, 1.2, true, m('dru'));
+    T(B.notched, 'лучевая', { x: -110, y: 8, size: 20, fill: COL.dim, anchor: 'middle' });
+    T(B.head, 'локтевая', { x: 0, y: 8, size: 19, fill: COL.board, anchor: 'middle', weight: 700 });
+    prog(q => B.set(-14 * Math.sin(Math.PI * q)), m('dg', .3), 1.8, lin);
+    prog(q => B.set(14 * Math.sin(Math.PI * q)), m('dg', 2.5), 1.8, lin);
+    pill(p, 'тыльное → супинация', 1080, 600, m('dg', .3), { col: COL.task, size: 22 });
+    pill(p, 'ладонное → пронация', 1300, 660, m('dg', 2.5), { col: COL.good, size: 22 });
+    infoCard(p, 860, 720, 660, 140, 'покой: супинация 10°', 'вогнутая — лучевая: скользит в ту же сторону; стабилизировать локтевую', COL.whole, m('dru', 3), { size: 21 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-ru', prompt: ['Пронация или супинация?'],
+    build: grid([
+      { parts: ['Тыльное скольжение головки лучевой (проксимальный)'], ans: ['p'], why: 'Пронация.' },
+      { parts: ['Ладонное скольжение головки лучевой (проксимальный)'], ans: ['s'], why: 'Супинация.' },
+      { parts: ['Тыльное скольжение лучевой кости (дистальный)'], ans: ['s'], why: 'Супинация.' },
+      { parts: ['Ладонное скольжение лучевой кости (дистальный)'], ans: ['p'], why: 'Пронация.' },
+    ], [['p', 'Пронация', COL.good], ['s', 'Супинация', COL.task]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Плечелоктевой: тракция под 45° к локтевой кости; скольжение вниз «черпаком» — для сгибания.', 'w1'],
+     ['Плечелучевой: тракция лучевой дистально; тыльное скольжение — разгибание, ладонное — сгибание; сжатие с супинацией — подвывих головки.', 'w2'],
+     ['Проксимальный лучелоктевой: тыльное скольжение головки — пронация, ладонное — супинация.', 'w3'],
+     ['Дистальный: тыльное скольжение лучевой — супинация, ладонное — пронация.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-pull', prompt: ['Подвывих головки лучевой кости у ребёнка. Какой приём описан в книге?'],
+    build: choice([
+      ['Сжатие по оси лучевой кости с супинацией и разгибанием запястья; острый — толчком'],
+      ['Тракция лучевой кости дистально'],
+      ['Тыльное скольжение головки лучевой'],
+      ['Скольжение вниз «черпаком»'],
+    ], 0, 'Сжатие плечелучевого сустава с супинацией.',
+    [null, 'Тракция — для «толкнутого» локтя, когда лучевая смещена вверх.', 'Это для разгибания.', 'Это для сгибания в плечелоктевом суставе.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Плоскость лечения плечелоктевого — около 45° к оси локтевой.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['При тракции плечелоктевого держат и лучевую кость.'], ans: ['f'], why: 'Неверно: лучевую не касаются.' },
+      { parts: ['Покой плечелучевого — разгибание и полная супинация.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Тыльное скольжение дистальной лучевой увеличивает пронацию.'], ans: ['f'], why: 'Неверно: супинацию.' },
+      { parts: ['Покой проксимального лучелоктевого — сгибание 70°, супинация 35°.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+// A curved arrow for supination below a joint.
+function arcArrowSup(p, x, y, t0) {
+  const g = G(p, { o: 0 });
+  path(g, `M${x - 60} ${y}Q${x} ${y + 40} ${x + 60} ${y}`, { stroke: COL.task, 'stroke-width': 5 });
+  path(g, `M${x + 42} ${y - 4}L${x + 60} ${y}L${x + 50} ${y + 16}`, { stroke: COL.task, 'stroke-width': 5 });
+  T(g, 'супинация', { x, y: y + 60, size: 20, fill: COL.task, anchor: 'middle' });
+  show(g, t0);
+  return g;
+}
+
+boot();
+</script>
+</body>
+</html>

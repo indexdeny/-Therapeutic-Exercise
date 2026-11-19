@@ -1,0 +1,29 @@
+[
+ {
+  "beat": "pert",
+  "fig": 0,
+  "target": "hamstrings",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает hamstrings, фигура ×0.7",
+  "off": "места для лупы нет"
+ },
+ {
+  "beat": "pert",
+  "fig": 1,
+  "target": "hamstrings",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает hamstrings, фигура ×0.7",
+  "off": "мышца на фигуре в покое — увеличивать нечего; лупа за рамкой, линии через рамку"
+ },
+ {
+  "beat": "pert",
+  "fig": 2,
+  "target": "gastroc",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает gastroc, фигура ×0.68",
+  "off": "места для лупы нет"
+ }
+]

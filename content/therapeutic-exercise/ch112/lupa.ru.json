@@ -1,0 +1,40 @@
+[
+ {
+  "beat": "period",
+  "fig": 3,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает rectus, фигура ×0.7",
+  "from": "b3",
+  "to": "b4"
+ },
+ {
+  "beat": "period",
+  "fig": 4,
+  "target": "biceps",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает biceps, фигура ×0.8",
+  "off": "места для лупы нет"
+ },
+ {
+  "beat": "inter",
+  "fig": 1,
+  "target": "biceps",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает biceps, фигура ×0.8",
+  "from": "light",
+  "to": "pre"
+ },
+ {
+  "beat": "inter",
+  "fig": 2,
+  "target": "biceps",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает biceps, фигура ×0.8",
+  "off": "места для лупы нет"
+ }
+]

@@ -1,0 +1,1134 @@
+{
+  "region": "ankle",
+  "exercises": [
+    {
+      "id": "calf-stretch-sit",
+      "ru": "Растяжка икроножной сидя с полотенцем",
+      "en": "towel stretch of the calf",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "roll",
+        "band"
+      ],
+      "key": [
+        "полотенце под передним отделом",
+        "колено прямо — икроножная",
+        "колено согнуто — камбаловидная"
+      ],
+      "warn": "после шва ахиллова сухожилия — сначала с чуть согнутым коленом, прогрессировать очень осторожно",
+      "page": 888,
+      "moments": [
+        {
+          "n": 225,
+          "beat": "df",
+          "mark": "ls"
+        },
+        {
+          "n": 225,
+          "beat": "df",
+          "mark": "two"
+        },
+        {
+          "n": 219,
+          "beat": "ex",
+          "mark": "mod"
+        },
+        {
+          "n": 222,
+          "beat": "ctrl",
+          "mark": "str"
+        },
+        {
+          "n": 223,
+          "beat": "ex",
+          "mark": "mod"
+        },
+        {
+          "n": 224,
+          "beat": "ph",
+          "mark": "mod"
+        },
+        {
+          "n": 196,
+          "beat": "late",
+          "mark": "goals"
+        }
+      ]
+    },
+    {
+      "id": "calf-stretch-stand",
+      "ru": "Растяжка икроножной стоя у стены",
+      "en": "standing calf stretch",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "выпад, пятка задней ноги на полу",
+        "заднюю стопу чуть внутрь",
+        "колено согнуть — камбаловидная"
+      ],
+      "warn": "при плоскостопии — обувь с супинатором или полотенце под свод; после шва ахиллова — только на двух ногах с согнутыми коленями до 12 недель",
+      "page": 888,
+      "moments": [
+        {
+          "n": 225,
+          "beat": "stand",
+          "mark": "wall"
+        },
+        {
+          "n": 225,
+          "beat": "df",
+          "mark": "prec"
+        },
+        {
+          "n": 221,
+          "beat": "mob",
+          "mark": "mob"
+        },
+        {
+          "n": 222,
+          "beat": "ctrl",
+          "mark": "str"
+        },
+        {
+          "n": 224,
+          "beat": "prec",
+          "mark": "box"
+        }
+      ]
+    },
+    {
+      "id": "slant-board",
+      "ru": "Стояние на наклонной доске",
+      "en": "slant board stretch",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "wedge"
+      ],
+      "key": [
+        "носки вверх, пятки вниз",
+        "наклон корпуса вперёд — сильнее",
+        "своды почти не нагружаются"
+      ],
+      "warn": "после шва ахиллова — клин не круче 10° и только на двух ногах",
+      "page": 889,
+      "moments": [
+        {
+          "n": 225,
+          "beat": "stand",
+          "mark": "board"
+        },
+        {
+          "n": 219,
+          "beat": "ex",
+          "mark": "mod"
+        },
+        {
+          "n": 223,
+          "beat": "ex",
+          "mark": "mod"
+        },
+        {
+          "n": 224,
+          "beat": "ph",
+          "mark": "mod"
+        }
+      ]
+    },
+    {
+      "id": "heel-drop",
+      "ru": "Опускание пятки со ступеньки",
+      "en": "heel drop off a step",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "phase": [
+        "min"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "step"
+      ],
+      "key": [
+        "передний отдел на краю ступеньки",
+        "медленно опускать пятку за край"
+      ],
+      "warn": "мышцы работают уступающе — может появиться болезненность; после шва ахиллова — не раньше 12 недель",
+      "page": 889,
+      "moments": [
+        {
+          "n": 225,
+          "beat": "stand",
+          "mark": "drop"
+        },
+        {
+          "n": 224,
+          "beat": "prec",
+          "mark": "box"
+        }
+      ]
+    },
+    {
+      "id": "inv-ev-stretch",
+      "ru": "Растяжка в инверсию и эверсию",
+      "en": "inversion and eversion self-stretch",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "roll",
+        "wedge"
+      ],
+      "key": [
+        "поворачивать пятку, не только носок",
+        "полотенце — тянуть за край стопы",
+        "наклонная доска краем стопы вниз"
+      ],
+      "page": 889,
+      "moments": [
+        {
+          "n": 225,
+          "beat": "inv",
+          "mark": "cross",
+          "to": "dfev"
+        }
+      ]
+    },
+    {
+      "id": "toe-stretch",
+      "ru": "Растяжка пальцев стопы",
+      "en": "toe stretching for claw and hammer toes",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "manual"
+      ],
+      "key": [
+        "сгибать пальцы у основания",
+        "разгибать межфаланговые суставы",
+        "стоя — пальцы за краем книги"
+      ],
+      "page": 890,
+      "moments": [
+        {
+          "n": 225,
+          "beat": "toes",
+          "mark": "claw",
+          "to": "amtp"
+        }
+      ]
+    },
+    {
+      "id": "hallux-stretch",
+      "ru": "Растяжка большого пальца",
+      "en": "great toe extension stretch",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "manual"
+      ],
+      "key": [
+        "разгибать сустав у основания пальца",
+        "сидя — отвести стопу назад",
+        "стоя — перекат вперёд, пятка вверх"
+      ],
+      "page": 890,
+      "moments": [
+        {
+          "n": 225,
+          "beat": "hal",
+          "mark": "pass",
+          "to": "stand"
+        },
+        {
+          "n": 218,
+          "beat": "ctrl",
+          "mark": "toe"
+        }
+      ]
+    },
+    {
+      "id": "fascia-roll",
+      "ru": "Массаж и раскатывание подошвенной фасции",
+      "en": "plantar fascia massage and rolling",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "ball",
+        "roll"
+      ],
+      "key": [
+        "глубокий массаж поперёк и вдоль",
+        "катать стопой мяч или бутылку",
+        "давить, насколько комфортно"
+      ],
+      "page": 890,
+      "moments": [
+        {
+          "n": 225,
+          "beat": "fascia",
+          "mark": "mass",
+          "to": "roll"
+        },
+        {
+          "n": 221,
+          "beat": "mob",
+          "mark": "mob"
+        }
+      ]
+    },
+    {
+      "id": "ankle-arom",
+      "ru": "Активные движения стопы",
+      "en": "active ankle range of motion",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "sit",
+        "supine"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "тыльное и подошвенное сгибание",
+        "инверсия и эверсия — позже",
+        "в безболезненном объёме"
+      ],
+      "warn": "после шва ахиллова — тыльное сгибание не дальше нуля первые 4 недели",
+      "page": 862,
+      "moments": [
+        {
+          "n": 222,
+          "beat": "ctrl",
+          "mark": "ex"
+        },
+        {
+          "n": 219,
+          "beat": "ex",
+          "mark": "max"
+        },
+        {
+          "n": 223,
+          "beat": "ex",
+          "mark": "max"
+        },
+        {
+          "n": 224,
+          "beat": "ph",
+          "mark": "max"
+        },
+        {
+          "n": 218,
+          "beat": "prot",
+          "mark": "mob"
+        }
+      ]
+    },
+    {
+      "id": "muscle-focus",
+      "ru": "Осознанное сокращение мышц голени",
+      "en": "muscle awareness of the ankle",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "control"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "сидя, колени прямые",
+        "сокращать по одной мышце",
+        "сосредоточиться на действии"
+      ],
+      "page": 891,
+      "moments": [
+        {
+          "n": 226,
+          "beat": "nm",
+          "mark": "iso"
+        }
+      ]
+    },
+    {
+      "id": "alphabet",
+      "ru": "«Алфавит» стопой",
+      "en": "ankle alphabet",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "mobility",
+        "control"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "рисовать буквы в воздухе",
+        "двигаться в голеностопе",
+        "заглавные, строчные, слова"
+      ],
+      "page": 891,
+      "moments": [
+        {
+          "n": 226,
+          "beat": "nm",
+          "mark": "abc"
+        },
+        {
+          "n": 222,
+          "beat": "ctrl",
+          "mark": "ex"
+        },
+        {
+          "n": 223,
+          "beat": "ex",
+          "mark": "mod"
+        }
+      ]
+    },
+    {
+      "id": "marbles",
+      "ru": "Перекладывание шариков пальцами",
+      "en": "marble pickup",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "захватывать пальцами по одному",
+        "перекладывать в коробку",
+        "работают мышцы подошвы"
+      ],
+      "page": 891,
+      "moments": [
+        {
+          "n": 226,
+          "beat": "nm",
+          "mark": "marb"
+        },
+        {
+          "n": 222,
+          "beat": "ctrl",
+          "mark": "ex"
+        },
+        {
+          "n": 221,
+          "beat": "mob",
+          "mark": "str"
+        }
+      ]
+    },
+    {
+      "id": "towel-curl",
+      "ru": "Собирание полотенца пальцами",
+      "en": "towel curls",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "roll"
+      ],
+      "key": [
+        "пятка на полу",
+        "сминать полотенце пальцами"
+      ],
+      "page": 891,
+      "moments": [
+        {
+          "n": 226,
+          "beat": "nm",
+          "mark": "towel"
+        },
+        {
+          "n": 222,
+          "beat": "ctrl",
+          "mark": "ex"
+        },
+        {
+          "n": 221,
+          "beat": "mob",
+          "mark": "str"
+        }
+      ]
+    },
+    {
+      "id": "arch-raise",
+      "ru": "Подъём свода стопы",
+      "en": "arch raise",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "control",
+        "strength"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "поднять медиальный свод",
+        "пятка и передний отдел на полу",
+        "сначала сидя, потом стоя"
+      ],
+      "page": 891,
+      "moments": [
+        {
+          "n": 226,
+          "beat": "nm2",
+          "mark": "arch"
+        },
+        {
+          "n": 219,
+          "beat": "ex",
+          "mark": "str"
+        }
+      ]
+    },
+    {
+      "id": "ball-roll",
+      "ru": "Катание мяча подошвами",
+      "en": "rolling a ball between the soles",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "control"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "ball"
+      ],
+      "key": [
+        "теннисный мяч между подошвами",
+        "от пятки к носку и обратно"
+      ],
+      "page": 891,
+      "moments": [
+        {
+          "n": 226,
+          "beat": "nm2",
+          "mark": "ball"
+        }
+      ]
+    },
+    {
+      "id": "rocker-board",
+      "ru": "Качающаяся доска",
+      "en": "rocker board",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "control",
+        "balance",
+        "mobility"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "board"
+      ],
+      "key": [
+        "сначала сидя, потом стоя",
+        "вперёд-назад и внутрь-наружу",
+        "по кругу в обе стороны"
+      ],
+      "page": 891,
+      "moments": [
+        {
+          "n": 226,
+          "beat": "nm2",
+          "mark": "rock"
+        },
+        {
+          "n": 222,
+          "beat": "ctrl",
+          "mark": "str"
+        },
+        {
+          "n": 224,
+          "beat": "ph",
+          "mark": "mod"
+        }
+      ]
+    },
+    {
+      "id": "gait-focus",
+      "ru": "Ходьба с контролем переката стопы",
+      "en": "gait training with foot placement",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "function",
+        "control"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "вес на пятку",
+        "по наружному краю стопы вперёд",
+        "отталкивание большим пальцем"
+      ],
+      "page": 891,
+      "moments": [
+        {
+          "n": 226,
+          "beat": "nm2",
+          "mark": "walk"
+        },
+        {
+          "n": 222,
+          "beat": "ctrl",
+          "mark": "gait"
+        }
+      ]
+    },
+    {
+      "id": "band-pf",
+      "ru": "Подошвенное сгибание с лентой",
+      "en": "plantarflexion against elastic resistance",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max",
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "band",
+        "roll"
+      ],
+      "key": [
+        "валик под голень, пятка в воздухе",
+        "лента вокруг переднего отдела",
+        "сгибать стопу против ленты"
+      ],
+      "page": 891,
+      "moments": [
+        {
+          "n": 226,
+          "beat": "oc",
+          "mark": "pf"
+        },
+        {
+          "n": 224,
+          "beat": "ph",
+          "mark": "max"
+        },
+        {
+          "n": 219,
+          "beat": "ex",
+          "mark": "str"
+        },
+        {
+          "n": 222,
+          "beat": "ret",
+          "mark": "str"
+        }
+      ]
+    },
+    {
+      "id": "inv-ev-iso",
+      "ru": "Изометрия инверсии и эверсии",
+      "en": "isometric eversion and inversion",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "эверсия — прижимать наружные края",
+        "инверсия — прижимать внутренние края"
+      ],
+      "page": 891,
+      "moments": [
+        {
+          "n": 226,
+          "beat": "oc",
+          "mark": "iso"
+        },
+        {
+          "n": 223,
+          "beat": "ex",
+          "mark": "max"
+        },
+        {
+          "n": 224,
+          "beat": "ph",
+          "mark": "max"
+        },
+        {
+          "n": 219,
+          "beat": "ex",
+          "mark": "max"
+        }
+      ]
+    },
+    {
+      "id": "band-inv-ev",
+      "ru": "Инверсия и эверсия с лентой",
+      "en": "eversion and inversion with elastic resistance",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit",
+        "supine"
+      ],
+      "gear": [
+        "band"
+      ],
+      "key": [
+        "петля вокруг обеих стоп — эверсия",
+        "лента снаружи — инверсия",
+        "бедро и голень не поворачивать"
+      ],
+      "page": 891,
+      "moments": [
+        {
+          "n": 226,
+          "beat": "oc",
+          "mark": "el"
+        },
+        {
+          "n": 222,
+          "beat": "ret",
+          "mark": "str"
+        },
+        {
+          "n": 219,
+          "beat": "ex",
+          "mark": "str"
+        }
+      ]
+    },
+    {
+      "id": "towel-sweep",
+      "ru": "«Дворник» полотенцем с грузом",
+      "en": "towel sweeps with a weight",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "roll",
+        "weight"
+      ],
+      "key": [
+        "пятка неподвижна",
+        "стопа тянет полотенце в сторону",
+        "груз на конце полотенца"
+      ],
+      "page": 892,
+      "moments": [
+        {
+          "n": 226,
+          "beat": "oc",
+          "mark": "towel"
+        }
+      ]
+    },
+    {
+      "id": "band-df",
+      "ru": "Тыльное сгибание с лентой",
+      "en": "dorsiflexion against elastic resistance",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max",
+        "min"
+      ],
+      "pos": [
+        "sit",
+        "supine"
+      ],
+      "gear": [
+        "band",
+        "roll"
+      ],
+      "key": [
+        "лента привязана к кровати",
+        "петля через тыл стопы",
+        "сгибать стопу на себя"
+      ],
+      "page": 892,
+      "moments": [
+        {
+          "n": 226,
+          "beat": "oc",
+          "mark": "df"
+        },
+        {
+          "n": 224,
+          "beat": "ph",
+          "mark": "max"
+        },
+        {
+          "n": 222,
+          "beat": "ret",
+          "mark": "str"
+        }
+      ]
+    },
+    {
+      "id": "heel-raise",
+      "ru": "Подъёмы на носки и на пятки",
+      "en": "heel raises and toe raises",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "stand",
+        "sit"
+      ],
+      "gear": [
+        "none",
+        "weight"
+      ],
+      "key": [
+        "на двух ногах, потом на одной",
+        "на носки, на пятки, на края стоп",
+        "груз — рюкзак, пояс, гантели"
+      ],
+      "warn": "после шва ахиллова — сидя, потом стоя на двух; на одной ноге — только с 10–12 недель",
+      "page": 893,
+      "moments": [
+        {
+          "n": 227,
+          "beat": "dyn",
+          "mark": "raise",
+          "shot": 7
+        },
+        {
+          "n": 224,
+          "beat": "ph",
+          "mark": "mod"
+        },
+        {
+          "n": 224,
+          "beat": "prec",
+          "mark": "box"
+        },
+        {
+          "n": 219,
+          "beat": "ex",
+          "mark": "str"
+        },
+        {
+          "n": 212,
+          "beat": "phases",
+          "mark": "max"
+        },
+        {
+          "n": 211,
+          "beat": "phases",
+          "mark": "max"
+        },
+        {
+          "n": 210,
+          "beat": "mod",
+          "mark": "ex"
+        },
+        {
+          "n": 195,
+          "beat": "max",
+          "mark": "ex"
+        }
+      ]
+    },
+    {
+      "id": "ecc-calf",
+      "ru": "Уступающая нагрузка трёхглавой мышцы голени",
+      "en": "eccentric loading of the gastrocnemius-soleus",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "min"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "step"
+      ],
+      "key": [
+        "здоровая нога на низкой платформе",
+        "вес на носок больной ноги",
+        "медленно опустить пятку на пол"
+      ],
+      "page": 893,
+      "moments": [
+        {
+          "n": 227,
+          "beat": "dyn",
+          "mark": "ecc",
+          "to": "tip"
+        },
+        {
+          "n": 224,
+          "beat": "prec",
+          "mark": "min"
+        },
+        {
+          "n": 230,
+          "beat": "le2",
+          "mark": "heel"
+        }
+      ]
+    },
+    {
+      "id": "resisted-walk",
+      "ru": "Ходьба на носках и пятках с сопротивлением",
+      "en": "resisted walking",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "strength",
+        "function"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "manual",
+        "band",
+        "machine"
+      ],
+      "key": [
+        "идти на пятках, потом на носках",
+        "сопротивление на таз",
+        "рукой, блоком или лентой"
+      ],
+      "page": 893,
+      "moments": [
+        {
+          "n": 227,
+          "beat": "walk",
+          "mark": "rw"
+        }
+      ]
+    },
+    {
+      "id": "band-step",
+      "ru": "Шаги здоровой ногой против ленты",
+      "en": "stepping against an elastic band",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "phase": [
+        "min"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "band"
+      ],
+      "key": [
+        "лента на лодыжке здоровой ноги",
+        "шаг вперёд — тыльные сгибатели",
+        "шаг назад — подошвенные сгибатели"
+      ],
+      "page": 893,
+      "moments": [
+        {
+          "n": 227,
+          "beat": "walk",
+          "mark": "band",
+          "to": "bw"
+        },
+        {
+          "n": 222,
+          "beat": "ret",
+          "mark": "nm"
+        }
+      ]
+    }
+  ]
+}

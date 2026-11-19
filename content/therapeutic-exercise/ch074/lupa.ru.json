@@ -1,0 +1,29 @@
+[
+ {
+  "beat": "dapre",
+  "fig": 0,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает rectus, фигура ×0.6",
+  "off": "таблица подходов занимает место — лупа видна меньше 2 с — мелькает"
+ },
+ {
+  "beat": "iso",
+  "fig": 0,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает rectus, фигура ×0.75",
+  "to": "spd"
+ },
+ {
+  "beat": "int",
+  "fig": 0,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает rectus, фигура ×0.8",
+  "off": "места для лупы нет"
+ }
+]

@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Механическое сопротивление — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 73, title: 'Механическое сопротивление; дети и подростки', minutes: 9, language: 'ru', next: '../ch074/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch073/lupa.ru.json
+const LUPA = [
+  {"beat": "intro", "fig": 1, "target": "biceps", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch073/cards.ru.json
+const CARDS_SHORT = {
+  "силовая тренировка\nтренировка с отягощениями: внешняя нагрузка от снаряда или тренажёра": "внешняя нагрузка",
+  "в реабилитации\nубрать или уменьшить дефицит мышечной функции и вернуть функцию": "вернуть функцию",
+  "в фитнесе\nвместе с аэробными упражнениями и упражнениями на гибкость": "+ аэробные и на гибкость",
+  "точка отсчёта и мотивация\nисходное значение и шаги нагрузки можно измерить и записать": "можно измерить и записать",
+  "средняя и поздняя стадия\nсила 4/5 и выше или пациент сильнее терапевта; нагрузка намного больше ручной": "сила 4/5 или сильнее терапевта",
+  "сила, выносливость, скорость\nдинамика и статика, много повторений; переменное сопротивление; гидравлика, пневматика, изокинетика, эластик — безопасно быстро": "динамика, статика, переменное сопротивление",
+  "самостоятельно, дома\nпосле обучения и периода под присмотром": "после обучения и периода под присмотром",
+  "не для очень слабых мышц\nи не для самой ранней стадии заживления — кроме снарядов с помощью или поддержкой": "и не для ранней стадии заживления",
+  "постоянная нагрузка\nмаксимум — лишь в одной точке объёма": "максимум — лишь в одной точке объёма",
+  "болезненную дугу не обойти\nкроме гидравлики, пневматики и изокинетики": "кроме гидравлики, пневматики и изокинетики",
+  "цена и шаг нагрузки\nоборудование дорогое; у свободных весов и тренажёров шаг задан производителем": "дорого, шаг задан производителем",
+  "объём движений\nвесь безболезненный объём; тянущие уравновешивают толкающими; и подъём, и опускание": "весь безболезненный объём",
+  "как двигаться\nмедленно или средне, ритмично, без рывков; дыхание не задерживать; лучше с партнёром": "ритмично, без рывков",
+  "перерыв больше 1–2 недель\nнагрузку и объём снизить": "нагрузку и объём снизить",
+  "можно и полезно\nпри правильной программе и тщательном контроле силовые тренировки детям полезны и безопасны": "при контроле — полезны и безопасны",
+  "что показано\nрост силы, мощности, результатов; профилактика спортивных травм — под вопросом; о навыках — мало данных": "рост силы, мощности, результатов",
+  "риск низкий — если по правилам\nнарушения правил: травмы мягких тканей и зон роста": "нарушения → травмы зон роста",
+  "незрелая терморегуляция\nдети хуже отдают тепло, быстрее устают и дольше восстанавливаются": "хуже отдают тепло, быстрее устают",
+  "контроль и техника\nобученный взрослый рядом; разминка 5–10 мин; правильная техника без рывков; малая интенсивность; питьё": "взрослый рядом, разминка",
+  "нагрузка\nна 8–15 повторений → постепенно 60–80 % расчётного максимума; прогрессия: сначала повторения или число упражнений, потом вес ≤ 5 %": "8–15 повторений → 60–80 %",
+  "объём и частота\n1 подход → 2–3; отдых ≥ 3 мин; не чаще 2 раз в неделю; многосуставные движения; эксцентрику ограничить; снаряды по размеру": "не чаще 2 раз в неделю",
+};
+// cards-short end
+
+const MECH = COL.task, KID = COL.good, ADULT = COL.whole, METAL = '#9fb0bf';
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A cuff weight strapped above the ankle of figure f (follows the leg).
+function cuffOn(p, f) {
+  const c = G(p);
+  mk('rect', { x: -15, y: -13, width: 30, height: 26, rx: 8, fill: '#5b6b78', stroke: '#2c353d', 'stroke-width': 2 }, c);
+  mk('rect', { x: -15, y: -3, width: 30, height: 6, fill: '#7f909c' }, c);
+  const upd = () => { const K = f.pts.KN, A = f.pts.AN, [x, y] = figPt(f, [lerp(K[0], A[0], .85), lerp(K[1], A[1], .85)]); put(c, { x, y, s: f.s, r: Math.atan2(A[1] - K[1], A[0] - K[0]) * 180 / Math.PI - 90 }); };
+  f.onSet.push(upd); upd();
+  return c;
+}
+// A cable column at x (floor GY): a pulley at the top and a weight stack that rises as the handle is pulled down.
+function cableColumn(p, x, GY, t0) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x: x - 35, y: GY - 420, width: 70, height: 420, rx: 6, fill: 'none', stroke: COL.dim, 'stroke-width': 4 }, g);
+  mk('circle', { cx: x, cy: GY - 400, r: 14, fill: 'none', stroke: COL.dim, 'stroke-width': 4 }, g);
+  const stack = G(g, {});
+  for (let i = 0; i < 7; i++) mk('rect', { x: x - 27, y: GY - 30 - i * 22, width: 54, height: 18, rx: 3, fill: MECH, 'fill-opacity': .75 }, stack);
+  const cable = path(g, '', { stroke: COL.chalk, 'stroke-width': 2.5 });
+  show(g, t0);
+  return { g, stack, cable, top: [x - 14, GY - 400] };
+}
+// A long bone of a child: shaft, ends and the two growth plates (returned to light up).
+function childBone(p, cx, cy, t0) {
+  const g = G(p, { o: 0 }), B = ANAT.bone, ln = mix(B, COL.board, .55);
+  mk('rect', { x: cx - 18, y: cy - 120, width: 36, height: 240, rx: 14, fill: B, stroke: ln, 'stroke-width': 2 }, g);
+  [-1, 1].forEach(k => mk('ellipse', { cx, cy: cy + k * 140, rx: 46, ry: 34, fill: B, stroke: ln, 'stroke-width': 2 }, g));
+  const plates = [-1, 1].map(k => path(g, `M${cx - 40} ${cy + k * 118}Q${cx} ${cy + k * 108} ${cx + 40} ${cy + k * 118}`, { stroke: COL.task, 'stroke-width': 6 }));
+  show(g, t0);
+  return { g, plates };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Механическое сопротивление', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 73', { x: 800, y: 170, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Механическое сопротивление', { x: 800, y: 255, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'для взрослых, детей и подростков', { x: 800, y: 320, size: 42, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'снаряды, тренажёры, нагрузка в цифрах', 800, 400, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const big = curlFig(art, 700, 790, .95, 1.4, 0), kid = curlFig(art, 900, 790, .62, .8, 0);
+    ground(art, 560, 1040, 790, 0);
+    curls(big, .4, Math.max(4, D - 1.4), 3); curls(kid, .7, Math.max(4, D - 1.7), 3, { lvl: .7 });
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['def', 'Что это', (m, D) => {
+    const p = panel(0);
+    txt(p, 'механическое сопротивление: нагрузку даёт снаряд', 800, 70, m('def'), { size: 28, weight: 700, anchor: 'middle' });
+    const GY = 560;
+    // a free weight
+    const c1 = curlFig(p, 230, GY, .95, 1.3, m('def', .4));
+    ground(p, 110, 360, GY, m('def', .4));
+    curls(c1, m('def', .6), D - m('def', .8), Math.max(2, Math.round((D - m('def')) / 3)));
+    txt(p, 'свободный вес', 230, 610, m('def', .6), { size: 23, fill: MECH, anchor: 'middle', weight: 700 });
+    // a cuff weight on the ankle, seated knee extension
+    const sk = fig(p, { x: 0, y: 0, s: .95, o: 0, pose: { ...SIT, t: 4, kN: 90, aN: 20, eN: 30, aF: 20, eF: 30 } });
+    plant(sk, 'H', 640, 400);
+    bench(p, 535, 700, 408, m('def', 1), COL.dim, GY - 408);
+    p.appendChild(sk.g);
+    const q4 = muscleOn(sk, ...MUSCLE.rectus, { after: 'ftN', w: 12 });
+    const cuff = cuffOn(p, sk); put(cuff, { o: 0 }); show(cuff, m('def', 1)); show(sk.g, m('def', 1));
+    prog(q => { sk.set({ kN: lerp(90, 8, cyc(q, Math.max(2, Math.round((D - m('def')) / 3.5)))) }); q4.act(.85); }, m('def', 1.2), D - m('def', 1.4), lin);
+    txt(p, 'манжета-утяжелитель', 640, 610, m('def', 1.2), { size: 23, fill: MECH, anchor: 'middle', weight: 700 });
+    // a cable column: elbow extension, the stack rises as the hand goes down
+    const col = cableColumn(p, 1240, GY, m('def', 1.8));
+    const f = fig(p, { x: 1100, y: GY - 182 * .95, s: .95, o: 0, pose: { t: 6, aN: 8, eN: 100 } });
+    const tri = muscleOn(f, ...MUSCLE.triceps, { after: 'hdN', w: 11 });
+    show(f.g, m('def', 1.8)); ground(p, 1000, 1300, GY, m('def', 1.8));
+    const y0 = onStage(f, 'WN')[1];
+    const upd = () => { const W = onStage(f, 'WN'); col.cable.setAttribute('d', `M${W[0].toFixed(1)} ${W[1].toFixed(1)}L${col.top[0]} ${col.top[1]}`); put(col.stack, { y: -(W[1] - y0) * .6 }); };
+    f.onSet.push(upd); upd();
+    prog(q => { f.set({ eN: lerp(100, 10, cyc(q, Math.max(2, Math.round((D - m('def')) / 3.5)))) }); tri.act(.9); }, m('def', 2), D - m('def', 2.2), lin);
+    txt(p, 'блок с грузом', 1180, 610, m('def', 2), { size: 23, fill: MECH, anchor: 'middle', weight: 700 });
+    infoCard(p, 60, 660, 470, 200, 'силовая тренировка', 'тренировка с отягощениями: внешняя нагрузка от снаряда или тренажёра', MECH, m('def'), { size: 22 });
+    infoCard(p, 565, 660, 470, 200, 'в реабилитации', 'убрать или уменьшить дефицит мышечной функции и вернуть функцию', ADULT, m('rehab'), { size: 22 });
+    infoCard(p, 1070, 660, 470, 200, 'в фитнесе', 'вместе с аэробными упражнениями и упражнениями на гибкость', COL.good, m('fit'), { size: 22 });
+  }],
+
+  ['adv', 'Преимущества', (m) => {
+    const p = panel(0);
+    txt(p, 'преимущества', 800, 70, m('adv'), { size: 30, weight: 700, fill: COL.good, anchor: 'middle' });
+    // load recorded week by week: progress in numbers
+    const x0 = 100, y0 = 520, W = 480, H = 300;
+    chartAxes(p, x0, y0, W, H, 'нагрузка', 'недели →', m('a1'));
+    pill(p, 'схема', x0 + W - 40, y0 - H - 10, m('a1'), { col: COL.dim, size: 19 });
+    [.35, .42, .5, .58, .66, .75, .84].forEach((v, i) => {
+      const b = put(mk('rect', { x: x0 + 30 + i * 64, y: y0 - v * H, width: 40, height: v * H, rx: 5, fill: MECH, 'fill-opacity': .8 }, p), { o: 0 });
+      show(b, m('a1', .4 + i * .25), .3);
+    });
+    txt(p, 'прогресс виден в цифрах', x0 + W / 2, y0 + 60, m('a1', 2), { size: 23, fill: MECH, anchor: 'middle', weight: 700 });
+    const c = curlFig(p, 200, 860, .55, 1.5, m('a2'));
+    curls(c, m('a2', .3), 8, 3);
+    txt(p, 'больше, чем даст рука', 270, 790, m('a2', .5), { size: 21, fill: COL.dim });
+    infoCard(p, 680, 110, 870, 165, 'точка отсчёта и мотивация', 'исходное значение и шаги нагрузки можно измерить и записать', COL.good, m('a1'), { size: 22 });
+    infoCard(p, 680, 290, 870, 175, 'средняя и поздняя стадия', 'сила 4/5 и выше или пациент сильнее терапевта; нагрузка намного больше ручной', COL.good, m('a2'), { size: 22 });
+    infoCard(p, 680, 480, 870, 200, 'сила, выносливость, скорость', 'динамика и статика, много повторений; переменное сопротивление; гидравлика, пневматика, изокинетика, эластик — безопасно быстро', COL.good, m('a3'), { size: 22 });
+    infoCard(p, 680, 695, 870, 150, 'самостоятельно, дома', 'после обучения и периода под присмотром', COL.good, m('a4'), { size: 22 });
+  }],
+
+  ['dis', 'Недостатки', (m) => {
+    const p = panel(0);
+    txt(p, 'недостатки', 800, 70, m('dis'), { size: 30, weight: 700, fill: COL.bad, anchor: 'middle' });
+    // constant resistance: the torque of a dumbbell peaks at one angle
+    const x0 = 100, y0 = 470, W = 480, H = 260;
+    chartAxes(p, x0, y0, W, H, 'момент груза', 'угол сгибания локтя →', m('d2'));
+    draw(path(p, fnPath(x0, y0, W, H, t => .9 * Math.sin(Math.PI * t), .02, .98), { stroke: MECH, 'stroke-width': 5 }, { d: 0 }), m('d2', .3), 1.2);
+    const pk = put(mk('circle', { cx: x0 + W / 2, cy: y0 - .9 * H, r: 10, fill: COL.bad }, p), { o: 0 }); show(pk, m('d2', 1.4));
+    txt(p, 'максимум — в одной точке', x0 + W / 2 + 22, y0 - .9 * H - 10, m('d2', 1.4), { size: 22, fill: COL.bad, anchor: 'start', weight: 700 });
+    txt(p, '0°', x0, y0 + 30, m('d2'), { size: 19, fill: COL.dim, anchor: 'middle' }); txt(p, '90°', x0 + W / 2, y0 + 30, m('d2'), { size: 19, fill: COL.dim, anchor: 'middle' });
+    pill(p, 'схема', x0 + 60, y0 + 74, m('d2'), { col: COL.dim, size: 19 });
+    const c = curlFig(p, 200, 860, .55, 1.4, m('d2'));
+    prog(q => { const e = cyc(q, 2); c.f.set({ aN: 6, eN: lerp(10, 140, e) }); c.mu.act(.4 + .6 * Math.sin(Math.PI * clamp(lerp(10, 140, e) / 180, 0, 1))); }, m('d2', .3), 7, lin);
+    txt(p, 'при 90° рычаг груза длиннее всего', 270, 760, m('d2', 2), { size: 20, fill: COL.dim });
+    infoCard(p, 680, 110, 870, 175, 'не для очень слабых мышц', 'и не для самой ранней стадии заживления — кроме снарядов с помощью или поддержкой', COL.bad, m('d1'), { size: 22 });
+    infoCard(p, 680, 300, 870, 150, 'постоянная нагрузка', 'максимум — лишь в одной точке объёма', COL.bad, m('d2'), { size: 22 });
+    infoCard(p, 680, 465, 870, 150, 'болезненную дугу не обойти', 'кроме гидравлики, пневматики и изокинетики', COL.bad, m('d3'), { size: 22 });
+    infoCard(p, 680, 630, 870, 175, 'цена и шаг нагрузки', 'оборудование дорогое; у свободных весов и тренажёров шаг задан производителем', COL.bad, m('d4'), { size: 22 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-mechpm', prompt: ['Преимущество или недостаток механического сопротивления?'],
+    build: grid([
+      { parts: ['Прогресс можно измерить и записать'], ans: ['plus'], why: 'Это мотивирует пациента.' },
+      { parts: ['Постоянный груз максимально нагружает мышцу лишь в одной точке объёма'], ans: ['minus'], why: 'Остальная часть объёма недогружена.' },
+      { parts: ['Подходит, когда пациент сильнее терапевта'], ans: ['plus'], why: 'Нагрузка намного больше ручной.' },
+      { parts: ['Мышца очень слаба, ткани в самой ранней стадии заживления'], ans: ['minus'], why: 'Нужны ручное сопротивление или снаряды с поддержкой.' },
+      { parts: ['После обучения можно заниматься дома'], ans: ['plus'], why: 'Самостоятельная домашняя программа.' },
+    ], [['plus', 'Преимущество', COL.good], ['minus', 'Недостаток', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['adult', 'Здоровые взрослые', (m) => {
+    const p = panel(0);
+    txt(p, 'здоровые нетренированные взрослые (до 50–60 лет)', 800, 62, m('adult'), { size: 27, weight: 700, anchor: 'middle' });
+    // the session: warm-up, flexibility, resistance, cool-down
+    [['разминка', COL.dim], ['гибкость', COL.good], ['силовая', MECH], ['заминка', COL.dim]].forEach(([s, c], i) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x: 260 + i * 280, y: 95, width: 250, height: 50, rx: 12, fill: mix(c, COL.board, .6), stroke: c, 'stroke-width': 2 }, g);
+      T(g, s, { x: 385 + i * 280, y: 128, size: 22, weight: 700, anchor: 'middle' });
+      if (i) T(g, '→', { x: 247 + i * 280, y: 128, size: 22, fill: COL.dim, anchor: 'middle' });
+      show(g, m('warm', i * .4));
+    });
+    // pulling and pushing groups take turns
+    const f = fig(p, { x: 230, y: 760 - 182 * 1.15, s: 1.15, o: 0, pose: { aN: 30, eN: 80, aF: -10, eF: 20 } });
+    const bi = muscleOn(f, ...MUSCLE.biceps, { after: 'hdN', w: 11 }), tr = muscleOn(f, ...MUSCLE.triceps, { after: 'hdN', w: 11 });
+    const ha = muscleOn(f, ...MUSCLE.hamstrings, { after: 'ftN', w: 13 }), qu = muscleOn(f, ...MUSCLE.rectus, { after: 'ftN', w: 13 });
+    show(f.g, m('groups')); ground(p, 100, 360, 760, m('groups'));
+    const lab = txt(p, '', 230, 820, m('groups', 1), { size: 22, weight: 700, fill: MECH, anchor: 'middle' });
+    prog(q => { const k = Math.floor(q * 6) % 2; bi.act(k ? 0 : .9); ha.act(k ? 0 : .9); tr.act(k ? .9 : 0); qu.act(k ? .9 : 0); lab.textContent = k ? 'толкающие: разгибание' : 'тянущие: сгибание'; }, m('groups', 1), 6, lin);
+    NOTE(p, 230, 210, m('groups', 1));
+    txt(p, '8–10 групп мышц', 230, 860, m('groups', .5), { size: 21, fill: COL.dim, anchor: 'middle' });
+    // intensity band on a % 1-RM scale
+    const gx = 470, gy = 260, gw = 520;
+    const gauge = G(p, { o: 0 });
+    mk('rect', { x: gx, y: gy, width: gw, height: 30, rx: 10, fill: COL.board, stroke: EDGE, 'stroke-width': 2 }, gauge);
+    mk('rect', { x: gx + .6 * gw, y: gy, width: .2 * gw, height: 30, rx: 6, fill: MECH }, gauge);
+    [0, 50, 60, 80, 100].forEach(v => T(gauge, v + '%', { x: gx + v / 100 * gw, y: gy + 60, size: 19, fill: v === 60 || v === 80 ? MECH : COL.dim, anchor: 'middle', weight: 600 }));
+    T(gauge, 'интенсивность, % повторного максимума', { x: gx, y: gy - 16, size: 21, fill: COL.chalk, weight: 600 });
+    show(gauge, m('int'));
+    txt(p, '8–12 повторений · шаг ≈ 5%', gx + gw / 2, gy + 105, m('int', 1.5), { size: 23, fill: MECH, anchor: 'middle', weight: 700 });
+    // sets and rest
+    const sy = 450, blocks = [['подход', 110, MECH, 1], ['отдых 2–3 мин', 140, COL.dim, 1], ['подход', 110, MECH, 1], ['отдых', 70, COL.dim, .35], ['подход', 110, MECH, .35]];
+    let xx = gx;
+    blocks.forEach(([s, w, c, o], i) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x: xx, y: sy, width: w - 6, height: 46, rx: 10, fill: mix(c, COL.board, .55), stroke: c, 'stroke-width': 2 }, g);
+      T(g, s, { x: xx + (w - 6) / 2, y: sy + 30, size: 19, weight: 600, anchor: 'middle' });
+      tw(g, { o }, m('sets', i * .3), .4);
+      xx += w;
+    });
+    para(p, '2 подхода → до 4; пока одна группа отдыхает, работает другая', gx, sy + 80, m('sets', 1.5), { size: 20, fill: COL.dim, maxW: 540 });
+    // a week
+    ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].forEach((d, i) => {
+      const on = i === 0 || i === 2 || i === 4, g = G(p, { o: 0 });
+      mk('rect', { x: gx + i * 74, y: 600, width: 64, height: 56, rx: 10, fill: on ? mix(MECH, COL.board, .4) : PANEL, stroke: on ? MECH : EDGE, 'stroke-width': 2 }, g);
+      T(g, d, { x: gx + i * 74 + 32, y: 636, size: 20, weight: 700, anchor: 'middle', fill: on ? COL.chalk : COL.dim });
+      show(g, m('sets', 2 + i * .12));
+    });
+    txt(p, '2–3 раза в неделю', gx + 260, 700, m('sets', 3), { size: 23, fill: MECH, anchor: 'middle', weight: 700 });
+    infoCard(p, 1040, 180, 510, 200, 'объём движений', 'весь безболезненный объём; тянущие уравновешивают толкающими; и подъём, и опускание', COL.good, m('groups'), { size: 21 });
+    infoCard(p, 1040, 400, 510, 200, 'как двигаться', 'медленно или средне, ритмично, без рывков; дыхание не задерживать; лучше с партнёром', ADULT, m('style'), { size: 21 });
+    infoCard(p, 1040, 620, 510, 170, 'перерыв больше 1–2 недель', 'нагрузку и объём снизить', COL.bad, m('style', 4), { size: 21 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-adultdose', prompt: ['Рекомендации для здоровых взрослых. Заполните пропуски.'],
+    build: blanks([
+      { parts: ['Интенсивность — от ', { box: '60' }, ' до ', { box: '80' }, ' % повторного максимума'], why: 'Умеренная интенсивность.' },
+      { parts: [{ box: '8' }, '–', { box: '12' }, ' повторений в подходе'], why: 'Столько позволяет груз 60–80 %.' },
+      { parts: ['Отдых между подходами — ', { box: '2' }, '–', { box: '3' }, ' минуты'], why: 'Пока отдыхает одна группа, работает другая.' },
+      { parts: ['Нагрузку повышают примерно на ', { box: '5' }, ' %'], why: 'Постепенно, по мере роста силы и выносливости.' },
+    ]),
+  }], done) }],
+
+  ['kids', 'Дети и подростки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'дети и подростки', 800, 62, m('kids'), { size: 30, weight: 700, fill: KID, anchor: 'middle' });
+    // body-weight squats by a child
+    const GY = 480, kf = fig(p, { x: 0, y: 0, s: .62, o: 0, pose: STAND });
+    const kq = muscleOn(kf, ...MUSCLE.rectus, { after: 'ftN', w: 9 });
+    plant(kf, 'AN', 230, GY); show(kf.g, m('eq')); ground(p, 120, 340, GY, m('eq'));
+    prog(q => { kf.set(blendPose(STAND, { ...SQUAT, t: 26, aN: 90, eN: 0, aF: 90, eF: 0 }, cyc(q, Math.max(2, Math.round((D - m('eq')) / 3))))); plant(kf, 'AN', 230, GY); kq.act(.8); }, m('eq', .3), D - m('eq', .5), lin);
+    txt(p, 'вес собственного тела', 230, 530, m('eq', .3), { size: 22, fill: KID, anchor: 'middle', weight: 700 });
+    // a child-sized dumbbell next to an adult one
+    const dA = G(p, { x: 470, y: 420, o: 0 }), dK = G(p, { x: 470, y: 480, o: 0 });
+    dumbbell(dA, 1.6); dumbbell(dK, .8);
+    show(dA, m('eq', 1)); show(dK, m('eq', 1.3));
+    txt(p, 'по размеру ребёнка', 470, 530, m('eq', 1.3), { size: 22, fill: KID, anchor: 'middle', weight: 700 });
+    // growth plates
+    const bone = childBone(p, 230, 720, m('risk'));
+    bone.plates.forEach(pl => tw(pl, { c_stroke: COL.bad }, m('risk', 1.5), .5));
+    txt(p, 'зоны роста', 330, 720, m('risk', 1), { size: 22, fill: COL.task, weight: 700 });
+    // heat: a thermometer
+    const th = G(p, { o: 0 }), tx = 520, ty = 820;
+    mk('rect', { x: tx - 14, y: ty - 210, width: 28, height: 200, rx: 14, fill: COL.board, stroke: COL.chalk, 'stroke-width': 2.5 }, th);
+    mk('circle', { cx: tx, cy: ty, r: 26, fill: COL.bad, stroke: COL.chalk, 'stroke-width': 2.5 }, th);
+    const lvl = mk('rect', { x: tx - 8, y: ty - 60, width: 16, height: 60, rx: 8, fill: COL.bad }, th);
+    show(th, m('heat'));
+    prog(q => { const h = lerp(60, 190, io(q)); lvl.setAttribute('y', (ty - h).toFixed(1)); lvl.setAttribute('height', h.toFixed(1)); }, m('heat', .4), 2.5);
+    txt(p, 'тепло отдаётся хуже', 560, 640, m('heat', .8), { size: 21, fill: COL.bad, weight: 700 });
+    txt(p, '→ быстрее устаёт', 560, 675, m('heat', 2), { size: 21, fill: COL.chalk });
+    txt(p, '→ отдых дольше', 560, 710, m('heat', 3), { size: 21, fill: COL.chalk });
+    infoCard(p, 820, 110, 730, 175, 'можно и полезно', 'при правильной программе и тщательном контроле силовые тренировки детям полезны и безопасны', KID, m('kids'), { size: 22 });
+    infoCard(p, 820, 300, 730, 175, 'что показано', 'рост силы, мощности, результатов; профилактика спортивных травм — под вопросом; о навыках — мало данных', ADULT, m('gain'), { size: 22 });
+    infoCard(p, 820, 490, 730, 175, 'риск низкий — если по правилам', 'нарушения правил: травмы мягких тканей и зон роста', COL.bad, m('risk'), { size: 22 });
+    infoCard(p, 820, 680, 730, 175, 'незрелая терморегуляция', 'дети хуже отдают тепло, быстрее устают и дольше восстанавливаются', COL.task, m('heat'), { size: 22 });
+  }],
+
+  ['box', 'Рекомендации для детей', (m) => {
+    const p = panel(0);
+    txt(p, 'рекомендации для детей (главное)', 800, 62, m('box'), { size: 28, weight: 700, anchor: 'middle' });
+    // an age line with the child growing
+    const ax = 100, aw = 1400, ay = 340;
+    const seg = [['до 6–7 лет', 'только подвижная игра', .22, COL.dim, 'b1'], ['6–7 лет и старше', '≥ 60 мин в день, аэробно; кости 3 дня/нед', .3, KID, 'b1'], ['сила', 'вес собственного тела', .22, ADULT, 'b2'], ['позже', 'лёгкие веса, под контролем', .26, MECH, 'b3']];
+    let xx = ax;
+    seg.forEach(([a, b, w, c, k], i) => {
+      const g = G(p, { o: 0 }), W = w * aw;
+      mk('rect', { x: xx, y: ay, width: W - 8, height: 54, rx: 12, fill: mix(c, COL.board, .55), stroke: c, 'stroke-width': 2 }, g);
+      T(g, a, { x: xx + (W - 8) / 2, y: ay + 35, size: 22, weight: 700, anchor: 'middle' });
+      put(para(g, b, xx + (W - 8) / 2, ay + 92, null, { size: 20, maxW: W - 30, fill: COL.chalk, anchor: 'middle' }), { o: 1 });
+      show(g, m(k, i === 1 ? 2.5 : 0));
+      const kf = fig(p, { x: 0, y: 0, s: .32 + i * .1, o: 0, pose: i === 0 ? { ...STAND, aN: 60, eN: 40, aF: -30, hN: 30, kN: 40 } : STAND });
+      plant(kf, 'AN', xx + (W - 8) / 2, ay - 14);
+      show(kf.g, m(k, i === 1 ? 2.5 : .3));
+      xx += W;
+    });
+    path(p, `M${ax} ${ay - 14}H${ax + aw - 8}`, { stroke: COL.faint, 'stroke-width': 3 });
+    txt(p, 'до зрелости скелета — никаких околомаксимальных весов, пауэрлифтинга и бодибилдинга', 800, 500, m('b4', 4), { size: 23, fill: COL.bad, anchor: 'middle', weight: 700 });
+    infoCard(p, 60, 540, 470, 320, 'контроль и техника', 'обученный взрослый рядом; разминка 5–10 мин; правильная техника без рывков; малая интенсивность; питьё', KID, m('b3'), { size: 22 });
+    infoCard(p, 565, 540, 470, 320, 'нагрузка', 'на 8–15 повторений → постепенно 60–80 % расчётного максимума; прогрессия: сначала повторения или число упражнений, потом вес ≤ 5 %', MECH, m('b4'), { size: 22 });
+    infoCard(p, 1070, 540, 470, 320, 'объём и частота', '1 подход → 2–3; отдых ≥ 3 мин; не чаще 2 раз в неделю; многосуставные движения; эксцентрику ограничить; снаряды по размеру', ADULT, m('b5'), { size: 22 });
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Механическое сопротивление измеримо и может быть большим; не для очень слабых мышц и самой ранней стадии заживления.', 'w1'],
+     ['Здоровым взрослым: 60–80 % повторного максимума, 8–12 повторений, 2–4 подхода, 2–3 раза в неделю.', 'w2'],
+     ['Детям можно — под контролем, с малой интенсивностью, весом тела и снарядами по размеру.', 'w3'],
+     ['У детей — дольше отдых, не чаще 2 раз в неделю, без максимальных весов до зрелости скелета.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 150, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-kidadult', prompt: ['Это правило для ребёнка или для взрослого?'],
+    build: grid([
+      { parts: ['Отдых между подходами — не меньше 3 минут'], ans: ['kid'], why: 'Дети дольше восстанавливаются.' },
+      { parts: ['60–80 % максимума, 2–4 подхода, отдых 2–3 минуты'], ans: ['adult'], why: 'Рекомендации для здоровых взрослых.' },
+      { parts: ['Сначала прибавлять повторения, вес — не больше чем на 5 %'], ans: ['kid'], why: 'Осторожная прогрессия у детей.' },
+      { parts: ['Не чаще двух раз в неделю, эксцентрику ограничить'], ans: ['kid'], why: 'Особые правила для детей.' },
+      { parts: ['После перерыва больше 1–2 недель снизить нагрузку и объём'], ans: ['adult'], why: 'Из рекомендаций для взрослых.' },
+    ], [['kid', 'Ребёнку', KID], ['adult', 'Взрослому', ADULT]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-kidbench', prompt: ['Мальчик 10 лет хочет, как старший брат, жать лёжа максимальный вес. Что ответить?'],
+    build: choice([
+      ['Силовые можно — под контролем, весом тела или лёгкими весами на 8–15 повторений, без максимальных весов'],
+      ['Силовые детям запрещены до 18 лет'],
+      ['Можно, если будет страховать брат'],
+      ['Можно, но только эксцентрические упражнения'],
+    ], 0, 'При правильной программе и контроле силовые детям полезны и безопасны; максимальные веса — только после созревания скелета.',
+    [null, 'Нет: при правильной программе и контроле силовые детям можно.', 'Нужен обученный взрослый, а максимальные веса до зрелости скелета нельзя.', 'Эксцентрику детям, наоборот, ограничивают.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

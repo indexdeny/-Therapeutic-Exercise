@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Растяжка и функция — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 36, title: 'Растяжка и функция; порядок процедуры', minutes: 8, language: 'ru', next: '../ch037/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch036/cards.ru.json
+const CARDS_SHORT = {
+  "слабость после иммобилизации\nи у мышцы, долго бывшей в удлинённом положении": "и после удлинённого положения",
+  "сначала — противоположная мышца\nукорочены сгибатели локтя → разгибатели в новом объёме": "разгибатели в новом объёме",
+  "потом — и растянутая\nдля баланса силы во всём объёме": "для баланса силы во всём объёме",
+  "отпустить, отдых\nв удлинённом положении — и повтор": "повтор в удлинённом",
+  "не переносит?\nнесколько очень медленных мягких коротких растяжений": "медленно и мягко",
+  "меньше боли после\nи стойче прирост объёма": "и стойче прирост объёма",
+  "активные движения\nукрепление в новом объёме, имитация повседневных задач": "укрепление в новом объёме",
+  "укрепить антагонисты\nдля контроля и стабильности": "для контроля и стабильности",
+};
+// cards-short end
+
+const HAND = '#b9cfe0', COLD = '#7fc4ec';
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A checklist row: a box that gets a tick at t0, then the text.
+function checkRow(p, x, y, str, t0, { size = 25, maxW = 1200, col = COL.good } = {}) {
+  const g = G(p, { o: 0, x: -16 });
+  mk('rect', { x, y: y - 26, width: 34, height: 34, rx: 6, fill: 'none', stroke: col, 'stroke-width': 3 }, g);
+  put(para(g, str, x + 54, y, null, { size, weight: 600, maxW }), { o: 1 });
+  tw(g, { o: 1, x: 0 }, t0, .5);
+  checkMark(p, x + 17, y - 9, t0 + .4, col, .9);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Растяжка и функция', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 4 · Урок 36', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Растяжка и функция,', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'порядок процедуры', { x: 800, y: 380, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'что делать до, во время и после растяжки', 800, 460, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const sc = tableScene(art, { hx: 820, top: 680, s: .55, t0: 0 });
+    muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 13 });
+    show(art, m('sub', .2));
+    prog(q => sc.pt.set({ hN: 75 * wave(q, 1) }), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['str', 'Сила', (m) => {
+    const p = panel(0);
+    // the elbow after stretching the flexors: first the extensors work in the new range, later the flexors too
+    const el = elbowModel(p, { x: 140, y: 500, s: 2 });
+    put(el.g, { o: 0 }); show(el.g, .2);
+    el.set(120);
+    prog(q => { el.set(lerp(120, 172, wave(q, 1.5))); el.act('triceps', .85 * Math.sin(Math.PI * Math.min(1, q * 1.5))); }, m('ag', .3), 5, lin);
+    prog(q => { el.act('triceps', 0); el.set(lerp(172, 90, wave(q, 1))); el.act('biceps', .85 * Math.sin(Math.PI * q)); }, m('later', .3), 4, lin);
+    infoCard(p, 900, 110, 620, 170, 'слабость после иммобилизации', 'и у мышцы, долго бывшей в удлинённом положении', COL.bad, m('weak'), { size: 23 });
+    infoCard(p, 900, 300, 620, 130, 'как можно раньше — малое сопротивление', null, COL.task, m('early'), { size: 23 });
+    infoCard(p, 900, 450, 620, 160, 'сначала — противоположная мышца', 'укорочены сгибатели локтя → разгибатели в новом объёме', COL.bad, m('ag'), { size: 22 });
+    infoCard(p, 900, 630, 620, 150, 'потом — и растянутая', 'для баланса силы во всём объёме', COL.good, m('later'), { size: 22 });
+  }],
+
+  ['func', 'Новый объём — в жизнь', (m) => {
+    const p = panel(0), X0 = 120, Y0 = 330, W = 560, H = 190;
+    chartAxes(p, X0, Y0, W + 20, H + 20, 'прирост', 'недели после окончания', m('tr'));
+    const cv = path(p, `M${X0} ${Y0 - 170}C${X0 + 200} ${Y0 - 160} ${X0 + 300} ${Y0 - 34} ${X0 + 560} ${Y0 - 16}`, { stroke: COL.bad, 'stroke-width': 6 }, { d: 0 });
+    draw(cv, m('tr', .5), 2);
+    txt(p, '≈ 4 недели', X0 + 300, Y0 - 100, m('tr', 2), { size: 23, weight: 700, fill: COL.bad });
+    labelBox(p, 1100, 170, 760, ['регулярно использовать новый объём в повседневных делах'], COL.good, m('use'), { size: 24 });
+    // shoulder: reaching a high shelf; knee: standing up from a chair with both knees bending
+    const s = .9, GY = 820;
+    ground(p, 220, 720, GY, m('sh'));
+    mk('rect', { x: 540, y: 470, width: 150, height: 12, rx: 4, fill: COL.dim }, p);
+    const f1 = fig(p, { x: 430, y: GY - 182 * s, s, o: 0, pose: { aN: 15, eN: 15 } });
+    show(f1.g, m('sh'));
+    prog(q => f1.set({ aN: lerp(15, 160, wave(q, 1.5)), eN: 10 }), m('sh', .5), 4, lin);
+    txt(p, 'плечо: тянуться вверх и за спину, полка', 470, 880, m('sh'), { size: 22, weight: 700, fill: COL.whole, anchor: 'middle' });
+    const f2 = fig(p, { x: 0, y: 0, s, o: 0, pose: SIT }), ax = 1130;
+    plant(f2, 'AN', ax, GY);
+    const [hx, hy] = onStage(f2, 'H');
+    const chairE = path(p, `M${hx - 50} ${hy + 26}H${hx + 30}M${hx - 44} ${hy + 26}V${GY}M${hx + 24} ${hy + 26}V${GY}M${hx - 50} ${hy + 26}V${hy - 70}`, { stroke: COL.dim, 'stroke-width': 5 }, { o: 0 });
+    show(chairE, m('kn'));
+    ground(p, 960, 1300, GY, m('kn'));
+    show(f2.g, m('kn'));
+    const keys = Object.keys(SIT);
+    prog(q => { const v = wave(q, 1.5), pose = {}; keys.forEach(k => { pose[k] = lerp(SIT[k], STAND[k], v); }); f2.set(pose); plant(f2, 'AN', ax, GY); }, m('kn', .5), 5, lin);
+    txt(p, 'колено: вставать со стула, сгибая оба колена', 1130, 880, m('kn'), { size: 22, weight: 700, fill: COL.whole, anchor: 'middle' });
+  }],
+
+  ['exam', 'Обследование', (m) => {
+    const p = panel(0);
+    txt(p, 'обследование', 800, 100, .2, { size: 30, weight: 700, fill: COL.whole, anchor: 'middle' });
+    ['анамнез и обзор систем', 'объём в поражённом и соседних суставах — активный и пассивный', 'связь с другими нарушениями и ограничением деятельности',
+     'что ограничивает: капсула, ткани вокруг сустава, мышца; игра сустава, подвижность фасции', 'раздражимость тканей и стадия заживления',
+     'сила: сможет ли пациент управлять новым объёмом', 'реалистичны ли цели'].forEach((str, i) => checkRow(p, 140, 180 + i * 95, str, m('e' + (i + 1)), { size: 25, col: COL.whole }));
+  }],
+
+  ['prep', 'Подготовка', (m) => {
+    const p = panel(0);
+    txt(p, 'подготовка', 800, 100, .2, { size: 30, weight: 700, fill: COL.task, anchor: 'middle' });
+    ['обсудить цели, получить согласие', 'выбрать приёмы', 'разогреть ткани: тепло или лёгкие активные упражнения',
+     'удобное устойчивое положение; растягивать точно против ограничения', 'объяснить, освободить от тесной одежды и повязок, попросить расслабиться'].forEach((str, i) => checkRow(p, 140, 200 + i * 120, str, m('p' + (i + 1)), { size: 26, col: COL.task }));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-order', prompt: ['Расставьте шаги по порядку.'],
+    build: grid([
+      { parts: ['Держать растяжение 30 с и дольше, продвигаясь дальше'], ans: ['4'], why: 'Четвёртый.' },
+      { parts: ['Обследование и цели'], ans: ['1'], why: 'Первый.' },
+      { parts: ['Холод в удлинённом положении и активные движения'], ans: ['5'], why: 'Последний.' },
+      { parts: ['Разогреть ткани'], ans: ['2'], why: 'Второй.' },
+      { parts: ['Довести до ограничения, стабилизировать проксимальный сегмент'], ans: ['3'], why: 'Третий.' },
+    ], [['1', '1', COL.whole], ['2', '2', COL.task], ['3', '3', COL.int], ['4', '4', COL.nat], ['5', '5', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['app', 'Ручная растяжка', (m) => {
+    const p = panel(0);
+    const sc = tableScene(p, { hx: 560, top: 580, s: 1.15, t0: .2 });
+    const ham = muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 13 });
+    // a strap holds the other thigh down: the proximal segment (pelvis) stays put
+    const [kfx, kfy] = onStage(sc.pt, 'KF');
+    const strap = mk('rect', { x: kfx - 40, y: kfy - 34, width: 26, height: 56, rx: 6, fill: COL.int, 'fill-opacity': .85 }, p);
+    put(strap, { o: 0 }); show(strap, m('a3'));
+    prog(q => sc.pt.set({ hN: 62 * io(q) }), m('a1', .3), 2.4, lin);
+    const steps = [['медленно до ограничения', COL.whole, 'a1'], ['захват выше и ниже сустава — широко', HAND, 'a2'], ['проксимальный стабилизирован', COL.int, 'a3'],
+      ['двусуставная: сначала один сустав, потом оба; мелкие суставы — от дистального', COL.real, 'a4'], ['можно: изометрия перед растяжкой, лёгкая тракция', COL.task, 'a5']];
+    steps.forEach(([str, col, mark], i) => put(para(p, str, 1040, 150 + i * 120, null, { size: 23, weight: 700, fill: col, maxW: 480 }), { o: 0 }) && show(p.lastChild, m(mark)));
+  }],
+
+  ['app2', 'Удержание', (m) => {
+    const p = panel(0);
+    const sc = tableScene(p, { hx: 560, top: 580, s: 1.15, t0: .2, pose: { hN: 62 } });
+    const ham = muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 13, slack: 1.04 });
+    // just past firm resistance, hold ≥30 s, go a little further as the tension drops, release, rest, repeat
+    prog(q => sc.pt.set({ hN: lerp(62, 70, io(q)) }), m('b1', .5), 1.5, lin);
+    const ring = G(p, { x: 1060, y: 220, o: 0 });
+    mk('circle', { r: 70, fill: 'none', stroke: EDGE, 'stroke-width': 12 }, ring);
+    const arc = path(ring, 'M0 -70A70 70 0 1 1 -0.1 -70', { stroke: COL.task, 'stroke-width': 12 }, { d: 0 });
+    T(ring, '≥ 30 с', { x: 0, y: 10, size: 28, weight: 700, fill: COL.task, anchor: 'middle' });
+    show(ring, m('b2'));
+    prog(q => put(arc, { d: q }), m('b2'), 5, lin);
+    prog(q => sc.pt.set({ hN: lerp(70, 76, io(q)) }), m('b2', 3), 1.2, lin);
+    prog(q => sc.pt.set({ hN: lerp(76, 55, io(q)) }), m('b3', .3), 1.4, lin);
+    prog(q => sc.pt.set({ hN: lerp(55, 76, io(q)) }), m('b3', 2.5), 1.4, lin);
+    txt(p, 'тянет — но не больно', 560, 140, m('b1', 1), { size: 25, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    infoCard(p, 1180, 120, 340, 200, 'отпустить, отдых', 'в удлинённом положении — и повтор', COL.whole, m('b3'), { size: 22 });
+    infoCard(p, 1180, 340, 340, 220, 'не переносит?', 'несколько очень медленных мягких коротких растяжений', COL.int, m('b4'), { size: 22 });
+    labelBox(p, 800, 840, 1000, ['весь объём за один-два сеанса не вернуть — это недели'], COL.bad, m('tip'), { size: 24 });
+  }],
+
+  ['after', 'После растяжки', (m) => {
+    const p = panel(0);
+    const sc = tableScene(p, { hx: 560, top: 580, s: 1.15, t0: .2, hands: null, pose: { hN: 0 } });
+    const ham = muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 13 });
+    // a cold pack on the back of the thigh, the leg kept long
+    const [kx, ky] = onStage(sc.pt, 'KN'), [hx, hy] = onStage(sc.pt, 'H');
+    const pack = mk('rect', { x: (hx + kx) / 2 - 60, y: hy + 6, width: 120, height: 26, rx: 8, fill: COLD, 'fill-opacity': .9 }, p);
+    put(pack, { o: 0 }); show(pack, m('c1'));
+    txt(p, 'холод в удлинённом положении', 560, 140, m('c1'), { size: 25, weight: 700, fill: COLD, anchor: 'middle' });
+    infoCard(p, 1060, 130, 460, 200, 'меньше боли после', 'и стойче прирост объёма', COLD, m('c1', 1), { size: 23 });
+    infoCard(p, 1060, 360, 460, 200, 'активные движения', 'укрепление в новом объёме, имитация повседневных задач', COL.good, m('c2'), { size: 23 });
+    infoCard(p, 1060, 590, 460, 170, 'укрепить антагонисты', 'для контроля и стабильности', COL.nat, m('c3'), { size: 23 });
+    prog(q => sc.pt.set({ hN: 60 * wave(q, 2), kN: 0 }), m('c2', .5), 4, lin);
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-when', prompt: ['До, во время или после растяжки?'],
+    build: grid([
+      { parts: ['Тепло или лёгкая разминка'], ans: ['b'], why: 'До.' },
+      { parts: ['Лёгкая тракция первой степени'], ans: ['d'], why: 'Во время.' },
+      { parts: ['Холод в удлинённом положении'], ans: ['a'], why: 'После.' },
+      { parts: ['Укрепление мышц-антагонистов'], ans: ['a'], why: 'После.' },
+      { parts: ['Удержание 30 с и дольше'], ans: ['d'], why: 'Во время.' },
+    ], [['b', 'До', COL.task], ['d', 'Во время', COL.whole], ['a', 'После', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Силу и новый объём тренируют рано: сначала противоположные мышцы, потом и растянутые.', 'w1'],
+     ['Без использования прирост держится около месяца.', 'w2'],
+     ['Обследовать, разогреть, стабилизировать проксимальный сегмент, медленно, держать 30 с и дольше.', 'w3'],
+     ['После — холод в удлинённом положении и активные движения.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-end', prompt: ['После растяжки сгибателей локтя пациент уходит домой. Чем закончить сеанс?'],
+    build: choice([
+      ['Холод в удлинённом положении и активные движения в новом объёме'],
+      ['Тепло и полный покой руки'],
+      ['Ещё одна интенсивная растяжка до боли'],
+      ['Повязка, фиксирующая локоть согнутым'],
+    ], 0, 'Холод в удлинённом положении и активное использование нового объёма.',
+    [null, 'Тепло — до растяжки; после — холод и движение.', 'Боль — признак перегрузки.', 'Согнутый локоть снова укоротит сгибатели.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Прирост гибкости после прекращения растяжки держится годами.'], ans: ['f'], why: 'Неверно: около четырёх недель.' },
+      { parts: ['Ткани разогревают перед растяжкой.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Пациент должен чувствовать боль, иначе растяжка не работает.'], ans: ['f'], why: 'Неверно: тянущее ощущение, без боли.' },
+      { parts: ['В мелких суставах растягивают от дистального к проксимальному.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Весь объём стоит вернуть за один сеанс.'], ans: ['f'], why: 'Неверно: это недели.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

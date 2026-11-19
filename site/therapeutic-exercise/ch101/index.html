@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Повреждения мягких тканей — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 101, title: 'Повреждения мягких тканей и их тяжесть', minutes: 10, language: 'ru', next: '../ch102/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch101/cards.ru.json
+const CARDS_SHORT = {
+  "растяжение мышцы\nперерастяжение, перенапряжение или перегрузка мягкой ткани": "перерастяжение мягкой ткани",
+  "обычно легче, чем растяжение связки\nнебольшая травма или непривычные повторяющиеся мелкие нагрузки; чаще — частичное нарушение мышечно-сухожильной единицы": "частичное нарушение единицы",
+  "растяжение связки\nсильная нагрузка, растяжение или разрыв: капсула, связка, сухожилие или мышца; чаще — травма связки": "капсула, связка, сухожилие",
+  "подвывих\nнеполный, частичный вывих; часто тоже со вторичной травмой окружающих мягких тканей": "неполный вывих",
+  "частичный разрыв\nболь в месте разрыва — при растяжении мышцы и при сокращении против сопротивления": "боль при растяжении и сокращении",
+  "полный разрыв\nмышца не тянет за место повреждения: ни растяжение, ни сокращение не болят": "ни растяжение, ни сокращение не болят",
+  "теносиновит\nвоспаление синовиальной оболочки, покрывающей сухожилие": "синовиальная оболочка сухожилия",
+  "тендинит\nвоспаление самого сухожилия; могут остаться рубцы или отложения кальция": "воспаление сухожилия",
+  "тендовагинит\nвоспаление с утолщением влагалища сухожилия": "воспаление с утолщением влагалища сухожилия",
+  "тендиноз\nдегенерация сухожилия из-за повторяющейся микротравмы": "дегенерация от микротравмы",
+  "синовит (synovitis)\nвоспаление синовиальной оболочки: лишняя синовиальная жидкость в суставе или во влагалище сухожилия — травма или болезнь": "лишняя синовиальная жидкость",
+  "гемартроз (hemarthrosis)\nкровоизлияние в сустав, обычно после тяжёлой травмы": "кровоизлияние в сустав",
+  "ганглий (ganglion)\nвыпячивание стенки суставной капсулы или влагалища сухожилия — как воздушный шарик": "выпячивание капсулы — как шарик",
+  "бурсит (bursitis)\nвоспаление синовиальной сумки": "воспаление синовиальной сумки",
+  "ушиб (contusion)\nпрямой удар: рвутся капилляры → кровоизлияние, отёк, воспалительный ответ": "прямой удар → кровоизлияние, отёк",
+  "синдромы перегрузки\nперегрузка, кумулятивная травма, повторяющееся напряжение: повторяющаяся субмаксимальная перегрузка или трение мышцы или сухожилия → воспаление и боль": "повторяющаяся перегрузка → воспаление",
+  "собственный мышечный спазм\nдлительное сокращение в ответ на местные изменения кровообращения и обмена в долго сокращённой мышце": "местные изменения кровообращения",
+  "миофасциальный компартмент-синдром\nдавление растёт в замкнутом нерастяжимом футляре → сосуды, мышцы, нервы страдают → ишемия и необратимая гибель мышцы": "давление в футляре → ишемия",
+  "I степень\nлёгкая боль в момент травмы или в первые 24 часа; небольшой отёк, местная болезненность; боль при нагрузке на ткань": "лёгкая боль, небольшой отёк",
+  "II степень\nсредняя боль — занятие приходится прекратить; нагрузка и пальпация резко усиливают боль. Связка: часть волокон порвана → подвижность сустава немного больше": "средняя боль, занятие прекратить",
+  "III степень\nпочти полный или полный разрыв или отрыв (сухожилие, связка), сильная боль. Нагрузка на порванную ткань обычно безболезненна, пальпация может найти дефект; разрыв связки → нестабильность": "полный разрыв → нестабильность",
+};
+// cards-short end
+
+const HEAD = COL.nat, PAIN = '#ff5a3c', LIGC = ANAT.tendon;
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A red star of pain at (x, y); set(k): 0 hidden … 1 full size.
+function painMark(p, x, y, r = 22) {
+  const g = G(p, { x, y, o: 0 });
+  mk('circle', { r: r * 1.6, fill: PAIN, 'fill-opacity': .2 }, g);
+  let d = '';
+  for (let i = 0; i < 16; i++) { const a = i / 16 * 2 * Math.PI, rr = i % 2 ? r * .45 : r; d += `${i ? 'L' : 'M'}${(rr * Math.cos(a)).toFixed(1)} ${(rr * Math.sin(a)).toFixed(1)}`; }
+  mk('path', { d: d + 'Z', fill: PAIN, stroke: '#ffd2c4', 'stroke-width': 2 }, g);
+  const pm = { g, x, y };
+  pm.at = (X, Y) => { pm.x = X; pm.y = Y; return pm; };
+  pm.set = k => put(g, { x: pm.x, y: pm.y, o: clamp(k * 1.6, 0, 1), s: .35 + .65 * clamp(k, 0, 1) });
+  return pm;
+}
+
+// A joint from the side with a ligament of eight fibres on its right: the upper bone is fixed, the lower one turns about
+// the far (left) edge of its plateau, so the gap opens on the ligament side. set({ open, torn }): open in degrees;
+// torn 0..1 — share of fibres torn (two frayed stubs each). lm.lowAt(P): a point of the lower bone (pivot frame) in the
+// model frame; lm.stage(P): model frame → parent.
+function ligModel(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), B = ANAT.bone, line = mix(B, '#000000', .5), f = v => v.toFixed(1);
+  const PV = [-74, 10], low = G(g, { x: PV[0], y: PV[1] });
+  limbEl(low, defs, B, 62, 34, line).set([74, 36], [74, 250]);
+  mk('rect', { x: 0, y: -4, width: 148, height: 36, rx: 12, fill: B, stroke: line, 'stroke-width': 2 }, low);
+  path(low, 'M8 -4H140', { stroke: CART, 'stroke-width': 6 });
+  limbEl(g, defs, B, 44, 36, line).set([0, -60], [0, -270]);
+  const cg = mk('radialGradient', { id: 'lm' + (++SHADE_ID), cx: .38, cy: .3, r: .8 }, defs);
+  [[0, mix(B, '#ffffff', .5)], [.55, B], [1, mix(B, '#000000', .4)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, cg));
+  mk('ellipse', { cx: 0, cy: -36, rx: 80, ry: 40, fill: `url(#${cg.id})`, stroke: line, 'stroke-width': 2 }, g);
+  path(g, 'M-70 -16.6A80 40 0 0 0 70 -16.6', { stroke: CART, 'stroke-width': 6 });
+  const N = 8, ORDER = [3, 6, 1, 5, 0, 7, 2, 4];
+  const fibs = Array.from({ length: N }, (_, i) => {
+    const u = [62 + i * 4, -60 + i * 2.4], l = [124 + i * 4.2, 50 + i * 4.5];
+    const fg = G(g, {}), L0 = Math.hypot(PV[0] + l[0] - u[0], PV[1] + l[1] - u[1]);
+    const le = ligEl(fg, { rest: L0 * 1.03, w: 4.2 });
+    const sg = G(g, { o: 0 }), s1 = path(sg, '', { stroke: mix(LIGC, PAIN, .45), 'stroke-width': 4.5 }), s2 = path(sg, '', { stroke: mix(LIGC, PAIN, .45), 'stroke-width': 4.5 });
+    return { u, l, fg, le, sg, s1, s2, rank: ORDER.indexOf(i) };
+  });
+  const lm = { g, st: { open: 0, torn: 0 } };
+  lm.lowAt = P => { const [a, b] = rotPt(P[0], P[1], lm.st.open); return [PV[0] + a, PV[1] + b]; };
+  lm.stage = P => [x + P[0] * s, y + P[1] * s];
+  const stub = (e, A, Bp, k) => {
+    const dx = Bp[0] - A[0], dy = Bp[1] - A[1], E = [A[0] + dx * k, A[1] + dy * k], n = [-dy * .12, dx * .12];
+    e.setAttribute('d', `M${f(A[0])} ${f(A[1])}Q${f(A[0] + dx * k * .5 + n[0])} ${f(A[1] + dy * k * .5 + n[1])} ${f(E[0])} ${f(E[1])}l${f(n[0] * .5 - 4)} ${f(n[1] * .5 + 5)}M${f(E[0])} ${f(E[1])}l${f(-n[0] * .5 + 5)} ${f(-n[1] * .5 + 4)}`);
+  };
+  lm.set = o => {
+    const S = Object.assign(lm.st, o);
+    put(low, { x: PV[0], y: PV[1], r: S.open });
+    fibs.forEach(F => {
+      const L = lm.lowAt(F.l), torn = F.rank < Math.round(S.torn * N);
+      put(F.fg, { o: torn ? 0 : 1 }); put(F.sg, { o: torn ? 1 : 0 });
+      if (torn) { stub(F.s1, F.u, L, .38); stub(F.s2, L, F.u, .34); } else F.le.set(F.u, L);
+    });
+    return lm;
+  };
+  lm.set({});
+  if (t0 !== null) show(g, t0);
+  return lm;
+}
+
+// A muscle–tendon unit between two bones (side view). The left bone is fixed at x0; the right one sits at x1 + d.
+// set({ d, act, notch, full }): d — the right bone moves right (stretch); act 0..1 — contraction; notch 0..1 — a partial
+// tear; full 0..1 — a complete tear: the belly parts and both ends retract. u.tear — stage point of the tear site.
+function mtu(p, x0, x1, y, t0, { w = 30 } = {}) {
+  const g = G(p, { o: 0 }), defs = mk('defs', {}, g), B = ANAT.bone, line = mix(B, '#000000', .5), f = v => v.toFixed(1);
+  const bA = limbEl(g, defs, B, 22, 22, line), bB = limbEl(g, defs, B, 22, 22, line);
+  bA.set([x0, y - 90], [x0, y + 90]);
+  const O = [x0 + 22, y], rest = x1 - x0 - 44, TX = O[0] + rest * .66;
+  const m0 = muscleEl(g, { rest, w, tendon: .16 });
+  const mA = muscleEl(g, { rest: (TX - O[0]) * .98, w: w * .95, tendon: .22 }), mB = muscleEl(g, { rest: rest * .34, w: w * .8, tendon: .34 });
+  const notch = path(g, '', { stroke: PAIN, 'stroke-width': 4, 'stroke-linejoin': 'round' });
+  const rag = path(g, '', { stroke: PAIN, 'stroke-width': 3.5, 'stroke-linejoin': 'round' });
+  const u = { g, st: { d: 0, act: 0, notch: 0, full: 0 }, tear: [TX, y - w * .5], m0, mA };
+  u.set = o => {
+    const S = Object.assign(u.st, o), XB = x1 + S.d, I = [XB - 22, y];
+    bB.set([XB, y - 90], [XB, y + 90]);
+    const whole = S.full < .01;
+    put(m0.g, { o: whole ? 1 : 0 }); put(mA.g, { o: whole ? 0 : 1 }); put(mB.g, { o: whole ? 0 : 1 });
+    if (whole) {
+      m0.act(S.act); m0.set(O, I);
+      const tx = O[0] + (I[0] - O[0]) * .66, hh = w * .9;
+      notch.setAttribute('d', `M${f(tx - 6)} ${f(y - hh * 1.1)}L${f(tx + 5)} ${f(y - hh * .75)}L${f(tx - 5)} ${f(y - hh * .4)}L${f(tx + 6)} ${f(y - hh * .05)}`);
+      notch.setAttribute('opacity', S.notch.toFixed(2)); rag.setAttribute('d', '');
+      u.tear = [tx, y - hh * .6];
+    } else {
+      const EA = [TX - 8 - 46 * S.full - 34 * S.act, y], EB = [TX + 8 + 30 * S.full + S.d, y];
+      mA.act(S.act); mA.set(O, EA); mB.set(EB, I);
+      notch.setAttribute('opacity', 0);
+      rag.setAttribute('d', [EA, EB].map(([X, Y], k) => { const sg = k ? -1 : 1; return `M${f(X)} ${f(Y - 18)}l${8 * sg} 7l${-6 * sg} 6l${8 * sg} 6l${-6 * sg} 6l${8 * sg} 6`; }).join(''));
+      u.tear = [(EA[0] + EB[0]) / 2, y - 30];
+    }
+    return u;
+  };
+  u.set({});
+  if (t0 !== null) show(g, t0);
+  return u;
+}
+
+// A ball-and-socket joint from the front: the socket on the left, the head with its shaft on the right; the capsule has an
+// upper and a lower band. set({ k, torn }): k 0 — in place, ≈ .45 — subluxation, 1 — dislocation; torn breaks the lower band.
+function ballJoint(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), B = ANAT.bone, line = mix(B, '#000000', .5), f = v => v.toFixed(1);
+  const sg = mk('linearGradient', { id: 'bj' + (++SHADE_ID), x1: 0, y1: 0, x2: 1, y2: 0 }, defs);
+  [[0, mix(B, '#000000', .35)], [1, mix(B, '#ffffff', .25)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, sg));
+  mk('path', { d: 'M-230 -200L-40 -128L-40 -54A67 67 0 0 0 -40 54L-40 128L-230 200Z', fill: `url(#${sg.id})`, stroke: line, 'stroke-width': 2 }, g);
+  path(g, 'M-40 -54A67 67 0 0 0 -40 54', { stroke: CART, 'stroke-width': 7 });
+  const shaft = limbEl(g, defs, B, 34, 27, line);
+  const hg = mk('radialGradient', { id: 'bh' + (++SHADE_ID), cx: .38, cy: .32, r: .8 }, defs);
+  [[0, mix(B, '#ffffff', .5)], [.6, B], [1, mix(B, '#000000', .4)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, hg));
+  const head = mk('circle', { r: 58, fill: `url(#${hg.id})`, stroke: line, 'stroke-width': 2 }, g);
+  const hc = mk('path', { fill: 'none', stroke: CART, 'stroke-width': 6 }, g);
+  const HP = k => [-6 + 52 * k, 150 * k];
+  const UP0 = [-58, -134], LO0 = [-58, 134], up = k => { const H = HP(k); return [H[0] + 46, H[1] - 40]; }, lo = k => { const H = HP(k); return [H[0] + 14, H[1] + 56]; };
+  const bandU = ligEl(g, { rest: Math.hypot(up(0)[0] - UP0[0], up(0)[1] - UP0[1]) * 1.05, w: 6 });
+  const loG = G(g, {}), bandL = ligEl(loG, { rest: Math.hypot(lo(0)[0] - LO0[0], lo(0)[1] - LO0[1]) * 1.05, w: 6 });
+  const tornG = G(g, { o: 0 }), t1 = path(tornG, '', { stroke: mix(LIGC, PAIN, .45), 'stroke-width': 5 }), t2 = path(tornG, '', { stroke: mix(LIGC, PAIN, .45), 'stroke-width': 5 });
+  const bj = { g, st: { k: 0, torn: 0 }, headAt: () => HP(bj.st.k), stage: P => [x + P[0] * s, y + P[1] * s] };
+  bj.set = o => {
+    const S = Object.assign(bj.st, o), H = HP(S.k);
+    shaft.set([H[0] + 28, H[1] + 36], [H[0] + 120, H[1] + 300]);
+    head.setAttribute('cx', f(H[0])); head.setAttribute('cy', f(H[1]));
+    hc.setAttribute('d', `M${f(H[0] - 30)} ${f(H[1] - 50)}A58 58 0 0 0 ${f(H[0] - 30)} ${f(H[1] + 50)}`);
+    bandU.set(UP0, up(S.k));
+    const L = lo(S.k);
+    put(loG, { o: S.torn > .5 ? 0 : 1 }); put(tornG, { o: S.torn > .5 ? 1 : 0 });
+    if (S.torn > .5) {
+      t1.setAttribute('d', `M${LO0[0]} ${LO0[1]}q14 22 30 16l6 9`);
+      t2.setAttribute('d', `M${f(L[0])} ${f(L[1])}q-20 -4 -26 12l-8 4`);
+    } else bandL.set(LO0, L);
+    return bj;
+  };
+  bj.set({});
+  if (t0 !== null) show(g, t0);
+  return bj;
+}
+
+// A synovial joint in section (schematic): two bone ends with cartilage, the capsule with its synovial lining and the joint
+// fluid; a tendon runs down the right side over a bursa; skin on both sides. set({ … }) 0..1: syn — synovitis (more fluid,
+// thick red lining); blood — the fluid turns to blood; gang — a ganglion balloons out of the capsule on the left; burs — the
+// bursa swells and reddens; bruise — bleeding and swelling under the skin on the left; glide — the tendon slides (px).
+function synJoint(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), B = ANAT.bone, line = mix(B, '#000000', .5), f = v => v.toFixed(1);
+  const skinF = mk('path', { fill: '#2c3c37' }, g), skin = mk('path', { fill: 'none', stroke: '#c9b9a6', 'stroke-width': 4 }, g);
+  const bruise = G(g, { o: 0 }), spots = [];
+  for (let i = 0; i < 16; i++) spots.push({ e: mk('circle', { r: 4 + (i % 4) * 2.2, fill: i % 3 ? '#8f2c3a' : '#5a2a5e', 'fill-opacity': .75 }, bruise), a: i * 2.4, k: (i % 5) / 5 });
+  const fluid = mk('path', {}, g), lining = mk('path', { fill: 'none', 'stroke-linejoin': 'round' }, g), caps = mk('path', { fill: 'none', stroke: LIGC, 'stroke-width': 5, 'stroke-linejoin': 'round' }, g);
+  const gang = G(g, {}), gStalk = path(gang, '', { stroke: LIGC, 'stroke-width': 5 }), gBall = mk('circle', { fill: FLUID, 'fill-opacity': .45, stroke: LIGC, 'stroke-width': 4 }, gang);
+  limbEl(g, defs, B, 50, 42, line).set([0, -80], [0, -262]);
+  limbEl(g, defs, B, 48, 42, line).set([0, 70], [0, 262]);
+  const eg = mk('radialGradient', { id: 'sj' + (++SHADE_ID), cx: .38, cy: .3, r: .8 }, defs);
+  [[0, mix(B, '#ffffff', .5)], [.55, B], [1, mix(B, '#000000', .4)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, eg));
+  mk('ellipse', { cx: 0, cy: -44, rx: 74, ry: 40, fill: `url(#${eg.id})`, stroke: line, 'stroke-width': 2 }, g);
+  mk('ellipse', { cx: 0, cy: 46, rx: 74, ry: 32, fill: `url(#${eg.id})`, stroke: line, 'stroke-width': 2 }, g);
+  path(g, 'M-64 -24A74 40 0 0 0 64 -24', { stroke: CART, 'stroke-width': 6 });
+  path(g, 'M-64 30A74 32 0 0 1 64 30', { stroke: CART, 'stroke-width': 6 });
+  const burs = mk('ellipse', { cx: 84, cy: 170 }, g);
+  const tend = mk('path', { d: 'M150 -300C152 -100 146 60 116 300', fill: 'none', stroke: LIGC, 'stroke-width': 30, 'stroke-linecap': 'butt' }, g);
+  const tfib = mk('path', { d: 'M150 -300C152 -100 146 60 116 300', fill: 'none', stroke: mix(LIGC, '#000000', .35), 'stroke-width': 2.5, 'stroke-dasharray': '22 10' }, g);
+  const sj = { g, st: { syn: 0, blood: 0, gang: 0, burs: 0, bruise: 0, glide: 0 }, stage: P => [x + P[0] * s, y + P[1] * s] };
+  const side = (k, b) => `${f(54 * k)} -100C${f((100 + b) * k)} -96 ${f((106 + b) * k)} -40 ${f((104 + b) * k)} 0S${f((100 + b) * k)} 96 ${f(52 * k)} 100`;
+  sj.set = o => {
+    const S = Object.assign(sj.st, o), b = 26 * S.syn;
+    const sk = 20 * S.bruise;
+    const lft = `M-175 -300C-175 -200 ${f(-180 - sk)} -170 ${f(-178 - sk)} -130S-172 -40 -172 0S-170 200 -168 300`;
+    skinF.setAttribute('d', `${lft}H200C204 200 210 0 204 -300Z`);
+    skin.setAttribute('d', `${lft}M200 300C204 200 210 0 204 -300`);
+    spots.forEach(sp => { const r = 8 + 52 * S.bruise * (.4 + .6 * sp.k); put(sp.e, { x: -140 + r * Math.cos(sp.a) * .55, y: -130 + r * Math.sin(sp.a) }); });
+    put(bruise, { o: S.bruise });
+    fluid.setAttribute('d', `M${side(-1, b)}L52 100C${f(100 + b)} 96 ${f(106 + b)} 40 ${f(104 + b)} 0S${f(100 + b)} -96 54 -100Z`);
+    fluid.setAttribute('fill', mix(FLUID, '#b3262b', S.blood)); fluid.setAttribute('fill-opacity', (.4 + .4 * S.blood).toFixed(2));
+    const both = `M${side(-1, b)}M${side(1, b)}`;
+    lining.setAttribute('d', both); lining.setAttribute('stroke', mix(SYNOV_C, PAIN, S.syn * .8)); lining.setAttribute('stroke-width', f(3 + 6 * S.syn));
+    caps.setAttribute('d', `M${side(-1, b + 9)}M${side(1, b + 9)}`);
+    const gx = -(113 + b), R = 4 + 32 * S.gang;
+    gStalk.setAttribute('d', `M${f(gx)} -30L${f(gx - 8 - R * .4)} -44`);
+    gBall.setAttribute('cx', f(gx - 10 - R)); gBall.setAttribute('cy', f(-48 - R * .3)); gBall.setAttribute('r', f(R));
+    put(gang, { o: S.gang > .02 ? 1 : 0 });
+    burs.setAttribute('rx', f(9 + 9 * S.burs)); burs.setAttribute('ry', f(40 + 10 * S.burs));
+    burs.setAttribute('fill', mix(FLUID, PAIN, S.burs)); burs.setAttribute('fill-opacity', (.45 + .25 * S.burs).toFixed(2));
+    burs.setAttribute('stroke', mix(SYNOV_C, PAIN, S.burs)); burs.setAttribute('stroke-width', f(2.5 + 2.5 * S.burs));
+    tfib.setAttribute('stroke-dashoffset', f(-S.glide));
+    return sj;
+  };
+  sj.set({});
+  if (t0 !== null) show(g, t0);
+  return sj;
+}
+
+// A schematic cross-section of the lower leg: skin, the deep fascia with its septa, two bones, muscles in closed fascial
+// compartments; the front compartment holds an artery, a vein and a nerve. set(k): pressure in that compartment rises —
+// the muscle swells against the fascia and darkens, the vessels and the nerve are squeezed.
+function legSection(p, cx, cy, s, t0) {
+  const g = G(p, { x: cx, y: cy, s, o: 0 }), f = v => v.toFixed(1);
+  mk('ellipse', { rx: 168, ry: 140, fill: '#344640', stroke: '#c9b9a6', 'stroke-width': 4 }, g);
+  const others = [[4, 90, 98, 28], [12, 44, 58, 22], [118, 2, 24, 42]].map(([x, y, rx, ry]) => mk('ellipse', { cx: x, cy: y, rx, ry, fill: ANAT.muscle, stroke: mix(ANAT.muscle, '#000000', .3), 'stroke-width': 2 }, g));
+  const ant = mk('ellipse', { cx: 52, cy: -74 }, g);
+  mk('ellipse', { rx: 156, ry: 128, fill: 'none', stroke: '#d6dfd9', 'stroke-width': 3.5 }, g);
+  path(g, 'M86 6L120 -86M86 22L132 82M-30 -12C10 18 50 26 86 14', { stroke: '#d6dfd9', 'stroke-width': 3.5 });
+  path(g, 'M-24 -40L80 4', { stroke: '#d6dfd9', 'stroke-width': 2.5, 'stroke-dasharray': '6 5' });
+  mk('path', { d: 'M-80 -96L-20 -112L-4 -36L-40 -6L-86 -40Z', fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 2, 'stroke-linejoin': 'round' }, g);
+  mk('circle', { cx: 92, cy: 12, r: 17, fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 2 }, g);
+  const art = mk('circle', { cx: 24, cy: -34, fill: BLOOD_A, stroke: COL.board, 'stroke-width': 1.5 }, g);
+  const vein = mk('circle', { cx: 42, cy: -30, fill: BLOOD_V, stroke: COL.board, 'stroke-width': 1.5 }, g);
+  const nerve = mk('circle', { cx: 32, cy: -50, fill: '#f3d35c', stroke: COL.board, 'stroke-width': 1.5 }, g);
+  const arr = G(g, { o: 0 }), arrows = [[-30, -104], [52, -126], [118, -80], [40, -36]].map(([ax, ay]) => fArrow(arr, ax, ay, 0, 0, PAIN, { w: 5, head: 12 }));
+  const ls = { g, stage: P => [cx + P[0] * s, cy + P[1] * s] };
+  ls.set = k => {
+    ant.setAttribute('rx', f(64 + 6 * k)); ant.setAttribute('ry', f(38 + 4 * k));
+    ant.setAttribute('fill', mix(ANAT.muscle, '#6c5a78', k * .85)); ant.setAttribute('stroke', mix(mix(ANAT.muscle, '#000000', .3), PAIN, k));
+    art.setAttribute('r', f(9 * (1 - .65 * k))); vein.setAttribute('r', f(9 * (1 - .8 * k))); nerve.setAttribute('r', f(7 * (1 - .4 * k)));
+    put(arr, { o: k > .05 ? 1 : 0 });
+    [[-30, -104, 14, 18], [52, -126, 0, 22], [118, -80, -18, 14], [40, -36, 0, -18]].forEach(([ax, ay, dx, dy], i) => arrows[i].set(ax, ay, dx * k * 1.2, dy * k * 1.2));
+    return ls;
+  };
+  ls.set(0);
+  if (t0 !== null) show(g, t0);
+  return ls;
+}
+
+// A hinge in close-up: bone A from (x, y) to the joint J = (x + len, y); bone B turns at J (deg: + = down, flexion).
+// A muscle crosses the joint on the flexion side; a capsule band (rest = capRest × its length at deg0) may limit extension.
+function hingeModel(p, x, y, len, t0, { deg0 = 60, capRest = null, mus = true } = {}) {
+  const g = G(p, { o: 0 }), defs = mk('defs', {}, g), B = ANAT.bone, line = mix(B, '#000000', .5);
+  const J = [x + len, y], bA = limbEl(g, defs, B, 17, 15, line), bB = limbEl(g, defs, B, 15, 13, line);
+  bA.set([x, y], [J[0] - 8, y]);
+  const dirB = d => [Math.cos(rad(d)), Math.sin(rad(d))], at = (d, k, n) => { const u = dirB(d); return [J[0] + u[0] * k - u[1] * n, J[1] + u[1] * k + u[0] * n]; };
+  const capPts = d => [[J[0] - 40, y + 16], at(d, 40, 16)];
+  const len0 = d => { const [A, C] = capPts(d); return Math.hypot(C[0] - A[0], C[1] - A[1]); };
+  const cap = capRest ? ligEl(g, { rest: len0(deg0) * capRest, w: 5.5 }) : null;
+  const musPts = d => [[x + len * .3, y + 18], at(d, len * .45, 20)];
+  const mu = mus ? muscleEl(g, { rest: Math.hypot(...[0, 1].map(i => musPts(deg0)[1][i] - musPts(deg0)[0][i])), w: 18 }) : null;
+  const jc = mk('circle', { cx: J[0], cy: J[1], r: 11, fill: COL.board, stroke: B, 'stroke-width': 4 }, g);
+  const h = { g, J, deg: deg0, cap, mu };
+  h.set = d => { h.deg = d; bB.set([J[0] + dirB(d)[0] * 8, J[1] + dirB(d)[1] * 8], at(d, len * .9, 0)); if (cap) cap.set(...capPts(d)); if (mu) mu.set(...musPts(d)); g.appendChild(jc); return h; };
+  h.tip = () => at(h.deg, len * .9, 0);
+  h.set(deg0);
+  if (t0 !== null) show(g, t0);
+  return h;
+}
+
+// A label at (x, y) with a thin leader line to the point (tx, ty).
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Повреждения мягких тканей', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 10 · Урок 101', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Повреждения мягких тканей', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и их тяжесть', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'мышцы, сухожилия, связки, суставы', 800, 360, m('sub'), { size: 30, fill: HEAD, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const lm = ligModel(art, 800, 610, .62, null); put(lm.g, { o: 1 });
+    const pm = painMark(art, ...lm.stage([82, 4]), 20);
+    const ar = fArrow(art, 0, 0, 0, 0, COL.whole, { w: 6, head: 16 });
+    prog(q => {
+      const k = io(clamp(q * 1.3, 0, 1));
+      lm.set({ open: 16 * k, torn: clamp((k - .35) / .6, 0, 1) * .6 });
+      const [bx, by] = lm.stage(lm.lowAt([74, 230]));
+      ar.set(bx + 70, by, -60 * k, 0); pm.set(clamp((k - .4) * 2, 0, 1) * (.8 + .2 * Math.sin(q * 40)));
+    }, .4, D - 1.4, lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['why', 'С чего начинается вмешательство', (m, D) => {
+    const p = panel(0);
+    txt(p, 'часть III — принципы вмешательства', 800, 56, m('why'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    txt(p, 'упражнения при повреждениях мышц, сухожилий, связок, суставов', 800, 96, m('why', 1), { size: 20, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 60, 140, 400, 260, 'обследование (examination)', 'находим нарушения, которые ограничивают функцию и участие пациента', COL.whole, m('exam'), { size: 22, textW: 250 });
+    const ic = G(p, { o: 0 });
+    roundBox(ic, 340, 250, 90, 100, COL.whole, COL.board, 2);
+    [276, 298, 320].forEach((yy, i) => path(ic, `M356 ${yy}H${412 - i * 12}`, { stroke: COL.chalk, 'stroke-width': 3 }));
+    show(ic, m('exam', 1));
+    const W = [[520, 0, { exud: 1, clot: 1, debris: 1, cells: 1 }], [870, 1, { exud: .3, cap: 1, fib: 1, coll: .8 }], [1220, 2, { coll: 1, align: 1, thick: 1, shrink: .4, fib: .3 }]];
+    W.forEach(([x, i, st], k) => {
+      const hv = healView(p, x, 140, 320, 230, m('stage', k * .5)); hv.set(st);
+      txt(p, STG_N[i] + ' стадия', x + 160, 405, m('stage', k * .5), { size: 23, weight: 700, fill: STG[i], anchor: 'middle' });
+    });
+    txt(p, 'вид и интенсивность упражнений', 1030, 470, m('dose'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    [90, 190, 300].forEach((w, i) => {
+      const e = mk('rect', { x: 530 + i * 350, y: 495, width: w, height: 26, rx: 13, fill: STG[i], 'fill-opacity': .85 }, p);
+      put(e, { o: 0 }); show(e, m('dose', .5 + i * .4));
+    });
+    pill(p, 'схема', 1480, 470, m('dose', .5), { col: COL.dim, size: 18 });
+    const sline = txt(p, 'упражнения не мешают заживлению — они помогают ему', 800, 640, m('dose', 2), { size: 32, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'цель — как можно больше функции и меньше новых проблем', 800, 690, m('dose', 3), { size: 24, fill: COL.chalk, anchor: 'middle' });
+  }],
+
+  ['strain', 'Растяжение мышцы и связки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'растяжение мышцы (strain) и растяжение связки (sprain)', 800, 56, m('strain'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    // the muscle-tendon unit: overstretched, a small breach near its junction
+    const u = mtu(p, 110, 650, 250, m('strain'));
+    const ar = fArrow(p, 0, 0, 0, 0, COL.whole, { w: 6, head: 16 });
+    prog(q => { const k = io(clamp(q * 2.5, 0, 1)); u.set({ d: 46 * k }); ar.set(650 + 46 * k + 30, 150, 50 * k, 0); }, m('strain', .5), Math.max(2, m('sprain') - m('strain', .5)), lin);
+    prog(q => u.set({ notch: q }), m('mtu'), .6);
+    txt(p, 'мышечно-сухожильная единица', 380, 386, m('mtu'), { size: 21, weight: 700, fill: ANAT.muscle, anchor: 'middle' });
+    infoCard(p, 60, 430, 700, 175, 'растяжение мышцы', 'перерастяжение, перенапряжение или перегрузка мягкой ткани', COL.nat, m('strain', 1), { size: 22 });
+    infoCard(p, 60, 625, 700, 210, 'обычно легче, чем растяжение связки', 'небольшая травма или непривычные повторяющиеся мелкие нагрузки; чаще — частичное нарушение мышечно-сухожильной единицы', COL.dim, m('mild'), { size: 21 });
+    // the ligament: stressed, some fibres torn
+    const lm = ligModel(p, 1150, 260, .52, m('sprain'));
+    const la = fArrow(p, 0, 0, 0, 0, COL.whole, { w: 6, head: 16 });
+    prog(q => { const k = io(q); lm.set({ open: 9 * k, torn: .4 * k }); const [bx, by] = lm.stage(lm.lowAt([74, 220])); la.set(bx + 60, by, -50 * k, 0); }, m('sprain', .5), 2);
+    txt(p, 'связка', 1250, 160, m('lig'), { size: 21, weight: 700, fill: LIGC });
+    show(path(p, 'M1246 168L1200 236', { stroke: LIGC, 'stroke-width': 2 }, { o: 0 }), m('lig'));
+    infoCard(p, 840, 430, 700, 210, 'растяжение связки', 'сильная нагрузка, растяжение или разрыв: капсула, связка, сухожилие или мышца; чаще — травма связки', LIGC, m('sprain'), { size: 22 });
+    txt(p, 'три степени тяжести:', 1190, 690, m('deg'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pillRow(p, ['I — лёгкая', 'II — средняя', 'III — тяжёлая'], 1190, 745, m('deg', .4), { col: [COL.int, COL.task, COL.bad], size: 21, gap: .5 });
+  }],
+
+  ['disl', 'Вывих и подвывих', (m, D) => {
+    const p = panel(0);
+    txt(p, 'вывих (dislocation) и подвывих (subluxation)', 800, 56, m('disl'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    const bj = ballJoint(p, 470, 360, 1.1, .2);
+    pill(p, 'сустав — схема', 470, 840, .4, { col: COL.dim, size: 18 });
+    const L1 = lab(p, 'суставная впадина', 330, 650, ...bj.stage([-60, 30]), COL.dim, .6);
+    const L2 = lab(p, 'головка', 680, 170, ...bj.stage([12, -50]), COL.dim, .8);
+    const L3 = lab(p, 'капсула', 680, 240, ...bj.stage([4, -100]), LIGC, 1);
+    [L1, L2, L3].forEach(e => hide(e, m('disl', .7)));
+    prog(q => bj.set({ k: io(q) }), m('disl', 1), 1.8);
+    whenAt(m('soft'), () => bj.set({ torn: 1 }));
+    const pm = painMark(p, 0, 0, 22);
+    prog(q => { const [hx, hy] = bj.stage(bj.headAt()); pm.at(hx - 70, hy + 110).set(.75 + .25 * Math.sin(q * 30)); }, m('soft'), Math.max(1, m('subl') - m('soft')), lin);
+    prog(q => pm.set(1 - q), m('subl'), .5);
+    prog(q => bj.set({ k: lerp(1, .45, io(q)), torn: 0 }), m('subl', .3), 1.6);
+    infoCard(p, 860, 130, 680, 250, 'вывих', 'суставные концы костей смещены: их анатомическое соотношение потеряно', COL.bad, m('disl'), { size: 23 });
+    txt(p, 'повреждены мягкие ткани:', 880, 330, m('soft'), { size: 21, weight: 700, fill: COL.chalk });
+    pillRow(p, ['воспаление', 'боль', 'мышечный спазм'], 1200, 360, m('soft', .5), { col: PAIN, size: 20, gap: .5 });
+    infoCard(p, 860, 430, 680, 250, 'подвывих', 'неполный, частичный вывих; часто тоже со вторичной травмой окружающих мягких тканей', COL.task, m('subl'), { size: 23 });
+  }],
+
+  ['tear', 'Частичный и полный разрыв', (m, D) => {
+    const p = panel(0);
+    txt(p, 'разрыв мышцы или сухожилия (rupture, tear)', 800, 56, m('tear'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    // partial: pain at the breach on stretch and on resisted contraction
+    const a = mtu(p, 110, 640, 250, m('tear'));
+    prog(q => a.set({ notch: q }), m('tear', 1), .5);
+    const pa = painMark(p, 0, 0, 22), sa = fArrow(p, 0, 0, 0, 0, COL.whole, { w: 6, head: 16 }), ra = fArrow(p, 0, 0, 0, 0, COL.task, { w: 6, head: 16 });
+    const tP = m('part'), tC = m('contr');
+    prog(q => {
+      const T = q * (D - tP), k1 = io(clamp(T / 1.2, 0, 1)) * (1 - io(clamp((T - (tC - tP) + .2) / .8, 0, 1)));
+      const k2 = io(clamp((T - (tC - tP) - .4) / .8, 0, 1));
+      a.set({ d: 36 * k1, act: k2 }); sa.set(640 + 36 * k1 + 30, 150, 46 * k1, 0); ra.set(640 + 30, 250, 40 * k2, 0);
+      const pk = Math.max(clamp(k1 * 1.4 - .2, 0, 1), k2); pa.at(a.tear[0], a.tear[1] - 40).set(pk * (.8 + .2 * Math.sin(T * 9)));
+    }, tP, D - tP, lin);
+    txt(p, 'растяжение', 690, 122, m('part', .3), { size: 19, fill: COL.whole });
+    txt(p, 'сопротивление', 690, 300, m('contr', .3), { size: 19, fill: COL.task });
+    infoCard(p, 860, 130, 680, 250, 'частичный разрыв', 'боль в месте разрыва — при растяжении мышцы и при сокращении против сопротивления', COL.task, m('part'), { size: 23 });
+    // complete: the muscle does not pull on the breach — no pain
+    const b = mtu(p, 110, 640, 620, m('full'));
+    prog(q => b.set({ full: io(q) }), m('full', .3), 1.2);
+    const sb = fArrow(p, 0, 0, 0, 0, COL.whole, { w: 6, head: 16 });
+    const tN = m('nopain');
+    prog(q => {
+      const T = q * (D - tN), k1 = io(clamp(T / 1.1, 0, 1)) * (1 - io(clamp((T - 2.2) / .8, 0, 1))), k2 = io(clamp((T - 2.6) / .8, 0, 1));
+      b.set({ d: 36 * k1, act: k2 }); sb.set(640 + 36 * k1 + 30, 520, 46 * k1, 0);
+    }, tN, D - tN, lin);
+    infoCard(p, 860, 500, 680, 250, 'полный разрыв', 'мышца не тянет за место повреждения: ни растяжение, ни сокращение не болят', COL.good, m('full'), { size: 23 });
+    const np = G(p, { o: 0 }); txt(np, 'боли нет', 380, 790, null, { size: 24, weight: 700, fill: COL.good, anchor: 'middle' }); put(np.lastChild, { o: 1 });
+    show(np, m('nopain', .5));
+  }],
+
+  ['tendon', 'Тендинопатия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'тендинопатия (tendinopathy)', 800, 56, m('tendon'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    txt(p, 'общий термин: повреждение сухожилия, связанное с механической нагрузкой', 800, 96, m('tendon', .5), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const ts = tendonSheath(p, 90, 360, 820, m('tendon'), { r: 36 });
+    txt(p, 'сухожилие', 160, 300, m('tendon', .5), { size: 21, weight: 700, fill: LIGC });
+    txt(p, 'влагалище сухожилия', 500, 250, m('tendon', .8), { size: 21, weight: 700, fill: SYNOV_C, anchor: 'middle' });
+    txt(p, 'синовиальная оболочка — изнутри', 500, 476, m('tendon', 1.1), { size: 19, fill: SYNOV_C, anchor: 'middle' });
+    const la = fArrow(p, 0, 0, 0, 0, COL.whole, { w: 6, head: 16 });
+    prog(q => { const g0 = 60 * Math.sin(q * 2 * Math.PI * 3); ts.set({ glide: g0 }); la.set(930, 360, 50 + .5 * g0, 0); }, m('tendon', .5), Math.max(2, m('teno') - m('tendon', .5)), lin);
+    const st = (k, o) => prog(q => { const s0 = {}; for (const key in o) s0[key] = lerp(ts.st[key] ?? 0, o[key], q); ts.set(s0); }, m(k), .9);
+    st('teno', { inflS: 1, fluid: .7 });
+    st('itis', { inflS: 0, fluid: .15, inflT: 1, calc: 1 });
+    st('vag', { inflT: 0, calc: 0, thick: 1, inflS: .7, fluid: .3 });
+    st('osis', { thick: 0, inflS: 0, fluid: 0, degen: 1 });
+    const C = [['teno', 'теносиновит', 'воспаление синовиальной оболочки, покрывающей сухожилие', SYNOV_C],
+      ['itis', 'тендинит', 'воспаление самого сухожилия; могут остаться рубцы или отложения кальция', PAIN],
+      ['vag', 'тендовагинит', 'воспаление с утолщением влагалища сухожилия', COL.task],
+      ['osis', 'тендиноз', 'дегенерация сухожилия из-за повторяющейся микротравмы', COL.dim]];
+    C.forEach(([k, t, b, c], i) => infoCard(p, 60 + (i % 2) * 750, 540 + Math.floor(i / 2) * 160, 730, 145, t, b, c, m(k), { size: 21 }));
+    const TAG = [['teno', 'оболочка воспалена,', 'жидкости больше'], ['itis', 'сухожилие воспалено;', 'отложения кальция'], ['vag', 'влагалище утолщено', 'и воспалено'], ['osis', 'волокна тонкие, беспорядочные;', 'много клеток, сосуды']];
+    TAG.forEach(([k, a1, a2], i) => {
+      const tg = G(p, { o: 0 }), c = C[i][3];
+      T(tg, C[i][1], { x: 1240, y: 330, size: 34, weight: 700, fill: c, anchor: 'middle' });
+      T(tg, a1, { x: 1240, y: 378, size: 21, fill: COL.chalk, anchor: 'middle' });
+      T(tg, a2, { x: 1240, y: 408, size: 21, fill: COL.chalk, anchor: 'middle' });
+      show(tg, m(k));
+      if (TAG[i + 1]) hide(tg, m(TAG[i + 1][0]) - .3, .3);
+    });
+  }],
+
+  ['joint', 'Синовит, гемартроз, ганглий', (m, D) => {
+    const p = panel(0);
+    txt(p, 'синовит, гемартроз, ганглий', 800, 56, m('syn'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    const sj = synJoint(p, 390, 470, 1.22, .2);
+    pill(p, 'сустав в разрезе — схема', 390, 855, .4, { col: COL.dim, size: 18 });
+    lab(p, 'капсула', 150, 300, ...sj.stage([-112, -60]), LIGC, .6);
+    lab(p, 'синовиальная', 640, 300, ...sj.stage([100, -30]), SYNOV_C, .8);
+    txt(p, 'оболочка', 640, 324, .8, { size: 19, fill: SYNOV_C, weight: 600 });
+    lab(p, 'сухожилие', 640, 170, ...sj.stage([150, -230]), LIGC, 1);
+    lab(p, 'сумка', 640, 760, ...sj.stage([84, 180]), FLUID, 1.2);
+    lab(p, 'хрящ', 120, 560, ...sj.stage([-50, -14]), CART, 1.4);
+    const sw = (k, o, dur = 1) => prog(q => { const s0 = {}; for (const key in o) s0[key] = lerp(sj.st[key] ?? 0, o[key], q); sj.set(s0); }, k, dur);
+    sw(m('syn', .5), { syn: 1 });
+    sw(m('hem'), { syn: .45, blood: 1 });
+    sw(m('gang'), { syn: 0, blood: 0, gang: 1 }, 1.4);
+    infoCard(p, 860, 120, 680, 230, 'синовит (synovitis)', 'воспаление синовиальной оболочки: лишняя синовиальная жидкость в суставе или во влагалище сухожилия — травма или болезнь', SYNOV_C, m('syn'), { size: 21 });
+    infoCard(p, 860, 370, 680, 170, 'гемартроз (hemarthrosis)', 'кровоизлияние в сустав, обычно после тяжёлой травмы', PAIN, m('hem'), { size: 21 });
+    infoCard(p, 860, 560, 680, 200, 'ганглий (ganglion)', 'выпячивание стенки суставной капсулы или влагалища сухожилия — как воздушный шарик', FLUID, m('gang'), { size: 21 });
+    pillRow(p, ['после травмы', 'иногда при ревматоидном артрите'], 1200, 805, m('ra'), { col: FLUID, size: 20, gap: .6 });
+  }],
+
+  ['bursa', 'Бурсит, ушиб, перегрузка', (m, D) => {
+    const p = panel(0);
+    txt(p, 'бурсит, ушиб, синдромы перегрузки', 800, 56, m('burs'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    const sj = synJoint(p, 390, 470, 1.22, .2);
+    pill(p, 'сустав в разрезе — схема', 390, 855, .4, { col: COL.dim, size: 18 });
+    lab(p, 'сумка', 640, 760, ...sj.stage([84, 180]), FLUID, .6);
+    lab(p, 'кожа', 130, 200, ...sj.stage([-176, -200]), '#c9b9a6', .8);
+    prog(q => sj.set({ burs: io(q) }), m('burs', .5), 1);
+    // a blow from the left: bleeding and swelling under the skin
+    const hit = fArrow(p, 0, 0, 0, 0, COL.chalk, { w: 9, head: 22 });
+    const tB = m('cont');
+    prog(q => { const k = io(clamp(q * 3, 0, 1)), back = clamp(q * 3 - 1.4, 0, 1); hit.set(lerp(0, 92, k) - 84 * back, 320, 70, 0); put(hit, { o: q > 0 && back < 1 ? 1 : 0 }); }, tB, 1.6, lin);
+    prog(q => sj.set({ bruise: io(q) }), tB + .6, 1.6);
+    // overuse: the tendon rubs back and forth over the bursa
+    const tO = m('over');
+    prog(q => sj.set({ glide: 40 * Math.sin(q * 2 * Math.PI * 7) }), tO, Math.max(2, D - tO), lin);
+    const rub = G(p, { o: 0 }); [0, 1, 2].forEach(i => path(rub, `M${570 + i * 14} ${630 + i * 10}q10 -12 0 -24`, { stroke: COL.task, 'stroke-width': 3 })); show(rub, tO + .5);
+    infoCard(p, 860, 120, 680, 140, 'бурсит (bursitis)', 'воспаление синовиальной сумки', FLUID, m('burs'), { size: 22 });
+    infoCard(p, 860, 280, 680, 220, 'ушиб (contusion)', 'прямой удар: рвутся капилляры → кровоизлияние, отёк, воспалительный ответ', '#c06a8a', m('cont'), { size: 22 });
+    infoCard(p, 860, 520, 680, 300, 'синдромы перегрузки', 'перегрузка, кумулятивная травма, повторяющееся напряжение: повторяющаяся субмаксимальная перегрузка или трение мышцы или сухожилия → воспаление и боль', COL.task, m('over'), { size: 22 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-tendon', prompt: ['Какой термин подходит?'],
+    build: grid([
+      { parts: ['Воспаление синовиальной оболочки, покрывающей сухожилие'], ans: ['a'], why: 'Теносиновит.' },
+      { parts: ['Воспаление самого сухожилия; могут остаться рубцы или кальций'], ans: ['b'], why: 'Тендинит.' },
+      { parts: ['Воспаление с утолщением влагалища сухожилия'], ans: ['c'], why: 'Тендовагинит.' },
+      { parts: ['Дегенерация сухожилия из-за повторяющейся микротравмы'], ans: ['d'], why: 'Тендиноз.' },
+    ], [['a', 'Теносиновит', SYNOV_C], ['b', 'Тендинит', PAIN], ['c', 'Тендовагинит', COL.task], ['d', 'Тендиноз', COL.dim]], { multi: false, text: true }),
+  }], done) }],
+
+  ['cond', 'Клинические состояния', (m, D) => {
+    const p = panel(0);
+    txt(p, 'состояния после травмы или болезни', 800, 56, m('cond'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    txt(p, 'первичное повреждение трудно определить или ткань зажила с ограничениями → функция теряется вторично', 800, 96, m('cond', .5), { size: 20, fill: COL.dim, anchor: 'middle' });
+    const card = (x, y, title, body, col, t0) => infoCard(p, x, y, 730, 360, title, body, col, t0, { size: 21, textW: 380 });
+    // 1 dysfunction: a reach that stops short
+    card(50, 120, 'дисфункция (dysfunction)', 'потеря нормальной функции ткани или области: адаптивное укорочение, спайки, слабость мышц, потеря подвижности', COL.task, m('dysf'));
+    const f = fig(p, { s: .72, o: 0 }); plant(f, 'AN', 610, 450); show(f.g, m('dysf'));
+    const [sx, sy] = onStage(f, 'Sh');
+    const full = path(p, romArc([sx, sy], 92, 10, 170, 90, -1), { stroke: COL.faint, 'stroke-width': 3, 'stroke-dasharray': '6 6' }, { o: 0 }); show(full, m('dysf', .5));
+    const got = path(p, romArc([sx, sy], 92, 10, 100, 90, -1), { stroke: COL.task, 'stroke-width': 5 }, { d: 0 });
+    prog(q => f.set({ aN: lerp(10, 100, io(q)) }), m('dysf', .8), 1.6);
+    draw(got, m('dysf', .8), 1.6);
+    cross(p, sx + 92 * Math.cos(rad(90 - 112)), sy + 92 * Math.sin(rad(90 - 112)), 11, m('dysf', 2.5), 5);
+    // 2 joint dysfunction: the glide is blocked
+    card(820, 120, 'дисфункция сустава (joint dysfunction)', 'механическая потеря суставной игры в синовиальном суставе: потеря функции и боль', COL.whole, m('joint'));
+    const j = jointGlide(p, { x: 1400, y: 270, s: .52, shaft: 120, t0: m('joint') });
+    j.tight = [1, 1];
+    prog(q => j.set({ d: 5 * Math.sin(q * 2 * Math.PI * 3) }), m('joint', .5), Math.max(2, m('contr') - m('joint', .5)), lin);
+    txt(p, 'суставная игра ↓', 1400, 440, m('joint', 1), { size: 20, weight: 700, fill: COL.bad, anchor: 'middle' });
+    pillRow(p, ['травма', 'иммобилизация', 'бездействие'], 1030, 395, m('jc'), { col: COL.whole, size: 17, gap: .3, space: 10 });
+    pillRow(p, ['возраст', 'ревматоидный артрит'], 1030, 442, m('jc', .9), { col: COL.whole, size: 17, gap: .3, space: 10 });
+    // 3 contracture: a short capsule stops extension
+    card(50, 500, 'контрактура (contracture)', 'адаптивное укорочение кожи, фасции, мышцы или капсулы: подвижность ограничена', COL.nat, m('contr'));
+    const h = hingeModel(p, 470, 650, 150, m('contr'), { deg0: 80, capRest: 1.28 });
+    // the capsule is taut at about 62°: extension stops there
+    prog(q => h.set(lerp(80, 62, io(clamp(q * 1.5, 0, 1))) + (q > .7 ? .6 * Math.sin(q * 60) : 0)), m('contr', .8), 2.2, lin);
+    txt(p, 'капсула укорочена', 640, 820, m('contr', 1.5), { size: 19, weight: 700, fill: LIGC, anchor: 'middle' });
+    const hs = fArrow(p, 0, 0, 0, 0, COL.whole, { w: 5, head: 13 });
+    prog(q => { const [tx, ty] = h.tip(); hs.set(tx + 16, ty + 10, 20 * Math.min(1, q * 3), -24 * Math.min(1, q * 3)); }, m('contr', .8), 2.2, lin);
+    // 4 adhesion: the tendon cannot glide in its sheath
+    card(820, 500, 'спайка (adhesion)', 'коллаген прилипает к окружающим структурам: при иммобилизации, после травмы или операции', COL.good, m('adh'));
+    const ts = tendonSheath(p, 1225, 690, 305, m('adh'), { r: 18 });
+    prog(q => ts.set({ adh: q }), m('adh', .4), .8);
+    prog(q => ts.set({ glide: 4 * Math.sin(q * 2 * Math.PI * 3) }), m('adh', 1.2), Math.max(2, D - m('adh', 1.2)), lin);
+    txt(p, 'не скользит', 1378, 790, m('adh', 1.4), { size: 20, weight: 700, fill: COL.bad, anchor: 'middle' });
+  }],
+
+  ['spasm', 'Защитное напряжение и спазм', (m, D) => {
+    const p = panel(0);
+    txt(p, 'защитное напряжение и мышечный спазм', 800, 56, m('guard'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    // left: reflex guarding splints a painful joint, and lets go when the pain is relieved
+    txt(p, 'рефлекторное защитное напряжение', 330, 120, m('guard'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, '(reflex muscle guarding)', 330, 150, m('guard'), { size: 19, fill: COL.dim, anchor: 'middle' });
+    const h = hingeModel(p, 90, 250, 230, m('guard'), { deg0: 40 });
+    const pm = painMark(p, h.J[0], h.J[1] - 52, 22);
+    const tS = m('stop');
+    prog(q => {
+      const T = q * (D - m('guard', .6)), on = T < tS - m('guard', .6) ? 1 : clamp(1 - (T - (tS - m('guard', .6))) / .8, 0, 1);
+      h.mu.act(on); pm.set(on * (.8 + .2 * Math.sin(T * 8)));
+      const free = 1 - on, push = Math.sin(T * 3);
+      h.set(40 + (on > .5 ? 1.5 * push : 28 * push * free));
+    }, m('guard', .6), D - m('guard', .6), lin);
+    txt(p, 'мышца как шина', 200, 500, m('splint'), { size: 21, weight: 700, fill: '#ff5a3c', anchor: 'middle' });
+    txt(p, 'сустав не двигается', 200, 530, m('splint', .4), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'боль ушла → напряжение прошло', 330, 585, m('stop'), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    infoCard(p, 60, 625, 540, 230, 'собственный мышечный спазм', 'длительное сокращение в ответ на местные изменения кровообращения и обмена в долго сокращённой мышце', COL.bad, m('spasm'), { size: 21 });
+    // right: the self-perpetuating cycle of muscle spasm (fig. 10.1, drawn anew)
+    txt(p, 'самоподдерживающийся цикл спазма (рис. 10.1)', 1110, 120, m('spasm'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const CA = ['травма', 'боль', 'воспаление', 'инфекция', 'эмоции', 'холод', 'иммобилизация'];
+    const cps = CA.map((s, i) => pill(p, s, 700 + i * 70 + (i > 3 ? 0 : 0), 0, null, { col: COL.dim, size: 16 }));
+    const totW = CA.reduce((a0, s) => a0 + uiW(s, 16) + 38, -8);
+    let cx0 = 1110 - totW / 2; cps.forEach((g0, i) => { const w = uiW(CA[i], 16) + 30; put(g0, { x: cx0 + w / 2, y: 180, o: 0 }); g0._cx = cx0 + w / 2; cx0 += w + 8; });
+    cps.forEach((g0, i) => show(g0, m('causes', i * .25)));
+    const RB = labelBox(p, 1110, 268, 400, ['рефлекторное сокращение мышцы'], COL.task, m('spasm', .5), { size: 21 });
+    const cin = G(p, { o: 0 }); cps.forEach(g0 => path(cin, `M${g0._cx.toFixed(1)} 194L${(1110 + (g0._cx - 1110) * .3).toFixed(1)} 248`, { stroke: COL.faint, 'stroke-width': 2 })); show(cin, m('causes'));
+    const ring = cycleRing(p, { cx: 1110, cy: 560, r: 250, ry: 200, w: 270, col: COL.bad, size: 20, items: [['мышечный спазм'], ['движение', 'ограничено'], ['застой кровообращения', 'ишемия, метаболиты'], ['боль']] });
+    show(path(p, 'M1110 290V330', { stroke: COL.task, 'stroke-width': 3.5 }, { o: 0 }), m('spasm', .8));
+    [0, 1, 2, 3].forEach(i => { ring.reveal(i, m('cycle', i * .6)); ring.arc(i, m('cycle', i * .6 + .4)); });
+    ring.runner(m('cycle', 2.8), Math.max(3, D - m('cycle', 2.8) - .3), 2, PAIN);
+  }],
+
+  ['weak', 'Слабость и компартмент-синдром', (m, D) => {
+    const p = panel(0);
+    txt(p, 'слабость мышц и компартмент-синдром', 800, 56, m('weak'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    infoCard(p, 60, 110, 620, 140, 'слабость мышц (muscle weakness)', 'сила сокращения уменьшается', COL.task, m('weak'), { size: 22 });
+    const bar = G(p, { o: 0 }); roundBox(bar, 470, 180, 180, 36, EDGE, COL.board, 2);
+    const fill = mk('rect', { x: 474, y: 184, width: 172, height: 28, rx: 12, fill: COL.task }, bar); show(bar, m('weak', .4));
+    prog(q => fill.setAttribute('width', (172 * (1 - .55 * io(q))).toFixed(1)), m('weak', .8), 1.4);
+    txt(p, 'причины:', 80, 300, m('wc'), { size: 21, weight: 700, fill: COL.chalk });
+    const WC = [['поражение нерва: ЦНС или периферическая', COL.real], ['системное или химическое', COL.real], ['нервно-мышечное соединение', COL.real], ['прямое повреждение мышцы', COL.nat], ['бездействие', COL.dim]];
+    WC.forEach(([s, c], i) => pill(p, s, 80 + uiW(s, 19) / 2 + 15, 345 + i * 50, m('wc', .4 + i * .5), { col: c, size: 19 }));
+    // compartment syndrome
+    const ls = legSection(p, 1140, 430, 1.35, m('comp'));
+    NOTE(p, 1140, 120, m('comp', .5));
+    txt(p, 'пример: голень в разрезе', 1140, 160, m('comp', .5), { size: 19, fill: COL.dim, anchor: 'middle' });
+    lab(p, 'фасция', 1440, 250, ...ls.stage([112, -89]), '#d6dfd9', m('comp', 1));
+    lab(p, 'мышца в футляре', 830, 300, ...ls.stage([30, -84]), ANAT.muscle, m('comp', 1.3));
+    lab(p, 'кость', 760, 470, ...ls.stage([-60, -60]), ANAT.bone, m('comp', 1.6));
+    prog(q => ls.set(io(q)), m('press'), Math.max(1.5, m('isch') - m('press') + 1));
+    txt(p, 'сосуды и нерв сдавлены', 1140, 660, m('press', 1), { size: 21, weight: 700, fill: PAIN, anchor: 'middle' });
+    infoCard(p, 60, 600, 620, 230, 'миофасциальный компартмент-синдром', 'давление растёт в замкнутом нерастяжимом футляре → сосуды, мышцы, нервы страдают → ишемия и необратимая гибель мышцы', COL.bad, m('comp'), { size: 21 });
+    txt(p, 'причины:', 820, 735, m('cause'), { size: 21, weight: 700, fill: COL.chalk });
+    pillRow(p, ['переломы', 'повторная травма', 'раздавливание'], 1180, 735, m('cause', .3), { col: COL.bad, size: 19, gap: .4, space: 10 });
+    pillRow(p, ['скелетное вытяжение', 'тесная одежда, повязки, гипс'], 1140, 790, m('cause', 1.5), { col: COL.bad, size: 19, gap: .4, space: 10 });
+  }],
+
+  ['grade', 'Три степени тяжести', (m, D) => {
+    const p = panel(0);
+    txt(p, 'тяжесть повреждения ткани', 800, 56, m('grade'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    const lm = ligModel(p, 330, 430, .78, .2);
+    txt(p, 'связка под нагрузкой', 330, 690, .4, { size: 20, fill: COL.dim, anchor: 'middle' });
+    const pm = painMark(p, ...lm.stage([88, 0]), 24), ar = fArrow(p, 0, 0, 0, 0, COL.whole, { w: 7, head: 18 });
+    const meter = G(p, { o: 0 }); txt(meter, 'боль', 575, 700, null, { size: 18, fill: COL.dim, anchor: 'middle' }); put(meter.lastChild, { o: 1 });
+    txt(meter, 'при нагрузке', 575, 722, null, { size: 18, fill: COL.dim, anchor: 'middle' }); put(meter.lastChild, { o: 1 });
+    roundBox(meter, 555, 470, 40, 210, EDGE, COL.board, 2);
+    const lvl = mk('rect', { x: 559, y: 676, width: 32, height: 0, rx: 8, fill: PAIN }, meter);
+    show(meter, m('g1'));
+    // one stress test per grade: opening, torn fibres, pain
+    const G3 = [[m('g1'), 3, 0, .3, COL.int], [m('g2'), 8, .4, 1, COL.task], [m('g3'), 22, 1, 0, COL.bad]];
+    G3.forEach(([t, open, torn, pain], i) => {
+      const nx = G3[i + 1] ? G3[i + 1][0] : D;
+      prog(q => {
+        const last = i === 2, T = q * (nx - t), k = io(clamp((T - .5) / 1.2, 0, 1)) * (last ? 1 : 1 - io(clamp((T - (nx - t) + 1) / .8, 0, 1)));
+        lm.set({ open: open * k + (last && T > 2 ? 4 * Math.sin(T * 2.2) : 0), torn: T > .3 ? torn : 0 });
+        const [bx, by] = lm.stage(lm.lowAt([74, 230])); ar.set(bx + 75, by, -60 * k, 0);
+        const pk = pain * k; pm.set(pk * (.85 + .15 * Math.sin(T * 9)));
+        lvl.setAttribute('y', (676 - 200 * pk).toFixed(1)); lvl.setAttribute('height', (200 * pk).toFixed(1));
+      }, t, nx - t, lin);
+    });
+    txt(p, 'сустав нестабилен', 330, 740, m('g3c'), { size: 24, weight: 700, fill: COL.bad, anchor: 'middle' });
+    infoCard(p, 680, 110, 860, 190, 'I степень', 'лёгкая боль в момент травмы или в первые 24 часа; небольшой отёк, местная болезненность; боль при нагрузке на ткань', COL.int, m('g1'), { size: 21 });
+    infoCard(p, 680, 320, 860, 230, 'II степень', 'средняя боль — занятие приходится прекратить; нагрузка и пальпация резко усиливают боль. Связка: часть волокон порвана → подвижность сустава немного больше', COL.task, m('g2'), { size: 21 });
+    infoCard(p, 680, 570, 860, 260, 'III степень', 'почти полный или полный разрыв или отрыв (сухожилие, связка), сильная боль. Нагрузка на порванную ткань обычно безболезненна, пальпация может найти дефект; разрыв связки → нестабильность', COL.bad, m('g3'), { size: 21 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-grade', prompt: ['Какая степень повреждения?'],
+    build: grid([
+      { parts: ['Лёгкая боль, небольшой отёк, болит при нагрузке на ткань'], ans: ['1'], why: 'Первая степень.' },
+      { parts: ['Боль заставила прекратить игру; часть волокон связки порвана'], ans: ['2'], why: 'Вторая степень.' },
+      { parts: ['Нагрузка на порванную связку не болит, сустав нестабилен'], ans: ['3'], why: 'Третья степень: полный разрыв, нагрузка на порванную ткань обычно безболезненна.' },
+      { parts: ['Пальпация находит дефект в сухожилии'], ans: ['3'], why: 'Третья степень: при полном разрыве пальпация может выявить дефект.' },
+      { parts: ['Пальпация и нагрузка резко усиливают боль, подвижность сустава немного больше'], ans: ['2'], why: 'Вторая степень.' },
+    ], [['1', 'I', COL.int], ['2', 'II', COL.task], ['3', 'III', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Стадия заживления определяет вид и интенсивность упражнений.', 'w1'],
+     ['Растяжение мышцы — мышечно-сухожильная единица; растяжение связки — три степени; вывих и подвывих ранят мягкие ткани.', 'w2'],
+     ['Частичный разрыв болит при растяжении и при сокращении против сопротивления, полный — нет.', 'w3'],
+     ['Последствия: дисфункция, контрактура, спайка, защитное напряжение и спазм, слабость, компартмент-синдром.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: HEAD }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tear', prompt: ['Футболист почувствовал боль сзади бедра на рывке. Когда он сгибает колено против сопротивления и когда мышцу растягивают, болит одно и то же место. Что вероятнее?'],
+    build: choice([
+      ['Частичный разрыв мышцы'],
+      ['Полный разрыв мышцы'],
+      ['Тендиноз'],
+      ['Гемартроз коленного сустава'],
+    ], 0, 'При частичном разрыве место повреждения болит и при растяжении, и при сокращении против сопротивления.',
+    [null, 'При полном разрыве мышца не тянет за место повреждения — растяжение и сокращение не болят.', 'Тендиноз — дегенерация сухожилия от повторяющейся микротравмы, а здесь острая травма.', 'Гемартроз — кровь в суставе; боль при сокращении и растяжении мышцы его не отличает.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-spasm', prompt: ['Ушиб поясницы почти зажил, но мышцы спины остаются напряжёнными и болят. Как это объяснить?'],
+    build: choice([
+      ['Самоподдерживающийся спазм: сокращение → застой кровообращения → боль → сокращение'],
+      ['Это защитное напряжение: оно не проходит, даже когда боль устранена'],
+      ['Компартмент-синдром мышц спины'],
+      ['Контрактура суставной капсулы'],
+    ], 0, 'Собственный мышечный спазм поддерживает себя сам, даже если первичное повреждение уже не раздражено.',
+    [null, 'Защитное напряжение как раз проходит, когда устранён болевой стимул.', 'Компартмент-синдром — рост давления в замкнутом футляре с ишемией; здесь нет такой картины.', 'Контрактура — укорочение ткани, а не длительное сокращение мышцы.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

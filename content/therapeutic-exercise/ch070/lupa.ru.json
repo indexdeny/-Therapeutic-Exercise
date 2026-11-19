@@ -1,0 +1,19 @@
+[
+ {
+  "beat": "intro",
+  "fig": 1,
+  "target": "hamstrings",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает hamstrings, фигура ×0.8"
+ },
+ {
+  "beat": "hipE",
+  "fig": 3,
+  "target": "m0",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает m0, фигура ×0.8",
+  "off": "места для лупы нет"
+ }
+]

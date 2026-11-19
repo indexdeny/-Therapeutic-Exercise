@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>МКФ в работе физического терапевта — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 4, title: 'МКФ в работе физического терапевта', minutes: 10, language: 'ru', next: '../ch005/' };
+
+const ICF_COLS = [['body', 'Функции и структуры', ICF_COL.body], ['act', 'Активность', ICF_COL.act], ['part', 'Участие', ICF_COL.part], ['env', 'Среда', ICF_COL.env], ['pers', 'Личность', ICF_COL.pers]];
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+// A simplified X-ray of a joint: two bone ends with a joint space of width gap (stage coordinates).
+function xray(p, x, y, t0, gap = 8) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x: x - 110, y: y - 80, width: 220, height: 160, rx: 12, fill: '#0b1310', stroke: COL.faint, 'stroke-width': 2 }, g);
+  const up = mk('path', { fill: '#b9c4bf', 'fill-opacity': .8, stroke: 'none' }, g), lo = mk('path', { fill: '#b9c4bf', 'fill-opacity': .8, stroke: 'none' }, g);
+  const set = s => {
+    up.setAttribute('d', `M${x - 26} ${y - 80}V${y - 30}Q${x - 46} ${y - s / 2 - 4} ${x - 20} ${y - s / 2}H${x + 20}Q${x + 46} ${y - s / 2 - 4} ${x + 26} ${y - 30}V${y - 80}Z`);
+    lo.setAttribute('d', `M${x - 30} ${y + 80}V${y + 30}Q${x - 44} ${y + s / 2 + 4} ${x - 22} ${y + s / 2}H${x + 22}Q${x + 44} ${y + s / 2 + 4} ${x + 30} ${y + 30}V${y + 80}Z`);
+  };
+  set(gap);
+  if (t0 !== null) show(g, t0);
+  return { g, set };
+}
+const ROLLER = { aN: 72, eN: 34, aF: 58, eF: 40 };
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'МКФ в работе терапевта', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 1 · Урок 4', { x: 800, y: 260, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'МКФ в работе физического терапевта', { x: 800, y: 355, size: 66, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как модель помогает разобраться в пациенте и выбрать упражнения', 800, 450, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const d = icfDiagram(scene, { x: 800, y: 690, s: .42 });
+    ['hc', 'body', 'act', 'part', 'env', 'pers', 'lines'].forEach((k, i) => d.reveal(k, m('sub', .3 + i * .15)));
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(d.g, D - .9, .8);
+  }],
+
+  ['apta', 'МКФ в практике', (m) => {
+    const p = panel(0), Y = 470;
+    head(p, 'МКФ входит в практику физических терапевтов');
+    show(path(p, `M200 ${Y}H1420`, { stroke: COL.faint, 'stroke-width': 4 }, { o: 0 }), .2);
+    const P4 = [[300, '2001', 'МКФ (ВОЗ)', COL.chalk, .3, -1], [660, '2008', 'APTA официально принимает МКФ', COL.whole, m('y08'), 1],
+      [1000, '2013', '«Руководство», 3-е изд. — электронное', COL.task, m('y13'), -1], [1320, '', 'клинические рекомендации на основе МКФ', COL.good, m('cpg'), 1]];
+    P4.forEach(([x, yr, s, c, t0, side]) => {
+      const dot = mk('circle', { cx: x, cy: Y, r: 14, fill: c }, p);
+      put(dot, { o: 0 }); show(dot, t0);
+      if (yr) txt(p, yr, x, Y + side * 52 + (side > 0 ? 10 : 0), t0, { size: 34, weight: 700, fill: c, anchor: 'middle' });
+      para(p, s, x, Y + side * (yr ? 110 : 60) + (side > 0 ? 10 : -24), t0 + .2, { size: 25, maxW: 300, anchor: 'middle' });
+    });
+  }],
+
+  ['hc', 'Состояние здоровья', (m) => {
+    const p = panel(0);
+    labelBox(p, 420, 190, 460, ['Состояние здоровья'], ICF_COL.hc, .2);
+    ['болезнь', 'расстройство', 'травма'].forEach((s, i) => pill(p, s, 240 + i * 180, 300, m('hc', .3 + i * .25), { col: COL.chalk, size: 23 }));
+    ['старение', 'беременность', 'стресс'].forEach((s, i) => pill(p, s, 240 + i * 180, 370, m('circ', .2 + i * .25), { col: COL.dim, size: 23 }));
+    pill(p, 'основа диагноза · кодируется по МКБ', 420, 460, m('icd'), { col: COL.task, size: 23 });
+    // the same X-ray, two very different lives
+    txt(p, 'ревматоидный артрит: одинаковое разрушение на снимке', 1150, 150, m('two'), { size: 25, weight: 600, anchor: 'middle' });
+    xray(p, 1000, 270, m('two', .3), 4); xray(p, 1300, 270, m('two', .3), 4);
+    const GY = 560;
+    ground(p, 900, 1100, GY, m('diff', -.3)); ground(p, 1200, 1400, GY, m('diff', -.3));
+    const a = fig(p, { x: 990, y: GY - 182 * .45, s: .45, o: 0 }), b = fig(p, { x: 1300, y: GY - 182 * .45, s: .45, o: 0, pose: { t: 16, hd: 16, hN: 20, hF: 12, aN: 36, eN: 30 } });
+    show(a.g, m('diff', -.2)); show(b.g, m('diff', -.2));
+    walk(a, m('diff', .4), 2.4, { cycles: 2, dx: 50 });
+    [[1000, 170, COL.good], [1300, 70, COL.int]].forEach(([x, w, c], i) => {
+      mk('rect', { x: x - 100, y: 600, width: 200, height: 18, rx: 9, fill: 'none', stroke: COL.faint, 'stroke-width': 2 }, p);
+      const bar = mk('rect', { x: x - 100, y: 600, width: 0, height: 18, rx: 9, fill: c }, p);
+      prog(q => bar.setAttribute('width', w * q), m('diff', .4 + i * .3), .9);
+    });
+    txt(p, 'функция', 1150, 660, m('diff', .5), { size: 24, fill: COL.dim, anchor: 'middle' });
+    para(p, 'диагноз не говорит, как человек двигается — терапевт оценивает влияние состояния на движение и функцию', 800, 760, m('assess'), { size: 27, weight: 600, fill: COL.good, maxW: 1200, anchor: 'middle' });
+  }],
+
+  ['body', 'Функции и структуры', (m) => {
+    const p = panel(0);
+    txt(p, 'нарушение = потеря целостности', 800, 84, m('imp'), { size: 30, weight: 700, fill: ICF_COL.body, anchor: 'middle' });
+    txt(p, 'Функции — физиология', 1160, 160, m('fn'), { size: 32, weight: 700, fill: ICF_COL.body, anchor: 'middle' });
+    txt(p, 'Структуры — анатомия', 440, 160, m('st'), { size: 32, weight: 700, fill: ICF_COL.body, anchor: 'middle' });
+    show(path(p, 'M800 130V780', { stroke: COL.faint, 'stroke-width': 2 }, { o: 0 }), .2);
+    const rows = [['видно', 'отёк сустава, рубец, рана, лимфедема, ампутация', 'see'], ['на ощупь', 'спайки, мышечный спазм, хруст в суставе', 'palp'], ['на снимке', 'сужение щели на рентгене, разрыв связки на МРТ', 'img']];
+    rows.forEach(([tg, s, k], i) => {
+      pill(p, tg, 190, 250 + i * 150, m(k), { col: COL.task, size: 24 });
+      para(p, s, 280, 260 + i * 150, m(k, .3), { size: 25, maxW: 470 });
+    });
+    const xr = xray(p, 440, 680, m('img', .6), 22);
+    prog(q => xr.set(lerp(22, 6, q)), m('img', 1.3), 1.8);
+    txt(p, 'щель сужается', 600, 690, m('img', 2.4), { size: 22, fill: COL.dim });
+    ['боль', 'чувствительность', 'объём движений', 'сила, мощность, выносливость', 'равновесие', 'координация', 'рефлексы', 'дыхание'].forEach((s, i) => {
+      pill(p, s, i % 2 ? 1320 : 1010, 260 + Math.floor(i / 2) * 90, m('func', .3 + i * .45), { col: ICF_COL.body, size: 23 });
+    });
+    para(p, 'системы: опорно-двигательная · нервно-мышечная · сердечно-лёгочная · кожа (бокс 1.3)', 1160, 650, m('func', 4), { size: 22, fill: COL.dim, maxW: 600, anchor: 'middle' });
+  }],
+
+  ['prim', 'Типы нарушений', (m) => {
+    const p = panel(0);
+    labelBox(p, 820, 120, 600, ['Поражение вращательной манжеты плеча'], ICF_COL.hc, .2, { size: 25 });
+    txt(p, 'первичные:', 330, 248, m('p1'), { size: 26, weight: 700, fill: ICF_COL.body });
+    ['боль', 'ограничение движений', 'слабость'].forEach((s, i) => {
+      pill(p, s, 560 + i * 260, 240, m('p1', .4 + i * .3), { col: ICF_COL.body, size: 24 });
+      arrowTo(p, [800, 152], [560 + i * 260, 214], m('p1', .2 + i * .3), { col: COL.faint, dur: .4 });
+    });
+    labelBox(p, 260, 120, 300, ['Плохая осанка'], COL.int, m('p2'));
+    arrowTo(p, [412, 120], [514, 120], m('p2', .4), { col: COL.int, w: 4 });
+    txt(p, 'вторичное: из уже существовавшего нарушения', 260, 185, m('p2', .6), { size: 21, fill: COL.int, anchor: 'middle' });
+    show(path(p, 'M120 330H1480', { stroke: COL.faint, 'stroke-width': 2 }, { o: 0 }), m('comp', -.4));
+    txt(p, 'составное нарушение', 800, 390, m('comp'), { size: 32, weight: 700, fill: COL.task, anchor: 'middle' });
+    para(p, 'растяжение голеностопа + несколько недель в ортезе', 800, 438, m('c1'), { size: 25, fill: COL.dim, maxW: 900, anchor: 'middle' });
+    labelBox(p, 800, 770, 420, ['Нарушение равновесия'], COL.task, m('c2'));
+    [['слабая связка', '(структура)', 'c3', 330], ['нарушена', 'проприоцепция', 'c4', 800], ['мышцы ослабли', 'без нагрузки', 'c5', 1270]].forEach(([a, b, k, x]) => {
+      labelBox(p, x, 560, 300, [a, b], ICF_COL.body, m(k), { size: 24 });
+      arrowTo(p, [x, 610], [800 + (x - 800) * .3, 735], m(k, .3), { col: ICF_COL.body, w: 3.5 });
+    });
+  }],
+
+  ['q1', 'Быстрая проверка', () => {
+    const p = panel(0);
+    ['слабая связка', 'проприоцепция', 'слабость мышц'].forEach((s, i) => { pill(p, s, 300, 240 + i * 90, .1, { col: ICF_COL.body, size: 23 }); arrowTo(p, [300, 260 + i * 90], [300, 520], .1, { col: COL.faint, dur: .1 }); });
+    labelBox(p, 300, 560, 300, ['равновесие'], COL.task, .1);
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-composite', prompt: ['После растяжения голеностопа и нескольких недель в ортезе у пациента нарушено равновесие: слабость связки, нарушенная проприоцепция и слабость мышц. Как называют такое нарушение?'],
+    build: choice([['Составное'], ['Первичное'], ['Вторичное']], 0,
+      'Оно складывается из нескольких причин — структурной и функциональных. Это составное нарушение.',
+      [null, 'Первичное возникает прямо из состояния здоровья и одно; здесь причин несколько.', 'Вторичное — следствие уже существовавшего нарушения; здесь же сумма трёх причин.']),
+  }], done) }],
+
+  ['relev', 'От нарушений к жизни', (m) => {
+    const p = panel(0);
+    head(p, 'Функционально значимые нарушения', .2, 86, COL.chalk);
+    txt(p, 'мешают в жизни сейчас или помешают потом', 800, 128, .5, { size: 25, fill: COL.dim, anchor: 'middle' });
+    labelBox(p, 300, 270, 380, ['Объём движений ограничен', 'какая ткань? почему?'], ICF_COL.body, m('cause'), { size: 25 });
+    const lens = G(p, { x: 470, y: 300, o: 0 });
+    mk('circle', { r: 26, fill: 'none', stroke: COL.task, 'stroke-width': 5 }, lens);
+    mk('path', { d: 'M18 18L40 40', stroke: COL.task, 'stroke-width': 7, 'stroke-linecap': 'round' }, lens);
+    pop(lens, m('cause', .5));
+    labelBox(p, 300, 560, 380, ['Нарушения'], ICF_COL.body, m('goal'));
+    ['сила ↑', 'объём движений ↑', 'равновесие ↑'].forEach((s, i) => pill(p, s, 300, 640 + i * 52, m('goal', .4 + i * .3), { col: COL.good, size: 22 }));
+    labelBox(p, 1300, 560, 380, ['Активность и участие'], ICF_COL.act, m('gap', -.3));
+    const dash = path(p, 'M500 560H1100', { stroke: COL.dim, 'stroke-width': 4, 'stroke-dasharray': '12 12' }, { o: 0 });
+    show(dash, m('gap'));
+    txt(p, '?', 800, 540, m('gap', .3), { size: 64, weight: 700, fill: COL.bad, anchor: 'middle' });
+    txt(p, 'не переносится автоматически', 800, 610, m('gap', .5), { size: 25, fill: COL.bad, anchor: 'middle' });
+    arrowTo(p, [500, 500], [1100, 500], m('task'), { c: [800, 330], col: COL.good, w: 6, dur: 1 });
+    txt(p, 'тренировка конкретных задач', 800, 398, m('task', .6), { size: 30, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['act', 'Активность и участие', (m) => {
+    const p = panel(0);
+    txt(p, 'Активность — выполнение задачи или действия', 800, 70, m('a'), { size: 27, weight: 600, fill: ICF_COL.act, anchor: 'middle' });
+    txt(p, 'Участие — вовлечённость в жизненную ситуацию', 800, 112, m('pa'), { size: 27, weight: 600, fill: ICF_COL.part, anchor: 'middle' });
+    const d = icfDiagram(p, { x: 860, y: 470, s: .78 });
+    ['hc', 'body', 'act', 'part', 'lines'].forEach((k, i) => d.reveal(k, .2 + i * .08));
+    whenAt(m('ex', .2), () => d.label('hc', ['Адгезивный капсулит', 'плеча']));
+    whenAt(m('e1', .1), () => d.label('body', ['Объём движений', 'в плече ограничен'], COL.bad));
+    whenAt(m('e2', .1), () => d.label('act', ['Не дотянуться', 'до верхней полки'], COL.bad));
+    whenAt(m('e3', .1), () => d.label('part', ['Уход за собой,', 'домашние дела'], COL.bad));
+    ['body', 'act', 'part'].forEach((k, i) => pulse(d.boxes[k].g, m(['e1', 'e2', 'e3'][i], .2), 1.1));
+    // the figure reaches for a shelf and stops short
+    const GY = 790, f = fig(p, { x: 170, y: GY - 182 * .5, s: .5, o: 0 });
+    ground(p, 90, 300, GY, m('ex')); show(f.g, m('ex'));
+    show(path(p, 'M200 560H300', { stroke: COL.dim, 'stroke-width': 6 }, { o: 0 }), m('e2', -.3));
+    poseTo(f, { aN: 100, eN: 8 }, m('e2'), 1.2);
+    txt(p, '✗', 236, 600, m('e2', 1.3), { size: 40, weight: 700, fill: COL.bad, anchor: 'middle' });
+    para(p, 'лёгкие нарушения не всегда ведут к ограничениям: у каждого свой порог', 860, 820, m('thr'), { size: 26, weight: 600, fill: COL.task, maxW: 1100, anchor: 'middle' });
+  }],
+
+  ['paint', 'Анализ задачи', (m) => {
+    const p = panel(0), XS = [260, 620, 980, 1340], GY = 560, S = .5;
+    const task = labelBox(p, 800, 110, 520, ['Покрасить комнату'], COL.chalk, .2);
+    txt(p, 'задача → составляющие движения', 800, 180, m('task'), { size: 25, fill: COL.dim, anchor: 'middle' });
+    XS.forEach(x => ground(p, x - 140, x + 140, GY, m('task', .3)));
+    const f1 = fig(p, { x: XS[0] - 30, y: GY - 182 * S, s: S, o: 0 });
+    show(f1.g, m('c1', -.2)); poseTo(f1, ROLLER, m('c1', .1), .8);
+    f1.set(ROLLER); const [rx, ry] = onStage(f1, 'WN'); f1.set(STAND);   // the roller sits in the hand of the final pose
+    const roller = G(p, { o: 0 });
+    mk('rect', { x: rx - 6, y: ry - 34, width: 16, height: 46, rx: 6, fill: COL.task }, roller);
+    show(roller, m('c1', .8));
+    const f2 = stepUp(p, XS[1] - 50, GY, S, m('c2', -.2), { dur: .8 });
+    put(f2.g, { o: 0 }); show(f2.g, m('c2', -.2));
+    const f3 = fig(p, { x: XS[2], y: GY - 182 * S, s: S, o: 0 });
+    show(f3.g, m('c3', -.2)); poseTo(f3, { aN: 100, eN: 8, aF: 96, eF: 8 }, m('c3', .1), 1);
+    const f4 = fig(p, { x: XS[3], y: GY - 182 * S, s: S, o: 0 });
+    show(f4.g, m('c4', -.2));
+    const [a4] = onStage(f4, 'AN');
+    poseTo(f4, SQUAT, m('c4', .1), 1, io, ['AN', a4, GY]);
+    [['удержать валик', 'c1'], ['подняться на стремянку', 'c2'], ['руки над головой', 'c3'], ['наклониться, встать на колени', 'c4']].forEach(([s, k], i) => {
+      txt(p, s, XS[i], 610, m(k), { size: 23, anchor: 'middle' });
+      if (i !== 2) checkMark(p, XS[i], 660, m(k, 1), COL.good);
+    });
+    txt(p, '✗', XS[2], 676, m('fail'), { size: 46, weight: 700, fill: COL.bad, anchor: 'middle' });
+    arrowTo(p, [XS[2] + 30, 380], [1064, 120], m('fail', .3), { c: [1080, 300], col: COL.bad, w: 4 });
+    cross(p, 800, 110, 36, m('fail', .9));
+    labelBox(p, 800, 770, 680, ['ремонт дома — моя роль → ограничение участия'], COL.bad, m('role'), { size: 25 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-actpart', prompt: ['Ограничение активности или ограничение участия?'],
+    build: grid([
+      { parts: ['Не может поднять руку над головой, чтобы причесаться'], ans: ['act'], why: 'Трудность выполнить действие — ограничение активности.' },
+      { parts: ['Не может работать маляром'], ans: ['part'], why: 'Работа — жизненная ситуация и роль: ограничение участия.' },
+      { parts: ['Трудно вставать со стула'], ans: ['act'], why: 'Это действие — ограничение активности.' },
+      { parts: ['Перестал ходить на встречи с друзьями в клуб'], ans: ['part'], why: 'Общение с друзьями — участие в жизни.' },
+      { parts: ['Не может ухаживать за маленьким ребёнком'], ans: ['part'], why: 'Забота об иждивенцах — область участия (бокс 1.5).' },
+    ], [['act', 'Активность', ICF_COL.act], ['part', 'Участие', ICF_COL.part]], { multi: false, text: true }),
+  }], done) }],
+
+  ['ctx', 'Факторы контекста', (m) => {
+    const p = panel(0);
+    const d = icfDiagram(p, { x: 800, y: 330, s: .75 });
+    ['hc', 'body', 'act', 'part', 'lines'].forEach((k, i) => { d.reveal(k, .2 + i * .06); });
+    ['hc', 'body', 'act', 'part'].forEach(k => tw(d.boxes[k].g, { o: .35 }, .9, .4));
+    d.reveal('env', .3); d.reveal('pers', .3);
+    pulse(d.boxes.env.g, m('env'), 1.12);
+    ['физическая', 'социальная', 'отношение людей'].forEach((s, i) => pill(p, s, 430 + i * 0, 560 + i * 54, m('env', .3 + i * .3), { col: ICF_COL.env, size: 22 }));
+    txt(p, 'облегчают', 610, 590, m('env', 1.4), { size: 24, weight: 700, fill: COL.good });
+    txt(p, 'или мешают', 610, 630, m('env', 1.7), { size: 24, weight: 700, fill: COL.bad });
+    pulse(d.boxes.pers.g, m('pers'), 1.12);
+    ['возраст, пол', 'образование', 'привычки', 'характер', 'умение справляться'].forEach((s, i) => pill(p, s, 1080 + (i % 2) * 210, 560 + Math.floor(i / 2) * 54, m('pers', .3 + i * .25), { col: ICF_COL.pers, size: 22 }));
+    para(p, '«я инвалид»: ограничения слишком тяжёлые или долгие — и ниже ожиданий человека, семьи и общества', 800, 748, m('perc'), { size: 25, maxW: 1200, anchor: 'middle' });
+    txt(p, 'личностные факторы не кодируют в МКФ, но они влияют на результат', 800, 836, m('code'), { size: 26, weight: 700, fill: ICF_COL.pers, anchor: 'middle' });
+  }],
+
+  ['prev', 'Двусторонний процесс', (m) => {
+    const p = panel(0), Y = 270;
+    head(p, 'Инвалидизация — процесс с обратными связями', .2, 86, COL.chalk);
+    const C4 = [[200, ['Артроз коленей', 'малоактивный человек'], ICF_COL.hc, 'oa'], [560, ['Сгибание ↓', 'сила бёдер ↓'], ICF_COL.body, 'e1'],
+      [930, ['Трудно встать', 'с пола, низкого сиденья'], ICF_COL.act, 'e2'], [1320, ['Ванна, туалет, дом,', 'посадка в машину'], ICF_COL.part, 'e3']];
+    C4.forEach(([x, lines, c, k], i) => {
+      labelBox(p, x, Y, 300, lines, c, m(k), { size: 24 });
+      if (i) {
+        const a = C4[i - 1][0] + 154, b = x - 154;
+        show(path(p, `M${a} ${Y}H${b}M${a + 14} ${Y - 9}L${a} ${Y}L${a + 14} ${Y + 9}M${b - 14} ${Y - 9}L${b} ${Y}L${b - 14} ${Y + 9}`, { stroke: COL.dim, 'stroke-width': 3 }, { o: 0 }), m(k, -.2));
+      }
+    });
+    txt(p, 'Что поможет:', 110, 480, m('help'), { size: 32, weight: 700, fill: COL.good });
+    const H4 = [[300, ['Упражнения', 'объём, сила → в быту'], ICF_COL.body, 'h1', 560], [640, ['Приспособления', 'в доме'], ICF_COL.env, 'h2', 930],
+      [980, ['Роли в семье', 'перераспределить'], ICF_COL.part, 'h3', 1320], [1320, ['Мотивация', 'самого человека'], ICF_COL.pers, 'h4', 1320]];
+    H4.forEach(([x, lines, c, k, to]) => {
+      labelBox(p, x, 600, 290, lines, c, m(k), { size: 24 });
+      if (k !== 'h4') arrowTo(p, [x, 554], [to, Y + 48], m(k, .3), { col: c, w: 3 });
+    });
+  }],
+
+  ['levels', 'Уровни профилактики', (m) => {
+    const p = panel(0);
+    head(p, 'Три уровня профилактики');
+    const L3 = [[160, 520, 'Первичная', 'укрепление здоровья: не допустить болезни у людей из группы риска', COL.good, 'l1'],
+      [600, 440, 'Вторичная', 'раннее выявление, меньше тяжесть и длительность болезни', COL.int, 'l2'],
+      [1040, 360, 'Третичная', 'реабилитация: ограничить прогрессирование при хронических состояниях', COL.nat, 'l3']];
+    L3.forEach(([x, y, h, s, c, k]) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x, y, width: 400, height: 760 - y, rx: 18, fill: c, 'fill-opacity': .12, stroke: c, 'stroke-width': 3 }, g);
+      T(g, h, { x: x + 24, y: y + 48, size: 32, weight: 700, fill: c });
+      put(para(g, s, x + 24, y + 94, null, { size: 23, maxW: 350 }), { o: 1 });
+      tw(g, { o: 1 }, m(k), .5);
+    });
+    labelBox(p, 800, 820, 1200, ['Упражнения — на всех уровнях: остеопороз — силовые и аэробные с опорой на ноги'], COL.task, m('all'), { size: 23 });
+  }],
+
+  ['risk', 'Факторы риска', (m) => {
+    const p = panel(0);
+    head(p, 'Факторы риска существуют ещё до болезни (бокс 1.6)', m('rf'), 86, COL.chalk);
+    const R4 = [['Биологические', 'возраст, пол, вес, наследственность', 'r1'], ['Поведенческие и психологические', 'малоподвижность, курение, питание, низкая мотивация', 'r2'],
+      ['Физическая среда', 'архитектурные барьеры, эргономика', 'r3'], ['Социально- экономические', 'доход, образование, доступ к помощи, поддержка', 'r4']];
+    R4.forEach(([h, s, k], i) => {
+      const x = 100 + i * 355, g = G(p, { o: 0 });
+      roundBox(g, x, 140, 335, 230, COL.bad, PANEL, 2.5);
+      put(para(g, h, x + 20, 186, null, { size: 26, weight: 700, fill: COL.bad, maxW: 300 }), { o: 1 });
+      put(para(g, s, x + 20, 276, null, { size: 22, fill: COL.dim, maxW: 300 }), { o: 1 });
+      show(g, m(k));
+    });
+    labelBox(p, 470, 480, 380, ['знаю о риске'], COL.dim, m('know'));
+    labelBox(p, 1130, 480, 380, ['меняю привычки'], COL.dim, m('know'));
+    arrowTo(p, [672, 480], [928, 480], m('know', .3), { col: COL.dim, w: 4 });
+    cross(p, 800, 480, 28, m('know', .8), 7);
+    txt(p, 'знание само поведение не меняет', 800, 560, m('know', 1), { size: 26, weight: 600, fill: COL.bad, anchor: 'middle' });
+    const sh = G(p, { x: 260, y: 700, o: 0 });
+    path(sh, 'M0 -70C30 -56 52 -58 70 -62C72 6 46 46 0 76C-46 46 -72 6 -70 -62C-52 -58 -30 -56 0 -70Z', { fill: COL.good, 'fill-opacity': .2, stroke: COL.good, 'stroke-width': 4 });
+    pop(sh, m('buf'));
+    txt(p, 'буферы:', 360, 660, m('buf', .2), { size: 28, weight: 700, fill: COL.good });
+    ['регулярные упражнения', 'больше движения днём', 'убрать барьеры', 'вспомогательные средства'].forEach((s, i) => pill(p, s, 560 + (i % 2) * 380, 720 + Math.floor(i / 2) * 60, m('buf', .5 + i * .3), { col: COL.good, size: 22 }));
+  }],
+
+  ['q3', 'Быстрая проверка', () => {
+    const p = panel(0);
+    [['Первичная', COL.good], ['Вторичная', COL.int], ['Третичная', COL.nat]].forEach(([s, c], i) => labelBox(p, 300, 260 + i * 130, 300, [s], c, .1));
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-prevention', prompt: ['Терапевт ведёт программу упражнений у человека с рассеянным склерозом, чтобы замедлить нарастание ограничений. Какой это уровень профилактики?'],
+    build: choice([['Третичная'], ['Первичная'], ['Вторичная']], 0,
+      'Хроническое необратимое состояние; цель — ограничить прогрессирование существующих ограничений. Это третичная профилактика.',
+      [null, 'Первичная — не допустить болезни у людей из группы риска; здесь болезнь уже есть.', 'Вторичная — раннее выявление и уменьшение тяжести; здесь речь о реабилитации при хроническом состоянии.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Диагноз не говорит, как человек двигается: оценивайте влияние состояния на функцию.', 'w1'],
+     ['Нарушения бывают первичными, вторичными и составными; ищите значимые и их причины.', 'w2'],
+     ['Улучшение нарушений само не переносится в жизнь — нужна тренировка задач.', 'w3'],
+     ['Учитывайте среду и личность, три уровня профилактики и факторы риска.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-case', prompt: ['Женщина 62 лет, артроз колена. Куда в МКФ относится каждая находка?'],
+    build: grid([
+      { parts: ['Сужение суставной щели на рентгене'], ans: ['body'], why: 'Анатомическое изменение — нарушение структуры.' },
+      { parts: ['Трудно вставать со стула'], ans: ['act'], why: 'Трудность выполнить действие — ограничение активности.' },
+      { parts: ['Перестала ездить к внукам'], ans: ['part'], why: 'Семейная роль и общение — ограничение участия.' },
+      { parts: ['В ванной нет поручней'], ans: ['env'], why: 'Физическая среда, которая мешает, — барьер.' },
+      { parts: ['Боится упасть и избегает нагрузки'], ans: ['pers'], why: 'Отношение самого человека — личностный фактор.' },
+    ], ICF_COLS, { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Два пациента с одним диагнозом и одинаковым снимком могут иметь разные ограничения.'], ans: ['t'], why: 'Верно: поэтому терапевт оценивает функцию, а не только диагноз.' },
+      { parts: ['Личностные факторы кодируют в МКФ.'], ans: ['f'], why: 'Неверно: их не кодируют, но обязательно учитывают.' },
+      { parts: ['Если увеличить силу и объём движений, активность улучшится автоматически.'], ans: ['f'], why: 'Неверно: нужна ещё тренировка конкретных задач.' },
+      { parts: ['Составное нарушение складывается из нескольких причин.'], ans: ['t'], why: 'Верно: например, слабость связки, проприоцепция и мышцы.' },
+      { parts: ['Знание о факторах риска само по себе меняет поведение.'], ans: ['f'], why: 'Неверно: знание поведение не меняет — нужны буферы и программа.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Грамотность в вопросах здоровья и типы двигательных задач — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 9, title: 'Грамотность в вопросах здоровья и типы двигательных задач', minutes: 9, language: 'ru', next: '../ch010/' };
+
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+// A small object held in the near hand of a figure: it follows every pose change.
+function holdIn(p, f, draw0) {
+  const c = G(p);
+  draw0(c);
+  const upd = () => { const [x, y] = onStage(f, 'WN'); put(c, { x, y }); };
+  f.onSet.push(upd); upd();
+  return c;
+}
+const leaflet = c => {
+  mk('rect', { x: -4, y: -30, width: 34, height: 44, rx: 4, fill: COL.chalk, stroke: COL.dim, 'stroke-width': 2 }, c);
+  [-20, -12, -4, 4].forEach(y => mk('path', { d: `M2 ${y}H24`, stroke: COL.faint, 'stroke-width': 2.5 }, c));
+};
+const cup = c => {
+  mk('path', { d: 'M-6 -26H18L15 0H-3Z', fill: COL.chalk, stroke: COL.dim, 'stroke-width': 2 }, c);
+  mk('path', { d: 'M17 -20Q26 -16 16 -7', fill: 'none', stroke: COL.dim, 'stroke-width': 2.5 }, c);
+};
+// Hamstrings from the ischial tuberosity (fixed to the pelvis) to just below the knee (fixed to the shank).
+function hamstring(f, rest) {
+  const mu = muscleEl(f.g, { rest, w: 13 });
+  f.g.insertBefore(mu.g, f.parts.thN.e.nextSibling);
+  const upd = () => {
+    const P = f.pts, un = (A, B) => { const dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy); return [dx / L, dy / L]; };
+    const w = un(P.H, P.Sh), back = [w[1] * f.dir, -w[0] * f.dir], v = un(P.KN, P.AN), nv = [-v[1] * f.dir, v[0] * f.dir];
+    mu.set([P.H[0] - w[0] * 14 + back[0] * 10, P.H[1] - w[1] * 14 + back[1] * 10], [P.KN[0] + v[0] * 22 + nv[0] * 9, P.KN[1] + v[1] * 22 + nv[1] * 9]);
+  };
+  f.onSet.push(upd); upd();
+  return mu;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Грамотность и типы задач', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 1 · Урок 9', { x: 800, y: 250, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Грамотность в вопросах здоровья', { x: 800, y: 330, size: 60, weight: 600, anchor: 'middle' });
+    T(g, 'и типы двигательных задач', { x: 800, y: 400, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'с чего начинается обучение упражнениям', 800, 490, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 800;
+    path(art, `M640 ${GY}H960`, { stroke: COL.faint, 'stroke-width': 3 });
+    const f = fig(art, { x: 760, y: GY - 182 * .5, s: .5, pose: { aN: 62, eN: 70 } });
+    holdIn(art, f, leaflet);
+    const t = fig(art, { x: 880, y: GY - 182 * .5, s: .5, dir: -1, col: '#b9cfe0', pose: { aN: 40, eN: 40 } });
+    show(art, m('sub', .2));
+    repeatPose(t, { ...STAND, aN: 70, eN: 30 }, m('sub', .6), 2.4, 2);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['hl', 'Грамотность в вопросах здоровья', (m) => {
+    const p = panel(0), GY = 640;
+    para(p, 'Грамотность в вопросах здоровья — способность находить, обрабатывать и понимать информацию о здоровье, чтобы принимать верные решения', 800, 70, m('def'), { size: 27, weight: 700, maxW: 1300, anchor: 'middle' });
+    labelBox(p, 800, 210, 760, ['говорить с каждым на понятном ему языке'], COL.whole, m('resp'), { size: 27 });
+    ground(p, 150, 520, GY, .3); ground(p, 1080, 1450, GY, .3);
+    const th = fig(p, { x: 330, y: GY - 182 * .55, s: .55, col: '#b9cfe0', pose: { aN: 50, eN: 40 } });
+    const pt = fig(p, { x: 1270, y: GY - 182 * .55, s: .55, dir: -1 });
+    put(th.g, { o: 0 }); put(pt.g, { o: 0 }); show(th.g, .3); show(pt.g, .3);
+    txt(p, 'специалист знает', 330, GY + 50, .4, { size: 24, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'что понял пациент?', 1270, GY + 50, .4, { size: 24, fill: COL.task, anchor: 'middle' });
+    const T5 = ['памятки', 'брошюры', 'видео', 'рисунки', 'обратная связь'];
+    T5.forEach((s, i) => {
+      const pl = mk('rect', { x: 520 + i * 112, y: GY - 6, width: 108, height: 20, rx: 5, fill: COL.good, 'fill-opacity': .35, stroke: COL.good, 'stroke-width': 2 }, p);
+      put(pl, { o: 0 }); show(pl, m('tools', .3 + i * .45));
+      pill(p, s, 580 + i * 110, 470 + (i % 2) * 60, m('tools', .3 + i * .45), { col: COL.good, size: 22 });
+    });
+    txt(p, 'разрыв в понимании закрыт', 800, GY + 50, m('gap', .3), { size: 26, weight: 700, fill: COL.good, anchor: 'middle' });
+    walk(pt, m('gap', .6), 1.6, { cycles: 1, dx: -110 });
+    labelBox(p, 800, 770, 980, ['без обучения даже хорошее вмешательство даёт худший результат'], COL.int, m('edu'), { size: 25 });
+  }],
+
+  ['prep', 'Подготовка к обучению', (m) => {
+    const p = panel(0);
+    head(p, 'Подготовка к обучению упражнениям', .2, 76, COL.chalk);
+    const rows = [['отношения', 'мотивирующая атмосфера', 'rel'], ['стиль обучения', '', 'style'], ['отношение к упражнениям', '', 'att'], ['сначала самое простое', 'ранний успех', 'easy'], ['конец занятия', 'удачная попытка', 'end']];
+    rows.forEach(([a, b, k], i) => {
+      const y = 170 + i * 135, g = G(p, { o: 0 });
+      mk('circle', { cx: 150, cy: y - 10, r: 24, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 150, y: y + 1, size: 28, fill: COL.board, weight: 700, anchor: 'middle' });
+      T(g, a, { x: 196, y, size: 30, weight: 700 });
+      if (b) T(g, b, { x: 196, y: y + 40, size: 24, fill: COL.dim });
+      show(g, m(k));
+    });
+    // 1 · two figures facing each other
+    const f1 = fig(p, { x: 820, y: 150, s: .3, col: '#b9cfe0' }), f2 = fig(p, { x: 900, y: 150, s: .3, dir: -1 });
+    [f1, f2].forEach(f => { put(f.g, { o: 0 }); show(f.g, m('rel', .3)); });
+    // 2 · watch · read · do
+    ['смотреть', 'читать', 'делать'].forEach((s, i) => pill(p, s, 780 + i * 190, 300, m('style', .4 + i * .3), { col: COL.whole, size: 25 }));
+    pill(p, 'неясно → несколько способов', 970, 356, m('style', 2.4), { col: COL.dim, size: 22 });
+    // 3 · three questions
+    ['помогут ли?', 'не будет ли дискомфорта?', 'занимается ли регулярно?'].forEach((s, i) => pill(p, s, [780, 1050, 1380][i], 440, m('att', 1 + i * 1.2), { col: COL.int, size: 23 }));
+    // 4 · steps from easy to harder
+    [0, 1, 2, 3].forEach(i => {
+      const r = mk('rect', { x: 720 + i * 90, y: 600 - 22 * (i + 1), width: 70, height: 22 * (i + 1), rx: 6, fill: i ? COL.faint : COL.good, 'fill-opacity': i ? .5 : .8 }, p);
+      put(r, { o: 0 }); show(r, m('easy', .3 + i * .2));
+    });
+    txt(p, 'начать отсюда', 755, 640, m('easy', 1.2), { size: 22, fill: COL.good, anchor: 'middle' });
+    // 5 · success at the end
+    const bar = G(p, { o: 0 });
+    [0, 1, 2, 3, 4].forEach(i => mk('circle', { cx: 760 + i * 70, cy: 715, r: 16, fill: i === 4 ? COL.good : COL.faint }, bar));
+    show(bar, m('end', .2));
+    checkMark(p, 1040, 716, m('end', .6), COL.good, 1.4);
+  }],
+
+  ['tips', 'Практические советы', (m) => {
+    const p = panel(0);
+    head(p, 'Советы для обучения упражнениям', .2, 76, COL.chalk);
+    const T7 = ['Спокойная обстановка, без отвлечений', 'Сначала упражнения, похожие на простые бытовые движения', 'Показать верное и неверное выполнение; пациент повторяет', 'Сначала можно провести пациента через движение руками', 'Чёткие устные и письменные инструкции с рисунками', 'Пациент показывает — терапевт говорит, что получилось и почему', 'Учить программу частями, за несколько визитов'];
+    T7.forEach((s, i) => {
+      const col = i < 4 ? 0 : 1, row = i < 4 ? i : i - 4, x = 110 + col * 720, y = 170 + row * 150;
+      const g = G(p, { o: 0 });
+      roundBox(g, x, y - 46, 680, 124, i === 5 ? COL.good : EDGE, PANEL, i === 5 ? 3 : 2);
+      mk('circle', { cx: x + 44, cy: y + 14, r: 22, fill: COL.task }, g);
+      T(g, String(i + 1), { x: x + 44, y: y + 24, size: 26, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, s, x + 84, y, null, { size: 25, maxW: 570, fill: i === 5 ? COL.good : COL.chalk }), { o: 1 });
+      show(g, m('t' + (i + 1)));
+    });
+  }],
+
+  ['q1', 'Быстрая проверка', () => {
+    const p = panel(0), GY = 640;
+    ground(p, 120, 520, GY, .1);
+    const f = fig(p, { x: 320, y: GY - 182 * .6, s: .6 });
+    const [ax] = onStage(f, 'AN');
+    repeatPose(f, { ...SQUAT, aN: 80, aF: 80 }, .3, 4, 2, ['AN', ax, GY]);
+    pill(p, 'пояснение: пример, не из книги', 320, 230, .3, { col: COL.dim, size: 20 });
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-feedback', prompt: ['Пациент выполнил присед правильно. Какая обратная связь полезнее?'],
+    build: choice([['«Хорошо!»'], ['«Спина осталась прямой, колени — над стопами: это и есть правильная техника»'], ['Промолчать, чтобы не отвлекать']], 1,
+      'Конкретная обратная связь говорит, что получилось и почему.',
+      ['Похвала без деталей не говорит, что именно было верным.', null, 'В начале обучения обратная связь нужна: так пациент учится оценивать движение.']),
+  }], done) }],
+
+  ['ml', 'Моторное обучение', (m) => {
+    const p = panel(0), GY = 560;
+    para(p, 'Моторное обучение — внутренние процессы, благодаря которым через практику навык приобретается и надолго сохраняется', 800, 70, m('def'), { size: 27, weight: 700, maxW: 1300, anchor: 'middle' });
+    ground(p, 160, 560, GY, m('perf', -.3)); ground(p, 1040, 1440, GY, m('learn', -.3));
+    const a = fig(p, { x: 360, y: GY - 182 * .55, s: .55, o: 0 }), b = fig(p, { x: 1240, y: GY - 182 * .55, s: .55, o: 0 });
+    show(a.g, m('perf', -.3)); show(b.g, m('learn', -.3));
+    const [ax] = onStage(a, 'AN'), [bx] = onStage(b, 'AN');
+    repeatPose(a, { ...SQUAT, aN: 80, aF: 80 }, m('perf'), 3, 2, ['AN', ax, GY]);
+    repeatPose(b, { ...SQUAT, aN: 80, aF: 80 }, m('learn', .2), 3, 2, ['AN', bx, GY]);
+    txt(p, 'сегодня', 360, 230, m('perf', -.3), { size: 28, weight: 700, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'через неделю', 1240, 230, m('learn', -.3), { size: 28, weight: 700, fill: COL.good, anchor: 'middle' });
+    labelBox(p, 360, 640, 400, ['выполнение', 'умею сейчас'], COL.whole, m('perf', .4), { size: 28 });
+    labelBox(p, 1240, 640, 400, ['обучение', 'навык сохранился'], COL.good, m('learn', .4), { size: 28 });
+    arrowTo(p, [600, 400], [1000, 400], m('learn'), { col: COL.dim, w: 4 });
+    txt(p, 'время', 800, 385, m('learn', .3), { size: 24, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'хорошо сегодня ≠ усвоил', 800, 470, m('trap'), { size: 30, weight: 700, fill: COL.bad, anchor: 'middle' });
+    const box = G(p, { o: 0 });
+    mk('rect', { x: 585, y: 590, width: 430, height: 120, rx: 18, fill: COL.board, stroke: COL.dim, 'stroke-width': 3, 'stroke-dasharray': '10 8' }, box);
+    T(box, 'обучение не видно напрямую', { x: 800, y: 640, size: 26, weight: 700, anchor: 'middle' });
+    T(box, 'о нём судят по выполнению позже', { x: 800, y: 682, size: 23, fill: COL.dim, anchor: 'middle' });
+    show(box, m('obs'));
+  }],
+
+  ['types', 'Типы задач', (m) => {
+    const p = panel(0), GY = 470;
+    head(p, 'Три типа двигательных задач', .2, 76, COL.chalk);
+    // discrete: one reach with a clear start and end
+    const x1 = 290;
+    txt(p, 'дискретная', x1, 160, m('disc'), { size: 32, weight: 700, fill: COL.whole, anchor: 'middle' });
+    ground(p, x1 - 140, x1 + 140, GY, m('disc'));
+    const f1 = fig(p, { x: x1 - 30, y: GY - 182 * .5, s: .5, o: 0 }); show(f1.g, m('disc'));
+    poseTo(f1, { aN: 95, eN: 8 }, m('disc', .8), 1); poseTo(f1, { aN: STAND.aN, eN: STAND.eN }, m('disc', 2.2), 1);
+    const tl1 = G(p, { o: 0 });
+    path(tl1, `M${x1 - 120} 540H${x1 + 120}M${x1 - 120} 524V556M${x1 + 120} 524V556`, { stroke: COL.whole, 'stroke-width': 5 });
+    T(tl1, 'начало', { x: x1 - 120, y: 590, size: 21, fill: COL.dim, anchor: 'middle' });
+    T(tl1, 'конец', { x: x1 + 120, y: 590, size: 21, fill: COL.dim, anchor: 'middle' });
+    show(tl1, m('disc', .5));
+    para(p, 'сократить мышцу, взять предмет, отжаться, ударить по мячу', x1, 650, m('disc', 1.2), { size: 23, maxW: 400, fill: COL.dim, anchor: 'middle' });
+    // serial: a chain of discrete steps in order
+    const x2 = 800;
+    txt(p, 'серийная', x2, 160, m('ser'), { size: 32, weight: 700, fill: COL.task, anchor: 'middle' });
+    ['взять вилку', 'повернуть', 'наколоть', 'ко рту'].forEach((s, i) => {
+      const y = 230 + i * 78;
+      labelBox(p, x2, y, 250, [s], COL.task, m('ser', 1 + i * .5), { size: 24 });
+      if (i < 3) arrowTo(p, [x2, y + 24], [x2, y + 52], m('ser', 1.3 + i * .5), { col: COL.task, w: 3 });
+    });
+    const tl2 = G(p, { o: 0 });
+    path(tl2, `M${x2 - 120} 540H${x2 + 120}` + [0, 1, 2, 3, 4].map(i => `M${x2 - 120 + i * 60} 528V552`).join(''), { stroke: COL.task, 'stroke-width': 5 });
+    show(tl2, m('ser', 3));
+    para(p, 'есть вилкой, пересесть из кресла-коляски', x2, 650, m('ser', 3.4), { size: 23, maxW: 400, fill: COL.dim, anchor: 'middle' });
+    // continuous: walking without a clear start or end
+    const x3 = 1310;
+    txt(p, 'непрерывная', x3, 160, m('cont'), { size: 32, weight: 700, fill: COL.good, anchor: 'middle' });
+    ground(p, x3 - 140, x3 + 140, GY, m('cont'));
+    const f3 = fig(p, { x: x3, y: GY - 182 * .5, s: .5, o: 0 }); show(f3.g, m('cont'));
+    walk(f3, m('cont', .3), 5, { cycles: 4, dx: 0 });
+    const tl3 = G(p, { o: 0 });
+    path(tl3, `M${x3 - 120} 540` + [0, 1, 2, 3].map(i => `q15 -22 30 0q15 22 30 0`).join(''), { stroke: COL.good, 'stroke-width': 5 });
+    T(tl3, '…', { x: x3 + 140, y: 548, size: 32, fill: COL.good });
+    show(tl3, m('cont', .6));
+    para(p, 'ходьба, подъём по лестнице, велосипед', x3, 650, m('cont', 1), { size: 23, maxW: 400, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'почти все упражнения — дискретные', x1, 760, m('disc', 4), { size: 23, weight: 700, fill: COL.whole, anchor: 'middle' });
+  }],
+
+  ['why', 'Зачем это знать', (m) => {
+    const p = panel(0), GY = 600;
+    head(p, 'Без моторного обучения упражнения не сработают', .2, 76, COL.chalk);
+    ground(p, 120, 760, GY, .2);
+    // long sitting: the hamstrings lengthen as the trunk leans forward with straight knees
+    const f = fig(p, { x: 0, y: 0, s: .95, o: 0, pose: { t: 0, hN: 90, kN: 0, fN: 0, hF: 90, kF: 0, fF: 0, aN: 40, eN: 20, aF: 40, eF: 20 } });
+    plant(f, 'H', 280, GY - 22);
+    hamstring(f, 116);
+    show(f.g, m('ex1', -.3));
+    prog(q => { const e = (1 - Math.cos(Math.PI * clamp(q * 1.4, 0, 1))) / 2; f.set({ t: lerp(0, 32, e), hN: lerp(90, 122, e), hF: lerp(90, 122, e), aN: lerp(40, 108, e), aF: lerp(40, 104, e), eN: lerp(20, 4, e) }); plant(f, 'H', 280, GY - 22); }, m('ex1', .4), 3, lin);
+    const lab = G(p, { o: 0 });
+    path(lab, 'M420 690L400 620', { stroke: ANAT.taut, 'stroke-width': 3 });
+    T(lab, 'растягиваются мышцы задней поверхности бедра', { x: 440, y: 720, size: 24, weight: 700, fill: ANAT.stretch, anchor: 'middle' });
+    show(lab, m('ex1', 2.4));
+    ['правильно встать', 'дозировать силу растяжения', 'управлять движением в новом объёме'].forEach((s, i) => pill(p, s, 440, 220 + i * 62, m(i < 2 ? 'ex1' : 'ex2', i < 2 ? 1.2 + i * 1 : .3), { col: COL.whole, size: 23 }));
+    // posture held across tasks
+    ground(p, 960, 1460, GY, m('ex3', -.3));
+    const a = fig(p, { x: 1080, y: GY - 182 * .55, s: .55, o: 0 }), b = fig(p, { x: 1330, y: GY - 182 * .55, s: .55, o: 0, pose: REACH });
+    [a, b].forEach(x => show(x.g, m('ex3', -.3)));
+    [1080, 1330].forEach(x => show(path(p, `M${x - 4} ${GY - 230}V${GY}`, { stroke: COL.good, 'stroke-width': 2, 'stroke-dasharray': '6 6' }, { o: 0 }), m('ex3', .4)));
+    txt(p, 'осанка — в разных задачах', 1210, 670, m('ex3', .6), { size: 25, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'чтобы боль не вернулась', 1210, 710, m('ex3', 1), { size: 23, fill: COL.dim, anchor: 'middle' });
+    labelBox(p, 800, 790, 1000, ['упражнения и функциональная тренировка требуют моторного обучения'], COL.task, m('must'), { size: 24 });
+  }],
+
+  ['gentile', 'Таксономия Джентайл', (m) => {
+    const p = panel(0);
+    head(p, 'Таксономия задач Джентайл', .2, 70, COL.chalk);
+    const D4 = [['среда', 'закрытая · открытая', 'd1'], ['вариативность между попытками', 'нет · есть', 'd2'], ['тело', 'неподвижно · перемещается', 'd3'], ['руки', 'без предметов · с предметами', 'd4']];
+    D4.forEach(([a, b, k], i) => {
+      const g = G(p, { o: 0 });
+      roundBox(g, 70, 130 + i * 112, 480, 92, COL.whole, PANEL, 2);
+      T(g, a, { x: 94, y: 168 + i * 112, size: 24, weight: 700, fill: COL.whole });
+      T(g, b, { x: 94, y: 202 + i * 112, size: 22, fill: COL.dim });
+      show(g, m(k));
+    });
+    const X0 = 760, Y0 = 210, CW = 190, CH = 120;
+    const rowsH = [['закрытая', 'без вариаций'], ['закрытая', 'с вариациями'], ['открытая', 'без вариаций'], ['открытая', 'с вариациями']];
+    const colsH = [['тело на месте', 'без предмета'], ['тело на месте', 'с предметом'], ['перемещение', 'без предмета'], ['перемещение', 'с предметом']];
+    const gg = G(p, { o: 0 });
+    colsH.forEach(([a, b], j) => { T(gg, a, { x: X0 + j * CW + CW / 2, y: Y0 - 44, size: 19, weight: 700, fill: COL.task, anchor: 'middle' }); T(gg, b, { x: X0 + j * CW + CW / 2, y: Y0 - 18, size: 18, fill: COL.dim, anchor: 'middle' }); });
+    rowsH.forEach(([a, b], i) => { T(gg, a, { x: X0 - 16, y: Y0 + i * CH + 54, size: 19, weight: 700, fill: COL.good, anchor: 'end' }); T(gg, b, { x: X0 - 16, y: Y0 + i * CH + 80, size: 18, fill: COL.dim, anchor: 'end' }); });
+    show(gg, m('grid'));
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) {
+      const k = i + j, c = mk('rect', { x: X0 + j * CW + 4, y: Y0 + i * CH + 4, width: CW - 8, height: CH - 8, rx: 12, fill: mix(COL.good, COL.bad, k / 6), 'fill-opacity': .14 + k * .07, stroke: mix(COL.good, COL.bad, k / 6), 'stroke-width': 2 }, p);
+      put(c, { o: 0 }); show(c, m('grid', .4 + k * .25));
+      const n = T(p, String(i * 4 + j + 1), { x: X0 + j * CW + CW / 2, y: Y0 + i * CH + CH / 2 + 12, size: 32, weight: 700, fill: COL.chalk, anchor: 'middle', o: 0 });
+      show(n, m('grid', .4 + k * .25));
+    }
+    txt(p, 'проще', X0 + 10, Y0 + 4 * CH + 44, m('grid', 2.2), { size: 25, weight: 700, fill: COL.good });
+    txt(p, 'сложнее', X0 + 4 * CW - 10, Y0 + 4 * CH + 44, m('grid', 2.2), { size: 25, weight: 700, fill: COL.bad, anchor: 'end' });
+    arrowTo(p, [X0 + 110, Y0 + 4 * CH + 36], [X0 + 4 * CW - 140, Y0 + 4 * CH + 36], m('grid', 2.4), { col: COL.dim, w: 3 });
+  }],
+
+  ['dims', 'Измерения на примерах', (m) => {
+    const p = panel(0), S = .3, H = 182 * S;
+    txt(p, 'проще', 640, 80, .2, { size: 30, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'сложнее', 1160, 80, .2, { size: 30, weight: 700, fill: COL.bad, anchor: 'middle' });
+    show(path(p, 'M900 110V790', { stroke: COL.faint, 'stroke-width': 2 }, { o: 0 }), .2);
+    const rowLab = (y, a, k) => txt(p, a, 110, y, m(k), { size: 27, weight: 700, fill: COL.whole });
+    const note = (x, y, s, k, off = .6) => txt(p, s, x, y, m(k, off), { size: 21, fill: COL.dim, anchor: 'middle' });
+    // row 1 — environment
+    let GY = 250;
+    rowLab(GY - 40, 'среда', 'cl');
+    ground(p, 540, 760, GY, m('cl'));
+    const sink = G(p, { o: 0 });
+    path(sink, `M680 ${GY}V${GY - 62}M650 ${GY - 62}H740M660 ${GY - 62}Q695 ${GY - 30} 730 ${GY - 62}M720 ${GY - 62}V${GY - 92}H706`, { stroke: COL.dim, 'stroke-width': 4 });
+    show(sink, m('cl'));
+    const a1 = fig(p, { x: 600, y: GY - H, s: S, o: 0, pose: { aN: 62, eN: 34, aF: 58, eF: 34, t: 8 } }); show(a1.g, m('cl'));
+    note(640, GY + 32, 'закрытая: темп задаёт пациент', 'cl');
+    const plat = G(p, { x: 1160, y: GY - 6, o: 0 });
+    mk('rect', { x: -80, y: -6, width: 160, height: 12, rx: 5, fill: COL.int, 'fill-opacity': .5, stroke: COL.int, 'stroke-width': 2 }, plat);
+    path(plat, 'M-20 6Q0 30 20 6', { stroke: COL.int, 'stroke-width': 3 });
+    fig(plat, { x: 0, y: -6 - H, s: S, pose: { aN: 40, aF: 40, eN: 10, eF: 10 } });
+    show(plat, m('op'));
+    prog(q => put(plat, { r: 7 * Math.sin(2 * Math.PI * 3 * q) }), m('op', .2), 6, lin);
+    note(1160, GY + 46, 'открытая: темп задаёт среда', 'op');
+    pill(p, 'люди на лестнице · автобус · платформа', 1160, GY - 120, m('op', .6), { col: COL.int, size: 20 });
+    // row 2 — intertrial variability
+    GY = 420;
+    rowLab(GY - 40, 'вариативность', 'var');
+    [0, 1, 2].forEach(i => { const r = mk('rect', { x: 560 + i * 60, y: GY - 44, width: 44, height: 44, rx: 5, fill: COL.task, 'fill-opacity': .35, stroke: COL.task, 'stroke-width': 3 }, p); put(r, { o: 0 }); show(r, m('var', .2 + i * .2)); });
+    [[30, 30], [56, 40], [42, 70]].forEach(([w, h], i) => { const r = mk('rect', { x: 1060 + i * 75, y: GY - h, width: w, height: h, rx: 5, fill: COL.task, 'fill-opacity': .35, stroke: COL.task, 'stroke-width': 3 }, p); put(r, { o: 0 }); show(r, m('var', 2 + i * .2)); });
+    note(640, GY + 34, 'одна и та же коробка', 'var', .4);
+    note(1160, GY + 34, 'коробки разные', 'var', 2.2);
+    // row 3 — body stability vs transport
+    GY = 590;
+    rowLab(GY - 40, 'тело', 'tr');
+    ground(p, 540, 740, GY, m('tr')); ground(p, 1020, 1300, GY, m('tr'));
+    const b1 = fig(p, { x: 640, y: GY - H, s: S, o: 0 }), b2 = fig(p, { x: 1100, y: GY - H, s: S, o: 0 });
+    [b1, b2].forEach(f => show(f.g, m('tr')));
+    walk(b2, m('tr', .3), 3, { cycles: 3, dx: 120 });
+    note(640, GY + 32, 'стоять на месте', 'tr', .3);
+    note(1160, GY + 32, 'перемещаться', 'tr', .3);
+    // row 4 — manipulation
+    GY = 760;
+    rowLab(GY - 40, 'руки', 'man');
+    ground(p, 520, 780, GY, m('man')); ground(p, 1000, 1320, GY, m('man'));
+    const c1 = fig(p, { x: 580, y: GY - H, s: S, o: 0 }), c2 = fig(p, { x: 1060, y: GY - H, s: S, o: 0, pose: { aN: 70, eN: 70 } });
+    const cp = holdIn(p, c2, cup); put(cp, { o: 0 });
+    [c1.g, c2.g, cp].forEach(e => show(e, m('man')));
+    walk(c1, m('man', .3), 3, { cycles: 3, dx: 120 });
+    [[1240, 1], [1290, -1]].forEach(([x, d], i) => { const q = fig(p, { x, y: GY - H, s: S, dir: d, o: 0, col: '#8d9b95' }); show(q.g, m('man', 2.6 + i * .3), .4); walk(q, m('man', 2.8 + i * .3), 2.4, { cycles: 2, dx: d * 60 }); });
+    note(640, GY + 30, 'пустые руки', 'man', .4);
+    note(1160, GY + 30, 'чашка кофе в людном коридоре', 'man', 2.6);
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-types', prompt: ['Какой это тип двигательной задачи?'],
+    build: grid([
+      { parts: ['Отжимание'], ans: ['d'], why: 'Ясное начало и конец — дискретная задача.' },
+      { parts: ['Есть вилкой'], ans: ['s'], why: 'Цепочка движений в определённом порядке — серийная.' },
+      { parts: ['Подъём по лестнице'], ans: ['c'], why: 'Повторяется без чёткого начала и конца — непрерывная.' },
+      { parts: ['Поставить кресло-коляску на тормоз'], ans: ['d'], why: 'Одно законченное движение — дискретная.' },
+      { parts: ['Пересесть из кресла-коляски на кровать'], ans: ['s'], why: 'Несколько шагов по порядку — серийная.' },
+    ], [['d', 'Дискретная', COL.whole], ['s', 'Серийная', COL.task], ['c', 'Непрерывная', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Учитывайте грамотность пациента: понятный язык, рисунки, проверка понимания.', 'w1'],
+     ['Начинайте с простого, показывайте, давайте конкретную обратную связь, учите частями.', 'w2'],
+     ['Выполнение сейчас — ещё не обучение: обучение включает сохранение навыка.', 'w3'],
+     ['Задачи дискретные, серийные и непрерывные; усложнять помогает таксономия Джентайл.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-gentile', prompt: ['По таксономии Джентайл: какая задача сложнее всего?'],
+    build: choice([
+      ['Стоять у раковины и мыть руки'],
+      ['Поднимать одну и ту же коробку на полку'],
+      ['Нести чашку кофе по людному коридору'],
+      ['Сидя сжимать мяч в руке'],
+    ], 2, 'Открытая среда, перемещение тела и предмет в руке — сложнее всего.',
+    ['Закрытая среда, тело на месте — это простая задача.', 'Предмет есть, но среда закрытая и без вариаций, тело на месте.', null, 'Тело неподвижно, среда закрытая — задача простая.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Если пациент хорошо выполнил упражнение на первом занятии, он его усвоил.'], ans: ['f'], why: 'Неверно: выполнение сейчас — ещё не обучение.' },
+      { parts: ['Обучение нельзя увидеть напрямую — о нём судят по выполнению позже.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Ходьба — дискретная задача.'], ans: ['f'], why: 'Неверно: ходьба — непрерывная задача.' },
+      { parts: ['Занятие лучше заканчивать удачной попыткой.'], ans: ['t'], why: 'Верно: это поддерживает мотивацию.' },
+      { parts: ['В открытой среде темп задаёт сам пациент.'], ans: ['f'], why: 'Неверно: в открытой среде темп задаёт среда.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

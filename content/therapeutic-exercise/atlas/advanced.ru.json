@@ -1,0 +1,668 @@
+{
+  "region": "advanced",
+  "exercises": [
+    {
+      "id": "adv-sit-unst",
+      "ru": "Сидя на неустойчивой опоре",
+      "en": "sitting on an unstable surface: reaching and perturbations",
+      "joint": [
+        "trunk",
+        "body"
+      ],
+      "goal": [
+        "balance",
+        "control"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "ball",
+        "board",
+        "band"
+      ],
+      "key": [
+        "тянуться одной, двумя руками, с грузом",
+        "терапевт двигает опору и толкает",
+        "ловить и бросать мяч"
+      ],
+      "page": 907,
+      "moments": [
+        {
+          "n": 229,
+          "beat": "sit",
+          "mark": "unst",
+          "to": "pert"
+        }
+      ]
+    },
+    {
+      "id": "adv-half-kneel",
+      "ru": "Полуприсед на колене и стойка на коленях",
+      "en": "half-kneeling and kneeling stabilization",
+      "joint": [
+        "trunk",
+        "hip"
+      ],
+      "goal": [
+        "balance",
+        "control"
+      ],
+      "pos": [
+        "kneel"
+      ],
+      "gear": [
+        "band",
+        "weight",
+        "roll",
+        "board"
+      ],
+      "key": [
+        "одно колено на полу, стопа впереди",
+        "диагонали руками против ленты",
+        "потом на валике или полусфере"
+      ],
+      "page": 908,
+      "moments": [
+        {
+          "n": 229,
+          "beat": "kneel",
+          "mark": "pos",
+          "to": "unst"
+        }
+      ]
+    },
+    {
+      "id": "adv-bil",
+      "ru": "Стойка на двух ногах с толчками",
+      "en": "bilateral stance with perturbations",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "balance",
+        "control"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "ball",
+        "board",
+        "band",
+        "manual"
+      ],
+      "key": [
+        "ловить мяч, поворот в бёдрах",
+        "тандем — терапевт толкает таз",
+        "доска: края не касаются пола"
+      ],
+      "page": 908,
+      "moments": [
+        {
+          "n": 229,
+          "beat": "bil",
+          "mark": "ready",
+          "to": "unst"
+        }
+      ]
+    },
+    {
+      "id": "sl-stance",
+      "ru": "Стойка на одной ноге: руки и неустойчивая опора",
+      "en": "unilateral stance: arm patterns, unstable surface",
+      "joint": [
+        "knee",
+        "hip",
+        "ankle"
+      ],
+      "goal": [
+        "balance",
+        "control"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "weight",
+        "band",
+        "board"
+      ],
+      "key": [
+        "диагонали руками с лентой",
+        "полусфера: круглая → плоская сторона",
+        "мах свободной ногой"
+      ],
+      "page": 910,
+      "moments": [
+        {
+          "n": 229,
+          "beat": "uni",
+          "mark": "start",
+          "to": "arms"
+        },
+        {
+          "n": 229,
+          "beat": "uni",
+          "mark": "unst"
+        },
+        {
+          "n": 229,
+          "beat": "uni",
+          "mark": "more"
+        }
+      ]
+    },
+    {
+      "id": "star-reach",
+      "ru": "«Звёздочка» на одной ноге",
+      "en": "star excursion reaching",
+      "joint": [
+        "knee",
+        "hip",
+        "ankle"
+      ],
+      "goal": [
+        "balance",
+        "control"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "стопа в центре звёздочки",
+        "другой ногой коснуться каждой линии",
+        "потом сменить ногу"
+      ],
+      "page": 910,
+      "moments": [
+        {
+          "n": 229,
+          "beat": "uni",
+          "mark": "star"
+        },
+        {
+          "n": 229,
+          "beat": "uni",
+          "mark": "pnf"
+        }
+      ]
+    },
+    {
+      "id": "move-freeze",
+      "ru": "«Двигайся и замри»",
+      "en": "moving and planting: jump, shuffle, run and freeze",
+      "joint": [
+        "knee",
+        "ankle",
+        "hip"
+      ],
+      "goal": [
+        "balance",
+        "function"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "step",
+        "none"
+      ],
+      "key": [
+        "спрыгнуть и удержать позу",
+        "приставные шаги — и стоп",
+        "бег — остановка по свистку"
+      ],
+      "page": 912,
+      "moments": [
+        {
+          "n": 229,
+          "beat": "plant",
+          "mark": "jump",
+          "to": "run"
+        },
+        {
+          "n": 229,
+          "beat": "plant",
+          "mark": "why"
+        }
+      ]
+    },
+    {
+      "id": "treadmill-hands",
+      "ru": "«Шаги» руками по дорожке и степперу",
+      "en": "upper-extremity weight bearing on a treadmill or stepper",
+      "joint": [
+        "shoulder",
+        "elbow"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "kneel"
+      ],
+      "gear": [
+        "machine"
+      ],
+      "key": [
+        "стоя на коленях у дорожки",
+        "руки «шагают» по полотну",
+        "или давят на педали степпера"
+      ],
+      "page": 914,
+      "moments": [
+        {
+          "n": 230,
+          "beat": "ue1",
+          "mark": "wb"
+        },
+        {
+          "n": 171,
+          "beat": "eq",
+          "mark": "step"
+        }
+      ]
+    },
+    {
+      "id": "adv-pushups",
+      "ru": "Отжимания на неустойчивой опоре и головой вниз",
+      "en": "push-ups on unstable surfaces and head-down",
+      "joint": [
+        "shoulder",
+        "elbow"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "prone",
+        "sit"
+      ],
+      "gear": [
+        "ball",
+        "roll",
+        "board",
+        "step"
+      ],
+      "key": [
+        "сидя — пятки на валике, поднять таз",
+        "руки на мяче, колени на валике",
+        "ноги выше — больше веса на руки"
+      ],
+      "page": 915,
+      "moments": [
+        {
+          "n": 230,
+          "beat": "ue2",
+          "mark": "unst"
+        },
+        {
+          "n": 230,
+          "beat": "ue2",
+          "mark": "seat",
+          "to": "step"
+        }
+      ]
+    },
+    {
+      "id": "ball-walkout",
+      "ru": "«Прогулка» на руках с мячом",
+      "en": "ball walk-out",
+      "joint": [
+        "shoulder",
+        "trunk"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "prone"
+      ],
+      "gear": [
+        "ball"
+      ],
+      "key": [
+        "голени на большом мяче",
+        "«шагать» руками вперёд и назад",
+        "между шагами — отжимание"
+      ],
+      "page": 916,
+      "moments": [
+        {
+          "n": 230,
+          "beat": "ue2",
+          "mark": "walk"
+        }
+      ]
+    },
+    {
+      "id": "bear-crawl",
+      "ru": "«Медвежья» ходьба",
+      "en": "plantigrade (bear) walking",
+      "joint": [
+        "shoulder",
+        "body"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "quad"
+      ],
+      "gear": [
+        "none",
+        "band"
+      ],
+      "key": [
+        "на кистях и стопах",
+        "держать лопатки и плечи",
+        "потом против шнура на тазу"
+      ],
+      "page": 917,
+      "moments": [
+        {
+          "n": 230,
+          "beat": "ue2",
+          "mark": "bear"
+        }
+      ]
+    },
+    {
+      "id": "ball-curl",
+      "ru": "Сгибание голеней на мяче",
+      "en": "supine hamstring curls on a ball",
+      "joint": [
+        "knee",
+        "hip"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "ball"
+      ],
+      "key": [
+        "стопы на большом мяче",
+        "подкатывать мяч к тазу",
+        "потом одной ногой"
+      ],
+      "page": 917,
+      "moments": [
+        {
+          "n": 230,
+          "beat": "le1",
+          "mark": "curl"
+        }
+      ]
+    },
+    {
+      "id": "nordic",
+      "ru": "Наклон вперёд на коленях",
+      "en": "kneeling hamstring (Nordic) lowering",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "kneel"
+      ],
+      "gear": [
+        "manual",
+        "weight"
+      ],
+      "key": [
+        "терапевт держит голени",
+        "наклон вперёд с прямым туловищем",
+        "отклонение назад — четырёхглавая"
+      ],
+      "page": 917,
+      "moments": [
+        {
+          "n": 230,
+          "beat": "le1",
+          "mark": "kneel"
+        }
+      ]
+    },
+    {
+      "id": "deep-squat",
+      "ru": "Глубокий присед",
+      "en": "deep squat",
+      "joint": [
+        "knee",
+        "hip"
+      ],
+      "goal": [
+        "strength",
+        "function"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "weight"
+      ],
+      "key": [
+        "вес на пятках",
+        "голени вертикальнее, колени не за носки",
+        "руки вперёд или о стол"
+      ],
+      "page": 918,
+      "moments": [
+        {
+          "n": 230,
+          "beat": "le1",
+          "mark": "squat"
+        }
+      ]
+    },
+    {
+      "id": "sled",
+      "ru": "Сани и бег против шнура",
+      "en": "pulling or pushing a heavy sled; resisted running",
+      "joint": [
+        "hip",
+        "knee",
+        "body"
+      ],
+      "goal": [
+        "strength",
+        "function"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "weight",
+        "band"
+      ],
+      "key": [
+        "тянуть или толкать силой ног",
+        "груз — постепенно",
+        "старт против шнура на поясе"
+      ],
+      "page": 921,
+      "moments": [
+        {
+          "n": 230,
+          "beat": "le2",
+          "mark": "sled"
+        }
+      ]
+    },
+    {
+      "id": "plyo-rotators",
+      "ru": "Плиометрика для ротаторов плеча",
+      "en": "plyometric drills for the shoulder rotators",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength",
+        "function"
+      ],
+      "pos": [
+        "stand",
+        "prone",
+        "kneel"
+      ],
+      "gear": [
+        "band",
+        "ball"
+      ],
+      "key": [
+        "лента: отпустить и быстро вернуть",
+        "лёжа: удар мячом об пол",
+        "обратная ловля спиной к терапевту"
+      ],
+      "warn": "не при воспалении, боли и нестабильности сустава; сначала учат безопасному приземлению",
+      "page": 926,
+      "moments": [
+        {
+          "n": 232,
+          "beat": "ueu",
+          "mark": "band",
+          "to": "rev"
+        }
+      ]
+    },
+    {
+      "id": "plyo-wb",
+      "ru": "Плиометрика с опорой на руки",
+      "en": "upper-extremity weight-bearing plyometrics",
+      "joint": [
+        "shoulder",
+        "elbow"
+      ],
+      "goal": [
+        "strength",
+        "function"
+      ],
+      "pos": [
+        "stand",
+        "kneel",
+        "prone"
+      ],
+      "gear": [
+        "none",
+        "step"
+      ],
+      "key": [
+        "оттолкнуться от стены, поймав себя",
+        "в стороны от столешницы",
+        "отжимания с хлопком"
+      ],
+      "warn": "не при воспалении, боли и нестабильности сустава; сначала учат безопасному приземлению",
+      "page": 929,
+      "moments": [
+        {
+          "n": 232,
+          "beat": "uewb",
+          "mark": "slide",
+          "to": "pu"
+        }
+      ]
+    },
+    {
+      "id": "plyo-jumps",
+      "ru": "Плиометрика ног: прыжки",
+      "en": "squat jumps, bounding, four-quadrant and tuck jumps",
+      "joint": [
+        "knee",
+        "hip",
+        "ankle"
+      ],
+      "goal": [
+        "function",
+        "strength"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "weight"
+      ],
+      "key": [
+        "приземляться в присед, без вальгуса",
+        "серии вперёд, потом на одной ноге",
+        "квадраты — быстрая смена направления"
+      ],
+      "warn": "не при воспалении, боли и нестабильности сустава; сначала учат безопасному приземлению",
+      "page": 932,
+      "moments": [
+        {
+          "n": 232,
+          "beat": "le2",
+          "mark": "squat",
+          "to": "lunge"
+        },
+        {
+          "n": 231,
+          "beat": "box1",
+          "mark": "le"
+        },
+        {
+          "n": 231,
+          "beat": "prec",
+          "mark": "prec",
+          "to": "more"
+        }
+      ]
+    },
+    {
+      "id": "plyo-boxes",
+      "ru": "Плиометрика ног: платформы и препятствия",
+      "en": "platform jumping and hopping over objects",
+      "joint": [
+        "knee",
+        "ankle"
+      ],
+      "goal": [
+        "function",
+        "strength"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "step"
+      ],
+      "key": [
+        "зигзаг всё быстрее и дальше",
+        "запрыгнуть — спрыгнуть, приземлиться",
+        "сначала скорость, потом высота"
+      ],
+      "warn": "не при воспалении, боли и нестабильности сустава; сначала учат безопасному приземлению",
+      "page": 935,
+      "moments": [
+        {
+          "n": 232,
+          "beat": "le3",
+          "mark": "zig",
+          "to": "obst",
+          "shot": 8
+        },
+        {
+          "n": 231,
+          "beat": "def",
+          "mark": "ex"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,665 @@
+{
+  "chapter": 9,
+  "terms": [
+    {
+      "id": "aquatic-exercise",
+      "ru": "Упражнения в воде",
+      "en": "aquatic exercise",
+      "def": "Занятия в бассейнах разной глубины или специальных ваннах: вода облегчает растяжку, силовые упражнения, тренировку равновесия, ходьбы и выносливости, а поплавки позволяют выбрать любое положение.",
+      "page": 295,
+      "moments": [
+        {
+          "n": 95,
+          "beat": "def",
+          "mark": "what",
+          "to": "pos"
+        },
+        {
+          "n": 95,
+          "beat": "goals",
+          "mark": "goals",
+          "to": "g9"
+        }
+      ],
+      "see": [
+        "buoyancy",
+        "hydrostatic-pressure",
+        "therapeutic-pool"
+      ]
+    },
+    {
+      "id": "buoyancy",
+      "ru": "Плавучесть",
+      "en": "buoyancy",
+      "alt": [
+        "выталкивающая сила"
+      ],
+      "def": "Сила, направленная вверх, против силы тяжести. В воде до передней верхней ости подвздошной кости на ноги приходится половина веса, до мечевидного отростка — треть, по шею — 10 %.",
+      "page": 297,
+      "moments": [
+        {
+          "n": 96,
+          "beat": "buoy",
+          "mark": "def",
+          "to": "c7"
+        },
+        {
+          "n": 96,
+          "beat": "assist",
+          "mark": "unload",
+          "to": "str"
+        }
+      ],
+      "see": [
+        "archimedes-principle",
+        "center-of-buoyancy",
+        "buoyancy-assisted"
+      ]
+    },
+    {
+      "id": "archimedes-principle",
+      "ru": "Закон Архимеда",
+      "en": "Archimedes’ principle",
+      "def": "На погружённое тело действует выталкивающая сила, равная весу вытесненной им жидкости.",
+      "page": 297,
+      "moments": [
+        {
+          "n": 96,
+          "beat": "buoy",
+          "mark": "arch"
+        }
+      ],
+      "see": [
+        "buoyancy"
+      ]
+    },
+    {
+      "id": "hydrostatic-pressure",
+      "ru": "Гидростатическое давление",
+      "en": "hydrostatic pressure",
+      "def": "Давление воды на погружённое тело; растёт с глубиной. Уменьшает выпот в суставе, помогает венозному возврату, смещает кровь к центру; мешает лёгким расправляться.",
+      "page": 297,
+      "moments": [
+        {
+          "n": 96,
+          "beat": "press",
+          "mark": "press",
+          "to": "surf"
+        },
+        {
+          "n": 95,
+          "beat": "resp",
+          "mark": "press"
+        }
+      ],
+      "see": [
+        "pascals-law",
+        "buoyancy"
+      ]
+    },
+    {
+      "id": "pascals-law",
+      "ru": "Закон Паскаля",
+      "en": "Pascal’s law",
+      "def": "Жидкость давит на погружённое тело одинаково со всех сторон; давление растёт с плотностью жидкости и глубиной.",
+      "page": 297,
+      "moments": [
+        {
+          "n": 96,
+          "beat": "press",
+          "mark": "pascal",
+          "to": "depth"
+        }
+      ],
+      "see": [
+        "hydrostatic-pressure"
+      ]
+    },
+    {
+      "id": "viscosity",
+      "ru": "Вязкость",
+      "en": "viscosity",
+      "def": "Трение между молекулами жидкости, из-за которого она сопротивляется течению. Сопротивление растёт со скоростью движения и с площадью, которая движется сквозь воду.",
+      "page": 298,
+      "moments": [
+        {
+          "n": 96,
+          "beat": "visc",
+          "mark": "visc",
+          "to": "area"
+        }
+      ],
+      "see": [
+        "drag",
+        "surface-tension"
+      ]
+    },
+    {
+      "id": "surface-tension",
+      "ru": "Поверхностное натяжение",
+      "en": "surface tension",
+      "def": "Поверхность жидкости ведёт себя как натянутая плёнка: конечность, которая пересекает поверхность, работает больше, чем под водой, а снаряд у поверхности добавляет сопротивление.",
+      "page": 298,
+      "moments": [
+        {
+          "n": 96,
+          "beat": "surf",
+          "mark": "surf",
+          "to": "equip"
+        }
+      ],
+      "see": [
+        "viscosity",
+        "drag"
+      ]
+    },
+    {
+      "id": "hydromechanics",
+      "ru": "Гидромеханика",
+      "en": "hydromechanics",
+      "def": "Физические свойства жидкости в движении; на поток влияют три фактора — ламинарное и турбулентное течение и лобовое сопротивление.",
+      "page": 298,
+      "moments": [
+        {
+          "n": 96,
+          "beat": "flow",
+          "mark": "flow"
+        }
+      ],
+      "see": [
+        "laminar-flow",
+        "turbulent-flow",
+        "drag"
+      ]
+    },
+    {
+      "id": "laminar-flow",
+      "ru": "Ламинарный поток",
+      "en": "laminar flow",
+      "def": "Течение, в котором все молекулы движутся параллельно друг другу; обычно при медленном движении.",
+      "page": 298,
+      "moments": [
+        {
+          "n": 96,
+          "beat": "flow",
+          "mark": "lam"
+        }
+      ],
+      "see": [
+        "turbulent-flow",
+        "hydromechanics"
+      ]
+    },
+    {
+      "id": "turbulent-flow",
+      "ru": "Турбулентный поток",
+      "en": "turbulent flow",
+      "def": "Течение, в котором молекулы движутся не параллельно; обычно при более быстром движении.",
+      "page": 298,
+      "moments": [
+        {
+          "n": 96,
+          "beat": "flow",
+          "mark": "turb"
+        }
+      ],
+      "see": [
+        "laminar-flow",
+        "drag"
+      ]
+    },
+    {
+      "id": "drag",
+      "ru": "Лобовое сопротивление",
+      "en": "drag",
+      "alt": [
+        "гидродинамическое сопротивление"
+      ],
+      "def": "Суммарное действие турбулентности и вязкости на движущийся предмет: чем быстрее движение и больше площадь, тем оно больше; перчатки, лопатки и ботинки его увеличивают.",
+      "page": 298,
+      "moments": [
+        {
+          "n": 96,
+          "beat": "flow",
+          "mark": "drag",
+          "to": "equip"
+        },
+        {
+          "n": 99,
+          "beat": "manual",
+          "mark": "drag"
+        },
+        {
+          "n": 99,
+          "beat": "indep",
+          "mark": "bsr"
+        }
+      ],
+      "see": [
+        "viscosity",
+        "turbulent-flow",
+        "buoyancy-superresisted"
+      ]
+    },
+    {
+      "id": "thermodynamics",
+      "ru": "Термодинамика воды",
+      "en": "thermodynamics",
+      "def": "Влияние температуры воды на тело: вода удерживает тепло в тысячу раз лучше воздуха и проводит его в 25 раз быстрее; движущийся в воде пациент теряет тепло быстрее.",
+      "page": 299,
+      "moments": [
+        {
+          "n": 96,
+          "beat": "thermo",
+          "mark": "thermo",
+          "to": "move"
+        },
+        {
+          "n": 97,
+          "beat": "temp",
+          "mark": "reg",
+          "to": "deep"
+        }
+      ],
+      "see": [
+        "specific-heat",
+        "water-temperature"
+      ]
+    },
+    {
+      "id": "specific-heat",
+      "ru": "Удельная теплоёмкость",
+      "en": "specific heat",
+      "def": "Количество тепла в калориях, нужное, чтобы нагреть один грамм вещества на один градус; от неё и от массы зависит скорость изменения температуры тела.",
+      "page": 299,
+      "moments": [
+        {
+          "n": 96,
+          "beat": "thermo",
+          "mark": "cp"
+        }
+      ],
+      "see": [
+        "thermodynamics"
+      ]
+    },
+    {
+      "id": "center-of-buoyancy",
+      "ru": "Центр плавучести",
+      "en": "center of buoyancy",
+      "def": "Точка погружённого тела, к которой приложены выталкивающие силы; у человека стоя — на уровне грудины. Силы, не проходящие через неё, вращают тело.",
+      "page": 299,
+      "moments": [
+        {
+          "n": 96,
+          "beat": "cob",
+          "mark": "cob",
+          "to": "front"
+        },
+        {
+          "n": 96,
+          "beat": "cob",
+          "mark": "amp"
+        }
+      ],
+      "see": [
+        "buoyancy",
+        "center-of-gravity"
+      ]
+    },
+    {
+      "id": "water-temperature",
+      "ru": "Температура воды",
+      "en": "water temperature",
+      "def": "Чем интенсивнее нагрузка, тем прохладнее вода: гибкость, сила и ходьба — 26–35 градусов, острая боль — 33, аэробная работа — 26–28, интенсивная — 22–26. Ниже 25 градусов тело теряет тепло, выше 37 долгая нагрузка опасна.",
+      "page": 299,
+      "moments": [
+        {
+          "n": 97,
+          "beat": "temp",
+          "mark": "rule",
+          "to": "air"
+        },
+        {
+          "n": 97,
+          "beat": "ranges",
+          "mark": "mob",
+          "to": "int"
+        },
+        {
+          "n": 97,
+          "beat": "limits",
+          "mark": "low",
+          "to": "high"
+        }
+      ],
+      "see": [
+        "thermodynamics"
+      ]
+    },
+    {
+      "id": "therapeutic-pool",
+      "ru": "Лечебный бассейн",
+      "en": "therapeutic pool",
+      "alt": [
+        "индивидуальный бассейн"
+      ],
+      "def": "Традиционный — не меньше 30 × 7,5 м (в книге — 100 × 25 футов), глубина от 1 до 3 м, для групп; индивидуальный — отдельная установка с дверцей, бывает с дорожкой и течением.",
+      "page": 300,
+      "moments": [
+        {
+          "n": 97,
+          "beat": "pools",
+          "mark": "trad",
+          "to": "enter"
+        },
+        {
+          "n": 97,
+          "beat": "pools",
+          "mark": "ind",
+          "to": "tread"
+        }
+      ],
+      "see": [
+        "aquatic-exercise"
+      ]
+    },
+    {
+      "id": "flotation-equipment",
+      "ru": "Плавучие снаряды для опоры",
+      "en": "collars, rings, belts, and vests",
+      "alt": [
+        "шейный воротник",
+        "плавательные кольца",
+        "пояс-поплавок",
+        "жилет"
+      ],
+      "def": "Надувной шейный воротник, кольца, пояса и жилеты: держат голову над водой и поддерживают конечность или всё тело на спине, на животе или вертикально.",
+      "page": 301,
+      "moments": [
+        {
+          "n": 97,
+          "beat": "support",
+          "mark": "collar",
+          "to": "vest"
+        },
+        {
+          "n": 100,
+          "beat": "equip",
+          "mark": "belt",
+          "to": "alt"
+        }
+      ],
+      "see": [
+        "buoyant-dumbbells",
+        "kickboard"
+      ]
+    },
+    {
+      "id": "buoyant-dumbbells",
+      "ru": "Плавучие гантели",
+      "en": "buoyant dumbbells (swim bars)",
+      "def": "Короткие и длинные плавучие гантели: поддерживают верхнюю часть тела вертикально или ноги лёжа; сидя или стоя на длинной гантели в глубокой воде тренируют равновесие.",
+      "page": 302,
+      "moments": [
+        {
+          "n": 97,
+          "beat": "support",
+          "mark": "bars",
+          "to": "bal"
+        }
+      ],
+      "see": [
+        "flotation-equipment"
+      ]
+    },
+    {
+      "id": "resistive-equipment",
+      "ru": "Снаряды для сопротивления в воде",
+      "en": "gloves, hand paddles, fins, and boots",
+      "alt": [
+        "гидроботинок",
+        "лопатки",
+        "ласты"
+      ],
+      "def": "Перчатки с перепонками, лопатки, большие гантели с прорезями, ласты и ботинки: увеличивают площадь, которая движется сквозь воду, и этим — сопротивление.",
+      "page": 302,
+      "moments": [
+        {
+          "n": 97,
+          "beat": "resist",
+          "mark": "gloves",
+          "to": "bells"
+        },
+        {
+          "n": 97,
+          "beat": "resist",
+          "mark": "fins",
+          "to": "boots"
+        },
+        {
+          "n": 96,
+          "beat": "boot",
+          "mark": "boot"
+        }
+      ],
+      "see": [
+        "drag",
+        "buoyancy-superresisted"
+      ]
+    },
+    {
+      "id": "kickboard",
+      "ru": "Доска для плавания",
+      "en": "kickboard",
+      "def": "Универсальный снаряд: даёт плавучесть лёжа, сопротивление при ходьбе, если держать её вертикально, и усложняет равновесие сидя, на коленях или стоя на глубине.",
+      "page": 303,
+      "moments": [
+        {
+          "n": 97,
+          "beat": "resist",
+          "mark": "kick"
+        }
+      ],
+      "see": [
+        "flotation-equipment"
+      ]
+    },
+    {
+      "id": "buoyancy-assisted",
+      "ru": "С помощью плавучести",
+      "en": "buoyancy-assisted",
+      "def": "Движение вертикально вверх, параллельно выталкивающей силе: плавучесть помогает, как при упражнениях с помощью на суше.",
+      "page": 312,
+      "moments": [
+        {
+          "n": 99,
+          "beat": "indep",
+          "mark": "ba"
+        },
+        {
+          "n": 98,
+          "beat": "self",
+          "mark": "ba"
+        }
+      ],
+      "see": [
+        "buoyancy-supported",
+        "buoyancy-resisted"
+      ]
+    },
+    {
+      "id": "buoyancy-supported",
+      "ru": "С поддержкой плавучести",
+      "en": "buoyancy-supported",
+      "def": "Движение горизонтально: плавучесть почти снимает необходимость удерживать конечность против силы тяжести; положение на спине с поддержкой воды удобно для ручных техник.",
+      "page": 312,
+      "moments": [
+        {
+          "n": 99,
+          "beat": "indep",
+          "mark": "bs"
+        },
+        {
+          "n": 98,
+          "beat": "why",
+          "mark": "plus"
+        }
+      ],
+      "see": [
+        "buoyancy-assisted",
+        "buoyancy-resisted"
+      ]
+    },
+    {
+      "id": "buoyancy-resisted",
+      "ru": "Против плавучести",
+      "en": "buoyancy-resisted",
+      "def": "Движение вниз или перпендикулярно выталкивающей силе: плавучесть сопротивляется без всяких снарядов — так укрепляют мышцы.",
+      "page": 312,
+      "moments": [
+        {
+          "n": 99,
+          "beat": "indep",
+          "mark": "br"
+        },
+        {
+          "n": 96,
+          "beat": "assist",
+          "mark": "resist",
+          "to": "str"
+        }
+      ],
+      "see": [
+        "buoyancy-superresisted",
+        "buoyancy-supported"
+      ]
+    },
+    {
+      "id": "buoyancy-superresisted",
+      "ru": "С усиленным сопротивлением",
+      "en": "buoyancy-superresisted",
+      "def": "Снаряд увеличивает площадь, которая движется сквозь воду, и лобовое сопротивление; при более быстром движении сопротивление ещё больше.",
+      "page": 312,
+      "moments": [
+        {
+          "n": 99,
+          "beat": "indep",
+          "mark": "bsr"
+        }
+      ],
+      "see": [
+        "buoyancy-resisted",
+        "resistive-equipment",
+        "drag"
+      ]
+    },
+    {
+      "id": "dynamic-trunk-stabilization",
+      "ru": "Динамическая стабилизация туловища",
+      "en": "dynamic trunk stabilization",
+      "def": "Пациент лежит на спине с поплавками и удерживает нейтральный позвоночник, пока терапевт ведёт его сквозь воду; быстрее и дистальнее захват — тяжелее, боковой изгиб — ошибка.",
+      "page": 311,
+      "moments": [
+        {
+          "n": 99,
+          "beat": "trunk",
+          "mark": "trunk",
+          "to": "cue"
+        },
+        {
+          "n": 99,
+          "beat": "trunk",
+          "mark": "int",
+          "to": "multi"
+        }
+      ],
+      "see": [
+        "drawing-in-maneuver",
+        "stabilization-exercises"
+      ]
+    },
+    {
+      "id": "drawing-in-maneuver",
+      "ru": "Втягивание живота",
+      "en": "drawing-in maneuver",
+      "def": "Изометрическое сокращение мышц живота, которое удерживает позвоночник в нейтральном положении, пока двигаются руки и ноги; основа стабилизации туловища в воде и на суше.",
+      "page": 312,
+      "moments": [
+        {
+          "n": 99,
+          "beat": "trunk",
+          "mark": "set"
+        },
+        {
+          "n": 99,
+          "beat": "lumbar",
+          "mark": "lumbar"
+        },
+        {
+          "n": 129,
+          "beat": "abs",
+          "mark": "dr"
+        }
+      ],
+      "see": [
+        "dynamic-trunk-stabilization",
+        "transversus-abdominis"
+      ]
+    },
+    {
+      "id": "deep-water-running",
+      "ru": "Бег в глубокой воде",
+      "en": "deep-water walking/running",
+      "def": "Ходьба или бег вертикально на глубине без касания дна, обычно с поясом-поплавком: убирает ударную нагрузку. Шея нейтрально, туловище чуть вперёд, бедро сгибается до 80°.",
+      "page": 315,
+      "moments": [
+        {
+          "n": 100,
+          "beat": "dwr",
+          "mark": "dwr",
+          "to": "pre"
+        },
+        {
+          "n": 100,
+          "beat": "form",
+          "mark": "form",
+          "to": "back"
+        },
+        {
+          "n": 100,
+          "beat": "phys",
+          "mark": "damp",
+          "to": "train"
+        }
+      ],
+      "see": [
+        "tethering",
+        "flotation-equipment",
+        "max-heart-rate"
+      ]
+    },
+    {
+      "id": "tethering",
+      "ru": "Привязь",
+      "en": "tethering",
+      "def": "В тесном бассейне пациента привязывают к бортику эластичной трубкой: он бежит или плывёт на месте, а трубка даёт сопротивление.",
+      "page": 315,
+      "moments": [
+        {
+          "n": 100,
+          "beat": "dwr",
+          "mark": "teth"
+        },
+        {
+          "n": 100,
+          "beat": "mid",
+          "mark": "tube"
+        }
+      ],
+      "see": [
+        "deep-water-running"
+      ]
+    }
+  ]
+}

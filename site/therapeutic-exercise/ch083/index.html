@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тренировочные адаптации — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 83, title: 'Тренировочные адаптации', minutes: 8, language: 'ru', next: '../ch084/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch083/cards.ru.json
+const CARDS_SHORT = {
+  "извлечение O₂ мышцей ↑\nферментные и биохимические сдвиги → VO₂max ↑ → работоспособность ↑": "VO₂max ↑ → работоспособность ↑",
+  "кровоток на кг мышцы может ↓\nэто компенсирует лучшее извлечение кислорода": "это компенсирует лучшее извлечение кислорода",
+  "меньше опоры на КФ и АТФ\nбольше окислительный потенциал митохондрий и запасы гликогена → лучше окисляются углеводы": "больше окислительный потенциал",
+};
+// cards-short end
+
+const BEF = COL.dim, AFT = COL.good, UP = COL.good, DN = COL.whole, O2C = '#9fe0f0';
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function row(p, x, y, w, s, col, t0, { size = 21, h = 64 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x, y, width: w, height: h, rx: 12, fill: PANEL, stroke: col, 'stroke-width': 2 }, g);
+  mk('circle', { cx: x + 24, cy: y + h / 2, r: 8, fill: col }, g);
+  const t = para(g, s, x + 44, y + h / 2 + size * .35, null, { size, maxW: w - 60 });
+  put(t, { o: 1, y: -(t._h - size * 1.32) / 2 });
+  show(g, t0);
+  return g;
+}
+// Paired bars "before / after" for one measure: v0, v1 in 0..1 of height h, baseline y.
+function pair(p, x, y, h, v0, v1, lab, t0, t1, arrow) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x, y: y - h * v0, width: 60, height: h * v0, rx: 8, fill: mix(BEF, COL.board, .3), stroke: BEF, 'stroke-width': 2 }, g);
+  T(g, lab, { x: x + 65, y: y + 32, size: 21, weight: 700, anchor: 'middle' });
+  show(g, t0);
+  const a = G(p, { o: 0 });
+  mk('rect', { x: x + 70, y: y - h * v1, width: 60, height: h * v1, rx: 8, fill: mix(AFT, COL.board, .3), stroke: AFT, 'stroke-width': 2 }, a);
+  if (arrow) T(a, arrow, { x: x + 100, y: y - h * Math.max(v0, v1) - 14, size: 30, weight: 700, fill: arrow === '=' ? COL.int : AFT, anchor: 'middle' });
+  show(a, t1);
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Тренировочные адаптации', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 7 · Урок 83', { x: 800, y: 150, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Что меняет тренировка', { x: 800, y: 235, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'адаптации к аэробной тренировке', { x: 800, y: 300, size: 42, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'сердце и сосуды, дыхание, обмен веществ и другие системы', 800, 380, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const fb = fibreX(art, 620, 640, 150), h = heartEl(art, 1000, 630, .9);
+    prog(q => { fb.set({ cap: q, mito: q, enz: q }); h.beat(cyc(q, 9 - 2 * q)); }, .4, Math.max(4, D - 1.4), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['rest', 'Сердце в покое', (m, D) => {
+    const p = panel(0);
+    txt(p, 'сердце и сосуды в покое', 800, 62, m('all'), { size: 28, weight: 700, anchor: 'middle' });
+    infoCard(p, 60, 95, 1480, 80, 'одна программа не даёт сразу все эффекты; многие — «у части людей»', null, COL.int, m('all', 3), { size: 22 });
+    // resting pulse: before and after
+    txt(p, 'пульс покоя ↓', 60, 240, m('hr'), { size: 26, weight: 700, fill: DN });
+    const e0 = ecgStrip(p, 60, 330, 560, 45, { win: 3, col: BEF, t0: m('hr') }), e1 = ecgStrip(p, 660, 330, 560, 45, { win: 3, col: AFT, t0: m('hr', .8) });
+    prog(q => { e0.set(76, q * 10); e1.set(58, q * 10); }, m('hr'), Math.max(3, D - m('hr')), lin);
+    txt(p, 'до', 340, 410, m('hr'), { size: 20, fill: BEF, anchor: 'middle' }); txt(p, 'после', 940, 410, m('hr', .8), { size: 20, fill: AFT, anchor: 'middle' });
+    ['симпатическая активность ↓', 'норадреналин, адреналин ↓', 'биохимия предсердий', 'тонус блуждающего нерва ↑'].forEach((s, i) => pill(p, s, 1390, 230 + i * 52, m('hr', 1.5 + i * 1.2), { col: DN, size: 19 }));
+    pill(p, 'схема', 640, 410, m('hr'), { col: COL.dim, size: 18 });
+    // blood pressure
+    txt(p, 'АД ↓', 60, 500, m('bp'), { size: 26, weight: 700, fill: DN });
+    pair(p, 210, 640, 140, .9, .7, 'систолическое', m('bp', .5), m('bp', 1.2), '↓');
+    pair(p, 420, 640, 140, .6, .55, 'диастолическое', m('bp', .5), m('bp', 1.2), '');
+    row(p, 640, 470, 900, 'вместе с периферическим сопротивлением; больше всего — систолическое', DN, m('bp', 1.5), { h: 70 });
+    row(p, 640, 555, 900, 'сильнее всего — у людей с гипертонией', COL.int, m('bp', 4), { h: 64 });
+    // blood volume and haemoglobin
+    txt(p, 'объём крови и гемоглобин ↑', 60, 730, m('vol'), { size: 26, weight: 700, fill: UP });
+    const drops = G(p, { o: 0 });
+    [0, 1, 2, 3, 4].forEach(i => { const x = 130 + i * 70; path(drops, `M${x} 760C${x + 22} 790 ${x + 22} 820 ${x} 830C${x - 22} 820 ${x - 22} 790 ${x} 760Z`, { fill: BLOOD_A, stroke: mix(BLOOD_A, '#000000', .4), 'stroke-width': 2 }); });
+    show(drops, m('vol', .5));
+    txt(p, '→ доставка O₂ ↑', 520, 806, m('vol', 1.5), { size: 26, weight: 700, fill: O2C });
+    pill(p, 'у части людей', 1390, 820, m('vol', 2), { col: COL.int, size: 19 });
+  }],
+
+  ['ex', 'Сердце при нагрузке', (m, D) => {
+    const p = panel(0);
+    txt(p, 'сердце и сосуды во время нагрузки', 800, 62, m('ex'), { size: 28, weight: 700, anchor: 'middle' });
+    // HR against the workload: lower after training
+    const x0 = 120, y0 = 450, w = 600, h = 320;
+    chartAxes(p, x0, y0, w, h, 'ЧСС', 'нагрузка', m('ex'));
+    draw(path(p, fnPath(x0, y0, w, h, x => .2 + .75 * x), { stroke: BEF, 'stroke-width': 4, 'stroke-dasharray': '10 8' }, { d: 0 }), m('ex', .5), 1.2);
+    draw(path(p, fnPath(x0, y0, w, h, x => .15 + .62 * x), { stroke: AFT, 'stroke-width': 5 }, { d: 0 }), m('ex', 1.5), 1.2);
+    txt(p, 'до', x0 + w - 6, y0 - .95 * h - 8, m('ex', .5), { size: 20, fill: BEF, anchor: 'end' });
+    txt(p, 'после', x0 + w + 10, y0 - .77 * h + 8, m('ex', 1.5), { size: 20, fill: AFT, weight: 700 });
+    show(put(path(p, `M${x0 + .6 * w} ${y0}V${y0 - h}`, { stroke: COL.faint, 'stroke-width': 2, 'stroke-dasharray': '6 6' }), { o: 0 }), m('ex', 2.5));
+    txt(p, 'та же нагрузка', x0 + .6 * w, y0 + 30, m('ex', 2.5), { size: 19, fill: COL.dim, anchor: 'middle' });
+    pill(p, 'схема', x0 + 80, y0 - h - 16, m('ex'), { col: COL.dim, size: 18 });
+    // at the same submaximal workload: HR down, SV up, cardiac output the same; at the maximum the output rises
+    txt(p, 'та же субмаксимальная нагрузка', 1150, 120, m('sv'), { size: 23, weight: 700, anchor: 'middle' });
+    pair(p, 850, 420, 230, .8, .66, 'ЧСС', m('sv'), m('sv', .5), '↓');
+    pair(p, 1060, 420, 230, .55, .67, 'УО', m('sv', 1), m('sv', 1.5), '↑');
+    pair(p, 1270, 420, 230, .7, .7, 'СВ', m('co'), m('co', .5), '=');
+    txt(p, 'на максимуме: СВ ↑', 1150, 490, m('co', 3), { size: 23, weight: 700, fill: UP, anchor: 'middle' });
+    infoCard(p, 60, 530, 700, 160, 'извлечение O₂ мышцей ↑', 'ферментные и биохимические сдвиги → VO₂max ↑ → работоспособность ↑', UP, m('ext'), { size: 21 });
+    infoCard(p, 60, 710, 700, 150, 'кровоток на кг мышцы может ↓', 'это компенсирует лучшее извлечение кислорода', COL.int, m('flow'), { size: 21 });
+    infoCard(p, 840, 530, 700, 330, 'потребление O₂ миокардом ↓', 'на любой заданной нагрузке; его оценивают по двойному произведению', DN, m('rpp'), { size: 22 });
+    pill(p, 'двойное произведение = ЧСС × систолическое АД', 1190, 720, m('rpp', 2), { col: COL.task, size: 22 });
+    txt(p, 'падает за счёт более редкого пульса', 1190, 790, m('rpp', 4), { size: 21, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'с небольшим снижением АД или без него', 1190, 822, m('rpp', 4), { size: 21, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-adapt', prompt: ['После тренировки, на той же субмаксимальной нагрузке. Как изменилось?'],
+    build: grid([
+      { parts: ['ЧСС'], ans: ['dn'], why: 'Пульс на той же нагрузке ниже.' },
+      { parts: ['Ударный объём'], ans: ['up'], why: 'Выше сократимость и объём желудочка.' },
+      { parts: ['Сердечный выброс'], ans: ['eq'], why: 'На субмаксимальной нагрузке почти не меняется; растёт на максимуме.' },
+      { parts: ['Двойное произведение'], ans: ['dn'], why: 'Пульс ниже — меньше потребление O₂ миокардом.' },
+      { parts: ['Извлечение O₂ работающей мышцей'], ans: ['up'], why: 'Ферментные и биохимические сдвиги.' },
+    ], [['dn', '↓ ниже', DN], ['eq', '= так же', COL.int], ['up', '↑ выше', UP]], { multi: false, text: true }),
+  }], done) }],
+
+  ['resp', 'Дыхание', (m, D) => {
+    const p = panel(0);
+    txt(p, 'дыхательная система', 800, 62, m('resp'), { size: 28, weight: 700, anchor: 'middle' });
+    txt(p, 'в покое', 400, 120, m('resp'), { size: 25, weight: 700, fill: COL.task, anchor: 'middle' });
+    const l0 = lungsEl(p, 230, 340, .85, m('resp')), l1 = lungsEl(p, 560, 340, .95, m('resp', .8));
+    txt(p, 'до', 230, 500, m('resp'), { size: 20, fill: BEF, anchor: 'middle' }); txt(p, 'после', 560, 510, m('resp', .8), { size: 20, fill: AFT, anchor: 'middle' });
+    prog(q => { l0.breathe(cyc(q, 5) * .6); l1.breathe(cyc(q, 5) * .6); }, m('resp'), Math.max(3, D - m('resp')), lin);
+    row(p, 60, 560, 700, 'лёгочные объёмы ↑ — дыхательный объём тот же', UP, m('resp', 1.5), { h: 70 });
+    row(p, 60, 645, 700, 'диффузионная способность ↑: больше объём лёгких и альвеолярно-капиллярная поверхность', UP, m('resp', 4), { h: 90 });
+    // alveoli wrapped in capillaries: more surface
+    const av = (cx, cy, n, t0) => { const g = G(p, { o: 0 }); mk('circle', { cx, cy, r: 46, fill: mix(LUNG_C, COL.board, .3), stroke: LUNG_C, 'stroke-width': 3 }, g);
+      for (let i = 0; i < n; i++) { const a = rad(i * 360 / n); path(g, `M${cx + 40 * Math.cos(a)} ${cy + 40 * Math.sin(a)}Q${cx + 62 * Math.cos(a + .25)} ${cy + 62 * Math.sin(a + .25)} ${cx + 44 * Math.cos(a + .5)} ${cy + 44 * Math.sin(a + .5)}`, { stroke: BLOOD_A, 'stroke-width': 3 }); } show(g, t0); };
+    av(170, 820, 6, m('resp', 4.5)); av(330, 820, 11, m('resp', 5));
+    txt(p, '→', 250, 828, m('resp', 5), { size: 28, fill: COL.dim, anchor: 'middle' });
+    pill(p, 'схема', 470, 820, m('resp', 4.5), { col: COL.dim, size: 18 });
+    txt(p, 'во время нагрузки', 1180, 120, m('rex'), { size: 25, weight: 700, fill: COL.task, anchor: 'middle' });
+    ['диффузионная способность ↑', 'тот же VO₂ — меньше вентиляция', 'максимальная минутная вентиляция ↑', 'эффективность дыхания ↑'].forEach((s, i) => row(p, 840, 160 + i * 96, 700, s, UP, m('rex', .5 + i * 1.6), { h: 76, size: 23 }));
+  }],
+
+  ['met', 'Обмен веществ', (m, D) => {
+    const p = panel(0);
+    txt(p, 'обмен веществ в мышце', 800, 62, m('met'), { size: 28, weight: 700, anchor: 'middle' });
+    txt(p, 'в покое', 400, 112, m('met'), { size: 24, weight: 700, fill: COL.task, anchor: 'middle' });
+    fibreX(p, 230, 280, 120, { t0: m('met') });
+    const fa = fibreX(p, 570, 280, 120, { col: '#e88a76', t0: m('met', .5) });
+    prog(q => { fa.set({ cap: q, mito: q, enz: .5 * q }); put(fa.g, { x: 570, y: 280, s: 1 + .12 * q }); }, m('met', 1), 2);
+    txt(p, 'до', 230, 430, m('met'), { size: 20, fill: BEF, anchor: 'middle' }); txt(p, 'после', 570, 445, m('met', .5), { size: 20, fill: AFT, anchor: 'middle' });
+    pillRow(p, ['гипертрофия', 'капилляры ↑', 'митохондрии ↑', 'миоглобин ↑'], 400, 490, m('met', 2), { col: [ANAT.muscle, BLOOD_A, '#e0904a', '#ff7a6a'], size: 20, gap: 1.2, space: 10 });
+    // during exercise: fuel shares at a submaximal load (shape only)
+    txt(p, 'при субмаксимальной работе', 1190, 112, m('gly'), { size: 24, weight: 700, fill: COL.task, anchor: 'middle' });
+    const fuel = (x, gl, lab, t0) => { const g = G(p, { o: 0 }), H = 280, top = 150;
+      mk('rect', { x, y: top, width: 110, height: H * gl, fill: COL.real, 'fill-opacity': .8 }, g);
+      mk('rect', { x, y: top + H * gl, width: 110, height: H * (1 - gl), fill: COL.int, 'fill-opacity': .8 }, g);
+      mk('rect', { x, y: top, width: 110, height: H, fill: 'none', stroke: COL.chalk, 'stroke-width': 2 }, g);
+      T(g, lab, { x: x + 55, y: top + H + 30, size: 20, fill: COL.dim, anchor: 'middle' }); show(g, t0); };
+    fuel(940, .6, 'до', m('gly', .5)); fuel(1110, .38, 'после', m('gly', 1.2));
+    txt(p, 'гликоген', 1250, 210, m('gly', .5), { size: 21, weight: 700, fill: COL.real });
+    txt(p, 'жиры', 1250, 400, m('gly', .5), { size: 21, weight: 700, fill: COL.int });
+    txt(p, 'сбережение гликогена', 1050, 500, m('gly', 2), { size: 23, weight: 700, fill: UP, anchor: 'middle' });
+    pill(p, 'схема', 1480, 140, m('gly'), { col: COL.dim, size: 18 });
+    // lactate against the workload: lower after training (shape only)
+    const x0 = 120, y0 = 860, w = 600, h = 280;
+    chartAxes(p, x0, y0, w, h, 'лактат крови', 'нагрузка', m('lac'));
+    draw(path(p, fnPath(x0, y0, w, h, x => .1 + .85 * x ** 3), { stroke: BEF, 'stroke-width': 4, 'stroke-dasharray': '10 8' }, { d: 0 }), m('lac', .3), 1.2);
+    draw(path(p, fnPath(x0, y0, w, h, x => .06 + .8 * Math.max(0, x - .25) ** 3 / .42), { stroke: AFT, 'stroke-width': 5 }, { d: 0 }), m('lac', 1), 1.2);
+    txt(p, 'до', x0 + .62 * w, y0 - .32 * h, m('lac', .3), { size: 20, fill: BEF, anchor: 'end' });
+    txt(p, 'после', x0 + .8 * w, y0 - .3 * h, m('lac', 1), { size: 20, fill: AFT, weight: 700 });
+    pill(p, 'схема', x0 + w - 30, y0 - h + 10, m('lac'), { col: COL.dim, size: 18 });
+    txt(p, 'ниже при субмаксимальной работе; механизм неясен', 420, 560 + 0, m('lac', 2), { size: 20, fill: UP, anchor: 'middle', weight: 700 });
+    infoCard(p, 840, 560, 700, 170, 'меньше опоры на КФ и АТФ', 'больше окислительный потенциал митохондрий и запасы гликогена → лучше окисляются углеводы', COL.whole, m('pc'), { size: 21 });
+    infoCard(p, 840, 750, 700, 100, 'плохое здоровье может влиять на эти сдвиги', null, COL.int, m('pc', 4), { size: 21 });
+  }],
+
+  ['other', 'Другие системы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'другие системы', 800, 62, m('other'), { size: 28, weight: 700, anchor: 'middle' });
+    const panelBox = (x, y, title, col, k) => { const g = G(p, { o: 0 }); mk('rect', { x, y, width: 720, height: 360, rx: 22, fill: PANEL, stroke: col, 'stroke-width': 2.5 }, g); T(g, title, { x: x + 360, y: y + 330, size: 25, weight: 700, fill: col, anchor: 'middle' }); show(g, m(k)); };
+    panelBox(60, 110, 'жировая масса ↓', COL.int, 'fat');
+    panelBox(820, 110, 'холестерин и триглицериды ↓', COL.task, 'chol');
+    panelBox(60, 500, 'привыкание к жаре ↑', COL.bad, 'heat');
+    panelBox(820, 500, 'кости, связки, сухожилия прочнее', COL.good, 'bone');
+    // fat: a limb in cross-section, the fat layer thins
+    const fg = G(p, { o: 0 }), fat = mk('ellipse', { cx: 420, cy: 270, rx: 150, ry: 115, fill: mix(COL.int, COL.board, .25), stroke: COL.int, 'stroke-width': 2 }, fg);
+    mk('ellipse', { cx: 420, cy: 270, rx: 105, ry: 80, fill: ANAT.muscle, stroke: mix(ANAT.muscle, '#000000', .4), 'stroke-width': 2 }, fg);
+    mk('circle', { cx: 420, cy: 270, r: 22, fill: ANAT.bone }, fg);
+    show(fg, m('fat'));
+    prog(q => { fat.setAttribute('rx', (150 - 30 * q).toFixed(1)); fat.setAttribute('ry', (115 - 22 * q).toFixed(1)); }, m('fat', .5), 1.5);
+    txt(p, 'жир', 590, 200, m('fat', .5), { size: 20, fill: COL.int });
+    // cholesterol: plaques shrink in a vessel
+    const cg = G(p, { o: 0 });
+    path(cg, 'M880 270H1480', { stroke: mix(BLOOD_A, '#000000', .45), 'stroke-width': 90 });
+    path(cg, 'M880 270H1480', { stroke: BLOOD_A, 'stroke-width': 78 });
+    const pl = [1000, 1180, 1360].map(x => mk('ellipse', { cx: x, cy: 236, rx: 50, ry: 18, fill: '#efe0a0', stroke: '#b8a860', 'stroke-width': 2 }, cg));
+    show(cg, m('chol'));
+    prog(q => pl.forEach(e => { e.setAttribute('rx', (50 - 25 * q).toFixed(1)); e.setAttribute('ry', (18 - 9 * q).toFixed(1)); }), m('chol', .5), 1.5);
+    pill(p, 'схема', 1460, 140, m('chol'), { col: COL.dim, size: 18 });
+    // heat: the sun and a sweat drop
+    const hg = G(p, { o: 0 });
+    mk('circle', { cx: 300, cy: 660, r: 50, fill: COL.int }, hg);
+    for (let i = 0; i < 10; i++) { const a = rad(i * 36); path(hg, `M${300 + 64 * Math.cos(a)} ${660 + 64 * Math.sin(a)}L${300 + 86 * Math.cos(a)} ${660 + 86 * Math.sin(a)}`, { stroke: COL.int, 'stroke-width': 5 }); }
+    const f = fig(hg, { x: 520, y: 760 - 182 * .55, s: .55 });
+    show(hg, m('heat'));
+    walk(f, m('heat', .3), 3, { cycles: 3 });
+    // bone and ligament: stronger under pull
+    const bg = G(p, { o: 0 });
+    path(bg, 'M900 680H1130M1190 680H1420', { stroke: ANAT.bone, 'stroke-width': 26 });
+    const lg = ligEl(bg, { rest: 110, w: 8 }); lg.set([1090, 660], [1230, 660]);
+    const lg2 = ligEl(bg, { rest: 110, w: 8 }); lg2.set([1090, 700], [1230, 700]);
+    T(bg, 'связка', { x: 1160, y: 640, size: 18, fill: ANAT.taut, anchor: 'middle' });
+    show(bg, m('bone'));
+    arrowTo(p, [960, 610], [880, 610], m('bone', 1), { col: COL.task, w: 4 });
+    arrowTo(p, [1360, 610], [1440, 610], m('bone', 1), { col: COL.task, w: 4 });
+    txt(p, 'прочность на излом и растяжение ↑', 1160, 770, m('bone', 1.5), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-restex', prompt: ['Изменение после тренировки: в покое или во время нагрузки?'],
+    build: grid([
+      { parts: ['Ниже пульс покоя'], ans: ['rest'], why: 'Сдвиг в покое.' },
+      { parts: ['Сбережение гликогена при субмаксимальной работе'], ans: ['ex'], why: 'Это сдвиг во время работы.' },
+      { parts: ['Больше лёгочные объёмы при том же дыхательном объёме'], ans: ['rest'], why: 'Сдвиг в покое.' },
+      { parts: ['Ниже лактат при субмаксимальной работе'], ans: ['ex'], why: 'Во время работы.' },
+      { parts: ['Больше митохондрий и капилляров'], ans: ['rest'], why: 'В книге — среди изменений в покое.' },
+    ], [['rest', 'В покое', COL.task], ['ex', 'При нагрузке', COL.whole]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['В покое: у части людей ниже пульс и АД, больше объём крови и гемоглобина.', 'w1'],
+     ['При нагрузке: больше ударный объём и извлечение O₂, ниже пульс и двойное произведение; выброс растёт только на максимуме.', 'w2'],
+     ['Мышца: больше капилляров, митохондрий и миоглобина; сбережение гликогена, ниже лактат.', 'w3'],
+     ['Меньше жира, ниже холестерин, лучше переносимость жары; прочнее кости, связки и сухожилия.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-rpp', prompt: ['На одной и той же нагрузке до тренировки: ЧСС 140, систолическое АД 160; после: ЧСС 120, АД 150. Посчитайте двойное произведение.'],
+    build: blanks([
+      { parts: ['До: 140 × 160 = ', { box: '22400' }], why: 'ЧСС × систолическое АД.' },
+      { parts: ['После: 120 × 150 = ', { box: '18000' }], why: '120 × 150.' },
+      { parts: ['Снижение: ', { box: '4400' }], why: '22 400 − 18 000 — миокарду нужно меньше кислорода.' },
+    ]),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-co', prompt: ['После 12 недель тренировок пульс пациента на той же субмаксимальной нагрузке снизился со 130 до 115. Что с сердечным выбросом на этой нагрузке?'],
+    build: choice([
+      ['Почти не изменился: ударный объём вырос'],
+      ['Снизился — пульс ведь ниже'],
+      ['Вырос так же, как на максимуме'],
+      ['Без нагрузочного теста ничего сказать нельзя'],
+    ], 0, 'На субмаксимальной нагрузке выброс почти не меняется: пульс ниже, а ударный объём больше. Растёт выброс на максимальной нагрузке.',
+    [null, 'Ударный объём вырос и компенсировал более редкий пульс.', 'Выброс растёт на максимальной, а не на субмаксимальной нагрузке.', 'Закономерность известна: выброс на субмаксимальной нагрузке почти не меняется.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

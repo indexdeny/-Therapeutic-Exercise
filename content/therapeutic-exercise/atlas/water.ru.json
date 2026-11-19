@@ -1,0 +1,465 @@
+{
+  "region": "water",
+  "exercises": [
+    {
+      "id": "aq-mstr-spine",
+      "ru": "Растяжка позвоночника в воде",
+      "en": "aquatic manual stretching: spine",
+      "joint": [
+        "neck",
+        "trunk"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "water",
+        "manual"
+      ],
+      "key": [
+        "лёжа на спине с поплавками",
+        "шея — терапевт у головы",
+        "бок — терапевт тянет через своё бедро"
+      ],
+      "page": 304,
+      "moments": [
+        {
+          "n": 98,
+          "beat": "spine",
+          "mark": "spine",
+          "to": "tpull",
+          "shot": 34.2,
+          "crop": [
+            40,
+            100,
+            1520,
+            700
+          ]
+        },
+        {
+          "n": 98,
+          "beat": "why",
+          "mark": "setup",
+          "to": "minus"
+        }
+      ]
+    },
+    {
+      "id": "aq-mstr-shoulder",
+      "ru": "Растяжка плеча в воде",
+      "en": "aquatic manual stretching: shoulder",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "water",
+        "manual"
+      ],
+      "key": [
+        "фиксирующая рука держит лопатку",
+        "двигающая ведёт руку",
+        "сгибание, отведение, ротации"
+      ],
+      "page": 305,
+      "moments": [
+        {
+          "n": 98,
+          "beat": "shoulder",
+          "mark": "shoulder",
+          "to": "sir",
+          "shot": 6.2,
+          "crop": [
+            20,
+            220,
+            840,
+            520
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aq-mstr-leg",
+      "ru": "Растяжка бедра и колена в воде",
+      "en": "aquatic manual stretching: hip and knee",
+      "joint": [
+        "hip",
+        "knee"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "water",
+        "manual"
+      ],
+      "key": [
+        "задняя группа — встать из приседа",
+        "колено — тянуть тело над стопой",
+        "на ступеньках — руками у сустава"
+      ],
+      "page": 305,
+      "moments": [
+        {
+          "n": 98,
+          "beat": "ham",
+          "mark": "ham",
+          "to": "close",
+          "shot": 16,
+          "crop": [
+            30,
+            300,
+            1080,
+            560
+          ]
+        },
+        {
+          "n": 98,
+          "beat": "knee",
+          "mark": "knee",
+          "to": "steps"
+        }
+      ]
+    },
+    {
+      "id": "aq-self-stretch",
+      "ru": "Самостоятельная растяжка с поплавком",
+      "en": "aquatic self-stretching with buoyancy",
+      "joint": [
+        "shoulder",
+        "hip",
+        "knee"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "stand",
+        "sit"
+      ],
+      "gear": [
+        "water"
+      ],
+      "key": [
+        "поплавок выводит конечность вверх",
+        "плечо — стоя в воде по шею",
+        "колено — поплавок на голени"
+      ],
+      "page": 307,
+      "moments": [
+        {
+          "n": 98,
+          "beat": "self",
+          "mark": "sh",
+          "crop": [
+            30,
+            330,
+            960,
+            540
+          ]
+        },
+        {
+          "n": 98,
+          "beat": "self",
+          "mark": "self",
+          "to": "ba"
+        },
+        {
+          "n": 98,
+          "beat": "self2",
+          "mark": "hip",
+          "to": "more"
+        }
+      ]
+    },
+    {
+      "id": "aq-mres-arm",
+      "ru": "Ручное сопротивление в воде: руки",
+      "en": "aquatic manual resistance: upper extremity",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "water",
+        "manual"
+      ],
+      "key": [
+        "терапевт держит руку — движется тело",
+        "сгибание уводит тело от терапевта",
+        "ротации и диагонали"
+      ],
+      "page": 308,
+      "moments": [
+        {
+          "n": 99,
+          "beat": "ue",
+          "mark": "ue",
+          "to": "diag",
+          "shot": 16.1,
+          "crop": [
+            20,
+            230,
+            1000,
+            500
+          ]
+        },
+        {
+          "n": 99,
+          "beat": "manual",
+          "mark": "manual",
+          "to": "hands"
+        }
+      ]
+    },
+    {
+      "id": "aq-mres-leg",
+      "ru": "Ручное сопротивление в воде: ноги",
+      "en": "aquatic manual resistance: lower extremity",
+      "joint": [
+        "hip",
+        "knee",
+        "ankle"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "water",
+        "manual"
+      ],
+      "key": [
+        "рука терапевта фиксирует ногу",
+        "тело скользит к ней или от неё",
+        "голеностоп — нагрузка большая"
+      ],
+      "warn": "при слабости связок и нестабильном голеностопе — не в полную силу",
+      "page": 310,
+      "moments": [
+        {
+          "n": 99,
+          "beat": "le",
+          "mark": "le",
+          "to": "lax",
+          "shot": 10.9,
+          "crop": [
+            30,
+            80,
+            760,
+            520
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aq-trunk",
+      "ru": "Стабилизация туловища в воде",
+      "en": "aquatic dynamic trunk stabilization",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "control"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "water",
+        "manual"
+      ],
+      "key": [
+        "нейтраль и втянутый живот",
+        "тело водят из стороны в сторону",
+        "боковой изгиб — стабилизация потеряна"
+      ],
+      "page": 312,
+      "moments": [
+        {
+          "n": 99,
+          "beat": "trunk",
+          "mark": "trunk",
+          "to": "multi",
+          "shot": 24.9,
+          "crop": [
+            30,
+            80,
+            820,
+            790
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aq-indep",
+      "ru": "Самостоятельные силовые упражнения в воде",
+      "en": "independent aquatic strengthening",
+      "joint": [
+        "shoulder",
+        "hip",
+        "knee"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "water"
+      ],
+      "key": [
+        "вверх — плавучесть помогает",
+        "вниз — против плавучести",
+        "лопатка и быстрее — тяжелее"
+      ],
+      "page": 312,
+      "moments": [
+        {
+          "n": 99,
+          "beat": "indep",
+          "mark": "indep",
+          "to": "bsr",
+          "shot": 18.4,
+          "crop": [
+            0,
+            100,
+            520,
+            700
+          ]
+        },
+        {
+          "n": 99,
+          "beat": "table",
+          "mark": "table",
+          "to": "squat"
+        }
+      ]
+    },
+    {
+      "id": "aq-lumbar",
+      "ru": "Укрепление поясницы в воде",
+      "en": "aquatic lumbar strengthening",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "stand",
+        "supine",
+        "prone"
+      ],
+      "gear": [
+        "water"
+      ],
+      "key": [
+        "нейтральная поясница",
+        "ходьба вперёд, назад, выпады",
+        "полулёжа на нудлах — велосипед"
+      ],
+      "page": 313,
+      "moments": [
+        {
+          "n": 99,
+          "beat": "lumbar",
+          "mark": "lumbar",
+          "to": "deep",
+          "shot": 17.4,
+          "crop": [
+            0,
+            250,
+            700,
+            520
+          ]
+        }
+      ]
+    },
+    {
+      "id": "deep-water-run",
+      "ru": "Бег в глубокой воде",
+      "en": "deep-water walking and running",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "endurance"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "water"
+      ],
+      "key": [
+        "тело чуть вперёд, шея нейтрально",
+        "бедро до 80° при прямом колене",
+        "пояс-поплавок сзади"
+      ],
+      "warn": "следить за новичками и пациентами с болезнями сердца, лёгких и сосудов",
+      "page": 315,
+      "moments": [
+        {
+          "n": 100,
+          "beat": "dwr",
+          "mark": "dwr",
+          "to": "teth"
+        },
+        {
+          "n": 100,
+          "beat": "form",
+          "mark": "form",
+          "to": "back",
+          "shot": 14.2,
+          "crop": [
+            30,
+            80,
+            880,
+            780
+          ]
+        },
+        {
+          "n": 100,
+          "beat": "mid",
+          "mark": "mid",
+          "to": "equip"
+        },
+        {
+          "n": 100,
+          "beat": "equip",
+          "mark": "equip",
+          "to": "midq"
+        },
+        {
+          "n": 100,
+          "beat": "mon",
+          "mark": "mon",
+          "to": "nov"
+        }
+      ],
+      "thumb": 1
+    }
+  ]
+}

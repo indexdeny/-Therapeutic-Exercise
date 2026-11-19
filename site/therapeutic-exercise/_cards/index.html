@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>cards sandbox</title><link rel="stylesheet" href="../lib/engine.css"></head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script>
+const CHAPTER = { number: 998, title: 'cards sandbox', minutes: 1, language: 'ru' };
+const CARDS_SHORT = { 'из таблицы\nполный текст карточки из таблицы, длинный и подробный': 'кратко из таблицы' };
+</script>
+<script>
+// Sandbox tests for the short info cards: each test returns true/false or { ok, detail }.
+const near = (a, b, e = .01) => Math.abs(a - b) <= e;
+// The card as 183 lessons drew it before the shared one: the full mode must give the same markup.
+function legacyCard(p, x, y, w, h, title, body, col, t0, { size = 23, textW = w - 44 } = {}) {
+  const g = G(p, { o: 0 });
+  roundBox(g, x, y, w, h, col, PANEL, 2.5);
+  const tt = put(para(g, title, x + 22, y + 42, null, { size: 26, weight: 700, fill: col, maxW: textW }), { o: 1 });
+  if (body) put(para(g, body, x + 22, y + 50 + tt._h, null, { size, fill: COL.chalk, maxW: textW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const BODY = 'полный текст карточки, который диктор и так произносит, поэтому на экране его можно сократить';
+function fresh() { scene.replaceChildren(); TW = []; CARD_REG.clear(); }
+const mkCard = (o = {}, body = BODY, t0 = 0) => infoCard(scene, 100, 200, 760, 200, 'заголовок', body, COL.whole, t0, { short: 'ключ → слова', ...o });
+const H = c => +c.firstChild.getAttribute('height'), Y = c => +c.firstChild.getAttribute('y');
+const op = e => e.getAttribute('opacity');
+const fire = el => el.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyT', key: 't', bubbles: true }));
+window.TESTS = {
+  defaultShort: () => { fresh(); return cardsMode() === 'short'; },
+  shortHeight: () => { fresh(); const c = mkCard(), want = 50 + 26 * 1.32 + 26;
+    return { ok: near(H(c), want) && op(c.children[3]) === '1' && op(c.children[2]) === '0', detail: H(c) + ' vs ' + want }; },
+  centre: () => { fresh(); const c = mkCard(); return { ok: near(Y(c) + H(c) / 2, 300), detail: Y(c) + H(c) / 2 }; },
+  titleMoves: () => { fresh(); const c = mkCard(), tr = c.children[1].getAttribute('transform') || '', m = /^translate\(0,([-\d.e]+)\)/.exec(tr);
+    return { ok: !!m && near(+m[1], Y(c) - 200), detail: tr }; },
+  twoLinesMax: () => { fresh(); const c = mkCard({ short: 'очень длинная строка ключевых слов '.repeat(6) });
+    return { ok: c.children[3].childElementCount === 2 && near(H(c), 50 + 26 * 1.32 + 25 * 1.32 + 26), detail: c.children[3].childElementCount + ' ' + H(c) }; },
+  bigBody: () => { fresh(); const c = mkCard({ size: 28 }); const s = c.children[3].firstChild.getAttribute('font-size');
+    return { ok: s === '28', detail: s }; },
+  table: () => { fresh(); const c = infoCard(scene, 100, 200, 760, 200, 'из таблицы', 'полный текст карточки из таблицы, длинный и подробный', COL.whole, 0);
+    return { ok: c.childElementCount === 4 && c.children[3].textContent === 'кратко из таблицы', detail: c.textContent }; },
+  noShortIsLegacy: () => { fresh(); const a = infoCard(scene, 100, 200, 760, 200, 'без строки', BODY, COL.whole, 1).outerHTML;
+    const b = legacyCard(scene, 100, 200, 760, 200, 'без строки', BODY, COL.whole, 1).outerHTML; return { ok: a === b && CARD_REG.size === 0, detail: a.length + ' ' + b.length }; },
+  noBodyIsLegacy: () => { fresh(); const a = infoCard(scene, 60, 500, 680, 370, 'блок', null, COL.whole, null, { short: 'не нужна' }).outerHTML;
+    const b = legacyCard(scene, 60, 500, 680, 370, 'блок', null, COL.whole, null).outerHTML; return { ok: a === b && CARD_REG.size === 0, detail: a }; },
+  fullIsLegacy: () => { fresh(); cardsSet('full'); const c = mkCard(); c.children[3].remove();
+    const b = legacyCard(scene, 100, 200, 760, 200, 'заголовок', BODY, COL.whole, 0), ok = c.outerHTML === b.outerHTML; cardsSet('short');
+    return { ok, detail: c.outerHTML.slice(0, 300) }; },
+  keyMidBeat: () => { fresh(); const c = mkCard({}, BODY, 1); evalTo(.5); fire(document);
+    const a = cardsMode() === 'full' && near(H(c), 200) && op(c.children[2]) === '1' && op(c.children[3]) === '0';
+    let s = null; try { s = localStorage.getItem('animebook:cards'); } catch {}
+    fire(document); const b = cardsMode() === 'short' && H(c) < 200;
+    return { ok: a && b && s === 'full', detail: [a, b, s].join() }; },
+  keyInInput: () => { fresh(); const c = mkCard(), inp = document.createElement('input'); document.body.appendChild(inp); inp.focus(); fire(inp);
+    const ok = cardsMode() === 'short' && H(c) < 200; inp.remove(); return ok; },
+  keyWithHelp: () => { fresh(); const c = mkCard(), help = document.getElementById('help'); help.hidden = false; fire(document); help.hidden = true;
+    return cardsMode() === 'short' && H(c) < 200; },
+  stale: () => { fresh(); mkCard(); scene.replaceChildren(); cardsSet('full'); cardsSet('short'); return CARD_REG.size === 0; },
+  helpLine: () => document.getElementById('help').textContent.includes('Карточки: кратко или подробно'),
+  stored: () => { CARDS_MODE = null; try { localStorage.setItem('animebook:cards', 'full'); } catch {} const a = cardsMode();
+    CARDS_MODE = null; try { localStorage.setItem('animebook:cards', 'short'); } catch {} const b = cardsMode();
+    return { ok: a === 'full' && b === 'short', detail: a + b }; },
+};
+// Opened as ?cards=full while the stored choice is "short".
+window.TESTS_Q = {
+  queryWins: () => { const c = mkCard(); return { ok: cardsMode() === 'full' && near(H(c), 200), detail: cardsMode() + ' ' + H(c) }; },
+};
+</script>
+</body></html>

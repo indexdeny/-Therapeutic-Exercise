@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Напряжение мышцы — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 56, title: 'От чего зависит напряжение мышцы', minutes: 9, language: 'ru', next: '../ch057/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch056/cards.ru.json
+const CARDS_SHORT = {
+  "например\nчетырёхглавая мышца бедра, икроножная, дельтовидная, двуглавая мышца плеча": "четырёхглавая, икроножная, дельтовидная",
+  "например\nпортняжная, червеобразные мышцы кисти": "портняжная, червеобразные мышцы кисти",
+  "длиннее плечо\n→ больше усилия мышцы относительно сустава": "больше усилия относительно сустава",
+  "меняется с углом\nу двуглавой плечо наибольшее около 90°": "у двуглавой плечо наибольшее около 90°",
+  "соотношение силы и скорости (force-velocity)\nс ростом скорости концентрическая сила падает, эксцентрическая — растёт": "скорость ↑ → концентрическая сила ↓",
+  "запасы энергии и кровоснабжение\nэнергия, кислород и питание — к мышце; продукты обмена — от неё": "кислород и питание — к мышце",
+  "густота сосудов ↔ тип волокон\nопределяет, как быстро мышца утомляется · три системы энергообеспечения — глава 7": "как быстро мышца утомляется",
+  "терапевт учитывает\nи выполнение упражнений, и результат программы": "и выполнение упражнений, и результат программы",
+};
+// cards-short end
+
+const T1 = '#c2564a', T2 = '#f6d2c6', MDARK = mix(ANAT.muscle, '#000000', .35);
+// The number of a factor (1–9) in a small circle.
+function factorNo(p, n, x, y, t0, col = COL.task) {
+  const g = G(p, { x, y, o: 0 });
+  mk('circle', { r: 24, fill: col }, g);
+  T(g, String(n), { y: 9, size: 26, weight: 700, fill: COL.board, anchor: 'middle' });
+  show(g, t0);
+  return g;
+}
+// A muscle cross-section of radius r with fibres of radius fr on a hexagonal grid.
+function crossSec(p, cx, cy, r, fr, t0, { col = ANAT.muscle, mixT1 = 0 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx, cy, r, fill: mix(col, COL.board, .6), stroke: col, 'stroke-width': 3 }, g);
+  const step = fr * 2.15, fib = [];
+  let k = 0;
+  for (let y = -r; y <= r; y += step * .87) for (let x = -r; x <= r; x += step) {
+    const xx = x + ((Math.round((y + r) / (step * .87)) % 2) ? step / 2 : 0);
+    if (Math.hypot(xx, y) > r - fr * 1.1) continue;
+    const t1 = mixT1 && (k++ % 3 !== 0);   // about 2 in 3 fibres are type I when mixT1
+    fib.push(mk('circle', { cx: cx + xx, cy: cy + y, r: t1 ? fr * .8 : fr, fill: t1 ? T1 : col, stroke: MDARK, 'stroke-width': 1.2 }, g));
+  }
+  if (t0 !== null) show(g, t0);
+  return { g, fib };
+}
+// A muscle drawn as fibres between two tendons, the left end fixed at (x, y): pennate or parallel. len: belly length.
+// set(k) shortens the belly to k × len (only along the line of pull).
+function fibreMuscle(p, x, y, len, pennate, t0) {
+  const g = G(p, { o: 0 }), inner = mk('g', {}, g), h = pennate ? 120 : 70, f = v => v.toFixed(1);
+  mk('path', { d: `M0 0C${len * .2} ${-h / 2} ${len * .8} ${-h / 2} ${len} 0C${len * .8} ${h / 2} ${len * .2} ${h / 2} 0 0Z`, fill: mix(ANAT.muscle, COL.board, .55), stroke: ANAT.muscle, 'stroke-width': 3 }, inner);
+  if (pennate) {
+    path(inner, `M${-40} 0H${len + 40}`, { stroke: ANAT.tendon, 'stroke-width': 6 });
+    for (let i = 1; i < 12; i++) {
+      const tx = len * (.1 + .8 * i / 12), w = Math.sin(Math.PI * (.1 + .8 * i / 12)) * h / 2 - 6;
+      [-1, 1].forEach(sg => path(inner, `M${f(tx)} 0L${f(tx - w * 1.1)} ${f(sg * w)}`, { stroke: ANAT.muscle, 'stroke-width': 4 }));
+    }
+  } else {
+    path(inner, `M${-40} 0H6M${len - 6} 0H${len + 40}`, { stroke: ANAT.tendon, 'stroke-width': 6 });
+    [-24, -12, 0, 12, 24].forEach(dy => path(inner, `M8 ${dy * .8}C${len * .3} ${dy * 1.3} ${len * .7} ${dy * 1.3} ${len - 8} ${dy * .8}`, { stroke: ANAT.muscle, 'stroke-width': 4 }));
+  }
+  const m = { g, set: k => inner.setAttribute('transform', `translate(${x + 40},${y}) scale(${k.toFixed(4)},1)`) };
+  m.set(1);
+  if (t0 !== null) show(g, t0);
+  return m;
+}
+// Force arrow from (x, y) to the right, length L; returns the path (set by setL).
+function forceArrow(p, x, y, col, t0, w = 6) {
+  const a = path(p, '', { stroke: col, 'stroke-width': w }, { o: 0 });
+  const setL = L => a.setAttribute('d', `M${x} ${y}H${x + L}M${x + L - 16} ${y - 12}L${x + L} ${y}L${x + L - 16} ${y + 12}`);
+  setL(20); show(a, t0);
+  return setL;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Напряжение мышцы', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 56', { x: 800, y: 200, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'От чего зависит', { x: 800, y: 285, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'напряжение мышцы', { x: 800, y: 350, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'девять факторов', 800, 430, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const mu = muscleEl(art, { rest: 300, w: 30 });
+    prog(q => { const v = (1 - Math.cos(2 * Math.PI * 2 * q)) / 2; mu.set([650, 600], [950 - 40 * v, 600]); mu.act(v); }, .3, Math.max(4, D - 1.2), lin);
+    for (let i = 0; i < 9; i++) factorNo(art, i + 1, 560 + i * 60, 720, .6 + i * .25);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['size', 'Поперечник', (m) => {
+    const p = panel(0);
+    txt(p, 'напряжение мышцы зависит от:', 800, 86, m('all'), { size: 28, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ['строения', 'механики', 'нервной регуляции', 'обмена веществ'].forEach((s, i) => pill(p, s, 320 + i * 320, 150, m('all', .6 + i * .5), { col: COL.whole, size: 24 }));
+    txt(p, 'сколько · как долго · как быстро · как скоро устаёт', 800, 215, m('all', 3), { size: 24, fill: COL.dim, anchor: 'middle' });
+    factorNo(p, 1, 120, 300, m('size'));
+    txt(p, 'поперечник мышцы: число и размер волокон', 160, 309, m('size'), { size: 27, weight: 700, fill: ANAT.muscle });
+    crossSec(p, 400, 530, 85, 13, m('size', .8));
+    crossSec(p, 960, 530, 135, 13, m('size', 1.4));
+    txt(p, 'меньше диаметр', 400, 665, m('size', .8), { size: 22, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'больше диаметр', 960, 715, m('size', 1.4), { size: 22, fill: COL.dim, anchor: 'middle' });
+    const a1 = forceArrow(p, 300, 780, ANAT.muscle, m('big'), 6), a2 = forceArrow(p, 760, 780, ANAT.muscle, m('big'), 12);
+    prog(q => { a1.call(null, 30 + 170 * io(q)); a2.call(null, 30 + 420 * io(q)); }, m('big', .2), 1.3, lin);
+    txt(p, 'напряжение', 160, 788, m('big'), { size: 22, fill: COL.dim });
+    labelBox(p, 1350, 530, 340, ['больше диаметр', '→ больше напряжения'], ANAT.muscle, m('big', 1.2), { size: 26 });
+  }],
+
+  ['arch', 'Архитектура', (m) => {
+    const p = panel(0);
+    factorNo(p, 2, 120, 90, m('arch'));
+    txt(p, 'архитектура: расположение и длина волокон', 160, 99, m('arch'), { size: 27, weight: 700, fill: ANAT.muscle });
+    const A = fibreMuscle(p, 120, 360, 460, true, m('pen')), B = fibreMuscle(p, 900, 360, 460, false, m('par'));
+    txt(p, 'перистое, многоперистое', 390, 240, m('pen'), { size: 26, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'короткие волокна под углом', 390, 470, m('pen', .5), { size: 22, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'параллельное', 1170, 240, m('par'), { size: 26, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'длинные параллельные волокна', 1170, 470, m('par', .5), { size: 22, fill: COL.dim, anchor: 'middle' });
+    // both contract for the same time: the pennate one shortens a little with a big force, the parallel one a lot with less
+    const fA = forceArrow(p, 160, 560, ANAT.muscle, m('par', 2), 12), fB = forceArrow(p, 940, 560, ANAT.muscle, m('par', 2), 5);
+    prog(q => { const v = io(q); A.set(1 - .08 * v); B.set(1 - .28 * v); fA(30 + 330 * v); fB(30 + 130 * v); }, m('par', 2.2), 1.4, lin);
+    txt(p, 'большая сила', 160, 610, m('par', 3.4), { size: 23, weight: 700, fill: ANAT.muscle });
+    txt(p, 'быстрое укорочение, меньше силы', 940, 610, m('par', 3.4), { size: 23, weight: 700, fill: COL.whole });
+    infoCard(p, 80, 660, 680, 170, 'например', 'четырёхглавая мышца бедра, икроножная, дельтовидная, двуглавая мышца плеча', ANAT.muscle, m('pen', 2.5), { size: 23 });
+    infoCard(p, 860, 660, 680, 170, 'например', 'портняжная, червеобразные мышцы кисти', COL.whole, m('par', 4), { size: 23 });
+  }],
+
+  ['type', 'Типы волокон', (m) => {
+    const p = panel(0), x0 = 120, y0 = 700, W = 640, H = 420;
+    factorNo(p, 3, 120, 90, m('type'));
+    txt(p, 'преобладающий тип волокон', 160, 99, m('type'), { size: 27, weight: 700, fill: ANAT.muscle });
+    chartAxes(p, x0, y0, W, H, 'сила', 'время →', m('type', .5));
+    const f1 = t => .38 * (1 - Math.exp(-t / .12)), f2 = t => .95 * (1 - Math.exp(-t / .03)) * Math.exp(-Math.max(0, t - .12) / .3);
+    draw(path(p, fnPath(x0, y0, W, H, f1), { stroke: T1, 'stroke-width': 6 }, { d: 0 }), m('t1', 1), 2.5);
+    draw(path(p, fnPath(x0, y0, W, H, f2), { stroke: T2, 'stroke-width': 6 }, { d: 0 }), m('t2', 1.5), 2.5);
+    txt(p, 'тип I', x0 + W - 10, y0 - .38 * H - 16, m('t1', 2.5), { size: 24, weight: 700, fill: T1, anchor: 'end' });
+    txt(p, 'тип II', x0 + .2 * W, y0 - .93 * H, m('t2', 2), { size: 24, weight: 700, fill: T2 });
+    txt(p, '↘ утомление', x0 + .36 * W, y0 - .62 * H, m('t2', 3.5), { size: 21, fill: COL.bad });
+    pill(p, 'схема', 700, 240, m('type', .5), { col: COL.dim, size: 19 });
+    const c1 = infoCard(p, 840, 150, 700, 300, 'тип I — тонические, медленные (slow-twitch)', 'небольшая сила · набирают её медленно · устойчивы к утомлению', T1, m('t1'), { size: 23, textW: 420 });
+    put(crossSec(c1, 1400, 340, 80, 11, null, { col: T2, mixT1: 1 }).g, { o: 1 });
+    const c2 = infoCard(p, 840, 480, 700, 300, 'тип IIA и IIB — фазические, быстрые (fast-twitch)', 'быстро развивают большую силу · быстро утомляются', T2, m('t2'), { size: 23, textW: 420 });
+    put(crossSec(c2, 1400, 670, 80, 14, null, { col: T2 }).g, { o: 1 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-property', prompt: ['Что даёт это свойство?'],
+    build: grid([
+      { parts: ['Короткие перистые волокна'], ans: ['f'], why: 'Перистое строение — у мышц большой силы.' },
+      { parts: ['Длинные параллельные волокна'], ans: ['v'], why: 'Быстрое укорочение, но меньше силы.' },
+      { parts: ['Много волокон первого типа'], ans: ['e'], why: 'Небольшая сила, зато устойчивость к утомлению.' },
+      { parts: ['Много волокон второго типа'], ans: ['f'], why: 'Быстро развивают большую силу.' },
+      { parts: ['Больший поперечник мышцы'], ans: ['f'], why: 'Больше диаметр — больше напряжения.' },
+    ], [['f', 'Большая сила', ANAT.muscle], ['v', 'Быстрое укорочение', COL.whole], ['e', 'Устойчивость к утомлению', T1]], { multi: false, text: true }),
+  }], done) }],
+
+  ['lt', 'Длина и напряжение', (m) => {
+    const p = panel(0), x0 = 120, y0 = 720, W = 700, H = 440;
+    factorNo(p, 4, 120, 90, m('lt'));
+    txt(p, 'соотношение длины и напряжения (length-tension)', 160, 99, m('lt'), { size: 27, weight: 700, fill: ANAT.muscle });
+    chartAxes(p, x0, y0, W, H, 'напряжение', '', m('lt', .5));
+    txt(p, 'длина мышцы →', x0 + W, y0 + 72, m('lt', .5), { size: 21, fill: COL.dim, anchor: 'end' });
+    const ten = x => Math.max(0, 1 - ((x - .5) / .42) ** 2) * .9;
+    draw(path(p, fnPath(x0, y0, W, H, ten, .08, .92), { stroke: ANAT.muscle, 'stroke-width': 6 }, { d: 0 }), m('lt', 1), 1.6);
+    pill(p, 'схема', 760, 250, m('lt', .5), { col: COL.dim, size: 19 });
+    const dot = put(mk('circle', { r: 14, fill: COL.task, stroke: COL.board, 'stroke-width': 3 }, p), { o: 0 });
+    const sr = sarcomere(p, 1180, 470, 300, 110);
+    put(sr.g, { o: 0 }); show(sr.g, m('rest'));
+    const lab = txt(p, '', 1180, 640, m('rest'), { size: 26, weight: 700, fill: COL.task, anchor: 'middle' });
+    const at = x => { put(dot, { x: x0 + x * W, y: y0 - ten(x) * H }); sr.set(lerp(190, 430, (x - .15) / .7)); };
+    at(.5); show(dot, m('rest'));
+    whenAt(m('rest'), () => { lab.textContent = 'около длины покоя — максимум'; });
+    prog(q => at(lerp(.5, .2, io(q))), m('short'), 1.4, lin);
+    whenAt(m('short', .1), () => { lab.textContent = 'сильно укорочена — меньше'; });
+    prog(q => at(lerp(.2, .82, io(q))), m('long'), 1.8, lin);
+    whenAt(m('long', .1), () => { lab.textContent = 'сильно растянута — меньше'; });
+    txt(p, 'саркомер: актин и миозин', 1180, 360, m('rest'), { size: 22, fill: COL.dim, anchor: 'middle' });
+    [['укорочена', .18], ['длина покоя', .5], ['растянута', .84]].forEach(([s, x]) => txt(p, s, x0 + x * W, y0 + 36, m('lt', 1.6), { size: 20, fill: COL.dim, anchor: 'middle' }));
+  }],
+
+  ['arm', 'Плечо силы', (m) => {
+    const p = panel(0), E = [500, 620], f = v => v.toFixed(1);
+    factorNo(p, 5, 120, 90, m('arm'));
+    txt(p, 'плечо силы (moment arm)', 160, 99, m('arm'), { size: 27, weight: 700, fill: ANAT.muscle });
+    // an enlarged lever: upper arm lying to the left of the elbow, forearm swinging up; the biceps from the
+    // humerus to the forearm (insertion drawn farther from the joint than in life so the moment arm is visible)
+    const arm = G(p, { o: 0 }), defs = mk('defs', {}, arm);
+    const skinU = limbEl(arm, defs, '#4b5f57', 46, 40, '#6f857b'), skinF = limbEl(arm, defs, '#4b5f57', 38, 26, '#6f857b');
+    const hum = boneEl(arm, 14), uln = boneEl(arm, 11);
+    const bic = muscleEl(arm, { rest: 330, w: 26 });
+    mk('circle', { cx: E[0], cy: E[1], r: 13, fill: COL.board, stroke: ANAT.bone, 'stroke-width': 5 }, arm);
+    show(arm, .3);
+    const lop = path(p, '', { stroke: COL.whole, 'stroke-width': 3, 'stroke-dasharray': '10 8' }, { o: 0 });
+    const ma = path(p, '', { stroke: ANAT.taut, 'stroke-width': 8 }, { o: 0 });
+    const axis = put(mk('circle', { cx: E[0], cy: E[1], r: 6, fill: ANAT.taut }, p), { o: 0 });
+    const len = txt(p, '', 1000, 300, m('long'), { size: 30, weight: 700, fill: ANAT.taut });
+    const bar = put(mk('rect', { x: 1000, y: 330, width: 0, height: 26, rx: 8, fill: ANAT.taut }, p), { o: 0 });
+    show(bar, m('long'));
+    const setA = ang => {
+      const ph = rad(180 - ang), F = [Math.cos(ph), -Math.sin(ph)], N = [F[1], -F[0]], S = [E[0] - 380, E[1]], W = [E[0] + F[0] * 330, E[1] + F[1] * 330];
+      skinU.set(S, E); skinF.set(E, [E[0] + F[0] * 360, E[1] + F[1] * 360]);
+      hum.set([S[0] + 20, E[1]], [E[0] - 8, E[1]]); uln.set([E[0] - F[0] * 10, E[1] - F[1] * 10], W);
+      const O = [S[0] + 70, E[1] - 30], I = [E[0] + F[0] * 80 + N[0] * 18, E[1] + F[1] * 80 + N[1] * 18];
+      bic.set(O, I); bic.act(.9);
+      const dx = I[0] - O[0], dy = I[1] - O[1], t = ((E[0] - O[0]) * dx + (E[1] - O[1]) * dy) / (dx * dx + dy * dy), Ft = [O[0] + t * dx, O[1] + t * dy];
+      lop.setAttribute('d', `M${f(O[0] - dx * .15)} ${f(O[1] - dy * .15)}L${f(I[0] + dx * .5)} ${f(I[1] + dy * .5)}`);
+      ma.setAttribute('d', `M${f(E[0])} ${f(E[1])}L${f(Ft[0])} ${f(Ft[1])}`);
+      const d = Math.hypot(E[0] - Ft[0], E[1] - Ft[1]);
+      bar.setAttribute('width', f(d * 5));
+      len.textContent = 'угол в локте ' + Math.round(ang) + '°';
+    };
+    setA(165);
+    show(lop, m('arm', .8)); show(ma, m('arm', 1.6)); show(axis, m('arm', 1.6));
+    txt(p, 'линия тяги двуглавой', 120, 730, m('arm', .8), { size: 23, fill: COL.whole, weight: 600 });
+    txt(p, 'ось сустава', E[0], E[1] + 70, m('arm', 1.6), { size: 22, fill: ANAT.taut, anchor: 'middle' });
+    txt(p, 'плечо силы', 1000, 395, m('long'), { size: 23, fill: ANAT.taut, weight: 600 });
+    prog(q => setA(lerp(165, 90, io(q))), m('long', .4), 2, lin);
+    prog(q => setA(lerp(90, 45, io(q))), m('chg', .4), 1.8, lin);
+    pill(p, 'схема', 820, 160, .3, { col: COL.dim, size: 19 });
+    infoCard(p, 960, 470, 580, 170, 'длиннее плечо', '→ больше усилия мышцы относительно сустава', ANAT.taut, m('long', 1), { size: 23 });
+    infoCard(p, 960, 670, 580, 170, 'меняется с углом', 'у двуглавой плечо наибольшее около 90°', COL.whole, m('chg'), { size: 23 });
+    NOTE(p, 1250, 870, m('chg', 1));
+  }],
+
+  ['neur', 'Двигательные единицы', (m) => {
+    const p = panel(0);
+    factorNo(p, 6, 100, 90, m('rec')); factorNo(p, 7, 160, 90, m('rate'));
+    txt(p, 'нервные факторы', 200, 99, m('neur'), { size: 27, weight: 700, fill: ANAT.taut });
+    // recruitment: three motor neurons, each with its fibres in the muscle
+    const cord = G(p, { o: 0 });
+    roundBox(cord, 80, 160, 200, 300, COL.dim, PANEL, 2);
+    T(cord, 'спинной мозг', { x: 180, y: 488, size: 20, fill: COL.dim, anchor: 'middle' });
+    show(cord, m('rec'));
+    const mus = G(p, { o: 0 });
+    mk('path', { d: 'M560 310C640 170 960 170 1040 310C960 450 640 450 560 310Z', fill: mix(ANAT.muscle, COL.board, .65), stroke: ANAT.muscle, 'stroke-width': 3 }, mus);
+    show(mus, m('rec'));
+    const unitCol = [COL.task, COL.whole, COL.good], units = [];
+    [0, 1, 2].forEach(u => {
+      const ny = 220 + u * 90, g = G(p, { o: 0 }), fibres = [];
+      const soma = mk('circle', { cx: 180, cy: ny, r: 16, fill: COL.board, stroke: unitCol[u], 'stroke-width': 4 }, g);
+      for (let k = 0; k < 6; k++) {
+        const fy = 230 + ((k * 3 + u) % 9) * 18 - 0, fx = 640 + k * 55;
+        path(g, `M196 ${ny}C380 ${ny} 420 ${fy} ${fx} ${fy}`, { stroke: unitCol[u], 'stroke-width': 2, 'stroke-opacity': .7 });
+        fibres.push(path(g, `M${fx - 30} ${fy}H${fx + 30}`, { stroke: ANAT.muscle, 'stroke-width': 7 }));
+      }
+      show(g, m('rec', .3));
+      units.push({ soma, fibres });
+    });
+    const fbar = mk('rect', { x: 1110, y: 420, width: 40, height: 0, rx: 8, fill: '#ff5a3c' }, p);
+    path(p, 'M1106 160V424H1154V160', { stroke: COL.dim, 'stroke-width': 2 }, { o: 0 });
+    show(p.lastChild, m('rec', .3));
+    txt(p, 'сила', 1130, 150, m('rec', .3), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const on = (u, v) => { units[u].soma.setAttribute('fill', mix(COL.board, unitCol[u], v)); units[u].fibres.forEach(e => e.setAttribute('stroke', mix(ANAT.muscle, '#ff5a3c', v))); };
+    [0, 1, 2].forEach(u => prog(q => { on(u, q); const n = u + q; fbar.setAttribute('y', (420 - 82 * n).toFixed(1)); fbar.setAttribute('height', (82 * n).toFixed(1)); }, m('rec', 1.2 + u * 1.2), .5, lin));
+    txt(p, 'больше единиц и синхроннее → больше сила', 800, 480, m('rec', 4.5), { size: 23, weight: 600, fill: '#ff7a5c', anchor: 'middle' });
+    // firing rate: sparse vs dense impulses and the resulting tension
+    const x0 = 140, W = 1240;
+    [[560, 6, 'редкие импульсы', .45], [740, 20, 'частые импульсы', .95]].forEach(([y, n, s, top], i) => {
+      const g = G(p, { o: 0 });
+      let sp = '';
+      for (let k = 0; k < n; k++) { const x = x0 + 40 + k * (500 / n); sp += `M${x.toFixed(1)} ${y + 40}V${y}`; }
+      path(g, sp, { stroke: ANAT.taut, 'stroke-width': 3 });
+      T(g, s, { x: x0, y: y - 18, size: 22, fill: ANAT.taut, weight: 600 });
+      show(g, m('rate', .4 + i * 1.6));
+      const fn = t => i ? top * (1 - Math.exp(-t / .12)) * (1 - .03 * Math.sin(t * 120)) : top * (.55 + .45 * Math.abs(Math.sin(t * Math.PI * 6))) * (1 - Math.exp(-t / .05));
+      draw(path(p, fnPath(x0 + 640, y + 40, 600, 120, fn, 0, 1, 160), { stroke: '#ff7a5c', 'stroke-width': 4 }, { d: 0 }), m('rate', .9 + i * 1.6), 1.2);
+    });
+    txt(p, 'напряжение', x0 + 640, 545, m('rate', .9), { size: 21, fill: COL.dim });
+    txt(p, 'чаще импульсы → выше напряжение', 1010, 880, m('rate', 4), { size: 23, weight: 600, fill: '#ff7a5c', anchor: 'middle' });
+  }],
+
+  ['mode', 'Вид и скорость сокращения', (m) => {
+    const p = panel(0);
+    factorNo(p, 8, 100, 90, m('mode')); factorNo(p, 9, 160, 90, m('fv'));
+    txt(p, 'вид и скорость сокращения', 200, 99, m('mode'), { size: 27, weight: 700, fill: ANAT.muscle });
+    [['эксцентрическое', 1, 'удлиняется под нагрузкой'], ['изометрическое', .78, 'длина не меняется'], ['концентрическое', .62, 'укорачивается']].forEach(([s, k, d], i) => {
+      const y = 210 + i * 110, g = G(p, { o: 0 });
+      T(g, s, { x: 100, y: y + 8, size: 24, weight: 700, fill: COL.chalk });
+      T(g, d, { x: 100, y: y + 38, size: 20, fill: COL.dim });
+      const b = mk('rect', { x: 330, y: y - 14, width: 0, height: 30, rx: 9, fill: ANAT.muscle }, g);
+      show(g, m('ord', .3 + i * .9));
+      prog(q => b.setAttribute('width', (300 * k * io(q)).toFixed(1)), m('ord', .5 + i * .9), .8, lin);
+    });
+    txt(p, 'сила', 480, 170, m('ord'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    pill(p, 'схема', 560, 560, m('ord'), { col: COL.dim, size: 19 });
+    // force-velocity: eccentric speed to the left, concentric to the right of zero
+    const cx = 1100, y0 = 700, W = 400, H = 480, f = v => v.toFixed(1);
+    const g = G(p, { o: 0 });
+    path(g, `M${cx - W} ${y0}H${cx + W + 20}M${cx} ${y0 + 10}V${y0 - H - 20}`, { stroke: COL.dim, 'stroke-width': 3 });
+    T(g, 'сила', { x: cx + 12, y: y0 - H - 10, size: 21, fill: COL.dim });
+    T(g, 'скорость укорочения →', { x: cx + W + 10, y: y0 + 36, size: 20, fill: COL.dim, anchor: 'end' });
+    T(g, '← скорость удлинения', { x: cx - W, y: y0 + 36, size: 20, fill: COL.dim });
+    T(g, 'изометрия', { x: cx + 12, y: y0 - .55 * H - 12, size: 20, fill: COL.dim });
+    show(g, m('fv'));
+    const Fc = v => .55 * (1 - v) / (1 + 3 * v), Fe = v => .55 + .35 * (1 - Math.exp(-v * 4));
+    const con = path(p, fnPath(cx, y0, W, H, Fc), { stroke: COL.whole, 'stroke-width': 6 }, { d: 0 });
+    const ecc = path(p, fnPath(cx - W, y0, W, H, v => Fe(1 - v)), { stroke: COL.task, 'stroke-width': 6 }, { d: 0 });
+    draw(con, m('con'), 1.4); draw(ecc, m('ecc'), 1.4);
+    const dot = put(mk('circle', { r: 13, fill: COL.chalk, stroke: COL.board, 'stroke-width': 3 }, p), { o: 0 });
+    prog(q => { put(dot, { x: cx + q * W * .9, y: y0 - Fc(q * .9) * H, o: 1 }); }, m('con', .3), 2, lin);
+    prog(q => { put(dot, { x: cx - q * W * .9, y: y0 - Fe(q * .9) * H }); }, m('ecc', .3), 2, lin);
+    txt(p, 'концентрическое: быстрее → слабее', cx + 40, y0 - .62 * H, m('con', .8), { size: 21, fill: COL.whole, weight: 600 });
+    txt(p, 'эксцентрическое: быстрее → сильнее', cx - W, y0 - .97 * H, m('ecc', .8), { size: 21, fill: COL.task, weight: 600 });
+    pill(p, 'схема', cx + W - 40, y0 - H, m('fv'), { col: COL.dim, size: 19 });
+    infoCard(p, 80, 600, 560, 220, 'соотношение силы и скорости (force-velocity)', 'с ростом скорости концентрическая сила падает, эксцентрическая — растёт', ANAT.muscle, m('fv', 1), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-tension', prompt: ['Верно или нет?'],
+    build: grid([
+      { parts: ['Больше всего напряжения — около длины покоя мышцы'], ans: ['t'], why: 'Так по соотношению длины и напряжения.' },
+      { parts: ['При эксцентрическом сокращении чем быстрее, тем меньше напряжение'], ans: ['f'], why: 'Наоборот: эксцентрическое с ростом скорости растёт.' },
+      { parts: ['Изометрическое сокращение сильнее концентрического'], ans: ['t'], why: 'Порядок: эксцентрическое, изометрическое, концентрическое.' },
+      { parts: ['Чем чаще импульсы мотонейрона, тем меньше напряжение'], ans: ['f'], why: 'Чаще импульсы — выше напряжение.' },
+      { parts: ['Длиннее плечо силы — больше усилия относительно сустава'], ans: ['t'], why: 'Да.' },
+    ], TF, { multi: false, text: true }),
+  }], done) }],
+
+  ['other', 'Другие факторы', (m) => {
+    const p = panel(0);
+    txt(p, 'другие факторы', 800, 86, m('other'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // capillaries are denser around type I fibres (scheme)
+    const cs = crossSec(p, 380, 400, 190, 20, m('en'), { col: T2, mixT1: 1 });
+    const cap = G(p, { o: 0 });
+    cs.fib.forEach((e, i) => {
+      const t1 = e.getAttribute('fill') === T1, cx = +e.getAttribute('cx'), cy = +e.getAttribute('cy'), r = +e.getAttribute('r');
+      (t1 ? [45, 165, 285] : [100]).forEach(a => mk('circle', { cx: cx + Math.cos(rad(a + i * 17)) * (r + 4), cy: cy + Math.sin(rad(a + i * 17)) * (r + 4), r: 3.2, fill: '#ff5a3c' }, cap));
+    });
+    show(cap, m('vas'));
+    txt(p, 'капилляры гуще у волокон типа I', 380, 630, m('vas'), { size: 22, fill: '#ff7a5c', anchor: 'middle', weight: 600 });
+    pill(p, 'схема', 380, 180, m('vas'), { col: COL.dim, size: 19 });
+    [['тип I', T1], ['тип II', T2]].forEach(([s, c], i) => { const g = G(p, { o: 0 }); mk('circle', { cx: 230 + i * 170, cy: 690, r: 12, fill: c }, g); T(g, s, { x: 250 + i * 170, y: 698, size: 21, fill: COL.dim }); show(g, m('en')); });
+    infoCard(p, 700, 130, 840, 170, 'запасы энергии и кровоснабжение', 'энергия, кислород и питание — к мышце; продукты обмена — от неё', COL.whole, m('en'), { size: 23 });
+    infoCard(p, 700, 320, 840, 170, 'густота сосудов ↔ тип волокон', 'определяет, как быстро мышца утомляется · три системы энергообеспечения — глава 7', COL.whole, m('vas'), { size: 23 });
+    ['утомление и восстановление', 'возраст', 'пол', 'психологическое состояние, познание'].forEach((s, i) => pill(p, s, i < 2 ? 870 + i * 380 : 870 + (i - 2) * 380, 550 + (i < 2 ? 0 : 70), m('rest', .4 + i * .6), { col: COL.task, size: 24 }));
+    infoCard(p, 700, 690, 840, 150, 'терапевт учитывает', 'и выполнение упражнений, и результат программы', COL.good, m('ther'), { size: 23 });
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Строение: больше поперечник и перистые волокна — больше силы; параллельные — быстрее укорочение.', 'w1'],
+     ['Тип I — небольшая сила и выносливость; тип II — быстрая большая сила и быстрое утомление.', 'w2'],
+     ['Механика: максимум около длины покоя и при длинном плече силы.', 'w3'],
+     ['Больше единиц и чаще импульсы — больше сила; эксцентрическое > изометрическое > концентрическое.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-factor', prompt: ['Какой фактор?'],
+    build: grid([
+      { parts: ['Перистое строение четырёхглавой мышцы'], ans: ['s'], why: 'Строение — архитектура волокон.' },
+      { parts: ['Мышца сокращается около своей длины покоя'], ans: ['m'], why: 'Механика — соотношение длины и напряжения.' },
+      { parts: ['Включается больше двигательных единиц'], ans: ['n'], why: 'Нервная регуляция — вовлечение единиц.' },
+      { parts: ['Опускать груз удаётся, а поднять — нет'], ans: ['c'], why: 'Вид сокращения: эксцентрическое сильнее концентрического.' },
+      { parts: ['При сгибании локтя меняется плечо силы двуглавой'], ans: ['m'], why: 'Механика — плечо силы.' },
+    ], [['s', 'Строение', ANAT.muscle], ['m', 'Механика', ANAT.taut], ['n', 'Нервная регуляция', COL.whole], ['c', 'Вид сокращения', COL.task]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-ecc', prompt: ['Пациентка не может поднять чашку на полку, сгибая локоть, но может медленно опустить её. Почему?'],
+    build: choice([
+      ['Эксцентрическое сокращение развивает больше силы, чем концентрическое'],
+      ['При опускании мышцы не работают'],
+      ['При опускании плечо силы всегда длиннее'],
+      ['Опускание выполняют только волокна первого типа'],
+    ], 0, 'Опуская, двуглавая работает эксцентрически — а это самый сильный вид сокращения.',
+    [null, 'Работают: двуглавая тормозит опускание, удлиняясь, — это эксцентрическое сокращение.', 'Плечо силы зависит от угла в суставе, а не от направления движения.', 'Тип волокон не меняется от направления движения.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

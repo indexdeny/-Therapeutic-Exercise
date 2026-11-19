@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Приёмы ПНФ — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 72, title: 'Специальные приёмы ПНФ', minutes: 8, language: 'ru', next: '../ch073/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch072/cards.ru.json
+const CARDS_SHORT = {
+  "внутри схемы ПНФ\nособые приёмы сильнее стимулируют слабые мышцы и улучшают движение или устойчивость": "приёмы стимулируют слабые мышцы",
+  "выбирают избирательно\nпод лучший ответ пациента и цель лечения": "под ответ пациента и цель лечения",
+  "что даёт\nпациент запоминает последовательность движений в схеме и понимает, с какой скоростью двигаться": "последовательность и скорость движений",
+  "для слабого агониста\nповторные динамические сокращения — укрепить слабый компонент схемы": "повторные сокращения → слабый компонент",
+  "как\nв любой точке объёма: быстрое растяжение → сопротивление → снова растяжение → снова сопротивление": "растяжение → сопротивление → снова",
+  "слабую схему стимулируют\nсопротивляясь сначала противоположной — статически или динамически": "сопротивляясь противоположной",
+  "с удержанием — для динамической устойчивости\nособенно проксимальных мышц": "особенно проксимальных мышц",
+  "для чего\nизометрическая сила и устойчивость: позные мышцы туловища, стабилизаторы плечевого пояса и бедра": "изометрическая сила и устойчивость",
+  "как\nR в одной плоскости — сначала с одной стороны, потом с другой; «держите»; движения в суставе нет; работают агонисты и антагонисты": "R с одной стороны, потом с другой",
+  "руки не отрывают\nпереносят на другую поверхность; R нарастает и убывает плавно": "R нарастает и убывает плавно",
+  "после чередующейся изометрии\nсовместное сокращение проксимальных стабилизаторов туловища, плечевого и тазового пояса": "совместное сокращение",
+  "многонаправленно\nруки на противоположных сторонах давят одновременно в противоположные стороны": "давят одновременно",
+  "потом — наоборот\nруки на другие поверхности; без расслабления": "без расслабления",
+};
+// cards-short end
+
+const RES = COL.whole, STABC = COL.good, D1C = COL.task, D2C = COL.real, ISO = COL.real;
+// A point on segment a→b of a figure, `along` units from a and `off` units to the side (the muscleOn convention).
+function bodyPt(f, a, b, along, off) {
+  const A = f.pts[a], B = f.pts[b], dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+  return figPt(f, [A[0] + ux * along - uy * f.dir * off, A[1] + uy * along + ux * f.dir * off]);
+}
+// A numbered step that lights up at t0 (dim before).
+function stepRow(p, x, y, w, n, str, col, t0) {
+  const g = G(p, { o: .35 });
+  mk('rect', { x, y, width: w, height: 74, rx: 16, fill: PANEL, stroke: col, 'stroke-width': 2.5 }, g);
+  mk('circle', { cx: x + 38, cy: y + 37, r: 20, fill: col }, g);
+  T(g, String(n), { x: x + 38, y: y + 46, size: 24, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 74, y + 32, null, { size: 22, maxW: w - 92 }), { o: 1 });
+  tw(g, { o: 1 }, t0, .4);
+  return g;
+}
+// The patient lying on the side, seen from above: head right, front facing down the screen; f.abs and f.back muscles.
+function sideLying(p, cx, cy, s, t0) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x: cx - 340 * s, y: cy - 110 * s, width: 680 * s, height: 220 * s, rx: 14, fill: PANEL, stroke: COL.dim, 'stroke-width': 3 }, g);
+  const f = fig(g, { x: cx, y: cy, s, r: 90, pose: { ...STAND, hN: 35, kN: 55, hF: 30, kF: 50, fN: 10, fF: 10, aN: 60, eN: 70, aF: 75, eF: 60 } });
+  f.abs = muscleOn(f, ['H', 'Sh', 10, 21], ['Sh', 'H', 26, -24], { w: 12 });
+  f.back = muscleOn(f, ['H', 'Sh', 10, -21], ['Sh', 'H', 26, 24], { w: 12 });
+  if (t0 !== null) show(g, t0);
+  return f;
+}
+// The trunk of a seated patient from above: front down the screen; f.ring = the rotators around the trunk.
+function trunkTop(p, cx, cy, s, t0) {
+  const g = G(p, { x: cx, y: cy, s, o: 0 }), defs = mk('defs', {}, g), line = mix(PNF_SKIN, COL.board, .62);
+  const L = (ra, rb) => limbEl(g, defs, PNF_SKIN, ra, rb, line);
+  L(26, 22).set([-42, 20], [-48, 210]); L(26, 22).set([42, 20], [48, 210]);
+  const ring = mk('ellipse', { cx: 0, cy: 0, rx: 150, ry: 78, fill: 'none', stroke: ANAT.muscle, 'stroke-width': 14, opacity: .25 }, g);
+  L(58, 58).set([-62, 0], [62, 0]);
+  L(30, 30).set([-112, 0], [112, 0]);
+  [-1, 1].forEach(k => mk('circle', { cx: 128 * k, cy: 0, r: 18, fill: mix(PNF_SKIN, COL.board, .15), stroke: line, 'stroke-width': 2 }, g));
+  const hg = mk('radialGradient', { id: 'tth' + (++SHADE_ID), cx: .38, cy: .32, r: .78 }, defs);
+  [[0, mix(PNF_SKIN, '#ffffff', .5)], [.55, PNF_SKIN], [1, mix(PNF_SKIN, '#000000', .45)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, hg));
+  mk('circle', { cx: 0, cy: 0, r: 40, fill: `url(#${hg.id})`, stroke: line, 'stroke-width': 2 }, g);
+  mk('ellipse', { cx: 0, cy: 42, rx: 7, ry: 9, fill: PNF_SKIN, stroke: line, 'stroke-width': 1.5 }, g);
+  if (t0 !== null) show(g, t0);
+  return { g, ring, at: ([x, y]) => [cx + x * s, cy + y * s] };
+}
+// A small schedule strip: blocks [label, width, colour]; returns the playhead.
+function strip(p, x, y, blocks, t0, h = 46) {
+  const g = G(p, { o: 0 });
+  let xx = x;
+  blocks.forEach(([lab, w, col]) => {
+    mk('rect', { x: xx, y, width: w - 4, height: h, rx: 10, fill: mix(col, COL.board, .55), stroke: col, 'stroke-width': 2 }, g);
+    T(g, lab, { x: xx + (w - 4) / 2, y: y + h / 2 + 8, size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    xx += w;
+  });
+  const head = path(g, `M0 ${y - 10}V${y + h + 10}`, { stroke: COL.chalk, 'stroke-width': 3 });
+  show(g, t0);
+  return { g, head, x0: x, W: xx - x };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Приёмы ПНФ', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 72', { x: 800, y: 170, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Специальные приёмы ПНФ', { x: 800, y: 255, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'начало, повторы, смена, изометрия, стабилизация', { x: 800, y: 320, size: 38, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как разбудить слабую мышцу и добавить устойчивости', 800, 400, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const f = pnfFig(art, 800, 650, .4, 0);
+    drive(f.arm, PAT.armD2, .4, Math.max(4, D - 1.4), 2);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['what', 'Зачем приёмы', (m, D) => {
+    const p = panel(0);
+    const f = pnfFig(p, 330, 500, .66, m('what', .2));
+    const rg = pnfRig(p, f, f.arm, { t0: m('what', .6) });
+    drive(f.arm, PAT.armD1, m('what', .6), D - m('what', .9), reps(D - m('what')), { cb: rg.cb(PAT.armD1, false, SPEC.armD1F) });
+    infoCard(p, 700, 110, 850, 170, 'внутри схемы ПНФ', 'особые приёмы сильнее стимулируют слабые мышцы и улучшают движение или устойчивость', D1C, m('what'), { size: 23 });
+    infoCard(p, 700, 300, 850, 130, 'выбирают избирательно', 'под лучший ответ пациента и цель лечения', COL.good, m('sel'), { size: 23 });
+    [['ритмическое начало', RES], ['повторные сокращения', D1C], ['смена антагонистов', D2C], ['чередующаяся изометрия', COL.good], ['ритмическая стабилизация', COL.bad]].forEach(([s, col], i) =>
+      pill(p, s, 1125, 500 + i * 70, m('list', .3 + i * .6), { col, size: 25 }));
+  }],
+
+  ['ri', 'Ритмическое начало', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ритмическое начало · D1 сгибание руки', 470, 70, m('ri'), { size: 26, weight: 700, anchor: 'middle' });
+    const f = pnfFig(p, 500, 520, .74, m('ri', .2));
+    const rg = pnfRig(p, f, f.arm, { t0: m('pas'), ther: m('pas') });
+    const base = rg.cb(PAT.armD1, false, SPEC.armD1F), noR = (e) => base(e, false);
+    const t0 = m('pas', .3);
+    drive(f.arm, PAT.armD1, t0, D - t0 - .3, reps(D - t0), { cb: noR });
+    hide(rg.c1, m('act', 3)); hide(rg.c2, m('act', 3)); hide(rg.th, m('act', 3));
+    const lab = txt(p, '', 470, 860, m('pas'), { size: 25, weight: 700, fill: RES, anchor: 'middle' });
+    whenAt(m('pas'), () => { lab.textContent = 'пассивно: ведёт терапевт, сопротивления нет'; });
+    whenAt(m('act'), () => { lab.textContent = 'с помощью — без сопротивления'; });
+    whenAt(m('act', 3), () => { lab.textContent = 'активно — сам пациент'; });
+    stepRow(p, 920, 160, 630, 1, 'пациент произвольно расслабляется', COL.dim, m('pas'));
+    stepRow(p, 920, 260, 630, 2, 'терапевт несколько раз пассивно проводит конечность по схеме', RES, m('pas', 1.5));
+    stepRow(p, 920, 360, 630, 3, 'с помощью или активно — без сопротивления', COL.good, m('act'));
+    infoCard(p, 920, 480, 630, 190, 'что даёт', 'пациент запоминает последовательность движений в схеме и понимает, с какой скоростью двигаться', D1C, m('rate'), { size: 22 });
+    pill(p, 'последовательность', 1080, 730, m('pas', 3), { col: D1C });
+    pill(p, 'скорость', 1350, 730, m('rate', .5), { col: D1C });
+  }],
+
+  ['rep', 'Повторные сокращения', (m, D) => {
+    const p = panel(0);
+    txt(p, 'повторные сокращения · слабый компонент схемы', 470, 70, m('rep'), { size: 26, weight: 700, anchor: 'middle' });
+    const f = pnfFig(p, 500, 520, .74, m('rep', .2));
+    const rg = pnfRig(p, f, f.arm, { t0: m('rep', .6), ther: m('rep', .6) });
+    const cb = rg.cb(PAT.armD1, false, SPEC.armD1F);
+    // forward through the pattern with a quick stretch (a small pull back) at three points, resistance throughout
+    const K = [[0, 0], [.2, .3], [.24, .23], [.28, .3], [.45, .55], [.49, .48], [.53, .55], [.7, .8], [.74, .73], [.78, .8], [.92, 1], [1, 1]];
+    const eAt = u => { for (let i = 1; i < K.length; i++) if (u <= K[i][0]) { const [a, ea] = K[i - 1], [b, eb] = K[i]; return lerp(ea, eb, io((u - a) / (b - a || 1))); } return 1; };
+    const t0 = m('rep', 1), T0 = Math.max(6, Math.min(9, D - t0 - .5));
+    toPose(f.arm, PAT.armD1, 0, m('rep', .3), .7, true);
+    prog(q => { const e = eAt(q), [v, t] = patPose(PAT.armD1, e); f.arm.set(v, t); cb(e, true); }, t0, T0, lin);
+    if (D - t0 - T0 > 7) prog(q => { const e = eAt(q), [v, t] = patPose(PAT.armD1, e); f.arm.set(v, t); cb(e, true); }, t0 + T0 + .8, Math.min(9, D - t0 - T0 - 1.2), lin);
+    [.24, .49, .74].forEach((u, i) => {
+      const P = tipPos(f, f.arm, PAT.armD1, K[[2, 5, 8][i]][1]);
+      const ring = put(mk('circle', { cx: P[0], cy: P[1], r: 30, fill: 'none', stroke: D1C, 'stroke-width': 5 }, p), { o: 0 });
+      tw(ring, { o: 1 }, t0 + u * T0 - .1, .15); tw(ring, { o: .35 }, t0 + u * T0 + .4, .5);
+    });
+    txt(p, 'кольца — быстрое растяжение', 470, 860, t0 + .24 * T0, { size: 23, weight: 700, fill: D1C, anchor: 'middle' });
+    infoCard(p, 920, 160, 630, 190, 'для слабого агониста', 'повторные динамические сокращения — укрепить слабый компонент схемы', D1C, m('rep'), { size: 23 });
+    infoCard(p, 920, 380, 630, 220, 'как', 'в любой точке объёма: быстрое растяжение → сопротивление → снова растяжение → снова сопротивление', RES, m('how'), { size: 23 });
+  }],
+
+  ['rev', 'Смена антагонистов', (m, D) => {
+    const p = panel(0);
+    txt(p, 'смена антагонистов', 800, 60, m('rev'), { size: 28, weight: 700, anchor: 'middle' });
+    ['пилить', 'рубить дрова', 'танцевать', 'теннис', 'взять и отпустить'].forEach((s, i) => pill(p, s, 250 + i * 270, 115, m('rev', .8 + i * .4), { col: COL.dim }));
+    const f = pnfFig(p, 420, 540, .64, m('rev', .3));
+    const rg = pnfRig(p, f, f.arm, { t0: m('idea'), ther: m('idea') });
+    const cF = rg.cb(PAT.armD1, false, SPEC.armD1F), cE = rg.cb(PAT.armD1, true, SPEC.armD1E);
+    const lab = txt(p, '', 420, 870, m('idea'), { size: 23, weight: 700, fill: RES, anchor: 'middle' });
+    // one movement plan: list of [e from, e to, seconds, hold]; extension = the stronger pattern here
+    const run = (t0, plan, labels) => {
+      const tot = plan.reduce((a, s) => a + s[2], 0);
+      prog(q => {
+        let t = q * tot, i = 0;
+        while (i < plan.length - 1 && t > plan[i][2]) { t -= plan[i][2]; i++; }
+        const [a, b, dur, hold] = plan[i], u = clamp(t / dur, 0, 1), e = hold ? a : lerp(a, b, io(u)), up = hold ? plan[i - 1] && plan[i - 1][1] > plan[i - 1][0] : b > a;
+        const [v, tv] = patPose(PAT.armD1, e, !up); f.arm.set(v, tv);
+        (up ? cF : cE)(e, true);
+        lab.textContent = labels[i];
+      }, t0, tot, lin);
+      return tot;
+    };
+    toPose(f.arm, PAT.armD1, 1, m('rev', .5), .8);
+    const tI = m('idea', .5);
+    run(tI, [[1, .08, 2.2], [.08, .95, 2.2]], ['сначала — сильная противоположная схема', 'поворот чуть раньше конца → слабая схема']);
+    // slow reversal: strong (extension) and weak (flexion) concentric, no pause
+    const sr = strip(p, 820, 300, [['сильная · конц.', 180, D2C], ['слабая · конц.', 180, D1C], ['сильная · конц.', 180, D2C], ['слабая · конц.', 180, D1C]], m('sr'));
+    txt(p, 'медленная смена — без расслабления', 820, 280, m('sr'), { size: 23, weight: 700, fill: COL.chalk });
+    const nS = Math.max(1, Math.floor((m('srh') - m('sr', .3)) / 4.4));
+    const planS = []; for (let i = 0; i < nS; i++) planS.push([.95, .05, 2.2], [.05, .95, 2.2]);
+    const totS = run(m('sr', .3), planS, planS.map((s, i) => i % 2 ? 'слабая схема: концентрически' : 'сильная схема: концентрически'));
+    prog(q => sr.head.setAttribute('d', `M${(sr.x0 + sr.W * ((q * nS) % 1 || (q >= 1 ? 1 : 0))).toFixed(1)} 290V356`), m('sr', .3), totS, lin);
+    // slow reversal hold: concentric, then an isometric hold at the end of range
+    const srh = strip(p, 820, 470, [['конц.', 170, D1C], ['изом.', 110, ISO], ['конц.', 170, D2C], ['изом.', 110, ISO], ['конц.', 170, D1C]], m('srh'));
+    txt(p, 'медленная смена с удержанием', 820, 450, m('srh'), { size: 23, weight: 700, fill: COL.chalk });
+    const planH = [[.05, 1, 2.2], [1, 1, 1.4, true], [1, 0, 2.2], [0, 0, 1.4, true], [0, 1, 2.2], [1, 1, 1.4, true]];
+    const totH = run(m('srh', .3), planH, ['слабая: концентрически', 'удержание в конце объёма', 'поворот: концентрически', 'удержание', 'концентрически', 'удержание']);
+    prog(q => srh.head.setAttribute('d', `M${(srh.x0 + Math.min(srh.W, srh.W * q * totH / (totH - 1.4))).toFixed(1)} 460V526`), m('srh', .3), totH, lin);
+    infoCard(p, 820, 580, 730, 150, 'слабую схему стимулируют', 'сопротивляясь сначала противоположной — статически или динамически', RES, m('idea'), { size: 22 });
+    infoCard(p, 820, 750, 730, 120, 'с удержанием — для динамической устойчивости', 'особенно проксимальных мышц', ISO, m('srh', 4), { size: 22 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-pnftech', prompt: ['Какой это приём?'],
+    build: grid([
+      { parts: ['Несколько раз пассивно провести руку по схеме'], ans: ['ri'], why: 'Ритмическое начало: последовательность и скорость.' },
+      { parts: ['Растяжение и сопротивление — снова и снова'], ans: ['rep'], why: 'Повторные сокращения — для слабого агониста.' },
+      { parts: ['Сильная схема — и сразу слабая, без паузы'], ans: ['sr'], why: 'Медленная смена.' },
+      { parts: ['Изометрия в конце объёма, затем поворот'], ans: ['srh'], why: 'Медленная смена с удержанием.' },
+    ], [['ri', 'Ритм. начало', RES], ['rep', 'Повторы', D1C], ['sr', 'Смена', D2C], ['srh', 'Смена + удержание', ISO]], { multi: false, text: true }),
+  }], done) }],
+
+  ['ai', 'Чередующаяся изометрия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'чередующаяся изометрия', 800, 60, m('ai'), { size: 28, weight: 700, anchor: 'middle' });
+    // side-lying, seen from above: hands on the front (push back), then on the back (push forward)
+    const f = sideLying(p, 450, 300, 1, m('ai', .5));
+    txt(p, 'на боку · вид сверху', 470, 150, m('ai', .5), { size: 22, fill: COL.dim, anchor: 'middle' });
+    const hands = [contact(p), contact(p)], Rs = [rArrow(p, RES, 60), rArrow(p, RES, 60)];
+    hands.forEach(h => show(h, m('ex', .5)));
+    const spots = k => [bodyPt(f, 'H', 'Sh', 92, 36 * k), bodyPt(f, 'H', 'Sh', 14, 36 * k)];
+    const front = spots(1), back = spots(-1);
+    const cycle = (q, n) => {   // 0–.4 front push, .4–.5 slide, .5–.9 back push, .9–1 slide
+      const u = (q * n) % 1, ramp = x => Math.sin(Math.PI * clamp(x, 0, 1));
+      let k, F, w;
+      if (u < .4) { k = 0; F = ramp(u / .4); w = 0; } else if (u < .5) { k = 0; F = 0; w = io((u - .4) / .1); } else if (u < .9) { k = 1; F = ramp((u - .5) / .4); w = 1; } else { k = 1; F = 0; w = 1 - io((u - .9) / .1); }
+      hands.forEach((h, i) => { const P = [lerp(front[i][0], back[i][0], w), lerp(front[i][1], back[i][1], w)]; h.at(P, false, 0); const d = k ? [front[i][0] - back[i][0], front[i][1] - back[i][1]] : [back[i][0] - front[i][0], back[i][1] - front[i][1]]; Rs[i].at(P, ...d); put(Rs[i], { o: F }); });
+      f.abs.act(k ? 0 : F); f.back.act(k ? F : 0);
+    };
+    const tA = m('ex', .6), nA = Math.max(2, Math.round((D - tA) / 4));
+    prog(q => cycle(q, nA), tA, D - tA - .2, lin);
+    txt(p, 'рука спереди — толкает назад: держат мышцы живота', 470, 470, m('ex', 1), { size: 21, fill: RES, anchor: 'middle', weight: 600 });
+    txt(p, 'рука сзади — толкает вперёд: держат разгибатели спины', 470, 505, m('ex', 2.5), { size: 21, fill: RES, anchor: 'middle', weight: 600 });
+    // arms in front, seated: R from above, then from below
+    const sf = fig(p, { x: 0, y: 0, s: .9, o: 0, pose: { ...SIT, t: 2, kN: 90, aN: 90, eN: 0, aF: 90, eF: 0 } });
+    plant(sf, 'H', 300, 760);
+    bench(p, 190, 360, 768, m('ext'), COL.dim, 120);
+    p.appendChild(sf.g);
+    const dl = muscleOn(sf, ['Sh', 'H', 4, -14], ['Sh', 'EN', 38, -9], { after: 'hdN', w: 10 }), ex = muscleOn(sf, ['Sh', 'H', 4, 14], ['Sh', 'EN', 34, 9], { after: 'hdN', w: 10 });
+    show(sf.g, m('ext'));
+    const hU = contact(p), Ru = rArrow(p, RES, 55);
+    show(hU, m('ext', .3));
+    const W0 = onStage(sf, 'WN'), E0 = onStage(sf, 'EN'), hp = [lerp(E0[0], W0[0], .6), lerp(E0[1], W0[1], .6)];
+    prog(q => { const u = (q * 3) % 1, top = u < .5, F = Math.sin(Math.PI * ((u % .5) / .5)); const P = [hp[0], hp[1] + (top ? -15 : 15)]; hU.at(P, !top, 0); Ru.at(P, 0, top ? 1 : -1); put(Ru, { o: F }); dl.act(top ? F : 0); ex.act(top ? 0 : F); }, m('ext', .5), Math.max(3, D - m('ext', .8)), lin);
+    pill(p, '«Держите!»', 640, 640, m('ext', .5), { col: D1C });
+    infoCard(p, 920, 150, 630, 190, 'для чего', 'изометрическая сила и устойчивость: позные мышцы туловища, стабилизаторы плечевого пояса и бедра', STABC, m('ai'), { size: 22 });
+    infoCard(p, 920, 360, 630, 210, 'как', 'R в одной плоскости — сначала с одной стороны, потом с другой; «держите»; движения в суставе нет; работают агонисты и антагонисты', RES, m('one'), { size: 22 });
+    infoCard(p, 920, 590, 630, 150, 'руки не отрывают', 'переносят на другую поверхность; R нарастает и убывает плавно', D1C, m('ex', 3), { size: 22 });
+    infoCard(p, 920, 760, 630, 110, 'одна или обе конечности, с опорой или без', null, COL.dim, m('ext'), { size: 22 });
+  }],
+
+  ['rs', 'Ритмическая стабилизация', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ритмическая стабилизация', 800, 60, m('rs'), { size: 28, weight: 700, anchor: 'middle' });
+    // seated: weight through the pelvis — approximation
+    const sf = fig(p, { x: 0, y: 0, s: 1, o: 0, pose: { ...SIT, t: 2, aN: 20, eN: 70, aF: 20, eF: 70 } });
+    plant(sf, 'H', 260, 560);
+    bench(p, 140, 330, 568, m('wb'), COL.dim, 170);
+    p.appendChild(sf.g);
+    show(sf.g, m('wb'));
+    const Sh = onStage(sf, 'Sh'), Hp = onStage(sf, 'H');
+    arrowTo(p, [Sh[0] + 70, Sh[1] - 60], [Hp[0] + 70, Hp[1] - 10], m('wb', .5), { col: STABC, w: 6 });
+    txt(p, 'опора → сближение суставов', 260, 790, m('wb', .8), { size: 22, fill: STABC, anchor: 'middle', weight: 700 });
+    // from above: hands on opposite sides push in opposite directions; the rotators hold
+    const tt = trunkTop(p, 830, 400, .95, m('multi'));
+    txt(p, 'вид сверху · сидя', 830, 150, m('multi'), { size: 22, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'сзади', 830, 290, m('multi'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'спереди ↓', 980, 640, m('multi'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const hs = [contact(p), contact(p)], Rs = [rArrow(p, RES, 60), rArrow(p, RES, 60)];
+    hs.forEach(h => show(h, m('multi', .4)));
+    const sets = [[[-95, 52], [0, -1], false, [95, -52], [0, 1], true], [[95, 52], [0, -1], false, [-95, -52], [0, 1], true]];
+    const rot = [arrowTo(p, [830 - 175, 400 + 60], [830 - 175, 400 - 60], m('multi', 1), { c: [830 - 215, 400], col: COL.bad, w: 5 }), arrowTo(p, [830 + 175, 400 + 60], [830 + 175, 400 - 60], m('sw', .6), { c: [830 + 215, 400], col: COL.bad, w: 5 })];
+    hide(rot[1], 0, 0);
+    const hold = (q, n) => {
+      const u = (q * n) % 1, k = Math.floor(q * n) % 2, F = Math.sin(Math.PI * clamp(u / .9, 0, 1)), sv = sets[k];
+      hs[0].at(tt.at(sv[0]), sv[2], 0); hs[1].at(tt.at(sv[3]), sv[5], 0);
+      Rs[0].at(tt.at(sv[0]), ...sv[1]); Rs[1].at(tt.at(sv[3]), ...sv[4]);
+      Rs.forEach(r => put(r, { o: F })); tt.ring.setAttribute('opacity', (.25 + .7 * F).toFixed(2));
+      put(rot[0], { o: k ? .15 : F }); put(rot[1], { o: k ? F : .15 });
+    };
+    prog(q => hold(q, 1), m('multi', .6), Math.max(2, m('sw') - m('multi', .8)), lin);
+    const nS = Math.max(2, Math.round((D - m('sw')) / 2.6));
+    prog(q => hold(q, nS), m('sw', .1), Math.max(2, D - m('sw', .4)), lin);
+    txt(p, 'вращатели держат', 830, 680, m('multi', 2), { size: 23, fill: COL.bad, anchor: 'middle', weight: 700 });
+    infoCard(p, 1120, 130, 430, 210, 'после чередующейся изометрии', 'совместное сокращение проксимальных стабилизаторов туловища, плечевого и тазового пояса', STABC, m('rs'), { size: 21 });
+    infoCard(p, 1120, 360, 430, 190, 'многонаправленно', 'руки на противоположных сторонах давят одновременно в противоположные стороны', RES, m('multi'), { size: 21 });
+    infoCard(p, 1120, 570, 430, 170, 'потом — наоборот', 'руки на другие поверхности; без расслабления', D1C, m('sw'), { size: 21 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-aiprs', prompt: ['Верно или нет?'],
+    build: grid([
+      { parts: ['При чередующейся изометрии сустав движется.'], ans: ['f'], why: 'Неверно: пациент держит положение, движения нет.' },
+      { parts: ['Чередующаяся изометрия укрепляет и агонисты, и антагонисты.'], ans: ['t'], why: 'Верно: сопротивление идёт то с одной, то с другой стороны.' },
+      { parts: ['Ритмическую стабилизацию обычно делают в положении с опорой.'], ans: ['t'], why: 'Верно: сближение суставов облегчает совместное сокращение.' },
+      { parts: ['При ритмической стабилизации обе руки давят в одну сторону.'], ans: ['f'], why: 'Неверно: в противоположные стороны одновременно — работают вращатели.' },
+      { parts: ['Между сокращениями при ритмической стабилизации пациент расслабляется.'], ans: ['f'], why: 'Неверно: расслабления между сокращениями нет.' },
+    ], TF, { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Ритмическое начало: пассивно, затем с помощью или активно — последовательность и скорость.', 'w1'],
+     ['Повторные сокращения: быстрое растяжение и сопротивление в любой точке — для слабого агониста.', 'w2'],
+     ['Медленная смена: сильная схема и сразу слабая; с удержанием — изометрия в конце объёма.', 'w3'],
+     ['Чередующаяся изометрия — одна плоскость, стороны по очереди; ритмическая стабилизация — в противоположные стороны сразу.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 150, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-pnfpick', prompt: ['Подберите приём к задаче.'],
+    build: grid([
+      { parts: ['Пациенту трудно начать движение по схеме'], ans: ['ri'], why: 'Ритмическое начало: пассивно, потом с помощью и активно.' },
+      { parts: ['Слаб один компонент схемы — агонист'], ans: ['rep'], why: 'Повторные сокращения: растяжение + сопротивление в нужной точке.' },
+      { parts: ['Устойчивость туловища: R в одной плоскости, стороны по очереди'], ans: ['ai'], why: 'Чередующаяся изометрия.' },
+      { parts: ['Устойчивость за счёт вращателей, в положении с опорой'], ans: ['rs'], why: 'Ритмическая стабилизация.' },
+    ], [['ri', 'Ритм. начало', RES], ['rep', 'Повторы', D1C], ['ai', 'Черед. изометрия', STABC], ['rs', 'Ритм. стабилизация', COL.bad]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-srh', prompt: ['В конце объёма мышцы плеча «не держат»: рука сразу опускается. Какой приём добавить в схему?'],
+    build: choice([
+      ['Медленную смену с удержанием'],
+      ['Ритмическое начало'],
+      ['Повторные сокращения только в начале объёма'],
+      ['Пассивные движения без сопротивления'],
+    ], 0, 'Изометрия в конце объёма учит ослабленную мышцу держать конечное положение; приём развивает динамическую устойчивость.',
+    [null, 'Ритмическое начало учит начинать движение, а не удерживать.', 'Нужна работа в конце объёма и с удержанием.', 'Без сопротивления удержание не тренируется.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

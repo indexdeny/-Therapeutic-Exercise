@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Адаптации к нагрузке — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 59, title: 'Адаптации к силовой тренировке', minutes: 8, language: 'ru', next: '../ch060/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch059/lupa.ru.json
+const LUPA = [
+  {"beat": "intro", "fig": 0, "target": "biceps", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch059/cards.ru.json
+const CARDS_SHORT = {
+  "ухудшают движение\nстрах боли, травмы, повторной травмы; депрессия; нарушения внимания и памяти — возраст, травма головы, лекарства": "страх, депрессия, внимание и память",
+  "принципы двигательного обучения\nиз главы 1 — и в силовой программе": "из главы 1 — и в силовой программе",
+  "внимание (attention)\nсосредоточиться на задании: важное — отобрать, лишнее — отсеять, сигналы своего тела — заметить; и при обучении, и дома": "важное отобрать, лишнее отсеять",
+  "форма и техника\n→ безопасность и долгосрочный результат": "→ безопасность и долгосрочный результат",
+  "мотивация\nдостаточно усилий и приверженность программе долго": "достаточно усилий и приверженность программе долго",
+  "что помогает\nзначимые действия, смена упражнений время от времени, график прироста силы": "значимые действия, смена, график",
+  "сила — в повседневные дела\nтогда прирост имеет смысл": "тогда прирост имеет смысл",
+  "обратная связь\nнапример, сигнал изокинетического динамометра": "например, сигнал изокинетического динамометра",
+  "записи прогресса\nсопротивление в упражнениях; расстояние и скорость ходьбы": "сопротивление, расстояние, скорость",
+  "первые 4–8 недель\nрастёт электрическая активность мышцы, гипертрофии почти нет": "активность растёт, гипертрофии нет",
+  "как\nдвигательное обучение и координация: больше единиц, чаще импульсы, синхроннее": "больше единиц, чаще импульсы",
+  "предполагают\nменьше торможения из ЦНС, ниже чувствительность сухожильных органов Гольджи, изменения синапса": "меньше торможения из ЦНС",
+  "когда\nобычно к 4–8-й неделе тренировки средней и высокой интенсивности; при очень высокой — через 2–3 недели": "к 4–8-й неделе, при высокой — 2–3",
+  "механизм\nсинтез белков (актин, миозин) ↑, распад ↓; аминокислоты захватываются активнее": "синтез белков ↑, распад ↓",
+  "сильнее всего\nбольшой объём · среднее сопротивление · эксцентрически; быстрее всего растут волокна IIB": "большой объём, эксцентрически",
+  "гиперплазия (hyperplasia)\nописана у животных; возможно, ошибка препарата; общее мнение — нет или незначительна": "общее мнение — нет или незначительна",
+  "в реабилитации и фитнесе\nIIB → IIA — обычно; II → I — почти нет": "IIB → IIA — обычно; II → I — почти нет",
+  "прочность на разрыв ↑\nподдерживают окрепшую мышцу, реже травмируются; соединительная ткань в мышце утолщается": "поддерживают мышцу, реже травмируются",
+  "плотность кости\nтесно связана с силой мышц и активностью всю жизнь": "связана с силой мышц",
+  "данные противоречивы\nнужны интенсивность и нагрузка на участок через опору; заметный прирост — 9–12 месяцев": "прирост — 9–12 месяцев",
+  "разгибатели спины\nсила связана с плотностью позвонков": "плотность позвонков",
+};
+// cards-short end
+
+const STR = COL.nat, END = COL.real, T1 = '#c2564a', T2A = '#e8907c', T2B = '#f6d2c6', CAP = '#ff5a3c';
+// A fibre circle with a label inside (fibre types).
+function fibreTok(p, x, y, r, col, label, t0) {
+  const g = G(p, { x, y, o: 0 });
+  mk('circle', { r, fill: col, stroke: mix(col, '#000000', .4), 'stroke-width': 3 }, g);
+  T(g, label, { y: 10, size: 28, weight: 700, fill: COL.board, anchor: 'middle' });
+  show(g, t0);
+  return g;
+}
+// A small cross-section: fibres of radius fr in rings, capillaries (k per fibre) around them.
+function capSection(p, cx, cy, fr, k, t0) {
+  const g = G(p, { o: 0 }), pts = [[0, 0]];
+  for (let i = 0; i < 6; i++) pts.push([Math.cos(rad(i * 60)) * fr * 2.25, Math.sin(rad(i * 60)) * fr * 2.25]);
+  for (let i = 0; i < 12; i++) pts.push([Math.cos(rad(i * 30 + 15)) * fr * 4.3, Math.sin(rad(i * 30 + 15)) * fr * 4.3]);
+  mk('circle', { cx, cy, r: fr * 5.6, fill: mix(ANAT.muscle, COL.board, .7), stroke: ANAT.muscle, 'stroke-width': 3 }, g);
+  pts.forEach(([x, y], i) => {
+    mk('circle', { cx: cx + x, cy: cy + y, r: fr, fill: ANAT.muscle, stroke: mix(ANAT.muscle, '#000000', .35), 'stroke-width': 1.2 }, g);
+    for (let j = 0; j < k; j++) { const a = rad(j * 360 / k + i * 23); mk('circle', { cx: cx + x + Math.cos(a) * (fr + 3), cy: cy + y + Math.sin(a) * (fr + 3), r: 3, fill: CAP }, g); }
+  });
+  show(g, t0);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Психология и адаптации', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 59', { x: 800, y: 190, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Психология', { x: 800, y: 275, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и адаптации к нагрузке', { x: 800, y: 340, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'голова, мышца, сухожилие, кость', 800, 420, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 820;
+    path(art, `M560 ${GY}H860`, { stroke: COL.faint, 'stroke-width': 3 });
+    const c = curlFig(art, 700, GY, .7, 1.3, 0);
+    curls(c, .5, Math.max(4, D - 1.2), 3.5);
+    [['голова', COL.whole], ['мышца', STR], ['сухожилие', ANAT.tendon], ['кость', ANAT.bone]].forEach(([s, col], i) => pill(art, s, 1000 + (i % 2) * 170, 620 + Math.floor(i / 2) * 80, .8 + i * .4, { col, size: 24 }));
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['psych', 'Психологические факторы', (m) => {
+    const p = panel(0), GY = 760;
+    txt(p, 'психологические и познавательные факторы', 800, 82, m('psych'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ground(p, 120, 520, GY, .3);
+    const c = curlFig(p, 320, GY, 1.05, 1.2, .3);
+    curls(c, m('form'), 4, 2.5, { lvl: .8 });
+    [['страх боли и травмы', 'neg', 0], ['депрессия', 'neg', 1.4], ['внимание, память', 'neg', 2.8]].forEach(([s, k, d], i) => pill(p, s, 220 + (i % 2) * 210, 170 + i * 52, m(k, d), { col: COL.bad, size: 23 }));
+    pill(p, 'может и помогать', 320, 340, m('pos'), { col: COL.good, size: 23 });
+    infoCard(p, 640, 130, 900, 165, 'ухудшают движение', 'страх боли, травмы, повторной травмы; депрессия; нарушения внимания и памяти — возраст, травма головы, лекарства', COL.bad, m('neg'), { size: 22 });
+    infoCard(p, 640, 310, 900, 120, 'принципы двигательного обучения', 'из главы 1 — и в силовой программе', COL.good, m('pos', 1.5), { size: 22 });
+    infoCard(p, 640, 445, 900, 190, 'внимание (attention)', 'сосредоточиться на задании: важное — отобрать, лишнее — отсеять, сигналы своего тела — заметить; и при обучении, и дома', COL.whole, m('att'), { size: 22 });
+    infoCard(p, 640, 650, 900, 130, 'форма и техника', '→ безопасность и долгосрочный результат', COL.good, m('form'), { size: 22 });
+  }],
+
+  ['mot', 'Мотивация и обратная связь', (m) => {
+    const p = panel(0);
+    txt(p, 'мотивация и обратная связь', 800, 82, m('mot'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // a chart of the resistance used, week by week (example)
+    const x0 = 120, y0 = 470, g = G(p, { o: 0 });
+    path(g, `M${x0} ${y0 - 280}V${y0}H${x0 + 560}`, { stroke: COL.dim, 'stroke-width': 3 });
+    T(g, 'груз, кг', { x: x0 + 10, y: y0 - 286, size: 20, fill: COL.dim });
+    T(g, 'недели →', { x: x0 + 560, y: y0 + 34, size: 20, fill: COL.dim, anchor: 'end' });
+    show(g, m('chart'));
+    [2, 2.5, 3, 3.5, 4].forEach((v, i) => {
+      const h = v * 55, b = put(mk('rect', { x: x0 + 30 + i * 105, y: y0 - h, width: 70, height: h, rx: 6, fill: STR }, p), { o: 0 });
+      show(b, m('chart', .3 + i * .35));
+      txt(p, String(v).replace('.', ','), x0 + 65 + i * 105, y0 - h - 12, m('chart', .3 + i * .35), { size: 20, fill: STR, anchor: 'middle', weight: 700 });
+    });
+    NOTE(p, 560, 150, m('chart'));
+    // biofeedback: every contraction should fall into the target band
+    const fg = G(p, { o: 0 });
+    roundBox(fg, 100, 540, 600, 300, COL.whole, PANEL, 2.5);
+    T(fg, 'сигнал прибора: попал ли в нужный диапазон', { x: 120, y: 580, size: 21, fill: COL.whole, weight: 600 });
+    mk('rect', { x: 140, y: 610, width: 520, height: 160, rx: 8, fill: 'none', stroke: COL.dim, 'stroke-width': 2 }, fg);
+    mk('rect', { x: 140, y: 650, width: 520, height: 45, fill: COL.good, 'fill-opacity': .2 }, fg);
+    T(fg, 'цель', { x: 650, y: 680, size: 19, fill: COL.good, anchor: 'end' });
+    show(fg, m('fb'));
+    const peaks = [.5, .8, .9, .75, .85], tr = path(p, '', { stroke: COL.task, 'stroke-width': 4 }), marks = [];
+    peaks.forEach((v, i) => marks.push(put(T(p, v > .7 && v < .95 ? '✓' : '✗', { x: 192 + i * 104, y: 810, size: 28, weight: 700, fill: v > .7 && v < .95 ? COL.good : COL.bad, anchor: 'middle' }), { o: 0 })));
+    prog(q => {
+      let d = '';
+      for (let i = 0; i <= 200; i++) { const t = i / 200 * q, k = Math.floor(t * 5), u = t * 5 - k, v = (peaks[Math.min(4, k)] || 0) * Math.sin(Math.PI * u); d += `${i ? 'L' : 'M'}${(140 + t * 520).toFixed(1)} ${(770 - v * 150).toFixed(1)}`; }
+      tr.setAttribute('d', d);
+      marks.forEach((e, i) => put(e, { o: q * 5 > i + .55 ? 1 : 0 }));
+    }, m('fb', 1.5), 4, lin);
+    infoCard(p, 760, 130, 780, 140, 'мотивация', 'достаточно усилий и приверженность программе долго', COL.task, m('mot', .5), { size: 22 });
+    infoCard(p, 760, 285, 780, 140, 'что помогает', 'значимые действия, смена упражнений время от времени, график прироста силы', COL.task, m('mean'), { size: 22 });
+    infoCard(p, 760, 440, 780, 120, 'сила — в повседневные дела', 'тогда прирост имеет смысл', COL.good, m('func'), { size: 22 });
+    infoCard(p, 760, 575, 780, 120, 'обратная связь', 'например, сигнал изокинетического динамометра', COL.whole, m('fb'), { size: 22 });
+    infoCard(p, 760, 710, 780, 140, 'записи прогресса', 'сопротивление в упражнениях; расстояние и скорость ходьбы', COL.whole, m('doc'), { size: 22 });
+  }],
+
+  ['neural', 'Нервные адаптации', (m) => {
+    const p = panel(0), x0 = 120, y0 = 650, W = 760, H = 440;
+    txt(p, 'нервные адаптации', 800, 82, m('neural'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'острые реакции → со временем адаптации (хронические ответы)', 800, 124, m('neural', 1), { size: 23, fill: COL.dim, anchor: 'middle' });
+    chartAxes(p, x0, y0, W, H, 'прирост силы', 'недели →', m('early', -1));
+    // neural part early, hypertrophy later (scheme)
+    const neu = t => .5 * (1 - Math.exp(-t / .12)) + (t > .75 ? .12 * (t - .75) / .25 : 0), hyp = t => t < .2 ? 0 : .42 * (1 - Math.exp(-(t - .2) / .2));
+    const area = (fa, fb, col, t0, dur) => {
+      let d = '';
+      for (let i = 0; i <= 80; i++) { const t = i / 80; d += `${i ? 'L' : 'M'}${(x0 + t * W).toFixed(1)} ${(y0 - fb(t) * H).toFixed(1)}`; }
+      for (let i = 80; i >= 0; i--) { const t = i / 80; d += `L${(x0 + t * W).toFixed(1)} ${(y0 - fa(t) * H).toFixed(1)}`; }
+      return show(put(mk('path', { d: d + 'Z', fill: col, 'fill-opacity': .55, stroke: col, 'stroke-width': 2 }, p), { o: 0 }), t0, dur);
+    };
+    area(() => 0, neu, ANAT.taut, m('early', .3), .8);
+    area(neu, t => neu(t) + hyp(t), STR, m('early', 4), .8);
+    const wk = G(p, { o: 0 });
+    path(wk, `M${x0 + .2 * W} ${y0}V${y0 - H}M${x0 + .4 * W} ${y0}V${y0 - H}`, { stroke: COL.dim, 'stroke-width': 2, 'stroke-dasharray': '6 6' });
+    T(wk, '4–8 нед.', { x: x0 + .3 * W, y: y0 - H + 4, size: 21, fill: COL.dim, anchor: 'middle', weight: 700 });
+    show(wk, m('early', 1));
+    txt(p, 'нервная система', x0 + .05 * W, y0 - .18 * H, m('early', .8), { size: 22, fill: COL.board, weight: 700 });
+    txt(p, 'гипертрофия', x0 + .55 * W, y0 - .62 * H, m('early', 4.2), { size: 22, fill: COL.board, weight: 700 });
+    txt(p, 'снова нервная?', x0 + .8 * W, y0 - .9 * H - 18, m('late'), { size: 21, fill: ANAT.taut, weight: 600, anchor: 'middle' });
+    pill(p, 'схема', x0 + W - 40, y0 - H - 30, m('early', -1), { col: COL.dim, size: 19 });
+    infoCard(p, 940, 170, 600, 170, 'первые 4–8 недель', 'растёт электрическая активность мышцы, гипертрофии почти нет', ANAT.taut, m('early'), { size: 22 });
+    infoCard(p, 940, 360, 600, 200, 'как', 'двигательное обучение и координация: больше единиц, чаще импульсы, синхроннее', COL.whole, m('how'), { size: 22 });
+    infoCard(p, 940, 580, 600, 200, 'предполагают', 'меньше торможения из ЦНС, ниже чувствительность сухожильных органов Гольджи, изменения синапса', COL.dim, m('spec'), { size: 22 });
+  }],
+
+  ['hyper', 'Гипертрофия', (m) => {
+    const p = panel(0);
+    txt(p, 'гипертрофия (hypertrophy)', 800, 82, m('hyper'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // one fibre: its myofibrils multiply and the fibre grows
+    const fg = G(p, { x: 300, y: 330, o: 0 }), out = mk('circle', { r: 120, fill: mix(ANAT.muscle, COL.board, .55), stroke: ANAT.muscle, 'stroke-width': 4 }, fg);
+    const mf = [];
+    for (let i = 0; i < 60; i++) { const a = i * 2.4, r = 14 * Math.sqrt(i); mf.push(mk('circle', { cx: Math.cos(a) * r, cy: Math.sin(a) * r, r: 7, fill: ANAT.muscle, opacity: i < 30 ? 1 : 0 }, fg)); }
+    show(fg, m('hyper', .5));
+    prog(q => { out.setAttribute('r', (120 + 40 * io(q)).toFixed(1)); mf.forEach((e, i) => e.setAttribute('opacity', i < 30 + 30 * q ? 1 : 0)); }, m('hyper', 2), 2.5, lin);
+    txt(p, 'больше миофибрилл — толще волокно', 300, 540, m('hyper', 2), { size: 22, fill: ANAT.muscle, anchor: 'middle', weight: 600 });
+    infoCard(p, 640, 130, 900, 150, 'когда', 'обычно к 4–8-й неделе тренировки средней и высокой интенсивности; при очень высокой — через 2–3 недели', STR, m('when'), { size: 22 });
+    infoCard(p, 640, 295, 900, 150, 'механизм', 'синтез белков (актин, миозин) ↑, распад ↓; аминокислоты захватываются активнее', STR, m('mech'), { size: 22 });
+    infoCard(p, 640, 460, 900, 150, 'сильнее всего', 'большой объём · среднее сопротивление · эксцентрически; быстрее всего растут волокна IIB', COL.task, m('most'), { size: 22 });
+    // hyperplasia: a fibre splitting lengthwise (debated)
+    const sp = G(p, { o: 0 });
+    const a = mk('path', { d: 'M120 720H520', stroke: ANAT.muscle, 'stroke-width': 34, 'stroke-linecap': 'round' }, sp);
+    const b = mk('path', { d: 'M120 720H520', stroke: ANAT.muscle, 'stroke-width': 34, 'stroke-linecap': 'round', opacity: .9 }, sp);
+    show(sp, m('plas'));
+    prog(q => { const d = 22 * io(q); a.setAttribute('d', `M120 ${720 - d}C250 ${720 - d} 300 ${720 - d * .3} 520 ${720 - d * .1}`); b.setAttribute('d', `M120 ${720 + d}C250 ${720 + d} 300 ${720 + d * .3} 520 ${720 + d * .1}`); a.setAttribute('stroke-width', (34 - 12 * q).toFixed(1)); b.setAttribute('stroke-width', (34 - 12 * q).toFixed(1)); }, m('plas', 1.5), 2, lin);
+    txt(p, '?', 560, 740, m('plas', 3), { size: 60, weight: 700, fill: COL.bad });
+    txt(p, 'гиперплазия: волокно расщепляется?', 120, 650, m('plas'), { size: 23, fill: COL.chalk, weight: 600 });
+    infoCard(p, 640, 640, 900, 200, 'гиперплазия (hyperplasia)', 'описана у животных; возможно, ошибка препарата; общее мнение — нет или незначительна', COL.bad, m('plas', 2), { size: 22 });
+  }],
+
+  ['ftype', 'Пластичность волокон', (m) => {
+    const p = panel(0);
+    txt(p, 'типы волокон меняются', 800, 82, m('ftype'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    fibreTok(p, 300, 330, 70, T1, 'I', m('ftype', .5));
+    fibreTok(p, 800, 330, 70, T2A, 'IIA', m('ftype', .9));
+    fibreTok(p, 1300, 330, 75, T2B, 'IIB', m('ftype', 1.3));
+    arrowTo(p, [1220, 330], [880, 330], m('b2a'), { col: COL.good, w: 8 });
+    txt(p, 'при тренировке выносливости', 1050, 270, m('b2a', .5), { size: 19, fill: COL.good, anchor: 'middle', weight: 600 });
+    txt(p, 'и в начале тяжёлой силовой', 1050, 296, m('b2a', .5), { size: 19, fill: COL.good, anchor: 'middle', weight: 600 });
+    txt(p, 'устойчивее к утомлению', 1050, 375, m('b2a', 1.5), { size: 19, fill: COL.good, anchor: 'middle' });
+    arrowTo(p, [340, 400], [760, 400], m('i2'), { col: COL.dim, w: 4, c: [550, 520] });
+    txt(p, 'I → II: денервация (животные), спинномозговая травма, невесомость', 550, 560, m('i2', .5), { size: 21, fill: COL.dim, anchor: 'middle' });
+    arrowTo(p, [740, 260], [360, 260], m('ii1'), { col: COL.bad, w: 4, c: [550, 170] });
+    cross(p, 550, 215, 18, m('ii1', .7));
+    txt(p, 'II → I при тренировке — почти не бывает', 550, 150, m('ii1', 1), { size: 22, fill: COL.bad, anchor: 'middle', weight: 700 });
+    infoCard(p, 200, 650, 1200, 150, 'в реабилитации и фитнесе', 'IIB → IIA — обычно; II → I — почти нет', COL.whole, m('ii1', 2), { size: 23 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-adapt', prompt: ['Верно или нет?'],
+    build: grid([
+      { parts: ['Первые 4–8 недель сила растёт в основном за счёт гипертрофии'], ans: ['f'], why: 'В основном за счёт нервной системы.' },
+      { parts: ['Быстрее всего гипертрофируются волокна IIB'], ans: ['t'], why: 'Да.' },
+      { parts: ['Гиперплазия — главная причина роста мышцы'], ans: ['f'], why: 'Если и есть, она незначительна.' },
+      { parts: ['При тренировке волокна II типа часто превращаются в I'], ans: ['f'], why: 'Почти не бывает.' },
+      { parts: ['IIB переходят в IIA и становятся устойчивее к утомлению'], ans: ['t'], why: 'Да: при тренировке выносливости и в начале тяжёлой силовой.' },
+    ], TF, { multi: false, text: true }),
+  }], done) }],
+
+  ['vasc', 'Сосуды и обмен', (m) => {
+    const p = panel(0);
+    txt(p, 'силовая и на выносливость: сравним', 800, 82, m('vasc'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    capSection(p, 260, 330, 26, 1, m('cap'));
+    txt(p, 'силовая: волокна толще, капилляров меньше', 260, 520, m('cap', .3), { size: 21, fill: STR, anchor: 'middle', weight: 600 });
+    capSection(p, 260, 700, 18, 4, m('cap', 3));
+    txt(p, 'на выносливость: капилляров больше', 260, 860, m('cap', 3.3), { size: 21, fill: END, anchor: 'middle', weight: 600 });
+    pill(p, 'схема', 470, 160, m('cap'), { col: COL.dim, size: 19 });
+    const X = [1060, 1360];
+    [['силовая', STR], ['на выносливость', END]].forEach(([s, c], i) => pill(p, s, X[i], 160, m('vasc', .5 + i * .4), { col: c, size: 25 }));
+    const rows = [['капилляры', '↓ или =', '↑', 'cap'], ['митохондрии', '↓', '↑', 'mito'], ['АТФ, КФ, миоглобин, ферменты', '↑', '↑', 'met'], ['триглицериды', '?', '↑', 'met'], ['безжировая масса', '↑', '=', 'body'], ['% жира', '↓', '↓', 'body']];
+    rows.forEach(([lab, a, b, k], i) => {
+      const y = 245 + i * 95, g = G(p, { o: 0 });
+      mk('rect', { x: 560, y: y - 38, width: 980, height: 76, rx: 12, fill: i % 2 ? 'none' : PANEL }, g);
+      put(para(g, lab, 580, y + 2, null, { size: 23, weight: 600, maxW: 320 }), { o: 1 });
+      [a, b].forEach((v, j) => T(g, v, { x: X[j], y: y + 10, size: 30, weight: 700, fill: v === '↑' ? COL.good : v === '↓' ? COL.bad : COL.dim, anchor: 'middle' }));
+      show(g, m(k, i === 3 ? 2 : i === 5 ? 1.5 : .3));
+    });
+  }],
+
+  ['conn', 'Соединительная ткань и кость', (m) => {
+    const p = panel(0);
+    txt(p, 'сухожилия, связки, кость', 800, 82, m('conn'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // a joint: two bones, a ligament across it, a muscle whose tendon inserts on the lower bone
+    const g = G(p, { o: 0 });
+    const b1 = boneEl(g, 22), b2 = boneEl(g, 22);
+    b1.set([120, 300], [400, 300]); b2.set([440, 300], [720, 300]);
+    const lig = ligEl(g, { rest: 120, w: 7 }); lig.set([360, 320], [480, 320]);
+    const mu = muscleEl(g, { rest: 300, w: 26, tendon: .25 }); mu.set([150, 250], [560, 284]);
+    show(g, m('conn', .5));
+    const spot = (x, y, t0) => { const s = G(p, { x, y, o: 0 }); mk('circle', { r: 22, fill: 'none', stroke: ANAT.taut, 'stroke-width': 5 }, s); show(s, t0); pulse(s, t0 + .5, 1.3); return s; };
+    spot(475, 279, m('ten')); spot(480, 320, m('ten', 3));
+    txt(p, 'мышечно-сухожильный переход', 470, 210, m('ten'), { size: 21, fill: ANAT.taut, anchor: 'middle', weight: 600 });
+    txt(p, 'связка у кости', 480, 382, m('ten', 3), { size: 21, fill: ANAT.taut, anchor: 'middle', weight: 600 });
+    infoCard(p, 80, 440, 680, 170, 'прочность на разрыв ↑', 'поддерживают окрепшую мышцу, реже травмируются; соединительная ткань в мышце утолщается', ANAT.tendon, m('ten', 1), { size: 22 });
+    pill(p, 'эксцентрически — быстрее', 420, 650, m('ecc'), { col: COL.task, size: 24 });
+    // bone: weight-bearing loads along the leg and the spine
+    const GY = 820, f = fig(p, { x: 1000, y: GY - 182 * .9, s: .9, o: 0 });
+    show(f.g, m('bone'));
+    ground(p, 900, 1100, GY, m('bone'));
+    const ext = muscleOn(f, ['H', 'Sh', 20, -14], ['Sh', 'H', 20, 12], { w: 9, after: 'torso' });
+    prog(q => ext.act(.7 * q), m('spine'), .6, lin);
+    const ld = G(p, { o: 0 });
+    path(ld, `M1000 340V${GY - 20}M988 ${GY - 40}L1000 ${GY - 18}L1012 ${GY - 40}`, { stroke: COL.whole, 'stroke-width': 5, 'stroke-dasharray': '12 8' });
+    show(ld, m('bone', 1));
+    txt(p, 'с опорой', 1000, 860, m('bone', 1), { size: 21, fill: COL.whole, anchor: 'middle', weight: 600 });
+    infoCard(p, 1150, 130, 390, 220, 'плотность кости', 'тесно связана с силой мышц и активностью всю жизнь', ANAT.bone, m('bone'), { size: 22 });
+    infoCard(p, 1150, 370, 390, 290, 'данные противоречивы', 'нужны интенсивность и нагрузка на участок через опору; заметный прирост — 9–12 месяцев', COL.int, m('ev'), { size: 22 });
+    infoCard(p, 1150, 680, 390, 180, 'разгибатели спины', 'сила связана с плотностью позвонков', COL.whole, m('spine'), { size: 22 });
+    txt(p, 'разгибатели спины', 870, 420, m('spine'), { size: 21, fill: '#ff7a5c', anchor: 'end', weight: 600 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-bone', prompt: ['Что, по данным книги, нужно, чтобы упражнения повышали или сохраняли плотность кости?'],
+    build: choice([
+      ['Достаточная интенсивность, нагрузка на нужный участок через опору и месяцы занятий'],
+      ['Лёгкие упражнения сидя, без опоры, несколько недель'],
+      ['Только растяжка'],
+      ['Покой, чтобы не перегружать кость'],
+    ], 0, 'Плотность росла или сохранялась при достаточной интенсивности и нагрузке через опору; срок — до 9–12 месяцев.',
+    [null, 'Без нагрузки через опору и при малой интенсивности плотность не росла; недель мало.', 'Растяжка не нагружает кость.', 'Кость приспосабливается к нагрузке, а не к покою.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Внимание, мотивация и обратная связь влияют на результат программы.', 'w1'],
+     ['Первые 4–8 недель — нервная система, потом — гипертрофия.', 'w2'],
+     ['Быстрее растут волокна IIB; IIB переходят в IIA; гиперплазия незначительна.', 'w3'],
+     ['Силовая: капилляров и митохондрий меньше; сухожилия, связки и кость крепче.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-table', prompt: ['Какая тренировка даёт эту адаптацию?'],
+    build: grid([
+      { parts: ['Плотность капилляров растёт'], ans: ['e'], why: 'Тренировка выносливости.' },
+      { parts: ['Гипертрофия волокон, больше всего IIB'], ans: ['s'], why: 'Силовая.' },
+      { parts: ['Плотность митохондрий снижается'], ans: ['s'], why: 'Силовая высокой интенсивности.' },
+      { parts: ['Безжировая масса не меняется, процент жира снижается'], ans: ['e'], why: 'Тренировка выносливости.' },
+      { parts: ['Безжировая масса растёт'], ans: ['s'], why: 'Силовая.' },
+    ], [['s', 'Силовая', STR], ['e', 'На выносливость', END]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-neural', prompt: ['Через три недели силовой программы пациент поднимает заметно больший груз, но объём мышцы не изменился. Чем это объяснить?'],
+    build: choice([
+      ['Нервными адаптациями: больше единиц, чаще и синхроннее импульсы'],
+      ['Гиперплазией: стало больше волокон'],
+      ['Переходом волокон II типа в I'],
+      ['Ростом плотности капилляров'],
+    ], 0, 'Ранний прирост силы — в основном нервный; гипертрофия обычно позже.',
+    [null, 'Гиперплазия, если и есть, незначительна.', 'Такого перехода при тренировке почти не бывает — и он не дал бы силы.', 'Силовая тренировка скорее снижает плотность капилляров.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

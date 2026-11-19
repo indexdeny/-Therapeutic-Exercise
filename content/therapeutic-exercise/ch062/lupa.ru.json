@@ -1,0 +1,46 @@
+[
+ {
+  "beat": "intro",
+  "fig": 30,
+  "target": "triceps",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает triceps, фигура ×0.55"
+ },
+ {
+  "beat": "res",
+  "fig": 0,
+  "target": "triceps",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает triceps, фигура ×0.55",
+  "off": "серия весов: каждая фигура видна около секунды — лупа мелькает"
+ },
+ {
+  "beat": "res",
+  "fig": 1,
+  "target": "triceps",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает triceps, фигура ×0.55",
+  "off": "серия весов: каждая фигура видна около секунды — лупа мелькает"
+ },
+ {
+  "beat": "res",
+  "fig": 32,
+  "target": "triceps",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает triceps, фигура ×0.55",
+  "off": "серия весов: каждая фигура видна около секунды — лупа мелькает"
+ },
+ {
+  "beat": "res",
+  "fig": 63,
+  "target": "triceps",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает triceps, фигура ×0.55",
+  "off": "серия весов: каждая фигура видна около секунды — лупа мелькает"
+ }
+]

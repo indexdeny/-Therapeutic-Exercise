@@ -1,0 +1,522 @@
+{
+  "joint": "elbow",
+  "title": "локоть",
+  "structures": {
+    "bic": {
+      "ru": "двуглавая плеча",
+      "en": "biceps brachii",
+      "kind": "muscle",
+      "limb": "bic",
+      "close": "bic"
+    },
+    "tri": {
+      "ru": "трёхглавая плеча",
+      "en": "triceps brachii",
+      "kind": "muscle",
+      "limb": "tri",
+      "close": "tri"
+    },
+    "brach": {
+      "ru": "плечевая",
+      "en": "brachialis",
+      "kind": "muscle",
+      "close": "brach"
+    },
+    "br": {
+      "ru": "плечелучевая",
+      "en": "brachioradialis",
+      "kind": "muscle",
+      "close": "br"
+    },
+    "anc": {
+      "ru": "локтевая мышца",
+      "en": "anconeus",
+      "kind": "muscle",
+      "close": "anc"
+    },
+    "deltA": {
+      "ru": "передняя дельтовидная",
+      "en": "anterior deltoid",
+      "kind": "muscle"
+    },
+    "deltP": {
+      "ru": "задняя дельтовидная и широчайшая",
+      "en": "posterior deltoid and latissimus dorsi",
+      "kind": "muscle"
+    },
+    "capA": {
+      "ru": "передняя капсула",
+      "en": "anterior capsule",
+      "kind": "cap",
+      "close": "capA"
+    },
+    "capP": {
+      "ru": "задняя капсула",
+      "en": "posterior capsule",
+      "kind": "cap",
+      "close": "capP"
+    },
+    "lcl": {
+      "ru": "наружная боковая связка",
+      "en": "lateral collateral ligament",
+      "kind": "lig",
+      "close": "lcl"
+    },
+    "bicA": {
+      "ru": "двуглавая плеча",
+      "en": "biceps brachii",
+      "kind": "muscle",
+      "close": "bic"
+    },
+    "sup": {
+      "ru": "супинатор",
+      "en": "supinator",
+      "kind": "muscle",
+      "close": "sup"
+    },
+    "pt": {
+      "ru": "круглый пронатор",
+      "en": "pronator teres",
+      "kind": "muscle",
+      "close": "pt"
+    },
+    "pq": {
+      "ru": "квадратный пронатор",
+      "en": "pronator quadratus",
+      "kind": "muscle",
+      "close": "pq"
+    },
+    "mcl": {
+      "ru": "внутренняя боковая связка",
+      "en": "medial collateral ligament",
+      "kind": "lig",
+      "close": "mcl"
+    },
+    "lclA": {
+      "ru": "наружная боковая связка",
+      "en": "lateral collateral ligament",
+      "kind": "lig",
+      "close": "lcl"
+    },
+    "contactF": {
+      "ru": "предплечье встретило плечо",
+      "en": "soft-tissue approximation",
+      "kind": "contact"
+    },
+    "elbowEnd": {
+      "ru": "локтевой отросток упёрся в ямку",
+      "en": "bony end feel: olecranon in its fossa",
+      "kind": "contact"
+    },
+    "endFlex": {
+      "ru": "плечевой сустав: конец сгибания",
+      "en": "end of shoulder flexion",
+      "kind": "contact"
+    },
+    "endExt": {
+      "ru": "плечевой сустав: конец разгибания",
+      "en": "end of shoulder extension",
+      "kind": "contact"
+    },
+    "endSup": {
+      "ru": "конец супинации: натянуты пронаторы и связки",
+      "en": "end of supination",
+      "kind": "contact"
+    },
+    "endPro": {
+      "ru": "конец пронации: лучевая перекрестила локтевую",
+      "en": "end of pronation",
+      "kind": "contact"
+    }
+  },
+  "motions": [
+    {
+      "id": "flex",
+      "title": "сгибание — разгибание",
+      "chip": "сгибание",
+      "ids": ["bic", "tri", "brach", "br", "anc", "deltA", "deltP", "capA", "capP", "lcl", "contactF", "elbowEnd", "endFlex", "endExt"],
+      "limb": {
+        "model": "armSide",
+        "muscles": ["bic", "tri"]
+      },
+      "close": {
+        "model": "elbowSag",
+        "clip": [200, 250]
+      },
+      "main": "el",
+      "dof": [
+        {
+          "key": "el",
+          "ru": "локоть",
+          "act": "сгибание локтя",
+          "range": [-5, 150],
+          "norm": [0, 145],
+          "normNote": true,
+          "handle": {
+            "limb": 0.6,
+            "close": 0.45
+          }
+        },
+        {
+          "key": "fl",
+          "ru": "плечо",
+          "act": "сгибание плеча",
+          "range": [-70, 180],
+          "norm": [-50, 180],
+          "normNote": true,
+          "handle": {
+            "limb": 0.55
+          }
+        }
+      ],
+      "groups": [
+        {
+          "id": "eflex",
+          "dof": "el",
+          "dir": 1,
+          "ids": ["bic", "brach", "br"]
+        },
+        {
+          "id": "eext",
+          "dof": "el",
+          "dir": -1,
+          "ids": ["tri", "anc"]
+        },
+        {
+          "id": "sflex",
+          "dof": "fl",
+          "dir": 1,
+          "ids": ["deltA", "bic"]
+        },
+        {
+          "id": "sext",
+          "dof": "fl",
+          "dir": -1,
+          "ids": ["deltP", "tri"]
+        }
+      ],
+      "positions": {
+        "stand": {
+          "r": 0,
+          "q0": {
+            "fl": 0,
+            "el": 0
+          },
+          "above": [],
+          "limb": [300, 220, 0.75],
+          "close": [800, 400, 1.0]
+        },
+        "supine": {
+          "r": -90,
+          "q0": {
+            "fl": 0,
+            "el": 0
+          },
+          "above": ["E", "W"],
+          "pad": 30,
+          "table": true,
+          "tableX": [60, 760],
+          "limb": [140, 560, 0.75],
+          "close": [800, 360, 1.0]
+        },
+        "up": {
+          "r": 0,
+          "q0": {
+            "fl": 170,
+            "el": 0
+          },
+          "above": [],
+          "limb": [340, 700, 0.75],
+          "close": [800, 420, 1.0]
+        }
+      },
+      "stops": [
+        {
+          "id": "tri",
+          "max": 0.37,
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "id": "bic",
+          "max": 0.052,
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "el",
+          "max": 145,
+          "ids": ["contactF"],
+          "feel": "soft",
+          "note": true
+        },
+        {
+          "dof": "el",
+          "min": 0,
+          "ids": ["elbowEnd"],
+          "feel": "hard",
+          "note": true
+        },
+        {
+          "dof": "fl",
+          "max": 180,
+          "ids": ["endFlex"],
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "fl",
+          "min": -60,
+          "ids": ["endExt"],
+          "feel": "firm",
+          "note": true
+        }
+      ],
+      "refs": [
+        {
+          "pos": "stand",
+          "q": {
+            "fl": 0,
+            "el": 0
+          },
+          "dof": "el",
+          "to": 160,
+          "expect": 145,
+          "by": "contactF",
+          "src": "note"
+        },
+        {
+          "pos": "stand",
+          "q": {
+            "fl": 0,
+            "el": 60
+          },
+          "dof": "el",
+          "to": -10,
+          "expect": 0,
+          "by": "elbowEnd",
+          "src": "note"
+        }
+      ],
+      "marks": [
+        {
+          "dof": "el",
+          "at": 70,
+          "short": "покой",
+          "ru": "положение покоя",
+          "page": 146
+        }
+      ]
+    },
+    {
+      "id": "rot",
+      "title": "супинация — пронация",
+      "chip": "супинация",
+      "ids": ["bicA", "sup", "pt", "pq", "mcl", "lclA", "endSup", "endPro"],
+      "limb": {
+        "model": "foreEnd"
+      },
+      "close": {
+        "model": "elbowAnt"
+      },
+      "main": "rot",
+      "dof": [
+        {
+          "key": "rot",
+          "ru": "предплечье",
+          "act": "супинация",
+          "range": [-95, 95],
+          "norm": [-80, 80],
+          "normNote": true,
+          "handle": {
+            "limb": 0.8
+          }
+        }
+      ],
+      "groups": [
+        {
+          "id": "sup",
+          "dof": "rot",
+          "dir": 1,
+          "ids": ["bicA", "sup"]
+        },
+        {
+          "id": "pro",
+          "dof": "rot",
+          "dir": -1,
+          "ids": ["pt", "pq"]
+        }
+      ],
+      "positions": {
+        "stand": {
+          "r": 0,
+          "q0": {
+            "rot": 0
+          },
+          "above": [],
+          "gravity": false,
+          "limb": [300, 440, 1.2],
+          "close": [760, 300, 0.85]
+        }
+      },
+      "stops": [
+        {
+          "dof": "rot",
+          "max": 85,
+          "ids": ["endSup"],
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "rot",
+          "min": -80,
+          "ids": ["endPro"],
+          "feel": "hard",
+          "note": true
+        }
+      ],
+      "refs": [],
+      "marks": [
+        {
+          "dof": "rot",
+          "at": 35,
+          "short": "покой",
+          "ru": "положение покоя",
+          "page": 148
+        }
+      ]
+    }
+  ],
+  "facts": [
+    {
+      "motion": "flex",
+      "ru": "Положение покоя плечелоктевого сустава — 70° сгибания и 10° супинации.",
+      "page": 146
+    },
+    {
+      "motion": "flex",
+      "ru": "Длинную головку трёхглавой растягивают, сгибая локоть при согнутом плече.",
+      "page": 115
+    },
+    {
+      "motion": "rot",
+      "ru": "Положение покоя проксимального лучелоктевого сустава — локоть 70°, супинация 35°.",
+      "page": 148
+    },
+    {
+      "motion": "rot",
+      "ru": "Двуглавая и плечелучевая участвуют и в супинации с пронацией, поэтому сгибатели локтя растягивают в обоих положениях предплечья.",
+      "page": 115
+    }
+  ],
+  "tasks": [
+    {
+      "id": "rest",
+      "text": "Поставьте локоть в положение покоя.",
+      "when": {
+        "motion": "flex",
+        "q": {
+          "el": [65, 75]
+        }
+      },
+      "hint": "Ищите зелёную метку «покой» на дуге у локтя.",
+      "show": {
+        "motion": "flex",
+        "pos": "stand",
+        "q": {
+          "el": 70
+        }
+      },
+      "why": "Положение покоя плечелоктевого сустава — около 70° сгибания (и 10° супинации).",
+      "page": 146
+    },
+    {
+      "id": "standCon",
+      "text": "Стоя в активном режиме согните локоть. Кто работает и как?",
+      "when": {
+        "motion": "flex",
+        "pos": "stand",
+        "mode": "active",
+        "work": {
+          "eflex": "con"
+        }
+      },
+      "hint": "Медленно поднимайте предплечье.",
+      "show": {
+        "motion": "flex",
+        "pos": "stand",
+        "mode": "active",
+        "q": {
+          "el": 100
+        },
+        "dur": 2.2
+      },
+      "hold": 0.6,
+      "why": "Стоя предплечье тянет вниз сила тяжести: сгибатели локтя поднимают его, укорачиваясь.",
+      "page": 224
+    },
+    {
+      "id": "upEcc",
+      "text": "Подняв руку вверх, в активном режиме медленно опускайте предплечье за голову. Кто работает?",
+      "when": {
+        "motion": "flex",
+        "pos": "up",
+        "mode": "active",
+        "work": {
+          "eext": "ecc"
+        }
+      },
+      "hint": "Положение «рука вверх», сгибайте локоть медленно.",
+      "show": {
+        "motion": "flex",
+        "pos": "up",
+        "mode": "active",
+        "q": {
+          "el": 120
+        },
+        "dur": 2.2
+      },
+      "hold": 0.6,
+      "why": "Рука вверх: предплечье падает за голову само, и тормозит его трёхглавая, удлиняясь, — уступающая работа.",
+      "page": 224
+    },
+    {
+      "id": "triFlex",
+      "text": "Растяните длинную головку трёхглавой до упора.",
+      "when": {
+        "motion": "flex",
+        "stop": "tri"
+      },
+      "hint": "Поднимите руку вверх и сгибайте локоть.",
+      "show": {
+        "motion": "flex",
+        "pos": "up",
+        "q": {
+          "el": 145
+        }
+      },
+      "why": "Длинная головка трёхглавой проходит через плечо и локоть: при поднятой руке сгибание локтя растягивает её до предела.",
+      "page": 115
+    },
+    {
+      "id": "supRest",
+      "text": "Поставьте предплечье в положение покоя проксимального лучелоктевого сустава.",
+      "when": {
+        "motion": "rot",
+        "q": {
+          "rot": [30, 40]
+        }
+      },
+      "hint": "Немного поверните ладонь вверх — к метке «покой».",
+      "show": {
+        "motion": "rot",
+        "pos": "stand",
+        "q": {
+          "rot": 35
+        }
+      },
+      "why": "Положение покоя проксимального лучелоктевого сустава — около 35° супинации при локте 70°.",
+      "page": 148
+    }
+  ]
+}

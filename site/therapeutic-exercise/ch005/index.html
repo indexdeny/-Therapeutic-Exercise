@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Клиническое решение и доказательная практика — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 5, title: 'Клиническое решение, коммуникация, доказательная практика', minutes: 9, language: 'ru', next: '../ch006/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch005/cards.ru.json
+const CARDS_SHORT = {
+  "Знания и данные\nсобрать нужное при обследовании; разобраться в незнакомой проблеме; прошлый опыт; помнить и объединять старое и новое": "обследование, опыт, старое + новое",
+  "Доказательства\nнаходить, анализировать и применять качественные исследования": "находить и применять исследования",
+  "Мышление\nупорядочивать и расставлять приоритеты; узнавать закономерности; рабочие гипотезы; варианты и планы": "приоритеты, закономерности, гипотезы",
+  "Пациент и рефлексия\nпонимать ценности и цели пациента; следить за собой и вовремя корректировать решения": "цели пациента + коррекция решений",
+  "Журналы\nсвои и смежных профессий — регулярно": "свои и смежные — регулярно",
+  "Систематические обзоры\nсжатая критическая сводка многих исследований": "сводка многих исследований",
+  "Клинические рекомендации\nсекции APTA, на основе МКФ; сайт PTNow": "секции APTA, сайт PTNow",
+  "Базы данных\nCochrane, CENTRAL, PubMed, EMBASE": "Cochrane, PubMed, EMBASE",
+  "PEDro\nединственная — только по физической терапии": "только физическая терапия",
+  "LEAP\nжурнал Physical Therapy: обзор Cochrane + практика": "обзор Cochrane + практика",
+};
+// cards-short end
+
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+const MODES = [['co', 'Совместное ведение', COL.whole], ['cons', 'Консультация', COL.real], ['sup', 'Руководство', COL.int], ['ref', 'Направление', COL.good]];
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Клиническое решение', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 1 · Урок 5', { x: 800, y: 250, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Клиническое решение, коммуникация', { x: 800, y: 340, size: 62, weight: 600, anchor: 'middle' });
+    T(g, 'и доказательная практика', { x: 800, y: 412, size: 62, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'на чём держится грамотное ведение пациента', 800, 500, m('sub'), { size: 32, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene);   // the ring lives in its own group, so it leaves with the title
+    const ring = cycleRing(art, { cx: 800, cy: 690, r: 230, ry: 110, items: ['данные', 'гипотеза', 'решение', 'проверка'], w: 160, size: 21 });
+    ring.nodes.forEach((n, i) => { ring.reveal(i, m('sub', .3 + i * .2)); ring.arc(i, m('sub', .5 + i * .2), .4); });
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['mgmt', 'Качественная помощь', (m) => {
+    const p = panel(0), GY = 560;
+    ground(p, 680, 920, GY, .2);
+    const f = fig(p, { x: 800, y: GY - 182 * .6, s: .6 });
+    put(f.g, { o: 0 }); show(f.g, .2);
+    txt(p, 'пациент', 800, GY + 44, .4, { size: 24, fill: COL.dim, anchor: 'middle' });
+    labelBox(p, 330, 230, 420, ['Здравые клинические', 'суждения'], COL.whole, m('j'), { size: 27 });
+    labelBox(p, 1270, 230, 420, ['Решать проблемы,', 'важные пациенту'], COL.good, m('solve'), { size: 27 });
+    arrowTo(p, [520, 270], [700, 380], m('j', .3), { col: COL.whole });
+    arrowTo(p, [1080, 270], [900, 380], m('solve', .3), { col: COL.good });
+    const d = icfDiagram(p, { x: 800, y: 760, s: .36 });
+    ['hc', 'body', 'act', 'part', 'lines'].forEach((k, i) => d.reveal(k, m('link', .2 + i * .15)));
+    para(p, 'связи уровней МКФ — на каждом этапе', 1070, 750, m('link', .4), { size: 26, weight: 600, fill: COL.task, maxW: 430 });
+  }],
+
+  ['cdm', 'Клиническое решение', (m) => {
+    const p = panel(0);
+    para(p, 'Клиническое решение — динамичный процесс рассуждения и критического мышления', 800, 80, m('def'), { size: 28, weight: 700, maxW: 1300, anchor: 'middle' });
+    const ring = cycleRing(p, { cx: 800, cy: 500, r: 330, ry: 250, items: ['данные', 'гипотеза', ['вмешательство', 'выбор'], 'проверка', 'коррекция'], col: COL.task, w: 250, size: 26 });
+    ring.nodes.forEach((n, i) => ring.reveal(i, i === 0 ? .2 : m('loop', i * .5)));
+    ring.nodes.forEach((n, i) => ring.arc(i, m('loop', .3 + i * .5), .5));
+    ring.runner(m('loop', 3), 5, 2, COL.task);
+    const GY = 530, f = fig(p, { x: 800, y: GY - 182 * .45, s: .45, o: 0 });
+    show(f.g, m('ex', -.2));
+    const [ax] = onStage(f, 'AN');
+    repeatPose(f, { ...SQUAT, hN: 60, kN: 60, fN: 18, hF: 60, kF: 60, fF: 18, t: 22, aN: 100, aF: 100 }, m('ex', .3), 3, 2, ['AN', ax, GY]);
+    repeatPose(f, SQUAT, m('ex', 3.4), 3, 2, ['AN', ax, GY]);
+    txt(p, 'подбор → изменение упражнения', 800, 580, m('ex', .3), { size: 25, weight: 600, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['req', 'Что нужно для решения', (m) => {
+    const p = panel(0);
+    head(p, 'Требования к клиническому решению (бокс 1.7) — в четырёх группах');
+    const C4 = [
+      [90, 140, 'Знания и данные', 'собрать нужное при обследовании; разобраться в незнакомой проблеме; прошлый опыт; помнить и объединять старое и новое', COL.whole, 'g1'],
+      [820, 140, 'Доказательства', 'находить, анализировать и применять качественные исследования', COL.good, 'g2'],
+      [90, 480, 'Мышление', 'упорядочивать и расставлять приоритеты; узнавать закономерности; рабочие гипотезы; варианты и планы', COL.task, 'g3'],
+      [820, 480, 'Пациент и рефлексия', 'понимать ценности и цели пациента; следить за собой и вовремя корректировать решения', COL.real, 'g4'],
+    ];
+    C4.forEach(([x, y, h, s, c, k]) => infoCard(p, x, y, 690, 300, h, s, c, m(k), { size: 25 }));
+  }],
+
+  ['tools', 'Инструменты', (m) => {
+    const p = panel(0);
+    head(p, 'Инструменты клинического решения');
+    // HOAC II: a short stack of steps
+    const hoac = G(p, { o: 0 });
+    [0, 1, 2, 3, 4].forEach(i => mk('rect', { x: 170 + i * 26, y: 470 - i * 56, width: 220, height: 44, rx: 10, fill: PANEL, stroke: COL.whole, 'stroke-width': 2.5 }, hoac));
+    T(hoac, 'HOAC II', { x: 300, y: 216, size: 34, weight: 700, fill: COL.whole, anchor: 'middle' });
+    T(hoac, 'алгоритм шагов', { x: 300, y: 560, size: 24, fill: COL.dim, anchor: 'middle' });
+    show(hoac, m('hoac'));
+    // a clinical prediction rule sifts a mixed group
+    const cx = 1050, rows = 4, cols = 10, dots = [];
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const good = (r * 7 + c * 3) % 5 === 0, d = mk('circle', { cx: cx - 225 + c * 50, cy: 200 + r * 40, r: 13, fill: good ? COL.good : COL.dim, 'fill-opacity': .85 }, p);
+      put(d, { o: 0 }); show(d, m('cpr', .1 + (r * cols + c) * .015)); dots.push([d, good, c]);
+    }
+    txt(p, 'большая разнородная группа', cx, 165, m('cpr'), { size: 24, fill: COL.dim, anchor: 'middle' });
+    const funnel = path(p, `M${cx - 270} 370H${cx + 270}L${cx + 70} 470V500H${cx - 70}V470Z`, { stroke: COL.task, 'stroke-width': 4, fill: COL.task, 'fill-opacity': .1 }, { o: 0 });
+    show(funnel, m('cpr', 1));
+    txt(p, 'правило клинического прогноза', cx, 440, m('cpr', 1.2), { size: 22, weight: 600, fill: COL.task, anchor: 'middle' });
+    let k = 0;
+    dots.forEach(([d, good]) => { if (good) { tw(d, { x: (cx - 50 + (k % 4) * 34) - +d.getAttribute('cx'), y: 560 + Math.floor(k / 4) * 34 - +d.getAttribute('cy') }, m('cpr', 2 + k * .1), .8); k++; } else tw(d, { o: .2 }, m('cpr', 2), .6); });
+    para(p, 'подгруппа, которой метод скорее всего поможет: например, боль в пояснице → стабилизирующие упражнения', cx, 690, m('ex'), { size: 24, weight: 600, fill: COL.good, maxW: 620, anchor: 'middle' });
+    const warn = G(p, { x: 300, y: 690, o: 0 });
+    path(warn, 'M0 -50L48 34H-48Z', { stroke: COL.int, 'stroke-width': 5, fill: COL.int, 'fill-opacity': .15 });
+    T(warn, '!', { x: 0, y: 22, size: 46, weight: 700, fill: COL.int, anchor: 'middle' });
+    pop(warn, m('warn'));
+    para(p, 'большинство правил мало проверены', 300, 780, m('warn', .3), { size: 24, weight: 600, fill: COL.int, maxW: 380, anchor: 'middle' });
+  }],
+
+  ['q1', 'Быстрая проверка', () => {
+    const p = panel(0);
+    path(p, 'M120 300H520L370 430V470H270V430Z', { stroke: COL.task, 'stroke-width': 4, fill: COL.task, 'fill-opacity': .1 });
+    txt(p, 'CPR', 320, 375, .1, { size: 36, weight: 700, fill: COL.task, anchor: 'middle' });
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-cpr', prompt: ['Что верно о правилах клинического прогноза (CPR) в физической терапии?'],
+    build: choice([['Помогают выделить подгруппу, которой метод скорее всего поможет, но большинство мало проверены'], ['Надёжно проверены и заменяют клиническое мышление'], ['Используются только для постановки медицинского диагноза']], 0,
+      'CPR уточняют диагноз, прогноз и, чаще всего, выделяют подгруппы; но обзоры показывают, что проверены они мало.',
+      [null, 'Систематические обзоры говорят об обратном: валидация ограничена, а мышление терапевта ничем не заменить.', 'Больше всего CPR в физической терапии предсказывают ответ на лечение, а не диагноз.']),
+  }], done) }],
+
+  ['coord', 'Координация', (m) => {
+    const p = panel(0), cx = 800, cy = 430;
+    txt(p, 'прямой доступ: пациент приходит без направления врача', 800, 80, m('direct', -1.5), { size: 27, weight: 600, anchor: 'middle' });
+    const pt = fig(p, { x: cx, y: cy + 40, s: .5, col: '#c9dfe9', o: 0 });
+    show(pt.g, .2);
+    txt(p, 'физический терапевт', cx, cy - 70, m('direct'), { size: 24, weight: 600, fill: COL.whole, anchor: 'middle' });
+    const flag = G(p, { x: 380, y: 200, o: 0 });
+    path(flag, 'M0 70V-50', { stroke: COL.chalk, 'stroke-width': 5 });
+    path(flag, 'M0 -50H70L52 -24L70 2H0Z', { fill: COL.bad, stroke: 'none' });
+    pop(flag, m('flag'));
+    para(p, 'красные флаги → направить к другому специалисту', 380, 310, m('flag', .3), { size: 23, weight: 600, fill: COL.bad, maxW: 340, anchor: 'middle' });
+    const POS = [[480, 520], [1120, 520], [480, 700], [1120, 700]];
+    MODES.forEach(([k, s, c], i) => {
+      const [x, y] = POS[i];
+      labelBox(p, x, y, 330, [s], c, m('m' + (i + 1)), { size: 26 });
+      arrowTo(p, [cx + (x < cx ? -60 : 60), cy + 40 + (y - 520) * .15], [x + (x < cx ? 170 : -170), y], m('m' + (i + 1), .3), { col: c, w: 3 });
+    });
+    const sub = ['ответственность пополам', 'дать или получить мнение', 'поручить часть, отвечая за всё', 'к специалисту и от него'];
+    sub.forEach((s, i) => txt(p, s, POS[i][0], POS[i][1] + 52, m('m' + (i + 1), .4), { size: 21, fill: COL.dim, anchor: 'middle' }));
+    labelBox(p, 1280, 260, 360, ['Диетолог', 'ожирение + низкая выносливость'], COL.good, m('ex'), { size: 24 });
+    arrowTo(p, [1120, 480], [1250, 312], m('ex', .3), { col: COL.good, w: 3 });
+    ['заключения', 'планы', 'выписки', 'домашние программы', 'работа в команде'].forEach((s, i) => pill(p, s, 300 + i * 250, 832, m('docs', .3 + i * .25), { col: COL.chalk, size: 21 }));
+  }],
+
+  ['ebp', 'Доказательная практика', (m) => {
+    const p = panel(0);
+    para(p, 'Доказательная практика — осознанное использование лучших современных доказательств при решениях о конкретном пациенте', 800, 74, m('def'), { size: 27, weight: 700, maxW: 1300, anchor: 'middle' });
+    const C3 = [[650, 400, 'исследования', COL.whole, 'c1'], [950, 400, 'опыт специалиста', COL.task, 'c2'], [800, 620, 'ценности пациента', COL.good, 'c3']];
+    C3.forEach(([x, y, s, c, k]) => {
+      const g = G(p, { x, y, s: .3, o: 0 });
+      mk('circle', { r: 200, fill: c, 'fill-opacity': .14, stroke: c, 'stroke-width': 4 }, g);
+      T(g, s, { x: (x - 800) * .7, y: (y - 470) * .55 + (y > 500 ? 40 : -40), size: 30, weight: 700, fill: c, anchor: 'middle' });
+      pop(g, m(k));
+    });
+    pill(p, 'решение', 800, 485, m('c3', 1), { col: COL.chalk, size: 26 });
+    txt(p, 'цели и обстоятельства пациента', 800, 845, m('c3', .6), { size: 23, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['steps', 'Шесть шагов', (m) => {
+    const p = panel(0);
+    const ring = cycleRing(p, { cx: 800, cy: 470, r: 470, ry: 300, items: [['1 · вопрос', 'конкретный'], ['2 · поиск', 'исследований'], ['3 · оценка', 'качество, применимость'], ['4 · интеграция', 'опыт + ценности'], ['5 · применение', 'в ведении пациента'], ['6 · результат', 'оценить исходы']], col: COL.good, w: 300, size: 25, start: -90 });
+    ring.reveal(0, .2);
+    [1, 2, 3, 4, 5].forEach(i => ring.reveal(i, m('s' + (i + 1))));
+    [0, 1, 2, 3, 4].forEach(i => ring.arc(i, m('s' + (i + 2), -.5), .4));
+    ring.arc(5, m('again'), .7);
+    txt(p, 'новый вопрос', 800, 470, m('again', .4), { size: 32, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['survey', 'Опрос терапевтов', (m) => {
+    const p = panel(0);
+    txt(p, '488', 800, 220, m('n'), { size: 120, weight: 700, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'физических терапевтов — членов APTA', 800, 280, m('n', .3), { size: 28, fill: COL.dim, anchor: 'middle' });
+    labelBox(p, 470, 450, 560, ['✓ доказательства нужны', 'и улучшают помощь'], COL.good, m('yes'), { size: 28 });
+    labelBox(p, 1130, 450, 560, ['⏱ шаги долгие', 'плохо сочетаются с загруженной работой'], COL.int, m('time'), { size: 28 });
+    para(p, 'не для каждого решения — но для сложных проблем и для обоснования лечения думающий терапевт ищет доказательства', 800, 660, m('think'), { size: 29, weight: 700, fill: COL.task, maxW: 1200, anchor: 'middle' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-steps', prompt: ['Какой это шаг доказательной практики?'],
+    build: grid([
+      { parts: ['Найти исследования, которые отвечают на вопрос'], ans: ['2'], why: 'Второй шаг — поиск литературы.' },
+      { parts: ['Сформулировать проблему пациента как конкретный вопрос'], ans: ['1'], why: 'С этого всё начинается.' },
+      { parts: ['Оценить качество исследований и применимость к пациенту'], ans: ['3'], why: 'Третий шаг — критическая оценка.' },
+      { parts: ['Применить решение в ведении пациента'], ans: ['5'], why: 'Пятый шаг — после интеграции с опытом и ценностями.' },
+      { parts: ['Оценить результат и при необходимости задать новый вопрос'], ans: ['6'], why: 'Шестой шаг замыкает цикл.' },
+    ], ['1', '2', '3', '4', '5', '6'].map(s => [s, s]), { multi: false, text: true }),
+  }], done) }],
+
+  ['access', 'Где брать доказательства', (m) => {
+    const p = panel(0);
+    head(p, 'Где брать доказательства');
+    const S6 = [
+      ['Журналы', 'свои и смежных профессий — регулярно', COL.chalk, 'j'], ['Систематические обзоры', 'сжатая критическая сводка многих исследований', COL.whole, 'rev'],
+      ['Клинические рекомендации', 'секции APTA, на основе МКФ; сайт PTNow', COL.good, 'cpg'], ['Базы данных', 'Cochrane, CENTRAL, PubMed, EMBASE', COL.real, 'db'],
+      ['PEDro', 'единственная — только по физической терапии', COL.task, 'pedro'], ['LEAP', 'журнал Physical Therapy: обзор Cochrane + практика', COL.int, 'leap'],
+    ];
+    S6.forEach(([h, s, c, k], i) => infoCard(p, 90 + (i % 3) * 480, 150 + Math.floor(i / 3) * 330, 450, 290, h, s, c, m(k), { size: 25 }));
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Клиническое решение — цикл: данные, гипотеза, вмешательство, проверка, коррекция.', 'w1'],
+     ['Правила клинического прогноза полезны, но пока мало проверены.', 'w2'],
+     ['Терапевт координирует помощь: совместное ведение, консультация, руководство, направление.', 'w3'],
+     ['Доказательная практика соединяет исследования, опыт специалиста и ценности пациента — шесть шагов.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-modes', prompt: ['Какая это форма работы с другими специалистами?'],
+    build: grid([
+      { parts: ['Терапевт поручает ассистенту часть процедур, но отвечает за всё лечение'], ans: ['sup'], why: 'Поручить часть, оставаясь ответственным, — руководство.' },
+      { parts: ['Терапевт направляет пациента к диетологу'], ans: ['ref'], why: 'Это направление к другому специалисту.' },
+      { parts: ['Терапевт и врач вместе ведут пациента, разделяя ответственность'], ans: ['co'], why: 'Общая ответственность — совместное ведение.' },
+      { parts: ['Терапевт спрашивает мнение ортопеда о сложном случае'], ans: ['cons'], why: 'Получить профессиональное мнение — консультация.' },
+    ], MODES, { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Правила клинического прогноза уже хорошо проверены в исследованиях.'], ans: ['f'], why: 'Неверно: обзоры показывают, что проверены они мало.' },
+      { parts: ['Доказательная практика объединяет исследования, опыт специалиста и ценности пациента.'], ans: ['t'], why: 'Верно: все три источника вместе.' },
+      { parts: ['Для каждого клинического решения нужно заново искать литературу.'], ans: ['f'], why: 'Неверно: это нереально; но для сложных проблем доказательства искать обязательно.' },
+      { parts: ['PEDro — база данных только по физической терапии.'], ans: ['t'], why: 'Верно: из крупных баз только она целиком посвящена физтерапии.' },
+      { parts: ['При прямом доступе терапевт сам решает, направить ли пациента к другому специалисту.'], ans: ['t'], why: 'Верно: поэтому так важно замечать красные флаги.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

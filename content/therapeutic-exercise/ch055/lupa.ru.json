@@ -1,0 +1,10 @@
+[
+ {
+  "beat": "intro",
+  "fig": 0,
+  "target": "m0",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает m0, фигура ×0.7"
+ }
+]

@@ -1,0 +1,29 @@
+[
+ {
+  "beat": "need",
+  "fig": 0,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает rectus, фигура ×0.8",
+  "to": "jobs"
+ },
+ {
+  "beat": "pressor",
+  "fig": 0,
+  "target": "biceps",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает biceps, фигура ×0.55",
+  "off": "места для лупы нет"
+ },
+ {
+  "beat": "pressor",
+  "fig": 1,
+  "target": "hamstrings",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает hamstrings, фигура ×0.55",
+  "off": "места для лупы нет"
+ }
+]

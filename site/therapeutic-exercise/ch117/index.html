@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Операции на суставах и костях — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 117, title: 'Операции на суставах и костях', minutes: 10, language: 'ru', next: '../ch118/' };
+// bio begin: places of the biomechanics layer (B switches); made by tools/therapeutic-exercise/bio.py from content/therapeutic-exercise/ch117/bio.ru.json
+const BIO = [
+  {"beat": "fuse", "fig": 0, "level": "angle", "joint": "hN", "load": {"type": "none"}},
+];
+// bio end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch117/cards.ru.json
+const CARDS_SHORT = {
+  "после операции\nчерез 1–2 дня — непрерывное пассивное или вспомогательное движение, затем активное во всём новом объёме; рано укрепляют антагонисты удлинённой мышцы и используют новый объём в делах": "через 1–2 дня — движение во всём объёме",
+  "после артроскопии\nв первые сутки — пассивные или вспомогательные движения и установочное напряжение, затем активные; колено — полная опора к 10–14-му дню; после открытой операции — медленнее; не усиливать боль и отёк": "опора к 10–14-му дню",
+  "цементная\nсо временем расшатывается — пожилым и малоактивным": "пожилым и малоактивным",
+  "бесцементная\nкость врастает в пористое покрытие — молодым и активным": "молодым и активным",
+  "противопоказания (блок 12.10)\nинфекция в суставе — прежде всего · остеомиелит · общая инфекция · большая потеря кости или опухоль · паралич мышц вокруг сустава · нейропатический сустав · недостаточная мотивация": "инфекция, потеря кости, паралич, мотивация",
+  "когда\nсильная боль и нестабильность, когда подвижность менее важна; паралич мышц; спасительная операция после неудачного эндопротеза; чаще позвоночник, запястье, большой палец, голеностоп": "боль, нестабильность; подвижность менее важна",
+  "после операции\nгипс 6–12 недель; объём и сила — в суставах выше и ниже; опора — после признаков сращения": "гипс 6–12 недель; опора — после сращения",
+  "остеотомия\nпересечение и перестановка кости: при артрозе одного отдела колена переносит нагрузку на здоровую часть, уменьшает боль и откладывает эндопротезирование": "перестановка кости → нагрузка на здоровую часть",
+  "после операции\nглавное — контакт фрагментов: сращение до 8–12 недель, полное восстановление — до полугода · движения в суставах выше и ниже, затем вспомогательные и активные упражнения, лёгкое сопротивление · опора защищена 4–6 недель и дольше": "контакт фрагментов: сращение до 8–12 недель",
+};
+// cards-short end
+
+const HEAD = COL.whole, PAIN = '#ff5a3c', SURG = '#7fc8c2', METAL = '#b8c4cc', PLAST = '#f2f0ea', NERVE = '#f1dfa0';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+// A tendon lengthened by a Z-cut (horizontal, from x, half-width r): set({ cut, slide }) — cut 0..1 draws the Z;
+// slide (px) pulls the right piece away; the overlap stays sutured.
+function zTendon(p, x, y, L, t0 = null, { r = 22 } = {}) {
+  const g = G(p, { o: 0 }), a = x + L * .38, b = x + L * .62, line = mix(ANAT.tendon, '#000000', .45);
+  const left = mk('path', { fill: ANAT.tendon, stroke: line, 'stroke-width': 2 }, g), right = mk('path', { fill: ANAT.tendon, stroke: line, 'stroke-width': 2 }, g);
+  const zl = mk('path', { fill: 'none', stroke: '#8a3a32', 'stroke-width': 3, 'stroke-dasharray': '1 1', pathLength: 1 }, g);
+  const sut = G(g, { o: 0 });
+  const S0 = { cut: 0, slide: 0 }, e = { g, st: S0 };
+  e.set = o => {
+    Object.assign(S0, o);
+    const d = S0.slide;
+    left.setAttribute('d', d > 0 ? `M${x} ${y - r}H${a}V${y}H${b}V${y + r}H${x}Z` : `M${x} ${y - r}H${x + L}V${y + r}H${x}Z`);
+    right.setAttribute('d', d > 0 ? `M${f1(a + d)} ${y - r}H${f1(x + L + d)}V${y + r}H${f1(b + d)}V${y}H${f1(a + d)}Z` : '');
+    zl.setAttribute('d', `M${a} ${y - r}V${y}H${b}V${y + r}`);
+    zl.setAttribute('stroke-dasharray', `${f1(S0.cut)} 1`);
+    zl.setAttribute('opacity', d > 0 ? 0 : 1);
+    sut.replaceChildren();
+    if (d > 0) for (let i = 0; i < 4; i++) { const X = a + d + 6 + i * Math.max(4, (b - a - d - 12) / 3); if (X < b - 2) path(sut, `M${f1(X)} ${y - 12}v24`, { stroke: '#3d4a52', 'stroke-width': 2.5 }); }
+    put(sut, { o: d > 0 ? 1 : 0 });
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// The carpal tunnel in section: the transverse ligament arches over tendons and the median nerve; set({ squeeze, release }).
+function tunnel(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 });
+  mk('path', { d: 'M-130 40C-120 100 120 100 130 40L110 70C60 110 -60 110 -110 70Z', fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 2 }, g);
+  [[-60, 40], [-20, 52], [20, 52], [60, 40], [-40, 10], [0, 18], [40, 10]].forEach(([cx, cy]) => mk('circle', { cx, cy, r: 15, fill: ANAT.tendon, stroke: mix(ANAT.tendon, '#000000', .4), 'stroke-width': 1.5 }, g));
+  const nerve = mk('ellipse', { cx: -10, cy: -18, rx: 18, ry: 18, fill: NERVE, stroke: '#8a7a40', 'stroke-width': 2 }, g);
+  const lig = mk('path', { fill: 'none', stroke: '#c9d2d8', 'stroke-width': 12, 'stroke-linecap': 'round' }, g);
+  const S0 = { squeeze: 0, release: 0 }, e = { g, st: S0 };
+  e.set = o => {
+    Object.assign(S0, o);
+    const sq = S0.squeeze * (1 - S0.release), top = -40 + 14 * sq;
+    nerve.setAttribute('ry', f1(18 - 9 * sq)); nerve.setAttribute('cy', f1(-18 + 6 * sq));
+    const op = 40 * S0.release;
+    lig.setAttribute('d', S0.release > 0 ? `M-132 40C-130 -10 -80 ${f1(top - 10)} ${f1(-12 - op)} ${f1(top - op * .6)}M${f1(-4 + op)} ${f1(top - op * .6)}C80 ${f1(top - 10)} 130 -10 132 40` : `M-132 40C-130 -10 -80 ${f1(top - 10)} 0 ${f1(top)}C80 ${f1(top - 10)} 130 -10 132 40`);
+    nerve.setAttribute('fill', mix(NERVE, '#e88a5c', sq));
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// Articular cartilage over subchondral bone with a defect. set({ holes, blood, fibro, patch, cells, plugs }).
+function cartDefect(p, x, y, w, t0) {
+  const g = G(p, { o: 0 }), dx = x + w * .5, dw = w * .26;
+  mk('rect', { x, y: y + 34, width: w, height: 130, fill: '#d9c9a6' }, g);
+  for (let i = 0; i < 26; i++) mk('circle', { cx: x + 14 + (i * 53) % (w - 28), cy: y + 70 + (i * 37) % 80, r: 5 + (i % 3) * 2, fill: '#b44a3a', 'fill-opacity': .35 }, g);
+  mk('rect', { x, y: y + 30, width: w, height: 8, fill: '#efe6cf' }, g);
+  mk('path', { d: `M${x} ${y}H${dx - dw / 2}L${dx - dw / 2 + 6} ${y + 30}H${dx + dw / 2 - 6}L${dx + dw / 2} ${y}H${x + w}V${y + 30}H${x}Z`, fill: '#a8d4e0', stroke: '#6fa3b5', 'stroke-width': 2 }, g);
+  const holes = G(g, { o: 0 }); [-.35, -.12, .12, .35].forEach(k => mk('rect', { x: dx + k * dw - 3, y: y + 30, width: 6, height: 40, fill: '#5b2a24' }, holes));
+  const blood = mk('rect', { x: dx - dw / 2 + 6, y: y + 30, width: dw - 12, height: 0, fill: '#b8433b', 'fill-opacity': .75 }, g);
+  const fibro = mk('path', { d: `M${dx - dw / 2 + 6} ${y + 30}Q${dx - dw / 4} ${y + 6} ${dx} ${y + 12}T${dx + dw / 2 - 6} ${y + 6}V${y + 30}Z`, fill: '#c9cfd2', stroke: '#8a9499', 'stroke-width': 2, opacity: 0 }, g);
+  const patch = mk('path', { d: `M${dx - dw / 2 - 14} ${y - 2}Q${dx} ${y - 14} ${dx + dw / 2 + 14} ${y - 2}`, fill: 'none', stroke: '#e7c3ae', 'stroke-width': 7, opacity: 0 }, g);
+  const cells = G(g, { o: 0 }); for (let i = 0; i < 9; i++) mk('circle', { cx: dx - dw / 2 + 14 + (i % 5) * (dw - 28) / 4, cy: y + 10 + Math.floor(i / 5) * 12, r: 5, fill: '#7fb0c4', stroke: '#3d6a7a', 'stroke-width': 1 }, cells);
+  const plugs = G(g, { o: 0 }); [-.3, 0, .3].forEach(k => { mk('rect', { x: dx + k * dw - 14, y: y + 2, width: 28, height: 70, rx: 6, fill: '#d9c9a6', stroke: '#8a7a5a', 'stroke-width': 1.5 }, plugs); mk('rect', { x: dx + k * dw - 14, y: y + 2, width: 28, height: 26, rx: 6, fill: '#a8d4e0' }, plugs); });
+  const S0 = {}, e = { g };
+  e.set = o => {
+    Object.assign(S0, o);
+    put(holes, { o: S0.holes || 0 });
+    blood.setAttribute('height', f1(26 * (S0.blood || 0))); blood.setAttribute('y', f1(y + 30 - 26 * (S0.blood || 0)));
+    fibro.setAttribute('opacity', f1(S0.fibro || 0)); patch.setAttribute('opacity', f1(S0.patch || 0)); put(cells, { o: S0.cells || 0 }); put(plugs, { o: S0.plugs || 0 });
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// A total hip replacement in section (right hip, front view): pelvis with a cup, the femur with a stem and a ball.
+// set({ arth, impl, cement, porous }): arth — a worn joint; impl — the components; cement / porous — the fixation.
+function hipTHA(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), line = mix(ANAT.bone, '#000000', .45);
+  mk('path', { d: 'M-140 -150C-60 -170 40 -150 90 -110C60 -80 30 -60 20 -40C-20 -60 -70 -60 -100 -30C-130 -60 -150 -110 -140 -150Z', fill: ANAT.bone, stroke: line, 'stroke-width': 2 }, g);
+  const cupBone = mk('path', { d: 'M-60 -70A62 62 0 0 1 60 -70', fill: 'none', stroke: '#a8d4e0', 'stroke-width': 8 }, g);
+  const fem = G(g, {});
+  mk('path', { d: 'M-30 -30L40 40L50 260H110L100 20L60 -20Z', fill: ANAT.bone, stroke: line, 'stroke-width': 2 }, fem);
+  const head = mk('circle', { cx: 0, cy: -60, r: 56, fill: ANAT.bone, stroke: line, 'stroke-width': 2 }, fem);
+  const worn = G(g, { o: 0 }); path(worn, 'M-50 -90L-30 -78M10 -112L22 -96M40 -86L30 -70', { stroke: '#8a3a32', 'stroke-width': 3 });
+  const imp = G(g, { o: 0 });
+  const cement = mk('path', { d: 'M40 0L58 250H108L96 10Z', fill: '#d6d2c4', stroke: '#9a9483', 'stroke-width': 1.5, opacity: 0 }, imp);
+  const stem = mk('path', { d: 'M-4 -54L44 4L62 240H98L88 14L46 -36Z', fill: METAL, stroke: '#6f7c85', 'stroke-width': 2 }, imp);
+  const porous = G(imp, { o: 0 }); for (let i = 0; i < 18; i++) mk('circle', { cx: 64 + (i % 3) * 10, cy: 40 + Math.floor(i / 3) * 34, r: 3, fill: '#6f7c85' }, porous);
+  mk('path', { d: 'M-70 -66A70 70 0 0 1 70 -66', fill: 'none', stroke: METAL, 'stroke-width': 12 }, imp);
+  mk('path', { d: 'M-58 -66A58 58 0 0 1 58 -66', fill: 'none', stroke: PLAST, 'stroke-width': 8 }, imp);
+  mk('circle', { cx: 0, cy: -60, r: 46, fill: METAL, stroke: '#6f7c85', 'stroke-width': 2 }, imp);
+  const S0 = {}, e = { g };
+  e.set = o => {
+    Object.assign(S0, o);
+    put(worn, { o: (S0.arth || 0) * (1 - (S0.impl || 0)) });
+    head.setAttribute('opacity', f1(1 - (S0.impl || 0)));
+    put(imp, { o: S0.impl || 0 });
+    cement.setAttribute('opacity', f1(S0.cement || 0)); put(porous, { o: S0.porous || 0 });
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Операции на суставах и костях', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 12 · Урок 117', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Операции на суставах и костях', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'от санации до эндопротеза и остеотомии', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'что делает хирург — и что после этого можно', 800, 360, m('sub'), { size: 30, fill: SURG, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const h = hipTHA(art, 640, 600, .95, null); put(h.g, { o: 1 });
+    prog(q => h.set({ arth: clamp(q * 3, 0, 1), impl: clamp(q * 3 - 1.4, 0, 1) }), .6, Math.max(2, D - 1.6), lin);
+    const lb = longBone(art, 860, 640, 420, null, { r: 26 }); put(lb.g, { o: 1 }); lb.set({ line: 'trans', plate: 1 });
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['rel', 'Рассечение и удлинение', (m, D) => {
+    const p = panel(0);
+    txt(p, 'рассечение, удлинение, декомпрессия', 800, 56, m('rel'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    pillRow(p, ['больше объём движений', 'остановить деформацию', 'убрать боль'], 800, 110, m('rel', .5), { col: COL.good, size: 20, gap: 1, space: 12 });
+    pillRow(p, ['молодые с тяжёлым артритом и контрактурами', 'перед эндопротезированием', 'мышечная дистрофия, церебральный паралич'], 800, 166, m('who'), { col: COL.dim, size: 18, gap: 1.6, space: 10 });
+    const z = zTendon(p, 120, 330, 600, m('z'));
+    prog(q => z.set({ cut: q }), m('z', .5), 1.2);
+    prog(q => z.set({ slide: 90 * q }), m('z', 2), 1.5);
+    txt(p, 'Z-удлинение сухожилия', 420, 270, m('z'), { size: 22, weight: 700, fill: ANAT.tendon, anchor: 'middle' });
+    txt(p, 'держать удлинённым — в шине или ортезе, кроме занятий', 420, 420, m('z', 3), { size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const tn = tunnel(p, 1180, 360, 1.3, m('dec'));
+    tn.set({ squeeze: 1 });
+    prog(q => tn.set({ release: q }), m('dec', 1.5), 1.2);
+    txt(p, 'декомпрессия: рассечь сдавливающую связку или фасцию', 1180, 236, m('dec'), { size: 21, weight: 700, fill: COL.whole, anchor: 'middle' });
+    lab(p, 'нерв', 1460, 470, 1180 - 13, 360 - 18, NERVE, m('dec', .5));
+    pill(p, 'импинджмент плеча, синдром запястного канала', 1180, 520, m('dec', 2.5), { col: COL.whole, size: 18 });
+    infoCard(p, 60, 600, 1480, 240, 'после операции', 'через 1–2 дня — непрерывное пассивное или вспомогательное движение, затем активное во всём новом объёме; рано укрепляют антагонисты удлинённой мышцы и используют новый объём в делах', COL.good, m('rp'), { size: 23 });
+  }],
+
+  ['deb', 'Санация и синовэктомия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'санация, промывание, синовэктомия', 800, 56, m('deb'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const a1 = arthroJoint(p, 300, 450, .7, m('deb'));
+    a1.set({ cart: [.7, .45], fiss: 1, osteo: .7 });
+    prog(q => a1.set({ fiss: 1 - q, osteo: .7 - .5 * q }), m('deb', 3), 1.6);
+    txt(p, 'санация: убрать лоскуты, обломки, остеофиты', 300, 130, m('deb'), { size: 21, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'от боли, щелчков, заклинивания', 300, 690, m('deb', 2), { size: 20, fill: COL.chalk, anchor: 'middle' });
+    const a2 = arthroJoint(p, 900, 450, .7, m('syn'));
+    a2.set({ syn: 1, eff: .7 });
+    prog(q => a2.set({ syn: 1 - q, eff: .7 * (1 - q) }), m('syn', 4), 1.6);
+    prog(q => a2.set({ syn: .35 * q }), m('regen'), 1.6);
+    txt(p, 'синовэктомия: удалить воспалённую оболочку', 900, 130, m('syn'), { size: 21, weight: 700, fill: '#d9a0b4', anchor: 'middle' });
+    put(para(p, 'обычно ревматоидный артрит: лекарства не помогают 4–6 месяцев, хрящ мало изменён; колено, локоть, запястье, пястно-фаланговые', 900, 690, m('syn', 1.5), { size: 19, maxW: 520, anchor: 'middle' }), {});
+    txt(p, 'отрастает — но боль и отёк на время уходят', 900, 790, m('regen'), { size: 20, weight: 700, fill: COL.good, anchor: 'middle' });
+    infoCard(p, 1220, 140, 330, 640, 'после артроскопии', 'в первые сутки — пассивные или вспомогательные движения и установочное напряжение, затем активные; колено — полная опора к 10–14-му дню; после открытой операции — медленнее; не усиливать боль и отёк', COL.good, m('sp'), { size: 20 });
+  }],
+
+  ['cart', 'Восстановление хряща', (m, D) => {
+    const p = panel(0);
+    txt(p, 'восстановление суставного хряща', 800, 56, m('cart'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const c1 = cartDefect(p, 60, 200, 460, m('stim'));
+    prog(q => c1.set({ holes: q }), m('stim', 1), .8);
+    prog(q => c1.set({ holes: 1, blood: q }), m('stim', 2.2), 1);
+    prog(q => c1.set({ blood: 1 - q, fibro: q }), m('stim', 3.6), 1.4);
+    txt(p, 'микропереломы, рассверливание', 290, 160, m('stim'), { size: 21, weight: 700, fill: COL.task, anchor: 'middle' });
+    put(para(p, 'из костного мозга — волокнистый хрящ: хуже гиалинового, со временем разрушается; микропереломы — дефект < 1,5 см²', 60, 420, m('fib'), { size: 19, maxW: 460 }), {});
+    const c2 = cartDefect(p, 570, 200, 460, m('aci'));
+    prog(q => c2.set({ patch: q }), m('aci', 2.5), .8);
+    prog(q => c2.set({ cells: q }), m('aci', 3.5), 1);
+    txt(p, 'пересадка своих хондроцитов', 800, 160, m('aci'), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    const dish = G(p, { o: 0 }); mk('ellipse', { cx: 940, cy: 470, rx: 50, ry: 16, fill: 'none', stroke: '#9fb0bf', 'stroke-width': 3 }, dish); for (let i = 0; i < 7; i++) mk('circle', { cx: 910 + i * 10, cy: 468 + (i % 2) * 4, r: 4, fill: '#7fb0c4' }, dish); show(dish, m('aci', 1));
+    put(para(p, 'дефект 2,5–4 см²; клетки растят несколько недель, вводят под заплату; хороший результат — до 82 %', 570, 420, m('aci', 1), { size: 19, maxW: 320 }), {});
+    const c3 = cartDefect(p, 1080, 200, 460, m('oc'));
+    prog(q => c3.set({ plugs: q }), m('oc', 1), 1);
+    txt(p, 'костно-хрящевые столбики', 1310, 160, m('oc'), { size: 21, weight: 700, fill: COL.whole, anchor: 'middle' });
+    put(para(p, 'хрящ вместе с костью; мозаичная пластика — несколько маленьких столбиков', 1080, 420, m('oc', .5), { size: 19, maxW: 460 }), {});
+    // rehabilitation after cartilage repair
+    const AX = 160, AW = 1300, X = wk => AX + wk / 52 * AW;
+    const ax = G(p, { o: 0 }); path(ax, `M${AX} 700H${AX + AW + 20}m-12 -8l12 8l-12 8`, { stroke: COL.dim, 'stroke-width': 2.5 });
+    [[0, 'операция'], [9, '8–9 нед.'], [26, '6 мес.'], [52, '1 год']].forEach(([v, s]) => { path(ax, `M${X(v)} 694V706`, { stroke: COL.dim, 'stroke-width': 2 }); T(ax, s, { x: X(v), y: 734, size: 17, fill: COL.dim, anchor: 'middle' }); });
+    show(ax, m('cp'));
+    const bar = (a, b, y, c, s, t, out) => { const g0 = G(p, { o: 0 }); mk('rect', { x: X(a), y, width: X(b) - X(a), height: 30, rx: 8, fill: c, 'fill-opacity': .85 }, g0); T(g0, s, { x: X(a) + (out ? 0 : 10), y: out ? y - 10 : y + 22, size: 17, weight: 700, fill: out ? c : COL.board }); show(g0, t); };
+    bar(0, 9, 610, COL.task, 'пассивные движения, защищённая опора', m('cp', .5), true);
+    bar(9, 52, 650, COL.good, 'полная опора; прогрессирующие упражнения до полугода — года', m('cp', 2));
+    txt(p, 'реабилитация медленная', 800, 800, m('cp'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-joint', prompt: ['Какая это операция?'],
+    build: grid([
+      { parts: ['Удаляют разволокнённый хрящ и обломки при щелчках и заклинивании'], ans: ['d'], why: 'Санация и промывание.' },
+      { parts: ['Удаляют воспалённую синовиальную оболочку при ревматоидном артрите'], ans: ['s'], why: 'Синовэктомия.' },
+      { parts: ['Шилом прокалывают кость под дефектом меньше 1,5 см²'], ans: ['m'], why: 'Микропереломы.' },
+      { parts: ['Клетки растят несколько недель и вводят под заплату'], ans: ['c'], why: 'Пересадка хондроцитов.' },
+      { parts: ['Убирают разросшуюся оболочку из влагалищ разгибателей запястья'], ans: ['s'], why: 'Теносиновэктомия — разновидность синовэктомии.' },
+    ], [['d', 'Санация', COL.task], ['s', 'Синовэктомия', '#d9a0b4'], ['m', 'Микропереломы', COL.whole], ['c', 'Хондроциты', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['arthro', 'Артропластика', (m, D) => {
+    const p = panel(0);
+    txt(p, 'артропластика', 800, 56, m('art'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    txt(p, 'любая восстанавливающая операция на суставе — снять боль и вернуть функцию', 800, 98, m('art', .5), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const mini = (x, kind, t0) => {
+      const g0 = G(p, { o: 0 }), B = ANAT.bone, line = mix(B, '#000000', .45);
+      mk('path', { d: `M${x - 40} 150V250Q${x} 280 ${x + 40} 250V150Z`, fill: B, stroke: line, 'stroke-width': 2 }, g0);
+      mk('path', { d: `M${x - 40} 420V${kind === 'exc' ? 340 : 310}Q${x} ${kind === 'exc' ? 326 : 296} ${x + 40} ${kind === 'exc' ? 340 : 310}V420Z`, fill: B, stroke: line, 'stroke-width': 2 }, g0);
+      if (kind === 'exc') for (let i = 0; i < 4; i++) path(g0, `M${x - 30 + i * 18} 290q6 10 0 22t0 22`, { stroke: '#c99a86', 'stroke-width': 3, fill: 'none' });
+      if (kind === 'int') mk('path', { d: `M${x - 44} 268Q${x} 300 ${x + 44} 268L${x + 44} 280Q${x} 312 ${x - 44} 280Z`, fill: '#e7c3ae', stroke: '#b98c78', 'stroke-width': 2 }, g0);
+      if (kind === 'tot') { mk('path', { d: `M${x - 44} 240Q${x} 290 ${x + 44} 240L${x + 44} 256Q${x} 304 ${x - 44} 256Z`, fill: METAL, stroke: '#6f7c85', 'stroke-width': 2 }, g0); mk('rect', { x: x - 46, y: 292, width: 92, height: 18, rx: 4, fill: PLAST, stroke: '#a9a59a', 'stroke-width': 1.5 }, g0); mk('rect', { x: x - 46, y: 310, width: 92, height: 10, fill: METAL, stroke: '#6f7c85', 'stroke-width': 1.5 }, g0); }
+      if (kind === 'hemi') mk('path', { d: `M${x - 44} 240Q${x} 290 ${x + 44} 240L${x + 44} 256Q${x} 304 ${x - 44} 256Z`, fill: METAL, stroke: '#6f7c85', 'stroke-width': 2 }, g0);
+      show(g0, t0);
+    };
+    mini(200, 'exc', m('exc')); mini(540, 'int', m('int')); mini(880, 'tot', m('tot')); mini(1220, 'hemi', m('tot', 2.5));
+    [['резекционная', 'удаляют часть кости, промежуток заполняет рубец; минусы — нестабильность, на бедре укорочение, дисбаланс мышц', 200, 'exc', COL.task],
+     ['интерпозиционная', 'между поверхностями — фасция, сухожилие, силикон или металл; молодым', 540, 'int', COL.real],
+     ['тотальное эндопротезирование', 'заменяют обе поверхности', 880, 'tot', COL.whole], ['однополюсное', 'заменяют одну поверхность', 1220, 'tot', COL.good]].forEach(([h, s, x, k, c], i) => {
+      txt(p, h, x, 470, m(k, i === 3 ? 2.5 : 0), { size: 21, weight: 700, fill: c, anchor: 'middle' });
+      put(para(p, s, x, 506, m(k, i === 3 ? 2.5 : .5), { size: 18, maxW: 310, anchor: 'middle' }), {});
+    });
+    // materials, fixation, minimally invasive, contraindications: a fresh panel
+    const p2 = panel(m('mat'));
+    txt(p2, 'эндопротез: материалы, фиксация, противопоказания', 800, 56, m('mat'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const h = hipTHA(p2, 280, 430, 1.05, m('mat'));
+    h.set({ impl: 1 });
+    pillRow(p2, ['металл', 'полиэтилен', 'керамика'], 280, 150, m('mat', .5), { col: [METAL, PLAST, '#e8d9c4'], size: 19, gap: .5, space: 10 });
+    txt(p2, 'от несвязанных — до связанных конструкций', 280, 760, m('mat', 3), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    prog(q => h.set({ cement: q }), m('fixm'), .8);
+    prog(q => h.set({ cement: 1 - q, porous: q }), m('fixm', 3), .8);
+    infoCard(p2, 560, 110, 480, 220, 'цементная', 'со временем расшатывается — пожилым и малоактивным', COL.task, m('fixm'), { size: 21 });
+    infoCard(p2, 1060, 110, 480, 220, 'бесцементная', 'кость врастает в пористое покрытие — молодым и активным', COL.good, m('fixm', 3), { size: 21 });
+    const mb = (y, cm, c, s, t) => { const g0 = G(p2, { o: 0 }); mk('rect', { x: 620, y, width: cm * 26, height: 26, rx: 8, fill: c }, g0); T(g0, s, { x: 630 + cm * 26, y: y + 21, size: 19, weight: 700, fill: c }); show(g0, t); };
+    txt(p2, 'малоинвазивная операция: разрез', 620, 380, m('mi'), { size: 21, weight: 700, fill: COL.chalk });
+    mb(400, 10, COL.good, '< 10 см', m('mi', .5)); mb(440, 30, COL.dim, '15–30 см', m('mi', 1));
+    put(para(p2, 'меньше боли и быстрее первые движения; через 8–12 недель результаты те же', 620, 500, m('mi', 2), { size: 19, maxW: 900 }), {});
+    infoCard(p2, 560, 560, 980, 300, 'противопоказания (блок 12.10)', 'инфекция в суставе — прежде всего · остеомиелит · общая инфекция · большая потеря кости или опухоль · паралич мышц вокруг сустава · нейропатический сустав · недостаточная мотивация', COL.bad, m('ci'), { size: 22 });
+  }],
+
+  ['fuse', 'Артродез', (m, D) => {
+    const p = panel(0);
+    txt(p, 'артродез — сращение сустава', 800, 56, m('ad'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    infoCard(p, 60, 96, 720, 230, 'когда', 'сильная боль и нестабильность, когда подвижность менее важна; паралич мышц; спасительная операция после неудачного эндопротеза; чаще позвоночник, запястье, большой палец, голеностоп', COL.whole, m('ad'), { size: 20 });
+    // an ankle fused with screws
+    const ak = G(p, { o: 0 }), line = mix(ANAT.bone, '#000000', .45);
+    mk('path', { d: 'M1040 120V330Q1100 360 1160 330V120Z', fill: ANAT.bone, stroke: line, 'stroke-width': 2 }, ak);
+    mk('path', { d: 'M1010 340Q1100 320 1190 340L1230 420H970Z', fill: ANAT.bone, stroke: line, 'stroke-width': 2 }, ak);
+    const gapE = mk('path', { d: 'M1040 334Q1100 352 1160 334', stroke: '#a8d4e0', 'stroke-width': 7, fill: 'none' }, ak);
+    show(ak, m('ad'));
+    const scr = G(p, { o: 0 }); [[1060, 250, 1110, 400], [1140, 250, 1090, 400]].forEach(([a, b, c, d]) => { path(scr, `M${a} ${b}L${c} ${d}`, { stroke: METAL, 'stroke-width': 9 }); path(scr, `M${a} ${b}L${c} ${d}`, { stroke: '#6f7c85', 'stroke-width': 2, 'stroke-dasharray': '3 4' }); });
+    show(scr, m('ap')); prog(q => gapE.setAttribute('opacity', (1 - q).toFixed(2)), m('ap', 1), 1.5);
+    txt(p, 'голеностоп: винты, сращение', 1100, 460, m('ap'), { size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // optimal positions
+    const el = elbowModel(p, { x: 120, y: 540, s: 1.1 }); put(el.g, { o: 0 }); show(el.g, m('pos')); el.set(100);
+    txt(p, 'локоть ведущей руки: 70–90° сгибания', 290, 680, m('pos'), { size: 19, weight: 700, fill: COL.task, anchor: 'middle' });
+    const hp = fig(p, { s: .6, o: 0, pose: { ...STAND, hN: 12, hF: 12, t: 0 } }); plant(hp, 'AN', 620, 640); show(hp.g, m('pos', 2.5));
+    txt(p, 'тазобедренный: 10–15° сгибания', 640, 700, m('pos', 2.5), { size: 19, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'голеностоп: нейтрально', 1100, 500, m('pos', 4.5), { size: 19, weight: 700, fill: COL.task, anchor: 'middle' });
+    // loads move to the joints above and below
+    const ar = G(p, { o: 0 }); path(ar, 'M1260 200C1320 170 1320 110 1270 90m10 16l-10 -16l18 -4', { stroke: COL.bad, 'stroke-width': 4, fill: 'none' }); path(ar, 'M1240 400C1300 430 1320 470 1280 500m4 -18l-4 18l-18 -6', { stroke: COL.bad, 'stroke-width': 4, fill: 'none' }); show(ar, m('minus'));
+    txt(p, 'соседние суставы перегружаются', 1380, 300, m('minus'), { size: 20, weight: 700, fill: COL.bad, anchor: 'middle' });
+    infoCard(p, 60, 720, 1480, 140, 'после операции', 'гипс 6–12 недель; объём и сила — в суставах выше и ниже; опора — после признаков сращения', COL.good, m('ap', 2), { size: 22 });
+  }],
+
+  ['bone', 'Остеосинтез и остеотомия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'остеосинтез и остеотомия', 800, 56, m('orif'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const lb = longBone(p, 80, 220, 620, m('orif'), { r: 28 });
+    lb.set({ line: 'obl', shift: 10 });
+    prog(q => lb.set({ shift: 10 * (1 - q) }), m('orif', 1.5), 1);
+    prog(q => lb.set({ plate: q }), m('orif', 2.5), .8);
+    txt(p, 'открытая репозиция и внутренняя фиксация', 390, 150, m('orif'), { size: 21, weight: 700, fill: COL.whole, anchor: 'middle' });
+    put(para(p, 'штифты, стержни, винты, пластины; фиксаторы иногда удаляют. Главное — стабильность отломков и раннее вставание', 80, 320, m('orif', 3), { size: 19, maxW: 620 }), {});
+    // high tibial osteotomy: the load line (hip → ankle) moves from the inner compartment to the middle of the knee
+    const lg = G(p, { o: 0 }), dfs = mk('defs', {}, lg), Hc = [1200, 110], Ac = [1200, 560];
+    const femE = limbEl(lg, dfs, ANAT.bone, 20, 16, mix(ANAT.bone, '#000000', .45)), tibE = limbEl(lg, dfs, ANAT.bone, 17, 13, mix(ANAT.bone, '#000000', .45));
+    const cond = mk('ellipse', { rx: 44, ry: 18, fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 2 }, lg);
+    const plat = mk('rect', { width: 92, height: 14, rx: 6, fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 2 }, lg);
+    const medial = mk('ellipse', { rx: 22, ry: 9, fill: PAIN, opacity: .7 }, lg);
+    const wedge = mk('path', { fill: '#f0d98a', opacity: 0 }, lg);
+    const load = path(lg, `M${Hc[0]} ${Hc[1]}L${Ac[0]} ${Ac[1]}`, { stroke: COL.task, 'stroke-width': 3.5, 'stroke-dasharray': '10 7' });
+    mk('circle', { cx: Hc[0], cy: Hc[1], r: 14, fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 2 }, lg);
+    const setLeg = k => {
+      const K = [1150 + 50 * k, 340];
+      femE.set(Hc, [K[0], K[1] - 14]); tibE.set([K[0], K[1] + 22], Ac);
+      cond.setAttribute('cx', K[0]); cond.setAttribute('cy', K[1] - 6);
+      plat.setAttribute('x', K[0] - 46); plat.setAttribute('y', K[1] + 8);
+      medial.setAttribute('cx', K[0] + 26); medial.setAttribute('cy', K[1] + 6); medial.setAttribute('opacity', f1(.7 * (1 - k)));
+      wedge.setAttribute('d', `M${K[0] - 14} ${K[1] + 44}L${K[0] + 20} ${K[1] + 36 - 10 * k}L${K[0] + 20} ${K[1] + 44 + 6 * k}Z`); wedge.setAttribute('opacity', f1(k));
+    };
+    setLeg(0); show(lg, m('ost'));
+    prog(q => setLeg(q), m('ost', 4), 1.6);
+    txt(p, 'высокая остеотомия большеберцовой', 1180, 600, m('ost'), { size: 21, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'нагрузка уходит с внутреннего отдела', 1180, 626, m('ost', 4.5), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    lab(p, 'внутренний отдел перегружен', 1020, 260, 1176, 344, PAIN, m('ost', 1));
+    pill(p, 'схема', 1180, 92, m('ost'), { col: COL.dim, size: 17 });
+    infoCard(p, 60, 400, 760, 210, 'остеотомия', 'пересечение и перестановка кости: при артрозе одного отдела колена переносит нагрузку на здоровую часть, уменьшает боль и откладывает эндопротезирование', COL.task, m('ost'), { size: 20 });
+    infoCard(p, 60, 640, 1480, 220, 'после операции', 'главное — контакт фрагментов: сращение до 8–12 недель, полное восстановление — до полугода · движения в суставах выше и ниже, затем вспомогательные и активные упражнения, лёгкое сопротивление · опора защищена 4–6 недель и дольше', COL.good, m('op'), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-impl', prompt: ['Подходит ли это?'],
+    build: grid([
+      { parts: ['Цементный эндопротез пожилому малоактивному пациенту'], ans: ['y'], why: 'Да.' },
+      { parts: ['Эндопротез при активной инфекции сустава'], ans: ['n'], why: 'Нет: инфекция — главное противопоказание.' },
+      { parts: ['Бесцементный эндопротез молодому активному'], ans: ['y'], why: 'Да: реже расшатывается.' },
+      { parts: ['Сразу полная опора после остеотомии в гипсе'], ans: ['n'], why: 'Нет: опора защищена до сращения.' },
+      { parts: ['После артродеза голеностопа — движения в колене и тазобедренном'], ans: ['y'], why: 'Да: объём и сила в суставах выше и ниже.' },
+    ], [['y', 'Подходит', COL.good], ['n', 'Нет', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['После рассечения и удлинения — ранние движения в новом объёме и укрепление антагонистов.', 'w1'],
+     ['Санация и синовэктомия облегчают боль; после восстановления хряща реабилитация медленная, полная опора — к 8–9-й неделе.', 'w2'],
+     ['Эндопротез: цементный — пожилым, бесцементный — активным; инфекция — главное противопоказание.', 'w3'],
+     ['После артродеза, остеосинтеза и остеотомии — движения в соседних суставах и защищённая опора до сращения.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SURG }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-synov', prompt: ['Артроскопическая синовэктомия коленного сустава при ревматоидном артрите. Что в первые дни?'],
+    build: choice([
+      ['В первые сутки — пассивные или вспомогательные движения и установочное напряжение; опора по переносимости, полная — к 10–14-му дню'],
+      ['Неделю полной неподвижности'],
+      ['Сразу бег и прыжки'],
+      ['Максимальная нагрузка, даже если колено отекает'],
+    ], 0, 'После артроскопической синовэктомии движения начинают в первые сутки; избегают нагрузок, усиливающих боль и отёк.',
+    [null, 'Неподвижность не нужна — движения начинают в первые сутки.', 'Слишком большая нагрузка для первых дней.', 'Усиление боли и отёка — сигнал снизить нагрузку.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-fusion', prompt: ['Артродез голеностопа, нога в гипсе 8 недель. Что делать в это время?'],
+    build: choice([
+      ['Поддерживать объём и силу в тазобедренном и коленном суставах; опора — после признаков сращения'],
+      ['Разрабатывать движения в оперированном суставе'],
+      ['Ходить с полной опорой без ограничений'],
+      ['Ничего не делать до снятия гипса'],
+    ], 0, 'В сращённом суставе движений нет: объём и силу поддерживают выше и ниже, опору разрешают после признаков сращения.',
+    [null, 'Цель артродеза — неподвижность сустава; разрабатывать его нельзя.', 'Опора ограничена до сращения.', 'Бездействие ослабит соседние суставы и мышцы.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

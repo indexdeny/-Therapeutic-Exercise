@@ -1,0 +1,270 @@
+{
+  "region": "elderly",
+  "exercises": [
+    {
+      "id": "eld-strength",
+      "ru": "Силовая программа для пожилых",
+      "en": "resistance training for the older adult",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "sit",
+        "stand",
+        "supine"
+      ],
+      "gear": [
+        "weight",
+        "band",
+        "machine",
+        "chair"
+      ],
+      "key": [
+        "8–10 групп мышц",
+        "не меньше 60% максимума",
+        "Борг 12–13 — «довольно легко»"
+      ],
+      "warn": "следить за слабостью от перетренированности и перегрузкой сердца и лёгких",
+      "page": 952,
+      "moments": [
+        {
+          "n": 237,
+          "beat": "res",
+          "mark": "why",
+          "to": "safe"
+        },
+        {
+          "n": 238,
+          "beat": "groups",
+          "mark": "intro",
+          "to": "arm"
+        },
+        {
+          "n": 238,
+          "beat": "int",
+          "mark": "sixty",
+          "to": "load"
+        },
+        {
+          "n": 238,
+          "beat": "proto",
+          "mark": "t",
+          "to": "freq"
+        },
+        {
+          "n": 237,
+          "beat": "equip",
+          "mark": "ch",
+          "to": "mach"
+        },
+        {
+          "n": 239,
+          "beat": "sarc",
+          "mark": "ex"
+        }
+      ]
+    },
+    {
+      "id": "power-train",
+      "ru": "Скоростная силовая тренировка для пожилых",
+      "en": "power training for the older adult",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "strength",
+        "function"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "weight",
+        "machine",
+        "band"
+      ],
+      "key": [
+        "подъём как можно быстрее",
+        "опускание под контролем ~3 секунды",
+        "8 повторений: 45, 60, 75% максимума"
+      ],
+      "warn": "только когда человек уверенно делает по три подхода каждого упражнения",
+      "page": 961,
+      "moments": [
+        {
+          "n": 238,
+          "beat": "pow",
+          "mark": "why",
+          "to": "prog",
+          "shot": 14.7
+        }
+      ]
+    },
+    {
+      "id": "eld-func",
+      "ru": "Функциональные задачи для пожилых",
+      "en": "functional training for the older adult",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "function",
+        "balance"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "chair",
+        "none"
+      ],
+      "key": [
+        "тренировать саму трудную задачу",
+        "стул — с подлокотниками, потом без рук",
+        "на носках, на пятках, боком, спиной"
+      ],
+      "page": 961,
+      "moments": [
+        {
+          "n": 238,
+          "beat": "func",
+          "mark": "ft",
+          "to": "spec"
+        },
+        {
+          "n": 237,
+          "beat": "bal",
+          "mark": "fn"
+        }
+      ]
+    },
+    {
+      "id": "osteo-ex",
+      "ru": "Упражнения при остеопорозе",
+      "en": "exercise for osteoporosis",
+      "joint": [
+        "trunk",
+        "body"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "stand",
+        "sit"
+      ],
+      "gear": [
+        "weight",
+        "ball",
+        "none"
+      ],
+      "key": [
+        "опорные нагрузки 3–5 раз в неделю",
+        "разгибание и осанка у стены",
+        "вместо скручиваний — мяч до нейтрали"
+      ],
+      "warn": "наклон туловища нагружает позвонки сильнее, чем нужно для перелома: без сгибания со скручиванием",
+      "page": 965,
+      "moments": [
+        {
+          "n": 239,
+          "beat": "osteo",
+          "mark": "int",
+          "to": "box"
+        },
+        {
+          "n": 238,
+          "beat": "mod",
+          "mark": "osteo",
+          "shot": 5
+        }
+      ],
+      "thumb": 1
+    },
+    {
+      "id": "weighted-vest",
+      "ru": "Утяжеляющий жилет",
+      "en": "weighted vest",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "weight"
+      ],
+      "key": [
+        "начинать с 5% веса тела",
+        "прибавлять по 1–2% до 10%",
+        "вес — на тазу, без боли"
+      ],
+      "page": 965,
+      "moments": [
+        {
+          "n": 239,
+          "beat": "vest",
+          "mark": "why",
+          "to": "ev"
+        },
+        {
+          "n": 237,
+          "beat": "equip",
+          "mark": "vest"
+        }
+      ]
+    },
+    {
+      "id": "oa-ex",
+      "ru": "Упражнения при остеоартрите",
+      "en": "exercise for osteoarthritis",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "strength",
+        "mobility",
+        "endurance"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "water"
+      ],
+      "key": [
+        "вне обострения — сила и выносливость",
+        "ежедневно — полный объём всех суставов",
+        "аэробика без ударов, бассейн"
+      ],
+      "warn": "в обострение не растягивать и не укреплять через боль; без энергичных повторов в нестабильных суставах",
+      "page": 968,
+      "moments": [
+        {
+          "n": 239,
+          "beat": "oa",
+          "mark": "self",
+          "to": "ex",
+          "shot": 22.2,
+          "crop": [
+            0,
+            80,
+            780,
+            400
+          ]
+        }
+      ]
+    }
+  ]
+}

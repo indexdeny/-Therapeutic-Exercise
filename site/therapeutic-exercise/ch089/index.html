@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Равновесие в разных условиях — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 89, title: 'Равновесие в разных условиях', minutes: 8, language: 'ru', next: '../ch090/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch089/cards.ru.json
+const CARDS_SHORT = {
+  "оптимальная осанка\nравновесие с наименьшими затратами мышечной энергии": "наименьшие затраты энергии",
+  "приспособление\nпрошлый опыт и упреждение меняют ответы": "опыт и упреждение",
+  "нагрузка на позвоночник\nдоказательств, что подъём ногами в целом её снижает, нет; если груз не между ног — сжатие даже больше": "подъём ногами снижает — не доказано",
+  "подъём спиной\nизгибающие моменты и натяжение фасций больше — но, видимо, ниже порога повреждения": "больше — но ниже порога повреждения",
+  "пожилым, если важно равновесие\nколени прямее: полуприсед, подъём с наклоном": "колени прямее: полуприсед, подъём с наклоном",
+  "молодым с сильной четырёхглавой\nподъём в шаге: одна нога впереди — шире площадь опоры": "одна нога впереди — шире опора",
+  "мышцы голеностопа\nуправляют ускорением центра тяжести, но не предотвращают падение": "ускорение, но не падение",
+};
+// cards-short end
+
+const ACT = '#ff5a3c', PRO = COL.whole, REA = COL.task;
+function row(p, x, y, w, s, col, t0, { size = 21, h = 64 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x, y, width: w, height: h, rx: 12, fill: PANEL, stroke: col, 'stroke-width': 2 }, g);
+  mk('circle', { cx: x + 24, cy: y + h / 2, r: 8, fill: col }, g);
+  const t = para(g, s, x + 44, y + h / 2 + size * .35, null, { size, maxW: w - 60 });
+  put(t, { o: 1, y: -(t._h - size * 1.32) / 2 });
+  show(g, t0);
+  return g;
+}
+const sway = (q, lo, hi, k = 1) => lo + (hi - lo) * (.5 + .32 * Math.sin(q * 6.1 * k) + .18 * Math.sin(q * 15.7 * k + 1));
+const env = (T, a, b, rise = .25, fade = .6) => T < a ? 0 : T < a + rise ? (T - a) / rise : T < b ? 1 : T < b + fade ? 1 - (T - b) / fade : 0;
+const MUS_AFTER = { gastroc: 'shN', tibAnt: 'shN', hamstrings: 'thN', quads: 'thN', iliopsoas: 'thN', parasp: 'torso', abdom: 'torso' };
+const muscles = (f, keys) => Object.fromEntries(keys.map(k => [k, muscleOn(f, ...MUSCLE[k], { w: k === 'parasp' || k === 'abdom' || k === 'iliopsoas' ? 10 : 12, after: MUS_AFTER[k] })]));
+// Lifting poses (side view, feet flat): a light and a heavy load expected; lifting styles.
+const LIFT_LIGHT = { ...STAND, t: 52, hd: -8, hN: 100, hF: 100, kN: 70, kF: 70, fN: 22, fF: 22, aN: 60, aF: 56, eN: 8, eF: 8 };
+const LIFT_HEAVY = { ...STAND, t: 48, hd: -8, hN: 112, hF: 112, kN: 92, kF: 92, fN: 28, fF: 28, aN: 56, aF: 52, eN: 8, eF: 8 };
+const STYLES = {
+  squat: { ...STAND, t: 25, hd: -6, hN: 105, hF: 105, kN: 110, kF: 110, fN: 30, fF: 30 },
+  semi: { ...STAND, t: 55, hd: -6, hN: 100, hF: 100, kN: 50, kF: 50, fN: 5, fF: 5 },
+  stoop: { ...STAND, t: 78, hd: -4, hN: 82, hF: 82, kN: 4, kF: 4, fN: 0, fF: 0 },
+  straddle: { ...STAND, t: 22, hd: -6, hN: 72, kN: 76, fN: 26, hF: 2, kF: 32, fF: 28 },
+};
+// A box on the floor with its top-centre at (x, y): returns the group.
+const floorBox = (p, x, y, w = 70, h = 52, col = '#c9a97a') => boxProp(G(p, { x, y: y + h / 2 }), w, h, col);
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Равновесие в разных условиях', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 8 · Урок 89', { x: 800, y: 150, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Равновесие в разных условиях', { x: 800, y: 235, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'стойка · толчок · подъём · ходьба', { x: 800, y: 300, size: 42, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как тело держит равновесие в обычных делах', 800, 385, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 830, S = .66;
+    path(art, `M380 ${GY}H1220`, { stroke: COL.faint, 'stroke-width': 3 });
+    const a = fig(art, { x: 470, y: GY - 182 * S, s: S }), [aax] = onStage(a, 'AN');
+    prog(q => { a.set(LEAN(sway(q, -1, 4, 1.3))); plant(a, 'AN', aax, GY); }, .4, Math.max(3, D - 1), lin);
+    const b = fig(art, { x: 760, y: GY - 182 * S, s: S }), [bax] = onStage(b, 'AN');
+    const bx = carry(art, b, c => boxProp(c, 60, 44), { turn: false, along: 14 });
+    prog(q => { const k = (1 - Math.cos(2 * Math.PI * 1.5 * q)) / 2; b.set({ ...blendPose(STAND, LIFT_HEAVY, k), aN: lerp(30, 70, k), eN: lerp(100, 10, k), aF: lerp(30, 66, k), eF: lerp(100, 10, k) }); plant(b, 'AN', bax, GY); }, .6, Math.max(3, D - 1.2), lin);
+    const w = fig(art, { x: 960, y: GY - 182 * S, s: S });
+    walk(w, .5, Math.max(3, D - 1), { cycles: 3, dx: 200 });
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['stance', 'Спокойная стойка', (m, D) => {
+    const p = panel(0), GY = 800, S = 1.08, X0 = 330;
+    txt(p, 'спокойная стойка: перевёрнутый маятник вокруг голеностопов', 800, 56, m('pend'), { size: 27, weight: 700, anchor: 'middle' });
+    ground(p, 130, 560, GY, m('pend'));
+    const f = fig(p, { x: X0, y: GY - 182 * S, s: S, o: 0 });
+    show(f.g, m('pend'));
+    const M = muscles(f, ['gastroc', 'tibAnt', 'iliopsoas', 'parasp', 'abdom']);
+    const [ax] = onStage(f, 'AN');
+    // the pendulum: a rod from the ankle to the COM
+    const rod = path(p, '', { stroke: COM_C, 'stroke-width': 4, 'stroke-dasharray': '10 6' });
+    const bob = comSym(p, 0, 0, 15);
+    put(rod, { o: 0 }); put(bob, { o: 0 }); show(rod, m('pend', .8)); show(bob, m('pend', .8));
+    mk('circle', { cx: ax, cy: GY - 4, r: 8, fill: COM_C }, p);
+    const T0 = m('pend');
+    prog(q => {
+      const T = T0 + q * (D - T0), lean = sway(q, -1.5, 4, 1.6);
+      f.set(LEAN(lean)); plant(f, 'AN', ax, GY);
+      const [cx, cy] = comOf(f);
+      rod.setAttribute('d', `M${ax} ${GY - 4}L${cx.toFixed(1)} ${cy.toFixed(1)}`); put(bob, { x: cx, y: cy });
+      const on = T > m('ank') ? 1 : 0;
+      M.gastroc.act(on * clamp((lean - 1) / 2, 0, 1)); M.tibAnt.act(on * clamp((.8 - lean) / 1.5, 0, 1));
+      const ton = T > m('ton') ? 1 : 0;
+      M.iliopsoas.act(.75 * ton * (T > m('ilio') ? 1 : 0)); M.parasp.act(.75 * ton * (T > m('par') ? 1 : 0));
+      M.abdom.act(T > m('par') ? .6 * Math.max(0, Math.sin((T - m('par')) * 2.2)) : 0);
+    }, T0, Math.max(3, D - T0), lin);
+    txt(p, 'задача: центр масс — в безопасных пределах опоры', 660, 150, m('pend', 1.5), { size: 22, fill: COL.chalk });
+    txt(p, 'голеностопная стратегия:', 660, 220, m('ank'), { size: 23, weight: 700, fill: COL.good });
+    txt(p, 'подошвенные и тыльные сгибатели,', 680, 254, m('ank', 1), { size: 21, fill: COL.chalk });
+    txt(p, 'мышцы, поворачивающие стопу внутрь и наружу', 680, 284, m('ank', 1.5), { size: 21, fill: COL.chalk });
+    txt(p, 'постоянно (тонически) работают:', 660, 360, m('ton'), { size: 23, weight: 700, fill: ACT });
+    txt(p, '· средняя ягодичная, напрягатель широкой фасции', 680, 400, m('gmed'), { size: 21, fill: COL.chalk });
+    txt(p, '· подвздошно-поясничная — против переразгибания бедра', 680, 440, m('ilio'), { size: 21, fill: COL.chalk });
+    txt(p, '· грудные разгибатели спины (+ иногда мышцы живота)', 680, 480, m('par'), { size: 21, fill: COL.chalk });
+    // a front-view inset for the lateral hip muscles
+    const fr = frontStand(p, 1330, 800, .78, m('gmed'), { pose: { w: 32 } });
+    fr.mus.medL.act(.75); fr.mus.medR.act(.75); fr.mus.addL.act(0); fr.mus.addR.act(0);
+    txt(p, 'вид спереди', 1330, 840, m('gmed'), { size: 18, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 660, 560, 470, 200, 'оптимальная осанка', 'равновесие с наименьшими затратами мышечной энергии', COL.good, m('align'), { size: 21 });
+  }],
+
+  ['pert', 'Толчки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'возмущения в стойке: внутренние и внешние', 800, 56, m('pert'), { size: 27, weight: 700, anchor: 'middle' });
+    // internal: own arm raise — postural muscles first (proactive)
+    const GY = 430, S = .7;
+    const ca = G(p, { o: 0 }); roundBox(ca, 60, 90, 720, 380, PRO, PANEL, 2.5);
+    T(ca, 'внутреннее: своё движение', { x: 420, y: 130, size: 23, weight: 700, fill: PRO, anchor: 'middle' });
+    show(ca, m('pert', 1));
+    const a = fig(p, { x: 200, y: GY - 182 * S, s: S, o: 0 }); show(a.g, m('pert', 1));
+    const MA = muscles(a, ['hamstrings', 'parasp', 'gastroc']);
+    const tl = (x0, y0, first, second, col, t0) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x: x0 + first[0] * 380, y: y0, width: (first[1] - first[0]) * 380, height: 30, rx: 8, fill: mix(first[3], COL.board, .4), stroke: first[3], 'stroke-width': 2 }, g);
+      T(g, first[2], { x: x0 + first[0] * 380 + 10, y: y0 + 22, size: 18, weight: 700, fill: COL.chalk });
+      mk('rect', { x: x0 + second[0] * 380, y: y0 + 46, width: (second[1] - second[0]) * 380, height: 30, rx: 8, fill: mix(second[3], COL.board, .4), stroke: second[3], 'stroke-width': 2 }, g);
+      T(g, second[2], { x: x0 + second[0] * 380 + 10, y: y0 + 68, size: 18, weight: 700, fill: COL.chalk });
+      path(g, `M${x0} ${y0 + 92}H${x0 + 390}`, { stroke: COL.dim, 'stroke-width': 2 });
+      T(g, 'время →', { x: x0 + 390, y: y0 + 114, size: 16, fill: COL.dim, anchor: 'end' });
+      show(g, t0);
+    };
+    tl(360, 250, [.05, .95, 'мышцы туловища и ног', ACT], [.35, .95, 'рука поднимается', PRO], PRO, m('pro'));
+    T(p, 'упреждающий (proactive)', { x: 560, y: 210, size: 22, weight: 700, fill: PRO, anchor: 'middle', o: 0 }); show(p.lastChild, m('pro'));
+    prog(q => { MA.hamstrings.act(q > .08 ? .85 : 0); MA.parasp.act(q > .08 ? .85 : 0); MA.gastroc.act(q > .08 ? .7 : 0); const k = q > .3 ? io(Math.min(1, (q - .3) / .4)) : 0; a.set({ aN: lerp(10, 95, k), eN: 8 }); }, m('pro', .3), 3, lin);
+    // external: a push — the muscles answer afterwards (reactive)
+    const cb = G(p, { o: 0 }); roundBox(cb, 820, 90, 720, 380, REA, PANEL, 2.5);
+    T(cb, 'внешнее: сила, приложенная к телу', { x: 1180, y: 130, size: 23, weight: 700, fill: REA, anchor: 'middle' });
+    show(cb, m('pert', 2.5));
+    const b = fig(p, { x: 960, y: GY - 182 * S, s: S, o: 0 }); show(b.g, m('pert', 2.5));
+    const MB = muscles(b, ['hamstrings', 'parasp', 'gastroc']);
+    const [bax] = onStage(b, 'AN');
+    const push = G(p, { o: 0 }); path(push, 'M880 260H930M916 250L930 260L916 270', { stroke: COL.bad, 'stroke-width': 5 }); show(push, m('re'));
+    tl(1120, 250, [.05, .3, 'толчок', COL.bad], [.38, .95, 'мышцы отвечают', ACT], REA, m('re'));
+    T(p, 'реактивный (reactive)', { x: 1320, y: 210, size: 22, weight: 700, fill: REA, anchor: 'middle', o: 0 }); show(p.lastChild, m('re'));
+    prog(q => { const lean = q < .2 ? 7 * out(q / .2) : 7 * (1 - io(Math.min(1, (q - .2) / .5))); b.set(LEAN(lean)); plant(b, 'AN', bax, GY); const a2 = q > .22 && q < .8 ? .85 : 0; MB.hamstrings.act(a2); MB.parasp.act(a2); MB.gastroc.act(a2); }, m('re', .3), 3, lin);
+    ground(p, 90, 330, GY, m('pert', 1)); ground(p, 850, 1090, GY, m('pert', 2.5));
+    // the tilting platform: toes up, a stretch reflex of the calf, smaller with every repeat
+    const GY2 = 830, S2 = .68, X2 = 330;
+    const cp = G(p, { o: 0 }); roundBox(cp, 60, 500, 1480, 365, EDGE, PANEL, 2);
+    T(cp, 'платформа наклоняется носками вверх (опыт Нашнера)', { x: 90, y: 540, size: 22, weight: 700, fill: COL.chalk });
+    show(cp, m('plat'));
+    const c = fig(p, { x: X2, y: GY2 - 182 * S2, s: S2, o: 0 }); show(c.g, m('plat'));
+    const MC = muscles(c, ['gastroc']);
+    const [cax] = onStage(c, 'AN');
+    const pl = G(p, { x: cax, y: GY2, o: 0 });
+    mk('rect', { x: -150, y: 0, width: 300, height: 16, rx: 6, fill: '#3d4a52', stroke: '#7f909c', 'stroke-width': 3 }, pl);
+    mk('circle', { cx: 0, cy: 8, r: 6, fill: '#7f909c' }, pl);
+    show(pl, m('plat'));
+    const LV = [1, .6, .25, 0], tR = m('nash');
+    prog(q => {
+      const T = tR + q * 10, i = Math.min(3, Math.floor((T - tR) / 2.5)), u = ((T - tR) % 2.5) / 2.5;
+      const tilt = 9 * Math.sin(Math.PI * Math.min(1, u / .7)) * (u < .7 ? 1 : 0), lvl = LV[i] * env(u, .12, .5, .08, .2);
+      put(pl, { x: cax, y: GY2, r: -tilt }); c.set({ ...LEAN(-3 * lvl), fN: tilt - 3 * lvl, fF: tilt - 3 * lvl }); plant(c, 'AN', cax, GY2); MC.gastroc.act(lvl);
+    }, tR, 10, lin);
+    txt(p, 'икроножная растягивается → рефлекторное сокращение', 560, 600, m('nash', .5), { size: 21, weight: 700, fill: ACT });
+    txt(p, 'ложное ощущение: «падаю вперёд»', 560, 636, m('nash', 1.5), { size: 21, fill: COL.chalk });
+    // the calf response per repeat
+    const bx0 = 1000, by0 = 820, bh = 150;
+    const ch = G(p, { o: 0 });
+    path(ch, `M${bx0 - 10} ${by0}H${bx0 + 420}`, { stroke: COL.dim, 'stroke-width': 2 });
+    T(ch, 'ответ икроножной', { x: bx0, y: by0 - bh - 30, size: 20, weight: 700, fill: ACT });
+    show(ch, m('four'));
+    LV.forEach((v, i) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x: bx0 + i * 105, y: by0 - bh * Math.max(v, .02), width: 70, height: bh * Math.max(v, .02), rx: 6, fill: mix(ACT, COL.board, .35), stroke: ACT, 'stroke-width': 2 }, g);
+      T(g, String(i + 1), { x: bx0 + 35 + i * 105, y: by0 + 28, size: 19, fill: COL.dim, anchor: 'middle' });
+      show(g, m('four', i * .5));
+    });
+    T(p, 'повтор', { x: bx0 + 420, y: by0 + 28, size: 17, fill: COL.dim, anchor: 'end', o: 0 }); show(p.lastChild, m('four'));
+    txt(p, '4-й повтор: ответа нет', bx0 + 330, by0 - 60, m('four', 2), { size: 20, weight: 700, fill: COL.good, anchor: 'middle' });
+    pill(p, 'схема', bx0 + 380, by0 - bh - 36, m('four'), { col: COL.dim, size: 17 });
+    infoCard(p, 560, 670, 400, 150, 'приспособление', 'прошлый опыт и упреждение меняют ответы', COL.good, m('exp'), { size: 20 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-prore', prompt: ['Ответ равновесия — упреждающий или реактивный?'],
+    build: grid([
+      { parts: ['Человек сам поднимает руку вперёд'], ans: ['pro'], why: 'Внутреннее возмущение — поправка заранее.' },
+      { parts: ['Его толкнули в плечо'], ans: ['re'], why: 'Внешняя сила — ответ после толчка.' },
+      { parts: ['Платформа под ногами внезапно сдвинулась'], ans: ['re'], why: 'Внешнее возмущение.' },
+      { parts: ['Наклоняется, чтобы поднять сумку'], ans: ['pro'], why: 'Своё движение — упреждающие поправки позы.' },
+      { parts: ['Автобус резко затормозил'], ans: ['re'], why: 'Внешнее возмущение.' },
+    ], [['pro', 'Упреждающий', PRO], ['re', 'Реактивный', REA]], { multi: false, text: true }),
+  }], done) }],
+
+  ['lift', 'Подъём груза', (m, D) => {
+    const p = panel(0), GY = 800, S = 1, X0 = 300;
+    txt(p, 'равновесие при подъёме груза с пола', 800, 56, m('lift'), { size: 27, weight: 700, anchor: 'middle' });
+    txt(p, 'потеря равновесия → падение, поскальзывание, травма спины', 800, 96, m('lift', 2), { size: 21, fill: COL.bad, anchor: 'middle' });
+    ground(p, 100, 620, GY, m('lift'));
+    const f = fig(p, { x: X0, y: GY - 182 * S, s: S, o: 0 });
+    show(f.g, m('lift'));
+    const [ax] = onStage(f, 'AN');
+    // where the hands meet the box in the crouch
+    f.set(LIFT_HEAVY); plant(f, 'AN', ax, GY);
+    const [tx] = onStage(f, 'toeN'), BX = tx + 30, BW = 74, BH = 54;
+    f.set(STAND); plant(f, 'AN', ax, GY);
+    const fb = floorBox(p, BX, GY - BH, BW, BH);
+    put(fb, { o: 0 }); show(fb, m('lift'));
+    const cb = carry(p, f, c => boxProp(c, BW, BH), { turn: false, along: 4 });
+    put(cb, { o: 0 });
+    const cs = comSym(p, 0, 0, 15), trail = path(p, '', { stroke: COM_C, 'stroke-width': 2.5, 'stroke-dasharray': '4 6' });
+    put(cs, { o: 0 }); show(cs, m('com'));
+    const pts = [];
+    const tC = m('com'), tL = m('load'), tU = m('angm', .3);
+    let held = false;
+    prog(q => {
+      const T = tC + q * (D - tC);
+      const down = io(clamp((T - tC) / 1.4, 0, 1)), up = io(clamp((T - tU) / 1.8, 0, 1));
+      const body = up > 0 ? blendPose(LIFT_HEAVY, STAND, up) : blendPose(STAND, LIFT_HEAVY, down);
+      f.set(body); plant(f, 'AN', ax, GY);
+      held = T >= tL;
+      if (up > 0) f.set({ aN: lerp(f.pose.aN, 30, up), eN: lerp(f.pose.eN, 100, up), aF: lerp(f.pose.aF, 30, up), eF: lerp(f.pose.eF, 100, up) });
+      if (down > .6 && up === 0) { const k = (down - .6) / .4; const [wx, wy] = onStage(f, 'WN'); reach(f, 'N', lerp(wx, BX - 4, k), lerp(wy, GY - BH / 2 - 4, k)); reach(f, 'F', lerp(wx, BX + 4, k), lerp(wy, GY - BH / 2 - 4, k)); }
+      put(fb, { o: held ? 0 : 1 }); put(cb, { o: held ? 1 : 0 });
+      let [cx, cy] = comOf(f);
+      if (held) { const s0 = st(cb); cx = (cx + .25 * s0.x) / 1.25; cy = (cy + .25 * s0.y) / 1.25; }
+      put(cs, { x: cx, y: cy });
+      if (T < tU + .2) { pts.push([cx, cy]); if (pts.length > 1) trail.setAttribute('d', 'M' + pts.map(v => v[0].toFixed(1) + ' ' + v[1].toFixed(1)).join('L')); }
+    }, tC, Math.max(3, D - tC), lin);
+    // the momentum backward, set up in advance
+    f.set(LIFT_HEAVY); plant(f, 'AN', ax, GY);
+    const [hx, hy] = onStage(f, 'H'), [c2x, c2y] = comOf(f);
+    f.set(STAND); plant(f, 'AN', ax, GY);
+    const la = G(p, { o: 0 });
+    path(la, `M${c2x - 20} ${c2y - 70}H${c2x - 130}M${c2x - 114} ${c2y - 80}L${c2x - 130} ${c2y - 70}L${c2x - 114} ${c2y - 60}`, { stroke: PRO, 'stroke-width': 5 });
+    T(la, 'линейный импульс назад', { x: c2x - 140, y: c2y - 92, size: 19, weight: 700, fill: PRO, anchor: 'start' });
+    show(la, m('lin'));
+    const aa = G(p, { o: 0 });
+    path(aa, `M${hx - 70} ${hy - 40}A80 80 0 0 1 ${hx + 10} ${hy - 110}`, { stroke: COL.real, 'stroke-width': 5 });
+    path(aa, `M${hx - 4} ${hy - 118}L${hx + 10} ${hy - 110}L${hx - 4} ${hy - 100}`, { stroke: COL.real, 'stroke-width': 5 });
+    T(aa, 'угловой', { x: hx + 20, y: hy - 118, size: 19, weight: 700, fill: COL.real });
+    show(aa, m('angm'));
+    hide(la, m('angm', 2)); hide(aa, m('angm', 2));
+    // the text column
+    row(p, 680, 130, 860, 'наклон и сгибание ног → центр масс вперёд (внутреннее возмущение)', COM_C, m('com'), { h: 70 });
+    row(p, 680, 214, 860, 'груз в руках → центр масс ещё дальше вперёд (внешнее возмущение)', COL.bad, m('load'), { h: 70 });
+    row(p, 680, 298, 860, 'упреждающая поправка: импульс назад — линейный и угловой', PRO, m('apa'), { h: 70 });
+    row(p, 680, 382, 860, 'оценка по опыту: размер, вес, плотность груза', COL.chalk, m('est'), { h: 64 });
+    // heavy vs light: deeper crouch, weight further back
+    const cmp = G(p, { o: 0 });
+    roundBox(cmp, 680, 470, 860, 390, EDGE, PANEL, 2);
+    T(cmp, 'ожидается тяжёлый груз:', { x: 710, y: 512, size: 22, weight: 700, fill: COL.chalk });
+    T(cmp, 'сильнее согнуты бёдра и колени,', { x: 710, y: 548, size: 21, fill: COL.chalk });
+    T(cmp, 'вес смещён назад', { x: 710, y: 580, size: 21, fill: COL.chalk });
+    [[1000, LIFT_LIGHT, 'ожидается лёгкий', COL.dim], [1330, LIFT_HEAVY, 'ожидается тяжёлый', COL.chalk]].forEach(([x, pose, lab, col]) => {
+      path(cmp, `M${x - 130} 820H${x + 130}`, { stroke: COL.faint, 'stroke-width': 3 });
+      const ff = fig(cmp, { x, y: 0, s: .74, pose }); plant(ff, 'AN', x + 40, 820);
+      path(cmp, `M${x + 40} 820V630`, { stroke: COL.dim, 'stroke-width': 2, 'stroke-dasharray': '5 6' });
+      const [hx2] = onStage(ff, 'H');
+      path(cmp, `M${hx2} 700H${x + 40}`, { stroke: COM_C, 'stroke-width': 3 });
+      T(cmp, lab, { x, y: 850, size: 19, weight: 700, fill: col, anchor: 'middle' });
+    });
+    T(cmp, '— насколько таз позади голеностопа', { x: 1060, y: 618, size: 18, fill: COM_C });
+    show(cmp, m('heavy'));
+  }],
+
+  ['mis', 'Ошибка в оценке веса', (m, D) => {
+    const p = panel(0), GY = 760, S = .95;
+    txt(p, 'вес груза оценён неверно', 800, 56, m('mis'), { size: 28, weight: 700, anchor: 'middle' });
+    // overestimated: an empty box, too much momentum — back, then a step back
+    const A = G(p, { o: 0 }); roundBox(A, 60, 100, 720, 770, PRO, PANEL, 2.5);
+    T(A, 'переоценил вес', { x: 420, y: 150, size: 25, weight: 700, fill: PRO, anchor: 'middle' });
+    T(A, 'импульса слишком много → назад → шаг назад', { x: 420, y: 190, size: 20, fill: COL.chalk, anchor: 'middle' });
+    show(A, m('over'));
+    ground(p, 120, 720, GY, m('over'));
+    const a = fig(p, { x: 420, y: GY - 182 * S, s: S, o: 0, pose: LIFT_HEAVY }); show(a.g, m('over'));
+    const [aAF] = onStage(a, 'AF');
+    plant(a, 'AF', aAF, GY);
+    const aBX = onStage(a, 'toeN')[0] + 28;
+    const ab = carry(p, a, c => { mk('rect', { x: -37, y: -27, width: 74, height: 54, rx: 3, fill: 'none', stroke: '#c9a97a', 'stroke-width': 2.5, 'stroke-dasharray': '6 5' }, c); T(c, 'пусто', { x: 0, y: 7, size: 16, fill: '#c9a97a', anchor: 'middle' }); }, { turn: false, along: 4 });
+    put(ab, { o: 0 }); show(ab, m('over'));
+    const UPB = { ...STAND, t: -12, hN: -12, hF: -12 }, BACK = { ...STAND, t: -12, hN: -30, kN: 8, fN: 14, hF: -8, kF: 2, fF: -6 };
+    prog(q => {
+      const k1 = io(clamp(q / .35, 0, 1)), k2 = io(clamp((q - .35) / .4, 0, 1));
+      a.set(k2 > 0 ? blendPose(UPB, BACK, k2) : blendPose(LIFT_HEAVY, UPB, k1)); plant(a, 'AF', aAF, GY);
+      const [hx, hy] = onStage(a, 'H');
+      const tx = k1 < 1 ? lerp(aBX, hx + 50, k1) : hx + 50, ty = k1 < 1 ? lerp(GY - 31, hy - 40, k1) : hy - 40;
+      reach(a, 'N', tx - 4, ty); reach(a, 'F', tx + 4, ty);
+    }, m('over', 1), 2.6, lin);
+    // underestimated: a heavy box, too little momentum — forward, the box back to the floor
+    const B = G(p, { o: 0 }); roundBox(B, 820, 100, 720, 770, REA, PANEL, 2.5);
+    T(B, 'недооценил вес', { x: 1180, y: 150, size: 25, weight: 700, fill: REA, anchor: 'middle' });
+    T(B, 'импульса мало → вперёд → груз снова на полу', { x: 1180, y: 190, size: 20, fill: COL.chalk, anchor: 'middle' });
+    show(B, m('under'));
+    ground(p, 880, 1480, GY, m('under'));
+    const b = fig(p, { x: 1140, y: GY - 182 * S, s: S, o: 0, pose: LIFT_HEAVY }); show(b.g, m('under'));
+    const [bAN] = onStage(b, 'AN');
+    plant(b, 'AN', bAN, GY);
+    const bBX = onStage(b, 'toeN')[0] + 28;
+    const bb = carry(p, b, c => boxProp(c, 74, 54, '#8a6a4a'), { turn: false, along: 4 });
+    put(bb, { o: 0 }); show(bb, m('under'));
+    const TIP = { ...LIFT_HEAVY, t: 62, hN: 110, hF: 110, kN: 70, kF: 70, fN: 20, fF: 20 };
+    prog(q => {
+      const up = Math.sin(Math.PI * clamp(q / .5, 0, 1)), k2 = io(clamp((q - .45) / .4, 0, 1));
+      b.set(k2 > 0 ? blendPose(LIFT_HEAVY, TIP, k2) : blendPose(LIFT_HEAVY, STAND, .25 * up)); plant(b, 'AN', bAN, GY);
+      const ty = GY - 31 - 40 * up * (k2 > 0 ? 0 : 1);
+      reach(b, 'N', bBX - 4, ty); reach(b, 'F', bBX + 4, ty);
+    }, m('under', 1), 2.4, lin);
+    arrowTo(p, [1250, 470], [1330, 510], m('under', 2), { col: COL.bad, w: 4 });
+  }],
+
+  ['style', 'Способ подъёма', (m, D) => {
+    const p = panel(0), GY = 450, S = .7;
+    txt(p, 'способ подъёма и равновесие', 800, 56, m('style'), { size: 28, weight: 700, anchor: 'middle' });
+    const X = [230, 610, 990, 1370];
+    const items = [['присед', 'squat', 'колени согнуты, спина прямая', COL.bad, 'риск потери равновесия выше'],
+      ['полуприсед', 'semi', 'колени прямее', COL.good, 'равновесие надёжнее'],
+      ['наклон', 'stoop', 'колени прямые, туловище наклонено', COL.good, 'равновесие надёжнее'],
+      ['в шаге', 'straddle', 'одна нога впереди', COL.good, 'шире опора']];
+    items.forEach(([name, k, sub, col, tag], i) => {
+      const x = X[i], f = fig(p, { x, y: 0, s: S, o: 0, pose: STYLES[k] });
+      plant(f, 'AN', x, GY);
+      const [tx] = onStage(f, 'toeN'), [fx] = onStage(f, 'AF'), between = k === 'squat' || k === 'straddle';
+      const bxX = between ? (k === 'straddle' ? (fx + onStage(f, 'AN')[0]) / 2 : onStage(f, 'AN')[0] + 4) : tx + 26;
+      const box = floorBox(p, bxX, GY - 40, 56, 40);
+      p.insertBefore(box, f.g);
+      reach(f, 'N', bxX - 4, GY - 42); reach(f, 'F', bxX + 4, GY - 42);
+      const t0 = m('style', .5 + i * .8);
+      ground(p, x - 140, x + 140, GY, t0);
+      put(box, { o: 0 }); show(box, t0); show(f.g, t0);
+      txt(p, name, x, GY + 40, t0, { size: 24, weight: 700, anchor: 'middle' });
+      txt(p, sub, x, GY + 70, t0, { size: 18, fill: COL.dim, anchor: 'middle' });
+      txt(p, tag, x, GY + 100, m('style', 4 + i * .4), { size: 19, weight: 700, fill: col, anchor: 'middle' });
+    });
+    pill(p, 'подъём ногами', X[0], 140, m('leg'), { col: COL.whole, size: 19 });
+    pill(p, 'подъём спиной', X[2], 140, m('leg', 3), { col: COL.whole, size: 19 });
+    pill(p, 'груз между стопами', X[0], 180, m('btw'), { col: COL.good, size: 18 });
+    pill(p, 'груз между стопами', X[3], 180, m('btw'), { col: COL.good, size: 18 });
+    infoCard(p, 60, 600, 720, 250, 'нагрузка на позвоночник', 'доказательств, что подъём ногами в целом её снижает, нет; если груз не между ног — сжатие даже больше', COL.task, m('ev'), { size: 21 });
+    infoCard(p, 820, 600, 720, 130, 'подъём спиной', 'изгибающие моменты и натяжение фасций больше — но, видимо, ниже порога повреждения', COL.whole, m('mom'), { size: 20 });
+    infoCard(p, 820, 750, 720, 100, 'цель — разгрузить поясницу → важнее другие факторы', null, COL.good, m('goal'), { size: 20 });
+  }],
+
+  ['safe', 'Безопасный подъём', (m, D) => {
+    const p = panel(0);
+    txt(p, 'безопасный подъём', 800, 56, m('safe'), { size: 28, weight: 700, anchor: 'middle' });
+    [['нейтральное положение позвоночника', 'neu'], ['медленный подъём', 'slow'], ['груз удобно — по горизонтали и вертикали', 'pos'], ['без бокового наклона и поворота туловища', 'asym'], ['груз полегче', 'light']].forEach(([s, k], i) => {
+      row(p, 60, 110 + i * 82, 720, s, k === 'asym' ? COL.bad : COL.good, m(k), { h: 66, size: 22 });
+    });
+    // an asymmetric lift seen from the front: side bend + twist
+    const GY = 560, fr = frontStand(p, 1180, GY, .95, m('asym'), { pose: { w: 36, lean: 24, tilt: 6, aR: 12, eR: 4, aL: 2, eL: 6 }, muscles: false });
+    ground(p, 960, 1400, GY, m('asym'));
+    const [hx, hy] = fr.at(fr.pts.arms[1][2]);
+    const bx = floorBox(p, hx + 18, GY - 46, 60, 46);
+    put(bx, { o: 0 }); show(bx, m('asym'));
+    cross(p, 1440, 170, 22, m('asym', .8));
+    const rotA = G(p, { o: 0 }), [sx, sy] = fr.at(fr.pts.Sc);
+    path(rotA, `M${sx - 70} ${sy + 30}A70 22 0 0 0 ${sx + 70} ${sy + 30}`, { stroke: COL.bad, 'stroke-width': 4 });
+    path(rotA, `M${sx + 56} ${sy + 40}L${sx + 70} ${sy + 30}L${sx + 54} ${sy + 22}`, { stroke: COL.bad, 'stroke-width': 4 });
+    show(rotA, m('asym', .5));
+    txt(p, 'боковой наклон + поворот →', 1180, 600, m('asym', 1), { size: 21, weight: 700, fill: COL.bad, anchor: 'middle' });
+    txt(p, 'боковые и скручивающие моменты на позвоночник ↑', 1180, 630, m('asym', 1.5), { size: 20, fill: COL.chalk, anchor: 'middle' });
+    // who lifts how, if balance matters
+    const mini = (x, pose, t0) => { const f = fig(p, { x, y: 0, s: .5, o: 0, pose }); plant(f, 'AN', x, 845); show(f.g, t0); ground(p, x - 80, x + 80, 845, t0); return f; };
+    infoCard(p, 60, 540, 720, 140, 'пожилым, если важно равновесие', 'колени прямее: полуприсед, подъём с наклоном', COL.whole, m('old'), { size: 21 });
+    infoCard(p, 60, 700, 720, 160, 'молодым с сильной четырёхглавой', 'подъём в шаге: одна нога впереди — шире площадь опоры', COL.task, m('young'), { size: 21 });
+    mini(1000, STYLES.semi, m('old')); mini(1300, STYLES.straddle, m('young'));
+    txt(p, 'полуприсед', 1000, 878, m('old'), { size: 19, weight: 700, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'в шаге', 1300, 878, m('young'), { size: 19, weight: 700, fill: COL.task, anchor: 'middle' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-lift', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Подъём ногами всегда меньше нагружает поясницу'], ans: ['f'], why: 'Если груз не между ног, сжатие позвоночника при подъёме ногами даже больше.' },
+      { parts: ['Подъём с более прямыми коленями снижает риск потерять равновесие'], ans: ['t'], why: 'Особенно при слабой четырёхглавой мышце.' },
+      { parts: ['Изгибающие моменты на позвоночник больше при подъёме спиной'], ans: ['t'], why: 'Больше — но, видимо, ниже порога повреждения.' },
+      { parts: ['Подъём с поворотом и боковым наклоном допустим, если груз лёгкий'], ans: ['f'], why: 'Асимметричного подъёма избегают: растут боковые и скручивающие моменты.' },
+      { parts: ['Молодым с сильными бёдрами подъём в шаге снижает риск потери равновесия'], ans: ['t'], why: 'Одна нога впереди — шире площадь опоры.' },
+    ], [['t', 'Верно', COL.good], ['f', 'Неверно', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['gait', 'Ходьба', (m, D) => {
+    const p = panel(0);
+    txt(p, 'равновесие при ходьбе', 800, 56, m('gait'), { size: 28, weight: 700, anchor: 'middle' });
+    // footprints from above: the COG weaves between the feet, inside the base only in double support
+    const fp = G(p, { x: 260, y: 470, s: .9, o: 0 }), N = 6, SL = 110, FX = 42;
+    const bos = mk('path', { fill: mix(BOS_C, COL.board, .8), stroke: BOS_C, 'stroke-width': 3 }, fp);
+    const prints = [];
+    for (let i = 0; i < N; i++) { const side = i % 2 ? 1 : -1, g = G(fp, { x: side * FX, y: 300 - i * SL }); mk('path', { d: footD(side), fill: mix('#cfc8b8', COL.board, .4), stroke: '#cfc8b8', 'stroke-width': 2.5 }, g); prints.push({ g, side, x: side * FX, y: 300 - i * SL }); }
+    const pathG = mk('path', { fill: 'none', stroke: COM_C, 'stroke-width': 2, 'stroke-dasharray': '5 6' }, fp);
+    const cog = comSym(fp, 0, 0, 14);
+    let d = '';
+    const cogAt = u => [-12 * Math.cos(Math.PI * (u - .4)), 300 - u * SL - 40];
+    for (let i = 0; i <= 80; i++) { const [x, y] = cogAt(i / 80 * (N - 2.5) + .5); d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); }
+    pathG.setAttribute('d', d);
+    show(fp, m('gait'));
+    const ptsOf = pr => FOOT_PTS.map(([u, v]) => [pr.x + u * pr.side, pr.y + v]);
+    const tG = m('gait');
+    prog(q => {
+      const u = .5 + q * (N - 2.5), i = Math.floor(u), ph = u - i;   // step i: from print i to print i+1
+      const dbl = ph > .85;
+      const P = dbl ? ptsOf(prints[i]).concat(ptsOf(prints[i + 1])) : ptsOf(prints[i]);
+      const H = hull(P);
+      bos.setAttribute('d', polyD(H));
+      const [x, y] = cogAt(u);
+      put(cog, { x, y });
+      const inside = inPoly(H, x, y);
+      bos.setAttribute('stroke', inside ? BOS_C : COL.bad); bos.setAttribute('fill', mix(inside ? BOS_C : COL.bad, COL.board, .8));
+      prints.forEach((pr, j) => pr.g.setAttribute('opacity', j === i || (dbl && j === i + 1) ? 1 : .35));
+    }, tG, Math.max(4, D - tG), lin);
+    txt(p, 'центр тяжести вне опоры —', 260, 810, m('gait', 1), { size: 21, weight: 700, fill: COL.bad, anchor: 'middle' });
+    txt(p, 'кроме двойной опоры', 260, 840, m('gait', 1), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, '«падаем вперёд — и не падаем»', 260, 110, m('fall'), { size: 22, weight: 700, fill: COM_C, anchor: 'middle' });
+    // side view: who holds what
+    const GY = 640, S = .95, f = fig(p, { x: 640, y: GY - 182 * S, s: S, o: 0 });
+    ground(p, 560, 1120, GY, m('hat'));
+    show(f.g, m('hat'));
+    const M = muscles(f, ['parasp', 'abdom', 'quads', 'tibAnt', 'gastroc']);
+    walk(f, m('hat', .3), Math.max(4, D - m('hat') - .5), { cycles: Math.max(3, Math.round((D - m('hat')) / 1.2)), dx: 330 });
+    prog(q => {
+      const T = m('hat', .3) + q * Math.max(4, D - m('hat') - .5);
+      const [, ty] = onStage(f, 'toeN'), swing = ty < GY - 4;
+      M.parasp.act(T > m('trunk') ? .7 : 0); M.abdom.act(T > m('trunk') ? .5 : 0);
+      M.quads.act(T > m('ext') && !swing ? .8 : 0);
+      M.tibAnt.act(T > m('toe') && swing ? .95 : 0); M.gastroc.act(T > m('ank') && !swing ? .5 : 0);
+    }, m('hat', .3), Math.max(4, D - m('hat') - .5), lin);
+    txt(p, 'голова, руки, туловище — в равновесии, тело вертикально', 840, 120, m('hat'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    row(p, 560, 690, 520, 'туловище и бедро: сгибатели/разгибатели, отводящие/приводящие', ACT, m('trunk'), { h: 70, size: 19 });
+    row(p, 560, 770, 520, 'разгибатели ног — не дают «сложиться»', ACT, m('ext'), { h: 56, size: 19 });
+    infoCard(p, 1140, 150, 400, 170, 'мышцы голеностопа', 'управляют ускорением центра тяжести, но не предотвращают падение', COL.task, m('ank'), { size: 19 });
+    // toe clearance in swing
+    const tc = G(p, { o: 0 });
+    roundBox(tc, 1140, 350, 400, 500, EDGE, PANEL, 2);
+    T(tc, 'фаза переноса', { x: 1340, y: 392, size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    path(tc, 'M1170 760H1510', { stroke: COL.faint, 'stroke-width': 4 });
+    const shank = mk('path', { d: 'M1290 470L1320 700', stroke: '#d8d1c1', 'stroke-width': 30, 'stroke-linecap': 'round' }, tc);
+    mk('path', { d: 'M1300 712C1360 716 1420 724 1470 738C1478 742 1474 748 1462 748L1300 744C1288 742 1286 718 1300 712Z', fill: '#d8d1c1', stroke: '#8f877a', 'stroke-width': 2 }, tc);
+    const ta = muscleEl(tc, { rest: 230, w: 13 }); ta.set([1335, 500], [1360, 718]); ta.act(.95);
+    path(tc, 'M1488 748V760', { stroke: COL.good, 'stroke-width': 3 });
+    path(tc, 'M1480 748H1496M1480 760H1496', { stroke: COL.good, 'stroke-width': 2 });
+    T(tc, '≈ 0,55 см', { x: 1500, y: 800, size: 24, weight: 700, fill: COL.good, anchor: 'end' });
+    T(tc, 'тыльные сгибатели стопы', { x: 1340, y: 440, size: 19, weight: 700, fill: ACT, anchor: 'middle' });
+    T(tc, 'включаются заранее', { x: 1340, y: 830, size: 19, fill: COL.chalk, anchor: 'middle' });
+    show(tc, m('toe'));
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Стойка — перевёрнутый маятник: голеностопная стратегия + постоянно работающие мышцы бедра и спины.', 'w1'],
+     ['Своё движение — упреждающий ответ, внешний толчок — реактивный; с повторами ответ слабеет.', 'w2'],
+     ['Подъём: импульс назад под ожидаемый вес; безопаснее нейтральная спина, медленно, без поворота.', 'w3'],
+     ['Ходьба: центр масс почти всегда вне опоры; тыльные сгибатели поднимают носок.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-empty', prompt: ['Пациент берётся за большую коробку, уверенный, что она тяжёлая, — а она пустая. Что вероятнее всего произойдёт?'],
+    build: choice([
+      ['Его качнёт назад, и он сделает шаг назад'],
+      ['Коробка быстро вернётся на пол'],
+      ['Ничего: импульс подстроится в момент подъёма'],
+      ['Его качнёт вперёд'],
+    ], 0, 'Вес переоценён — импульс назад слишком велик: тело заваливается назад, и человек обычно делает шаг назад.',
+    [null, 'Так бывает, когда вес недооценён.', 'Импульс задаётся заранее, по ожиданию; ошибка проявится.', 'Вперёд качает при недооценке веса.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-basket', prompt: ['Пожилой пациентке с неуверенным равновесием нужно поднять с пола корзину с бельём. Что безопаснее, по материалу урока?'],
+    build: choice([
+      ['Полуприсед, колени прямее; корзину ближе, медленно, без поворота'],
+      ['Глубокий присед с прямой спиной'],
+      ['Быстрым рывком, чтобы меньше времени провести в наклоне'],
+      ['Поднять сбоку с поворотом туловища'],
+    ], 0, 'Когда важно равновесие, безопаснее способы с более прямыми коленями; плюс нейтральная спина, медленный подъём, груз близко и без асимметрии.',
+    [null, 'С сильно согнутыми коленями равновесие теряется чаще — особенно при слабой четырёхглавой.', 'Медленный подъём — один из факторов безопасности.', 'Асимметричный подъём увеличивает боковые и скручивающие моменты.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

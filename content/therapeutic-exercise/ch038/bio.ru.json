@@ -1,0 +1,45 @@
+[
+ {
+  "beat": "er",
+  "fig": null,
+  "joint": "shRot",
+  "from": "lever",
+  "level": "full",
+  "load": {
+   "type": "hand",
+   "at": 0.55,
+   "w": 1
+  },
+  "muscle": null,
+  "bars": [
+   1060,
+   196
+  ],
+  "enabled": true,
+  "keep": [
+   30,
+   45,
+   90
+  ],
+  "why": "«Локоть согнут на девяносто градусов: предплечье служит рычагом»",
+  "gon": "compact"
+ },
+ {
+  "beat": "ir",
+  "fig": null,
+  "joint": "shRot",
+  "level": "forces",
+  "load": {
+   "type": "hand",
+   "at": 0.55,
+   "w": 1
+  },
+  "muscle": null,
+  "enabled": true,
+  "keep": [
+   45,
+   90
+  ],
+  "why": "«Плечо отведено так, чтобы грудная клетка не мешала движению: сначала на сорок пять градусов, потом на девяносто»"
+ }
+]

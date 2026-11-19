@@ -1,0 +1,1411 @@
+{
+  "chapter": 4,
+  "terms": [
+    {
+      "id": "stretching",
+      "ru": "Растяжка",
+      "en": "stretching",
+      "def": "Любой лечебный приём, который удлиняет адаптивно укоротившиеся ткани и увеличивает гибкость и объём движений: сила в конце доступного объёма проводит сустав чуть дальше.",
+      "page": 83,
+      "moments": [
+        {
+          "n": 28,
+          "beat": "str",
+          "mark": "def",
+          "to": "seq"
+        },
+        {
+          "n": 29,
+          "beat": "stretch",
+          "mark": "end",
+          "to": "src"
+        }
+      ],
+      "see": [
+        "passive-stretching",
+        "self-stretching",
+        "static-stretching"
+      ]
+    },
+    {
+      "id": "dynamic-flexibility",
+      "ru": "Динамическая гибкость",
+      "en": "dynamic flexibility",
+      "def": "Насколько активное сокращение мышц проводит сустав через объём движений.",
+      "page": 83,
+      "moments": [
+        {
+          "n": 28,
+          "beat": "flex",
+          "mark": "dyn"
+        }
+      ],
+      "see": [
+        "passive-flexibility",
+        "flexibility"
+      ]
+    },
+    {
+      "id": "passive-flexibility",
+      "ru": "Пассивная гибкость",
+      "en": "passive flexibility",
+      "def": "Насколько сустав можно провести через объём пассивно. Это необходимое условие динамической гибкости, но не гарантия её.",
+      "page": 83,
+      "moments": [
+        {
+          "n": 28,
+          "beat": "flex",
+          "mark": "pas",
+          "to": "pre"
+        }
+      ],
+      "see": [
+        "dynamic-flexibility"
+      ]
+    },
+    {
+      "id": "hypomobility",
+      "ru": "Гипомобильность",
+      "en": "hypomobility",
+      "def": "Уменьшение подвижности суставов: из-за иммобилизации, боли, малоподвижности, неправильных поз, паралича, мышечного дисбаланса, травм, болезней суставов.",
+      "page": 83,
+      "moments": [
+        {
+          "n": 28,
+          "beat": "hypo",
+          "mark": "hypo",
+          "to": "trauma"
+        }
+      ],
+      "see": [
+        "hypermobility",
+        "contracture"
+      ]
+    },
+    {
+      "id": "contracture",
+      "ru": "Контрактура",
+      "en": "contracture",
+      "def": "Адаптивное укорочение мышечно-сухожильной единицы и других тканей вокруг сустава, которое сильно сопротивляется растяжению. Называют по стороне укороченных тканей.",
+      "page": 83,
+      "moments": [
+        {
+          "n": 28,
+          "beat": "contr",
+          "mark": "def",
+          "to": "terms"
+        },
+        {
+          "n": 28,
+          "beat": "name",
+          "mark": "side",
+          "to": "vs"
+        },
+        {
+          "n": 101,
+          "beat": "cond",
+          "mark": "contr"
+        }
+      ],
+      "see": [
+        "myostatic-contracture",
+        "fibrotic-contracture",
+        "hypomobility",
+        "adhesion"
+      ]
+    },
+    {
+      "id": "myostatic-contracture",
+      "ru": "Миостатическая контрактура",
+      "en": "myostatic contracture",
+      "def": "Укорочение мышечно-сухожильной единицы без болезни самой мышцы: саркомеров стало меньше. Уходит за сравнительно короткое время растяжки.",
+      "page": 84,
+      "moments": [
+        {
+          "n": 28,
+          "beat": "types",
+          "mark": "myo"
+        }
+      ],
+      "see": [
+        "pseudomyostatic-contracture",
+        "contracture"
+      ]
+    },
+    {
+      "id": "pseudomyostatic-contracture",
+      "ru": "Псевдомиостатическая контрактура",
+      "en": "pseudomyostatic contracture",
+      "def": "Мышца будто постоянно сокращена — из-за спастичности, ригидности, спазма, защитного напряжения или боли. После нервно-мышечного торможения удлиняется полностью.",
+      "page": 84,
+      "moments": [
+        {
+          "n": 28,
+          "beat": "types",
+          "mark": "pseudo",
+          "to": "inh"
+        }
+      ],
+      "see": [
+        "myostatic-contracture"
+      ]
+    },
+    {
+      "id": "arthrogenic-contracture",
+      "ru": "Артрогенная контрактура",
+      "en": "arthrogenic contracture",
+      "def": "Контрактура из-за изменений внутри сустава: спаек, разрастания синовиальной оболочки, выпота, неровностей хряща, остеофитов.",
+      "page": 84,
+      "moments": [
+        {
+          "n": 28,
+          "beat": "types2",
+          "mark": "arth"
+        }
+      ],
+      "see": [
+        "periarticular-contracture"
+      ]
+    },
+    {
+      "id": "periarticular-contracture",
+      "ru": "Периартикулярная контрактура",
+      "en": "periarticular contracture",
+      "def": "Контрактура, при которой теряют подвижность капсула и ткани, прикрепляющиеся к суставу.",
+      "page": 84,
+      "moments": [
+        {
+          "n": 28,
+          "beat": "types2",
+          "mark": "peri"
+        }
+      ],
+      "see": [
+        "arthrogenic-contracture"
+      ]
+    },
+    {
+      "id": "fibrotic-contracture",
+      "ru": "Фиброзная контрактура",
+      "en": "fibrotic contracture",
+      "def": "В мышце и вокруг сустава разрастается фиброзная ткань: растянуть можно, но вернуть оптимальную длину трудно. Чем она дольше, тем вероятнее станет необратимой.",
+      "page": 84,
+      "moments": [
+        {
+          "n": 28,
+          "beat": "types2",
+          "mark": "fib"
+        }
+      ],
+      "see": [
+        "irreversible-contracture"
+      ]
+    },
+    {
+      "id": "irreversible-contracture",
+      "ru": "Необратимая контрактура",
+      "en": "irreversible contracture",
+      "def": "Мышцу и ткани заместили рубец, плотные спайки или кость; без операции её не исправить.",
+      "page": 84,
+      "moments": [
+        {
+          "n": 28,
+          "beat": "types2",
+          "mark": "irr"
+        }
+      ],
+      "see": [
+        "fibrotic-contracture"
+      ]
+    },
+    {
+      "id": "selective-stretching",
+      "ru": "Избирательная растяжка",
+      "en": "selective stretching",
+      "def": "Одни мышцы растягивают, а другим позволяют немного укоротиться ради функции — обычно при стойком параличе: например, ради устойчивого сидения или тенодезного захвата.",
+      "page": 85,
+      "moments": [
+        {
+          "n": 28,
+          "beat": "sel",
+          "mark": "sel",
+          "to": "ten"
+        }
+      ],
+      "see": [
+        "tenodesis"
+      ]
+    },
+    {
+      "id": "tenodesis",
+      "ru": "Тенодезный захват",
+      "en": "tenodesis grasp",
+      "def": "Захват без работы мышц кисти: при разгибании запястья немного укороченные длинные сгибатели пальцев натягиваются, и пальцы сгибаются сами.",
+      "page": 85,
+      "moments": [
+        {
+          "n": 28,
+          "beat": "sel",
+          "mark": "ten"
+        }
+      ],
+      "see": [
+        "selective-stretching"
+      ]
+    },
+    {
+      "id": "overstretching",
+      "ru": "Перерастяжение",
+      "en": "overstretching",
+      "def": "Растяжение далеко за нормальную длину мышцы и объём сустава; его итог — гипермобильность.",
+      "page": 85,
+      "moments": [
+        {
+          "n": 28,
+          "beat": "over",
+          "mark": "over"
+        }
+      ],
+      "see": [
+        "hypermobility"
+      ]
+    },
+    {
+      "id": "hypermobility",
+      "ru": "Гипермобильность",
+      "en": "hypermobility",
+      "def": "Подвижность больше нормы. Сильным спортсменам иногда нужна, но если связки и мышцы не удерживают сустав, ведёт к нестабильности, боли и травмам.",
+      "page": 85,
+      "moments": [
+        {
+          "n": 28,
+          "beat": "over",
+          "mark": "over",
+          "to": "instab"
+        }
+      ],
+      "see": [
+        "hypomobility",
+        "overstretching"
+      ]
+    },
+    {
+      "id": "passive-stretching",
+      "ru": "Пассивная растяжка",
+      "en": "passive stretching",
+      "def": "Растяжка, при которой пациент максимально расслаблен, а силу прикладывают руки терапевта или прибор.",
+      "page": 85,
+      "moments": [
+        {
+          "n": 29,
+          "beat": "stretch",
+          "mark": "pas"
+        }
+      ],
+      "see": [
+        "assisted-stretching",
+        "self-stretching"
+      ]
+    },
+    {
+      "id": "assisted-stretching",
+      "ru": "Ассистированная растяжка",
+      "en": "assisted stretching",
+      "def": "Растяжка, при которой пациент помогает движению, а терапевт или прибор добавляет силу.",
+      "page": 85,
+      "moments": [
+        {
+          "n": 29,
+          "beat": "stretch",
+          "mark": "ass"
+        }
+      ],
+      "see": [
+        "passive-stretching"
+      ]
+    },
+    {
+      "id": "self-stretching",
+      "ru": "Самостоятельная растяжка",
+      "en": "self-stretching",
+      "def": "Растяжка, которую пациент после обучения выполняет сам: дома, медленно, после разминки, на устойчивой опоре, по письменной инструкции.",
+      "page": 85,
+      "moments": [
+        {
+          "n": 29,
+          "beat": "stretch",
+          "mark": "self"
+        },
+        {
+          "n": 34,
+          "beat": "self",
+          "mark": "self",
+          "to": "w3"
+        },
+        {
+          "n": 98,
+          "beat": "self",
+          "mark": "self",
+          "to": "noeq"
+        }
+      ],
+      "see": [
+        "passive-stretching",
+        "static-stretching",
+        "buoyancy-assisted"
+      ]
+    },
+    {
+      "id": "muscle-energy-techniques",
+      "ru": "Мышечно-энергетические техники",
+      "en": "muscle energy techniques",
+      "alt": [
+        "постизометрическая релаксация"
+      ],
+      "def": "Приёмы из остеопатии: пациент дозированно напрягает мышцу против сопротивления специалиста; их называют и постизометрической релаксацией.",
+      "page": 85,
+      "moments": [
+        {
+          "n": 29,
+          "beat": "other",
+          "mark": "met"
+        },
+        {
+          "n": 42,
+          "beat": "other",
+          "mark": "me"
+        },
+        {
+          "n": 141,
+          "beat": "rib",
+          "mark": "post",
+          "to": "ant"
+        }
+      ],
+      "see": [
+        "hold-relax"
+      ]
+    },
+    {
+      "id": "soft-tissue-mobilization",
+      "ru": "Мобилизация мягких тканей",
+      "en": "soft tissue mobilization",
+      "def": "Ручные приёмы для мягких тканей: фрикционный массаж, миофасциальный релиз, акупрессура, работа с триггерными точками и специальными инструментами.",
+      "page": 86,
+      "moments": [
+        {
+          "n": 29,
+          "beat": "other",
+          "mark": "stm"
+        },
+        {
+          "n": 37,
+          "beat": "other",
+          "mark": "stm"
+        }
+      ]
+    },
+    {
+      "id": "neural-tissue-mobilization",
+      "ru": "Мобилизация нервной ткани",
+      "en": "neural tissue mobilization",
+      "def": "Приёмы, которые максимально смещают нерв при минимальном растяжении — когда спайки или сдавление мешают ему скользить. Без симптомов, медленно и ритмично; главная ошибка — слишком много и слишком быстро.",
+      "page": 86,
+      "moments": [
+        {
+          "n": 29,
+          "beat": "other",
+          "mark": "neur"
+        },
+        {
+          "n": 121,
+          "beat": "princ",
+          "mark": "goal",
+          "to": "err"
+        }
+      ],
+      "see": [
+        "neural-sliding",
+        "neural-glide",
+        "neurodynamic-tests"
+      ]
+    },
+    {
+      "id": "dynamic-stretching",
+      "ru": "Динамическая растяжка",
+      "en": "dynamic stretching",
+      "def": "Контролируемые медленные движения через активный объём с малой силой. Перед силовой работой может улучшить результат, в отличие от долгой статической растяжки.",
+      "page": 87,
+      "moments": [
+        {
+          "n": 29,
+          "beat": "perf",
+          "mark": "dyn"
+        },
+        {
+          "n": 34,
+          "beat": "ball",
+          "mark": "dyn"
+        }
+      ],
+      "see": [
+        "static-stretching",
+        "ballistic-stretching"
+      ]
+    },
+    {
+      "id": "stretch-tolerance",
+      "ru": "Переносимость растяжения",
+      "en": "stretch tolerance",
+      "def": "Насколько человек терпит ощущение растяжения; её рост может увеличить объём даже без изменения строения мышцы.",
+      "page": 86,
+      "moments": [
+        {
+          "n": 29,
+          "beat": "out",
+          "mark": "tol"
+        }
+      ]
+    },
+    {
+      "id": "elasticity",
+      "ru": "Упругость",
+      "en": "elasticity",
+      "def": "Свойство ткани сразу возвращаться к прежней длине после короткого растяжения.",
+      "page": 88,
+      "moments": [
+        {
+          "n": 30,
+          "beat": "resp",
+          "mark": "el"
+        }
+      ],
+      "see": [
+        "viscoelasticity",
+        "plasticity"
+      ]
+    },
+    {
+      "id": "viscoelasticity",
+      "ru": "Вязкоупругость",
+      "en": "viscoelasticity",
+      "def": "Свойство соединительной ткани: сначала сопротивляется, при длительной силе медленно удлиняется, а потом постепенно возвращается.",
+      "page": 88,
+      "moments": [
+        {
+          "n": 30,
+          "beat": "resp",
+          "mark": "ve",
+          "to": "pl"
+        },
+        {
+          "n": 31,
+          "beat": "rate",
+          "mark": "rate",
+          "to": "slow"
+        }
+      ],
+      "see": [
+        "elasticity",
+        "plasticity",
+        "creep"
+      ]
+    },
+    {
+      "id": "plasticity",
+      "ru": "Пластичность",
+      "en": "plasticity",
+      "def": "Свойство ткани сохранять новую, большую длину после того, как силу сняли.",
+      "page": 88,
+      "moments": [
+        {
+          "n": 30,
+          "beat": "resp",
+          "mark": "pl",
+          "to": "who"
+        }
+      ],
+      "see": [
+        "elasticity",
+        "plastic-range"
+      ]
+    },
+    {
+      "id": "collagen",
+      "ru": "Коллаген",
+      "en": "collagen",
+      "def": "Волокна соединительной ткани, которые дают прочность и жёсткость: рвутся, удлинившись меньше чем на 10 %, но в пять раз прочнее эластина.",
+      "page": 88,
+      "moments": [
+        {
+          "n": 30,
+          "beat": "fibers",
+          "mark": "col"
+        },
+        {
+          "n": 30,
+          "beat": "nums",
+          "mark": "c10",
+          "to": "c5"
+        }
+      ],
+      "see": [
+        "elastin",
+        "ground-substance"
+      ]
+    },
+    {
+      "id": "elastin",
+      "ru": "Эластин",
+      "en": "elastin",
+      "def": "Волокна, которые дают растяжимость: сильно удлиняются при малой нагрузке, а при большой внезапно рвутся.",
+      "page": 88,
+      "moments": [
+        {
+          "n": 30,
+          "beat": "fibers",
+          "mark": "ela"
+        },
+        {
+          "n": 30,
+          "beat": "nums",
+          "mark": "c10"
+        }
+      ],
+      "see": [
+        "collagen"
+      ]
+    },
+    {
+      "id": "ground-substance",
+      "ru": "Основное вещество",
+      "en": "ground substance",
+      "def": "Гель с водой между волокнами соединительной ткани: сопротивляется сжатию, уменьшает трение и не даёт волокнам слишком сильно сшиваться.",
+      "page": 88,
+      "moments": [
+        {
+          "n": 30,
+          "beat": "fibers",
+          "mark": "gs"
+        }
+      ],
+      "see": [
+        "collagen"
+      ]
+    },
+    {
+      "id": "stress-strain-curve",
+      "ru": "Кривая «напряжение — деформация»",
+      "en": "stress-strain curve",
+      "def": "График того, как ткань удлиняется под нагрузкой: пальцевая зона, упругая зона до предела упругости, пластическая зона и разрыв.",
+      "page": 89,
+      "moments": [
+        {
+          "n": 30,
+          "beat": "ss",
+          "mark": "ss",
+          "to": "types"
+        }
+      ],
+      "see": [
+        "mechanical-stress",
+        "strain",
+        "toe-region",
+        "plastic-range"
+      ]
+    },
+    {
+      "id": "strain",
+      "ru": "Деформация",
+      "en": "strain",
+      "def": "Насколько ткань удлинилась под нагрузкой.",
+      "page": 89,
+      "moments": [
+        {
+          "n": 30,
+          "beat": "ss",
+          "mark": "eps"
+        }
+      ],
+      "see": [
+        "mechanical-stress",
+        "stress-strain-curve"
+      ]
+    },
+    {
+      "id": "toe-region",
+      "ru": "Пальцевая зона",
+      "en": "toe region",
+      "def": "Начало кривой «напряжение — деформация»: волнистые коллагеновые волокна выпрямляются при малой силе. Здесь проходит большая часть повседневных движений.",
+      "page": 89,
+      "moments": [
+        {
+          "n": 30,
+          "beat": "toe",
+          "mark": "toe"
+        }
+      ],
+      "see": [
+        "elastic-range"
+      ]
+    },
+    {
+      "id": "elastic-range",
+      "ru": "Упругая зона",
+      "en": "elastic range",
+      "alt": [
+        "предел упругости"
+      ],
+      "def": "Линейная часть кривой: напряжение и деформация растут пропорционально; если снять нагрузку здесь, ткань вернётся к прежней длине. Кончается пределом упругости.",
+      "page": 89,
+      "moments": [
+        {
+          "n": 30,
+          "beat": "toe",
+          "mark": "lin",
+          "to": "lim"
+        }
+      ],
+      "see": [
+        "toe-region",
+        "plastic-range",
+        "stiffness"
+      ]
+    },
+    {
+      "id": "plastic-range",
+      "ru": "Пластическая зона",
+      "en": "plastic range",
+      "alt": [
+        "предел прочности"
+      ],
+      "def": "Часть кривой за пределом упругости: рвутся связи и волокна, и после разгрузки ткань остаётся длиннее. Кончается пределом прочности, за ним — разрыв.",
+      "page": 89,
+      "moments": [
+        {
+          "n": 30,
+          "beat": "plast",
+          "mark": "pl",
+          "to": "num"
+        }
+      ],
+      "see": [
+        "elastic-range",
+        "plasticity"
+      ]
+    },
+    {
+      "id": "stiffness",
+      "ru": "Модуль упругости",
+      "en": "Young's modulus (stiffness)",
+      "alt": [
+        "жёсткость ткани"
+      ],
+      "def": "Наклон упругой зоны кривой: чем он круче, тем жёстче ткань и тем меньше она удлиняется при той же силе. Контрактуры и рубцы жёстче нормы.",
+      "page": 90,
+      "moments": [
+        {
+          "n": 30,
+          "beat": "stiff",
+          "mark": "k",
+          "to": "con"
+        }
+      ],
+      "see": [
+        "elastic-range"
+      ]
+    },
+    {
+      "id": "creep",
+      "ru": "Ползучесть",
+      "en": "creep",
+      "def": "Если плавно увеличить нагрузку и удерживать её, ткань продолжает медленно удлиняться; нагрев усиливает ползучесть. На ней основаны длительные растяжения.",
+      "page": 90,
+      "moments": [
+        {
+          "n": 31,
+          "beat": "creep",
+          "mark": "creep",
+          "to": "rec"
+        },
+        {
+          "n": 131,
+          "beat": "support",
+          "mark": "creep"
+        }
+      ],
+      "see": [
+        "stress-relaxation",
+        "viscoelasticity",
+        "postural-dysfunction"
+      ]
+    },
+    {
+      "id": "stress-relaxation",
+      "ru": "Релаксация напряжения",
+      "en": "stress-relaxation",
+      "def": "Если удерживать ткань на постоянной длине, нужная для этого сила постепенно уменьшается; на этом основаны долговременные растяжения.",
+      "page": 90,
+      "moments": [
+        {
+          "n": 31,
+          "beat": "relax",
+          "mark": "sr",
+          "to": "perm"
+        },
+        {
+          "n": 33,
+          "beat": "static",
+          "mark": "prog"
+        }
+      ],
+      "see": [
+        "creep",
+        "static-progressive-stretching"
+      ]
+    },
+    {
+      "id": "cyclic-loading",
+      "ru": "Циклическая нагрузка",
+      "en": "cyclic loading",
+      "alt": [
+        "усталость соединительной ткани"
+      ],
+      "def": "Повторные нагрузки за короткое время: выделяют тепло и могут разрушить ткань при меньшей деформации, чем одна нагрузка, — это усталость ткани.",
+      "page": 91,
+      "moments": [
+        {
+          "n": 31,
+          "beat": "cyc",
+          "mark": "cyc",
+          "to": "lim"
+        }
+      ],
+      "see": [
+        "creep"
+      ]
+    },
+    {
+      "id": "sarcomere",
+      "ru": "Саркомер",
+      "en": "sarcomere",
+      "def": "Сократительная единица мышечного волокна, где перекрываются нити актина и миозина. В укороченном положении мышца теряет саркомеры, в удлинённом — добавляет.",
+      "page": 92,
+      "moments": [
+        {
+          "n": 32,
+          "beat": "struct",
+          "mark": "sarc",
+          "to": "cb"
+        },
+        {
+          "n": 32,
+          "beat": "imm",
+          "mark": "short",
+          "to": "long"
+        }
+      ],
+      "see": [
+        "myostatic-contracture"
+      ]
+    },
+    {
+      "id": "endomysium",
+      "ru": "Эндомизий",
+      "en": "endomysium",
+      "def": "Соединительнотканная оболочка вокруг отдельного мышечного волокна.",
+      "page": 92,
+      "moments": [
+        {
+          "n": 32,
+          "beat": "ct",
+          "mark": "endo"
+        }
+      ],
+      "see": [
+        "perimysium",
+        "epimysium"
+      ]
+    },
+    {
+      "id": "perimysium",
+      "ru": "Перимизий",
+      "en": "perimysium",
+      "def": "Соединительнотканная оболочка вокруг пучка мышечных волокон.",
+      "page": 92,
+      "moments": [
+        {
+          "n": 32,
+          "beat": "ct",
+          "mark": "peri"
+        }
+      ],
+      "see": [
+        "endomysium",
+        "epimysium"
+      ]
+    },
+    {
+      "id": "epimysium",
+      "ru": "Эпимизий",
+      "en": "epimysium",
+      "def": "Соединительнотканная оболочка вокруг всей мышцы. Вместе с эндомизием и перимизием — главный источник сопротивления мышцы пассивному растяжению.",
+      "page": 92,
+      "moments": [
+        {
+          "n": 32,
+          "beat": "ct",
+          "mark": "epi",
+          "to": "res"
+        }
+      ],
+      "see": [
+        "endomysium",
+        "perimysium"
+      ]
+    },
+    {
+      "id": "muscle-spindle",
+      "ru": "Мышечное веретено",
+      "en": "muscle spindle",
+      "def": "Главный датчик мышцы: чувствует изменение её длины и скорость; внутри — интрафузальные волокна, чувствительность настраивают гамма-мотонейроны.",
+      "page": 93,
+      "moments": [
+        {
+          "n": 32,
+          "beat": "spindle",
+          "mark": "sp",
+          "to": "gam"
+        }
+      ],
+      "see": [
+        "stretch-reflex",
+        "golgi-tendon-organ"
+      ]
+    },
+    {
+      "id": "golgi-tendon-organ",
+      "ru": "Сухожильный орган Гольджи",
+      "en": "Golgi tendon organ (GTO)",
+      "alt": [
+        "орган Гольджи"
+      ],
+      "def": "Датчик напряжения у перехода мышцы в сухожилие; через спинной мозг тормозит собственную мышцу. Порог у него низкий: он постоянно регулирует напряжение.",
+      "page": 93,
+      "moments": [
+        {
+          "n": 32,
+          "beat": "gto",
+          "mark": "gto",
+          "to": "low"
+        }
+      ],
+      "see": [
+        "autogenic-inhibition",
+        "muscle-spindle"
+      ]
+    },
+    {
+      "id": "stretch-reflex",
+      "ru": "Рефлекс на растяжение",
+      "en": "stretch reflex",
+      "def": "Веретено чувствует удлинение, и мышца рефлекторно напрягается, сопротивляясь растяжке; поэтому растягивают медленно, с малой силой и долго.",
+      "page": 95,
+      "moments": [
+        {
+          "n": 32,
+          "beat": "reflex",
+          "mark": "sr"
+        },
+        {
+          "n": 32,
+          "beat": "reflex",
+          "mark": "slow"
+        }
+      ],
+      "see": [
+        "muscle-spindle"
+      ]
+    },
+    {
+      "id": "reciprocal-inhibition",
+      "ru": "Реципрокное торможение",
+      "en": "reciprocal inhibition",
+      "def": "Торможение мышцы на противоположной стороне сустава, когда сокращается её антагонист; показано только на животных.",
+      "page": 95,
+      "moments": [
+        {
+          "n": 32,
+          "beat": "reflex",
+          "mark": "ri"
+        },
+        {
+          "n": 35,
+          "beat": "what",
+          "mark": "old"
+        }
+      ],
+      "see": [
+        "autogenic-inhibition",
+        "agonist-contraction"
+      ]
+    },
+    {
+      "id": "autogenic-inhibition",
+      "ru": "Аутогенное торможение",
+      "en": "autogenic inhibition",
+      "def": "Снижение напряжения мышцы её собственным органом Гольджи при длительном растяжении или сокращении.",
+      "page": 95,
+      "moments": [
+        {
+          "n": 32,
+          "beat": "reflex",
+          "mark": "ai"
+        },
+        {
+          "n": 35,
+          "beat": "what",
+          "mark": "old"
+        }
+      ],
+      "see": [
+        "golgi-tendon-organ",
+        "reciprocal-inhibition"
+      ]
+    },
+    {
+      "id": "alignment",
+      "ru": "Выравнивание",
+      "en": "alignment",
+      "def": "Положение тела и сегментов, при котором сила растяжки или сопротивления направлена на нужную мышцу с учётом силы тяжести; без него появляются обходные движения.",
+      "page": 95,
+      "moments": [
+        {
+          "n": 33,
+          "beat": "align",
+          "mark": "al",
+          "to": "bad"
+        },
+        {
+          "n": 60,
+          "beat": "align",
+          "mark": "align",
+          "to": "tfl"
+        }
+      ],
+      "see": [
+        "stabilization",
+        "substitute-motions"
+      ]
+    },
+    {
+      "id": "stabilization",
+      "ru": "Стабилизация",
+      "en": "stabilization",
+      "def": "Удержание сегмента или всего тела неподвижным, обычно там, где крепится работающая мышца: внешняя — руками, ремнями, опорой; внутренняя — сокращением соседних мышц.",
+      "page": 95,
+      "moments": [
+        {
+          "n": 33,
+          "beat": "stab",
+          "mark": "st",
+          "to": "src"
+        },
+        {
+          "n": 60,
+          "beat": "stab",
+          "mark": "stab",
+          "to": "weak"
+        }
+      ],
+      "see": [
+        "alignment",
+        "substitute-motions"
+      ]
+    },
+    {
+      "id": "stretch-intensity",
+      "ru": "Интенсивность растяжки",
+      "en": "intensity of stretch",
+      "def": "Величина силы. Растягивают с малой нагрузкой: удобнее, меньше защитного напряжения, безопаснее для ослабленных тканей и стойче эффект.",
+      "page": 96,
+      "moments": [
+        {
+          "n": 33,
+          "beat": "int",
+          "mark": "low",
+          "to": "safe"
+        },
+        {
+          "n": 33,
+          "beat": "box",
+          "mark": "ll"
+        }
+      ],
+      "see": [
+        "stretch-duration"
+      ]
+    },
+    {
+      "id": "stretch-duration",
+      "ru": "Длительность растяжки",
+      "en": "duration of stretch",
+      "def": "Сколько удерживают одно растяжение; сумма повторов — общее время. Обычно по 30 секунд, у пожилых — по 60; дольше 60 секунд, по-видимому, не нужно.",
+      "page": 97,
+      "moments": [
+        {
+          "n": 33,
+          "beat": "dur",
+          "mark": "dur",
+          "to": "nc"
+        },
+        {
+          "n": 33,
+          "beat": "box",
+          "mark": "sixty",
+          "to": "chr"
+        }
+      ],
+      "see": [
+        "stretch-intensity",
+        "stretch-frequency"
+      ]
+    },
+    {
+      "id": "static-stretching",
+      "ru": "Статическая растяжка",
+      "en": "static stretching",
+      "def": "Ткань удлиняют чуть дальше точки сопротивления и удерживают — чаще всего по 30 секунд; напряжение мышцы при этом примерно вдвое меньше, чем при баллистической.",
+      "page": 97,
+      "moments": [
+        {
+          "n": 33,
+          "beat": "static",
+          "mark": "st",
+          "to": "half"
+        }
+      ],
+      "see": [
+        "static-progressive-stretching",
+        "cyclic-stretching",
+        "ballistic-stretching"
+      ]
+    },
+    {
+      "id": "static-progressive-stretching",
+      "ru": "Статическая прогрессирующая растяжка",
+      "en": "static progressive stretching",
+      "def": "Растяжение держат, пока ткань не «отпустит», затем удлиняют дальше и снова держат — так используют релаксацию напряжения.",
+      "page": 99,
+      "moments": [
+        {
+          "n": 33,
+          "beat": "static",
+          "mark": "prog"
+        }
+      ],
+      "see": [
+        "static-stretching",
+        "stress-relaxation"
+      ]
+    },
+    {
+      "id": "cyclic-stretching",
+      "ru": "Циклическая растяжка",
+      "en": "cyclic (intermittent) stretching",
+      "def": "Короткое растяжение медленно прикладывают, отпускают и повторяют много раз за сеанс; это не баллистика — скорость низкая, сила малая.",
+      "page": 99,
+      "moments": [
+        {
+          "n": 33,
+          "beat": "cyc",
+          "mark": "cyc",
+          "to": "ev"
+        }
+      ],
+      "see": [
+        "static-stretching",
+        "ballistic-stretching"
+      ]
+    },
+    {
+      "id": "ballistic-stretching",
+      "ru": "Баллистическая растяжка",
+      "en": "ballistic stretching",
+      "def": "Быстрая и сильная растяжка, например мах прямой ногой. Гибкость увеличивает как статическая, но больше травмирует; пожилым и пациентам с контрактурами не рекомендуют.",
+      "page": 99,
+      "moments": [
+        {
+          "n": 34,
+          "beat": "ball",
+          "mark": "ball",
+          "to": "no"
+        },
+        {
+          "n": 34,
+          "beat": "hv",
+          "mark": "who",
+          "to": "prog"
+        }
+      ],
+      "see": [
+        "static-stretching",
+        "dynamic-stretching"
+      ]
+    },
+    {
+      "id": "stretch-frequency",
+      "ru": "Частота растяжки",
+      "en": "frequency of stretch",
+      "def": "Число сеансов в день или неделю — обычно два–пять в неделю с перерывами на заживление. Если объём уменьшается, а не растёт, это признак перегрузки.",
+      "page": 100,
+      "moments": [
+        {
+          "n": 34,
+          "beat": "freq",
+          "mark": "freq",
+          "to": "sign"
+        }
+      ],
+      "see": [
+        "stretch-duration"
+      ]
+    },
+    {
+      "id": "mode-of-stretch",
+      "ru": "Способ растяжки",
+      "en": "mode of stretch",
+      "def": "Кто прикладывает силу и как участвует пациент: ручная, механическая или самостоятельная растяжка; пассивная, ассистированная или активная.",
+      "page": 100,
+      "moments": [
+        {
+          "n": 34,
+          "beat": "mode",
+          "mark": "mode",
+          "to": "nobest"
+        }
+      ],
+      "see": [
+        "manual-stretching",
+        "mechanical-stretching",
+        "self-stretching"
+      ]
+    },
+    {
+      "id": "manual-stretching",
+      "ru": "Ручная растяжка",
+      "en": "manual stretching",
+      "def": "Терапевт сам управляет стабилизацией, направлением, скоростью, силой и временем; уместна в начале и когда пациент не может растягиваться сам.",
+      "page": 100,
+      "moments": [
+        {
+          "n": 34,
+          "beat": "man",
+          "mark": "man",
+          "to": "help"
+        },
+        {
+          "n": 36,
+          "beat": "app",
+          "mark": "a1",
+          "to": "a5"
+        },
+        {
+          "n": 98,
+          "beat": "why",
+          "mark": "setup",
+          "to": "minus"
+        }
+      ],
+      "see": [
+        "mode-of-stretch",
+        "buoyancy-supported"
+      ]
+    },
+    {
+      "id": "mechanical-stretching",
+      "ru": "Механическая растяжка",
+      "en": "mechanical stretching",
+      "def": "Очень малая сила очень долго — манжета с грузом, регулируемые ортезы, серийные гипсы; от 15 минут до многих часов, лучше всего при давних контрактурах.",
+      "page": 102,
+      "moments": [
+        {
+          "n": 34,
+          "beat": "mech",
+          "mark": "mech",
+          "to": "care"
+        }
+      ],
+      "see": [
+        "mode-of-stretch",
+        "creep"
+      ]
+    },
+    {
+      "id": "pnf-stretching",
+      "ru": "Растяжка по методу ПНФ",
+      "en": "PNF stretching",
+      "alt": [
+        "ПНФ-растяжка"
+      ],
+      "def": "Растяжка с активными сокращениями мышц, чтобы растягиваемая мышца оставалась как можно более расслабленной; нужны нормальная иннервация и произвольный контроль.",
+      "page": 103,
+      "moments": [
+        {
+          "n": 35,
+          "beat": "what",
+          "mark": "pnf",
+          "to": "ev"
+        },
+        {
+          "n": 35,
+          "beat": "lim",
+          "mark": "innerv",
+          "to": "spasm"
+        }
+      ],
+      "see": [
+        "hold-relax",
+        "agonist-contraction",
+        "hold-relax-agonist-contraction"
+      ]
+    },
+    {
+      "id": "hold-relax",
+      "ru": "Напряжение — расслабление",
+      "en": "hold-relax (HR)",
+      "alt": [
+        "сокращение — расслабление"
+      ],
+      "def": "Приём ПНФ: мышцу удлиняют до сопротивления, пациент умеренно напрягает её изометрически около пяти секунд, расслабляется, и терапевт проводит конечность дальше.",
+      "page": 103,
+      "moments": [
+        {
+          "n": 35,
+          "beat": "hr",
+          "mark": "pos",
+          "to": "move"
+        },
+        {
+          "n": 35,
+          "beat": "cr",
+          "mark": "cr"
+        },
+        {
+          "n": 112,
+          "beat": "inter",
+          "mark": "pnf"
+        }
+      ],
+      "see": [
+        "agonist-contraction",
+        "pnf-stretching"
+      ]
+    },
+    {
+      "id": "agonist-contraction",
+      "ru": "Сокращение агониста",
+      "en": "agonist contraction (AC)",
+      "def": "Приём ПНФ: пациент медленно сокращает мышцу напротив укороченной, проводит сустав в новый объём и удерживает конечное положение.",
+      "page": 103,
+      "moments": [
+        {
+          "n": 35,
+          "beat": "ac",
+          "mark": "ac",
+          "to": "good"
+        }
+      ],
+      "see": [
+        "hold-relax",
+        "reciprocal-inhibition"
+      ]
+    },
+    {
+      "id": "hold-relax-agonist-contraction",
+      "ru": "Напряжение — расслабление с сокращением агониста",
+      "en": "hold-relax with agonist contraction (HR-AC)",
+      "def": "Сочетание приёмов ПНФ: удлинить мышцу, изометрически напрячь её, расслабить и сразу активно сократить противоположную мышцу.",
+      "page": 103,
+      "moments": [
+        {
+          "n": 35,
+          "beat": "hrac",
+          "mark": "hrac",
+          "to": "knee"
+        }
+      ],
+      "see": [
+        "hold-relax",
+        "agonist-contraction"
+      ]
+    },
+    {
+      "id": "progressive-relaxation",
+      "ru": "Прогрессивная релаксация",
+      "en": "progressive relaxation",
+      "def": "Метод Джекобсона: от дистальных мышц к проксимальным напрячь на 5–7 секунд, расслабить на 20–30 и почувствовать тяжесть и тепло.",
+      "page": 110,
+      "moments": [
+        {
+          "n": 37,
+          "beat": "relax",
+          "mark": "prog"
+        }
+      ],
+      "see": [
+        "autogenic-training"
+      ]
+    },
+    {
+      "id": "autogenic-training",
+      "ru": "Аутогенная тренировка",
+      "en": "autogenic training",
+      "def": "Способ расслабления через самовнушение и медитацию.",
+      "page": 110,
+      "moments": [
+        {
+          "n": 37,
+          "beat": "relax",
+          "mark": "aut"
+        }
+      ],
+      "see": [
+        "progressive-relaxation"
+      ]
+    },
+    {
+      "id": "heterotopic-ossification",
+      "ru": "Гетеротопическая оссификация",
+      "en": "heterotopic ossification",
+      "alt": [
+        "оссифицирующий миозит",
+        "эктопическая кость"
+      ],
+      "def": "Образование кости в мягких тканях вокруг сустава после травм и ожогов; энергичная пассивная растяжка, вероятно, повышает риск, поэтому растягивают очень мягко.",
+      "page": 116,
+      "moments": [
+        {
+          "n": 39,
+          "beat": "ext",
+          "mark": "ho"
+        },
+        {
+          "n": 176,
+          "beat": "ho",
+          "mark": "term",
+          "to": "debate"
+        },
+        {
+          "n": 176,
+          "beat": "hoSign",
+          "mark": "clin",
+          "to": "resorb"
+        }
+      ],
+      "see": [
+        "total-elbow-arthroplasty"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Виды ROM: показания, цели, ограничения — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 20, title: 'Виды ROM: показания, цели, ограничения', minutes: 8, language: 'ru', next: '../ch021/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch020/lupa.ru.json
+const LUPA = [
+  {"beat": "types", "fig": 3, "target": "m0", "from": "arom", "to": "aarom", "zoom": 3},
+];
+// lupa end
+// bio begin: places of the biomechanics layer (B switches); made by tools/therapeutic-exercise/bio.py from content/therapeutic-exercise/ch020/bio.ru.json
+const BIO = [
+  {"beat": "rom", "fig": 0, "level": "angle", "joint": "aN", "load": {"type": "none"}},
+];
+// bio end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch020/cards.ru.json
+const CARDS_SHORT = {
+  "объём сустава\nсгибание, разгибание, отведение, приведение, ротация; гониометр, градусы": "гониометр, градусы",
+  "объём мышцы\nфункциональная экскурсия: насколько мышца укорачивается после полного растяжения": "функциональная экскурсия",
+  "цель упражнений на объём\nсохранить подвижность суставов и мягких тканей, уменьшить потерю гибкости и образование контрактур": "сохранить подвижность, без контрактур",
+  "Роберт Солтер\nпольза движения для заживления — в лаборатории и в клинике": "польза движения для заживления",
+  "острое воспаление\nактивное движение помешало бы заживлению; воспаление — 2–6 дней": "воспаление 2–6 дней",
+  "не может или не должен двигаться\nкома, паралич, строгий постельный режим": "кома, паралич",
+  "после шва мышцы или сухожилия\nактивное движение повредило бы шов": "активное повредило бы шов",
+  "может сам\nактивные движения": "активные движения",
+  "мышцы слабые\nвспомогательные → затем сопротивление": "вспомогательные",
+  "сегмент в гипсе\nдвигать выше и ниже; к костылям": "выше и ниже",
+  "ещё\nаэробные программы; снять напряжение от поз": "аэробные программы",
+};
+// cards-short end
+
+// Types of ROM — one colour each, kept through chapter 3.
+const ROMC = { p: COL.whole, a: COL.bad, aa: COL.task };
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+// A goniometer arc at the shoulder of a standing figure, from the arm hanging down to the arm now; shows degrees.
+function gonio(p, f, t0, R = 80) {
+  const arc = path(p, '', { stroke: COL.int, 'stroke-width': 4 }, { o: 0 }), lab = T(p, '0°', { size: 28, weight: 700, fill: COL.int, o: 0 });
+  const upd = () => {
+    const [sx, sy] = onStage(f, 'Sh'), th = clamp(f.pose.aN - f.pose.t, 0, 179.9), d = f.dir;
+    const ex = sx + d * R * Math.sin(rad(th)), ey = sy + R * Math.cos(rad(th));
+    arc.setAttribute('d', `M${sx} ${sy + R}A${R} ${R} 0 0 ${d > 0 ? 0 : 1} ${ex.toFixed(1)} ${ey.toFixed(1)}`);
+    lab.textContent = `${Math.round(th)}°`;
+    put(lab, { x: sx + d * (R + 46) * Math.sin(rad(th / 2)) - 24, y: sy + (R + 46) * Math.cos(rad(th / 2)) + 10 });
+  };
+  f.onSet.push(upd); upd();
+  show(arc, t0); show(lab, t0);
+}
+// The near-arm shoulder flexors (anterior deltoid), for showing active work in the supine scenes.
+const FLEXOR = [['Sh', 'H', -6, -12], ['Sh', 'EN', 40, -9]];
+// A supine patient on a table with a therapist behind it. assist: the therapist's hands follow the arm.
+function romScene(p, cx, t0, { assist = true, s = .5 } = {}) {
+  const TOP = 560, hx = cx + 70, legH = 155 * s;
+  const th = fig(p, { x: hx - 118 * s + 70, y: TOP + legH - 182 * s, s, dir: -1, col: '#b9cfe0', o: 0, pose: { t: 24, hN: 26, hF: 22, kN: 8, kF: 8 } });
+  bench(p, cx - 210, cx + 210, TOP, t0, COL.dim, legH);
+  const pt = supine(p, hx, TOP, s, t0);
+  const fl = muscleOn(pt, ...FLEXOR, { after: 'hdN', w: 10 });
+  if (assist) { show(th.g, t0); holdHand(th, 'N', pt, () => onStage(pt, 'EN')); holdHand(th, 'F', pt, () => onStage(pt, 'WN')); }
+  return { pt, th, fl };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Виды ROM', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 3 · Урок 20', { x: 800, y: 250, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Виды упражнений на объём движений', { x: 800, y: 335, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'показания, цели, ограничения', { x: 800, y: 400, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'глава третья — объём движений (ROM)', 800, 480, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 820;
+    path(art, `M680 ${GY}H920`, { stroke: COL.faint, 'stroke-width': 3 });
+    const f = fig(art, { x: 790, y: GY - 182 * .5, s: .5 });
+    gonio(art, f, 0, 50);
+    show(art, m('sub', .2));
+    repeatPose(f, { ...STAND, aN: 170, eN: 4 }, m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), 1);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['rom', 'Объём движений', (m) => {
+    const p = panel(0), GY = 620;
+    para(p, 'объём движений (ROM) — полное возможное движение между двумя костями', 800, 76, m('def'), { size: 28, weight: 700, maxW: 1300, anchor: 'middle' });
+    ground(p, 140, 560, GY, m('def'));
+    const f = fig(p, { x: 330, y: GY - 182 * .9, s: .9, o: 0 }); show(f.g, m('def'));
+    gonio(p, f, m('joint'));
+    poseTo(f, { aN: 170, eN: 4 }, m('joint', .4), 2.4);
+    txt(p, 'зависит от строения сустава и гибкости мягких тканей', 800, 150, m('lim'), { size: 25, fill: COL.dim, anchor: 'middle' });
+    ['мышцы', 'суставные поверхности', 'синовиальная жидкость', 'капсула', 'связки', 'фасции', 'сосуды', 'нервы'].forEach((s, i) => pill(p, s, 830 + (i % 2) * 360, 220 + Math.floor(i / 2) * 62, m('all', .3 + i * .35), { col: COL.whole, size: 24 }));
+    infoCard(p, 660, 500, 420, 220, 'объём сустава', 'сгибание, разгибание, отведение, приведение, ротация; гониометр, градусы', COL.int, m('joint'), { size: 23 });
+    infoCard(p, 1110, 500, 420, 220, 'объём мышцы', 'функциональная экскурсия: насколько мышца укорачивается после полного растяжения', COL.nat, m('musc'), { size: 23 });
+  }],
+
+  ['excur', 'Одно- и двусуставные', (m) => {
+    const p = panel(0), GY = 640;
+    txt(p, 'односуставная', 380, 100, m('one'), { size: 30, weight: 700, fill: COL.whole, anchor: 'middle' });
+    const el = elbowModel(p, { x: 130, y: 360, s: 1.45 });
+    put(el.g, { o: 0 }); show(el.g, m('one'));
+    el.muscles.biceps.g.setAttribute('opacity', .25); el.muscles.triceps.g.setAttribute('opacity', .25);
+    prog(q => el.set(lerp(170, 45, (1 - Math.cos(2 * Math.PI * 2 * q)) / 2)), m('one', .4), 6, lin);
+    para(p, 'плечевая мышца: её объём = объём локтевого сустава', 380, 520, m('one', 1.2), { size: 25, maxW: 520, anchor: 'middle', fill: COL.whole });
+    txt(p, 'двусуставная', 1180, 100, m('two'), { size: 30, weight: 700, fill: COL.nat, anchor: 'middle' });
+    ground(p, 980, 1380, GY, m('two'));
+    const f = fig(p, { x: 1180, y: GY - 182 * .9, s: .9, o: 0 }); show(f.g, m('two'));
+    muscleOn(f, ...MUSCLE.hamstrings, { after: 'ftN', w: 14 });
+    pill(p, 'задняя группа бедра', 1180, 200, m('two', .6), { col: COL.nat, size: 24 });
+    para(p, 'объём шире, чем у тазобедренного или коленного сустава', 1180, 720, m('two', 1.4), { size: 24, maxW: 520, anchor: 'middle', fill: COL.nat });
+    labelBox(p, 800, 805, 1180, ['обычно работают в середине экскурсии — там оптимальны длина и напряжение'], COL.chalk, m('mid'), { size: 24 });
+  }],
+
+  ['insuf', 'Активная и пассивная недостаточность', (m) => {
+    const p = panel(0), GY = 640;
+    txt(p, 'активная недостаточность', 400, 100, m('act'), { size: 30, weight: 700, fill: COL.bad, anchor: 'middle' });
+    ground(p, 200, 600, GY, m('act', -.3));
+    const a = fig(p, { x: 400, y: GY - 182 * .85, s: .85, o: 0 }); show(a.g, m('act', -.3));
+    const ha = muscleOn(a, ...MUSCLE.hamstrings, { after: 'ftN', w: 14 });
+    const [ax] = onStage(a, 'AF');
+    poseTo(a, { hN: -18, kN: 110, fN: -10 }, m('act', .3), 1.4, io, ['AF', ax, GY]);
+    prog(q => ha.act(q), m('act', 1.2), .8, out);
+    para(p, 'колено согнуто и бедро разогнуто: мышца слишком коротка, напряжения мало', 400, 720, m('act', 2), { size: 23, maxW: 520, anchor: 'middle', fill: COL.bad });
+    txt(p, 'пассивная недостаточность', 1180, 100, m('pas'), { size: 30, weight: 700, fill: ANAT.stretch, anchor: 'middle' });
+    ground(p, 980, 1380, GY, m('pas', -.3));
+    const b = fig(p, { x: 1100, y: GY - 182 * .85, s: .85, o: 0 }); show(b.g, m('pas', -.3));
+    muscleOn(b, ...MUSCLE.hamstrings, { after: 'ftN', w: 14 });
+    const [bx] = onStage(b, 'AF');
+    poseTo(b, { hN: 70, kN: 0, aN: 20 }, m('pas', .3), 1.6, io, ['AF', bx, GY]);
+    const pasTxt = para(p, 'колено разогнуто: мышца растянута и ограничивает сгибание бедра', 1180, 720, m('pas', 1.6), { size: 23, maxW: 520, anchor: 'middle', fill: ANAT.stretch });
+    poseTo(b, { hN: 105, kN: 95 }, m('pas2'), 1.2, io, ['AF', bx, GY]);
+    poseTo(b, { kN: 50 }, m('pas2', 1.4), 1.2, io, ['AF', bx, GY]);
+    hide(pasTxt, m('pas2', -.2), .3);
+    para(p, 'бедро согнуто полностью: мышца ограничивает разгибание колена', 1180, 720, m('pas2', 1.6), { size: 23, maxW: 520, anchor: 'middle', fill: ANAT.stretch });
+  }],
+
+  ['why', 'Зачем двигать', (m) => {
+    const p = panel(0);
+    labelBox(p, 800, 100, 960, ['периодически проводить через весь объём — и сустава, и мышц'], COL.good, m('keep'), { size: 27 });
+    txt(p, 'что уменьшает объём', 400, 210, m('loss'), { size: 26, weight: 700, fill: COL.bad, anchor: 'middle' });
+    ['системные болезни', 'болезни суставов', 'неврологические', 'мышечные', 'операции и травмы', 'бездействие, иммобилизация'].forEach((s, i) => pill(p, s, 250 + (i % 2) * 300, 270 + Math.floor(i / 2) * 62, m('loss', .3 + i * .4), { col: COL.bad, size: 23 }));
+    infoCard(p, 870, 180, 640, 220, 'цель упражнений на объём', 'сохранить подвижность суставов и мягких тканей, уменьшить потерю гибкости и образование контрактур', COL.good, m('goal'), { size: 24 });
+    infoCard(p, 870, 430, 640, 160, 'Роберт Солтер', 'польза движения для заживления — в лаборатории и в клинике', COL.whole, m('salter'), { size: 24 });
+    const ns = G(p, { o: 0 });
+    roundBox(ns, 160, 520, 560, 150, COL.int, PANEL, 3);
+    T(ns, 'это не растяжка', { x: 440, y: 580, size: 30, weight: 700, fill: COL.int, anchor: 'middle' });
+    T(ns, 'растяжка — главы 4 и 5', { x: 440, y: 630, size: 24, fill: COL.dim, anchor: 'middle' });
+    show(ns, m('nst'));
+  }],
+
+  ['types', 'Три вида', (m) => {
+    const p = panel(0);
+    const S = [['пассивные (PROM)', 'внешняя сила', ROMC.p, 'prom', 300], ['активные (AROM)', 'свои мышцы', ROMC.a, 'arom', 800], ['активно-вспомогательные', 'свои мышцы + помощь', ROMC.aa, 'aarom', 1300]];
+    S.forEach(([h, sub, c, k, cx]) => {
+      txt(p, h, cx, 120, m(k), { size: 28, weight: 700, fill: c, anchor: 'middle' });
+      txt(p, sub, cx, 160, m(k, .2), { size: 23, fill: COL.dim, anchor: 'middle' });
+      const sc = romScene(p, cx, m(k, .2), { assist: k !== 'arom' });
+      const lift = q => (1 - Math.cos(2 * Math.PI * 1.25 * q)) / 2;   // up, down, and up again: ends with the arm raised
+      prog(q => sc.pt.set({ aN: lerp(4, 165, lift(q)), eN: 6 }), m(k, .8), 6, lin);
+      if (k !== 'prom') prog(q => { const sn = Math.sin(Math.PI * 2 * 1.25 * q), lv = k === 'arom' ? 1 : .5; sc.fl.act(lv * (sn > 0 ? Math.min(1, 2 * sn) : .3 * Math.min(1, -2 * sn))); }, m(k, .8), 6, lin);
+    });
+    txt(p, 'внешняя сила: тяжесть, аппарат, другой человек, другая часть тела пациента', 800, 780, m('prom', 1.5), { size: 23, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'пассивные движения ≠ пассивная растяжка', 800, 830, m('prom', 3), { size: 23, weight: 700, fill: ROMC.p, anchor: 'middle' });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-type', prompt: ['Какой это вид упражнения?'],
+    build: grid([
+      { parts: ['Терапевт поднимает расслабленную руку пациента'], ans: ['p'], why: 'Движение полностью создаёт внешняя сила — пассивное.' },
+      { parts: ['Пациент сам поднимает руку'], ans: ['a'], why: 'Движение создают свои мышцы — активное.' },
+      { parts: ['Пациент поднимает руку, терапевт немного помогает'], ans: ['aa'], why: 'Свои мышцы плюс помощь — активно-вспомогательное.' },
+      { parts: ['Пациент двигает больную руку здоровой, мышцы больной расслаблены'], ans: ['p'], why: 'Внешняя сила — другая часть тела самого пациента.' },
+      { parts: ['Слабые мышцы не проходят объём против силы тяжести, аппарат помогает'], ans: ['aa'], why: 'Механическая помощь слабым мышцам — активно-вспомогательное.' },
+    ], [['p', 'Пассивное', ROMC.p], ['a', 'Активное', ROMC.a], ['aa', 'Активно-вспомогательное', ROMC.aa]], { multi: false, text: true }),
+  }], done) }],
+
+  ['prom', 'Пассивные: показания и цели', (m) => {
+    const p = panel(0);
+    head(p, 'Пассивные движения: когда и зачем', .2, 70, ROMC.p);
+    infoCard(p, 90, 120, 450, 200, 'острое воспаление', 'активное движение помешало бы заживлению; воспаление — 2–6 дней', ROMC.p, m('ac'), { size: 23 });
+    infoCard(p, 575, 120, 450, 200, 'не может или не должен двигаться', 'кома, паралич, строгий постельный режим', ROMC.p, m('cant'), { size: 23 });
+    infoCard(p, 1060, 120, 450, 200, 'после шва мышцы или сухожилия', 'активное движение повредило бы шов', ROMC.p, m('rep'), { size: 23 });
+    txt(p, 'цель — меньше осложнений иммобилизации', 800, 380, m('goals'), { size: 26, weight: 700, fill: COL.good, anchor: 'middle' });
+    ['подвижность сустава и ткани', 'меньше контрактур', 'эластичность мышцы', 'кровообращение', 'питание хряща', 'меньше боли', 'заживление', 'ощущение движения'].forEach((s, i) => pill(p, s, 230 + (i % 4) * 380, 450 + Math.floor(i / 4) * 64, m('goals', .6 + i * .45), { col: COL.good, size: 23 }));
+    txt(p, 'ещё: обследование · показ упражнения · перед пассивной растяжкой', 800, 640, m('other'), { size: 24, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['promlim', 'Ограничения пассивных', (m) => {
+    const p = panel(0);
+    labelBox(p, 800, 120, 980, ['трудно добиться полного расслабления, если пациент в сознании'], ROMC.p, m('hard'), { size: 26 });
+    const L = ['не предотвращают атрофию', 'не увеличивают силу и выносливость', 'помогают кровообращению меньше, чем сокращение мышц'];
+    L.forEach((s, i) => {
+      const y = 280 + i * 130, g = G(p, { o: 0 });
+      roundBox(g, 260, y - 50, 1080, 90, COL.bad, PANEL, 2.5);
+      T(g, s, { x: 340, y: y + 8, size: 28, weight: 600 });
+      show(g, m('no', .3 + i * 1.2));
+      cross(p, 300, y - 5, 18, m('no', .6 + i * 1.2), 5);
+    });
+  }],
+
+  ['arom', 'Активные и вспомогательные', (m) => {
+    const p = panel(0);
+    infoCard(p, 90, 90, 340, 190, 'может сам', 'активные движения', ROMC.a, m('can'), { size: 23 });
+    infoCard(p, 450, 90, 340, 190, 'мышцы слабые', 'вспомогательные → затем сопротивление', ROMC.aa, m('weak'), { size: 23 });
+    infoCard(p, 810, 90, 340, 190, 'сегмент в гипсе', 'двигать выше и ниже; к костылям', ROMC.a, m('imm'), { size: 23 });
+    infoCard(p, 1170, 90, 340, 190, 'ещё', 'аэробные программы; снять напряжение от поз', ROMC.a, m('aer'), { size: 23 });
+    txt(p, 'кроме целей пассивных движений:', 800, 340, m('goals'), { size: 25, weight: 700, fill: COL.good, anchor: 'middle' });
+    ['эластичность и сократимость мышц', 'обратная связь от мышц', 'стимул для кости и сустава', 'кровоток, нет тромбоза', 'координация и навыки'].forEach((s, i) => pill(p, s, i < 3 ? 300 + i * 500 : 550 + (i - 3) * 500, 410 + Math.floor(i / 3) * 66, m('goals', .6 + i * .6), { col: COL.good, size: 23 }));
+    labelBox(p, 800, 640, 1100, ['не сохраняют и не увеличивают силу сильных мышц;', 'навык — только в выполняемых движениях'], COL.int, m('lim'), { size: 26 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => {
+    const p = panel(0);
+    const sc = romScene(p, 330, .1, { assist: true });
+    sc.pt.set({ aN: 60 });
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-repair', prompt: ['После операции сшили сухожилие; активное сокращение может повредить шов. Что подойдёт?'],
+    build: choice([['Пассивные движения'], ['Активные движения'], ['Упражнения с сопротивлением']], 0,
+      'После шва мышцы или сухожилия, пока активное движение опасно, — пассивные движения.',
+      [null, 'Активное сокращение как раз может повредить шов.', 'Сопротивление тем более нагрузит шов.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Объём бывает суставным и мышечным; у двусуставных мышц — активная и пассивная недостаточность.', 'w1'],
+     ['Пассивные — внешняя сила, активные — свои мышцы, вспомогательные — свои мышцы с помощью.', 'w2'],
+     ['Пассивные движения уменьшают осложнения иммобилизации, но не строят силу и не предотвращают атрофию.', 'w3'],
+     ['Активные дают ещё обратную связь, кровоток и координацию; объём движений — не растяжка.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-type', prompt: ['Какой вид упражнения выбрать?'],
+    build: grid([
+      { parts: ['Пациент в коме'], ans: ['p'], why: 'Не может двигаться сам — пассивные.' },
+      { parts: ['Острое воспаление сустава на второй день после травмы'], ans: ['p'], why: 'В остром воспалении активное движение мешает заживлению — пассивные.' },
+      { parts: ['Мышцы слабые и не поднимают руку против силы тяжести'], ans: ['aa'], why: 'Нужна помощь слабым мышцам — активно-вспомогательные.' },
+      { parts: ['Голень в гипсе: двигать области выше и ниже гипса'], ans: ['a'], why: 'Выше и ниже иммобилизованного сегмента — активные движения.' },
+      { parts: ['Пациент может сам и хорошо контролирует движение'], ans: ['a'], why: 'Активные.' },
+    ], [['p', 'Пассивные', ROMC.p], ['a', 'Активные', ROMC.a], ['aa', 'Активно-вспомогательные', ROMC.aa]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Пассивные движения и пассивная растяжка — одно и то же.'], ans: ['f'], why: 'Неверно: объём движений — не растяжка.' },
+      { parts: ['Пассивные движения предотвращают атрофию мышц.'], ans: ['f'], why: 'Неверно: не предотвращают.' },
+      { parts: ['При разогнутом колене задняя группа бедра ограничивает сгибание бедра.'], ans: ['t'], why: 'Верно: пассивная недостаточность.' },
+      { parts: ['Активные движения сильных мышц увеличивают их силу.'], ans: ['f'], why: 'Неверно: не сохраняют и не увеличивают силу сильных мышц.' },
+      { parts: ['Воспаление после травмы или операции обычно длится 2–6 дней.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

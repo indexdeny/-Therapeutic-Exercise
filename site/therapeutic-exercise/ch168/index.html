@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Изометрия и стабилизация плеча — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 168, title: 'Изометрия и стабилизация плеча', minutes: 9, language: 'ru', next: '../ch169/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch168/cards.ru.json
+const CARDS_SHORT = {
+  "зачем\nесли лопатка наклоняется, отходит крылом или ритм нарушен — исправляют упражнениями; если головка плохо держится при подъёме — акцент на манжете": "лопатка или манжета",
+  "начало\nмышцы лопатки и туловища раньше мышц плечевого сустава; ослабленные и зашитые — напряжение и изометрия с минимальным сопротивлением": "лопатка и туловище — раньше",
+  "дальше\nстабилизация в открытой и закрытой цепи, динамика, изоляция слабых движений; потом сочетанные паттерны и функция; по необходимости — эксцентрика высокой интенсивности, плиометрика, ловкость": "стабилизация → паттерны → функция",
+  "как\nлёжа на боку, на животе или сидя, рука поддержана; давление прямо на лопатку против подъёма, опускания, выдвижения или сведения": "давление прямо на лопатку",
+  "опускание — нижняя трапециевидная\nлопатка наклонена вперёд и запаздывает с поворотом вверх (соударение); сопротивление — у нижнего угла": "сопротивление у нижнего угла",
+  "выдвижение — передняя зубчатая\nкрыловидная лопатка, неполный поворот вверх, «проваливание» при опускании руки; сопротивление — у наружного края, клювовидного или через плечо": "у наружного края",
+  "сведение — ромбовидные и трапециевидная\nвыдвинутые лопатки, голова вперёд, кифоз; сопротивление — у внутреннего края": "у внутреннего края",
+  "ротации\nплечо у тела, в лёгком сгибании, отведении или подъёме в плоскости лопатки, локоть 90°; на тыл предплечья — против НР, на ладонь — против ВР": "локоть 90°, на тыл и на ладонь",
+  "отведение и другие\nплечо в нейтральной ротации: 0, 30, 45, 60°; выше 90° — сначала повернуть наружу; подъём в плоскости лопатки — 30 и 60°; разгибание; приведение — 15–30°": "выше 90° — сначала наружу",
+  "двуглавая\nплечо у тела, ладонь вверх — сопротивление сгибанию локтя натягивает длинную головку; затем при большем сгибании или разгибании плеча": "сгибание локтя натягивает головку",
+  "сам\nдругой рукой или упором в стену и дверной косяк": "другой рукой или стена",
+  "чередующаяся изометрия\nпроксимальные мышцы учатся отвечать на меняющуюся нагрузку; сначала мышцы лопатки — основа для мышц плеча; вначале медленно и с подсказкой, потом быстрее и без подсказок": "медленно → быстрее",
+  "лёжа на боку\nпредплечье пациента на плече терапевта; руки терапевта сверху и снизу лопатки, у края и клювовидного, у нижнего угла и акромиона; затем — сидя": "предплечье на плече терапевта",
+  "палка над грудью\nлёжа, руки прямые на 90°: терапевт толкает, тянет и поворачивает палку; помогает здоровая — работать одной; затем сидя и стоя, следить за лопаткой": "толкает, тянет, поворачивает",
+  "опора\nвключает стабилизаторы и, возможно, питание хряща; начинают рано, в защищённой опоре; крыловидная лопатка — не прогрессировать": "рано, в защищённой опоре",
+  "Ул и соавт.\n18 здоровых: молитва, четвереньки, треножник, «указка», упор лёжа, упор с ногами на 45 см, на одной руке — чем больше опора, тем выше активность; подостная — самая активная везде, кроме молитвы (там большая грудная)": "больше опора — выше активность",
+  "техника\nна здоровом боку, кисть упирается в стол — сопротивление на лопатку; сидя с опорой предплечий или стоя у стола — давление на плечи, «держать»": "«держать»",
+  "дальше\nстена или мяч; четвереньки — давление на корпус нагружает переднюю зубчатую; неустойчивые опоры; одна рука": "стена, мяч, одна рука",
+  "у стены или стола\nперекатываться с руки на руку; затем поочерёдно отрывать одну руку — другая держит нагрузку; сопротивление на плечи или грузы на запястья, всё менее предсказуемо по направлению, времени и силе": "с руки на руку",
+  "на четвереньках\nподнимать ногу: своей стороны — больше передняя зубчатая, противоположной — нижняя трапециевидная; затем доска, полусфера, опора на одну руку": "+ нога; доска, полусфера",
+};
+// cards-short end
+
+const SH = '#86c9e8', MU = '#f4a48c', LG = '#f1dfa0', FUN = '#f0c060', SP = '#8fd6b0', ENV = '#c9b8e8', BAD = COL.bad;
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, t = Array.isArray(t0) ? t0[i] : t0 === null ? null : t0 + i * gap, g = pill(p, s, x + ws[i] / 2, y, t, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19, anchor = null } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x, an = anchor || (right ? 'end' : 'start');
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: an });
+  const lx = an === 'start' && right ? x + uiW(str, size) + 8 : an === 'middle' ? x : x + (right ? 8 : -8), ly = an === 'middle' ? y + (ty > y ? 8 : -size) : y - size * .35;
+  path(g, `M${lx} ${ly}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+const arw = (p, x1, y1, x2, y2, col, t0, w = 6) => { const a = Math.atan2(y2 - y1, x2 - x1), h = 14, g = G(p, { o: 0 }); path(g, `M${f1(x1)} ${f1(y1)}L${f1(x2)} ${f1(y2)}M${f1(x2 - h * Math.cos(a - .5))} ${f1(y2 - h * Math.sin(a - .5))}L${f1(x2)} ${f1(y2)}L${f1(x2 - h * Math.cos(a + .5))} ${f1(y2 - h * Math.sin(a + .5))}`, { stroke: col, 'stroke-width': w }); if (t0 !== null) show(g, t0); else put(g, { o: 1 }); return g; };
+const floorLn = (p, x1, x2, y, t0) => show(path(p, `M${x1} ${y}H${x2}`, { stroke: COL.dim, 'stroke-width': 4 }, { o: 0 }), t0);
+const ring = (p, P, r, col, t0) => { const c = mk('circle', { cx: f1(P[0]), cy: f1(P[1]), r, fill: 'none', stroke: col, 'stroke-width': 4, opacity: 0 }, p); show(c, t0); return c; };
+// an arc of the glenoid or the head (radius rr about the centre C of the joint, angles a0..a1) in stage coordinates
+const arcOn = (j, conv, rr, a0, a1) => { const P = []; for (let a = a0; a <= a1; a += 4) P.push(j.at(conv(polar([0, 0], rr, a)))); return P; };
+
+/* ---------- exercise helpers (chapter 17, lessons 166–171) ---------- */
+// Put a hand of the front-view figure on a stage point (two-link arm 72 + 66); flip bends the elbow the other way.
+function fsReach(f, side, X, Y, flip = false) {
+  const S = st(f.g), i = side === 'L' ? 0 : 1, k = i ? 1 : -1, Sh = f.pts.Sh[i];
+  const tx = (X - S.x) / S.s - Sh[0], ty = (Y - S.y) / S.s - Sh[1], D = clamp(Math.hypot(tx, ty), 8, 137.5), dg = 180 / Math.PI;
+  const phi = Math.atan2(k * tx, ty) * dg, be = Math.acos(clamp((72 * 72 + D * D - 66 * 66) / (2 * 72 * D), -1, 1)) * dg, ga = Math.acos(clamp((72 * 72 + 66 * 66 - D * D) / (2 * 72 * 66), -1, 1)) * dg;
+  const sg = flip ? -1 : 1;
+  f.set({ ['a' + side]: phi + sg * be, ['e' + side]: -sg * (180 - ga) });
+}
+// an elastic band between two stage points; set(A, B, rest) — brighter and thinner as it stretches
+function bandLine(p, col = '#e86a8a') {
+  const e = path(p, '', { stroke: col, 'stroke-width': 6, 'stroke-linecap': 'round' }, { o: 0 });
+  return { e, set(A, B, rest = 100) { const L = Math.hypot(B[0] - A[0], B[1] - A[1]), k = clamp(L / rest - 1, 0, 1); e.setAttribute('d', `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`); e.setAttribute('stroke-width', f1(6 - 2.5 * k)); e.setAttribute('stroke', mix(col, '#ffd75e', k * .6)); } };
+}
+const propLine = (p, d, t0, col = COL.dim, w = 5) => { const e = path(p, d, { stroke: col, 'stroke-width': w, 'stroke-linecap': 'round' }, { o: 0 }); if (t0 !== null) show(e, t0); return e; };
+// a ball (side view): set(x, y) moves it
+function ballEl(p, r, col = '#86c9e8') {
+  const defs = mk('defs', {}, p), g = G(p, { o: 0 });
+  mk('circle', { r, fill: ballGrad(defs, col), stroke: mix(col, '#000000', .45), 'stroke-width': 2 }, g);
+  return { g, set(x, y) { put(g, { x, y }); } };
+}
+// a seated rig figure on a chair, ankle at (ax, GY)
+function seatFig(p, ax, GY, s, t0, pose = {}) {
+  const f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...SIT, ...pose } });
+  plant(f, 'AN', ax, GY);
+  const [hx, hy] = onStage(f, 'H');
+  chair(p, hx, hy + 22 * s / .5 * .32, GY, t0);
+  p.appendChild(f.g); show(f.g, t0);
+  return f;
+}
+const QUAD = { ...STAND, t: 66, hN: 66, kN: 90, hF: 66, kF: 90, aN: 66, aF: 66, eN: 0, eF: 0, fN: -90, fF: -90 };
+// a rig figure on all fours: knee at (kx, FY); hands under the shoulders
+function quadFig(p, kx, FY, s, t0, pose = {}) {
+  const f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...QUAD, ...pose } });
+  plant(f, 'KN', kx, FY - 12 * s);
+  const Sh = onStage(f, 'Sh'); f.hand = [Sh[0] + 4, FY - 28 * s];
+  reach(f, 'N', ...f.hand); reach(f, 'F', f.hand[0] - 4, f.hand[1]);
+  show(f.g, t0); return f;
+}
+// a checklist of criteria that tick one by one
+function checklist(p, x, y, items, t0, gap, col = SP, { size = 18, dy = 40 } = {}) {
+  return items.map((s, i) => { const t = t0 + i * gap, g = G(p, {}); checkMark(g, x + 12, y + i * dy - 6, t, col, .9); txt(g, s, x + 34, y + i * dy, t, { size, fill: COL.chalk, weight: 600 }); return g; });
+}
+// horizontal bars with values: rows [label, value, colour]; k — px per unit
+function bars(p, x, y, rows, t0, { k = 5, dy = 46, unit = '%', w0 = 210, size = 17 } = {}) {
+  return rows.map(([s, v, c], i) => {
+    const yy = y + i * dy, g = G(p, { o: 0 }); show(g, t0 + i * .5);
+    T(g, s, { x: x + w0 - 12, y: yy + 6, size, fill: c, weight: 700, anchor: 'end' });
+    const b = mk('rect', { x: x + w0, y: yy - 13, width: 0, height: 24, rx: 7, fill: c }, g);
+    const tv = T(g, '', { x: x + w0 + 8, y: yy + 6, size, fill: COL.chalk, weight: 700 });
+    prog(q => { b.setAttribute('width', f1(k * v * q)); put(tv, { x: x + w0 + 8 + k * v * q }); tv.textContent = (unit === '' ? '' : (v * q).toFixed(v % 1 ? 1 : 0).replace('.', ',')) + unit; }, t0 + i * .5, 1);
+    return g;
+  });
+}
+// a resistance arrow (the hand or a band pushes the other way): a short thick arrow onto point P from direction ang
+function pushArr(p, P, ang, col, t0, L = 70) { const A = polar(P, L + 14, ang), B = polar(P, 14, ang); return arw(p, A[0], A[1], B[0], B[1], col, t0, 7); }
+
+// a standing rig figure leaning on a wall with both hands (shoulders about 90°); lean 0..1
+function wallLean(p, ax, GY, s, t0, wx) {
+  const f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...STAND, t: 8, fN: 8, fF: 8 } });
+  const set = (k = 0, lift = 0) => { f.set({ t: 8 + 10 * k, fN: 8 + 10 * k, fF: 8 + 10 * k }); plant(f, 'AN', ax, GY); const Sh = onStage(f, 'Sh'); reach(f, 'N', wx - 6, Sh[1] + 4 - lift * 60); reach(f, 'F', wx - 10, Sh[1] + 4); };
+  set(0); show(f.g, t0); return set;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Изометрия и стабилизация', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 17 · Урок 168', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Изометрия и стабилизация плеча', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'будить мышцы лопатки и манжеты и учить их держать сустав', 800, 300, m('sub'), { size: 28, fill: SH, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    floorLn(art, 520, 1080, 820, null); [...art.children].forEach(c => put(c, { o: 1 }));
+    const q = quadFig(art, 700, 820, 1.05, null);
+    prog(t => { const k = cyc(t, 2); q.set({ hF: 66 - 66 * k, kF: 90 - 85 * k }); plant(q, 'KN', 700, 820 - 12 * 1.05); reach(q, 'N', ...q.hand); reach(q, 'F', q.hand[0] - 4, q.hand[1]); }, 1, Math.max(3, D - 2));
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['prog', 'Прогрессия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'блок 17.11 — от простого к сложному', 800, 56, m('why'), { size: 28, weight: 700, anchor: 'middle', fill: SH });
+    const steps = [['осознать и включить слабые мышцы: сначала лопатка и туловище', SP, 'box', 1], ['напряжение и многоугловая изометрия, движения с помощью', SP, 'box', 7], ['ровно столько нагрузки, чтобы не было симптомов', FUN, 'box', 13], ['стабилизация в открытой и закрытой цепи', FUN, 'next', 0], ['динамика; слабые движения — изолированно', SH, 'next', 4], ['выносливость вместе с силой; сочетанные паттерны', SH, 'next', 8], ['функция, общая выносливость, равновесие', MU, 'next', 12], ['эксцентрика, плиометрика, ловкость — по целям', BAD, 'next', 15]];
+    steps.forEach(([s, c, mk2, dt], i) => { const g = G(p, { x: 60 + i * 30, y: 120 + i * 92, o: 0 }); mk('rect', { x: 0, y: 0, width: 700 - i * 30, height: 70, rx: 14, fill: PANEL, stroke: c, 'stroke-width': 2.5 }, g); T(g, String(i + 1), { x: 22, y: 45, size: 26, fill: c, weight: 700 }); put(para(g, s, 56, 30, null, { size: 18, fill: COL.chalk, maxW: 620 - i * 30 }), { o: 1 }); show(g, m(mk2, dt)); });
+    infoCard(p, 800, 90, 760, 210, 'зачем', 'если лопатка наклоняется, отходит крылом или ритм нарушен — исправляют упражнениями; если головка плохо держится при подъёме — акцент на манжете', SH, m('why'), { size: 19 });
+    infoCard(p, 800, 315, 760, 175, 'начало', 'мышцы лопатки и туловища раньше мышц плечевого сустава; ослабленные и зашитые — напряжение и изометрия с минимальным сопротивлением', SP, m('box'), { size: 19 });
+    infoCard(p, 800, 505, 760, 200, 'дальше', 'стабилизация в открытой и закрытой цепи, динамика, изоляция слабых движений; потом сочетанные паттерны и функция; по необходимости — эксцентрика высокой интенсивности, плиометрика, ловкость', FUN, m('next'), { size: 19 });
+  }],
+
+  ['scap', 'Мышцы лопатки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'изометрия лопатки — по нарушению', 800, 56, m('pos'), { size: 28, weight: 700, anchor: 'middle', fill: MU });
+    const b = scapBack(p, 470, 540, .74, m('pos'), { both: false, rhythm: false }); b.only([]);
+    txt(p, 'давление — прямо на лопатку, против движения', 420, 120, m('pos', 1), { size: 18, fill: COL.dim, weight: 700, anchor: 'middle' });
+    // depression: resistance under the inferior angle
+    b.only(['ltr'], m('dep'));
+    prog(q => b.mus.ltr.act(.85 * q), m('dep', .5), .8);
+    const IA = b.at('IA'), a1 = pushArr(p, IA, 90, FUN, m('dep', 1));
+    // protraction: resistance against the lateral border
+    b.only(['sa'], m('pro'));
+    prog(q => { b.mus.ltr.act(0); b.mus.sa.act(.85 * q); }, m('pro', .5), .8);
+    hide(a1, m('pro')); const lat = b.at('lat'), a2 = pushArr(p, lat, 0, FUN, m('pro', 1));
+    // retraction: resistance against the medial border
+    b.only(['rh', 'mtr'], m('ret'));
+    prog(q => { b.mus.sa.act(0); b.mus.rh.act(.85 * q); b.mus.mtr.act(.85 * q); }, m('ret', .5), .8);
+    hide(a2, m('ret')); pushArr(p, b.at('med'), 180, FUN, m('ret', 1));
+    infoCard(p, 800, 90, 760, 140, 'как', 'лёжа на боку, на животе или сидя, рука поддержана; давление прямо на лопатку против подъёма, опускания, выдвижения или сведения', MU, m('pos'), { size: 18 });
+    infoCard(p, 800, 245, 760, 170, 'опускание — нижняя трапециевидная', 'лопатка наклонена вперёд и запаздывает с поворотом вверх (соударение); сопротивление — у нижнего угла', FUN, m('dep'), { size: 18 });
+    infoCard(p, 800, 430, 760, 200, 'выдвижение — передняя зубчатая', 'крыловидная лопатка, неполный поворот вверх, «проваливание» при опускании руки; сопротивление — у наружного края, клювовидного или через плечо', FUN, m('pro'), { size: 18 });
+    infoCard(p, 800, 645, 760, 160, 'сведение — ромбовидные и трапециевидная', 'выдвинутые лопатки, голова вперёд, кифоз; сопротивление — у внутреннего края', FUN, m('ret'), { size: 18 });
+  }],
+
+  ['gh', 'Мышцы плечевого сустава', (m, D) => {
+    const p = panel(0);
+    txt(p, 'многоугловая изометрия манжеты', 800, 56, m('gh'), { size: 28, weight: 700, anchor: 'middle', fill: SH });
+    pill(p, 'больно от сжатия — лёгкая тракция с сопротивлением', 400, 120, m('gh', 3), { col: SH, size: 15 });
+    // rotations: the hand pushes on the back or the front of the forearm (view from above)
+    const r = topRot(p, 240, 330, .6, m('rot'));
+    const W = r.at('W'), e1 = pushArr(p, W, 0, FUN, m('rot', 2));
+    txt(p, 'на тыл — против НР', 240, 200, m('rot', 2), { size: 16, fill: FUN, weight: 700, anchor: 'middle' });
+    const r2 = topRot(p, 560, 330, .6, m('rot', 4));
+    pushArr(p, r2.at('W'), 180, MU, m('rot', 5));
+    txt(p, 'на ладонь — против ВР', 560, 200, m('rot', 5), { size: 16, fill: MU, weight: 700, anchor: 'middle' });
+    // abduction at several angles: the hand presses on the arm above the elbow
+    const f = frontStand(p, 240, 820, .78, m('abd'), { muscles: false });
+    const angs = [0, 30, 45, 60];
+    angs.forEach((a, i) => whenAt(m('abd', 1 + i * 2.4), () => { f.set({ aR: 8 + a }); }));
+    const E = () => f.at(f.pts.arms[1][0]);
+    const pa = G(p, { o: 0 }); show(pa, m('abd', 1));
+    prog(() => { pa.innerHTML = ''; const P = E(); const A = polar(P, 80, -45 + 0), B = polar(P, 18, -45); path(pa, `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`, { stroke: FUN, 'stroke-width': 7 }); }, m('abd', 1), 12, lin);
+    const lbl = txt(p, '', 240, 520, m('abd', 1), { size: 18, fill: FUN, weight: 700, anchor: 'middle' });
+    angs.forEach((a, i) => whenAt(m('abd', 1 + i * 2.4), () => { lbl.textContent = 'отведение ' + a + '°'; }));
+    pillRow(p, ['подъём в плоскости лопатки: 30° и 60°', 'приведение: 15–30°'], 560, 560, m('abd', 12), { col: SH, size: 14, gap: 2, space: 6 });
+    // biceps: elbow flexion with the forearm supinated
+    const c = fig(p, { x: 0, y: 0, s: .8, o: 0, pose: { ...STAND, aN: 0, eN: 90 } }); plant(c, 'AN', 560, 860); show(c.g, m('bic'));
+    pushArr(p, onStage(c, 'WN'), -90, LG, m('bic', 1));
+    txt(p, 'двуглавая: сгибание локтя, ладонь вверх', 560, 640, m('bic', 1), { size: 15, fill: LG, weight: 700, anchor: 'middle' });
+    infoCard(p, 800, 90, 760, 170, 'ротации', 'плечо у тела, в лёгком сгибании, отведении или подъёме в плоскости лопатки, локоть 90°; на тыл предплечья — против НР, на ладонь — против ВР', FUN, m('rot'), { size: 18 });
+    infoCard(p, 800, 275, 760, 175, 'отведение и другие', 'плечо в нейтральной ротации: 0, 30, 45, 60°; выше 90° — сначала повернуть наружу; подъём в плоскости лопатки — 30 и 60°; разгибание; приведение — 15–30°', SH, m('abd'), { size: 18 });
+    infoCard(p, 800, 465, 760, 150, 'двуглавая', 'плечо у тела, ладонь вверх — сопротивление сгибанию локтя натягивает длинную головку; затем при большем сгибании или разгибании плеча', LG, m('bic'), { size: 18 });
+    infoCard(p, 800, 630, 760, 120, 'сам', 'другой рукой или упором в стену и дверной косяк', SP, m('self'), { size: 18 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-scapm', prompt: ['Какую мышцу лопатки включают?'],
+    build: grid([
+      { parts: ['Лопатка наклонена вперёд и запаздывает с поворотом вверх'], ans: ['l'], why: 'Нижняя трапециевидная.' },
+      { parts: ['Лопатка отходит крылом'], ans: ['s'], why: 'Передняя зубчатая.' },
+      { parts: ['Выдвинутые лопатки, голова вперёд, кифоз'], ans: ['r'], why: 'Ромбовидные и трапециевидная.' },
+      { parts: ['Лопатка «проваливается» при опускании руки'], ans: ['s'], why: 'Передняя зубчатая.' },
+      { parts: ['Сопротивление — у нижнего угла'], ans: ['l'], why: 'Нижняя трапециевидная, опускание.' },
+    ], [['l', 'Нижняя трапециевидная', FUN], ['s', 'Передняя зубчатая', MU], ['r', 'Ромбовидные', SH]], { multi: false, text: true }),
+  }], done) }],
+
+  ['open', 'Открытая цепь', (m, D) => {
+    const p = panel(0);
+    txt(p, 'стабилизация: удержать против меняющейся силы', 800, 56, m('alt'), { size: 28, weight: 700, anchor: 'middle', fill: FUN });
+    // alternating pushes on the scapula, slowly then faster
+    const b = scapBack(p, 400, 520, .6, m('alt'), { both: false, rhythm: false }); b.only(['ltr', 'sa', 'rh', 'utr']);
+    const IA = b.at('IA'), AC = b.at('acro'), aw = [pushArr(p, IA, 90, FUN, null), pushArr(p, AC, -90, FUN, null), pushArr(p, b.at('med'), 180, SH, null), pushArr(p, b.at('lat'), 0, SH, null)];
+    aw.forEach(e => put(e, { o: 0 }));
+    prog(q => { const n = Math.floor(q * (q < .5 ? 6 : 16)) % 4; aw.forEach((e, i) => put(e, { o: i === n ? 1 : .08 })); ['ltr', 'sa', 'rh', 'utr'].forEach((k, i) => b.mus[k].act(i === n ? .9 : .3)); }, m('alt', 2), Math.max(6, m('rod') - m('alt') - 2.5), lin);
+    pillRow(p, ['медленно, «держите»', 'сказать, куда толкну', '→ быстрее, без подсказок'], 400, 830, m('alt', 6), { col: FUN, size: 15, gap: 3, space: 6 });
+    // supine with a rod held up: push, pull, rotate
+    [b.g, ...aw].forEach(e => hide(e, m('rod')));
+    const FY = 520, s = 1.05;
+    matLine(p, 60, 760, FY, m('rod'));
+    const sp = supine(p, 470, FY, s, m('rod'), { hN: 40, kN: 85, hF: 40, kF: 85, fN: 0, fF: 0, aN: 90, aF: 90, eN: 2, eF: 2 });
+    const W = onStage(sp, 'WN'), rod = G(p, { o: 0 }); mk('circle', { cx: f1(W[0]), cy: f1(W[1]), r: 10, fill: '#c9a97a', stroke: mix('#c9a97a', '#000000', .4), 'stroke-width': 2 }, rod); show(rod, m('rod'));
+    const dirs = [[1, 0], [0, -1], [-1, 0], [0, 1]], ra = dirs.map(([u, v]) => { const e = arw(p, W[0] + u * 90, W[1] + v * 90, W[0] + u * 24, W[1] + v * 24, FUN, null, 6); put(e, { o: 0 }); return e; });
+    prog(q => { const n = Math.floor(q * 10) % 4; ra.forEach((e, i) => put(e, { o: i === n ? 1 : 0 })); }, m('rod', 2), Math.max(4, m('blade') - m('rod') - 2.5), lin);
+    txt(p, 'палка или мяч, руки на 90°: толкать, тянуть, поворачивать', 400, 620, m('rod', 1), { size: 16, fill: FUN, weight: 700, anchor: 'middle' });
+    pill(p, '«боди-блейд»: стабилизаторы лопатки работают сильнее, чем с гантелями', 400, 760, m('blade'), { col: SH, size: 15 });
+    infoCard(p, 800, 90, 760, 230, 'чередующаяся изометрия', 'проксимальные мышцы учатся отвечать на меняющуюся нагрузку; сначала мышцы лопатки — основа для мышц плеча; вначале медленно и с подсказкой, потом быстрее и без подсказок', FUN, m('alt'), { size: 18 });
+    infoCard(p, 800, 335, 760, 175, 'лёжа на боку', 'предплечье пациента на плече терапевта; руки терапевта сверху и снизу лопатки, у края и клювовидного, у нижнего угла и акромиона; затем — сидя', MU, m('side'), { size: 18 });
+    infoCard(p, 800, 525, 760, 200, 'палка над грудью', 'лёжа, руки прямые на 90°: терапевт толкает, тянет и поворачивает палку; помогает здоровая — работать одной; затем сидя и стоя, следить за лопаткой', SP, m('rod'), { size: 18 });
+  }],
+
+  ['closed', 'Закрытая цепь', (m, D) => {
+    const p = panel(0);
+    txt(p, 'опора на руки включает стабилизаторы', 800, 56, m('wb'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const GY = 480, set = wallLean(p, 140, GY, .78, m('wb'), 330);
+    propLine(p, `M330 120V${GY}`, m('wb'), COL.dim, 6);
+    floorLn(p, 40, 360, GY, m('wb'));
+    prog(q => set(cyc(q, 1.5)), m('wb', 1), 5);
+    txt(p, 'крыло лопатки — дальше не идти', 220, 540, m('wb', 9), { size: 16, fill: BAD, weight: 700, anchor: 'middle' });
+    // Uhl: more support on the arms — more activity (schematic order)
+    txt(p, 'Ул: от лёгкого к тяжёлому', 590, 150, m('ev', 1), { size: 17, fill: COL.task, weight: 700, anchor: 'middle' });
+    [['молитва у стены', 1, SP], ['четвереньки', 1.4, SP], ['треножник', 2.2, FUN], ['«указка»', 2.6, FUN], ['упор лёжа', 3.4, BAD], ['ноги на 45 см', 3.9, BAD], ['на одной руке', 4.6, BAD]].forEach(([s, v, c], i) => {
+      const y = 190 + i * 40, g = G(p, { o: 0 }); show(g, m('ev', 3 + i * 1.2));
+      T(g, s, { x: 560, y: y + 5, size: 15, fill: c, weight: 700, anchor: 'end' }); mk('rect', { x: 570, y: y - 10, width: v * 38, height: 18, rx: 6, fill: c }, g);
+    });
+    pill(p, 'схема', 700, 470, m('ev', 3), { col: COL.dim, size: 13 });
+    txt(p, 'в книге — 18 дюймов', 600, 500, m('ev', 10), { size: 13, fill: COL.dim, weight: 600, anchor: 'middle' });
+    // progression: all fours, pressure on the trunk, unstable surfaces
+    const q4 = quadFig(p, 180, 840, .9, m('prog'));
+    pushArr(p, onStage(q4, 'Sh'), 180, FUN, m('prog', 1));
+    floorLn(p, 40, 400, 840, m('prog'));
+    const bl = ballEl(p, 34, SH); bl.set(560, 806); show(bl.g, m('prog', 5));
+    txt(p, 'мяч, качающаяся доска, одна рука', 560, 720, m('prog', 5), { size: 15, fill: SH, weight: 700, anchor: 'middle' });
+    infoCard(p, 800, 90, 760, 160, 'опора', 'включает стабилизаторы и, возможно, питание хряща; начинают рано, в защищённой опоре; крыловидная лопатка — не прогрессировать', SP, m('wb'), { size: 18 });
+    infoCard(p, 800, 265, 760, 265, 'Ул и соавт.', '18 здоровых: молитва, четвереньки, треножник, «указка», упор лёжа, упор с ногами на 45 см, на одной руке — чем больше опора, тем выше активность; подостная — самая активная везде, кроме молитвы (там большая грудная)', COL.task, m('ev'), { size: 18 });
+    infoCard(p, 800, 545, 760, 160, 'техника', 'на здоровом боку, кисть упирается в стол — сопротивление на лопатку; сидя с опорой предплечий или стоя у стола — давление на плечи, «держать»', FUN, m('tech'), { size: 18 });
+    infoCard(p, 800, 720, 760, 150, 'дальше', 'стена или мяч; четвереньки — давление на корпус нагружает переднюю зубчатую; неустойчивые опоры; одна рука', SH, m('prog'), { size: 18 });
+  }],
+
+  ['dyn', 'Динамическая стабилизация', (m, D) => {
+    const p = panel(0);
+    txt(p, 'тело движется над опорной рукой', 800, 56, m('shift'), { size: 28, weight: 700, anchor: 'middle', fill: MU });
+    const GY = 480, set = wallLean(p, 160, GY, .78, m('shift'), 350);
+    propLine(p, `M350 120V${GY}`, m('shift'), COL.dim, 6); floorLn(p, 60, 420, GY, m('shift'));
+    prog(q => set(.5 + .5 * Math.sin(2 * Math.PI * 2 * q), q > .5 ? Math.max(0, Math.sin(2 * Math.PI * 4 * q)) : 0), m('shift', 1), Math.max(5, m('quad') - m('shift') - 1.5), lin);
+    pillRow(p, ['перекат с руки на руку', 'оторвать одну руку', 'груз на запястье'], 400, 540, m('shift', 4), { col: MU, size: 15, gap: 2, space: 6 });
+    // on all fours: lift a leg — same side for the serratus, opposite for the lower trapezius
+    const q4 = quadFig(p, 220, 840, .9, m('quad'));
+    prog(t => { const k = cyc(t, 2); q4.set({ hF: 66 - 66 * k, kF: 90 - 85 * k }); plant(q4, 'KN', 220, 840 - 12 * .9); reach(q4, 'N', ...q4.hand); reach(q4, 'F', q4.hand[0] - 4, q4.hand[1]); }, m('quad', 1), 6);
+    floorLn(p, 60, 420, 840, m('quad'));
+    pillRow(p, ['нога своей стороны → передняя зубчатая', 'противоположной → нижняя трапециевидная'], 400, 640, m('quad', 3), { col: [SP, FUN], size: 14, gap: 2, space: 6 });
+    infoCard(p, 800, 90, 760, 245, 'у стены или стола', 'перекатываться с руки на руку; затем поочерёдно отрывать одну руку — другая держит нагрузку; сопротивление на плечи или грузы на запястья, всё менее предсказуемо по направлению, времени и силе', MU, m('shift'), { size: 18 });
+    infoCard(p, 800, 350, 760, 200, 'на четвереньках', 'поднимать ногу: своей стороны — больше передняя зубчатая, противоположной — нижняя трапециевидная; затем доска, полусфера, опора на одну руку', SP, m('quad'), { size: 18 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-load', prompt: ['Какая поза нагружает плечо больше?'],
+    build: grid([
+      { parts: ['«Молитва» у стены'], ans: ['a'], why: 'Мало — для раннего этапа.' },
+      { parts: ['Четвереньки'], ans: ['a'], why: 'Мало — для раннего этапа.' },
+      { parts: ['«Треножник»'], ans: ['b'], why: 'Средне.' },
+      { parts: ['Упор лёжа'], ans: ['c'], why: 'Много — особенно подостная.' },
+      { parts: ['Упор на одной руке'], ans: ['c'], why: 'Много — все мышцы, кроме надостной.' },
+    ], [['a', 'Мало', SP], ['b', 'Средне', FUN], ['c', 'Много', BAD]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Сначала — мышцы лопатки и туловища, потом мышцы плечевого сустава; выносливость — вместе с силой.', 'w1'],
+     ['Изометрия лопатки — по нарушению: нижняя трапециевидная, передняя зубчатая, ромбовидные; манжета — под разными углами.', 'w2'],
+     ['Стабилизация — от медленной смены сопротивления с подсказками к быстрой и автоматической.', 'w3'],
+     ['Опора — от «молитвы» и четверенек к упорам и одной руке; крыловидная лопатка — сигнал облегчить.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SH }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-wing', prompt: ['На четвереньках при давлении на корпус у пациента отходит медиальный край лопатки. Что сделать?'],
+    build: choice([
+      ['Облегчить: меньше сопротивления или опоры — например, вернуться к стене; укреплять переднюю зубчатую'],
+      ['Увеличить давление, чтобы мышца «проснулась»'],
+      ['Перейти на одну руку'],
+      ['Не обращать внимания'],
+    ], 0, 'Крыловидная лопатка — стабилизаторы не справляются: облегчить положение или угол.',
+    [null, 'Это усилит отрыв.', 'Это ещё тяжелее.', 'Это сигнал прогрессии.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-cues', prompt: ['Как проводить ритмическую стабилизацию в начале обучения?'],
+    build: choice([
+      ['Медленно менять направление, просить «держать» и говорить, куда будешь давить'],
+      ['Сразу быстро и без предупреждения'],
+      ['Сильнее всего на первом занятии'],
+      ['Только на мышцы плечевого сустава, без лопатки'],
+    ], 0, 'Сначала медленно и с подсказками, потом быстрее и без них — ответ становится автоматическим.',
+    [null, 'Это следующий этап.', 'Нагрузка — по силе пациента.', 'Сначала мышцы лопатки.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

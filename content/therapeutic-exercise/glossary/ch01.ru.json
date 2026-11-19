@@ -1,0 +1,1688 @@
+{
+  "chapter": 1,
+  "terms": [
+    {
+      "id": "therapeutic-exercise",
+      "ru": "Лечебные упражнения",
+      "en": "therapeutic exercise",
+      "def": "Систематическое, заранее спланированное выполнение движений, поз или видов активности, чтобы устранить нарушения, улучшить активность и участие, снизить факторы риска и укрепить здоровье.",
+      "page": 2,
+      "moments": [
+        {
+          "n": 1,
+          "beat": "def",
+          "mark": "t",
+          "to": "aim"
+        },
+        {
+          "n": 1,
+          "beat": "aims",
+          "mark": "a1",
+          "to": "a4"
+        }
+      ],
+      "see": [
+        "impairment",
+        "activity",
+        "participation"
+      ]
+    },
+    {
+      "id": "patient",
+      "ru": "Пациент",
+      "en": "patient",
+      "def": "Человек, у которого физический терапевт выявил нарушения и ограничения функции; ему помогают вернуть функцию и не допустить новых ограничений.",
+      "page": 1,
+      "moments": [
+        {
+          "n": 1,
+          "beat": "who",
+          "mark": "pat"
+        }
+      ],
+      "see": [
+        "client"
+      ]
+    },
+    {
+      "id": "client",
+      "ru": "Клиент",
+      "en": "client",
+      "def": "Человек без выявленных нарушений движения, который приходит укрепить здоровье, улучшить форму или снизить риск травм и болезней.",
+      "page": 1,
+      "moments": [
+        {
+          "n": 1,
+          "beat": "who",
+          "mark": "cli"
+        }
+      ],
+      "see": [
+        "patient"
+      ]
+    },
+    {
+      "id": "mobility",
+      "ru": "Подвижность",
+      "en": "mobility",
+      "def": "Способность частей тела двигаться самим или под внешней силой в объёме, которого хватает для повседневных дел.",
+      "page": 2,
+      "moments": [
+        {
+          "n": 2,
+          "beat": "mob",
+          "mark": "d"
+        },
+        {
+          "n": 28,
+          "beat": "mob",
+          "mark": "mob",
+          "to": "func"
+        }
+      ],
+      "see": [
+        "flexibility",
+        "passive-mobility",
+        "active-mobility"
+      ]
+    },
+    {
+      "id": "flexibility",
+      "ru": "Гибкость",
+      "en": "flexibility",
+      "def": "В книге — синоним подвижности: насколько свободно суставы и мягкие ткани пропускают движение в нужном объёме.",
+      "page": 2,
+      "moments": [
+        {
+          "n": 2,
+          "beat": "mob",
+          "mark": "d"
+        },
+        {
+          "n": 28,
+          "beat": "flex",
+          "mark": "flex",
+          "to": "pre"
+        }
+      ],
+      "see": [
+        "mobility",
+        "dynamic-flexibility",
+        "passive-flexibility"
+      ]
+    },
+    {
+      "id": "passive-mobility",
+      "ru": "Пассивная подвижность",
+      "en": "passive mobility",
+      "def": "Подвижность, когда сустав двигает кто-то другой; зависит от растяжимости мышц и несократительных тканей — капсулы, связок, фасций.",
+      "page": 2,
+      "moments": [
+        {
+          "n": 2,
+          "beat": "mob",
+          "mark": "pas",
+          "to": "non"
+        }
+      ],
+      "see": [
+        "active-mobility"
+      ]
+    },
+    {
+      "id": "active-mobility",
+      "ru": "Активная подвижность",
+      "en": "active mobility",
+      "def": "Подвижность, когда человек двигается сам: кроме растяжимости тканей нужна активация мышц нервной системой.",
+      "page": 2,
+      "moments": [
+        {
+          "n": 2,
+          "beat": "mob",
+          "mark": "act"
+        }
+      ],
+      "see": [
+        "passive-mobility"
+      ]
+    },
+    {
+      "id": "muscle-performance",
+      "ru": "Мышечная работоспособность",
+      "en": "muscle performance",
+      "def": "Способность мышцы развивать напряжение и выполнять работу; складывается из силы, мощности и мышечной выносливости.",
+      "page": 2,
+      "moments": [
+        {
+          "n": 2,
+          "beat": "perf",
+          "to": "e"
+        },
+        {
+          "n": 54,
+          "beat": "perf",
+          "mark": "perf",
+          "to": "three"
+        }
+      ],
+      "see": [
+        "strength",
+        "power",
+        "muscular-endurance"
+      ]
+    },
+    {
+      "id": "cardiopulmonary-endurance",
+      "ru": "Кардиореспираторная выносливость",
+      "en": "cardiopulmonary endurance",
+      "alt": [
+        "кардиореспираторная тренированность",
+        "сердечно-сосудистая выносливость"
+      ],
+      "def": "Способность долго выполнять повторяющиеся движения всем телом умеренной интенсивности: ходьба, бег трусцой, велосипед, плавание.",
+      "page": 2,
+      "moments": [
+        {
+          "n": 2,
+          "beat": "cardio",
+          "to": "syn"
+        },
+        {
+          "n": 78,
+          "beat": "end",
+          "mark": "cv"
+        }
+      ],
+      "see": [
+        "vo2max",
+        "aerobic-training"
+      ]
+    },
+    {
+      "id": "balance",
+      "ru": "Равновесие",
+      "en": "balance",
+      "alt": [
+        "постуральный контроль",
+        "постуральная устойчивость"
+      ],
+      "def": "Умение удерживать центр масс тела над площадью опоры или перемещать его в её пределах, не падая; его вместе дают нервная система (органы чувств и их обработка) и опорно-двигательный аппарат.",
+      "page": 2,
+      "moments": [
+        {
+          "n": 2,
+          "beat": "balance",
+          "to": "sens"
+        },
+        {
+          "n": 86,
+          "beat": "terms",
+          "mark": "bal",
+          "to": "dyn"
+        }
+      ],
+      "see": [
+        "center-of-mass",
+        "base-of-support",
+        "limits-of-stability",
+        "sensory-organization"
+      ]
+    },
+    {
+      "id": "stability",
+      "ru": "Стабильность",
+      "en": "stability",
+      "def": "Удержание одного сегмента тела неподвижным, пока другой движется. У сустава — удержание костей в правильном положении: связками и капсулой, а динамически мышцами.",
+      "page": 2,
+      "moments": [
+        {
+          "n": 2,
+          "beat": "stab",
+          "to": "dyn"
+        }
+      ]
+    },
+    {
+      "id": "neuromuscular-control",
+      "ru": "Нервно-мышечный контроль",
+      "en": "neuromuscular control",
+      "def": "Взаимодействие органов чувств и мышц, при котором мышцы заранее готовятся к движению или вовремя отвечают на сигналы о положении тела.",
+      "page": 2,
+      "moments": [
+        {
+          "n": 2,
+          "beat": "coord",
+          "mark": "nmc",
+          "to": "roles"
+        }
+      ],
+      "see": [
+        "coordination"
+      ]
+    },
+    {
+      "id": "coordination",
+      "ru": "Координация",
+      "en": "coordination",
+      "def": "Правильный момент, порядок и сила включения мышц: рука тянется к чашке, и у цели трёхглавая мышца вовремя тормозит движение.",
+      "page": 2,
+      "moments": [
+        {
+          "n": 2,
+          "beat": "coord",
+          "to": "bad"
+        }
+      ],
+      "see": [
+        "neuromuscular-control"
+      ]
+    },
+    {
+      "id": "mechanical-stress",
+      "ru": "Механическое напряжение",
+      "en": "stress",
+      "def": "Сила, делённая на площадь. Ткани приспосабливаются к нагрузке: при её недостатке слабеют, при избытке травмируются.",
+      "page": 3,
+      "moments": [
+        {
+          "n": 2,
+          "beat": "stress",
+          "mark": "f",
+          "to": "high"
+        },
+        {
+          "n": 30,
+          "beat": "ss",
+          "mark": "sig"
+        }
+      ],
+      "see": [
+        "stress-strain-curve"
+      ]
+    },
+    {
+      "id": "disablement",
+      "ru": "Инвалидизация",
+      "en": "disablement",
+      "def": "Последствия острой или хронической болезни, травмы или аномалии, которые мешают базовым движениям и привычным ролям человека в обществе.",
+      "page": 4,
+      "moments": [
+        {
+          "n": 3,
+          "beat": "disable",
+          "mark": "def"
+        }
+      ],
+      "see": [
+        "icf"
+      ]
+    },
+    {
+      "id": "icf",
+      "ru": "МКФ",
+      "en": "International Classification of Functioning, Disability and Health (ICF)",
+      "alt": [
+        "Международная классификация функционирования"
+      ],
+      "def": "Классификация ВОЗ, которая описывает здоровье через функции и структуры, активность, участие и факторы контекста; все уровни влияют друг на друга.",
+      "page": 4,
+      "moments": [
+        {
+          "n": 3,
+          "beat": "icf",
+          "mark": "icf",
+          "to": "arrows"
+        },
+        {
+          "n": 4,
+          "beat": "apta",
+          "mark": "y08"
+        }
+      ],
+      "see": [
+        "biopsychosocial-model",
+        "icd"
+      ]
+    },
+    {
+      "id": "biopsychosocial-model",
+      "ru": "Биопсихосоциальная модель",
+      "en": "biopsychosocial model",
+      "def": "Взгляд на здоровье и инвалидность как на результат совместного действия биологических, психологических и социальных факторов, а не одной болезни.",
+      "page": 5,
+      "moments": [
+        {
+          "n": 3,
+          "beat": "icf",
+          "mark": "bps"
+        }
+      ],
+      "see": [
+        "icf"
+      ]
+    },
+    {
+      "id": "icd",
+      "ru": "МКБ",
+      "en": "International Classification of Diseases (ICD)",
+      "alt": [
+        "Международная классификация болезней"
+      ],
+      "def": "Международная классификация болезней: в ней кодируют сами болезни и состояния, а их влияние на функцию описывает МКФ.",
+      "page": 4,
+      "moments": [
+        {
+          "n": 3,
+          "beat": "icf",
+          "mark": "icd"
+        },
+        {
+          "n": 4,
+          "beat": "hc",
+          "mark": "icd"
+        }
+      ],
+      "see": [
+        "icf"
+      ]
+    },
+    {
+      "id": "functioning",
+      "ru": "Функционирование",
+      "en": "functioning",
+      "def": "Положительная сторона здоровья в МКФ: целостные функции и структуры организма, выполнение действий и участие в жизни.",
+      "page": 4,
+      "moments": [
+        {
+          "n": 3,
+          "beat": "neutral",
+          "mark": "plus"
+        }
+      ],
+      "see": [
+        "disability"
+      ]
+    },
+    {
+      "id": "disability",
+      "ru": "Ограничения жизнедеятельности",
+      "en": "disability",
+      "alt": [
+        "инвалидность"
+      ],
+      "def": "Отрицательная сторона здоровья в МКФ: нарушения, ограничения активности и ограничения участия вместе.",
+      "page": 4,
+      "moments": [
+        {
+          "n": 3,
+          "beat": "neutral",
+          "mark": "minus"
+        },
+        {
+          "n": 17,
+          "beat": "dis",
+          "mark": "who"
+        }
+      ],
+      "see": [
+        "functioning"
+      ]
+    },
+    {
+      "id": "contextual-factors",
+      "ru": "Факторы контекста",
+      "en": "contextual factors",
+      "def": "Весь фон жизни человека: факторы среды, которые помогают или мешают, и личностные факторы.",
+      "page": 5,
+      "moments": [
+        {
+          "n": 3,
+          "beat": "parts",
+          "mark": "p2",
+          "to": "persf"
+        }
+      ],
+      "see": [
+        "environmental-factors",
+        "personal-factors"
+      ]
+    },
+    {
+      "id": "capacity",
+      "ru": "Способность",
+      "en": "capacity",
+      "def": "В МКФ — выполнение задачи в стандартных условиях, без влияния привычной среды человека.",
+      "page": 5,
+      "moments": [
+        {
+          "n": 3,
+          "beat": "cap",
+          "mark": "cap"
+        }
+      ],
+      "see": [
+        "performance"
+      ]
+    },
+    {
+      "id": "performance",
+      "ru": "Реализация",
+      "en": "performance",
+      "def": "В МКФ — выполнение задачи в реальной среде, где человек живёт; разница со способностью показывает, помогает среда или мешает.",
+      "page": 5,
+      "moments": [
+        {
+          "n": 3,
+          "beat": "cap",
+          "mark": "perf",
+          "to": "gap"
+        }
+      ],
+      "see": [
+        "capacity"
+      ]
+    },
+    {
+      "id": "health-condition",
+      "ru": "Состояние здоровья",
+      "en": "health condition",
+      "def": "Острая или хроническая болезнь, расстройство, травма или такие обстоятельства, как старение, беременность, стресс; на нём основан медицинский диагноз.",
+      "page": 6,
+      "moments": [
+        {
+          "n": 4,
+          "beat": "hc",
+          "mark": "hc",
+          "to": "icd"
+        }
+      ]
+    },
+    {
+      "id": "impairment",
+      "ru": "Нарушение",
+      "en": "impairment",
+      "def": "Потеря целостности физиологических функций или анатомических структур: например, боль, ограничение объёма движений, слабость, отёк.",
+      "page": 6,
+      "moments": [
+        {
+          "n": 4,
+          "beat": "body",
+          "mark": "imp",
+          "to": "func"
+        }
+      ],
+      "see": [
+        "primary-impairment",
+        "activity-limitation"
+      ]
+    },
+    {
+      "id": "primary-impairment",
+      "ru": "Первичное нарушение",
+      "en": "primary impairment",
+      "def": "Нарушение, которое возникает прямо из-за состояния здоровья.",
+      "page": 7,
+      "moments": [
+        {
+          "n": 4,
+          "beat": "prim",
+          "mark": "p1"
+        }
+      ],
+      "see": [
+        "secondary-impairment",
+        "composite-impairment"
+      ]
+    },
+    {
+      "id": "secondary-impairment",
+      "ru": "Вторичное нарушение",
+      "en": "secondary impairment",
+      "def": "Нарушение, которое стало следствием уже существовавших нарушений: например, плохая осанка изменила механику плеча.",
+      "page": 7,
+      "moments": [
+        {
+          "n": 4,
+          "beat": "prim",
+          "mark": "p2"
+        }
+      ],
+      "see": [
+        "primary-impairment"
+      ]
+    },
+    {
+      "id": "composite-impairment",
+      "ru": "Составное нарушение",
+      "en": "composite impairment",
+      "def": "Нарушение с несколькими причинами сразу: например, равновесие после растяжения голеностопа страдает из-за слабой связки, проприоцепции и мышц.",
+      "page": 8,
+      "moments": [
+        {
+          "n": 4,
+          "beat": "prim",
+          "mark": "comp",
+          "to": "c5"
+        }
+      ],
+      "see": [
+        "primary-impairment"
+      ]
+    },
+    {
+      "id": "activity",
+      "ru": "Активность",
+      "en": "activity",
+      "def": "В МКФ — выполнение человеком задачи или действия.",
+      "page": 6,
+      "moments": [
+        {
+          "n": 4,
+          "beat": "act",
+          "mark": "a"
+        }
+      ],
+      "see": [
+        "activity-limitation",
+        "participation"
+      ]
+    },
+    {
+      "id": "participation",
+      "ru": "Участие",
+      "en": "participation",
+      "def": "В МКФ — вовлечённость человека в жизненную ситуацию: работа, семья, досуг, самообслуживание.",
+      "page": 6,
+      "moments": [
+        {
+          "n": 4,
+          "beat": "act",
+          "mark": "pa"
+        }
+      ],
+      "see": [
+        "participation-restriction",
+        "activity"
+      ]
+    },
+    {
+      "id": "activity-limitation",
+      "ru": "Ограничение активности",
+      "en": "activity limitation",
+      "def": "Трудность, с которой человек выполняет отдельное действие: например, не может дотянуться до верхней полки.",
+      "page": 9,
+      "moments": [
+        {
+          "n": 4,
+          "beat": "act",
+          "mark": "e2"
+        }
+      ],
+      "see": [
+        "participation-restriction"
+      ]
+    },
+    {
+      "id": "participation-restriction",
+      "ru": "Ограничение участия",
+      "en": "participation restriction",
+      "def": "Трудность участия в жизненных ситуациях: например, потеря самостоятельности в уходе за собой и в домашних делах.",
+      "page": 9,
+      "moments": [
+        {
+          "n": 4,
+          "beat": "act",
+          "mark": "e3"
+        }
+      ],
+      "see": [
+        "activity-limitation"
+      ]
+    },
+    {
+      "id": "environmental-factors",
+      "ru": "Факторы среды",
+      "en": "environmental factors",
+      "def": "Физическая и социальная среда и отношение окружающих; облегчают функционирование или становятся барьерами.",
+      "page": 5,
+      "moments": [
+        {
+          "n": 4,
+          "beat": "ctx",
+          "mark": "env"
+        }
+      ],
+      "see": [
+        "personal-factors"
+      ]
+    },
+    {
+      "id": "personal-factors",
+      "ru": "Личностные факторы",
+      "en": "personal factors",
+      "def": "Внутренние особенности человека: возраст, пол, образование, привычки, характер, умение справляться с трудностями. В МКФ их не кодируют, но учитывают.",
+      "page": 5,
+      "moments": [
+        {
+          "n": 4,
+          "beat": "ctx",
+          "mark": "pers",
+          "to": "code"
+        }
+      ],
+      "see": [
+        "environmental-factors"
+      ]
+    },
+    {
+      "id": "primary-prevention",
+      "ru": "Первичная профилактика",
+      "en": "primary prevention",
+      "def": "Укрепление здоровья и снижение риска, чтобы проблема не возникла у человека или группы из группы риска.",
+      "page": 10,
+      "moments": [
+        {
+          "n": 4,
+          "beat": "levels",
+          "mark": "l1"
+        },
+        {
+          "n": 15,
+          "beat": "prev",
+          "mark": "p1"
+        }
+      ],
+      "see": [
+        "secondary-prevention",
+        "tertiary-prevention"
+      ]
+    },
+    {
+      "id": "secondary-prevention",
+      "ru": "Вторичная профилактика",
+      "en": "secondary prevention",
+      "def": "Раннее выявление болезни и уменьшение её тяжести и длительности.",
+      "page": 10,
+      "moments": [
+        {
+          "n": 4,
+          "beat": "levels",
+          "mark": "l2"
+        },
+        {
+          "n": 15,
+          "beat": "prev",
+          "mark": "p2"
+        }
+      ],
+      "see": [
+        "primary-prevention",
+        "tertiary-prevention"
+      ]
+    },
+    {
+      "id": "tertiary-prevention",
+      "ru": "Третичная профилактика",
+      "en": "tertiary prevention",
+      "def": "Реабилитация, которая ограничивает прогрессирование и уменьшает инвалидность при хронических или необратимых болезнях.",
+      "page": 10,
+      "moments": [
+        {
+          "n": 4,
+          "beat": "levels",
+          "mark": "l3"
+        },
+        {
+          "n": 15,
+          "beat": "prev",
+          "mark": "p3"
+        }
+      ],
+      "see": [
+        "primary-prevention",
+        "secondary-prevention"
+      ]
+    },
+    {
+      "id": "risk-factors",
+      "ru": "Факторы риска",
+      "en": "risk factors",
+      "def": "Особенности, которые есть ещё до болезни и повышают её вероятность: биологические, поведенческие, средовые, социально-экономические.",
+      "page": 10,
+      "moments": [
+        {
+          "n": 4,
+          "beat": "risk",
+          "mark": "rf",
+          "to": "r4"
+        }
+      ]
+    },
+    {
+      "id": "clinical-decision-making",
+      "ru": "Клиническое решение",
+      "en": "clinical decision-making",
+      "def": "Процесс рассуждения: терапевт собирает данные, выдвигает гипотезу, выбирает вмешательство, проверяет результат и корректирует план.",
+      "page": 11,
+      "moments": [
+        {
+          "n": 5,
+          "beat": "cdm",
+          "mark": "def",
+          "to": "loop"
+        }
+      ],
+      "see": [
+        "clinical-prediction-rule",
+        "evidence-based-practice"
+      ]
+    },
+    {
+      "id": "clinical-prediction-rule",
+      "ru": "Правило клинического прогноза",
+      "en": "clinical prediction rule (CPR)",
+      "def": "Набор признаков, по которому уточняют диагноз или прогноз и выделяют пациентов, которым конкретный метод скорее поможет; большинство правил пока мало проверены.",
+      "page": 12,
+      "moments": [
+        {
+          "n": 5,
+          "beat": "tools",
+          "mark": "cpr",
+          "to": "warn"
+        },
+        {
+          "n": 140,
+          "beat": "manip",
+          "mark": "fly"
+        }
+      ],
+      "see": [
+        "treatment-categories"
+      ]
+    },
+    {
+      "id": "red-flags",
+      "ru": "Красные флаги",
+      "en": "red flags",
+      "def": "Тревожные признаки серьёзного состояния, при которых пациента нужно вовремя направить к врачу: при боли в спине — признаки поражения спинного мозга, травма с неисключённым переломом, необъяснимая ночная боль.",
+      "page": 12,
+      "moments": [
+        {
+          "n": 5,
+          "beat": "coord",
+          "mark": "flag"
+        },
+        {
+          "n": 136,
+          "beat": "exam",
+          "mark": "red"
+        },
+        {
+          "n": 142,
+          "beat": "ha",
+          "mark": "red"
+        }
+      ]
+    },
+    {
+      "id": "evidence-based-practice",
+      "ru": "Доказательная практика",
+      "en": "evidence-based practice",
+      "def": "Осознанное использование лучших современных доказательств вместе с опытом специалиста и ценностями пациента при решениях о конкретном человеке.",
+      "page": 13,
+      "moments": [
+        {
+          "n": 5,
+          "beat": "ebp",
+          "mark": "def",
+          "to": "c3"
+        },
+        {
+          "n": 5,
+          "beat": "steps",
+          "mark": "s1",
+          "to": "again"
+        }
+      ]
+    },
+    {
+      "id": "patient-management-model",
+      "ru": "Модель ведения пациента",
+      "en": "patient/client management model",
+      "def": "Шесть элементов работы: обследование, оценка, диагноз, прогноз и план лечения, вмешательство, анализ результатов; на всём пути — координация и документация.",
+      "page": 14,
+      "moments": [
+        {
+          "n": 6,
+          "beat": "model",
+          "mark": "goal",
+          "to": "out"
+        }
+      ],
+      "see": [
+        "examination",
+        "evaluation",
+        "diagnosis",
+        "prognosis"
+      ]
+    },
+    {
+      "id": "examination",
+      "ru": "Обследование",
+      "en": "examination",
+      "def": "Систематический сбор сведений о проблеме пациента: анамнез, обзор систем, тесты и измерения. Задаёт исходный уровень для оценки результата.",
+      "page": 15,
+      "moments": [
+        {
+          "n": 6,
+          "beat": "exam",
+          "mark": "def",
+          "to": "base"
+        }
+      ],
+      "see": [
+        "systems-review",
+        "tests-and-measures"
+      ]
+    },
+    {
+      "id": "systems-review",
+      "ru": "Обзор систем",
+      "en": "systems review",
+      "def": "Короткая проверка сердца и лёгких, кожи, опорно-двигательной и нервно-мышечной систем и общения, чтобы не пропустить то, что требует врача.",
+      "page": 15,
+      "moments": [
+        {
+          "n": 6,
+          "beat": "sysrev",
+          "mark": "cv",
+          "to": "cog"
+        }
+      ],
+      "see": [
+        "examination"
+      ]
+    },
+    {
+      "id": "tests-and-measures",
+      "ru": "Тесты и измерения",
+      "en": "tests and measures",
+      "def": "Объективные проверки, которые подтверждают или опровергают рабочие гипотезы и задают исходный уровень.",
+      "page": 15,
+      "moments": [
+        {
+          "n": 6,
+          "beat": "tests",
+          "mark": "why",
+          "to": "rules"
+        }
+      ],
+      "see": [
+        "examination"
+      ]
+    },
+    {
+      "id": "evaluation",
+      "ru": "Оценка",
+      "en": "evaluation",
+      "def": "Интерпретация собранных данных, из которой складываются диагноз, прогноз и план. Идёт на всём пути лечения.",
+      "page": 20,
+      "moments": [
+        {
+          "n": 7,
+          "beat": "eval",
+          "mark": "def",
+          "to": "all"
+        }
+      ],
+      "see": [
+        "diagnosis"
+      ]
+    },
+    {
+      "id": "diagnosis",
+      "ru": "Диагноз",
+      "en": "diagnosis",
+      "def": "У физического терапевта — процесс и категория: какие нарушения системы движения есть и чем то, как человек двигается, отличается от нужного ему.",
+      "page": 21,
+      "moments": [
+        {
+          "n": 7,
+          "beat": "dx",
+          "mark": "two",
+          "to": "s3"
+        },
+        {
+          "n": 7,
+          "beat": "dx",
+          "mark": "who",
+          "to": "gap"
+        }
+      ],
+      "see": [
+        "evaluation",
+        "prognosis"
+      ]
+    },
+    {
+      "id": "prognosis",
+      "ru": "Прогноз",
+      "en": "prognosis",
+      "def": "Ожидаемый оптимальный уровень функции после лечения и время, нужное, чтобы его достичь.",
+      "page": 22,
+      "moments": [
+        {
+          "n": 7,
+          "beat": "prog",
+          "mark": "def",
+          "to": "f"
+        }
+      ],
+      "see": [
+        "plan-of-care"
+      ]
+    },
+    {
+      "id": "plan-of-care",
+      "ru": "План лечения",
+      "en": "plan of care",
+      "def": "Цели со сроками, измеримые ожидаемые результаты, конкретные вмешательства, их частота и длительность и план выписки.",
+      "page": 22,
+      "moments": [
+        {
+          "n": 7,
+          "beat": "plan",
+          "mark": "p1",
+          "to": "p6"
+        }
+      ],
+      "see": [
+        "prognosis"
+      ]
+    },
+    {
+      "id": "intervention",
+      "ru": "Вмешательство",
+      "en": "intervention",
+      "def": "Целенаправленная работа терапевта с пациентом, а при необходимости — с его близкими и другими специалистами; её меняют по реакции пациента.",
+      "page": 23,
+      "moments": [
+        {
+          "n": 8,
+          "beat": "interv",
+          "mark": "def",
+          "to": "upd"
+        }
+      ],
+      "see": [
+        "patient-instruction",
+        "outcomes"
+      ]
+    },
+    {
+      "id": "task-specific-exercise",
+      "ru": "Упражнения, специфичные для задачи",
+      "en": "task-specific exercise",
+      "def": "Упражнения в движениях, близких к нужным в жизни: например, тренировать силу ног подъёмом и спуском по лестнице.",
+      "page": 24,
+      "moments": [
+        {
+          "n": 8,
+          "beat": "shift",
+          "mark": "now",
+          "to": "task"
+        },
+        {
+          "n": 8,
+          "beat": "stairs",
+          "mark": "st",
+          "to": "res"
+        }
+      ]
+    },
+    {
+      "id": "patient-instruction",
+      "ru": "Обучение пациента",
+      "en": "patient-related instruction",
+      "def": "Единственная категория вмешательств, нужная каждому пациенту на всём пути лечения: знания, отношение и навыки для пациента, семьи и ухаживающих.",
+      "page": 24,
+      "moments": [
+        {
+          "n": 8,
+          "beat": "instr",
+          "mark": "all",
+          "to": "what"
+        }
+      ]
+    },
+    {
+      "id": "outcomes",
+      "ru": "Результаты",
+      "en": "outcomes",
+      "def": "Итоги лечения: функционирование, профилактика, общее здоровье, удовлетворённость пациента. Их отслеживают по ходу лечения и в конце.",
+      "page": 25,
+      "moments": [
+        {
+          "n": 8,
+          "beat": "outc",
+          "mark": "def",
+          "to": "areas"
+        }
+      ],
+      "see": [
+        "discharge"
+      ]
+    },
+    {
+      "id": "discharge",
+      "ru": "Выписка",
+      "en": "discharge",
+      "def": "Окончание помощи, когда цели и ожидаемые результаты достигнуты; её планируют с самого начала лечения.",
+      "page": 26,
+      "moments": [
+        {
+          "n": 8,
+          "beat": "disch",
+          "mark": "dis",
+          "to": "plan"
+        }
+      ],
+      "see": [
+        "discontinuation"
+      ]
+    },
+    {
+      "id": "discontinuation",
+      "ru": "Прекращение лечения",
+      "en": "discontinuation",
+      "def": "Окончание помощи до достижения целей: пациент сам решил остановиться, прогресс стал невозможен или лечение не оплачивается.",
+      "page": 26,
+      "moments": [
+        {
+          "n": 8,
+          "beat": "disch",
+          "mark": "stop"
+        }
+      ],
+      "see": [
+        "discharge"
+      ]
+    },
+    {
+      "id": "health-literacy",
+      "ru": "Грамотность в вопросах здоровья",
+      "en": "health literacy",
+      "def": "Способность человека находить, обрабатывать и понимать основные сведения о здоровье, нужные для решений о себе.",
+      "page": 27,
+      "moments": [
+        {
+          "n": 9,
+          "beat": "hl",
+          "mark": "def",
+          "to": "gap"
+        }
+      ]
+    },
+    {
+      "id": "motor-learning",
+      "ru": "Моторное обучение",
+      "en": "motor learning",
+      "def": "Внутренние процессы, благодаря которым человек через практику приобретает навык и надолго его сохраняет; о нём судят по выполнению навыка позже.",
+      "page": 27,
+      "moments": [
+        {
+          "n": 9,
+          "beat": "ml",
+          "mark": "def"
+        },
+        {
+          "n": 9,
+          "beat": "ml",
+          "mark": "perf",
+          "to": "obs"
+        }
+      ],
+      "see": [
+        "motor-performance",
+        "cognitive-stage"
+      ]
+    },
+    {
+      "id": "motor-performance",
+      "ru": "Выполнение навыка",
+      "en": "motor performance",
+      "def": "Умение сделать движение сейчас, на занятии; ещё не значит, что навык усвоен и сохранится.",
+      "page": 27,
+      "moments": [
+        {
+          "n": 9,
+          "beat": "ml",
+          "mark": "perf",
+          "to": "trap"
+        }
+      ],
+      "see": [
+        "motor-learning"
+      ]
+    },
+    {
+      "id": "discrete-task",
+      "ru": "Дискретная задача",
+      "en": "discrete task",
+      "def": "Движение с ясным началом и концом: сократить мышцу, взять предмет, отжаться.",
+      "page": 28,
+      "moments": [
+        {
+          "n": 9,
+          "beat": "types",
+          "mark": "disc"
+        }
+      ],
+      "see": [
+        "serial-task",
+        "continuous-task"
+      ]
+    },
+    {
+      "id": "serial-task",
+      "ru": "Серийная задача",
+      "en": "serial task",
+      "def": "Цепочка дискретных движений в определённом порядке: например, есть вилкой.",
+      "page": 28,
+      "moments": [
+        {
+          "n": 9,
+          "beat": "types",
+          "mark": "ser"
+        }
+      ],
+      "see": [
+        "discrete-task",
+        "continuous-task"
+      ]
+    },
+    {
+      "id": "continuous-task",
+      "ru": "Непрерывная задача",
+      "en": "continuous task",
+      "def": "Движение, которое повторяется без чёткого начала и конца: ходьба, подъём по лестнице, велосипед.",
+      "page": 28,
+      "moments": [
+        {
+          "n": 9,
+          "beat": "types",
+          "mark": "cont"
+        }
+      ],
+      "see": [
+        "discrete-task",
+        "serial-task"
+      ]
+    },
+    {
+      "id": "gentile-taxonomy",
+      "ru": "Таксономия Джентайл",
+      "en": "Gentile's taxonomy of motor tasks",
+      "def": "Деление двигательных задач по четырём измерениям: закрытая или открытая среда, её изменчивость, тело на месте или в движении, работа руками; всего 16 условий.",
+      "page": 28,
+      "moments": [
+        {
+          "n": 9,
+          "beat": "gentile",
+          "mark": "d1",
+          "to": "grid"
+        },
+        {
+          "n": 9,
+          "beat": "dims",
+          "mark": "cl",
+          "to": "man"
+        }
+      ],
+      "see": [
+        "closed-environment",
+        "open-environment"
+      ]
+    },
+    {
+      "id": "closed-environment",
+      "ru": "Закрытая среда",
+      "en": "closed environment",
+      "def": "Условия, где предметы и опора неподвижны и человек сам задаёт темп: например, моет руки у раковины.",
+      "page": 28,
+      "moments": [
+        {
+          "n": 9,
+          "beat": "dims",
+          "mark": "cl"
+        },
+        {
+          "n": 87,
+          "beat": "ctx",
+          "mark": "env"
+        }
+      ],
+      "see": [
+        "open-environment"
+      ]
+    },
+    {
+      "id": "open-environment",
+      "ru": "Открытая среда",
+      "en": "open environment",
+      "def": "Условия, где что-то движется — люди, транспорт, качающаяся опора, — и темп задаёт среда.",
+      "page": 28,
+      "moments": [
+        {
+          "n": 9,
+          "beat": "dims",
+          "mark": "op"
+        },
+        {
+          "n": 87,
+          "beat": "ctx",
+          "mark": "env"
+        }
+      ],
+      "see": [
+        "closed-environment"
+      ]
+    },
+    {
+      "id": "cognitive-stage",
+      "ru": "Когнитивная стадия",
+      "en": "cognitive stage",
+      "def": "Первая стадия моторного обучения: человек понимает задачу и думает о каждом шаге, ошибок много; нужны тихая обстановка и частая обратная связь.",
+      "page": 31,
+      "moments": [
+        {
+          "n": 10,
+          "beat": "cog",
+          "mark": "goal",
+          "to": "err"
+        },
+        {
+          "n": 10,
+          "beat": "cogstr",
+          "mark": "c1",
+          "to": "c7"
+        }
+      ],
+      "see": [
+        "associative-stage",
+        "autonomous-stage"
+      ]
+    },
+    {
+      "id": "associative-stage",
+      "ru": "Ассоциативная стадия",
+      "en": "associative stage",
+      "def": "Вторая стадия: ошибок мало, человек шлифует навык, пробует варианты и сам исправляет ошибки; обратную связь дают реже и позже.",
+      "page": 31,
+      "moments": [
+        {
+          "n": 10,
+          "beat": "assoc",
+          "mark": "ch",
+          "to": "home"
+        }
+      ],
+      "see": [
+        "cognitive-stage",
+        "autonomous-stage"
+      ]
+    },
+    {
+      "id": "autonomous-stage",
+      "ru": "Автономная стадия",
+      "en": "autonomous stage",
+      "def": "Третья стадия: движение автоматическое, его можно делать одновременно с другим делом; большинство пациентов выписывают раньше.",
+      "page": 31,
+      "moments": [
+        {
+          "n": 10,
+          "beat": "auto",
+          "mark": "ch",
+          "to": "disch"
+        }
+      ],
+      "see": [
+        "associative-stage"
+      ]
+    },
+    {
+      "id": "part-practice",
+      "ru": "Практика по частям",
+      "en": "part practice",
+      "def": "Отработка отдельных трудных частей сложного серийного навыка: например, при пересаживании из кресла-коляски.",
+      "page": 32,
+      "moments": [
+        {
+          "n": 11,
+          "beat": "partwhole",
+          "mark": "part",
+          "to": "ex"
+        }
+      ],
+      "see": [
+        "whole-practice"
+      ]
+    },
+    {
+      "id": "whole-practice",
+      "ru": "Практика целиком",
+      "en": "whole practice",
+      "def": "Навык отрабатывают целиком: непрерывные задачи вроде ходьбы, серийные задачи с ритмом и инерцией, простые дискретные движения.",
+      "page": 32,
+      "moments": [
+        {
+          "n": 11,
+          "beat": "partwhole",
+          "mark": "whole",
+          "to": "disc"
+        }
+      ],
+      "see": [
+        "part-practice"
+      ]
+    },
+    {
+      "id": "blocked-practice",
+      "ru": "Блоковая практика",
+      "en": "blocked-order practice",
+      "def": "Одна и та же задача в одних и тех же условиях подряд. Быстро улучшает выполнение на занятии, но навык хуже сохраняется.",
+      "page": 32,
+      "moments": [
+        {
+          "n": 11,
+          "beat": "order",
+          "mark": "bl"
+        },
+        {
+          "n": 11,
+          "beat": "effects",
+          "mark": "acq"
+        }
+      ],
+      "see": [
+        "random-practice",
+        "random-blocked-practice"
+      ]
+    },
+    {
+      "id": "random-practice",
+      "ru": "Случайная практика",
+      "en": "random-order practice",
+      "def": "Вариации задачи в непредсказуемом порядке. Осваивается медленнее, зато навык лучше сохраняется и переносится на новые условия.",
+      "page": 32,
+      "moments": [
+        {
+          "n": 11,
+          "beat": "order",
+          "mark": "rnd"
+        },
+        {
+          "n": 11,
+          "beat": "effects",
+          "mark": "ret"
+        }
+      ],
+      "see": [
+        "blocked-practice",
+        "random-blocked-practice"
+      ]
+    },
+    {
+      "id": "random-blocked-practice",
+      "ru": "Случайно-блоковая практика",
+      "en": "random/blocked-order practice",
+      "def": "Вариации задачи в случайном порядке, но каждая — хотя бы дважды подряд; середина между блоковой и случайной практикой.",
+      "page": 32,
+      "moments": [
+        {
+          "n": 11,
+          "beat": "order",
+          "mark": "rb"
+        },
+        {
+          "n": 11,
+          "beat": "effects",
+          "mark": "rb"
+        }
+      ],
+      "see": [
+        "blocked-practice",
+        "random-practice"
+      ]
+    },
+    {
+      "id": "mental-practice",
+      "ru": "Мысленная практика",
+      "en": "mental practice",
+      "alt": [
+        "визуализация"
+      ],
+      "def": "Мысленное проигрывание движения перед выполнением. Одна уступает физической практике, но вместе с ней ускоряет освоение навыка.",
+      "page": 32,
+      "moments": [
+        {
+          "n": 11,
+          "beat": "mental",
+          "mark": "ment",
+          "to": "both"
+        }
+      ]
+    },
+    {
+      "id": "feedback",
+      "ru": "Обратная связь",
+      "en": "feedback",
+      "def": "Сенсорные сведения, которые ученик получает во время или после попытки; по важности для обучения уступает только практике.",
+      "page": 33,
+      "moments": [
+        {
+          "n": 12,
+          "beat": "def",
+          "mark": "def",
+          "to": "sched"
+        }
+      ],
+      "see": [
+        "intrinsic-feedback",
+        "augmented-feedback",
+        "knowledge-of-results"
+      ]
+    },
+    {
+      "id": "intrinsic-feedback",
+      "ru": "Внутренняя обратная связь",
+      "en": "intrinsic feedback",
+      "def": "Сведения от собственных органов чувств ученика — чувства положения и движения, осязания, зрения, слуха; возникает в самом движении.",
+      "page": 33,
+      "moments": [
+        {
+          "n": 12,
+          "beat": "src",
+          "mark": "intr"
+        }
+      ],
+      "see": [
+        "augmented-feedback"
+      ]
+    },
+    {
+      "id": "augmented-feedback",
+      "ru": "Дополнительная обратная связь",
+      "en": "augmented feedback",
+      "alt": [
+        "внешняя обратная связь"
+      ],
+      "def": "Сведения, которые добавляет кто-то или что-то снаружи: слова и прикосновения терапевта, экран ультразвука, сигнал миографа, видео.",
+      "page": 33,
+      "moments": [
+        {
+          "n": 12,
+          "beat": "src",
+          "mark": "aug",
+          "to": "need"
+        }
+      ],
+      "see": [
+        "intrinsic-feedback"
+      ]
+    },
+    {
+      "id": "knowledge-of-performance",
+      "ru": "Знание выполнения",
+      "en": "knowledge of performance (KP)",
+      "def": "Обратная связь о качестве движения: например, «держите колено над стопой».",
+      "page": 33,
+      "moments": [
+        {
+          "n": 12,
+          "beat": "kpkr",
+          "mark": "kp"
+        }
+      ],
+      "see": [
+        "knowledge-of-results"
+      ]
+    },
+    {
+      "id": "knowledge-of-results",
+      "ru": "Знание результата",
+      "en": "knowledge of results (KR)",
+      "def": "Обратная связь об итоге движения: «вы дотянулись до цели». Внимание к результату лучше закрепляет навык, чем внимание к деталям.",
+      "page": 33,
+      "moments": [
+        {
+          "n": 12,
+          "beat": "kpkr",
+          "mark": "kr",
+          "to": "shift"
+        }
+      ],
+      "see": [
+        "knowledge-of-performance"
+      ]
+    },
+    {
+      "id": "concurrent-feedback",
+      "ru": "Одновременная обратная связь",
+      "en": "concurrent feedback",
+      "def": "Даётся прямо во время движения: картинка на экране, ручное ведение. Ускоряет освоение, но при избытке создаёт зависимость.",
+      "page": 33,
+      "moments": [
+        {
+          "n": 12,
+          "beat": "sched",
+          "mark": "conc",
+          "to": "guide"
+        }
+      ],
+      "see": [
+        "immediate-feedback"
+      ]
+    },
+    {
+      "id": "immediate-feedback",
+      "ru": "Немедленная обратная связь",
+      "en": "immediate feedback",
+      "def": "Даётся сразу после попытки: ускоряет начало обучения, но не оставляет времени подумать самому.",
+      "page": 33,
+      "moments": [
+        {
+          "n": 12,
+          "beat": "sched",
+          "mark": "imm"
+        }
+      ],
+      "see": [
+        "delayed-feedback",
+        "summary-feedback"
+      ]
+    },
+    {
+      "id": "delayed-feedback",
+      "ru": "Отсроченная обратная связь",
+      "en": "delayed feedback",
+      "def": "Даётся не сразу, а после небольшой паузы после попытки.",
+      "page": 33,
+      "moments": [
+        {
+          "n": 12,
+          "beat": "sched",
+          "mark": "del"
+        }
+      ],
+      "see": [
+        "immediate-feedback"
+      ]
+    },
+    {
+      "id": "summary-feedback",
+      "ru": "Суммарная обратная связь",
+      "en": "summary feedback",
+      "def": "Даётся после нескольких повторений, об их среднем результате; закрепляет навык лучше, чем немедленная после каждой попытки.",
+      "page": 33,
+      "moments": [
+        {
+          "n": 12,
+          "beat": "sched",
+          "mark": "sum"
+        },
+        {
+          "n": 12,
+          "beat": "study",
+          "mark": "c3"
+        }
+      ],
+      "see": [
+        "immediate-feedback",
+        "variable-feedback"
+      ]
+    },
+    {
+      "id": "variable-feedback",
+      "ru": "Переменная обратная связь",
+      "en": "variable feedback",
+      "def": "Даётся нерегулярно, не после каждого повтора; лучше закрепляет навык и не создаёт зависимости от подсказок.",
+      "page": 35,
+      "moments": [
+        {
+          "n": 12,
+          "beat": "freq",
+          "mark": "var",
+          "to": "fade"
+        }
+      ],
+      "see": [
+        "summary-feedback"
+      ]
+    },
+    {
+      "id": "adherence",
+      "ru": "Приверженность к упражнениям",
+      "en": "adherence to exercise",
+      "alt": [
+        "приверженность"
+      ],
+      "def": "Регулярное выполнение программы, в составлении которой пациент участвовал; в отличие от «послушания» означает активное участие и сотрудничество с терапевтом.",
+      "page": 35,
+      "moments": [
+        {
+          "n": 13,
+          "beat": "why",
+          "mark": "key",
+          "to": "term"
+        },
+        {
+          "n": 13,
+          "beat": "strat",
+          "mark": "s1",
+          "to": "s8"
+        }
+      ]
+    }
+  ]
+}

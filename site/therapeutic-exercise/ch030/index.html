@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кривая напряжение–деформация — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 30, title: 'Соединительная ткань: кривая напряжение–деформация', minutes: 10, language: 'ru', next: '../ch031/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch030/cards.ru.json
+const CARDS_SHORT = {
+  "коллаген\nпрочность и жёсткость; сопротивляется растяжению; связи созревают от нестойких к прочным": "прочность и жёсткость",
+  "эластин\nрастяжимость: сильно удлиняется при малой силе, при большой — внезапно рвётся": "растяжимость: удлиняется при малой силе",
+  "основное вещество\nгель с водой: протеогликаны держат воду и сопротивляются сжатию; меньше трения и лишних сшивок между волокнами": "гель с водой: сжатие + меньше трения",
+  "напряжение\nсила на единицу площади — внутреннее сопротивление ткани": "сила на единицу площади",
+  "деформация\nнасколько ткань удлинилась": "насколько ткань удлинилась",
+  "до разрыва\nволокно коллагена — 7–8%; связка целиком — 20–40%": "волокно 7–8%, связка 20–40%",
+  "модуль упругости\nчем круче наклон, тем меньше ткань удлиняется при той же силе": "круче → меньше удлиняется",
+};
+// cards-short end
+
+const BONE = ANAT.bone, GSUB = '#6fa8c9';
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// The chart used through the lesson: origin (160, 770), 840 × 560.
+const CX = 160, CY = 770, CW = 840, CH = 560;
+const REG = [['пальцевая', 0, .15, COL.int], ['упругая', .15, .5, COL.whole], ['пластическая', .5, .85, COL.nat], ['разрыв', .85, 1, COL.bad]];
+// Shaded regions of the curve with their names along the top; returns the region groups (for pickEls).
+function regions(p, c, t0, { labels = true } = {}) {
+  return REG.map(([name, a, b, col], i) => {
+    const g = G(p, { o: 0 }), x = CX + a * CW, w = (b - a) * CW;
+    mk('rect', { x, y: CY - CH, width: w, height: CH, fill: col, 'fill-opacity': .09 }, g);
+    if (labels) T(g, name, { x: x + w / 2, y: CY - CH + 30, size: 20, weight: 700, fill: col, anchor: 'middle' });
+    show(g, typeof t0 === 'function' ? t0(i) : t0);
+    return { g, box: [x, CY - CH, w, CH], label: name };
+  });
+}
+// Four collagen fibers in a box: wavy at rest, straight in the elastic range, breaking one by one in the plastic range.
+function fiberBox(p, x, y, w, t0) {
+  const g = G(p, { o: 0 }), lines = [0, 1, 2, 3].map(() => mk('path', { fill: 'none', stroke: BONE, 'stroke-width': 7, 'stroke-linecap': 'round' }, g));
+  roundBox(g, x - 20, y - 40, w + 40, 230, EDGE, 'none', 2);
+  g.insertBefore(g.lastChild, g.firstChild);
+  const f = v => v.toFixed(1);
+  const fb = { g };
+  fb.set = e => {
+    const amp = 14 * clamp(1 - e / .15, 0, 1), broken = clamp((e - .5) / .35, 0, 1) * 4;
+    lines.forEach((ln, i) => {
+      const yy = y + i * 46, gap = i < Math.floor(broken) ? 1 : i === Math.floor(broken) ? broken % 1 : 0;
+      let d = '';
+      for (let k = 0; k <= 40; k++) { const q = k / 40, xx = x + q * w; d += `${k ? 'L' : 'M'}${f(xx)} ${f(yy + amp * Math.sin(q * Math.PI * 8 + i))}`; }
+      ln.setAttribute('d', d);
+      ln.setAttribute('stroke-dasharray', gap > .5 ? `${f(w * .45)} ${f(w * .1)} ${f(w)}` : 'none');
+      ln.setAttribute('stroke', gap > .5 ? mix(BONE, COL.bad, .5) : mix(BONE, ANAT.taut, clamp((e - .15) / .35, 0, 1) * .6));
+    });
+  };
+  fb.set(0);
+  show(g, t0);
+  return fb;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Напряжение и деформация', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 4 · Урок 30', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Соединительная ткань:', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'кривая «напряжение — деформация»', { x: 800, y: 380, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'что происходит с тканью, когда её растягивают', 800, 460, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), c = stressCurve(620, 820, 360, 260);
+    chartAxes(art, 620, 820, 380, 280, 'напряжение', 'деформация', 0);
+    const cv = path(art, c.path(0, .85), { stroke: COL.task, 'stroke-width': 6 }, { d: 0 });
+    show(art, m('sub', .2)); draw(cv, m('sub', .4), Math.max(1, D - m('sub', .4) - 1.2));
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['resp', 'Упругость и пластичность', (m) => {
+    const p = panel(0), defs = mk('defs', {}, p);
+    // each column: a strip of tissue pulled by a weight for 3 s, then released, and its length over time
+    const col = (cx, title, col, Lf, t0) => {
+      const g = G(p, { o: 0 });
+      T(g, title, { x: cx, y: 130, size: 27, weight: 700, fill: col, anchor: 'middle' });
+      mk('rect', { x: cx - 190, y: 230, width: 22, height: 70, rx: 4, fill: COL.dim }, g);
+      const strip = limbEl(g, defs, ANAT.tendon, 16, 16, mix(ANAT.tendon, '#000000', .35));
+      const wt = G(g, {});
+      path(wt, 'M0 0V48', { stroke: COL.dim, 'stroke-width': 3 });
+      mk('rect', { x: -24, y: 48, width: 48, height: 40, rx: 6, fill: COL.dim }, wt);
+      chartAxes(g, cx - 160, 560, 320, 150, 'длина', 'время', 0);
+      const tr = path(g, '', { stroke: col, 'stroke-width': 5 }, {});
+      show(g, t0);
+      const set = t => {
+        const L = 170 + Lf(t);
+        strip.set([cx - 168, 265], [cx - 168 + L, 265]);
+        put(wt, { x: cx - 168 + L, y: 265, o: t > .3 && t < 3.5 ? 1 : 0 });
+        let d = '';
+        for (let k = 0; k <= 60; k++) { const tt = t * k / 60; d += `${k ? 'L' : 'M'}${(cx - 160 + tt / 6 * 320).toFixed(1)} ${(560 - 10 - Lf(tt) * 2.4).toFixed(1)}`; }
+        tr.setAttribute('d', d);
+      };
+      set(0);
+      prog(q => set(6 * q), t0 + .4, 6, lin);
+      return g;
+    };
+    const on = (t, a, b) => clamp((t - a) / b, 0, 1);
+    col(300, 'упругость', COL.whole, t => t < 3.5 ? 45 * on(t, .3, .2) : 45 * (1 - on(t, 3.5, .2)), m('el'));
+    col(800, 'вязкоупругость', COL.task, t => t < 3.5 ? (t < .3 ? 0 : 18 * on(t, .3, .2) + 27 * (1 - Math.exp(-(t - .3) / 1))) : 44 * .55 * Math.exp(-(t - 3.5) / .9), m('ve'));
+    col(1300, 'пластичность', COL.nat, t => t < 3.5 ? 45 * on(t, .3, .2) : 45 - 17 * on(t, 3.5, .3), m('pl'));
+    ['сразу возвращается', 'медленно удлиняется и медленно возвращается', 'остаётся длиннее'].forEach((str, i) => put(para(p, str, [300, 800, 1300][i], 640, null, { size: 22, maxW: 380, anchor: 'middle', fill: COL.chalk }), { o: 0 }) && show(p.lastChild, [m('el'), m('ve'), m('pl')][i] + 3.8));
+    labelBox(p, 800, 790, 1240, ['упругость и пластичность — у мышцы и соединительной ткани, вязкоупругость — только у соединительной'], COL.int, m('who'), { size: 23 });
+  }],
+
+  ['ct', 'Соединительная ткань', (m) => {
+    const p = panel(0);
+    ['связки', 'сухожилия', 'капсула', 'фасция', 'оболочки мышц', 'кожа'].forEach((str, i) => pill(p, str, 200 + i * 240, 110, m('where', .3 + i * .5), { col: ANAT.tendon, size: 23 }));
+    const mg = magnifier(p, 520, 470, 250, m('comp'));
+    [['коллагеновые волокна', BONE, 360], ['эластические волокна', ANAT.taut, 430], ['ретикулярные волокна', COL.dim, 500], ['основное вещество', GSUB, 570]].forEach(([str, col, y], i) => {
+      txt(p, str, 900, y, m('comp', .6 + i * .8), { size: 25, weight: 700, fill: col });
+      const ln = path(p, `M890 ${y - 8}L${[690, 650, 620, 600][i]} ${[400, 470, 520, 600][i]}`, { stroke: col, 'stroke-width': 2, 'stroke-dasharray': '5 5' }, { o: 0 });
+      show(ln, m('comp', .6 + i * .8));
+    });
+    labelBox(p, 800, 810, 1000, ['длиннее её делает только перестройка структуры'], COL.task, m('only'), { size: 26 });
+  }],
+
+  ['fibers', 'Волокна', (m) => {
+    const p = panel(0);
+    const mg = magnifier(p, 420, 470, 250, .2);
+    const focus = (k, t0) => Object.entries(mg.parts).forEach(([name, e]) => tw(e, { o: name === k ? 1 : .18 }, t0, .4));
+    focus('col', m('col')); focus('ela', m('ela')); focus('ret', m('ret')); focus('gs', m('gs'));
+    infoCard(p, 760, 110, 760, 160, 'коллаген', 'прочность и жёсткость; сопротивляется растяжению; связи созревают от нестойких к прочным', BONE, m('col'), { size: 22 });
+    infoCard(p, 760, 290, 760, 140, 'эластин', 'растяжимость: сильно удлиняется при малой силе, при большой — внезапно рвётся', ANAT.taut, m('ela'), { size: 22 });
+    infoCard(p, 760, 450, 760, 90, 'ретикулин — объём', null, COL.dim, m('ret'), { size: 22 });
+    infoCard(p, 760, 560, 760, 190, 'основное вещество', 'гель с водой: протеогликаны держат воду и сопротивляются сжатию; меньше трения и лишних сшивок между волокнами', GSUB, m('gs'), { size: 22 });
+  }],
+
+  ['nums', 'Цифры', (m) => {
+    const p = panel(0);
+    txt(p, 'удлинение до разрыва', 120, 150, m('c10'), { size: 26, weight: 700, fill: COL.chalk });
+    const bar = (y, w, col, label, t0) => {
+      const r = mk('rect', { x: 120, y, height: 46, rx: 10, fill: col, 'fill-opacity': .85 }, p);
+      put(r, { o: 0 }); show(r, t0);
+      prog(q => r.setAttribute('width', (w * io(q)).toFixed(1)), t0, 1.2, lin);
+      txt(p, label, 140 + w, y + 32, t0 + 1, { size: 24, weight: 700, fill: col });
+    };
+    bar(190, 860 * 10 / 150, BONE, 'коллаген: меньше 10%', m('c10', .4));
+    bar(260, 860, ANAT.taut, 'эластин: 150%', m('c10', 2));
+    txt(p, 'прочность', 120, 450, m('c5'), { size: 26, weight: 700, fill: COL.chalk });
+    bar(490, 600, BONE, 'коллаген: в 5 раз прочнее', m('c5', .4));
+    bar(560, 120, ANAT.taut, 'эластин', m('c5', .9));
+  }],
+
+  ['orient', 'Направление волокон', (m) => {
+    const p = panel(0);
+    const box = (cx, title, body, t0, draw) => {
+      const g = G(p, { o: 0 });
+      roundBox(g, cx - 210, 170, 420, 360, EDGE, PANEL, 2);
+      draw(g, cx, 350);
+      T(g, title, { x: cx, y: 580, size: 27, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      put(para(g, body, cx, 624, null, { size: 21, maxW: 400, anchor: 'middle', fill: COL.dim }), { o: 1 });
+      show(g, t0);
+      return g;
+    };
+    const st = { stroke: BONE, 'stroke-width': 5, 'stroke-linecap': 'round' };
+    box(300, 'сухожилие', 'волокна параллельны — выдерживают наибольшее растяжение', m('ten'), (g, cx, cy) => { for (let i = -3; i <= 3; i++) path(g, `M${cx - 170} ${cy + i * 26}H${cx + 170}`, st); });
+    box(800, 'кожа', 'волокна беспорядочны — слабее сопротивляются растяжению', m('skin'), (g, cx, cy) => { let s = 7; const r = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; }; for (let i = 0; i < 16; i++) { const a = r() * Math.PI, x = cx + (r() - .5) * 300, y = cy + (r() - .5) * 280; path(g, `M${(x - 60 * Math.cos(a)).toFixed(1)} ${(y - 60 * Math.sin(a)).toFixed(1)}L${(x + 60 * Math.cos(a)).toFixed(1)} ${(y + 60 * Math.sin(a)).toFixed(1)}`, st); } });
+    box(1300, 'связки, капсула, фасция', 'волокна в разных направлениях — нагрузка с разных сторон', m('lig'), (g, cx, cy) => { for (let i = -2; i <= 2; i++) { path(g, `M${cx - 170} ${cy + i * 34}H${cx + 170}`, st); path(g, `M${cx - 150} ${cy - 120 + i * 30}L${cx + 150} ${cy + 60 + i * 30}`, { ...st, 'stroke-opacity': .6 }); } });
+    arrowTo(p, [470, 350], [560, 350], m('ten', .8), { col: COL.whole, w: 5 });
+    arrowTo(p, [130, 350], [40, 350], m('ten', .8), { col: COL.whole, w: 5 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-comp', prompt: ['Какой это компонент?'],
+    build: grid([
+      { parts: ['Даёт прочность и жёсткость'], ans: ['c'], why: 'Коллаген.' },
+      { parts: ['Удлиняется на 150% и рвётся внезапно'], ans: ['e'], why: 'Эластин.' },
+      { parts: ['Придаёт объём'], ans: ['r'], why: 'Ретикулин.' },
+      { parts: ['Удерживает воду и сопротивляется сжатию'], ans: ['g'], why: 'Основное вещество (протеогликаны).' },
+      { parts: ['Рвётся, удлинившись меньше чем на 10%'], ans: ['c'], why: 'Коллаген.' },
+    ], [['c', 'Коллаген', BONE], ['e', 'Эластин', ANAT.taut], ['r', 'Ретикулин', COL.dim], ['g', 'Основное вещество', GSUB]], { multi: false, text: true }),
+  }], done) }],
+
+  ['ss', 'Кривая', (m) => {
+    const p = panel(0), c = stressCurve(CX, CY, CW, CH);
+    chartAxes(p, CX, CY, CW + 20, CH + 20, 'напряжение', 'деформация, %', m('ss'));
+    const cv = path(p, c.path(0, .85), { stroke: COL.task, 'stroke-width': 6 }, { d: 0 });
+    draw(cv, m('ss', .5), 2.5);
+    infoCard(p, 1060, 130, 460, 170, 'напряжение', 'сила на единицу площади — внутреннее сопротивление ткани', COL.task, m('sig'), { size: 22 });
+    infoCard(p, 1060, 320, 460, 130, 'деформация', 'насколько ткань удлинилась', COL.whole, m('eps'), { size: 22 });
+    // tension, compression, shear on a small block
+    const icon = (y, label, arrows, t0) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x: 1130, y: y - 24, width: 80, height: 48, rx: 6, fill: ANAT.tendon, 'fill-opacity': .5, stroke: ANAT.tendon, 'stroke-width': 2 }, g);
+      arrows.forEach(([a, b]) => arrowTo(g, a, b, 0, { col: COL.whole, w: 4, dur: .01 }));
+      T(g, label, { x: 1260, y: y + 8, size: 22, fill: COL.chalk });
+      show(g, t0);
+    };
+    icon(530, 'растяжение', [[[1120, 530], [1080, 530]], [[1220, 530], [1260 - 10, 530]]], m('types'));
+    icon(620, 'сжатие', [[[1080, 620], [1120, 620]], [[1260, 620], [1222, 620]]], m('types', 1.2));
+    icon(710, 'сдвиг', [[[1130, 680], [1190, 680]], [[1210, 740], [1150, 740]]], m('types', 2.4));
+  }],
+
+  ['toe', 'Пальцевая и упругая зоны', (m) => {
+    const p = panel(0), c = stressCurve(CX, CY, CW, CH);
+    chartAxes(p, CX, CY, CW + 20, CH + 20, 'напряжение', 'деформация, %', .2);
+    regions(p, c, i => i === 0 ? m('toe') : i === 1 ? m('lin') : 999);
+    const cv = path(p, c.path(0, .5), { stroke: COL.task, 'stroke-width': 6 }, { d: 0 });
+    const dot = mk('circle', { r: 11, fill: COL.chalk }, p);
+    const fb = fiberBox(p, 1130, 260, 330, m('toe'));
+    T(p, 'коллагеновые волокна', { x: 1295, y: 200, size: 21, fill: COL.dim, anchor: 'middle' });
+    const go = e => { const [x, y] = c.pt(e); put(dot, { x, y }); fb.set(e); };
+    go(0); put(dot, { o: 0 }); show(dot, m('toe'));
+    prog(q => { go(.15 * q); put(cv, { d: .3 * q }); }, m('toe', .4), 2.5, lin);
+    prog(q => { go(lerp(.15, .5, q)); put(cv, { d: lerp(.3, 1, q) }); }, m('lin', .4), 3, lin);
+    txt(p, 'волнистые волокна выпрямляются', 1295, 520, m('toe', 1), { size: 22, weight: 700, fill: COL.int, anchor: 'middle' });
+    txt(p, 'большая часть повседневных движений', 1295, 560, m('toe', 3), { size: 21, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'сила и удлинение растут пропорционально', 1295, 620, m('lin', 1), { size: 22, weight: 700, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'сняли нагрузку — прежняя длина', 1295, 660, m('lin', 4), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const [lx, ly] = c.pt(.5);
+    const lm = G(p, { o: 0 });
+    mk('circle', { cx: lx, cy: ly, r: 13, fill: 'none', stroke: COL.nat, 'stroke-width': 4 }, lm);
+    T(lm, 'предел упругости', { x: lx + 22, y: ly + 40, size: 23, weight: 700, fill: COL.nat });
+    show(lm, m('lim'));
+  }],
+
+  ['plast', 'Пластическая зона', (m) => {
+    const p = panel(0), c = stressCurve(CX, CY, CW, CH);
+    chartAxes(p, CX, CY, CW + 20, CH + 20, 'напряжение', 'деформация, %', .2);
+    regions(p, c, i => i < 2 ? .2 : i === 2 ? m('pl') : m('ult', 1.5));
+    path(p, c.path(0, .5), { stroke: COL.task, 'stroke-width': 6 });
+    const cv = path(p, c.path(.5, .85), { stroke: COL.task, 'stroke-width': 6 }, { d: 0 });
+    const dot = mk('circle', { r: 11, fill: COL.chalk }, p);
+    const fb = fiberBox(p, 1130, 260, 330, .2);
+    T(p, 'коллагеновые волокна', { x: 1295, y: 200, size: 21, fill: COL.dim, anchor: 'middle' });
+    const go = e => { const [x, y] = c.pt(e); put(dot, { x, y }); fb.set(e); };
+    go(.5);
+    prog(q => { go(lerp(.5, .64, q)); put(cv, { d: .4 * q }); }, m('pl', .3), 2, lin);
+    // unloading from X runs parallel to the elastic slope and ends to the right of zero: a new length
+    const X = c.pt(.64), slope = 1.886 * CH / CW, dx = (CY - X[1]) / slope;
+    const un = path(p, `M${X[0]} ${X[1]}L${(X[0] - dx).toFixed(1)} ${CY}`, { stroke: COL.good, 'stroke-width': 4, 'stroke-dasharray': '10 8' }, { d: 0 });
+    draw(un, m('pl', 2.6), 1.2);
+    txt(p, 'новая длина', X[0] - dx, CY + 32, m('pl', 3.6), { size: 22, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'рвутся связи, затем волокна', 1295, 520, m('pl', 1), { size: 22, weight: 700, fill: COL.nat, anchor: 'middle' });
+    prog(q => { go(lerp(.64, .85, q)); put(cv, { d: lerp(.4, 1, q) }); }, m('ult', .3), 2.5, lin);
+    const [ux, uy] = c.pt(.72), um = G(p, { o: 0 });
+    mk('circle', { cx: ux, cy: uy, r: 13, fill: 'none', stroke: COL.bad, 'stroke-width': 4 }, um);
+    T(um, 'предел прочности', { x: ux, y: CY - CH - 14, size: 23, weight: 700, fill: COL.bad, anchor: 'middle' });
+    path(um, `M${ux} ${CY - CH - 6}V${uy - 16}`, { stroke: COL.bad, 'stroke-width': 2, 'stroke-dasharray': '4 4' });
+    show(um, m('ult'));
+    txt(p, 'сужение — и разрыв даже при малой силе', 1295, 560, m('ult', 2), { size: 21, fill: COL.bad, anchor: 'middle' });
+    infoCard(p, 1080, 600, 440, 170, 'до разрыва', 'волокно коллагена — 7–8%; связка целиком — 20–40%', COL.chalk, m('num'), { size: 22 });
+  }],
+
+  ['stiff', 'Жёсткость', (m) => {
+    const p = panel(0), c = stressCurve(CX, CY, CW, CH), cs = stressCurve(CX, CY, CW, CH, { k: 1.7 });
+    chartAxes(p, CX, CY, CW + 20, CH + 20, 'напряжение', 'деформация, %', .2);
+    const n = path(p, c.path(0, .5), { stroke: COL.task, 'stroke-width': 6 }, { d: 0 });
+    draw(n, m('k'), 1.5);
+    const [ax, ay] = c.pt(.25), [bx, by] = c.pt(.42);
+    const tri = path(p, `M${ax} ${ay}H${bx}V${by}`, { stroke: COL.chalk, 'stroke-width': 3, 'stroke-dasharray': '6 6' }, { o: 0 });
+    show(tri, m('k', 1.5));
+    txt(p, 'наклон = жёсткость', bx + 16, (ay + by) / 2, m('k', 1.8), { size: 23, weight: 700, fill: COL.chalk });
+    const sc = path(p, cs.path(0, cs.e(.5)), { stroke: COL.bad, 'stroke-width': 6 }, { d: 0 });
+    draw(sc, m('con'), 1.5);
+    txt(p, 'рубец, контрактура — круче', cs.pt(cs.e(.5))[0], cs.pt(cs.e(.5))[1] - 24, m('con', 1), { size: 23, weight: 700, fill: COL.bad, anchor: 'middle' });
+    txt(p, 'нормальная ткань', c.pt(.5)[0] + 20, c.pt(.5)[1] + 10, m('k', 1), { size: 23, weight: 700, fill: COL.task });
+    infoCard(p, 1080, 200, 440, 230, 'модуль упругости', 'чем круче наклон, тем меньше ткань удлиняется при той же силе', COL.chalk, m('k', 2), { size: 23 });
+  }],
+
+  ['grades', 'Степени повреждения', (m) => {
+    const p = panel(0), c = stressCurve(CX, CY, CW, CH);
+    chartAxes(p, CX, CY, CW + 20, CH + 20, 'напряжение', 'деформация, %', .2);
+    regions(p, c, .2);
+    path(p, c.path(0, .85), { stroke: COL.task, 'stroke-width': 6 });
+    const mark = (e, n, body, t0, col) => {
+      const [x, y] = e < .85 ? c.pt(e) : [CX + e * CW, CY - 40];
+      const g = G(p, { o: 0 });
+      mk('circle', { cx: x, cy: y, r: 24, fill: col }, g);
+      T(g, n, { x, y: y + 9, size: 26, weight: 700, fill: COL.board, anchor: 'middle' });
+      show(g, t0);
+      put(para(p, body, 1080, [300, 420, 540][n.length - 1], null, { size: 24, weight: 700, fill: col, maxW: 430 }), { o: 0 });
+      show(p.lastChild, t0);
+    };
+    mark(.56, 'I', 'I — микроразрывы, начало пластической зоны', m('g1'), COL.int);
+    mark(.78, 'II', 'II — частичный разрыв, конец пластической', m('g2'), COL.nat);
+    mark(.92, 'III', 'III — полный разрыв', m('g3'), COL.bad);
+    txt(p, 'степени повреждения связки', 1080, 220, m('g1'), { size: 26, weight: 700, fill: COL.chalk });
+  }],
+
+  ['q2', 'Быстрая проверка', () => {
+    const p = panel(0), c = stressCurve(CX, CY + 40, CW, CH - 60);
+    chartAxes(p, CX, CY + 40, CW + 20, CH - 40, 'напряжение', 'деформация, %', .2);
+    BANDS = regions(p, c, .2, { labels: false });
+    path(p, c.path(0, .85), { stroke: COL.task, 'stroke-width': 6 });
+  }, { ask: done => quiz({ x: 200, y: 40, w: 1200, cls: 'side' }, [{
+    id: 'c-plast', prompt: ['Нажмите на зону, после которой ткань остаётся длиннее.'],
+    build: pickEls(BANDS.map(b => ({ el: b.g, box: b.box, label: b.label })), 2,
+      'Пластическая зона: связи и волокна рвутся, и после разгрузки ткань длиннее.',
+      i => ['Пальцевая зона: волокна лишь выпрямляются.', 'Упругая зона: ткань вернётся к прежней длине.', '', 'Это уже разрыв ткани.'][i]),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Упругость — возврат сразу, вязкоупругость — медленно, пластичность — новая длина.', 'w1'],
+     ['Коллаген прочен и мало растяжим, эластин растяжим и слаб.', 'w2'],
+     ['Пальцевая зона → упругая → предел упругости → пластическая → разрыв.', 'w3'],
+     ['Длиннее ткань становится в пластической зоне — но далеко от разрыва.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-zone', prompt: ['Какая это зона кривой?'],
+    build: grid([
+      { parts: ['Обычная ходьба по ровному полу'], ans: ['t'], why: 'Пальцевая зона: большая часть повседневных движений.' },
+      { parts: ['Растяжение, после которого ткань вернулась к прежней длине'], ans: ['e'], why: 'Упругая зона.' },
+      { parts: ['Растяжение, после которого ткань стала длиннее'], ans: ['p'], why: 'Пластическая зона.' },
+      { parts: ['Связка разорвана полностью'], ans: ['f'], why: 'Разрыв — III степень.' },
+      { parts: ['Повреждение связки I степени'], ans: ['p'], why: 'Микроразрывы в начале пластической зоны.' },
+    ], [['t', 'Пальцевая', COL.int], ['e', 'Упругая', COL.whole], ['p', 'Пластическая', COL.nat], ['f', 'Разрыв', COL.bad]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Вязкоупругость есть и у сократительной, и у соединительной ткани.'], ans: ['f'], why: 'Неверно: только у соединительной.' },
+      { parts: ['Коллаген в пять раз прочнее эластина.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['В коже коллагеновые волокна параллельны.'], ans: ['f'], why: 'Неверно: беспорядочны; параллельны — в сухожилии.' },
+      { parts: ['Чем круче наклон упругой зоны, тем жёстче ткань.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Рубец жёстче нормальной ткани.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+let BANDS = [];
+// A magnified circle of connective tissue: wavy collagen, curly elastin, a fine reticulin net in a watery ground
+// substance. parts: col, ela, ret, gs (for highlighting).
+function magnifier(p, cx, cy, r, t0) {
+  const g = G(p, { o: 0 }), id = 'mg' + (++SHADE_ID), f = v => v.toFixed(1);
+  const cp = mk('clipPath', { id }, mk('defs', {}, g));
+  mk('circle', { cx, cy, r }, cp);
+  const inner = G(g, {}); inner.setAttribute('clip-path', `url(#${id})`);
+  const gs = mk('circle', { cx, cy, r, fill: GSUB, 'fill-opacity': .22 }, inner);
+  const ret = G(inner, {}), col = G(inner, {}), ela = G(inner, {});
+  for (let i = -6; i <= 6; i++) path(ret, `M${cx - r} ${cy + i * 38}L${cx + r} ${cy + i * 38 + 60}M${cx + i * 40} ${cy - r}L${cx + i * 40 - 50} ${cy + r}`, { stroke: COL.dim, 'stroke-width': 1.5, 'stroke-opacity': .7 });
+  for (let i = -3; i <= 3; i++) { let d = ''; for (let k = 0; k <= 40; k++) { const x = cx - r + k / 40 * 2 * r; d += `${k ? 'L' : 'M'}${f(x)} ${f(cy + i * 62 + 12 * Math.sin(k / 40 * Math.PI * 6 + i))}`; } path(col, d, { stroke: BONE, 'stroke-width': 11 }); }
+  for (let i = 0; i < 5; i++) { let d = ''; const y0 = cy - r + 50 + i * 95; for (let k = 0; k <= 60; k++) { const x = cx - r + k / 60 * 2 * r; d += `${k ? 'L' : 'M'}${f(x)} ${f(y0 + 18 * Math.sin(k / 60 * Math.PI * 14) + 30 * Math.sin(k / 60 * Math.PI * 2))}`; } path(ela, d, { stroke: ANAT.taut, 'stroke-width': 3 }); }
+  mk('circle', { cx, cy, r, fill: 'none', stroke: COL.chalk, 'stroke-width': 5 }, g);
+  if (t0 !== null) show(g, t0);
+  return { g, parts: { col, ela, ret, gs } };
+}
+
+boot();
+</script>
+</body>
+</html>

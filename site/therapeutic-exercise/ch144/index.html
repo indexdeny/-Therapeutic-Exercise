@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Основы: базовые вмешательства и общие правила — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 144, title: 'Основы: базовые вмешательства и общие правила', minutes: 8, language: 'ru', next: '../ch145/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch144/cards.ru.json
+const CARDS_SHORT = {
+  "по возможностям и желанию учиться\nхронические симптомы: сначала понять, что усиливает их, и научиться двигаться безопасно": "понять, что усиливает симптомы",
+  "шея и поясница\nпринципы похожи: многие приёмы годятся для обоих отделов": "многие приёмы — для обоих",
+  "активный участник\nвместе с терапевтом выбирает цели и знает, на что рассчитывать": "выбирает цели вместе с терапевтом",
+  "ограничения стадий\nострое — не навсегда; не перегружать себя в начале подострой фазы; на поздних стадиях — выходить за кажущиеся пределы": "острое — не навсегда",
+  "сам управляет симптомами\nне пассивный получатель «лечения»; продолжает и после занятий с терапевтом": "продолжает и после занятий",
+  "профилактика\nбезопасные упражнения, механика тела для возврата к нагрузкам, изменения дома и на работе": "механика тела, дом и работа",
+  "кинестетическое осознание\nбезопасные положения и движения; как поза лёжа, на боку, сидя и стоя влияет на позвоночник": "как поза влияет на позвоночник",
+  "подвижность и гибкость\nрастяжка и мобилизация тугих тканей; при категории мобилизации — манипуляции или толчки, затем растяжка; мобилизация нервов": "растяжка + мобилизация нервов",
+  "мышечная работоспособность\nв позвоночнике — и стабильность: осознание → удержание при движениях конечностей → выносливость, равновесие, сила → динамика во всём объёме": "осознание → удержание → динамика",
+  "выносливость сердца и лёгких\nаэробика, как только повторы не усиливают симптомы; безопасная поза": "аэробика, как только повторы не усиливают",
+  "функциональная деятельность\nперекат, вставание, ходьба → подъём, толкание, тяга, переноска, эргономика, спорт": "перекат, вставание → подъём, спорт",
+};
+// cards-short end
+
+const SP = '#8fd6b0', KIN = '#86c9e8', STB = '#8fd6b0', FUN = '#f0c060', MOB = '#c9b8e8', AER = '#f4a48c', TRA = '#e0a0c8';
+const PH = ['#f4a48c', '#f0c060', '#8fd6b0'];
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, t = Array.isArray(t0) ? t0[i] : t0 === null ? null : t0 + i * gap, g = pill(p, s, x + ws[i] / 2, y, t, { col: c, size }); x += ws[i] + space; return g; });
+}
+function numLine(p, n, str, x, y, col, t0, { size = 19, maxW = 640 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 16, cy: y - 7, r: 15, fill: col }, g);
+  T(g, String(n), { x: x + 16, y: y, size: 18, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 44, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+// A seated mannequin on a chair with its ankle planted at (ax, GY); sitStand — n sit-to-stand repetitions (as in lesson 11).
+function chairFig(p, ax, GY, s, t0, col) {
+  const f = fig(p, { x: 0, y: 0, s, o: 0, pose: SIT, col });
+  plant(f, 'AN', ax, GY);
+  const [hx, hy] = onStage(f, 'H');
+  chair(p, hx, hy + 22 * s / .5 * .32, GY, t0);
+  show(f.g, t0);
+  return f;
+}
+function sitStand(f, t0, dur, n, ax, GY) {
+  prog(q => {
+    const e = cyc(q, n), o = {};
+    for (const k in SIT) o[k] = lerp(SIT[k], STAND[k], e);
+    o.t += 26 * Math.sin(Math.PI * e);
+    o.aN += 30 * Math.sin(Math.PI * e); o.aF += 30 * Math.sin(Math.PI * e);
+    f.set(o); plant(f, 'AN', ax, GY);
+  }, t0, dur, lin);
+}
+// The transversus abdominis as a belt round the lumbar part of a lying figure.
+function trBelt(p, f, t0, k = 22) {
+  const B = f.unit(2.5, k), e = mk('ellipse', { cx: f1(B[0]), cy: f1(B[1]), rx: 18, ry: 40, fill: 'none', stroke: TRA, 'stroke-width': 6, opacity: 0 }, p);
+  show(e, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Основы ведения', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 16 · Урок 144', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Основы ведения позвоночника', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'упражнениями', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'базовые вмешательства, обучение и пять составляющих программы', 800, 360, m('sub'), { size: 30, fill: SP, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    matLine(art, 500, 1100, 800, null); [...art.children].forEach(c => put(c, { o: 1 }));
+    const f = lieFig(art, 1060, 800, .62, null, 'supine'); put(f.g, { o: 1 });
+    f.hold(hookLegs(50));
+    const belt = trBelt(art, f, null); put(belt, { o: 1 });
+    prog(q => { const k = Math.sin(2 * Math.PI * 2 * q); f.hold({ tilt: 8 * k, lord: 46 + 12 * k }); belt.setAttribute('ry', f1(40 - 6 * cyc(q, 2))); }, 1, Math.max(3, D - 2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['base', 'Базовые вмешательства', (m, D) => {
+    const p = panel(0);
+    txt(p, 'базовые вмешательства для каждого пациента (блок 16.1)', 800, 56, m('box'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    pill(p, 'разные диагнозы и стадии — общее начало', 800, 100, m('box', 1), { col: COL.dim, size: 17 });
+    const col = (i, title, c, items, t0) => {
+      const x = 60 + i * 500, g = G(p, { o: 0 });
+      roundBox(g, x, 130, 480, 740, c, PANEL, 2.5);
+      T(g, title, { x: x + 240, y: 172, size: 24, fill: c, weight: 700, anchor: 'middle' });
+      show(g, t0);
+      items.forEach((s, j) => numLine(p, j + 1, s, x + 20, 540 + j * 100, c, t0 + 1.5 + j * 2.5, { size: 19, maxW: 400 }));
+    };
+    col(0, 'кинестетическое обучение', KIN, ['кивок головой и наклоны таза', 'нейтраль или положение предпочтения: на спине, на животе, сидя, стоя', 'как дела и движения рук и ног влияют на позвоночник'], m('kin'));
+    col(1, 'стабилизация', STB, ['глубокие мышцы: шея — осевое вытяжение с кивком; поясница — втягивание и многораздельная', 'глобальные мышцы держат позу при нагрузке руками и ногами', 'пассивная опора — только если нужна'], m('stab'));
+    col(2, 'функциональная тренировка', FUN, ['перекат «бревном» на живот и обратно', 'с бока — в положение сидя и обратно', 'вставание со стула и ходьба'], m('fun'));
+    // 1: pelvic tilts and nods
+    matLine(p, 80, 520, 440, m('kin'));
+    const a = lieFig(p, 505, 440, .45, m('kin'), 'supine'); a.hold(hookLegs(50));
+    prog(q => { const k = Math.sin(2 * Math.PI * 3 * q); a.hold({ tilt: 9 * k, lord: 46 + 13 * k, fh: -.5 * cyc(q, 3) }); }, m('kin', 1), 9, lin);
+    // 2: draw-in and an arm raise with the spine still
+    matLine(p, 580, 1020, 440, m('stab'));
+    const b = lieFig(p, 1005, 440, .45, m('stab'), 'supine'); b.hold(hookLegs(50));
+    const belt = trBelt(p, b, m('stab', 1), 18);
+    prog(q => { belt.setAttribute('ry', f1(32 - 6 * Math.min(1, q * 4))); b.set({ arm: 160 * cyc(q, 2) }); }, m('stab', 1.5), 12, lin);
+    // 3: sit to stand
+    const c = chairFig(p, 1330, 440, .66, m('fun'));
+    sitStand(c, m('fun', 1), 6, 1.5, 1330, 440);
+    show(path(p, 'M1090 440H1510', { stroke: COL.dim, 'stroke-width': 4 }, { o: 0 }), m('fun'));
+  }],
+
+  ['cont', 'Лестница навыков', (m, D) => {
+    const p = panel(0);
+    txt(p, 'дальше — по ступеням, по возможностям пациента', 800, 56, m('ch'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const steps = [['осознание: что усиливает симптомы, как двигаться безопасно', KIN, m('ch', 4)], ['глубокие и глобальные мышцы под нагрузкой рук и ног', STB, m('mp')], ['механика тела в быту', FUN, m('bm')], ['хроническая стадия → желанные дела', AER, m('bm', 4.5)]];
+    const tread = i => [100 + i * 355, 820 - i * 120];
+    steps.forEach(([s, c, t], i) => {
+      const [x, y] = tread(i), g = G(p, { o: 0 });
+      mk('rect', { x, y, width: 345, height: 860 - y, fill: c, 'fill-opacity': .12, stroke: c, 'stroke-width': 2.5 }, g);
+      mk('circle', { cx: x + 24, cy: y - 34, r: 18, fill: c }, g);
+      T(g, String(i + 1), { x: x + 24, y: y - 27, size: 19, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, s, x + 52, y - 52, null, { size: 18, maxW: 285, weight: 600 }), { o: 1 });
+      show(g, t);
+    });
+    const dot = G(p, { o: 0 }); mk('circle', { r: 13, fill: COL.chalk, stroke: COL.board, 'stroke-width': 3 }, dot);
+    const pos = [0, 1, 2, 3].map(i => { const [x, y] = tread(i); return [x + 300, y - 14]; });
+    show(dot, m('ch', 4));
+    put(dot, { x: pos[0][0], y: pos[0][1] });
+    [[m('mp'), 1], [m('bm'), 2], [m('bm', 4.5), 3]].forEach(([t, i]) => tw(dot, { x: pos[i][0], y: pos[i][1] }, t, 1));
+    infoCard(p, 100, 100, 640, 160, 'по возможностям и желанию учиться', 'хронические симптомы: сначала понять, что усиливает их, и научиться двигаться безопасно', COL.dim, m('ch'), { size: 19 });
+    infoCard(p, 960, 100, 600, 160, 'шея и поясница', 'принципы похожи: многие приёмы годятся для обоих отделов', SP, m('same'), { size: 20 });
+  }],
+
+  ['edu', 'Обучение пациента', (m, D) => {
+    const p = panel(0);
+    txt(p, 'обучение — ключ к каждой цели', 800, 56, m('part'), { size: 28, weight: 700, anchor: 'middle', fill: KIN });
+    const GY = 440;
+    show(path(p, `M80 ${GY}H740`, { stroke: COL.dim, 'stroke-width': 4 }, { o: 0 }), m('part'));
+    const th = fig(p, { x: 220, y: GY - 182 * .9, s: .9, o: 0, col: '#b9c9dc', pose: { ...STAND, aN: 40, eN: 60 } });
+    const pt = fig(p, { x: 600, y: GY - 182 * .9, s: .9, o: 0, dir: -1, pose: { ...STAND, aN: 30, eN: 70 } });
+    show(th.g, m('part')); show(pt.g, m('part'));
+    const bd = G(p, { o: 0 }); roundBox(bd, 330, 130, 160, 120, KIN, PANEL, 2.5); T(bd, 'цели', { x: 410, y: 182, size: 24, fill: KIN, weight: 700, anchor: 'middle' }); T(bd, 'вместе', { x: 410, y: 214, size: 18, fill: COL.chalk, weight: 600, anchor: 'middle' }); show(bd, m('part', 1));
+    txt(p, 'терапевт', 220, 480, m('part'), { size: 17, fill: COL.dim, anchor: 'middle', weight: 600 });
+    txt(p, 'пациент — активный участник', 600, 480, m('part'), { size: 17, fill: KIN, anchor: 'middle', weight: 700 });
+    infoCard(p, 60, 520, 700, 350, 'рекомендации по боли в пояснице (данные средней силы)', '', COL.dim, m('cpg'));
+    ['позвоночник прочен', 'что такое боль', 'прогноз благоприятный', 'как справляться с болью', 'раньше вернуться к обычным делам', 'повышать активность'].forEach((s, i) => numLine(p, i + 1, s, 90 + (i % 2) * 340, 650 + Math.floor(i / 2) * 64, KIN, m('cpg', 2 + i * 1.3), { size: 18, maxW: 280 }));
+    infoCard(p, 800, 90, 760, 170, 'активный участник', 'вместе с терапевтом выбирает цели и знает, на что рассчитывать', KIN, m('part'), { size: 20 });
+    infoCard(p, 800, 275, 760, 200, 'ограничения стадий', 'острое — не навсегда; не перегружать себя в начале подострой фазы; на поздних стадиях — выходить за кажущиеся пределы', FUN, m('lim'), { size: 20 });
+    infoCard(p, 800, 490, 760, 170, 'сам управляет симптомами', 'не пассивный получатель «лечения»; продолжает и после занятий с терапевтом', STB, m('self'), { size: 20 });
+    infoCard(p, 800, 675, 760, 195, 'профилактика', 'безопасные упражнения, механика тела для возврата к нагрузкам, изменения дома и на работе', AER, m('prev'), { size: 20 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-base', prompt: ['К какой группе базовых вмешательств это относится?'],
+    build: grid([
+      { parts: ['Кивок головой и наклоны таза'], ans: ['k'], why: 'Кинестетическое обучение: безопасное движение.' },
+      { parts: ['Втягивание живота и включение многораздельной'], ans: ['s'], why: 'Стабилизация: глубокие мышцы.' },
+      { parts: ['Перекат «бревном» со спины на живот'], ans: ['f'], why: 'Функциональная тренировка.' },
+      { parts: ['Как движения рук влияют на позвоночник'], ans: ['k'], why: 'Кинестетическое обучение.' },
+      { parts: ['Вставание со стула с устойчивой спиной'], ans: ['f'], why: 'Функциональная тренировка.' },
+    ], [['k', 'Кинестетика', KIN], ['s', 'Стабилизация', STB], ['f', 'Функция', FUN]], { multi: false, text: true }),
+  }], done) }],
+
+  ['five', 'Пять составляющих', (m, D) => {
+    const p = panel(0);
+    txt(p, 'пять составляющих программы', 800, 56, m('five'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const CX = 400, CY = 470, R = 280;
+    const pf = postureFig(p, CX, CY + 150, .34, m('five'));
+    const ring = G(p, { o: 0 }); mk('circle', { cx: CX, cy: CY, r: R, fill: 'none', stroke: COL.dim, 'stroke-width': 2, 'stroke-dasharray': '8 8' }, ring); show(ring, m('five'));
+    const items = [['осознание', KIN, 'ka'], ['подвижность', MOB, 'mob'], ['мышцы', STB, 'mp'], ['аэробика', AER, 'aer'], ['функция', FUN, 'fa']];
+    items.forEach(([s, c, mk2], i) => {
+      const a = rad(-90 + i * 72), x = CX + R * Math.cos(a), y = CY + R * Math.sin(a);
+      const g = pill(p, s, x, y, m(mk2), { col: c, size: 20 });
+      pulse(g, m(mk2, .3), 1.25);
+    });
+    const cards = [
+      ['кинестетическое осознание', 'безопасные положения и движения; как поза лёжа, на боку, сидя и стоя влияет на позвоночник', KIN, 'ka'],
+      ['подвижность и гибкость', 'растяжка и мобилизация тугих тканей; при категории мобилизации — манипуляции или толчки, затем растяжка; мобилизация нервов', MOB, 'mob'],
+      ['мышечная работоспособность', 'в позвоночнике — и стабильность: осознание → удержание при движениях конечностей → выносливость, равновесие, сила → динамика во всём объёме', STB, 'mp'],
+      ['выносливость сердца и лёгких', 'аэробика, как только повторы не усиливают симптомы; безопасная поза', AER, 'aer'],
+      ['функциональная деятельность', 'перекат, вставание, ходьба → подъём, толкание, тяга, переноска, эргономика, спорт', FUN, 'fa'],
+    ];
+    cards.forEach(([t, b, c, mk2], i) => infoCard(p, 800, 90 + i * 158, 760, 148, t, b, c, m(mk2), { size: 17 }));
+  }],
+
+  ['phases', 'Три фазы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'составляющие по фазам (по мотивам табл. 16.1)', 800, 52, m('t1'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const X0 = 60, LW = 210, CW = 430, Y0 = 84, HH = 70, RH = 146;
+    const rows = [['осознание', KIN], ['подвижность', MOB], ['мышцы', STB], ['аэробика', AER], ['функция', FUN]];
+    const heads = ['I · ранняя, защита', 'II · контролируемое движение', 'III · возврат к функции'];
+    const cells = [
+      ['наклоны таза, втягивание подбородка: пассивно → активно; что облегчает и что усиливает; нейтраль', 'активный контроль лёжа, на четвереньках, сидя, стоя; держать безболевое положение в делах', 'привычная нейтраль во всех делах'],
+      ['движение против застоя; туловище — только в облегчающих положениях; манипуляции I–II, толчок по показаниям', 'мягко в болезненный объём; руки и ноги — при стабильной спине; манипуляции до III', 'в болезненный объём — растяжка и манипуляции по показаниям'],
+      ['глубокие мышцы; стабилизация с нагрузкой конечностями, при нужде — с опорами', 'активный контроль, выносливость, упражнения против толчков, лёгкая динамика', 'стабилизация в переходах, сила; динамическое укрепление'],
+      ['только если переносится, в удобной позе', 'малая–средняя интенсивность, с учётом предпочтения', 'высокая интенсивность, целевой пульс, несколько раз в неделю'],
+      ['безопасные позы; перекат и переходы с устойчивой спиной', 'механика устойчивой спины, эргономика', 'нагрузки как в желанных делах; профилактика'],
+    ];
+    const rl = G(p, { o: 0 });
+    rows.forEach(([s, c], i) => { const y = Y0 + HH + i * RH; roundBox(rl, X0, y + 6, LW - 14, RH - 12, c, PANEL, 2); T(rl, s, { x: X0 + (LW - 14) / 2, y: y + RH / 2 + 7, size: 20, fill: c, weight: 700, anchor: 'middle' }); });
+    show(rl, m('t1'));
+    heads.forEach((h, j) => {
+      const x = X0 + LW + j * CW, g = G(p, { o: 0 });
+      mk('rect', { x: x + 4, y: Y0, width: CW - 8, height: HH - 10, rx: 12, fill: PH[j], 'fill-opacity': .25, stroke: PH[j], 'stroke-width': 2 }, g);
+      T(g, h, { x: x + CW / 2, y: Y0 + 38, size: 20, fill: PH[j], weight: 700, anchor: 'middle' });
+      rows.forEach((r, i) => { const y = Y0 + HH + i * RH; mk('rect', { x: x + 4, y: y + 6, width: CW - 8, height: RH - 12, rx: 10, fill: PANEL, stroke: mix(PH[j], COL.board, .45), 'stroke-width': 1.5 }, g); put(para(g, cells[i][j], x + 18, y + 36, null, { size: 16, maxW: CW - 36 }), { o: 1 }); });
+      show(g, m(['p1', 'p2', 'p3'][j]));
+    });
+  }],
+
+  ['terms', 'Термины и данные', (m, D) => {
+    const p = panel(0);
+    txt(p, 'манипуляция и толчок; что рекомендуют', 800, 56, m('term'), { size: 28, weight: 700, anchor: 'middle', fill: MOB });
+    const X0 = 100, X1 = 660, Y = 330, g = G(p, { o: 0 });
+    path(g, `M${X0} ${Y}H${X1}`, { stroke: COL.dim, 'stroke-width': 3 });
+    path(g, `M${X1 - 40} ${Y - 150}V${Y + 14}`, { stroke: COL.bad, 'stroke-width': 3, 'stroke-dasharray': '6 4' });
+    T(g, 'патологический предел', { x: X1 - 40, y: Y + 40, size: 16, fill: COL.bad, anchor: 'middle', weight: 600 });
+    let d = ''; for (let i = 0; i <= 60; i++) { const x = lerp(X0 + 140, X1 - 60, i / 60); d += (i ? 'L' : 'M') + f1(x) + ' ' + f1(Y - 60 + 26 * Math.sin(i / 60 * Math.PI * 8)); }
+    path(g, d, { stroke: MOB, 'stroke-width': 4 });
+    T(g, 'манипуляция: колебания по степеням', { x: X0 + 140, y: Y - 110, size: 19, fill: MOB, weight: 700 });
+    show(g, m('term'));
+    const th = G(p, { o: 0 });
+    path(th, `M${X1 - 90} ${Y - 160}H${X1 - 22}M${X1 - 36} ${Y - 172}L${X1 - 20} ${Y - 160}L${X1 - 36} ${Y - 148}`, { stroke: COL.bad, 'stroke-width': 6 });
+    T(th, 'толчок: быстро, малая амплитуда, у предела', { x: X1 - 10, y: Y - 190, size: 19, fill: COL.bad, weight: 700, anchor: 'end' });
+    show(th, m('term', 4));
+    infoCard(p, 800, 90, 760, 780, 'сильные данные (рекомендации по шее и пояснице)', '', SP, m('ev'));
+    [['манипуляции и толчки при нарушенной подвижности', 0], ['координация, сила и выносливость туловища', 4], ['постепенная выносливость и физическая форма', 7], ['направленное предпочтение при централизации', 10]].forEach(([s, dt], i) => {
+      const g2 = G(p, { o: 0 }), y = 240 + i * 150;
+      [0, 1, 2].forEach(j => mk('circle', { cx: 850 + j * 30, cy: y - 8, r: 11, fill: COL.good }, g2));
+      put(para(g2, s, 960, y, null, { size: 21, maxW: 560, weight: 600 }), { o: 1 });
+      show(g2, m('ev', dt));
+    });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-phase', prompt: ['К какой фазе это относится?'],
+    build: grid([
+      { parts: ['Манипуляции I–II степени, растяжка туловища только в облегчающих положениях'], ans: ['1'], why: 'Первая фаза — защита.' },
+      { parts: ['Упражнения против толчков, аэробика малой интенсивности'], ans: ['2'], why: 'Вторая фаза — контролируемое движение.' },
+      { parts: ['Аэробика с целевым пульсом несколько раз в неделю'], ans: ['3'], why: 'Третья фаза — возврат к функции.' },
+      { parts: ['Перекат и вставание с устойчивой спиной'], ans: ['1'], why: 'Базовые навыки первой фазы.' },
+      { parts: ['Стабилизация в переходах с упором на силу'], ans: ['3'], why: 'Третья фаза.' },
+    ], [['1', 'I', PH[0]], ['2', 'II', PH[1]], ['3', 'III', PH[2]]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Базовые вмешательства для всех: кинестетика, стабилизация, механика устойчивого позвоночника.', 'w1'],
+     ['Пациент — активный участник: знает ограничения, сам управляет симптомами, учится профилактике.', 'w2'],
+     ['Пять составляющих: осознание, подвижность, мышцы, аэробика, функция.', 'w3'],
+     ['Они меняются от защиты к контролируемому движению и возврату к функции.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SP }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-start', prompt: ['Пациентка с хронической болью в пояснице хочет сразу начать скручивания и бег. С чего начать?'],
+    build: choice([
+      ['С базовых вмешательств: безопасные движения и нейтраль, глубокие мышцы, механика тела'],
+      ['Сразу с динамических скручиваний'],
+      ['Только с пассивных процедур'],
+      ['С длительного бега'],
+    ], 0, 'Базовые вмешательства — основа для любого уровня; динамика и интенсивная аэробика — позже.',
+    [null, 'Динамика без стабилизации может усилить симптомы.', 'Пациент должен быть активным участником.', 'Сначала безопасная поза и контроль.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-edu', prompt: ['Пациент в острой стадии боится, что боль навсегда, и хочет только «лечиться» у терапевта. Что важно в обучении?'],
+    build: choice([
+      ['Объяснить благоприятный прогноз и ограничения стадии, сделать его активным участником'],
+      ['Строгий покой до полного исчезновения боли'],
+      ['Сказать, что самому ничего делать не нужно'],
+      ['Сразу дать нагрузки третьей фазы'],
+    ], 0, 'Обучение: прогноз, ограничения стадии, самоуправление и ранний возврат к активности.',
+    [null, 'Рекомендации советуют раньше вернуться к обычным делам.', 'Пациент учится сам управлять симптомами.', 'В начале подострой фазы перегружать себя не стоит.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

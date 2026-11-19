@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выравнивание и интенсивность — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 60, title: 'Выравнивание, стабилизация, интенсивность', minutes: 9, language: 'ru', next: '../ch061/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch060/lupa.ru.json
+const LUPA = [
+  {"beat": "stab", "fig": 0, "target": "gastroc", "from": "prox", "to": "dist", "zoom": 3},
+  {"beat": "stab", "fig": 1, "target": "gastroc", "from": "dist", "to": "int", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch060/cards.ru.json
+const CARDS_SHORT = {
+  "под функциональные цели (SAID)\nа также причина слабости, тяжесть нарушений, возраст, история болезни, психика, социальная ситуация": "причина слабости, тяжесть, возраст, психика",
+  "обходные движения\nработу берёт сильный соседний агонист или мышца-стабилизатор": "работу берёт сильный сосед",
+  "правильное выравнивание\nнаправление волокон, линия тяги, действие мышцы: конечность движется так, как её двигает мышца": "направление волокон, линия тяги",
+  "положение выбирают так,\nчтобы и сила тяжести, и груз сопротивлялись именно действию укрепляемой мышцы": "именно действию укрепляемой мышцы",
+  "проксимальный сегмент\nчаще стабилизируют его; иногда — дистальный": "стабилизируют чаще",
+  "величина сопротивления в каждом повторении\nнагрузка (load): сколько груза поднимают, опускают или удерживают": "сколько груза поднимают или удерживают",
+  "перегрузка\nнагрузка выше привычной — постепенно увеличивать сопротивление": "нагрузка выше привычной — постепенно увеличивать сопротивление",
+  "субмаксимальная или максимальная?\nцели программы · причина и тяжесть нарушений · стадия заживления · возраст · здоровье · тренированность": "цели, нарушения, заживление, возраст",
+  "внимание\nболь при упражнении — интенсивность слишком велика; ближе к максимуму — выше риск для сердца и сосудов → ритмичное дыхание в каждом повторении": "боль — слишком велика; ритмичное дыхание",
+  "наибольший груз\nкоторый с контролем проходит весь доступный объём заданное число раз до утомления (Делорм)": "весь объём заданное число раз (Делорм)",
+  "зачем\nначальный груз · исходная динамическая сила": "начальный груз · исходная динамическая сила",
+  "1ПМ — надёжно и безопасно\nздоровые молодые, спортсмены, активные пожилые": "здоровые молодые, спортсмены, активные пожилые",
+  "небезопасно\nпоражения суставов; заживление или риск травмы мягких тканей; остеопороз или его риск; болезни сердца и сосудов": "суставы, заживление, остеопороз, сердце",
+  "расчёт 1ПМ\nпо формулам и таблицам — больше повторений с меньшим грузом": "по формулам: больше повторений, меньше груз",
+};
+// cards-short end
+
+const LOW = COL.whole, HIGH = COL.nat, TFLC = '#e0b25a';
+// A patient lying on the left side, seen from the front: a flatFig turned −90°, so the head is on the left and the near
+// (top) leg abducts upward. The gluteus medius and the tensor fasciae latae (with the iliotibial band) on the top hip;
+// cuff: a cuff weight above the ankle. abd(th) abducts the top leg. Local → stage: (x, y) → (cx + y·s, cy − x·s).
+function sideLying(p, cx, cy, s, t0, { cuff = false } = {}) {
+  const f = flatFig(p, cx, cy, s, t0);
+  put(f.g, { r: -90 });
+  bench(p, cx - 330 * s, cx + 420 * s, cy + 68 * s, t0, COL.dim, 110 * s);
+  p.appendChild(f.g);
+  const R = (v, th) => { const c = Math.cos(rad(th)), sn = Math.sin(rad(th)); return [v[0] * c + v[1] * sn, -v[0] * sn + v[1] * c]; };
+  const H = [30, 0], add = (A, v) => [A[0] + v[0], A[1] + v[1]];
+  const gm = muscleEl(f.top, { rest: 82, w: 17 });
+  const tfl = muscleEl(f.top, { rest: 70, w: 11, col: mix(ANAT.muscle, '#d8b070', .3), tendon: .15 });
+  const itb = mk('path', { fill: 'none', stroke: ANAT.tendon, 'stroke-width': 4, 'stroke-linecap': 'round', opacity: .9 }, f.top);
+  const cw = cuff ? G(f.top) : null;
+  if (cw) { mk('rect', { x: -14, y: -24, width: 28, height: 48, rx: 9, fill: '#5b6f86', stroke: '#2b3644', 'stroke-width': 2 }, cw); path(cw, 'M-14 -8H14M-14 8H14', { stroke: '#2b3644', 'stroke-width': 2 }); }
+  const out = { f, gm, tfl, th: 3 };
+  out.abd = th => {
+    f.leg(th); out.th = th;
+    gm.set([64, -64], add(H, R([30, 12], th)));
+    const tb = add(H, R([24, 80], th)), kn = add(H, R([20, 168], th));
+    tfl.set([46, -44], tb);
+    itb.setAttribute('d', `M${tb[0].toFixed(1)} ${tb[1].toFixed(1)}L${kn[0].toFixed(1)} ${kn[1].toFixed(1)}`);
+    if (cw) { const a = add(H, R([0, 300], th)); put(cw, { x: a[0], y: a[1], r: -th }); }
+  };
+  out.abd(3);
+  out.stage = P => [cx + P[1] * s, cy - P[0] * s];
+  out.ankle = () => out.stage(add(H, R([0, 300], out.th)));
+  return out;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Выравнивание и интенсивность', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 60', { x: 800, y: 170, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Выравнивание, стабилизация', { x: 800, y: 255, size: 54, weight: 600, anchor: 'middle' });
+    T(g, 'и интенсивность', { x: 800, y: 320, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'из чего складывается программа', 800, 395, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const sl = sideLying(art, 760, 600, .8, 0, { cuff: true });
+    prog(q => { sl.abd(3 + 30 * (1 - Math.cos(2 * Math.PI * 2.5 * q)) / 2); sl.gm.act(.9); }, .5, Math.max(4, D - 1.2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['det', 'Параметры программы', (m) => {
+    const p = panel(0);
+    txt(p, 'параметры программы упражнений с сопротивлением', 800, 82, m('det'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const items = ['выравнивание', 'стабилизация', 'интенсивность', 'объём', 'порядок', 'частота', 'отдых', 'длительность', 'режим', 'скорость', 'периодизация', 'перенос в функцию'];
+    items.forEach((s, i) => pill(p, s, 230 + (i % 4) * 380, 170 + Math.floor(i / 4) * 72, m('box', .3 + i * .45), { col: i < 2 ? COL.good : i < 8 ? COL.task : COL.whole, size: 26 }));
+    txt(p, 'этот урок — выравнивание, стабилизация, интенсивность; остальное — уроки 61–62', 800, 395, m('box', 6), { size: 22, fill: COL.dim, anchor: 'middle', italic: true });
+    const fitt = [['F', 'frequency', 'частота'], ['I', 'intensity', 'интенсивность'], ['T', 'time', 'время'], ['T', 'type', 'тип']];
+    fitt.forEach(([l, e, r], i) => {
+      const g = G(p, { x: 330 + i * 320, y: 520, o: 0 });
+      mk('rect', { x: -60, y: -60, width: 120, height: 120, rx: 18, fill: PANEL, stroke: COL.task, 'stroke-width': 3 }, g);
+      T(g, l, { y: 22, size: 70, weight: 700, fill: COL.task, anchor: 'middle' });
+      T(g, r, { y: 100, size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      T(g, e, { y: 130, size: 21, fill: COL.dim, anchor: 'middle' });
+      show(g, m('fitt', .6 + i * .5));
+    });
+    txt(p, 'FITT — Американский колледж спортивной медицины (ACSM)', 800, 448, m('fitt'), { size: 22, fill: COL.task, anchor: 'middle' });
+    infoCard(p, 140, 715, 1320, 140, 'под функциональные цели (SAID)', 'а также причина слабости, тяжесть нарушений, возраст, история болезни, психика, социальная ситуация', COL.good, m('said'), { size: 23 });
+  }],
+
+  ['align', 'Выравнивание', (m) => {
+    const p = panel(0);
+    txt(p, 'выравнивание (alignment)', 800, 82, m('align'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'как при мануальном мышечном тестировании', 800, 122, m('align', 1.5), { size: 23, fill: COL.dim, anchor: 'middle' });
+    const sl = sideLying(p, 470, 470, 1.05, .3, { cuff: false });
+    // the hip abducts: the gluteus medius works (red); if the hip flexes, the tensor fasciae latae takes over
+    prog(q => { sl.abd(3 + 30 * (1 - Math.cos(2 * Math.PI * 1.5 * q)) / 2); sl.gm.act(.95); sl.tfl.act(.15); }, m('gm', .6), Math.max(2, m('tfl') - m('gm', .7)), lin);
+    prog(q => { sl.abd(3 + 30 * (1 - Math.cos(2 * Math.PI * 1.5 * q)) / 2); sl.gm.act(.25); sl.tfl.act(.95); }, m('tfl', .3), 4, lin);
+    const lg = G(p, { o: 0 });
+    const [gx, gy] = sl.stage([62, -40]);
+    T(lg, 'средняя ягодичная', { x: gx - 40, y: gy - 70, size: 23, weight: 700, fill: '#ff7a5c', anchor: 'middle' });
+    show(lg, m('gm', .5));
+    const lt = G(p, { o: 0 });
+    T(lt, 'напрягатель широкой фасции (TFL)', { x: gx + 170, y: gy - 200, size: 23, weight: 700, fill: TFLC, anchor: 'middle' });
+    show(lt, m('tfl', .5));
+    arrowTo(p, [sl.ankle()[0] + 30, sl.ankle()[1] - 10], [sl.ankle()[0] + 30, sl.ankle()[1] - 120], m('gm', .3), { col: COL.good, w: 5 });
+    txt(p, 'отведение', sl.ankle()[0] + 50, sl.ankle()[1] - 70, m('gm', .5), { size: 22, fill: COL.good, weight: 600 });
+    // the view from above: the leg in line with the trunk (slightly extended) or brought forward (flexed)
+    const ig = G(p, { o: 0 });
+    roundBox(ig, 960, 150, 580, 300, COL.dim, PANEL, 2);
+    T(ig, 'вид сверху (сагиттальная плоскость)', { x: 1250, y: 186, size: 21, fill: COL.dim, anchor: 'middle' });
+    show(ig, m('gm', 1));
+    const up = fig(p, { x: 1240, y: 330, s: .62, r: -90, o: 0, pose: { ...STAND, hN: -8, kN: 2, hF: 0, kF: 0, aN: 4, eN: 10, aF: 4, eF: 10 } });
+    show(up.g, m('gm', 1));
+    const tag = txt(p, '✓ бедро слегка разогнуто, таз чуть вперёд', 1250, 425, m('gm', 1.5), { size: 21, fill: COL.good, anchor: 'middle', weight: 600 });
+    poseTo(up, { hN: 35 }, m('tfl', .2), 1, io);
+    whenAt(m('tfl', .2), () => { tag.textContent = '✗ бедро согнуто — работает TFL'; tag.setAttribute('fill', COL.bad); });
+    infoCard(p, 960, 480, 580, 170, 'обходные движения', 'работу берёт сильный соседний агонист или мышца-стабилизатор', COL.bad, m('sub'), { size: 22 });
+    infoCard(p, 960, 670, 580, 190, 'правильное выравнивание', 'направление волокон, линия тяги, действие мышцы: конечность движется так, как её двигает мышца', COL.good, m('line'), { size: 22 });
+  }],
+
+  ['grav', 'Выравнивание и сила тяжести', (m) => {
+    const p = panel(0);
+    txt(p, 'положение относительно силы тяжести', 800, 82, m('grav'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'вес тела, гантели, штанги, манжеты', 800, 122, m('grav', 1), { size: 23, fill: COL.dim, anchor: 'middle' });
+    const sl = sideLying(p, 360, 420, .78, m('side'), { cuff: true });
+    prog(q => { sl.abd(3 + 32 * (1 - Math.cos(2 * Math.PI * 1.5 * q)) / 2); sl.gm.act(.95); }, m('side', .6), 4, lin);
+    const A = sl.ankle();
+    arrowTo(p, [A[0] + 40, A[1] - 150], [A[0] + 40, A[1] - 30], m('side', .5), { col: COL.whole, w: 6 });
+    txt(p, 'тяжесть + манжета', A[0] + 60, A[1] - 110, m('side', .5), { size: 21, fill: COL.whole, weight: 600 });
+    txt(p, 'на боку: сопротивляются отведению ✓', 400, 640, m('side', 1), { size: 24, fill: COL.good, anchor: 'middle', weight: 700 });
+    // supine: gravity and the cuff now resist hip flexion
+    const sp = supine(p, 1180, 470, .95, m('sup'));
+    bench(p, 1180 - 330 * .95, 1180 + 330 * .95, 470, m('sup'), COL.dim, 110);
+    p.appendChild(sp.g);
+    // a cuff weight just above the ankle, along the shank
+    const cuff = G(p, { o: 0 });
+    mk('rect', { x: -14, y: -24, width: 28, height: 48, rx: 9, fill: '#5b6f86', stroke: '#2b3644', 'stroke-width': 2 }, cuff);
+    sp.onSet.push(() => { const K = onStage(sp, 'KN'), An = onStage(sp, 'AN'); put(cuff, { x: lerp(K[0], An[0], .82), y: lerp(K[1], An[1], .82), r: Math.atan2(An[1] - K[1], An[0] - K[0]) * 180 / Math.PI - 90, s: sp.s }); });
+    sp.set({}); show(cuff, m('sup'));
+    const rf = muscleOn(sp, ...MUSCLE.rectus, { after: 'ftN', w: 12 });
+    prog(q => { sp.set({ hN: 40 * (1 - Math.cos(2 * Math.PI * 1.5 * q)) / 2 }); rf.act(.9); }, m('sup', .6), 4, lin);
+    txt(p, 'на спине: сопротивляются сгибанию бедра ✗', 1180, 640, m('sup', 1), { size: 24, fill: COL.bad, anchor: 'middle', weight: 700 });
+    infoCard(p, 240, 700, 1120, 150, 'положение выбирают так,', 'чтобы и сила тяжести, и груз сопротивлялись именно действию укрепляемой мышцы', COL.good, m('sup', 3), { size: 23 });
+  }],
+
+  ['stab', 'Стабилизация', (m) => {
+    const p = panel(0), GY = 470;
+    txt(p, 'стабилизация (stabilization)', 800, 82, m('stab'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'удержать сегмент или всё тело неподвижным; твёрдая опора, вес тела', 800, 122, m('stab', 1), { size: 23, fill: COL.dim, anchor: 'middle' });
+    // proximal: long sitting, plantarflexion against a band, the leg strapped down
+    ground(p, 70, 520, GY, m('prox'));
+    const ls = fig(p, { x: 0, y: 0, s: .72, o: 0, pose: { ...STAND, t: -4, hN: 92, kN: 0, fN: -5, hF: 92, kF: 0, fF: -5, aN: 64, eN: 8, aF: 64, eF: 8 } });
+    plant(ls, 'heelN', 330, GY - 4);
+    const gas = muscleOn(ls, ...MUSCLE.gastroc, { after: 'ftN', w: 10 });
+    const band = path(p, '', { stroke: COL.good, 'stroke-width': 4 });
+    ls.onSet.push(() => { const T0 = onStage(ls, 'toeN'), W = onStage(ls, 'WN'); band.setAttribute('d', `M${T0[0].toFixed(1)} ${T0[1].toFixed(1)}Q${(T0[0] + 40).toFixed(1)} ${((T0[1] + W[1]) / 2).toFixed(1)} ${W[0].toFixed(1)} ${W[1].toFixed(1)}`); });
+    ls.set({}); put(band, { o: 0 });
+    show(ls.g, m('prox')); show(band, m('prox'));
+    const strap = G(p, { o: 0 });
+    const K = onStage(ls, 'KN'), An = onStage(ls, 'AN');
+    mk('rect', { x: (K[0] + An[0]) / 2 - 14, y: K[1] - 22, width: 28, height: 40, rx: 6, fill: '#7a6a52', stroke: '#3d342a', 'stroke-width': 2 }, strap);
+    show(strap, m('prox', 1));
+    prog(q => { ls.set({ fN: -5 - 35 * (1 - Math.cos(2 * Math.PI * 2 * q)) / 2 }); plant(ls, 'heelN', 330, GY - 4); gas.act(.9); }, m('prox', 1), 4, lin);
+    txt(p, 'фиксируют голень', 300, 520, m('prox', 1), { size: 22, fill: COL.good, anchor: 'middle', weight: 600 });
+    // distal: standing heel raises, the foot held by the floor
+    ground(p, 600, 900, GY, m('dist'));
+    const hr = fig(p, { x: 750, y: GY - 182 * .72, s: .72, o: 0 });
+    const g2 = muscleOn(hr, ...MUSCLE.gastroc, { after: 'ftN', w: 10 });
+    show(hr.g, m('dist'));
+    const toe = onStage(hr, 'toeN');
+    prog(q => { const e = (1 - Math.cos(2 * Math.PI * 2 * q)) / 2; hr.set({ fN: -30 * e, fF: -30 * e }); plant(hr, 'toeN', toe[0], toe[1]); g2.act(.9); }, m('dist', .5), 4, lin);
+    txt(p, 'стопу держит опора', 750, 520, m('dist', .5), { size: 22, fill: COL.good, anchor: 'middle', weight: 600 });
+    // internal: bilateral straight leg raise, the abdominals hold the pelvis
+    const sp = supine(p, 1260, GY - 30, .66, m('int'));
+    bench(p, 1260 - 220, 1260 + 230, GY - 30, m('int'), COL.dim, 60);
+    p.appendChild(sp.g);
+    const abd = muscleOn(sp, ['H', 'Sh', 14, 20], ['Sh', 'H', 30, -22], { after: 'torso', w: 11 });
+    const hf = muscleOn(sp, ...MUSCLE.rectus, { after: 'ftN', w: 10 });
+    prog(q => { const e = (1 - Math.cos(2 * Math.PI * 1.5 * q)) / 2; sp.set({ hN: 40 * e, hF: 40 * e }); abd.act(.85); hf.act(.9); }, m('int', 1.5), 4, lin);
+    txt(p, 'мышцы живота держат таз', 1260, 520, m('int', 1.5), { size: 22, fill: '#ff7a5c', anchor: 'middle', weight: 600 });
+    infoCard(p, 70, 580, 470, 150, 'проксимальный сегмент', 'чаще стабилизируют его; иногда — дистальный', COL.good, m('prox'), { size: 22 });
+    infoCard(p, 565, 580, 470, 260, 'внешняя', 'руки терапевта, ремни; сила тяжести прижимает к спинке стула или к столу', COL.whole, m('ext'), { size: 22 });
+    infoCard(p, 1060, 580, 470, 260, 'внутренняя', 'изометрия соседних мышц, которая не мешает движению', '#ff7a5c', m('int'), { size: 22 });
+    pill(p, 'только если они сильны и не утомлены', 1295, 790, m('weak'), { col: COL.bad, size: 21 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-slr', prompt: ['Пациент поднимает обе прямые ноги лёжа на спине, а поясница отрывается от стола и прогибается. Что это значит?'],
+    build: choice([
+      ['Мышцы живота не удерживают таз — слабы или утомлены: внутренняя стабилизация не работает'],
+      ['Так и должно быть при этом упражнении'],
+      ['Сгибатели бедра слишком сильны, их надо растянуть'],
+      ['Нужно добавить груз на голени'],
+    ], 0, 'Внутренняя стабилизация работает, только если фиксирующие мышцы достаточно сильны и не утомлены.',
+    [null, 'Таз и поясница должны оставаться неподвижными — их держат мышцы живота.', 'Дело не в силе сгибателей, а в том, что таз не стабилизирован.', 'Большая нагрузка только усилит прогиб.']),
+  }], done) }],
+
+  ['int', 'Интенсивность', (m) => {
+    const p = panel(0), GY = 760;
+    txt(p, 'интенсивность (intensity)', 800, 82, m('int'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ground(p, 120, 520, GY, .3);
+    const c = curlFig(p, 320, GY, 1.1, 1, .3);
+    curls(c, m('int', .8), 3, 1.5);
+    prog(q => { const s = 1 + .5 * io(q); [...c.db.children].forEach(e => put(e, { s })); }, m('ov', .5), 1.5, lin);
+    infoCard(p, 620, 130, 920, 170, 'величина сопротивления в каждом повторении', 'нагрузка (load): сколько груза поднимают, опускают или удерживают', HIGH, m('int'), { size: 22 });
+    infoCard(p, 620, 315, 920, 150, 'перегрузка', 'нагрузка выше привычной — постепенно увеличивать сопротивление', COL.task, m('ov'), { size: 22 });
+    infoCard(p, 620, 480, 920, 190, 'субмаксимальная или максимальная?', 'цели программы · причина и тяжесть нарушений · стадия заживления · возраст · здоровье · тренированность', COL.whole, m('sub'), { size: 22 });
+    infoCard(p, 620, 685, 920, 120, 'в реабилитации — обычно меньше, чем у здоровых', null, COL.good, m('reh'), { size: 22 });
+  }],
+
+  ['tab', 'Малая и высокая интенсивность', (m) => {
+    const p = panel(0);
+    txt(p, 'малая интенсивность', 410, 82, m('tab'), { size: 30, weight: 700, fill: LOW, anchor: 'middle' });
+    txt(p, 'высокая интенсивность', 1200, 82, m('h'), { size: 30, weight: 700, fill: HIGH, anchor: 'middle' });
+    const low = ['ранняя стадия заживления', 'после долгой иммобилизации: хрящ, кость', 'проверить реакцию после бездействия', 'обучение упражнению, форма', 'большинство детей и пожилых', 'цель — выносливость', 'разминка и заминка', 'медленная изокинетика — меньше сжатие'];
+    low.forEach((s, i) => {
+      const g = G(p, { o: 0 }), y = 140 + i * 70;
+      mk('rect', { x: 50, y, width: 730, height: 58, rx: 14, fill: PANEL, stroke: LOW, 'stroke-width': 2 }, g);
+      T(g, s, { x: 72, y: y + 38, size: 24, fill: COL.chalk });
+      show(g, m('l' + (i + 1)));
+    });
+    const high = ['цель — сила, мощность, рост мышцы', 'поздняя реабилитация здоровых взрослых перед тяжёлой работой или спортом', 'программы для людей без патологии', 'тяжёлая атлетика, бодибилдинг'];
+    high.forEach((s, i) => {
+      const g = G(p, { o: 0 }), y = 140 + i * 105;
+      mk('rect', { x: 820, y, width: 730, height: 90, rx: 14, fill: PANEL, stroke: HIGH, 'stroke-width': 2 }, g);
+      put(para(g, s, 842, y + 38, null, { size: 24, maxW: 690 }), { o: 1 });
+      show(g, m('h' + (i + 1)));
+    });
+    infoCard(p, 820, 580, 730, 270, 'внимание', 'боль при упражнении — интенсивность слишком велика; ближе к максимуму — выше риск для сердца и сосудов → ритмичное дыхание в каждом повторении', COL.bad, m('pain'), { size: 23 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-intensity', prompt: ['Малая или высокая интенсивность?'],
+    build: grid([
+      { parts: ['Третий день после растяжения связок, ткани надо защищать'], ans: ['l'], why: 'Ранняя стадия заживления — малая.' },
+      { parts: ['Пациента учат новому упражнению'], ans: ['l'], why: 'Сначала форма — малая.' },
+      { parts: ['Здоровый взрослый перед возвращением к тяжёлой работе, поздняя реабилитация'], ans: ['h'], why: 'Высокая.' },
+      { parts: ['Цель — выносливость мышц'], ans: ['l'], why: 'Малая интенсивность, больше повторений.' },
+      { parts: ['Цель — сила и мощность у здорового человека'], ans: ['h'], why: 'Высокая.' },
+    ], [['l', 'Малая', LOW], ['h', 'Высокая', HIGH]], { multi: false, text: true }),
+  }], done) }],
+
+  ['rm', 'Повторный максимум', (m) => {
+    const p = panel(0), GY = 780;
+    txt(p, 'повторный максимум (repetition maximum, RM)', 800, 82, m('rm'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ground(p, 70, 330, GY, m('one', -.5)); ground(p, 360, 620, GY, m('ten', -.5));
+    const a = curlFig(p, 200, GY, .95, 1.6, m('one', -.5)), b = curlFig(p, 490, GY, .95, 1.05, m('ten', -.5));
+    curls(a, m('one', .3), 2.4, .5, { top: 120 });
+    const ca = txt(p, '1ПМ: 1 раз', 200, 330, m('one', .3), { size: 26, weight: 700, fill: HIGH, anchor: 'middle' });
+    const cb = txt(p, '', 490, 330, m('ten', .3), { size: 26, weight: 700, fill: LOW, anchor: 'middle' });
+    prog(q => { const e = (1 - Math.cos(2 * Math.PI * 10 * q)) / 2; b.f.set({ aN: 6, eN: lerp(10, 120, e) }); b.mu.act(.6 + .4 * q); cb.textContent = '10ПМ: ' + Math.min(10, Math.floor(q * 10 + .5)) + ' раз'; }, m('ten', .3), 6, lin);
+    txt(p, 'весь объём, с контролем, до утомления', 345, 850, m('def', 1), { size: 21, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 680, 120, 860, 150, 'наибольший груз', 'который с контролем проходит весь доступный объём заданное число раз до утомления (Делорм)', COL.task, m('def'), { size: 22 });
+    infoCard(p, 680, 285, 860, 120, 'зачем', 'начальный груз · исходная динамическая сила', COL.whole, m('use'), { size: 22 });
+    infoCard(p, 680, 420, 860, 120, '1ПМ — надёжно и безопасно', 'здоровые молодые, спортсмены, активные пожилые', COL.good, m('safe'), { size: 22 });
+    infoCard(p, 680, 555, 860, 165, 'небезопасно', 'поражения суставов; заживление или риск травмы мягких тканей; остеопороз или его риск; болезни сердца и сосудов', COL.bad, m('no'), { size: 22 });
+    infoCard(p, 680, 735, 860, 120, 'расчёт 1ПМ', 'по формулам и таблицам — больше повторений с меньшим грузом', COL.whole, m('calc'), { size: 22 });
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Параметры программы (FITT и другие) подбирают под функциональные цели.', 'w1'],
+     ['Выравнивание — как действует мышца и с учётом силы тяжести; стабилизация — внешняя или внутренняя.', 'w2'],
+     ['Малая интенсивность — заживление, обучение, выносливость, дети и пожилые; высокая — сила и мощность у здоровых.', 'w3'],
+     ['Повторный максимум задаёт начальный груз и исходную силу; 1ПМ — не для всех.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-1rm', prompt: ['Можно ли определять одноповторный максимум (1ПМ)?'],
+    build: grid([
+      { parts: ['Здоровый молодой спортсмен перед программой'], ans: ['y'], why: 'Надёжно и безопасно.' },
+      { parts: ['Активная пожилая женщина без болезней'], ans: ['y'], why: 'У активных пожилых — тоже.' },
+      { parts: ['Пациентка с остеопорозом'], ans: ['n'], why: 'Максимальное усилие небезопасно — рассчитать по таблицам.' },
+      { parts: ['Две недели после растяжения связок голеностопа'], ans: ['n'], why: 'Мягкие ткани заживают.' },
+      { parts: ['Пациент с ишемической болезнью сердца'], ans: ['n'], why: 'Сердечно-сосудистый риск.' },
+    ], [['y', 'Можно', COL.good], ['n', 'Небезопасно', COL.bad]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-gmed', prompt: ['Пациентка лежит на боку и отводит ногу с манжетой, но бедро при этом уходит вперёд, в сгибание. Что происходит и что исправить?'],
+    build: choice([
+      ['Работу берёт напрягатель широкой фасции; держать бедро слегка разогнутым, таз чуть вперёд'],
+      ['Всё правильно — так сильнее работает средняя ягодичная'],
+      ['Нужно лечь на спину — так манжета лучше сопротивляется отведению'],
+      ['Нужно убрать манжету и делать быстрее'],
+    ], 0, 'При сгибании бедра главным двигателем становится TFL; правильное выравнивание возвращает работу средней ягодичной.',
+    [null, 'При сгибании польза для средней ягодичной теряется.', 'На спине сила тяжести и манжета сопротивляются сгибанию, а не отведению.', 'Дело не в грузе и скорости, а в выравнивании.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+[
+ {
+  "beat": "cc",
+  "fig": 0,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает rectus, фигура ×0.8",
+  "to": "tg"
+ },
+ {
+  "beat": "cc",
+  "fig": 1,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает rectus, фигура ×0.75",
+  "from": "tg"
+ }
+]

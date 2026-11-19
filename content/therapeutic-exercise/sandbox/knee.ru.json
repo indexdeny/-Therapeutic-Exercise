@@ -1,0 +1,455 @@
+{
+  "joint": "knee",
+  "title": "колено",
+  "structures": {
+    "rf": {
+      "ru": "прямая мышца бедра",
+      "en": "rectus femoris",
+      "kind": "muscle",
+      "limb": "rf"
+    },
+    "quad": {
+      "ru": "широкие мышцы бедра",
+      "en": "vastus muscles",
+      "kind": "muscle",
+      "close": "quad"
+    },
+    "ham": {
+      "ru": "подколенные мышцы",
+      "en": "hamstrings",
+      "kind": "muscle",
+      "limb": "ham",
+      "close": "ham"
+    },
+    "gast": {
+      "ru": "икроножная",
+      "en": "gastrocnemius",
+      "kind": "muscle",
+      "limb": "gast",
+      "close": "gast"
+    },
+    "ilio": {
+      "ru": "подвздошно-поясничная",
+      "en": "iliopsoas",
+      "kind": "muscle",
+      "limb": "ilio"
+    },
+    "gmax": {
+      "ru": "большая ягодичная",
+      "en": "gluteus maximus",
+      "kind": "muscle",
+      "limb": "gmax"
+    },
+    "acl": {
+      "ru": "передняя крестообразная",
+      "en": "anterior cruciate ligament",
+      "kind": "lig",
+      "close": "acl"
+    },
+    "pcl": {
+      "ru": "задняя крестообразная",
+      "en": "posterior cruciate ligament",
+      "kind": "lig",
+      "close": "pcl"
+    },
+    "lcl": {
+      "ru": "наружная боковая связка",
+      "en": "lateral collateral ligament",
+      "kind": "lig",
+      "close": "lcl"
+    },
+    "capK": {
+      "ru": "задняя капсула колена",
+      "en": "posterior capsule of the knee",
+      "kind": "cap",
+      "close": "C.post"
+    },
+    "iliofem": {
+      "ru": "подвздошно-бедренная связка",
+      "en": "iliofemoral ligament",
+      "kind": "lig",
+      "limb": "iliofem"
+    },
+    "capH": {
+      "ru": "передняя капсула бедра",
+      "en": "anterior capsule of the hip",
+      "kind": "cap",
+      "limb": "C.ant"
+    },
+    "contactK": {
+      "ru": "голень встретила бедро",
+      "en": "soft-tissue approximation",
+      "kind": "contact"
+    },
+    "contactH": {
+      "ru": "бедро встретило живот",
+      "en": "soft-tissue approximation",
+      "kind": "contact"
+    }
+  },
+  "motions": [
+    {
+      "id": "flex",
+      "title": "сгибание — разгибание",
+      "limb": {
+        "model": "hipSag",
+        "muscles": ["ilio", "rf", "gmax", "ham", "gast"]
+      },
+      "close": {
+        "model": "kneeSag",
+        "muscles": ["quad", "ham", "gast"]
+      },
+      "main": "kn",
+      "dof": [
+        {
+          "key": "kn",
+          "ru": "колено",
+          "act": "сгибание колена",
+          "range": [-10, 145],
+          "norm": [0, 135],
+          "normNote": true,
+          "handle": 0.62
+        },
+        {
+          "key": "th",
+          "ru": "бедро",
+          "act": "сгибание бедра",
+          "range": [-30, 130],
+          "norm": [-10, 120],
+          "normNote": true,
+          "handle": 0.55
+        }
+      ],
+      "groups": [
+        {
+          "id": "kflex",
+          "dof": "kn",
+          "dir": 1,
+          "ids": ["ham", "gast"]
+        },
+        {
+          "id": "kext",
+          "dof": "kn",
+          "dir": -1,
+          "ids": ["rf", "quad"]
+        },
+        {
+          "id": "hflex",
+          "dof": "th",
+          "dir": 1,
+          "ids": ["ilio", "rf"]
+        },
+        {
+          "id": "hext",
+          "dof": "th",
+          "dir": -1,
+          "ids": ["gmax", "ham"]
+        }
+      ],
+      "positions": {
+        "stand": {
+          "r": 0,
+          "q0": {
+            "th": 0,
+            "kn": 0
+          },
+          "above": [],
+          "limb": [250, 280, 0.62],
+          "close": [800, 640, 1.0]
+        },
+        "sit": {
+          "r": 0,
+          "q0": {
+            "th": 90,
+            "kn": 90
+          },
+          "above": ["K"],
+          "pad": 46,
+          "seat": true,
+          "limb": [170, 330, 0.55],
+          "close": [800, 500, 1.05]
+        },
+        "supine": {
+          "r": -90,
+          "q0": {
+            "th": 0,
+            "kn": 0
+          },
+          "above": ["K", "ankle", "heel"],
+          "pad": 0,
+          "table": true,
+          "limb": [230, 600, 0.55],
+          "close": [800, 300, 1.0]
+        },
+        "prone": {
+          "r": 90,
+          "q0": {
+            "th": 0,
+            "kn": 0
+          },
+          "above": ["K", "ankle"],
+          "pad": 34,
+          "table": true,
+          "limb": [640, 620, 0.55],
+          "close": [800, 260, 1.0]
+        }
+      },
+      "stops": [
+        {
+          "id": "rf",
+          "max": 0.159,
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "id": "ham",
+          "max": 0.22,
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "id": "iliofem",
+          "max": 0.071,
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "kn",
+          "min": -5,
+          "ids": ["capK", "acl"],
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "kn",
+          "max": 140,
+          "ids": ["contactK"],
+          "feel": "soft",
+          "note": true
+        },
+        {
+          "dof": "th",
+          "max": 125,
+          "ids": ["contactH"],
+          "feel": "soft",
+          "note": true
+        }
+      ],
+      "refs": [
+        {
+          "pos": "prone",
+          "q": {
+            "th": 0,
+            "kn": 0
+          },
+          "dof": "kn",
+          "to": 145,
+          "expect": 125,
+          "by": "rf",
+          "src": "note"
+        },
+        {
+          "pos": "supine",
+          "q": {
+            "th": 0,
+            "kn": 0
+          },
+          "dof": "th",
+          "to": 130,
+          "expect": 80,
+          "by": "ham",
+          "src": "note"
+        },
+        {
+          "pos": "supine",
+          "q": {
+            "th": 60,
+            "kn": 90
+          },
+          "dof": "th",
+          "to": 130,
+          "expect": 125,
+          "by": "contactH",
+          "src": "note"
+        },
+        {
+          "pos": "stand",
+          "q": {
+            "th": 0,
+            "kn": 0
+          },
+          "dof": "th",
+          "to": -30,
+          "expect": -15,
+          "by": "iliofem",
+          "src": "note"
+        },
+        {
+          "pos": "stand",
+          "q": {
+            "th": 0,
+            "kn": 0
+          },
+          "dof": "kn",
+          "to": -10,
+          "expect": -5,
+          "by": "capK",
+          "src": "note"
+        },
+        {
+          "pos": "sit",
+          "q": {
+            "th": 90,
+            "kn": 90
+          },
+          "dof": "kn",
+          "to": 145,
+          "expect": 140,
+          "by": "contactK",
+          "src": "note"
+        }
+      ],
+      "marks": [
+        {
+          "dof": "kn",
+          "at": 25,
+          "short": "покой",
+          "ru": "положение покоя",
+          "page": 777
+        }
+      ]
+    }
+  ],
+  "facts": [
+    {
+      "ru": "Положение покоя колена — около 25° сгибания.",
+      "page": 777
+    },
+    {
+      "ru": "Подколенные и прямая мышца бедра двусуставные: их длина зависит и от бедра, и от колена.",
+      "page": 120
+    },
+    {
+      "ru": "Сидя разгибать колено против силы тяжести труднее всего в последние 15°.",
+      "page": 773,
+      "mode": "active",
+      "pos": "sit"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "rest",
+      "text": "Поставьте колено в положение покоя.",
+      "when": {
+        "q": {
+          "kn": [20, 30]
+        }
+      },
+      "hint": "Ищите зелёную метку «покой» на дуге у колена.",
+      "show": {
+        "pos": "supine",
+        "path": [
+          {
+            "th": 40
+          }
+        ],
+        "q": {
+          "kn": 25
+        }
+      },
+      "why": "Около 25° сгибания — положение покоя колена: в нём начинают мягкие приёмы мобилизации, пока сустав болит.",
+      "page": 777
+    },
+    {
+      "id": "hamStretch",
+      "text": "Растяните подколенные мышцы до предела.",
+      "when": {
+        "stop": "ham",
+        "q": {
+          "kn": [-5, 10]
+        }
+      },
+      "hint": "Колено держите прямым и сгибайте бедро.",
+      "show": {
+        "pos": "supine",
+        "q": {
+          "th": 130
+        }
+      },
+      "why": "Подколенные проходят через два сустава: сгибание бедра с прямым коленом растягивает их сильнее всего.",
+      "page": 118
+    },
+    {
+      "id": "rfStop",
+      "text": "Найдите позу, в которой согнуть колено до конца мешает прямая мышца бедра.",
+      "when": {
+        "stop": "rf"
+      },
+      "hint": "Бедро должно быть разогнуто — удобнее всего лёжа на животе.",
+      "show": {
+        "pos": "prone",
+        "q": {
+          "kn": 145
+        }
+      },
+      "why": "При разогнутом бедре прямая мышца бедра натягивается раньше и останавливает сгибание колена.",
+      "page": 120
+    },
+    {
+      "id": "proneEcc",
+      "text": "Лёжа на животе в активном режиме согните колено больше 90°. Кто теперь работает?",
+      "when": {
+        "pos": "prone",
+        "mode": "active",
+        "work": {
+          "kext": "ecc"
+        }
+      },
+      "hint": "Медленно сгибайте дальше 90°: голень сама падает к ягодице — кто её тормозит?",
+      "show": {
+        "pos": "prone",
+        "mode": "active",
+        "path": [
+          {
+            "kn": 95
+          }
+        ],
+        "q": {
+          "kn": 120
+        },
+        "dur": 2.2
+      },
+      "hold": 0.6,
+      "why": "За вертикалью сила тяжести сама сгибает колено, и движение тормозит четырёхглавая, удлиняясь: это уступающая работа.",
+      "page": 224
+    },
+    {
+      "id": "sitEcc",
+      "text": "Сидя в активном режиме сделайте так, чтобы четырёхглавая работала уступающе.",
+      "when": {
+        "pos": "sit",
+        "mode": "active",
+        "work": {
+          "kext": "ecc"
+        }
+      },
+      "hint": "Поднимите голень, а потом медленно опускайте её.",
+      "show": {
+        "pos": "sit",
+        "mode": "active",
+        "path": [
+          {
+            "kn": 20
+          }
+        ],
+        "q": {
+          "kn": 80
+        },
+        "dur": 2.2
+      },
+      "hold": 0.6,
+      "why": "Опуская сегмент, мышца удлиняется под нагрузкой — это уступающая (эксцентрическая) работа.",
+      "page": 224
+    }
+  ]
+}

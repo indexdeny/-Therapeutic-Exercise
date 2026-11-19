@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Артрокинематика — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 43, title: 'Артрокинематика: качение, скольжение, вращение', minutes: 10, language: 'ru', next: '../ch044/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch043/cards.ru.json
+const CARDS_SHORT = {
+  "угловое (маховое) движение — swing\nсгибание, разгибание, отведение, приведение, ротация; угломер измеряет его — это объём движения": "угломер измеряет — объём движения",
+  "поверхности внутри сустава\nкатятся, скользят или вращаются — это даёт кости отклониться дальше": "катятся, скользят, вращаются",
+  "нужна суставная игра\nкапсула должна быть достаточно свободной": "капсула должна быть достаточно свободной",
+  "капсула натягивается неравномерно\nкость смещается в сторону, противоположную тугой части капсулы": "кость — от тугой части капсулы",
+  "опыты на трупах\nскольжение, нацеленное на тугую капсулу, увеличивало объём": "скольжение на тугую капсулу → объём",
+  "редакционная статья: важны\nразмер поверхностей · исходное положение · натяжение капсулы — а не только конечное положение": "размер, исходное положение, натяжение",
+  "плечо\nвращательная манжета сдвигает головку вниз при отведении": "головку вниз",
+  "колено\nзадняя группа бедра сдвигает голень назад при сгибании": "голень назад",
+};
+// cards-short end
+
+const HAND = '#b9cfe0', TICKS = [COL.task, COL.whole, COL.good, COL.nat, COL.real];
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const gripOval = (p, k = 1) => { const e = mk('ellipse', { rx: 24 * k, ry: 16 * k, fill: HAND, 'fill-opacity': .9, stroke: '#7d93a3', 'stroke-width': 2 }, p); put(e, { o: 0 }); return e; };
+// A dot that stays on a point given by fn() (stage coordinates) after every change of the joint j.
+function dotOn(p, j, fn, col = COL.task, r = 9) {
+  const e = mk('circle', { r, fill: col, stroke: COL.board, 'stroke-width': 2 }, p);
+  const upd = () => { const S = fn(); put(e, { x: S[0], y: S[1] }); };
+  j.onSet.push(upd); upd();
+  return e;
+}
+// An arc arrow around C (romArc conventions) with a head at the end.
+function arcArrow(p, C, R, a0, a1, zero, sign, t0, col = COL.whole) {
+  const g = G(p, { o: 0 });
+  path(g, romArc(C, R, a0, a1, zero, sign), { stroke: col, 'stroke-width': 5 });
+  const e = rad(zero + sign * a1), x = C[0] + R * Math.cos(e), y = C[1] + R * Math.sin(e), tx = -Math.sin(e) * sign * Math.sign(a1 - a0), ty = Math.cos(e) * sign * Math.sign(a1 - a0);
+  path(g, `M${(x - 18 * tx - 10 * ty).toFixed(1)} ${(y - 18 * ty + 10 * tx).toFixed(1)}L${x.toFixed(1)} ${y.toFixed(1)}L${(x - 18 * tx + 10 * ty).toFixed(1)} ${(y - 18 * ty - 10 * tx).toFixed(1)}`, { stroke: col, 'stroke-width': 5 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Артрокинематика', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 5 · Урок 43', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Артрокинематика:', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'качение, скольжение, вращение', { x: 800, y: 380, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как движутся суставные поверхности', 800, 460, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), j = jointGlide(art, { x: 800, y: 690, s: .62, r: -90, t0: 0, shaft: 260 });
+    dotOn(art, j, () => j.stage(j.headAt(0)));
+    show(art, m('sub', .2));
+    prog(q => j.set({ a: 30 * Math.sin(2 * Math.PI * q) }), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['shapes', 'Формы поверхностей', (m) => {
+    const p = panel(0);
+    txt(p, 'движение зависит от формы поверхностей', 800, 95, m('shape'), { size: 26, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const j = jointGlide(p, { x: 400, y: 480, s: .95, shaft: 150, t0: m('ovoid') });
+    txt(p, 'овоидный (ovoid)', 400, 170, m('ovoid'), { size: 27, weight: 700, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'вогнутая', 500, 400, m('ovoid', 1), { size: 23, fill: COL.whole });
+    txt(p, 'выпуклая', 510, 530, m('ovoid', 1.6), { size: 23, fill: COL.task });
+    prog(q => j.set({ a: 25 * Math.sin(2 * Math.PI * q) }), m('ovoid', 2), 3, lin);
+    const sd = saddle(p, 1150, 520, 1.15, m('sellar'));
+    txt(p, 'седловидный (sellar)', 1150, 170, m('sellar'), { size: 27, weight: 700, fill: COL.task, anchor: 'middle' });
+    show(sd.conc, m('sellar', 1.5)); show(sd.conv, m('sellar', 2.5));
+    txt(p, 'вогнута', 1325, 455, m('sellar', 1.5), { size: 23, weight: 700, fill: COL.whole });
+    txt(p, 'выпукла', 1235, 655, m('sellar', 2.5), { size: 23, weight: 700, fill: COL.task });
+    sd.setRider(170);
+    show(sd.rider, m('sellar', 3.5));
+    prog(q => sd.setRider(lerp(170, 26, io(q))), m('sellar', 3.6), 1.6, lin);
+    txt(p, 'партнёр комплементарен — как всадник и седло', 1150, 790, m('sellar', 4), { size: 22, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['swing', 'Угловое движение', (m) => {
+    const p = panel(0), j = jointGlide(p, { x: 470, y: 420, s: 1.05, shaft: 200, t0: .2 });
+    const C = j.stage([0, 0]), arc = path(p, '', { stroke: COL.whole, 'stroke-width': 5 }, { o: 0 });
+    const deg = txt(p, '', 0, 0, m('swing', 1), { size: 30, weight: 700, fill: COL.whole });
+    prog(q => {
+      const a = 40 * io(q); j.set({ a });
+      arc.setAttribute('d', romArc(C, 250, 0, a, 90, -1)); put(arc, { o: q > 0 ? 1 : 0 });
+      const e = rad(90 - a - 6); put(deg, { x: C[0] + 275 * Math.cos(e), y: C[1] + 275 * Math.sin(e) + 10 }); deg.textContent = Math.round(a) + '°';
+    }, m('swing', 1), 2.4, lin);
+    infoCard(p, 900, 120, 620, 230, 'угловое (маховое) движение — swing', 'сгибание, разгибание, отведение, приведение, ротация; угломер измеряет его — это объём движения', COL.whole, m('swing'), { size: 23 });
+    const ring = G(p, { o: 0 });
+    mk('circle', { cx: C[0], cy: C[1], r: 125, fill: 'none', stroke: COL.task, 'stroke-width': 4, 'stroke-dasharray': '10 8' }, ring);
+    show(ring, m('surf'));
+    infoCard(p, 900, 390, 620, 200, 'поверхности внутри сустава', 'катятся, скользят или вращаются — это даёт кости отклониться дальше', COL.task, m('surf'), { size: 23 });
+    infoCard(p, 900, 630, 620, 170, 'нужна суставная игра', 'капсула должна быть достаточно свободной', ANAT.taut, m('lax'), { size: 23 });
+  }],
+
+  ['roll', 'Качение', (m) => {
+    const p = panel(0), gy = 600, R = 80, x0 = 200, step = 105, f = v => v.toFixed(1);
+    txt(p, 'качение (roll): новые точки — новым точкам', 420, 110, m('roll'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    show(path(p, `M100 ${gy}H730`, { stroke: COL.dim, 'stroke-width': 5 }, { o: 0 }), .2);
+    for (let i = 0; i < 5; i++) show(path(p, `M${x0 + i * step} ${gy - 2}V${gy + 16}`, { stroke: TICKS[i], 'stroke-width': 6 }, { o: 0 }), .2);
+    const wg = G(p, { x: x0, y: gy - R, o: 0 }), wr = G(wg, {}), defs = mk('defs', {}, wg);
+    const hg = mk('radialGradient', { id: 'wh' + (++SHADE_ID), cx: .38, cy: .34, r: .75 }, defs);
+    [[0, mix(ANAT.bone, '#ffffff', .5)], [.55, ANAT.bone], [1, mix(ANAT.bone, '#000000', .4)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, hg));
+    mk('circle', { r: R, fill: `url(#${hg.id})`, stroke: mix(ANAT.bone, '#000000', .5), 'stroke-width': 2 }, wr);
+    for (let i = 0; i < 5; i++) { const a = -i * step / R * 180 / Math.PI, A = rotPt(0, R - 2, a), B = rotPt(0, R - 18, a); path(wr, `M${f(A[0])} ${f(A[1])}L${f(B[0])} ${f(B[1])}`, { stroke: TICKS[i], 'stroke-width': 7 }); }
+    show(wg, .2);
+    prog(q => { const X = 4 * step * io(q); put(wg, { x: x0 + X }); put(wr, { r: X / R * 180 / Math.PI }); }, m('roll', 1.5), 7, lin);
+    txt(p, 'как колесо на дороге', 420, 680, m('roll', 1.5), { size: 22, fill: COL.dim, anchor: 'middle' });
+    ['поверхности неконгруэнтны', 'даёт угловое движение кости', 'всегда — в сторону движения кости'].forEach((str, i) => pill(p, str, 420, 750 + i * 52, [m('roll', .5), m('ang'), m('dir')][i], { col: COL.whole, size: 21 }));
+    // pure rolling in a joint: the head rolls toward the swing and presses into that side of the cup
+    const j = jointGlide(p, { x: 1180, y: 400, s: .95, shaft: 170, t0: m('comp') });
+    prog(q => { const a = 26 * io(q); j.set({ a, d: j.R * rad(a) * .5, raw: true }); }, m('comp', .8), 2.2, lin);
+    txt(p, 'только качение', 1180, 110, m('comp'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'сжатие', 1310, 290, m('comp', 2.5), { size: 23, weight: 700, fill: COL.bad });
+    txt(p, 'расхождение', 1040, 290, m('comp', 2.5), { size: 23, weight: 700, fill: COL.whole, anchor: 'end' });
+    labelBox(p, 1180, 760, 660, ['угловая растяжка рычагом', 'может сдавить участок хряща'], COL.bad, m('harm'), { size: 25 });
+    prog(q => { const a = 26; j.set({ a, d: j.R * rad(a) * .5 * (1 - io(q)), raw: true }); }, m('norm', .5), 1.4, lin);
+    txt(p, 'в норме — вместе со скольжением и вращением', 1180, 860, m('norm'), { size: 22, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['slide', 'Скольжение', (m) => {
+    const p = panel(0), gy = 470, f = v => v.toFixed(1);
+    txt(p, 'скольжение (slide): одна точка — новым точкам', 800, 110, m('slide'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // flat surfaces
+    txt(p, 'плоские', 400, 230, m('slide', 1), { size: 23, fill: COL.dim, anchor: 'middle' });
+    show(path(p, `M120 ${gy}H680`, { stroke: COL.dim, 'stroke-width': 5 }, { o: 0 }), m('slide', 1));
+    for (let i = 0; i < 5; i++) show(path(p, `M${200 + i * 95} ${gy - 2}V${gy + 16}`, { stroke: TICKS[i], 'stroke-width': 6 }, { o: 0 }), m('slide', 1));
+    const blk = G(p, { x: 200, y: gy, o: 0 });
+    mk('rect', { x: -80, y: -110, width: 160, height: 108, rx: 10, fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .5), 'stroke-width': 2 }, blk);
+    mk('circle', { cx: 0, cy: -4, r: 9, fill: COL.bad, stroke: COL.board, 'stroke-width': 2 }, blk);
+    show(blk, m('slide', 1));
+    prog(q => put(blk, { x: 200 + 380 * io(q) }), m('pt'), 3, lin);
+    // curved, congruent surfaces: the piece turns about the common centre
+    const C = [1180, 700], Rl = 260;
+    txt(p, 'изогнутые', 1180, 230, m('slide', 1), { size: 23, fill: COL.dim, anchor: 'middle' });
+    show(path(p, `M${f(C[0] - Rl * Math.sin(rad(55)))} ${f(C[1] - Rl * Math.cos(rad(55)))}A${Rl} ${Rl} 0 0 1 ${f(C[0] + Rl * Math.sin(rad(55)))} ${f(C[1] - Rl * Math.cos(rad(55)))}`, { stroke: COL.dim, 'stroke-width': 5 }, { o: 0 }), m('slide', 1));
+    for (let i = 0; i < 5; i++) { const a = rad(-36 + i * 18), A = [C[0] + (Rl - 2) * Math.sin(a), C[1] - (Rl - 2) * Math.cos(a)], B = [C[0] + (Rl - 18) * Math.sin(a), C[1] - (Rl - 18) * Math.cos(a)]; show(path(p, `M${f(A[0])} ${f(A[1])}L${f(B[0])} ${f(B[1])}`, { stroke: TICKS[i], 'stroke-width': 6 }, { o: 0 }), m('slide', 1)); }
+    const cp = G(p, { x: C[0], y: C[1], r: -36, o: 0 }), r1 = Rl + 3, r2 = Rl + 100, a1 = rad(18);
+    mk('path', { d: `M${f(-r1 * Math.sin(a1))} ${f(-r1 * Math.cos(a1))}A${r1} ${r1} 0 0 1 ${f(r1 * Math.sin(a1))} ${f(-r1 * Math.cos(a1))}L${f(r2 * Math.sin(a1))} ${f(-r2 * Math.cos(a1))}A${r2} ${r2} 0 0 0 ${f(-r2 * Math.sin(a1))} ${f(-r2 * Math.cos(a1))}Z`, fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .5), 'stroke-width': 2 }, cp);
+    mk('circle', { cx: 0, cy: -Rl - 6, r: 9, fill: COL.bad, stroke: COL.board, 'stroke-width': 2 }, cp);
+    show(cp, m('slide', 1));
+    prog(q => put(cp, { r: -36 + 72 * io(q) }), m('pt'), 3, lin);
+    txt(p, 'та же красная точка касается новых меток', 800, 610, m('pt', 1), { size: 23, weight: 700, fill: COL.bad, anchor: 'middle' });
+    pill(p, 'поверхности конгруэнтны', 400, 700, m('slide', 2), { col: COL.whole, size: 22 });
+    pill(p, 'в суставах чистого скольжения нет', 1180, 760, m('pure'), { col: COL.dim, size: 22 });
+    labelBox(p, 800, 850, 900, ['направление зависит от формы движущейся поверхности'], COL.task, m('dep'), { size: 25 });
+  }],
+
+  ['rule', 'Правило «выпуклое — вогнутое»', (m) => {
+    const p = panel(0);
+    const A = jointGlide(p, { x: 420, y: 390, s: .92, shaft: 170, t0: .2 }), B = jointGlide(p, { x: 1180, y: 390, s: .92, shaft: 170, convexMoves: false, t0: .2 });
+    txt(p, 'движется выпуклая', 420, 100, .2, { size: 26, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'движется вогнутая', 1180, 100, .2, { size: 26, weight: 700, fill: COL.whole, anchor: 'middle' });
+    dotOn(p, A, () => A.stage(A.headAt(0)), COL.bad);
+    dotOn(p, B, () => B.stage(B.cupAt(0)), COL.bad);
+    prog(q => A.set({ a: 30 * io(q) }), m('cvx', .8), 2, lin);
+    prog(q => B.set({ a: 30 * io(q) }), m('ccv', .8), 2, lin);
+    const L = (j, k) => j.stage([0, k]);
+    arcArrow(p, A.stage([0, 0]), 225, 2, 30, 90, -1, m('cvx', .8));
+    arcArrow(p, B.stage([0, 0]), 225, 2, 30, 90, -1, m('ccv', .8));
+    txt(p, 'кость', A.stage([0, 0])[0] + 140, A.stage([0, 0])[1] + 260, m('cvx', 1.5), { size: 22, fill: COL.whole });
+    txt(p, 'кость', B.stage([0, 0])[0] + 140, B.stage([0, 0])[1] + 260, m('ccv', 1.5), { size: 22, fill: COL.whole });
+    // the slide at the joint surface
+    const CA = L(A, 0), CB = L(B, 0);
+    arrowTo(p, [CA[0] + 35, CA[1] - 38], [CA[0] - 35, CA[1] - 38], m('cvx', 2.5), { col: COL.bad, w: 5 });
+    txt(p, 'скольжение', CA[0] - 105, CA[1] - 30, m('cvx', 2.5), { size: 22, weight: 700, fill: COL.bad, anchor: 'end' });
+    arrowTo(p, [CB[0] - 35, CB[1] + 92], [CB[0] + 35, CB[1] + 92], m('ccv', 2.5), { col: COL.bad, w: 5 });
+    txt(p, 'скольжение', CB[0] + 105, CB[1] + 100, m('ccv', 2.5), { size: 22, weight: 700, fill: COL.bad });
+    labelBox(p, 420, 720, 600, ['против движения кости'], COL.task, m('cvx', 3), { size: 26 });
+    labelBox(p, 1180, 720, 600, ['в ту же сторону'], COL.whole, m('ccv', 3), { size: 26 });
+    labelBox(p, 800, 840, 1000, ['правило «выпуклое — вогнутое» → направление силы при мобилизации'], COL.good, m('name'), { size: 25 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-rule', prompt: ['Куда скользит суставная поверхность движущейся кости?'],
+    build: grid([
+      { parts: ['Головка плечевой кости при отведении плеча'], ans: ['o'], why: 'Выпуклая головка: рука идёт вверх, головка скользит вниз.' },
+      { parts: ['Большеберцовая кость при разгибании колена, стопа свободна'], ans: ['s'], why: 'Вогнутые плато скользят вперёд, вместе с голенью.' },
+      { parts: ['Основание фаланги пальца при сгибании'], ans: ['s'], why: 'Основание фаланги вогнутое.' },
+      { parts: ['Головка бедренной кости при отведении бедра'], ans: ['o'], why: 'Выпуклая головка скользит против движения.' },
+    ], [['o', 'Против движения кости', COL.task], ['s', 'В ту же сторону', COL.whole]], { multi: false, text: true }),
+  }], done) }],
+
+  ['evid', 'Что показали исследования', (m) => {
+    const p = panel(0), j = jointGlide(p, { x: 430, y: 420, s: 1, shaft: 170, t0: .2 });
+    txt(p, 'тугая часть капсулы справа', 430, 100, m('hsu'), { size: 24, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    // a tight right capsule: the bone swings left and the head moves left too, against the rule
+    prog(q => { const v = io(q); j.set({ a: -28 * v, d: -10 * v, raw: true }); }, m('ev', 1), 2.2, lin);
+    const C = j.stage([0, 0]);
+    arrowTo(p, [C[0] + 120, C[1] + 10], [C[0] + 200, C[1] + 10], m('ev', 2.5), { col: COL.dim, w: 4 });
+    txt(p, 'по правилу', C[0] + 160, C[1] - 16, m('ev', 2.5), { size: 21, fill: COL.dim, anchor: 'middle' });
+    arrowTo(p, [C[0] - 120, C[1] + 10], [C[0] - 200, C[1] + 10], m('ev', 3.2), { col: COL.bad, w: 5 });
+    txt(p, 'на самом деле', C[0] - 160, C[1] - 16, m('ev', 3.2), { size: 21, weight: 700, fill: COL.bad, anchor: 'middle' });
+    // a glide aimed at the tight part stretches it, and the range grows
+    prog(q => { const v = io(q); j.set({ a: lerp(-28, -40, v), d: lerp(-10, 6, v), raw: true }); }, m('hsu', 5), 2.4, lin);
+    infoCard(p, 880, 120, 640, 240, 'капсула натягивается неравномерно', 'кость смещается в сторону, противоположную тугой части капсулы', ANAT.taut, m('hsu'), { size: 23 });
+    infoCard(p, 880, 390, 640, 180, 'опыты на трупах', 'скольжение, нацеленное на тугую капсулу, увеличивало объём', COL.good, m('hsu', 5), { size: 23 });
+    infoCard(p, 880, 600, 640, 230, 'редакционная статья: важны', 'размер поверхностей · исходное положение · натяжение капсулы — а не только конечное положение', COL.whole, m('ed'), { size: 23 });
+  }],
+
+  ['combo', 'Качение со скольжением', (m) => {
+    const p = panel(0), f = v => v.toFixed(1);
+    // congruent: mostly sliding; incongruent: mostly rolling
+    const cj = jointGlide(p, { x: 200, y: 330, s: .55, shaft: 120, span: 70, gap: 4, t0: m('cong') });
+    prog(q => cj.set({ a: 25 * Math.sin(2 * Math.PI * q) }), m('cong', .5), 3, lin);
+    txt(p, 'конгруэнтные', 200, 110, m('cong'), { size: 22, weight: 700, fill: COL.whole, anchor: 'middle' });
+    txt(p, '→ больше скольжения', 200, 140, m('cong'), { size: 21, fill: COL.whole, anchor: 'middle' });
+    const gy = 420, wg = G(p, { x: 520, y: gy - 50, o: 0 });
+    show(path(p, `M420 ${gy}H700`, { stroke: COL.dim, 'stroke-width': 5 }, { o: 0 }), m('cong', 1));
+    mk('circle', { r: 50, fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .5), 'stroke-width': 2 }, wg);
+    mk('circle', { cx: 0, cy: 38, r: 7, fill: COL.bad }, wg);
+    show(wg, m('cong', 1));
+    prog(q => { const X = 110 * Math.sin(Math.PI * q); put(wg, { x: 520 + X, r: X / 50 * 180 / Math.PI }); }, m('cong', 1.5), 3, lin);
+    txt(p, 'неконгруэнтные', 560, 110, m('cong', 1), { size: 22, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, '→ больше качения', 560, 140, m('cong', 1), { size: 21, fill: COL.task, anchor: 'middle' });
+    infoCard(p, 60, 480, 340, 190, 'плечо', 'вращательная манжета сдвигает головку вниз при отведении', COL.nat, m('mus'), { size: 21 });
+    infoCard(p, 420, 480, 340, 190, 'колено', 'задняя группа бедра сдвигает голень назад при сгибании', COL.nat, m('mus', 2.5), { size: 21 });
+    labelBox(p, 410, 740, 700, ['функция утрачена → микротравмы и дисфункция'], COL.bad, m('loss'), { size: 23 });
+    // the mobilisation glide: the whole bone moves parallel to the joint surface
+    const j = jointGlide(p, { x: 1200, y: 380, s: .85, shaft: 170, t0: m('glide') });
+    const gh = gripOval(p, 1.1), upd = () => { const S = j.stage(j.movPt([0, 130])); put(gh, { x: S[0], y: S[1], r: 90 }); };
+    j.onSet.push(upd); upd();
+    show(gh, m('glide', .3));
+    prog(q => j.set({ d: 12 * io(q) }), m('glide', 1.5), 1.6, lin);
+    arrowTo(p, [1230, 560], [1300, 560], m('glide', 1.5), { col: COL.whole, w: 5 });
+    txt(p, 'трансляторное скольжение (glide)', 1200, 110, m('glide'), { size: 23, weight: 700, fill: COL.whole, anchor: 'middle' });
+    pill(p, 'мягко — уменьшает боль', 1200, 640, m('glide', 5), { col: COL.good, size: 21 });
+    pill(p, 'с силой — растягивает капсулу', 1200, 694, m('glide', 6.5), { col: ANAT.taut, size: 21 });
+    const nr = G(p, { o: 0 });
+    roundBox(nr, 900, 740, 620, 110, COL.bad, PANEL, 2.5);
+    T(nr, 'качение (угловая растяжка) — не для капсулы', { x: 1210, y: 785, size: 23, weight: 700, fill: COL.bad, anchor: 'middle' });
+    T(nr, 'оно сжимает сустав', { x: 1210, y: 822, size: 22, fill: COL.chalk, anchor: 'middle' });
+    show(nr, m('noroll'));
+  }],
+
+  ['spin', 'Вращение', (m) => {
+    const p = panel(0), f = v => v.toFixed(1);
+    txt(p, 'вращение (spin): вокруг неподвижной оси', 800, 100, m('spin'), { size: 26, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const disk = (cx, cy, r, t0) => {
+      const g = G(p, { x: cx, y: cy, o: 0 }), defs = mk('defs', {}, g), id = 'sp' + (++SHADE_ID), gr = mk('radialGradient', { id, cx: .38, cy: .34, r: .75 }, defs);
+      [[0, mix(ANAT.bone, '#ffffff', .5)], [.55, ANAT.bone], [1, mix(ANAT.bone, '#000000', .4)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, gr));
+      mk('circle', { r, fill: `url(#${id})`, stroke: mix(ANAT.bone, '#000000', .5), 'stroke-width': 2 }, g);
+      const rot = G(g, {});
+      mk('circle', { cx: 0, cy: -r + 14, r: 9, fill: COL.bad }, rot);
+      mk('circle', { r: 6, fill: COL.board }, g);
+      show(g, t0);
+      return rot;
+    };
+    const big = disk(330, 470, 150, .2);
+    const trail = path(p, '', { stroke: COL.bad, 'stroke-width': 4, 'stroke-dasharray': '6 6' }, { o: 0 });
+    prog(q => { const a = 200 * io(q); put(big, { r: a }); let d = ''; for (let i = 0; i <= 30; i++) { const e = rad(a * i / 30 - 90); d += `${i ? 'L' : 'M'}${f(330 + 136 * Math.cos(e))} ${f(470 + 136 * Math.sin(e))}`; } trail.setAttribute('d', d); put(trail, { o: 1 }); }, m('spin', 1), 3, lin);
+    txt(p, 'та же точка описывает дугу', 330, 690, m('spin', 2), { size: 22, weight: 700, fill: COL.bad, anchor: 'middle' });
+    pill(p, 'одно — редко; обычно вместе с качением и скольжением', 330, 770, m('rare'), { col: COL.dim, size: 19 });
+    [['плечо', 'сгибание и разгибание', 760], ['тазобедренный', 'сгибание и разгибание', 1060], ['головка лучевой', 'пронация и супинация', 1360]].forEach(([a, b, x], i) => {
+      const r = disk(x, 430, 80, m('ex', .3 + i * 1.6));
+      prog(q => put(r, { r: 70 * Math.sin(2 * Math.PI * q) }), m('ex', .5 + i * 1.6), 3, lin);
+      txt(p, a, x, 560, m('ex', .3 + i * 1.6), { size: 24, weight: 700, fill: COL.whole, anchor: 'middle' });
+      txt(p, b, x, 595, m('ex', .3 + i * 1.6), { size: 21, fill: COL.dim, anchor: 'middle' });
+    });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-kind', prompt: ['Какой это вид движения поверхностей?'],
+    build: grid([
+      { parts: ['Новые точки одной поверхности встречают новые точки другой'], ans: ['r'], why: 'Качение.' },
+      { parts: ['Одна точка движущейся поверхности касается всё новых точек'], ans: ['s'], why: 'Скольжение.' },
+      { parts: ['Поворот вокруг неподвижной механической оси'], ans: ['p'], why: 'Вращение.' },
+      { parts: ['Головка лучевой кости при пронации'], ans: ['p'], why: 'Пример вращения.' },
+      { parts: ['Если идёт одно, сжимает сустав на стороне движения'], ans: ['r'], why: 'Качение без скольжения.' },
+    ], [['r', 'Качение', COL.task], ['s', 'Скольжение', COL.whole], ['p', 'Вращение', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Поверхности бывают овоидные (выпуклая и вогнутая) и седловидные.', 'w1'],
+     ['Качение: новые точки встречают новые, всегда в сторону движения кости; одно качение сжимает сустав.', 'w2'],
+     ['Скольжение: одна точка — новые; выпуклая скользит против движения кости, вогнутая — в ту же сторону.', 'w3'],
+     ['Вращение — вокруг неподвижной оси. Мобилизация использует скольжение, а не качение.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-knee', prompt: ['Сгибание колена ограничено. Вогнутые плато большеберцовой кости движутся по бедренной. Куда направить скольжение голени?'],
+    build: choice([
+      ['Назад — в ту же сторону, что и движение голени'],
+      ['Вперёд — против движения голени'],
+      ['Вниз, по длинной оси'],
+      ['Качнуть голень рычагом в сгибание'],
+    ], 0, 'Вогнутая поверхность скользит в ту же сторону, что и кость: при сгибании голень и плато идут назад.',
+    [null, 'Против движения скользит выпуклая поверхность.', 'Тяга по длинной оси — это тракция, а не скольжение.', 'Угловая растяжка рычагом сжимает сустав.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Качение всегда идёт в сторону движения кости.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Чистое скольжение в суставах встречается часто.'], ans: ['f'], why: 'Неверно: поверхности не совпадают полностью.' },
+      { parts: ['Вогнутая поверхность скользит против движения кости.'], ans: ['f'], why: 'Неверно: в ту же сторону.' },
+      { parts: ['Чем конгруэнтнее поверхности, тем больше скольжения.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Тугую капсулу растягивают качением.'], ans: ['f'], why: 'Неверно: качение сжимает сустав; используют скольжение.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

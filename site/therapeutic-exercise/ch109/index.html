@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Фибромиалгия и миофасциальный синдром — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 109, title: 'Фибромиалгия и миофасциальный болевой синдром', minutes: 10, language: 'ru', next: '../ch110/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch109/cards.ru.json
+const CARDS_SHORT = {
+  "распространённая боль\nсправа и слева, выше и ниже пояса и в осевом скелете — дольше 3 месяцев": "дольше 3 месяцев",
+  "критерии 1990 г.\n+ болезненность в 11 из 18 определённых точек": "+ болезненность в 11 из 18 определённых точек",
+  "начало\nобычно ранний или средний взрослый возраст; часто после травмы (например, аварии) или вирусной инфекции": "после травмы или вирусной инфекции",
+  "среда\nсмена погоды и давления, холод, сырость": "погода, холод, сырость",
+  "физические\nповторяющаяся работа, долгое сидение или стояние, сменная работа": "повторяющаяся работа, сидение",
+  "эмоциональные\nобычные жизненные стрессы": "обычные жизненные стрессы",
+  "FIQ — опросник влияния фибромиалгии\n10 пунктов; клинически значимое изменение ≈ 14 %": "10 пунктов; клинически значимое изменение ≈ 14 %",
+  "упражнения, особенно аэробные\nболь меньше; сила, качество жизни и настроение лучше; прогрессирующие силовые программы не вызывают обострений": "боль ↓; силовые — без обострений",
+  "клинический совет\nначинать ниже обычных рекомендаций ACSM по аэробным и силовым нагрузкам, наращивать медленно; при усилении симптомов — снизить интенсивность, но не прекращать занятия": "ниже ACSM; не прекращать",
+  "хронический регионарный болевой синдром\nтриггерные точки в мышце со своей схемой отражённой боли + чувствительные, двигательные и вегетативные симптомы": "триггерные точки + отражённая боль",
+  "пример: грушевидная мышца\nточки в ней отражают боль в ягодицу и по задней поверхности бедра": "боль в ягодицу и по бедру",
+  "хроническая перегрузка\nповторяющаяся работа или удержание мышцы в укороченном положении": "работа или укороченное положение",
+  "острая перегрузка\nпоскользнулся и удержался; поднял неожиданно тяжёлый предмет; авария": "поскользнулся, тяжёлый предмет, авария",
+  "плохая подготовка и нагрузка на осанку\nнетренированные мышцы; долгое сидение, особенно за неудобным рабочим местом; разная длина ног; неправильный подъём тяжестей": "сидение, длина ног, подъём тяжестей",
+};
+// cards-short end
+
+const HEAD = COL.whole, PAIN = '#ff5a3c', FM = COL.real, MPS = COL.nat, TPC = '#e8456a';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+let SEED = 7;
+const rnd = () => (SEED = SEED * 16807 % 2147483647) / 2147483647;
+
+// A standing figure for body maps; back = true draws the spine, the shoulder blades and the gluteal fold.
+// f.loc(name, side) gives a local point (side −1 = the figure's left on screen, 1 = right).
+function bodyFig(p, x, gy, s, t0, back = false) {
+  const f = frontStand(p, x, gy, s, null, { muscles: false }), q = f.pts, line = mix('#d8d1c1', COL.board, .62);
+  if (back) {
+    const P = q.P, C = q.Sc, a = { stroke: line, 'stroke-width': 2, fill: 'none', 'stroke-linecap': 'round' };
+    path(f.g, `M${C[0]} ${C[1] - 8}L${P[0]} ${P[1] - 10}`, a);
+    [-1, 1].forEach(k => {
+      path(f.g, `M${C[0] + k * 12} ${C[1] + 6}L${C[0] + k * 40} ${C[1] + 4}L${C[0] + k * 18} ${C[1] + 46}Z`, { ...a, 'stroke-width': 1.6 });
+      path(f.g, `M${P[0] + k * 4} ${P[1] + 26}Q${P[0] + k * 20} ${P[1] + 34} ${P[0] + k * 38} ${P[1] + 24}`, a);
+    });
+    path(f.g, `M${P[0]} ${P[1] - 6}V${P[1] + 26}`, a);
+  }
+  const L = {
+    cerv: k => [q.Sc[0] + k * 8, q.Sc[1] - 8], rib: k => [q.Sc[0] + k * 25, q.Sc[1] + 20],
+    epi: k => { const E = q.arms[k < 0 ? 0 : 1][0]; return [E[0] + k * 9, E[1]]; },
+    knee: k => { const K = q.legs[k < 0 ? 0 : 1][0]; return [K[0] - k * 9, K[1] - 4]; },
+    occ: k => [q.Hc[0] + k * 11, q.Hc[1] + 21], trap: k => [q.Sc[0] + k * 25, q.Sc[1] - 4], supra: k => [q.Sc[0] + k * 27, q.Sc[1] + 17],
+    glut: k => [q.P[0] + k * 26, q.P[1] - 2], troch: k => [q.P[0] + k * 46, q.P[1] + 16],
+  };
+  f.loc = (n, k) => L[n](k);
+  f.st = P => f.at(P);
+  return show(f.g, t0 ?? 0, t0 === null ? 0 : .5), f;
+}
+// Tender points (dots) on a body figure; returns the group.
+function tenderDots(f, names, t0, { col = TPC, r = 6, gap = .12 } = {}) {
+  const g = G(f.g);
+  names.forEach((n, i) => [-1, 1].forEach((k, j) => {
+    const [x, y] = f.loc(n, k), d = G(g, { x, y, s: 0, o: 0 });
+    mk('circle', { r, fill: col, stroke: '#ffffff', 'stroke-width': 1.5 }, d);
+    if (t0 !== null) pop(d, t0 + (i * 2 + j) * gap);
+  }));
+  return g;
+}
+// A soft glow along body parts of a figure (local points), e.g. where it hurts.
+function glowAlong(f, pts, w, t0, col = PAIN) {
+  const e = path(f.g, 'M' + pts.map(P => P[0].toFixed(1) + ' ' + P[1].toFixed(1)).join('L'), { stroke: col, 'stroke-width': w, 'stroke-opacity': .38, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none' }, { o: 0 });
+  if (t0 !== null) show(e, t0, .6);
+  return e;
+}
+function glowSpot(f, P, rx, ry, t0, col = PAIN) {
+  const e = mk('ellipse', { cx: P[0], cy: P[1], rx, ry, fill: col, 'fill-opacity': .38, opacity: 0 }, f.g);
+  if (t0 !== null) show(e, t0, .6);
+  return e;
+}
+// A muscle belly in close-up (horizontal, shaded) with a taut band and a trigger point on it.
+// set({ band, tp, hot, stretch, ease }): band 0..1 — one band of fibres pulls tight and straight; tp 0..1 — the knot;
+// hot 0..1 — the knot hurts (red halo); stretch 0..1 — the muscle is lengthened; ease 0..1 — the band lets go.
+// knot() — the stage point of the trigger point.
+function tpMuscle(p, x, y, L, t0 = null, { h = 60, tend = 70 } = {}) {
+  const g = G(p, { x, y, o: 0 }), defs = mk('defs', {}, g), id = 'tpm' + (++SHADE_ID);
+  const gr = mk('linearGradient', { id, x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+  [[0, mix(ANAT.muscle, '#ffffff', .35)], [.5, ANAT.muscle], [1, mix(ANAT.muscle, '#000000', .42)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, gr));
+  const ten = mk('path', { fill: 'none', stroke: ANAT.tendon, 'stroke-width': 10, 'stroke-linecap': 'round' }, g);
+  const belly = mk('path', { fill: `url(#${id})`, stroke: mix(ANAT.muscle, '#000000', .42), 'stroke-width': 2 }, g);
+  const fib = mk('path', { fill: 'none', stroke: mix(ANAT.muscle, '#ffffff', .45), 'stroke-width': 1.6, 'stroke-opacity': .75 }, g);
+  const band = mk('path', { fill: 'none', stroke: ANAT.taut, 'stroke-width': 0, 'stroke-linecap': 'round' }, g);
+  const halo = mk('circle', { r: 0, fill: PAIN, 'fill-opacity': .28 }, g);
+  const knot = mk('ellipse', { rx: 0, ry: 0, fill: mix(PAIN, ANAT.muscle, .25), stroke: '#7a1d10', 'stroke-width': 1.5 }, g);
+  const s = { band: 0, tp: 0, hot: 0, stretch: 0, ease: 0 }, B = -.32, e = { g, s, kx: 0, ky: 0 };
+  const f = v => v.toFixed(1);
+  e.set = q => {
+    Object.assign(s, q);
+    const k = 1 + .3 * s.stretch, hh = h * (1 - .2 * s.stretch), x1 = -L / 2 * k, x2 = L / 2 * k, a = L * k * .25;
+    const curve = (c, dx = 6) => `M${f(x1 + dx)} 0C${f(x1 + a)} ${f(c)} ${f(x2 - a)} ${f(c)} ${f(x2 - dx)} 0`;
+    ten.setAttribute('d', `M${f(x1 - tend)} 0H${f(x2 + tend)}`);
+    belly.setAttribute('d', `M${f(x1)} 0C${f(x1 + a)} ${f(-hh * 1.33)} ${f(x2 - a)} ${f(-hh * 1.33)} ${f(x2)} 0C${f(x2 - a)} ${f(hh * 1.33)} ${f(x1 + a)} ${f(hh * 1.33)} ${f(x1)} 0Z`);
+    fib.setAttribute('d', [-.72, -.5, -.12, .1, .32, .54, .76].map(j => curve(j * hh * 1.33)).join(''));
+    const tight = s.band * (1 - s.ease), bc = B * hh * 1.33 * (1 - .5 * tight);
+    band.setAttribute('d', curve(bc, 2));
+    band.setAttribute('stroke-width', f(5 * tight));
+    band.setAttribute('stroke-opacity', f(Math.min(1, tight * 1.4)));
+    // the knot sits on the band a little left of the middle (bezier at t = .42)
+    const t = .42, bx = (1 - t) ** 3 * (x1 + 2) + 3 * (1 - t) ** 2 * t * (x1 + a) + 3 * (1 - t) * t * t * (x2 - a) + t ** 3 * (x2 - 2), by = 3 * t * (1 - t) * bc;
+    e.kx = bx; e.ky = by;
+    const kn = s.tp * (1 - .75 * s.ease);
+    knot.setAttribute('cx', f(bx)); knot.setAttribute('cy', f(by)); knot.setAttribute('rx', f(14 * kn)); knot.setAttribute('ry', f(9 * kn));
+    halo.setAttribute('cx', f(bx)); halo.setAttribute('cy', f(by)); halo.setAttribute('r', f(34 * s.hot * kn));
+    return e;
+  };
+  e.knot = () => { const s0 = st(g); return [s0.x + e.kx * (s0.s ?? 1), s0.y + e.ky * (s0.s ?? 1)]; };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// A fingertip (seen from the side) pointing down with its tip at (0, 0); move the returned group.
+function finger(p, t0 = null) {
+  const g = G(p, { o: 0 }), defs = mk('defs', {}, g), sh = shadeGrad(defs, '#d8d1c1');
+  const e = mk('path', { d: capsuleD([0, -110], [0, -12], 17, 13), fill: sh.url, stroke: mix('#d8d1c1', COL.board, .62), 'stroke-width': 2 }, g);
+  sh.aim([0, -110], [0, -12], 17);
+  mk('path', { d: 'M-8 -30Q0 -24 8 -30', fill: 'none', stroke: mix('#d8d1c1', COL.board, .4), 'stroke-width': 2 }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const wave = q => .5 + .5 * Math.sin(q);
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Фибромиалгия и миофасциальный синдром', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 11 · Урок 109', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Фибромиалгия', { x: 800, y: 210, size: 52, weight: 600, anchor: 'middle', fill: FM });
+    T(g, 'и миофасциальный болевой синдром', { x: 800, y: 272, size: 42, weight: 600, anchor: 'middle', fill: MPS });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'часто путают — но причина и лечение разные', 800, 350, m('sub'), { size: 30, fill: COL.dim, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const f = bodyFig(art, 480, 860, 1.05, null);
+    glowAlong(f, [f.pts.arms[0][1], f.pts.arms[0][0], f.pts.Sh[0], f.pts.Sh[1], f.pts.arms[1][0], f.pts.arms[1][1]], 26, .8);
+    glowAlong(f, [f.pts.legs[0][1], f.pts.legs[0][0], f.pts.H[0], f.pts.H[1], f.pts.legs[1][0], f.pts.legs[1][1]], 28, 1.1);
+    glowAlong(f, [f.pts.Hc, f.pts.P], 30, 1.4);
+    tenderDots(f, ['cerv', 'rib', 'epi', 'knee'], 1.6, { r: 5.5 });
+    txt(art, 'распространённая боль', 480, 430, .9, { size: 22, weight: 700, fill: FM, anchor: 'middle' });
+    const tm = tpMuscle(art, 1110, 640, 380, null, { h: 62 }); put(tm.g, { o: 1 });
+    txt(art, 'триггерная точка в тугом тяже', 1110, 540, 1.6, { size: 22, weight: 700, fill: MPS, anchor: 'middle' });
+    prog(q => tm.set({ band: clamp(q * 3, 0, 1), tp: clamp(q * 3 - .6, 0, 1), hot: clamp(q * 3 - 1, 0, 1) * wave(q * 30) }), 1.2, Math.max(2, D - 2.4), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['cmp', 'Похожие, но разные', (m, D) => {
+    const p = panel(0);
+    txt(p, 'фибромиалгия и миофасциальный синдром (табл. 11.2)', 800, 56, m('cmp'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    txt(p, 'фибромиалгия', 530, 108, m('cmp'), { size: 26, weight: 700, fill: FM, anchor: 'middle' });
+    txt(p, 'миофасциальный синдром', 1170, 108, m('cmp'), { size: 26, weight: 700, fill: MPS, anchor: 'middle' });
+    const row = (y, h, head, a, b, ta, tb) => {
+      const g0 = G(p, { o: 0 }), ga = G(p, { o: 0 }), gb = G(p, { o: 0 });
+      put(para(g0, head, 60, y + h / 2 + 6, null, { size: 19, weight: 700, fill: COL.dim, maxW: 170 }), { o: 1 });
+      roundBox(ga, 250, y, 560, h, FM, PANEL, 2); roundBox(gb, 860, y, 620, h, MPS, PANEL, 2);
+      const ty = h > 90 ? y + 40 : y + h / 2 + 7;
+      put(para(ga, a, 270, ty, null, { size: 20, maxW: 520 }), { o: 1 }); put(para(gb, b, 880, ty, null, { size: 20, maxW: 580 }), { o: 1 });
+      show(g0, Math.min(ta, tb)); show(ga, ta); show(gb, tb);
+    };
+    row(126, 100, 'причина', 'нервная система иначе обрабатывает болевые сигналы', 'меняется сама мышца в определённом месте', m('fm'), m('mps'));
+    const cg = G(p, { o: 0 });
+    put(para(cg, 'общее', 60, 292, null, { size: 19, weight: 700, fill: COL.dim, maxW: 170 }), { o: 1 });
+    roundBox(cg, 250, 246, 1230, 76, COL.whole, PANEL, 2);
+    T(cg, 'боль в мышцах · меньше объём движений · роль нагрузок на осанку', { x: 865, y: 292, size: 21, weight: 600, anchor: 'middle' });
+    show(cg, m('sim'));
+    const d0 = m('diff'), dd = Math.max(4, D - d0);
+    [['точки', 'болезненные точки в определённых местах', 'триггерные точки в мышце'],
+     ['отражённая боль', 'нет', 'есть, по определённой схеме'],
+     ['тугой тяж', 'нет', 'есть'],
+     ['усталость, сон', 'усталость, неосвежающий сон', 'жалоб на усталость нет']].forEach(([h, a, b], i) =>
+      row(350 + i * 92, 80, h, a, b, d0 + dd * (.04 + i * .1), d0 + dd * (.56 + i * .1)));
+    // small reminders under the columns
+    const f = bodyFig(p, 530, 880, .27, d0 + dd * .1);
+    tenderDots(f, ['cerv', 'rib', 'epi', 'knee'], d0 + dd * .15, { r: 9, gap: .05 });
+    const tm = tpMuscle(p, 1170, 812, 230, d0 + dd * .55, { h: 30, tend: 40 });
+    prog(q => tm.set({ band: q, tp: q, hot: q }), d0 + dd * .6, 1);
+  }],
+
+  ['fm', 'Фибромиалгия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'фибромиалгия (fibromyalgia)', 800, 56, m('fm'), { size: 28, weight: 700, anchor: 'middle', fill: FM });
+    const fF = bodyFig(p, 175, 870, 1.45, m('fm')), fB = bodyFig(p, 445, 870, 1.45, m('fm'), true);
+    txt(p, 'спереди', 175, 300, m('fm'), { size: 20, fill: COL.dim, anchor: 'middle', weight: 600 });
+    txt(p, 'сзади', 445, 300, m('fm'), { size: 20, fill: COL.dim, anchor: 'middle', weight: 600 });
+    // widespread: right and left, above and below the waist, and the axial skeleton
+    const q = fF.pts;
+    glowAlong(fF, [q.arms[0][1], q.arms[0][0], q.Sh[0], [q.Sc[0] - 20, q.Sc[1] + 30]], 24, m('fm', 1.5));
+    glowAlong(fF, [q.arms[1][1], q.arms[1][0], q.Sh[1], [q.Sc[0] + 20, q.Sc[1] + 30]], 24, m('fm', 2));
+    glowAlong(fF, [q.legs[0][1], q.legs[0][0], q.H[0]], 26, m('fm', 2.5));
+    glowAlong(fF, [q.legs[1][1], q.legs[1][0], q.H[1]], 26, m('fm', 3));
+    glowAlong(fB, [[fB.pts.Hc[0], fB.pts.Hc[1] + 20], [fB.pts.P[0], fB.pts.P[1] - 8]], 22, m('fm', 3.6));
+    const pts = ['cerv', 'rib', 'epi', 'knee'], ptsB = ['occ', 'trap', 'supra', 'glut', 'troch'];
+    tenderDots(fF, pts, m('tp', .5));
+    tenderDots(fB, ptsB, m('tp', 1.5));
+    pill(p, 'по мотивам рис. 11.7 — схема', 310, 262, m('tp'), { col: COL.dim, size: 17 });
+    infoCard(p, 620, 92, 920, 150, 'распространённая боль', 'справа и слева, выше и ниже пояса и в осевом скелете — дольше 3 месяцев', FM, m('fm'), { size: 21 });
+    infoCard(p, 620, 256, 920, 110, 'критерии 1990 г.', '+ болезненность в 11 из 18 определённых точек', TPC, m('tp'), { size: 21 });
+    pillRow(p, ['неосвежающий сон', 'утренняя скованность', 'усталость, плохо переносит нагрузку'], 1080, 400, m('sleep', .3), { col: FM, size: 20, gap: .6, space: 12 });
+    const ng = infoCard(p, 620, 436, 920, 186, 'критерии 2010 г. — без пальпации точек', 'индекс распространённой боли + шкала тяжести симптомов', COL.whole, m('new'), { size: 21, textW: 880 });
+    const bar = G(p, { o: 0 });
+    mk('rect', { x: 642, y: 566, width: 500, height: 30, rx: 8, fill: COL.board, stroke: COL.dim, 'stroke-width': 1.5 }, bar);
+    const fill = mk('rect', { x: 642, y: 566, width: 0, height: 30, rx: 8, fill: COL.whole }, bar);
+    T(bar, '88 % отнесены верно', { x: 1160, y: 589, size: 20, weight: 700, fill: COL.whole });
+    show(bar, m('new', 1.5)); prog(q => fill.setAttribute('width', (500 * .88 * q).toFixed(1)), m('new', 1.8), 1.2, out);
+    txt(p, 'сколько людей', 620, 666, m('prev'), { size: 22, weight: 700, fill: COL.chalk });
+    [[2, 'все взрослые', FM], [3.4, 'женщины', FM], [.5, 'мужчины', COL.dim], [7.4, 'женщины 70–79 лет', FM]].forEach(([v, s, c], i) => {
+      const y = 688 + i * 46, g0 = G(p, { o: 0 });
+      T(g0, s, { x: 900, y: y + 25, size: 20, fill: COL.chalk, anchor: 'end' });
+      const r = mk('rect', { x: 920, y, width: 0, height: 32, rx: 7, fill: c }, g0);
+      const tv = T(g0, `${String(v).replace('.', ',')} %`, { x: 930, y: y + 25, size: 21, weight: 700, fill: c });
+      show(g0, m('prev', .3 + i * .7));
+      prog(k => { r.setAttribute('width', (v * 62 * k).toFixed(1)); put(tv, { x: 930 + v * 62 * k }); }, m('prev', .4 + i * .7), .8, out);
+    });
+  }],
+
+  ['char', 'Течение фибромиалгии', (m, D) => {
+    const p = panel(0);
+    txt(p, 'как проявляется фибромиалгия', 800, 56, m('char'), { size: 28, weight: 700, anchor: 'middle', fill: FM });
+    infoCard(p, 60, 92, 520, 190, 'начало', 'обычно ранний или средний взрослый возраст; часто после травмы (например, аварии) или вирусной инфекции', FM, m('char'), { size: 20 });
+    const fF = bodyFig(p, 190, 640, .8, m('pain')), fB = bodyFig(p, 450, 640, .8, m('pain'), true);
+    txt(p, 'спереди', 190, 318, m('pain'), { size: 18, fill: COL.dim, anchor: 'middle', weight: 600 });
+    txt(p, 'сзади', 450, 318, m('pain'), { size: 18, fill: COL.dim, anchor: 'middle', weight: 600 });
+    const a = fF.pts, b = fB.pts, t1 = m('pain', .8);
+    glowSpot(fF, a.Hc, 30, 30, t1); glowSpot(fF, [a.Sc[0], a.Sc[1] - 10], 14, 14, t1 + .3); glowSpot(fF, [a.Sc[0], a.Sc[1] + 30], 44, 22, t1 + .6);
+    glowSpot(fB, [b.Sc[0] - 26, b.Sc[1] + 24], 20, 26, t1 + .9); glowSpot(fB, [b.Sc[0] + 26, b.Sc[1] + 24], 20, 26, t1 + .9); glowSpot(fB, [b.P[0], b.P[1] - 30], 34, 18, t1 + 1.2);
+    pillRow(p, ['лопатки', 'голова', 'шея', 'грудь', 'поясница'], 320, 690, m('pain', .8), { col: PAIN, size: 19, gap: .3, space: 8 });
+    // good day → as much as possible → several bad days (schematic)
+    const X0 = 700, Y0 = 410, W = 800, H = 250, n = 12, bw = W / n;
+    chartAxes(p, X0, Y0, W, H, '', 'дни →', m('fluct'));
+    const act = [.92, .2, .15, .22, .3, .88, .18, .15, .25, .9, .2, .18], sym = [.22, .85, .8, .65, .4, .25, .88, .78, .5, .24, .86, .8];
+    act.forEach((v, i) => { const r = mk('rect', { x: X0 + i * bw + bw * .2, y: Y0 - v * H, width: bw * .6, height: v * H, rx: 5, fill: COL.task, 'fill-opacity': .75, opacity: 0 }, p); show(r, m('fluct', .4 + i * .15), .3); });
+    draw(path(p, 'M' + sym.map((v, i) => `${(X0 + (i + .5) * bw).toFixed(1)} ${(Y0 - v * H).toFixed(1)}`).join('L'), { stroke: COL.bad, 'stroke-width': 4, fill: 'none' }, { d: 0 }), m('fluct', 1), 2.5);
+    pill(p, 'активность', X0 + 120, Y0 - H - 10, m('fluct', .4), { col: COL.task, size: 18 });
+    pill(p, 'симптомы', X0 + 270, Y0 - H - 10, m('fluct', 1), { col: COL.bad, size: 18 });
+    pill(p, 'схема', X0 + W - 30, Y0 - H - 10, m('fluct'), { col: COL.dim, size: 17 });
+    txt(p, 'хороший день — сделать как можно больше', X0, Y0 + 66, m('fluct', 1.5), { size: 19, weight: 700, fill: COL.task });
+    txt(p, '→ потом несколько дней хуже', X0, Y0 + 96, m('fluct', 3.5), { size: 19, weight: 700, fill: COL.bad });
+    txt(p, 'чаще бывают:', 700, 560, m('co'), { size: 21, weight: 700, fill: COL.chalk });
+    const co = [['тендиниты', 'головные боли', 'синдром раздражённого кишечника'], ['нарушения ВНЧС', 'беспокойные ноги', 'пролапс митрального клапана'], ['тревога, депрессия', 'проблемы с памятью']];
+    co.forEach((r, i) => pillRow(p, r, 1100, 612 + i * 56, m('co', .3 + i * 1.6), { col: COL.real, size: 19, gap: .5, space: 10 }));
+    // flare triggers on a fresh panel
+    const p2 = panel(m('flare'));
+    txt(p2, 'что усиливает симптомы', 800, 56, m('flare'), { size: 28, weight: 700, anchor: 'middle', fill: FM });
+    pillRow(p2, ['не воспалительная', 'не дегенеративная', 'не прогрессирует'], 800, 140, m('flare', .5), { col: COL.good, size: 23, gap: .6 });
+    const F = [['среда', 'смена погоды и давления, холод, сырость', COL.whole], ['физические', 'повторяющаяся работа, долгое сидение или стояние, сменная работа', COL.task], ['эмоциональные', 'обычные жизненные стрессы', COL.real]];
+    const t0 = m('flare') + 3.5, span = Math.max(4, D - t0);
+    F.forEach(([h, s, c], i) => infoCard(p2, 60 + i * 500, 520, 470, 220, h, s, c, t0 + span * i * .28, { size: 21 }));
+    // icons: a cloud with rain, a clock, a heart
+    const ic = G(p2, { o: 0 }), ix = 295, iy = 380;
+    path(ic, `M${ix - 70} ${iy + 20}a30 30 0 0 1 20 -52a42 42 0 0 1 78 -6a30 30 0 0 1 42 58Z`, { fill: '#9fb0bf', stroke: COL.dim, 'stroke-width': 2 });
+    [-40, -10, 20, 50].forEach(dx => path(ic, `M${ix + dx} ${iy + 34}l-8 22`, { stroke: COL.whole, 'stroke-width': 4, 'stroke-linecap': 'round' }));
+    show(ic, t0);
+    const cl = G(p2, { o: 0 }), cx = 795;
+    mk('circle', { cx, cy: iy, r: 62, fill: PANEL, stroke: COL.task, 'stroke-width': 5 }, cl);
+    const hand = path(cl, `M${cx} ${iy}V${iy - 46}`, { stroke: COL.task, 'stroke-width': 5, 'stroke-linecap': 'round' });
+    path(cl, `M${cx} ${iy}H${cx + 32}`, { stroke: COL.task, 'stroke-width': 5, 'stroke-linecap': 'round' });
+    show(cl, t0 + span * .28);
+    prog(q => hand.setAttribute('transform', `rotate(${(q * 720).toFixed(1)} ${cx} ${iy})`), t0 + span * .28, Math.max(1, D - t0 - span * .28), lin);
+    const hx = 1295, hr = G(p2, { x: hx, y: iy, o: 0 });
+    path(hr, 'M0 48C-70 0 -64 -46 -32 -52C-14 -55 -3 -42 0 -32C3 -42 14 -55 32 -52C64 -46 70 0 0 48Z', { fill: COL.real, 'fill-opacity': .8, stroke: COL.real, 'stroke-width': 3 });
+    show(hr, t0 + span * .56);
+    prog(q => put(hr, { s: 1 + .08 * cyc(q, 6) }), t0 + span * .56, Math.max(1, D - t0 - span * .56), lin);
+  }],
+
+  ['fmgmt', 'Ведение фибромиалгии', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ведение фибромиалгии', 800, 56, m('pace'), { size: 28, weight: 700, anchor: 'middle', fill: FM });
+    // pacing over a day (schematic)
+    txt(p, 'распределять активность в течение дня', 60, 120, m('pace'), { size: 22, weight: 700, fill: COL.chalk });
+    const SX = 270, SW = 480, hr = SW / 15, rows = [
+      ['перегрузка', [[7, 13, 'a'], [13, 22, 'c']]],
+      ['недогрузка', [[7, 9, 'a'], [9, 22, 'r']]],
+      ['распределено', [[7, 8.5, 'a'], [8.5, 9.2, 'r'], [9.2, 10.7, 'a'], [10.7, 11.5, 'r'], [11.5, 13, 'a'], [13, 14, 'r'], [14, 15.5, 'a'], [15.5, 16.3, 'r'], [16.3, 17.8, 'a'], [17.8, 22, 'r']]]];
+    const CC = { a: COL.task, r: COL.whole, c: COL.bad };
+    rows.forEach(([name, segs], i) => {
+      const y = 150 + i * 56, g0 = G(p, { o: 0 });
+      T(g0, name, { x: SX - 14, y: y + 24, size: 19, weight: 700, fill: i === 2 ? COL.good : COL.dim, anchor: 'end' });
+      segs.forEach(([a, b, k]) => mk('rect', { x: SX + (a - 7) * hr, y, width: (b - a) * hr - 2, height: 34, rx: 6, fill: CC[k], 'fill-opacity': k === 'a' ? .85 : .4 }, g0));
+      if (i === 2) checkMark(p, SX + SW + 30, y + 18, m('pace', 2.8));
+      show(g0, m('pace', .6 + i * .9));
+    });
+    T(p, '7:00', { x: SX, y: 340, size: 16, fill: COL.dim, anchor: 'middle' }); T(p, '22:00', { x: SX + SW, y: 340, size: 16, fill: COL.dim, anchor: 'middle' });
+    pillRow(p, ['дело', 'отдых', 'плохо'], 510, 378, m('pace', .6), { col: [COL.task, COL.whole, COL.bad], size: 17, gap: .1, space: 10 });
+    pill(p, 'схема', 700, 120 - 7, m('pace'), { col: COL.dim, size: 17 });
+    // FIQ
+    infoCard(p, 820, 92, 720, 230, 'FIQ — опросник влияния фибромиалгии', '10 пунктов; клинически значимое изменение ≈ 14 %', COL.whole, m('fiq'), { size: 21 });
+    const fq = G(p, { o: 0 }), gid = 'fiq' + (++SHADE_ID), lg = mk('linearGradient', { id: gid }, mk('defs', {}, fq));
+    [[0, COL.good], [1, COL.bad]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, lg));
+    mk('rect', { x: 850, y: 246, width: 520, height: 24, rx: 12, fill: `url(#${gid})` }, fq);
+    T(fq, 'выше балл — хуже функция', { x: 1110, y: 300, size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    T(fq, '0', { x: 850, y: 300, size: 17, fill: COL.dim }); T(fq, '100', { x: 1370, y: 300, size: 17, fill: COL.dim, anchor: 'end' });
+    show(fq, m('fiq', 1.2));
+    // exercise
+    infoCard(p, 60, 420, 700, 190, 'упражнения, особенно аэробные', 'боль меньше; сила, качество жизни и настроение лучше; прогрессирующие силовые программы не вызывают обострений', COL.good, m('ex'), { size: 20 });
+    const ce = cycleErgo(p, 170, 870, .66, m('ex', 1));
+    prog(q => ce.crank(q * Math.PI * 2 * 9, .7), m('ex', 1), Math.max(2, D - m('ex', 1)), lin);
+    // evidence
+    txt(p, 'исследования', 1180, 380, m('ev'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const evRow = (y, a, b, t) => {
+      const g0 = G(p, { o: 0 });
+      put(pill(g0, a, 1020, y, null, { col: COL.good, size: 19 }), { o: 1 });
+      T(g0, '>', { x: 1200, y: y + 9, size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      put(pill(g0, b, 1360, y, null, { col: COL.dim, size: 19 }), { o: 1 });
+      show(g0, t);
+    };
+    const e0 = m('ev'), eS = Math.max(6, m('add') - e0);
+    evRow(450, 'аэробные, 8 нед.', 'силовые', e0 + .3);
+    evRow(540, 'малой интенсивности, 12 нед.', 'на гибкость', e0 + eS * .3);
+    const st = G(p, { o: 0 });
+    [[0, 0], [26, -34]].forEach(([dx, dy]) => { mk('ellipse', { cx: 880 + dx, cy: 650 + dy, rx: 11, ry: 20, fill: COL.good, 'fill-opacity': .85 }, st); mk('circle', { cx: 880 + dx, cy: 676 + dy, r: 8, fill: COL.good, 'fill-opacity': .85 }, st); });
+    T(st, '≥ 5000 шагов в день', { x: 940, y: 650, size: 22, weight: 700, fill: COL.good });
+    T(st, '→ через 12 недель функция лучше', { x: 940, y: 684, size: 20, fill: COL.chalk });
+    show(st, e0 + eS * .62);
+    // other interventions and the dosing tip on a fresh panel
+    const p2 = panel(m('add'));
+    txt(p2, 'кроме упражнений', 800, 56, m('add'), { size: 28, weight: 700, anchor: 'middle', fill: FM });
+    pillRow(p2, ['лекарства', 'распределение активности', 'когнитивно-поведенческая терапия', 'меньше стрессов'], 800, 130, m('add', .4), { col: COL.whole, size: 20, gap: .6, space: 12 });
+    pillRow(p2, ['меньше алкоголя и кофеина', 'диета', 'мануальная терапия'], 800, 190, m('add', 3), { col: COL.whole, size: 20, gap: .6, space: 12 });
+    const X0 = 120, Y0 = 760, W = 880, H = 380;
+    chartAxes(p2, X0, Y0, W, H, '', 'недели →', m('tip'));
+    show(T(p2, 'нагрузка', { x: X0 - 12, y: Y0 - H - 14, size: 20, fill: COL.dim, o: 0 }), m('tip'));
+    draw(path(p2, `M${X0} ${Y0 - H * .78}H${X0 + W - 20}`, { stroke: COL.dim, 'stroke-width': 3, 'stroke-dasharray': '10 8' }, { d: 0 }), m('tip', .3), 1);
+    txt(p2, 'обычные рекомендации', X0 + W - 20, Y0 - H * .78 - 14, m('tip', .5), { size: 18, fill: COL.dim, anchor: 'end', weight: 600 });
+    const ld = u => u < .55 ? .22 + .38 * u : u < .64 ? .429 - (.429 - .3) * Math.sin((u - .55) / .09 * Math.PI / 2) : .3 + .42 * (u - .64);
+    draw(path(p2, fnPath(X0 + 10, Y0, W - 40, H, ld, 0, 1, 160), { stroke: COL.good, 'stroke-width': 5 }, { d: 0 }), m('tip', 1), 3, lin);
+    txt(p2, 'начать ниже', X0 + 20, Y0 - H * .22 + 44, m('tip', 1), { size: 19, weight: 700, fill: COL.good });
+    txt(p2, 'наращивать медленно', X0 + W * .3, Y0 - H * .36 - 26, m('tip', 2), { size: 19, weight: 700, fill: COL.good, anchor: 'middle' });
+    const dip = X0 + 10 + (W - 40) * .62;
+    txt(p2, 'симптомы усилились →', dip, Y0 - H * .3 + 60, m('tip', 3.4), { size: 19, weight: 700, fill: COL.bad, anchor: 'middle' });
+    txt(p2, 'снизить, но продолжать', dip, Y0 - H * .3 + 86, m('tip', 3.4), { size: 19, weight: 700, fill: COL.bad, anchor: 'middle' });
+    pill(p2, 'схема', X0 + W - 40, Y0 - H - 20, m('tip'), { col: COL.dim, size: 17 });
+    infoCard(p2, 1060, 300, 480, 400, 'клинический совет', 'начинать ниже обычных рекомендаций ACSM по аэробным и силовым нагрузкам, наращивать медленно; при усилении симптомов — снизить интенсивность, но не прекращать занятия', COL.task, m('tip'), { size: 21 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-fm', prompt: ['Фибромиалгия или миофасциальный синдром?'],
+    build: grid([
+      { parts: ['Болезненные точки в определённых местах по обе стороны тела'], ans: ['f'], why: 'Фибромиалгия.' },
+      { parts: ['Тугой тяж в мышце; при надавливании боль отдаёт в ягодицу и бедро'], ans: ['m'], why: 'Миофасциальный синдром: триггерная точка с отражённой болью.' },
+      { parts: ['Неосвежающий сон и постоянная усталость'], ans: ['f'], why: 'Фибромиалгия: при миофасциальном синдроме жалоб на усталость нет.' },
+      { parts: ['Боль в одной области после долгой работы за неудобным столом'], ans: ['m'], why: 'Миофасциальный: регионарная боль от нагрузки на осанку.' },
+      { parts: ['Распространённая боль дольше трёх месяцев'], ans: ['f'], why: 'Фибромиалгия.' },
+    ], [['f', 'Фибромиалгия', FM], ['m', 'Миофасциальный', MPS]], { multi: false, text: true }),
+  }], done) }],
+
+  ['mps', 'Миофасциальный болевой синдром', (m, D) => {
+    const p = panel(0);
+    txt(p, 'миофасциальный болевой синдром', 800, 56, m('mps'), { size: 28, weight: 700, anchor: 'middle', fill: MPS });
+    infoCard(p, 640, 92, 900, 170, 'хронический регионарный болевой синдром', 'триггерные точки в мышце со своей схемой отражённой боли + чувствительные, двигательные и вегетативные симптомы', MPS, m('mps'), { size: 21 });
+    // the trigger point in a taut band
+    const tm = tpMuscle(p, 1090, 400, 520, m('tp'), { h: 58 });
+    prog(q => tm.set({ band: clamp(q * 2, 0, 1), tp: clamp(q * 2 - .6, 0, 1) }), m('tp', .3), 2);
+    prog(q => tm.set({ hot: .55 + .45 * Math.sin(q * 40) }), m('tp', 2.3), Math.max(2, D - m('tp', 2.3)), lin);
+    lab(p, 'тугой тяж', 790, 330, 900, 378, ANAT.taut, m('tp', 1));
+    lab(p, 'триггерная точка — гипервозбудимый участок', 1110, 500, 1044, 392, PAIN, m('tp', 1.8));
+    txt(p, 'боль тупая, ноющая, глубокая', 1090, 560, m('tp', 3), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // the piriformis example: X marks and the referred pattern on a back view
+    const f = bodyFig(p, 300, 880, 1.5, m('mps'), true), q = f.pts, P = q.P;
+    const piri = path(f.g, `M${P[0] + 6} ${P[1] + 2}Q${P[0] + 26} ${P[1] - 4} ${P[0] + 44} ${P[1] + 12}L${P[0] + 42} ${P[1] + 18}Q${P[0] + 24} ${P[1] + 6} ${P[0] + 6} ${P[1] + 12}Z`, { fill: '#c0392b', stroke: '#7a1d10', 'stroke-width': 1 }, { o: 0 });
+    show(piri, m('ref'));
+    const stip = G(f.g, { o: 0 }), K = q.legs[1][0], Hh = q.H[1];
+    SEED = 11;
+    for (let i = 0; i < 70; i++) { const a = rnd() * 2 * Math.PI, r = Math.sqrt(rnd()); mk('circle', { cx: P[0] + 26 + Math.cos(a) * r * 17, cy: P[1] + 8 + Math.sin(a) * r * 15, r: 1.6, fill: '#c81d3a' }, stip); }
+    mk('ellipse', { cx: P[0] + 26, cy: P[1] + 8, rx: 13, ry: 10, fill: '#c81d3a', 'fill-opacity': .55 }, stip);
+    for (let i = 0; i < 90; i++) { const u = rnd(), w = (rnd() - .5) * 2; mk('circle', { cx: Hh[0] + (K[0] - Hh[0]) * u * .9 + w * 9 - 2, cy: Hh[1] + 14 + (K[1] - Hh[1] - 14) * u * .9, r: 1.3, fill: '#ff6f7f', 'fill-opacity': .85 }, stip); }
+    show(stip, m('ref', .8), 1);
+    const X = (dx, dy) => { const g0 = G(f.g, { x: P[0] + dx, y: P[1] + dy, o: 0 }); path(g0, 'M-4 -4L4 4M4 -4L-4 4', { stroke: '#ffffff', 'stroke-width': 2.2 }); return g0; };
+    show(X(16, 3), m('ref', .5)); show(X(32, 8), m('ref', .5));
+    lab(p, 'грушевидная мышца', 590, 560, ...f.at([P[0] + 36, P[1] + 10]), '#ff7b6b', m('ref', .3));
+    infoCard(p, 640, 620, 900, 150, 'пример: грушевидная мышца', 'точки в ней отражают боль в ягодицу и по задней поверхности бедра', '#ff7b6b', m('ref'), { size: 21 });
+    pillRow(p, ['основная зона', 'может распространяться'], 1090, 820, m('ref', 1.5), { col: ['#ff5a6e', '#ffa0aa'], size: 18, gap: .4 });
+    pill(p, 'по мотивам рис. 11.8 — схема', 300, 296, m('ref'), { col: COL.dim, size: 17 });
+    // causes on a fresh panel, with an overloaded neck at a poor workstation
+    const p2 = panel(m('cause'));
+    txt(p2, 'возможные причины триггерных точек', 800, 56, m('cause'), { size: 28, weight: 700, anchor: 'middle', fill: MPS });
+    infoCard(p2, 640, 92, 900, 150, 'хроническая перегрузка', 'повторяющаяся работа или удержание мышцы в укороченном положении', MPS, m('cause'), { size: 21 });
+    infoCard(p2, 640, 256, 900, 150, 'острая перегрузка', 'поскользнулся и удержался; поднял неожиданно тяжёлый предмет; авария', COL.task, m('acute'), { size: 21 });
+    infoCard(p2, 640, 420, 900, 186, 'плохая подготовка и нагрузка на осанку', 'нетренированные мышцы; долгое сидение, особенно за неудобным рабочим местом; разная длина ног; неправильный подъём тяжестей', COL.whole, m('cond'), { size: 21 });
+    const GY = 760, SY = 560, hx = 200;
+    chair(p2, hx, SY, GY, m('cause', .3));
+    const desk = G(p2, { o: 0 });
+    path(desk, `M${hx + 110} ${SY - 50}H${hx + 390}M${hx + 370} ${SY - 50}V${GY}`, { stroke: COL.dim, 'stroke-width': 5 });
+    mk('rect', { x: hx + 270, y: SY - 112, width: 90, height: 60, rx: 4, fill: '#3d4a52', stroke: '#9fb0bf', 'stroke-width': 3 }, desk);
+    path(desk, `M${hx + 60} ${GY}H${hx + 440}`, { stroke: COL.dim, 'stroke-width': 3 });
+    show(desk, m('cause', .3));
+    const fs = fig(p2, { s: .95, o: 0, pose: { ...SIT, t: 26, hd: 26, hN: 116, hF: 116, kN: 100, kF: 100 } });
+    plant(fs, 'H', hx, SY - 14);
+    reach(fs, 'N', hx + 185, SY - 58); reach(fs, 'F', hx + 170, SY - 56);
+    const tr = muscleOn(fs, ['Sh', 'Hc', 24, -9], ['Sh', 'Hc', -16, -15], { w: 9 });
+    show(fs.g, m('cause', .3));
+    prog(q => tr.act(.35 + .45 * wave(q * 26)), m('cause', 1), Math.max(2, D - m('cause', 1)), lin);
+    txt(p2, 'долгое сидение, голова вперёд:', 330, 830, m('cause', 1), { size: 19, weight: 700, fill: MPS, anchor: 'middle' });
+    txt(p2, 'мышцы шеи и плеча перегружены', 330, 858, m('cause', 1), { size: 19, weight: 700, fill: MPS, anchor: 'middle' });
+    NOTE(p2, 330, 330, m('cause', 1));
+    txt(p2, 'связаны с:', 640, 660, m('ev'), { size: 21, weight: 700, fill: COL.chalk });
+    pillRow(p2, ['головные боли напряжения', 'боль в шее и плече'], 1090, 710, m('ev', .4), { col: COL.real, size: 20, gap: .6 });
+    txt(p2, 'боль в пояснице: больше точек → сильнее боль и хуже сон', 1090, 780, m('ev', 3), { size: 20, weight: 700, fill: COL.bad, anchor: 'middle' });
+  }],
+
+  ['mmgmt', 'Лечение триггерных точек', (m, D) => {
+    const p = panel(0);
+    txt(p, 'что делает триггерная точка', 800, 56, m('imp'), { size: 28, weight: 700, anchor: 'middle', fill: MPS });
+    // stretch: the band stops the muscle short and the point hurts
+    const tm = tpMuscle(p, 420, 380, 420, m('imp'), { h: 56 });
+    tm.set({ band: 1, tp: 1 });
+    const st0 = m('imp', .5), stD = Math.max(3, m('three') - st0 - 4);
+    prog(q => { const c = cyc(q, 2); tm.set({ stretch: .45 * c, hot: c }); }, st0, stD, lin);
+    const arL = G(p, { o: 0 }), arR = G(p, { o: 0 });
+    path(arL, 'M0 0h-60m14 -12l-14 12l14 12', { stroke: COL.chalk, 'stroke-width': 4, fill: 'none' }); path(arR, 'M0 0h60m-14 -12l14 12l-14 12', { stroke: COL.chalk, 'stroke-width': 4, fill: 'none' });
+    put(arL, { x: 100, y: 380 }); put(arR, { x: 740, y: 380 }); show(arL, st0); show(arR, st0);
+    pillRow(p, ['объём при растяжке меньше', 'сила меньше', 'растяжка болит'], 420, 500, m('imp', 1), { col: [COL.task, COL.whole, COL.bad], size: 19, gap: .8, space: 10 });
+    // active vs latent
+    const ta = tpMuscle(p, 1060, 300, 300, m('imp', 5.5), { h: 42, tend: 50 }), tl = tpMuscle(p, 1060, 570, 300, m('imp', 5.5), { h: 42, tend: 50 });
+    ta.set({ band: 1, tp: 1 }); tl.set({ band: 1, tp: 1 });
+    txt(p, 'активная', 860, 220, m('imp', 6), { size: 22, weight: 700, fill: PAIN });
+    txt(p, 'латентная', 860, 490, m('imp', 8.2), { size: 22, weight: 700, fill: COL.whole });
+    prog(q => ta.set({ hot: .55 + .45 * Math.sin(q * 50) }), m('imp', 6), Math.max(2, m('three') - m('imp', 6)), lin);
+    const [kx, ky] = ta.knot(), ref = path(p, `M${kx} ${ky - 30}c20 -30 50 -30 70 -10s50 20 80 -10`, { stroke: PAIN, 'stroke-width': 3.5, fill: 'none', 'stroke-dasharray': '7 6' }, { d: 0 });
+    draw(ref, m('imp', 6.3), 1);
+    txt(p, 'своя схема боли', kx + 160, ky - 54, m('imp', 6.5), { size: 18, weight: 600, fill: PAIN });
+    txt(p, 'молчит, пока на неё не надавят', 1060, 665, m('imp', 8.2), { size: 19, fill: COL.chalk, anchor: 'middle', weight: 600 });
+    const [lx, ly] = tl.knot(), fg = finger(p, m('imp', 8.8));
+    put(fg, { x: lx, y: ly - 90 }); tw(fg, { y: ly - 6 }, m('imp', 9.1), .6);
+    prog(q => tl.set({ hot: q }), m('imp', 9.7), .5);
+    // the three parts of treatment on a fresh panel
+    const p2 = panel(m('three'));
+    txt(p2, 'лечение: три части', 800, 56, m('three'), { size: 28, weight: 700, anchor: 'middle', fill: MPS });
+    const C = [[60, '1', 'убрать перегрузку', 'осанка, повторяющиеся действия, подъём тяжестей; короткие перерывы; при необходимости — оценить рабочее место', COL.task, 't1'],
+      [565, '2', 'устранить триггерную точку', 'сокращение – расслабление – пассивная растяжка (повторять, пока мышца не удлинится); то же с активной растяжкой; освобождение триггерной точки; охлаждающий спрей + растяжка; физические факторы; сухая игла или инъекция', MPS, 't2'],
+      [1070, '3', 'укрепить мышцы', 'упражнения на выносливость: мышцы кора и стабилизаторы лопатки', COL.good, 't3']];
+    C.forEach(([x, n, h, s, c, k]) => {
+      const g0 = G(p2, { o: 0 });
+      roundBox(g0, x, 100, 470, 330, c, PANEL, 2.5);
+      mk('circle', { cx: x + 40, cy: 140, r: 22, fill: c }, g0);
+      T(g0, n, { x: x + 40, y: 149, size: 24, weight: 700, fill: COL.board, anchor: 'middle' });
+      put(para(g0, h, x + 74, 149, null, { size: 23, weight: 700, fill: c, maxW: 380 }), { o: 1 });
+      put(para(g0, s, x + 24, 210, null, { size: 20, maxW: 426 }), { o: 1 });
+      show(g0, m(k));
+    });
+    // dry needling: the needle goes into the point and the knot lets go
+    const nm = tpMuscle(p2, 800, 580, 340, m('dn'), { h: 44, tend: 46 });
+    nm.set({ band: 1, tp: 1, hot: .8 });
+    const [nx, ny] = nm.knot(), nd = G(p2, { x: nx + 70, y: ny - 110, o: 0 });
+    path(nd, 'M0 0L-70 110', { stroke: '#d9dde0', 'stroke-width': 2 }); path(nd, 'M0 0l14 -22', { stroke: '#9fb0bf', 'stroke-width': 9, 'stroke-linecap': 'round' });
+    show(nd, m('dn', .3)); tw(nd, { x: nx + 50, y: ny - 80 }, m('dn', .8), .7);
+    prog(q => nm.set({ ease: q, hot: .8 * (1 - q) }), m('dn', 1.6), 1.6);
+    hide(nd, m('dn', 3.4));
+    txt(p2, 'сухая игла: низкий риск; боль меньше, функция лучше', 800, 670, m('dn', 1), { size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // strengthen last
+    pillRow(p2, ['1 · убрать перегрузку', '2 · устранить точку', '3 · укреплять'], 800, 770, m('tip'), { col: [COL.task, MPS, COL.good], size: 21, gap: .5, space: 60 });
+    txt(p2, 'укреплять — когда объём восстановлен и с триггерной точкой справились', 800, 860, m('tip', .5), { size: 22, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-order', prompt: ['Миофасциальный синдром от хронической перегрузки. В каком порядке?'],
+    build: grid([
+      { parts: ['Исправить осанку и рабочее место, научить делать перерывы'], ans: ['1'], why: 'Сначала — убрать перегрузку.' },
+      { parts: ['Сокращение – расслабление – растяжка, сухая игла'], ans: ['2'], why: 'Затем — устранить триггерную точку.' },
+      { parts: ['Упражнения на выносливость для мышц кора'], ans: ['3'], why: 'Укреплять — когда объём восстановлен.' },
+      { parts: ['Охлаждающий спрей с растяжкой'], ans: ['2'], why: 'Это способ устранить триггерную точку.' },
+      { parts: ['Упражнения для стабилизаторов лопатки'], ans: ['3'], why: 'Это укрепление — последний шаг.' },
+    ], [['1', 'Сначала', COL.task], ['2', 'Затем', MPS], ['3', 'В конце', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Фибромиалгия — распространённая боль дольше 3 месяцев, болезненные точки, неосвежающий сон и усталость: нервная система иначе обрабатывает боль.', 'w1'],
+     ['Ведение: распределять активность; аэробные и силовые упражнения — начинать ниже обычных норм и наращивать медленно.', 'w2'],
+     ['Миофасциальный синдром — триггерные точки в тугом тяже мышцы с отражённой болью по своей схеме.', 'w3'],
+     ['Лечение: убрать перегрузку → устранить триггерную точку → укреплять мышцы на выносливость.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: i < 2 ? FM : MPS }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-fm', prompt: ['Женщина 45 лет: распространённая боль полгода, неосвежающий сон, усталость. В хорошие дни делает всё сразу, потом 2–3 дня лежит. С чего начать?'],
+    build: choice([
+      ['Аэробные упражнения ниже обычных рекомендаций с медленным ростом и обучение распределять активность'],
+      ['Сразу силовая программа по полным рекомендациям ACSM'],
+      ['Покой, пока боль не пройдёт'],
+      ['Только растяжка: аэробная нагрузка вызовет обострение'],
+    ], 0, 'Нагрузку начинают ниже обычных норм и наращивают медленно; распределение активности сглаживает «хорошие» и «плохие» дни.',
+    [null, 'Переносимость нагрузки низкая: начинают ниже обычных рекомендаций.', 'Упражнения уменьшают симптомы; покой не лечит фибромиалгию.', 'Аэробные упражнения как раз лучше всего изучены и уменьшают симптомы.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-mps', prompt: ['Офисный работник: боль в шее и плече. В верхней части трапециевидной мышцы — тугой тяж с точкой, надавливание на которую вызывает привычную боль. Что делать в первую очередь?'],
+    build: choice([
+      ['Оценить рабочее место и осанку, научить коротким перерывам; затем — устранять триггерную точку'],
+      ['Сразу силовые упражнения для трапециевидной мышцы с большим весом'],
+      ['Это фибромиалгия: только аэробная программа'],
+      ['Ничего не делать: такие точки безвредны'],
+    ], 0, 'Сначала убирают хроническую перегрузку, затем устраняют триггерную точку, укрепляют — в конце.',
+    [null, 'Укреплять начинают, когда объём восстановлен и с точкой справились.', 'Регионарная боль с тугим тяжем и триггерной точкой — миофасциальный синдром.', 'Активная точка вызывает боль, уменьшает объём и силу — её лечат.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

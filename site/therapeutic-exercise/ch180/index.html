@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Функция кисти и нервы — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 180, title: 'Функция кисти и нервы', minutes: 11, language: 'ru', next: '../ch181/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch180/cards.ru.json
+const CARDS_SHORT = {
+  "зависит от положения суставов\nпроксимальные «крылья» межкостных сильнее влияют на ПФ сустав, дистальные — на межфаланговые": "«крылья» межкостных",
+  "запястье ставит длину\nкогда пальцы сгибаются, разгибатели запястья стабилизируют его — иначе глубокий и поверхностный сгибатели и длинный сгибатель большого согнули бы и запястье": "разгибатели запястья стабилизируют",
+  "сильный хват\nзапястье синхронно разгибается: сухожилия сгибателей удлиняются, мышца в выгодной длине": "запястье разгибается",
+  "сильное разгибание пальцев\nзапястье стабилизируют его сгибатели — разгибатели пальцев работают эффективнее": "стабилизируют сгибатели",
+  "основа\nсухожилие разгибателя пальцев (с разгибателями указательного и мизинца), капюшон, центральный и боковые пучки → терминальное": "разгибатель, капюшон, пучки",
+  "пассивная часть\nтреугольная связка и сагиттальные пучки: держат сухожилие по центру, без «тетивы»": "без «тетивы»",
+  "активная часть\nтыльные и ладонные межкостные и червеобразные — внутренние мышцы": "межкостные и червеобразные",
+  "разгибатель пальцев\nтыльнее оси ПФ: тянет сагиттальные пучки и разгибает основную фалангу; один — даёт «коготь»": "разгибает основную фалангу",
+  "внутренние мышцы\nладоннее оси ПФ, в аппарат до ПМФ: с разгибателем разгибают всё, без него — ПФ сгибают, МФ разгибают": "ПФ сгибают, МФ разгибают",
+  "«коготь»\nсокращаются только внешние сгибатели и разгибатели": "сокращаются только внешние сгибатели и разгибатели",
+  "сжатие\nвнешние сгибатели + вязкоупругость межкостных (меньше — червеобразных); разгибатель тормозит ПФ — МФ точнее": "сгибатели + межкостные",
+  "раскрытие\nвнешние разгибатели и внутренние мышцы; глубокий сгибатель сопротивляется вязкоупруго": "разгибатели + внутренние мышцы",
+  "ПФ сгибание + МФ разгибание\nдают внутренние мышцы; червеобразная снимает натяжение с глубокого сгибателя и сильно разгибает МФ": "червеобразная разгибает МФ",
+  "силовой захват\nпредмет прижат пальцами к ладони, большой давит навстречу; работа изометрическая": "пальцы к ладони, большой навстречу",
+  "мышцы\nзапястье — в лёгком разгибании и локтевом отклонении; главная сила — глубокий сгибатель IV–V; разгибатель прижимает ПФ": "глубокий сгибатель IV–V",
+  "точный захват\nмежду противопоставленным большим и пальцами, без ладони; изотонически, на чувствительных подушечках": "противопоставленный большой",
+  "комбинированный\nI–II (III) точно, III–V добавляют силу": "I–II (III) точно, III–V добавляют силу",
+  "щипок\nкак точный захват, но удержание изометрическое": "как точный захват, но удержание изометрическое",
+  "срединный нерв\nчаще всего сдавливается в запястном канале": "чаще всего сдавливается в запястном канале",
+  "локтевой нерв\nчаще всего — в локтевом канале (канале Гийона); подробно — глава 13": "канал Гийона",
+  "корешки C6–T1\nчерез срединный, локтевой и лучевой нервы; нерв страдает на любом участке от шеи, боль бывает и от тканей того же сегмента": "нерв страдает на любом участке",
+  "обследование\nанамнез и весь верхний квадрант, включая шейный отдел, если есть отражённая боль или нарушения чувствительности": "весь верхний квадрант",
+};
+// cards-short end
+
+const SH = '#86c9e8', MU = '#f4a48c', LG = '#f1dfa0', FUN = '#f0c060', SP = '#8fd6b0', ENV = '#c9b8e8', BAD = COL.bad;
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, t = Array.isArray(t0) ? t0[i] : t0 === null ? null : t0 + i * gap, g = pill(p, s, x + ws[i] / 2, y, t, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19, anchor = null } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x, an = anchor || (right ? 'end' : 'start');
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: an });
+  const lx = an === 'start' && right ? x + uiW(str, size) + 8 : an === 'middle' ? x : x + (right ? 8 : -8), ly = an === 'middle' ? y + (ty > y ? 8 : -size) : y - size * .35;
+  path(g, `M${lx} ${ly}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+const arw = (p, x1, y1, x2, y2, col, t0, w = 6) => { const a = Math.atan2(y2 - y1, x2 - x1), h = 14, g = G(p, { o: 0 }); path(g, `M${f1(x1)} ${f1(y1)}L${f1(x2)} ${f1(y2)}M${f1(x2 - h * Math.cos(a - .5))} ${f1(y2 - h * Math.sin(a - .5))}L${f1(x2)} ${f1(y2)}L${f1(x2 - h * Math.cos(a + .5))} ${f1(y2 - h * Math.sin(a + .5))}`, { stroke: col, 'stroke-width': w }); if (t0 !== null) show(g, t0); else put(g, { o: 1 }); return g; };
+const floorLn = (p, x1, x2, y, t0) => show(path(p, `M${x1} ${y}H${x2}`, { stroke: COL.dim, 'stroke-width': 4 }, { o: 0 }), t0);
+const ring = (p, P, r, col, t0) => { const c = mk('circle', { cx: f1(P[0]), cy: f1(P[1]), r, fill: 'none', stroke: col, 'stroke-width': 4, opacity: 0 }, p); show(c, t0); return c; };
+// an arc of the glenoid or the head (radius rr about the centre C of the joint, angles a0..a1) in stage coordinates
+const arcOn = (j, conv, rr, a0, a1) => { const P = []; for (let a = a0; a <= a1; a += 4) P.push(j.at(conv(polar([0, 0], rr, a)))); return P; };
+
+/* ---------- exercise helpers (chapters 17–18) ---------- */
+// Put a hand of the front-view figure on a stage point (two-link arm 72 + 66); flip bends the elbow the other way.
+function fsReach(f, side, X, Y, flip = false) {
+  const S = st(f.g), i = side === 'L' ? 0 : 1, k = i ? 1 : -1, Sh = f.pts.Sh[i];
+  const tx = (X - S.x) / S.s - Sh[0], ty = (Y - S.y) / S.s - Sh[1], D = clamp(Math.hypot(tx, ty), 8, 137.5), dg = 180 / Math.PI;
+  const phi = Math.atan2(k * tx, ty) * dg, be = Math.acos(clamp((72 * 72 + D * D - 66 * 66) / (2 * 72 * D), -1, 1)) * dg, ga = Math.acos(clamp((72 * 72 + 66 * 66 - D * D) / (2 * 72 * 66), -1, 1)) * dg;
+  const sg = flip ? -1 : 1;
+  f.set({ ['a' + side]: phi + sg * be, ['e' + side]: -sg * (180 - ga) });
+}
+// an elastic band between two stage points; set(A, B, rest) — brighter and thinner as it stretches
+function bandLine(p, col = '#e86a8a') {
+  const e = path(p, '', { stroke: col, 'stroke-width': 6, 'stroke-linecap': 'round' }, { o: 0 });
+  return { e, set(A, B, rest = 100) { const L = Math.hypot(B[0] - A[0], B[1] - A[1]), k = clamp(L / rest - 1, 0, 1); e.setAttribute('d', `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`); e.setAttribute('stroke-width', f1(6 - 2.5 * k)); e.setAttribute('stroke', mix(col, '#ffd75e', k * .6)); } };
+}
+const propLine = (p, d, t0, col = COL.dim, w = 5) => { const e = path(p, d, { stroke: col, 'stroke-width': w, 'stroke-linecap': 'round' }, { o: 0 }); if (t0 !== null) show(e, t0); return e; };
+// a ball (side view): set(x, y) moves it
+function ballEl(p, r, col = '#86c9e8') {
+  const defs = mk('defs', {}, p), g = G(p, { o: 0 });
+  mk('circle', { r, fill: ballGrad(defs, col), stroke: mix(col, '#000000', .45), 'stroke-width': 2 }, g);
+  return { g, set(x, y) { put(g, { x, y }); } };
+}
+// a seated rig figure on a chair, ankle at (ax, GY)
+function seatFig(p, ax, GY, s, t0, pose = {}) {
+  const f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...SIT, ...pose } });
+  plant(f, 'AN', ax, GY);
+  const [hx, hy] = onStage(f, 'H');
+  chair(p, hx, hy + 22 * s / .5 * .32, GY, t0);
+  p.appendChild(f.g); show(f.g, t0);
+  return f;
+}
+const QUAD = { ...STAND, t: 66, hN: 66, kN: 90, hF: 66, kF: 90, aN: 66, aF: 66, eN: 0, eF: 0, fN: -90, fF: -90 };
+// a rig figure on all fours: knee at (kx, FY); hands under the shoulders
+function quadFig(p, kx, FY, s, t0, pose = {}) {
+  const f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...QUAD, ...pose } });
+  plant(f, 'KN', kx, FY - 12 * s);
+  const Sh = onStage(f, 'Sh'); f.hand = [Sh[0] + 4, FY - 28 * s];
+  reach(f, 'N', ...f.hand); reach(f, 'F', f.hand[0] - 4, f.hand[1]);
+  show(f.g, t0); return f;
+}
+// a checklist of criteria that tick one by one
+function checklist(p, x, y, items, t0, gap, col = SP, { size = 18, dy = 40 } = {}) {
+  return items.map((s, i) => { const t = t0 + i * gap, g = G(p, {}); checkMark(g, x + 12, y + i * dy - 6, t, col, .9); txt(g, s, x + 34, y + i * dy, t, { size, fill: COL.chalk, weight: 600 }); return g; });
+}
+// horizontal bars with values: rows [label, value, colour]; k — px per unit
+function bars(p, x, y, rows, t0, { k = 5, dy = 46, unit = '%', w0 = 210, size = 17 } = {}) {
+  return rows.map(([s, v, c], i) => {
+    const yy = y + i * dy, g = G(p, { o: 0 }); show(g, t0 + i * .5);
+    T(g, s, { x: x + w0 - 12, y: yy + 6, size, fill: c, weight: 700, anchor: 'end' });
+    const b = mk('rect', { x: x + w0, y: yy - 13, width: 0, height: 24, rx: 7, fill: c }, g);
+    const tv = T(g, '', { x: x + w0 + 8, y: yy + 6, size, fill: COL.chalk, weight: 700 });
+    prog(q => { b.setAttribute('width', f1(k * v * q)); put(tv, { x: x + w0 + 8 + k * v * q }); tv.textContent = (unit === '' ? '' : (v * q).toFixed(v % 1 ? 1 : 0).replace('.', ',')) + unit; }, t0 + i * .5, 1);
+    return g;
+  });
+}
+// a resistance arrow (the hand or a band pushes the other way): a short thick arrow onto point P from direction ang
+function pushArr(p, P, ang, col, t0, L = 70) { const A = polar(P, L + 14, ang), B = polar(P, 14, ang); return arw(p, A[0], A[1], B[0], B[1], col, t0, 7); }
+
+
+/* ---------- chapter 18 helpers (lesson 172) ---------- */
+// a range dial round a stage point: the arc a0..a1 (degrees of flexion, 0 hanging down, turning forward = to the right)
+function flexArc(p, C, r, a0, a1, col, t0, w = 10) { const e = path(p, romArc(C, r, a0, a1, 90, -1), { stroke: col, 'stroke-width': w, 'stroke-linecap': 'round' }, { o: 0 }); if (t0 !== null) show(e, t0); return e; }
+// a forearm-rotation dial for foreEnd: the sector ±a about thumb-up, and a pointer along the thumb
+function rotDial(p, e, r, a, col, t0) {
+  const C = e.at('C'), g = G(p, { o: 0 });
+  path(g, romArc(C, r, -a, a, -90, 1), { stroke: col, 'stroke-width': 10, 'stroke-linecap': 'round' });
+  T(g, 'супинация', { x: C[0] - r - 12, y: C[1] - r * .55, size: 16, fill: col, weight: 700, anchor: 'end' });
+  T(g, 'пронация', { x: C[0] + r + 12, y: C[1] - r * .55, size: 16, fill: col, weight: 700 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a small axial inset of a radioulnar joint (volar side up). kind 'prox': the radial head in the annular ring against
+// the radial notch of the ulna; 'dist': the ulnar notch of the radius going round the head of the ulna. set(pro 0..1)
+function ruInset(p, x, y, kind, t0) {
+  const g = G(p, { x, y, o: 0 }), defs = mk('defs', {}, g), RC = mix(ANAT.bone, '#f6d9a8', .25), line = mix(ANAT.bone, '#000000', .5);
+  roundBox(g, -150, -120, 300, 240, EDGE, PANEL, 2);
+  T(g, 'ладонная сторона', { x: 0, y: -92, size: 15, fill: COL.dim, anchor: 'middle' });
+  T(g, 'тыльная сторона', { x: 0, y: 108, size: 15, fill: COL.dim, anchor: 'middle' });
+  const o = { g };
+  if (kind === 'prox') {
+    mk('path', { d: 'M48 -62Q8 0 48 62L110 62L110 -62Z', fill: boneGrad(defs, 0, 0, 1, 0), stroke: line, 'stroke-width': 2 }, g);   // ulna, radial notch
+    path(g, 'M44 -56Q6 0 44 56', { stroke: CART_C, 'stroke-width': 4 });
+    path(g, 'M44 -56A58 58 0 1 0 44 56', { stroke: ANAT.tendon, 'stroke-width': 9, 'stroke-opacity': .85 });   // annular ligament
+    const head = G(g, { x: -16, y: 0 });
+    mk('circle', { r: 46, fill: ballGrad(defs, RC), stroke: line, 'stroke-width': 2 }, head);
+    const stripe = path(head, 'M0 -44L0 -26', { stroke: line, 'stroke-width': 4 });
+    o.set = pro => { put(head, { x: -16, y: 0, r: -170 * pro }); };
+    o.head = head; o.stripe = stripe;
+  } else {
+    mk('circle', { cx: 30, cy: 6, r: 34, fill: ballGrad(defs), stroke: line, 'stroke-width': 2 }, g);   // head of the ulna
+    const rad = G(g, { x: 30, y: 6 });
+    mk('path', { d: 'M-40 -24A38 38 0 0 1 -40 24L-112 34Q-128 0 -112 -34Z', fill: boneGrad(defs, 0, 0, 1, 0, RC), stroke: line, 'stroke-width': 2 }, rad);
+    path(rad, 'M-40 -24A38 38 0 0 1 -40 24', { stroke: CART_C, 'stroke-width': 4 });
+    o.set = pro => { put(rad, { x: 30, y: 6, r: 55 * pro }); };
+  }
+  o.set(0);
+  if (t0 !== null) show(g, t0);
+  return o;
+}
+
+/* ---------- chapter 18 helpers (lesson 173) ---------- */
+// the flexion range a contracted capsule allows: [extension limit, flexion limit], scanned on the model
+function capRange(j) {
+  let lo = 0, hi = 145;
+  for (let a = 0; a <= 145; a++) { j.set({ flex: a }); if (j.capA.tension < .97) { lo = a; break; } }
+  for (let a = 145; a >= 0; a--) { j.set({ flex: a }); if (j.capP.tension < .97) { hi = a; break; } }
+  return [lo, hi];
+}
+// a hinged elbow brace on an elbowSag model (bars, straps, the hinge); block — the extension stop in degrees
+function hingeBrace(p, j, t0, block = null) {
+  const g = G(p, { o: 0 }), col = '#9fb0bf', sw = 11 * st(j.g).s / .7;
+  const bar1 = path(g, '', { stroke: col, 'stroke-width': sw, 'stroke-linecap': 'round', 'stroke-opacity': .9 });
+  const bar2 = path(g, '', { stroke: col, 'stroke-width': sw, 'stroke-linecap': 'round', 'stroke-opacity': .9 });
+  const straps = [0, 1, 2, 3].map(() => path(g, '', { stroke: '#6fa8c8', 'stroke-width': sw * 1.1, 'stroke-linecap': 'round', 'stroke-opacity': .75 }));
+  const hinge = mk('circle', { r: sw * 1.3, fill: '#6f7f8c', stroke: '#2b343a', 'stroke-width': 2 }, g);
+  const stop = block !== null ? path(g, '', { stroke: COL.bad, 'stroke-width': sw * .9, 'stroke-linecap': 'round' }) : null;
+  const seg = (A, B) => `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`;
+  const across = (P, Q, k) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], L = Math.hypot(dx, dy) || 1, n = [-dy / L * 34 * st(j.g).s / .7, dx / L * 34 * st(j.g).s / .7]; return seg([P[0] + n[0], P[1] + n[1]], [P[0] - n[0], P[1] - n[1]]); };
+  const upd = () => {
+    const C = j.at('C'), A = j.at(j.hum([-.15, -5.6])), B = j.at(j.fore([.1, 6.3]));
+    bar1.setAttribute('d', seg(A, C)); bar2.setAttribute('d', seg(C, B));
+    const a1 = j.at(j.hum([-.18, -4.6])), a2 = j.at(j.hum([-.22, -2.4])), b1 = j.at(j.fore([0, 2.6])), b2 = j.at(j.fore([.1, 5.2]));
+    straps[0].setAttribute('d', across(a1, C, 1)); straps[1].setAttribute('d', across(a2, C, 1)); straps[2].setAttribute('d', across(b1, C, 1)); straps[3].setAttribute('d', across(b2, C, 1));
+    hinge.setAttribute('cx', f1(C[0])); hinge.setAttribute('cy', f1(C[1]));
+    if (stop) { const r = rad(st(j.g).r || 0), P = polar(C, 60 * st(j.g).s / .7, 90 - block + (st(j.g).r || 0)), Q = polar(C, 90 * st(j.g).s / .7, 90 - block + (st(j.g).r || 0)); stop.setAttribute('d', seg(P, Q)); }
+  };
+  j.onSet.push(upd); upd();
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a small scene card: a framed box with a caption
+function sceneBox(p, x, y, w, h, title, col, t0) { const g = G(p, { o: 0 }); roundBox(g, x, y, w, h, EDGE, PANEL, 2); T(g, title, { x: x + w / 2, y: y + h - 16, size: 16, fill: col, weight: 700, anchor: 'middle' }); if (t0 !== null) show(g, t0); return g; }
+
+/* ---------- chapter 18 helpers: a phase strip ---------- */
+// Rehabilitation phases on a time axis: rows [label, from, to, colour] in weeks; ticks [[value, label]].
+// Each phase gets its own row; they appear one by one (t0 + i * gap, or t0[i] if an array).
+function phaseBar(p, x, y, w, max, rows, ticks, t0, { gap = .6, dy = 34, size = 15 } = {}) {
+  const g = G(p, { o: 0 }), X = v => x + w * v / max;
+  path(g, `M${x} ${y}H${x + w}`, { stroke: COL.dim, 'stroke-width': 3 });
+  ticks.forEach(([v, s0]) => { path(g, `M${f1(X(v))} ${y - 6}V${y + 6}`, { stroke: COL.dim, 'stroke-width': 2 }); T(g, s0, { x: X(v), y: y + 26, size: 14, fill: COL.dim, anchor: 'middle' }); });
+  if (t0 !== null) show(g, Array.isArray(t0) ? t0[0] : t0);
+  const els = rows.map(([s0, a, b, c], i) => {
+    const r = G(p, { o: 0 }), yy = y - 26 - (rows.length - 1 - i) * dy;
+    mk('rect', { x: X(a), y: yy - 12, width: Math.max(4, X(b) - X(a)), height: 22, rx: 8, fill: c, 'fill-opacity': .85 }, r);
+    const fits = uiW(s0, size) + 16 <= X(b) - X(a);
+    T(r, s0, { x: fits ? X(a) + 8 : X(b) + 8, y: yy + 5, size, fill: fits ? COL.board : c, weight: 700 });
+    if (t0 !== null) show(r, Array.isArray(t0) ? t0[i] : t0 + i * gap);
+    return r;
+  });
+  return { g, rows: els, X };
+}
+
+/* ---------- chapter 18 helpers (lesson 175) ---------- */
+// a two-column list with marks: items [text, colour], cross (✕) or tick
+function markList(p, x, y, items, t0, gap, { cross: isX = true, size = 16, dy = 36, maxW = 300 } = {}) {
+  return items.map(([s0, c], i) => { const g = G(p, { o: 0 }), yy = y + i * dy; if (isX) cross(g, x + 10, yy - 6, 9, 0, 4); else checkMark(g, x + 10, yy - 6, 0, c, .8); put(para(g, s0, x + 30, yy, null, { size, fill: c, weight: 600, maxW }), { o: 1 }); show(g, t0 + i * gap); return g; });
+}
+// a range bar: [label, lo, hi, mean, colour] on a % scale (k px per %)
+function rangeBars(p, x, y, rows, t0, { k = 6, dy = 48, w0 = 220, size = 15, track = false } = {}) {
+  return rows.map(([s0, lo, hi, mean, c], i) => {
+    const g = G(p, { o: 0 }), yy = y + i * dy;
+    T(g, s0, { x: x + w0 - 10, y: yy + 5, size, fill: c, weight: 700, anchor: 'end' });
+    if (track) mk('rect', { x: x + w0, y: yy - 9, width: 100 * k, height: 18, rx: 6, fill: COL.faint, 'fill-opacity': .5 }, g);
+    const a0 = track && lo === hi ? 0 : lo;
+    mk('rect', { x: x + w0 + a0 * k, y: yy - 9, width: Math.max(4, (hi - a0) * k), height: 18, rx: 6, fill: c, 'fill-opacity': track ? .9 : .35 }, g);
+    if (mean !== null) mk('rect', { x: x + w0 + mean * k - 3, y: yy - 14, width: 6, height: 28, rx: 2, fill: c }, g);
+    T(g, (mean !== null ? String(mean).replace('.', ',') + ' %' : lo === hi ? `${lo} %` : `${lo}–${hi} %`), { x: x + w0 + Math.max(hi, mean ?? 0) * k + 12, y: yy + 5, size, fill: COL.chalk, weight: 700 });
+    show(g, t0 + i * .6);
+    return g;
+  });
+}
+
+/* ---------- chapter 18 helpers (lesson 176) ---------- */
+// a tendon close-up: healthy (parallel collagen) or tendinosis (disorganised fibres, new vessels)
+function tendonPatch(p, x, y, w, h, sick, t0) {
+  const g = G(p, { o: 0 }); roundBox(g, x, y, w, h, EDGE, PANEL, 2);
+  for (let i = 0; i < 9; i++) {
+    const yy = y + 22 + i * (h - 44) / 8;
+    if (!sick) path(g, `M${x + 16} ${yy}H${x + w - 16}`, { stroke: ANAT.tendon, 'stroke-width': 3 });
+    else { let d = `M${x + 16} ${yy}`; for (let k = 1; k <= 6; k++) d += `L${f1(x + 16 + (w - 32) * k / 6)} ${f1(yy + ((i * 7 + k * 5) % 9 - 4) * 2.4)}`; path(g, d, { stroke: ANAT.tendon, 'stroke-width': 2.5, 'stroke-opacity': .8 }); }
+  }
+  if (sick) for (let k = 0; k < 3; k++) path(g, `M${x + 30 + k * 50} ${y + 20}q12 20 -4 40t4 40`, { stroke: COL.bad, 'stroke-width': 3, 'stroke-opacity': .85 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a fingertip that rubs across a point (cross-friction): returns the group; it oscillates along direction ang
+function rubTip(p, P, ang, t0, dur, amp = 16) {
+  const g = G(p, { o: 0 }); mk('ellipse', { rx: 15, ry: 20, fill: '#b9cfe0', 'fill-opacity': .9, stroke: '#4d6b80', 'stroke-width': 2 }, g);
+  const u = polar([0, 0], 1, ang);
+  prog(q => { const s0 = amp * Math.sin(2 * Math.PI * 4 * q); put(g, { x: P[0] + u[0] * s0, y: P[1] + u[1] * s0, r: ang + 90 }); }, t0, dur, lin);
+  show(g, t0);
+  return g;
+}
+
+/* ---------- chapter 18 helpers (lesson 177) ---------- */
+// keep an armSide's wrist on a fixed stage point while it re-poses (forearm on a mat or a table)
+function armHold(a, o, W0) { a.set(o); const W = a.at('W'), S0 = st(a.g); put(a.g, { x: S0.x + W0[0] - W[0], y: S0.y + W0[1] - W[1] }); a.set({}); }
+// a helper hand (pale ellipse) with a push arrow onto stage point P from direction ang
+function helpHand(p, P, ang, t0, col = COL.good) { const g = G(p, { o: 0 }), A = polar(P, 46, ang); mk('ellipse', { cx: A[0], cy: A[1], rx: 24, ry: 16, fill: '#b9cfe0', 'fill-opacity': .9, stroke: '#4d6b80', 'stroke-width': 2, transform: `rotate(${f1(ang)} ${f1(A[0])} ${f1(A[1])})` }, g); const B = polar(P, 28, ang), C2 = polar(P, 8, ang); arw(g, B[0], B[1], C2[0], C2[1], col, null, 5); if (t0 !== null) show(g, t0); return g; }
+
+/* ---------- chapter 18 helpers (lesson 178) ---------- */
+// a dumbbell held by an armSide: it follows the fist
+function armDb(p, a, k = .6, t0 = null) { const g = G(p, { o: 0 }); dumbbell(g, k); a.onSet.push(() => { const P = a.at('grip'); put(g, { x: P[0], y: P[1], r: (a.dir || 0) + 90 }); }); a.set({}); if (t0 !== null) show(g, t0); return g; }
+// resistance torque of gravity over the elbow angle (a scheme): two curves on a small chart
+function torqueChart(p, x, y, w, h, curves, t0) {
+  const g = G(p, { o: 0 });
+  path(g, `M${x} ${y}H${x + w}M${x} ${y}V${y - h}`, { stroke: COL.dim, 'stroke-width': 2.5 });
+  T(g, 'сопротивление', { x: x - 4, y: y - h - 10, size: 14, fill: COL.dim });
+  [[0, '0°'], [90, '90°'], [140, '140°']].forEach(([v, s0]) => T(g, s0, { x: x + w * v / 140, y: y + 22, size: 13, fill: COL.dim, anchor: 'middle' }));
+  T(g, 'сгибание локтя', { x: x + w, y: y + 44, size: 13, fill: COL.dim, anchor: 'end' });
+  curves.forEach(([fn, col, s0, lx, ly]) => { path(g, fnPath(x, y, w, h, v => fn(v * 140)), { stroke: col, 'stroke-width': 4 }); T(g, s0, { x: lx, y: ly, size: 14, fill: col, weight: 700 }); });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+/* ---------- chapter 19 lesson helpers ---------- */
+// sample points of a handSag model at a temporary pose (the model is restored)
+function hPose(h, pose, pts) { const save = { ...h.q }; h.set(pose); const out = pts.map(([k, x, y]) => h.fr(k, [x, y])); h.set(save); return out; }
+// a band polygon along a polyline: from the line (offset d0) outward to d1 on the side sg (+1 / −1 of the normal)
+function hShellD(P, d0, d1, sg = 1) {
+  const off = d => P.map((q, i) => { const a = P[Math.max(0, i - 1)], b = P[Math.min(P.length - 1, i + 1)], L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, nx = -(b[1] - a[1]) / L, ny = (b[0] - a[0]) / L; return [q[0] + sg * nx * d, q[1] + sg * ny * d]; });
+  const A = off(d0), B = off(d1).reverse();
+  return smoothD(A, false).replace(/^M/, 'M') + 'L' + smoothD(B, false).slice(1) + 'Z';
+}
+const ORTH = c => ({ fill: c, 'fill-opacity': .42, stroke: mix(c, '#000000', .35), 'stroke-width': 2, 'stroke-linejoin': 'round' });
+// Orthoses on a handSag model. kind:
+//  'dbo' — static dorsal blocking orthosis (forearm 2/3, hand, fingers) shaped at { wr, mp } flexion with IP straight;
+//  'kl' — the same plus Kleinert traction: an elastic from the nail under a palmar bar to the wrist (follows the finger);
+//  'volar' — a short volar wrist orthosis at wr (default −12, i.e. extension), to the distal palmar crease;
+//  'rest' — a volar resting orthosis to the fingertips at the given pose;
+//  'ten' — a tenodesis orthosis: forearm cuff, a hinge at the wrist, hand piece holding MP at 60° and the IP straight;
+//  'dyn' — a dynamic MP extension orthosis: dorsal base, an outrigger over the finger and an elastic to a sling under P1;
+//  'pip' / 'dip' — finger splints holding the PIP (or DIP, slight hyperextension) straight; 'tpl' — a volar template
+//  that limits PIP flexion to o.pip and DIP flexion to o.dip.
+function hOrth(h, kind, t0, o = {}) {
+  const g = G(h.ovG, { o: 0 }), col = o.col || ORTH_C;
+  const strap = (A, B) => path(g, `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`, { stroke: '#6b7f8c', 'stroke-width': 9, 'stroke-opacity': .85, 'stroke-linecap': 'butt' });
+  if (kind === 'dbo' || kind === 'kl') {
+    const pose = { wr: o.wr ?? 20, mp: o.mp ?? 50, pip: 0, dip: 0 };
+    const D = hPose(h, pose, [['r', -330, -58], ['r', -150, -56], ['r', -40, -52], ['l', 0, -40], ['h', 60, -33], ['h', 150, -28], ['h', 214, -27], ['1', 30, -20], ['1', 70, -18], ['2', 20, -16], ['2', 45, -15], ['3', 20, -14], ['3', 44, -10]]);
+    mk('path', { d: hShellD(D, 1, 12, -1), ...ORTH(col) }, g);
+    const V = hPose(h, pose, [['r', -200, 62], ['h', 120, 50], ['1', 40, 22]]);
+    const Dd = hPose(h, pose, [['r', -200, -60], ['h', 120, -32], ['1', 40, -22]]);
+    [0, 1, 2].forEach(i => strap(Dd[i], V[i]));
+    if (kind === 'kl') {
+      const bar = hPose(h, pose, [['h', 168, 52]])[0];
+      mk('circle', { cx: bar[0], cy: bar[1], r: 7, fill: '#8a9aa6', stroke: '#4d5a63', 'stroke-width': 2 }, g);
+      const band = path(g, '', { stroke: '#e86a8a', 'stroke-width': 4 });
+      const anchor = [-120, 64];
+      const upd = () => { const N = h.fr('3', [40, -6]); band.setAttribute('d', `M${f1(N[0])} ${f1(N[1])}L${f1(bar[0])} ${f1(bar[1] + 7)}L${f1(anchor[0])} ${f1(anchor[1])}`); };
+      h.onSet.push(upd); upd();
+    }
+  }
+  if (kind === 'volar' || kind === 'rest') {
+    const pose = kind === 'volar' ? { wr: o.wr ?? -12 } : { wr: o.wr ?? -10, mp: o.mp ?? 0, pip: o.pip ?? 0, dip: o.dip ?? 0 };
+    const pts = [['r', -300, 62], ['r', -120, 60], ['l', 0, 58], ['h', 60, 56], ['h', 150, 48], ['h', 206, 44]];
+    if (kind === 'rest') pts.push(['1', 30, 22], ['1', 70, 20], ['2', 30, 18], ['3', 30, 16]);
+    const V = hPose(h, { ...h.q, ...pose }, pts);
+    mk('path', { d: hShellD(V, 1, 12, 1), ...ORTH(col) }, g);
+    const Dd = hPose(h, { ...h.q, ...pose }, [['r', -220, -58], ['h', 100, -32]]), Vv = hPose(h, { ...h.q, ...pose }, [['r', -220, 64], ['h', 100, 54]]);
+    [0, 1].forEach(i => strap(Dd[i], Vv[i]));
+  }
+  if (kind === 'ten') {
+    const cuff = hPose(h, h.q, [['r', -300, -60], ['r', -160, -58], ['r', -30, -54]]);
+    mk('path', { d: hShellD(cuff, 1, 12, -1), ...ORTH(col) }, g);
+    const hg = G(h.G.h, { o: 1 }), hand = [[40, -34], [120, -29], [200, -27]].concat([[30, -20], [70, -18], [L1H + 30, -16]].map(([a, b]) => { const v = rotPt(a, b, 60); return [212 + v[0], v[1]]; }));
+    mk('path', { d: hShellD(hand, 1, 11, -1), ...ORTH(col) }, hg);
+    mk('circle', { cx: 0, cy: -48, r: 9, fill: '#8a9aa6', stroke: '#4d5a63', 'stroke-width': 2.5 }, hg);
+    g.hand = hg;
+  }
+  if (kind === 'dyn') {
+    const base = hPose(h, { ...h.q, wr: o.wr ?? -12 }, [['r', -300, -58], ['r', -120, -56], ['l', 0, -40], ['h', 80, -32], ['h', 170, -28]]);
+    mk('path', { d: hShellD(base, 1, 12, -1), ...ORTH(col) }, g);
+    const hg = G(h.G.h, {});
+    path(hg, 'M140 -40L150 -105L268 -105', { stroke: '#8a9aa6', 'stroke-width': 6 });
+    const band = path(g, '', { stroke: '#e86a8a', 'stroke-width': 3.5 }), sling = path(g, '', { stroke: '#6b7f8c', 'stroke-width': 5 });
+    const upd = () => { const T = h.fr('h', [262, -105]), S = h.fr('1', [44, 20]), S0 = h.fr('1', [34, 18]), S1 = h.fr('1', [54, 18]); band.setAttribute('d', `M${f1(T[0])} ${f1(T[1])}L${f1(S[0])} ${f1(S[1])}`); sling.setAttribute('d', `M${f1(S0[0])} ${f1(S0[1])}Q${f1(S[0])} ${f1(S[1] + 8)} ${f1(S1[0])} ${f1(S1[1])}`); };
+    h.onSet.push(upd); upd();
+    g.hand = hg;
+  }
+  if (kind === 'pip' || kind === 'dip' || kind === 'tpl') {
+    const fr = kind === 'dip' ? '2' : '1', fg = G(h.G[fr], {});
+    let P;
+    if (kind === 'pip') P = [[10, 22], [50, 22], [L1H, 21], [L1H + 30, 19], [L1H + 50, 18]];
+    else if (kind === 'dip') P = [[14, 19], [40, 18], [52 + 6, 17], ...[[12, 16], [34, 14]].map(([a, b]) => { const v = rotPt(a, b, -5); return [52 + v[0], v[1]]; })];
+    else { const a = o.pip ?? 30, b = o.dip ?? 22; P = [[10, 23], [50, 22], [L1H - 2, 21]]; [[16, 18], [40, 17]].forEach(([u, w]) => { const v = rotPt(u, w, a); P.push([L1H + v[0], v[1]]); }); const D = rotPt(52, 0, a); [[10, 15], [30, 14]].forEach(([u, w]) => { const v = rotPt(u, w, a + b); P.push([L1H + D[0] + v[0], D[1] + v[1]]); }); }
+    mk('path', { d: hShellD(P, 0, 9, 1), ...ORTH(col) }, fg);
+    g.hand = fg;
+  }
+  if (t0 !== null) { show(g, t0); if (g.hand) { put(g.hand, { o: 0 }); show(g.hand, t0); } }
+  else if (g.hand) put(g.hand, { o: 1 });
+  return g;
+}
+const L1H = 88, MPX19 = 212, L3H = 36;
+// The carpal tunnel in cross-section (palm side up): the carpal arch, the transverse carpal ligament, nine flexor
+// tendons and the median nerve inside; the canal of Guyon (ulnar nerve and artery) on the ulnar side. Radial to the left.
+function tunnelX(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), t = { g };
+  [[[-150, 30], [-120, -10], [-80, 10], [-90, 50], [-140, 60]], [[-80, 20], [-40, 30], [-30, 70], [-70, 80], [-95, 55]], [[-30, 40], [30, 40], [40, 85], [-25, 90]], [[38, 30], [90, 10], [120, -20], [135, -10], [110, 40], [100, 70], [48, 80]], [[130, 50], [160, 30], [175, 60], [150, 80]]]
+    .forEach(P => boneSh(g, defs, P, { ax: [0, 0, 0, 1] }));
+  t.tcl = path(g, 'M-140 -14C-90 -60 60 -62 128 -26', { stroke: CAPS_C, 'stroke-width': 16, 'stroke-opacity': .85 });
+  const tend = (cx, cy, r, col) => mk('circle', { cx, cy, r, fill: col, stroke: mix(col, '#000000', .35), 'stroke-width': 1.5 }, g);
+  t.syn = mk('ellipse', { cx: -2, cy: 6, rx: 112, ry: 34, fill: '#f4a48c', 'fill-opacity': 0, stroke: 'none' }, g);
+  t.fds = [[-46, -14], [-16, -22], [16, -22], [46, -14]].map(([a, b]) => tend(a, b, 11, ANAT.tendon));
+  t.fdp = [[-42, 14], [-14, 18], [14, 18], [42, 14]].map(([a, b]) => tend(a, b, 11, mix(ANAT.tendon, '#d9b860', .3)));
+  t.fpl = tend(-84, 12, 11, mix(ANAT.tendon, '#d9b860', .15));
+  t.med = mk('ellipse', { cx: -70, cy: -24, rx: 15, ry: 10, fill: NERVE_C, stroke: mix(NERVE_C, '#000000', .4), 'stroke-width': 1.5 }, g);
+  mk('path', { d: 'M100 -40C112 -60 150 -62 162 -40', fill: 'none', stroke: CAPS_C, 'stroke-width': 7, 'stroke-opacity': .7 }, g);
+  t.uln = mk('circle', { cx: 120, cy: -46, r: 9, fill: NERVE_C, stroke: mix(NERVE_C, '#000000', .4), 'stroke-width': 1.5 }, g);
+  t.art = mk('circle', { cx: 142, cy: -48, r: 7, fill: VESS_C, stroke: mix(VESS_C, '#000000', .4), 'stroke-width': 1.5 }, g);
+  if (t0 !== null) show(g, t0);
+  return t;
+}
+// a shaded cylinder seen end-on (a handle, a bar) or a ball
+function cylEl(p, r, col = '#9fb0bf') { const g = G(p, {}), defs = mk('defs', {}, g); mk('circle', { r, fill: ballGrad(defs, col), stroke: mix(col, '#000000', .45), 'stroke-width': 2 }, g); return g; }
+// a group clipped to a rounded rectangle (for a close-up of a big model)
+function clipG(p, x, y, w, h) { const id = 'cl' + (++SHADE_ID), d = mk('defs', {}, p), cp = mk('clipPath', { id }, d); mk('rect', { x, y, width: w, height: h, rx: 18 }, cp); return mk('g', { 'clip-path': `url(#${id})` }, p); }
+// A table: cols — column widths; head — header strings; rows — arrays of cell strings. Rows appear at t0s[i]
+// (or t0 + i * gap). Returns the group; g.rows — the row groups.
+function tbl(p, x, y, cols, head, rows, t0s, { size = 15, gap = .5, col = SH, pad = 10, minH = 36 } = {}) {
+  const g = G(p, { o: 0 }), rg = [];
+  let yy = y;
+  const row = (cells, isHead) => {
+    const r = G(g, { o: isHead ? 1 : 0 }), hs = [];
+    let xx = x;
+    cells.forEach((c, i) => { const t = put(para(r, c || '—', xx + pad, yy + size + pad - 2, null, { size: isHead ? size - 1 : size, weight: isHead || i === 0 ? 700 : 500, fill: isHead ? col : i === 0 ? COL.chalk : i === 1 ? COL.chalk : COL.dim, maxW: cols[i] - pad * 2 }), { o: 1 }); hs.push(t._h || size * 1.3); xx += cols[i]; });
+    const hgt = Math.max(minH, Math.max(...hs) + pad * 1.4);
+    const bg = mk('rect', { x, y: yy, width: cols.reduce((a, b) => a + b, 0), height: hgt, fill: isHead ? mix(col, COL.board, .82) : (rg.length % 2 ? PANEL : mix(PANEL, '#ffffff', .03)), stroke: EDGE, 'stroke-width': 1 }, r);
+    r.insertBefore(bg, r.firstChild);
+    yy += hgt;
+    return r;
+  };
+  row(head, true);
+  rows.forEach((c, i) => { const r = row(c, false); rg.push(r); show(r, Array.isArray(t0s) ? t0s[i] : t0s + i * gap, .4); });
+  g.rows = rg; g.h = yy - y;
+  show(g, Array.isArray(t0s) ? t0s[0] - .3 : t0s - .3);
+  return g;
+}
+/* ---------- beats ---------- */
+// The extensor mechanism of a finger seen from above (schematic): faint bones; ED tendon, sagittal bands, hood,
+// central slip, lateral bands, triangular ligament, terminal tendon; the interosseous and lumbrical joining the bands.
+// The finger points right from the MP joint at (x, y). parts: ed sag hood cs lb tri tt io lum (paths); at(k) — points.
+function extMech(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), e = { g }, B = mix(ANAT.bone, COL.board, .55);
+  [[[-150, -15], [-10, -13], [8, -17], [16, 0], [8, 17], [-10, 13], [-150, 15]], [[16, -15], [40, -11], [128, -10], [140, -13], [146, 0], [140, 13], [128, 10], [40, 11], [16, 15]], [[148, -12], [168, -9], [218, -8], [228, -11], [233, 0], [228, 11], [218, 8], [168, 9], [148, 12]], [[235, -10], [250, -7], [282, -6], [290, 0], [282, 6], [250, 7], [235, 10]]]
+    .forEach(P => mk('path', { d: smoothD(P), fill: B, stroke: mix(B, '#000000', .3), 'stroke-width': 1.5 }, g));
+  const T = (d, w, col = ANAT.tendon, op = .95) => path(g, d, { stroke: col, 'stroke-width': w, 'stroke-opacity': op });
+  e.sag = [T('M-4 -10C-2 -26 6 -34 12 -40', 7, CAPS_C, .8), T('M-4 10C-2 26 6 34 12 40', 7, CAPS_C, .8)];
+  e.hood = mk('path', { d: 'M4 -8C40 -24 80 -20 100 -10L100 10C80 20 40 24 4 8Z', fill: CAPS_C, 'fill-opacity': .35, stroke: CAPS_C, 'stroke-width': 1.5 }, g);
+  e.ed = T('M-160 0H20', 9);
+  e.cs = T('M20 0H150', 7);
+  e.lb = [T('M40 -6C80 -16 130 -16 160 -10C190 -6 210 -3 236 0', 5), T('M40 6C80 16 130 16 160 10C190 6 210 3 236 0', 5)];
+  e.tri = mk('path', { d: 'M178 -8L210 -3L210 3L178 8Z', fill: CAPS_C, 'fill-opacity': .55, stroke: CAPS_C, 'stroke-width': 1.2 }, g);
+  e.tt = T('M210 0H240', 6);
+  e.io = T('M-90 -30C-40 -30 10 -26 52 -12', 4, '#e88a70');
+  e.lum = T('M-90 30C-40 30 10 26 52 12', 4, '#f4a48c');
+  const P = { ed: [-80, 0], sag: [8, -36], hood: [60, -16], cs: [120, 0], lb: [130, -14], tri: [196, 6], tt: [228, 0], io: [-50, -30], lum: [-50, 30] };
+  e.at = k => { const S = st(g), Q = P[k]; return [S.x + Q[0] * S.s, S.y + Q[1] * S.s]; };
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+const BEATS = [
+  ['intro', 'Функция кисти', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 19 · Урок 180', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Функция кисти и нервы', { x: 800, y: 215, size: 52, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'мышцы · разгибательный аппарат · захваты · нервы', 800, 300, m('sub'), { size: 27, fill: SH, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const h = handSag(art, 560, 560, .85, null); put(h.g, { o: 1 });
+    const ball = cylEl(art, 30, '#86c9e8');
+    prog(q => { const k = cyc(q, 2); h.set({ wr: -15 * k, mp: 10 + 45 * k, pip: 15 + 65 * k, dip: 10 + 40 * k, ...h.thumbTo(h.fr('h', [200, 70 - 30 * k]), 20) }); h.act({ fdp: k, fds: .6 * k, ed: .3 * k }); const P = h.at(h.fr('h', [215, 62])); put(ball, { x: P[0], y: P[1], o: k > .6 ? 1 : 0 }); }, .8, Math.max(3, D - 2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['table', 'Таблица 19.1', (m, D) => {
+    const p = panel(0);
+    const t1 = txt(p, 'запястье', 400, 56, m('wr'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const A = handSag(p, 270, 280, .95, m('wr'), { thumb: false, wmus: true, ghost: false });
+    A.set({ wr: 0, mp: 10, pip: 15, dip: 10 });
+    const w0 = m('wr');
+    prog(q => { A.set({ wr: 40 * q }); A.act({ wflx: q, fdp: .35 * q, fds: .35 * q }); }, w0 + 4, 2.5);
+    prog(q => { A.set({ wr: lerp(40, -40, q) }); A.act({ wflx: 1 - q, fdp: .35 * (1 - q), fds: .35 * (1 - q), wext: q, ed: .5 * q }); }, w0 + 12, 3);
+    prog(q => { A.set({ wr: lerp(-40, 0, q) }); A.act({ wext: 1 - q, ed: .5 * (1 - q) }); }, w0 + 21, 2);
+    const la = [lab(p, 'сгибатели запястья', 40, 470, ...A.at([-160, 44]), MU, w0 + 4.5, { size: 16, anchor: 'start' }), lab(p, 'разгибатели', 40, 140, ...A.at([-160, -42]), MU, w0 + 12.5, { size: 16, anchor: 'start' })];
+    const B = handFront(p, 330, 870, 1.05, w0 + 22);
+    B.set({ f: [5, 5, 5] });
+    prog(q => B.set({ dev: -22 * Math.sin(Math.PI * q) }), w0 + 24, 4.5);
+    prog(q => B.set({ dev: 25 * Math.sin(Math.PI * q) }), w0 + 29.5, 4.5);
+    const T1 = tbl(p, 800, 90, [170, 330, 260], ['действие', 'главные', 'помощники'], [
+      ['сгибание', 'лучевой и локтевой сгибатели запястья, длинная ладонная', 'поверхностный и глубокий сгибатели пальцев, длинный сгибатель большого'],
+      ['разгибание', 'длинный и короткий лучевые разгибатели, локтевой разгибатель, разгибатель пальцев', 'разгибатели указательного и мизинца, короткий разгибатель и длинная отводящая большого'],
+      ['лучевое отклонение', 'лучевой сгибатель, длинный и короткий лучевые разгибатели', 'длинный сгибатель, короткий разгибатель и длинная отводящая большого'],
+      ['локтевое отклонение', 'локтевые сгибатель и разгибатель запястья', ''],
+    ], [w0 + 4, w0 + 12, w0 + 24, w0 + 29.5], { size: 15 });
+    const thumbT = m('th');
+    [A.g, B.g, T1, t1, ...la].forEach(e => hide(e, thumbT, .5));
+    // thumb
+    const t2 = txt(p, 'большой палец', 400, 56, thumbT + .3, { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const C = handFront(p, 300, 860, 1.6, thumbT + .3, { view: 'palm' });
+    C.set({ f: [5, 5, 5] });
+    const ci = C.intr(thumbT + .5, ['then', 'add']);
+    const seq = [[0, { opp: 1, oppTo: 5, pabd: .6 }, 'then'], [3.2, { rabd: 35 }, null], [6.5, { pabd: 1 }, 'then'], [11, { tmp: 8 }, 'add'], [13.5, { tmp: 55 }, 'then'], [17, { tip: 60 }, null]];
+    seq.forEach(([dt, o, mus], i) => {
+      const t0 = thumbT + 1 + dt, end = (seq[i + 1] ? seq[i + 1][0] : 22) + thumbT + .6;
+      prog(q => { const k = Math.sin(Math.PI * q), base = { opp: 0, rabd: 0, pabd: 0, tmp: 8, tip: 6 }, o2 = {}; for (const key in o) o2[key] = lerp(base[key] ?? 0, o[key], k); if (o.oppTo) o2.oppTo = o.oppTo; C.set({ ...base, ...o2 }); ['then', 'add'].forEach(n => ci.M[n].act(n === mus ? k : 0)); }, t0, Math.max(1, end - t0));
+    });
+    const T2 = tbl(p, 800, 90, [190, 330, 240], ['большой палец', 'главные', 'помощники'], [
+      ['ЗП: противопоставление', 'противопоставляющая', ''],
+      ['ЗП: лучевое приведение', 'противопоставляющая', ''],
+      ['ЗП: лучевое отведение', 'длинная отводящая', 'длинный разгибатель'],
+      ['ЗП: ладонное отведение', 'противопоставляющая, длинная и короткая отводящие, короткий разгибатель', 'короткий сгибатель (поверхностная головка)'],
+      ['ЗП: ладонное приведение', 'приводящая (первая ладонная межкостная)', 'короткий сгибатель (глубокая головка), длинный разгибатель'],
+      ['ПФ: сгибание', 'короткий сгибатель', 'длинный сгибатель'],
+      ['ПФ: разгибание', 'короткий и длинный разгибатели', 'длинный разгибатель'],
+      ['МФ: сгибание', 'длинный сгибатель', ''],
+      ['МФ: разгибание', 'длинный разгибатель', ''],
+    ], [0, 2.4, 3.2, 6.5, 11, 13.5, 15, 17, 19].map(v => thumbT + 1 + v), { size: 14, minH: 30, pad: 8 });
+    const digT = m('dig');
+    [C.g, ci, T2, t2].forEach(e => hide(e, digT, .5));
+    // fingers
+    const t3 = txt(p, 'II–V пальцы', 400, 56, digT + .3, { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const Dh = handSag(p, -150, 290, 1.8, digT + .3, { thumb: false, ghost: false });
+    Dh.set({ wr: 0, mp: 0, pip: 0, dip: 0 });
+    const step = (t0, dur, to, act) => prog(q => { const k = Math.sin(Math.PI * q); const o = {}; for (const key in to) o[key] = to[key] * k; Dh.set(o); const a = {}; for (const key in act) a[key] = act[key] * k; Dh.act(a); }, t0, dur);
+    step(digT + 1, 5, { mp: 65 }, { lum: 1, io: 1, fds: .4, fdp: .4 });
+    step(digT + 6.5, 4, { mp: -20 }, { ed: 1 });
+    step(digT + 17, 5, { pip: 85, dip: 60 }, { fds: 1, fdp: 1 });
+    step(digT + 22, 4, { mp: 0 }, { lum: 1, io: 1, ed: .8 });
+    const E = handFront(p, 320, 880, 1.05, digT + 10.5);
+    E.set({ f: [0, 0, 0] });
+    const ei = E.intr(digT + 10.5, ['di']);
+    prog(q => { const k = Math.sin(Math.PI * q); E.set({ spread: 16 * k }); for (const n in ei.M) ei.M[n].act(k); }, digT + 11, 3.5);
+    prog(q => { const k = Math.sin(Math.PI * q); E.set({ spread: -5 * k }); }, digT + 14.5, 2.5);
+    const T3 = tbl(p, 800, 90, [170, 590], ['II–V пальцы', 'главные'], [
+      ['ПФ: сгибание', 'червеобразные, ладонные и тыльные межкостные, поверхностный и глубокий сгибатели'],
+      ['ПФ: разгибание', 'разгибатель пальцев, разгибатели мизинца и указательного'],
+      ['ПФ: отведение', 'тыльные межкостные, мышца, отводящая мизинец'],
+      ['ПФ: приведение', 'ладонные межкостные'],
+      ['МФ: сгибание', 'поверхностный сгибатель (только ПМФ), глубокий (ПМФ и ДМФ)'],
+      ['МФ: разгибание', 'червеобразные, межкостные и разгибатель пальцев через разгибательный аппарат'],
+    ], [1, 6.5, 11, 14.5, 17, 22].map(v => digT + v), { size: 15 });
+    infoCard(p, 800, 640, 760, 175, 'зависит от положения суставов', 'проксимальные «крылья» межкостных сильнее влияют на ПФ сустав, дистальные — на межфаланговые', FUN, m('vary'), { size: 19 });
+  }],
+
+  ['lt', 'Запястье и длина мышц', (m, D) => {
+    const p = panel(0);
+    txt(p, 'длина — напряжение', 400, 56, m('stab'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const A = handSag(p, 250, 270, .95, m('stab'), { thumb: false, wmus: true, ghost: true });
+    const B = handSag(p, 250, 640, .95, m('stab', 1), { thumb: false, wmus: true, ghost: true });
+    A.set({ wr: 0, mp: 5, pip: 5, dip: 5 }); B.set({ wr: -10, mp: 5, pip: 5, dip: 5 });
+    txt(p, 'разгибатели запястья молчат', 400, 130, m('stab', 1.5), { size: 16, fill: COL.bad, weight: 700, anchor: 'middle' });
+    txt(p, 'разгибатели держат запястье', 400, 490, m('stab', 2.5), { size: 16, fill: COL.good, weight: 700, anchor: 'middle' });
+    prog(q => { const k = cyc(q, 1); A.set({ mp: 5 + 70 * k, pip: 5 + 80 * k, dip: 5 + 50 * k, wr: 40 * k }); A.act({ fdp: k, fds: k }); }, m('stab', 3), 4.5);
+    prog(q => { const k = cyc(q, 1); B.set({ mp: 5 + 70 * k, pip: 5 + 80 * k, dip: 5 + 50 * k, wr: -10 }); B.act({ fdp: k, fds: k, wext: k }); }, m('stab', 3), 4.5);
+    // a strong grip: the wrist extends more, the flexors keep a good length
+    prog(q => { B.set({ mp: 75 * q, pip: 85 * q, dip: 55 * q, wr: lerp(-10, -30, q) }); B.act({ fdp: q, fds: q, wext: q }); }, m('grip', .5), 2);
+    lab(p, 'сгибатели пальцев в выгодной длине', 470, 820, ...B.at('fdpM'), MU, m('grip', 2.5), { size: 16 });
+    prog(q => { B.set({ mp: lerp(75, -5, q), pip: lerp(85, 0, q), dip: lerp(55, 0, q), wr: lerp(-30, 15, q) }); B.act({ fdp: 1 - q, fds: 1 - q, wext: 1 - q, ed: q, wflx: q }); }, m('ext', .5), 2);
+    lab(p, 'сгибатели запястья держат', 470, 860, ...B.at([-160, 46]), MU, m('ext', 2.5), { size: 16 });
+    infoCard(p, 800, 90, 760, 205, 'запястье ставит длину', 'когда пальцы сгибаются, разгибатели запястья стабилизируют его — иначе глубокий и поверхностный сгибатели и длинный сгибатель большого согнули бы и запястье', COL.task, m('stab'), { size: 19 });
+    infoCard(p, 800, 310, 760, 175, 'сильный хват', 'запястье синхронно разгибается: сухожилия сгибателей удлиняются, мышца в выгодной длине', MU, m('grip'), { size: 19 });
+    infoCard(p, 800, 500, 760, 150, 'сильное разгибание пальцев', 'запястье стабилизируют его сгибатели — разгибатели пальцев работают эффективнее', SH, m('ext'), { size: 19 });
+  }],
+
+  ['mech', 'Разгибательный аппарат', (m, D) => {
+    const p = panel(0);
+    txt(p, 'разгибательный аппарат', 400, 56, m('parts'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const e = extMech(p, 270, 215, 1.2, m('parts'));
+    txt(p, 'сверху', 640, 330, m('parts'), { size: 14, fill: COL.dim, anchor: 'middle' });
+    const L = (str, k, x, y, col, t, o = {}) => lab(p, str, x, y, ...e.at(k), col, t, { size: 15, ...o });
+    L('сухожилие разгибателя', 'ed', 40, 112, ANAT.tendon, m('parts', 1), { anchor: 'start' });
+    L('капюшон', 'hood', 330, 108, ANAT.tendon, m('parts', 4));
+    L('центральный пучок', 'cs', 500, 122, ANAT.tendon, m('parts', 5.5));
+    L('боковые пучки', 'lb', 500, 312, ANAT.tendon, m('parts', 7));
+    L('терминальное', 'tt', 640, 168, ANAT.tendon, m('parts', 9));
+    L('треугольная связка', 'tri', 640, 282, CAPS_C, m('passive', .5));
+    L('сагиттальные пучки', 'sag', 40, 318, CAPS_C, m('passive', 3.5), { anchor: 'start' });
+    L('межкостная', 'io', 40, 150, '#e88a70', m('active', .5), { anchor: 'start' });
+    L('червеобразная', 'lum', 40, 282, '#f4a48c', m('active', 2), { anchor: 'start' });
+    pulse(e.tri, m('passive', .6), 1.2); e.sag.forEach(s0 => pulse(s0, m('passive', 3.6), 1.2));
+    // the side view
+    const h = handSag(p, -120, 560, 1.6, m('ed') - .5, { thumb: false, ghost: false });
+    h.set({ wr: 0, mp: 35, pip: 25, dip: 10 });
+    txt(p, 'сбоку', 680, 600, m('ed') - .5, { size: 14, fill: COL.dim, anchor: 'middle' });
+    prog(q => { h.set({ mp: lerp(35, -5, q) }); h.act({ ed: q }); }, m('ed', 1.5), 2.5);
+    prog(q => { h.set({ mp: lerp(-5, -25, q), pip: lerp(25, 60, q), dip: lerp(10, 35, q) }); h.act({ ed: 1 }); }, m('claw', .3), 2.5);
+    const cl = pill(p, '«коготь»: ПФ переразогнут, МФ согнуты', 400, 385, m('claw', 3), { col: COL.bad, size: 16 });
+    hide(cl, m('inter'), .3);
+    prog(q => { h.set({ mp: lerp(-25, 30, q), pip: lerp(60, 40, q), dip: lerp(35, 25, q) }); h.act({ ed: 1 - q }); }, m('inter', .2), 1.5);
+    const Mx = G(p, { o: 0 }); show(Mx, m('inter', 2));
+    h.set({ mp: 30, pip: 40, dip: 25 }); const MPp = h.at('MP'), IOp = h.at(h.fr('h', [MPX19, 11])); h.set({ mp: 35, pip: 25, dip: 10 });
+    mk('circle', { cx: f1(MPp[0]), cy: f1(MPp[1]), r: 7, fill: COL.whole, stroke: COL.board, 'stroke-width': 2 }, Mx);
+    path(Mx, `M${f1(MPp[0] - 60)} ${f1(MPp[1])}H${f1(MPp[0] + 60)}`, { stroke: COL.whole, 'stroke-width': 2, 'stroke-dasharray': '6 5' });
+    T(Mx, 'ось ПФ', { x: MPp[0] - 64, y: MPp[1] - 10, size: 14, fill: COL.whole, anchor: 'end' });
+    hide(lab(p, 'ладоннее оси', 300, 840, ...IOp, '#e88a70', m('inter', 3), { size: 15 }), m('need'), .3);
+    hide(Mx, m('need'), .3);
+    prog(q => { h.set({ pip: lerp(40, 0, q), dip: lerp(25, 0, q) }); h.act({ lum: q, io: q }); }, m('inter', 8), 2.5);
+    hide(pill(p, 'проксимальный и дистальный разгибаются вместе', 400, 385, m('inter', 9.5), { col: SH, size: 15 }), m('need'), .3);
+    prog(q => { h.set({ mp: lerp(30, 75, q), pip: 0, dip: 0 }); h.act({ lum: 1 - q, io: 1 - q }); }, m('need', 1), 2.5);
+    hide(lab(p, 'натянут при сгибании ПФ', 470, 420, ...h.at('ed'), ANAT.taut, m('need', 3.5), { size: 15 }), m('intr'), .3);
+    prog(q => { h.set({ mp: lerp(75, 0, q) }); h.act({ ed: q, lum: q, io: q }); }, m('intr', .5), 2.5);
+    prog(q => { h.set({ mp: 70 * q, pip: 0, dip: 0 }); h.act({ ed: 1 - q, lum: 1, io: 1 }); }, m('intr', 6), 2.5);
+    pill(p, 'без разгибателя: ПФ сгибается, МФ разогнуты', 400, 385, m('intr', 7.5), { col: SH, size: 15 });
+    infoCard(p, 800, 90, 760, 150, 'основа', 'сухожилие разгибателя пальцев (с разгибателями указательного и мизинца), капюшон, центральный и боковые пучки → терминальное', ANAT.tendon, m('parts'), { size: 18 });
+    infoCard(p, 800, 255, 760, 120, 'пассивная часть', 'треугольная связка и сагиттальные пучки: держат сухожилие по центру, без «тетивы»', CAPS_C, m('passive'), { size: 18 });
+    infoCard(p, 800, 390, 760, 120, 'активная часть', 'тыльные и ладонные межкостные и червеобразные — внутренние мышцы', MU, m('active'), { size: 18 });
+    infoCard(p, 800, 525, 760, 175, 'разгибатель пальцев', 'тыльнее оси ПФ: тянет сагиттальные пучки и разгибает основную фалангу; один — даёт «коготь»', ANAT.tendon, m('ed'), { size: 18 });
+    infoCard(p, 800, 715, 760, 155, 'внутренние мышцы', 'ладоннее оси ПФ, в аппарат до ПМФ: с разгибателем разгибают всё, без него — ПФ сгибают, МФ разгибают', MU, m('inter'), { size: 18 });
+  }],
+
+  ['free', 'Свободная кисть', (m, D) => {
+    const p = panel(0);
+    txt(p, 'как кисть сжимается и раскрывается', 400, 56, m('fclaw'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const h = handSag(p, -40, 360, 1.5, m('fclaw'), { thumb: false });
+    h.set({ wr: 0, mp: 10, pip: 10, dip: 5 });
+    prog(q => { h.set({ mp: lerp(10, -20, q), pip: lerp(10, 60, q), dip: lerp(5, 40, q) }); h.act({ ed: q, fdp: q }); }, m('fclaw', 2), 2.5);
+    const c1 = pill(p, 'только внешние мышцы → «коготь»', 400, 120, m('fclaw', 4), { col: COL.bad, size: 17 });
+    hide(c1, m('close'), .3);
+    prog(q => { h.set({ mp: lerp(-20, 80, q), pip: lerp(60, 95, q), dip: lerp(40, 60, q) }); h.act({ ed: lerp(1, .3, q), fdp: 1, fds: q }); }, m('close', .5), 3);
+    lab(p, 'разгибатель — «тормоз» на ПФ', 470, 160, ...h.at('ed'), ANAT.taut, m('close', 4), { size: 16 });
+    lab(p, 'межкостные: вязкоупругое натяжение', 40, 640, ...h.at('io'), MU, m('close', 6), { size: 16, anchor: 'start' });
+    prog(q => { h.set({ mp: lerp(80, 0, q), pip: lerp(95, 0, q), dip: lerp(60, 0, q) }); h.act({ ed: lerp(.3, 1, q), fdp: 0, fds: 0, lum: q, io: q }); }, m('open', .5), 3);
+    lab(p, 'глубокий сгибатель сопротивляется', 40, 700, ...h.at('fdpM'), MU, m('open', 3.5), { size: 16, anchor: 'start' });
+    prog(q => { h.set({ mp: 75 * q, pip: 0, dip: 0 }); h.act({ ed: 1 - q, lum: 1, io: 1 }); }, m('recip', .5), 3);
+    lab(p, 'червеобразная тянет сухожилие глубокого', 470, 600, ...h.at('lum'), MU, m('recip', 4), { size: 16 });
+    infoCard(p, 800, 90, 760, 150, '«коготь»', 'сокращаются только внешние сгибатели и разгибатели', COL.bad, m('fclaw'), { size: 19 });
+    infoCard(p, 800, 255, 760, 175, 'сжатие', 'внешние сгибатели + вязкоупругость межкостных (меньше — червеобразных); разгибатель тормозит ПФ — МФ точнее', MU, m('close'), { size: 19 });
+    infoCard(p, 800, 445, 760, 150, 'раскрытие', 'внешние разгибатели и внутренние мышцы; глубокий сгибатель сопротивляется вязкоупруго', SH, m('open'), { size: 19 });
+    infoCard(p, 800, 610, 760, 175, 'ПФ сгибание + МФ разгибание', 'дают внутренние мышцы; червеобразная снимает натяжение с глубокого сгибателя и сильно разгибает МФ', MU, m('recip'), { size: 19 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-mech', prompt: ['Что получится?'],
+    build: grid([
+      { parts: ['Сокращается только разгибатель пальцев'], ans: ['c'], why: 'ПФ переразгибается, МФ сгибают натянутые сгибатели — «коготь».' },
+      { parts: ['Межкостные и червеобразные без разгибателя пальцев'], ans: ['t'], why: 'ПФ сгибается, МФ разгибаются.' },
+      { parts: ['Разгибатель, межкостные и червеобразные вместе'], ans: ['e'], why: 'Разгибаются все суставы.' },
+      { parts: ['Работают только внешние сгибатели и разгибатели'], ans: ['c'], why: '«Коготь».' },
+      { parts: ['Червеобразная снимает натяжение глубокого сгибателя'], ans: ['t'], why: 'Вместе с межкостными — сгибание ПФ и разгибание МФ.' },
+    ], [['c', '«Коготь»', COL.bad], ['t', 'Положение стола', MU], ['e', 'Всё разогнуто', SH]], { multi: false, text: true }),
+  }], done) }],
+
+  ['grips', 'Захваты', (m, D) => {
+    const p = panel(0);
+    txt(p, 'захваты', 400, 56, m('power'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    // power grips on the hand seen from the palm; the object lies between the palm and the flexed fingers
+    const F = handFront(p, 330, 860, 1.8, m('power'), { view: 'palm' });
+    F.set({ f: [5, 5, 5] });
+    const fi = F.intr(m('pm', 25), ['then', 'add', 'hyp']);
+    const obj = (fn) => { const g = G(F.objL, { o: 0 }); fn(g); return g; };
+    const defs = mk('defs', {}, F.objL);
+    const bar = obj(g => mk('rect', { x: -86, y: -192, width: 172, height: 42, rx: 21, fill: boneGrad(defs, 0, 0, 0, 1, '#c9a97a'), stroke: '#6b5638', 'stroke-width': 2 }, g));
+    const ball = obj(g => mk('circle', { cx: -4, cy: -150, r: 56, fill: ballGrad(defs, '#86c9e8'), stroke: '#3f6f86', 'stroke-width': 2 }, g));
+    const hdl = G(F.ovL, { o: 0 }); mk('rect', { x: -74, y: -250, width: 148, height: 16, rx: 8, fill: boneGrad(defs, 0, 0, 0, 1, '#c9a97a'), stroke: '#6b5638', 'stroke-width': 2 }, hdl);
+    const POW = {
+      cyl: { f: [72, 92, 55], spread: 0, dev: 8, rabd: -6, pabd: .2, tmp: 45, tip: 30, opp: 0 },
+      sph: { f: [38, 48, 26], spread: 12, dev: 0, rabd: 10, pabd: .7, tmp: 18, tip: 12, opp: 0 },
+      hook: { f: [0, 92, 70], spread: 0, dev: 0, rabd: 10, pabd: 0, tmp: 6, tip: 4, opp: 0 },
+      lat: { f: { 2: [45, 75, 30], 3: [65, 95, 60], 4: [70, 95, 60], 5: [75, 95, 60] }, spread: 0, dev: 0, rabd: 0, pabd: .25, tmp: 20, tip: 10, opp: 1, oppPt: null },
+    };
+    F.set(POW.lat); const L2 = [F.J.PIP2[0] - 14, (F.J.PIP2[1] + F.J.DIP2[1]) / 2]; POW.lat.oppPt = L2;
+    const key = obj(g => { mk('rect', { x: L2[0] - 6, y: L2[1] - 34, width: 12, height: 50, rx: 3, fill: '#c9cdd1', stroke: '#6a6f73', 'stroke-width': 2 }, g); mk('circle', { cx: L2[0], cy: L2[1] + 26, r: 13, fill: '#c9cdd1', stroke: '#6a6f73', 'stroke-width': 2 }, g); });
+    F.set({ f: [5, 5, 5] });
+    let cur = { f: [5, 5, 5], spread: 0, dev: 0, rabd: 0, pabd: 0, tmp: 8, tip: 6, opp: 0 };
+    const lf = (a, b, q) => Array.isArray(a) && Array.isArray(b) ? a.map((v, i) => lerp(v, b[i], q)) : b;
+    const fArr = v => Array.isArray(v) ? v : null;
+    const go = (B, t0, dur = .9) => { const A = cur; prog(q => { const o = {}; for (const k of ['spread', 'dev', 'rabd', 'pabd', 'tmp', 'tip', 'opp']) o[k] = lerp(A[k] ?? 0, B[k] ?? 0, q); const fa = fArr(A.f), fb = fArr(B.f); o.f = fa && fb ? lf(fa, fb, q) : (q < .5 ? A.f : B.f); o.oppPt = B.oppPt || A.oppPt || null; if (B.oppPt) o.oppTo = 2; F.set(o); }, t0, dur); cur = B; };
+    const pills = [];
+    const pl = (str, t, col) => { pills.forEach(e => hide(e, t, .3)); pills.push(pill(p, str, 400, 112, t + .2, { col, size: 17 })); };
+    const vis = (el, t0, t1) => { show(el, t0, .3); if (t1) hide(el, t1, .3); };
+    const P = m('power');
+    go(POW.cyl, P + 1.5); vis(bar, P + 1.2, P + 14.2); pl('цилиндрический', P + 1.5, MU);
+    go(POW.sph, P + 14.3, .8); vis(ball, P + 14.5, P + 15.9); pl('сферический', P + 14.3, MU);
+    go(POW.hook, P + 15.9, .8); vis(hdl, P + 16.2, P + 17.4); pl('крючковой', P + 15.9, MU);
+    hide(F.g, P + 17.4, .4); show(F.g, m('pm'), .4); pl('боковой щипок', P + 17.4, MU);
+    // muscles of the power grip
+    const pm = m('pm');
+    go(POW.cyl, pm + .1, .9);
+    const bar2 = obj(g => mk('rect', { x: -86, y: -192, width: 172, height: 42, rx: 21, fill: boneGrad(defs, 0, 0, 0, 1, '#c9a97a'), stroke: '#6b5638', 'stroke-width': 2 }, g));
+    vis(bar2, pm + .5, m('prec'));
+    pl('запястье: лёгкое разгибание и локтевое отклонение', pm + 1, COL.task);
+    const fg = G(F.ovL, { o: 0 }); F.set(POW.cyl); [4, 5].forEach(n => path(fg, smoothD(['CMC', 'MP', 'PIP', 'DIP', 'TIP'].map(k => F.pts[k + n]), false), { stroke: '#ff5a3c', 'stroke-width': 9, 'stroke-opacity': .7 })); F.set({ f: [5, 5, 5] });
+    show(fg, pm + 6); hide(fg, m('prec'), .3);
+    const ml = [lab(p, 'глубокий сгибатель IV–V', 40, 330, ...F.at('MP5'), MU, pm + 6.5, { size: 16, anchor: 'start' }),
+      lab(p, 'возвышение большого пальца', 560, 560, ...F.at('MC1'), MU, pm + 26, { size: 16 }), lab(p, 'приводящая', 560, 640, ...F.at([-30, -120]), MU, pm + 28, { size: 16 })];
+    prog(q => { fi.M.then.act(q); fi.M.add.act(q); }, pm + 26, 1.5);
+    pl('червеобразные не участвуют (кроме четвёртой)', pm + 21, COL.dim);
+    [...ml, F.g, fi].forEach(e => hide(e, m('prec'), .4));
+    pills.forEach(e => hide(e, m('prec'), .3));
+    // precision patterns on the side view, close up
+    const h = handSag(p, -170, 400, 1.9, null, { ghost: true });
+    show(h.g, m('power', 17.5), .4); hide(h.g, m('pm'), .3); show(h.g, m('prec', .3), .4);
+    const pr = m('prec');
+    const sideP = {};
+    const PADp = { wr: -5, mp: 55, pip: 62, dip: 18, g: [70, 92, 60] }, TIPp = { wr: -5, mp: 55, pip: 75, dip: 50, g: [70, 92, 60] }, SIDEp = { wr: 0, mp: 60, pip: 88, dip: 35, g: [72, 95, 62] };
+    h.set(PADp); const ipad = h.fr('3', [24, 17]), padN = h.fr('3', [24, 30]); Object.assign(PADp, h.thumbTo(padN, 10));
+    h.set(TIPp); const itip = h.fr('3', [L3H + 9, 6]), tipN = h.fr('3', [L3H + 14, 14]); Object.assign(TIPp, h.thumbTo(tipN, 35));
+    h.set(SIDEp); const iside = h.fr('2', [24, 0]); Object.assign(SIDEp, h.thumbTo(iside, 15));
+    h.set({ wr: 0, mp: 20, pip: 20, dip: 10, tc: 0, tmp: 5, tip: 5 });
+    let hc = { ...h.q };
+    const goS = (B, t0, dur = 1) => { const A = hc; prog(q => { const o = {}; for (const k of ['wr', 'mp', 'pip', 'dip', 'tc', 'tmp', 'tip']) o[k] = lerp(A[k] ?? 0, B[k] ?? 0, q); o.g = (A.g || B.g) ? [0, 1, 2].map(i => lerp((A.g || [A.mp, A.pip, A.dip])[i], (B.g || [B.mp, B.pip, B.dip])[i], q)) : null; h.set(o); }, t0, dur); hc = B; };
+    const ob = G(p, {});
+    const coin = G(ob, { o: 0 }), needle = G(ob, { o: 0 }), keyS = G(ob, { o: 0 }), pen = G(ob, { o: 0 }), card = G(ob, { o: 0 });
+    const mid = (A, B) => h.at([(A[0] + B[0]) / 2, (A[1] + B[1]) / 2]);
+    let Q = mid(ipad, padN); mk('ellipse', { cx: f1(Q[0]), cy: f1(Q[1]), rx: 16, ry: 5, fill: '#e3c35a', stroke: '#7a6420', 'stroke-width': 2, transform: `rotate(-30 ${f1(Q[0])} ${f1(Q[1])})` }, coin);
+    Q = mid(itip, tipN); path(needle, `M${f1(Q[0] - 40)} ${f1(Q[1] - 50)}L${f1(Q[0] + 22)} ${f1(Q[1] + 26)}`, { stroke: '#d9e2e8', 'stroke-width': 3 });
+    Q = h.at(iside); mk('rect', { x: f1(Q[0] - 7), y: f1(Q[1] - 40), width: 14, height: 56, rx: 3, fill: '#c9cdd1', stroke: '#6a6f73', 'stroke-width': 2 }, keyS);
+    Q = mid(ipad, padN); path(pen, `M${f1(Q[0] - 110)} ${f1(Q[1] - 90)}L${f1(Q[0] + 60)} ${f1(Q[1] + 50)}`, { stroke: '#86c9e8', 'stroke-width': 10 });
+    Q = mid(ipad, padN); mk('rect', { x: f1(Q[0] - 4), y: f1(Q[1] - 46), width: 8, height: 80, fill: '#f1f1e6', stroke: '#8a8a7a', 'stroke-width': 1.5, transform: `rotate(-30 ${f1(Q[0])} ${f1(Q[1])})` }, card);
+    const keyP = G(ob, { o: 0 }); { const Q0 = h.at(iside); mk('rect', { x: f1(Q0[0] - 7), y: f1(Q0[1] - 40), width: 14, height: 56, rx: 3, fill: '#c9cdd1', stroke: '#6a6f73', 'stroke-width': 2 }, keyP); }
+    { const A0 = hc; prog(q => h.set(q < 1 ? SIDEp : SIDEp), m('power', 17.4), .2); prog(() => h.set(A0), m('pm'), .1); }
+    vis(keyP, m('power', 17.8), m('pm'));
+    goS(PADp, pr + 8); vis(coin, pr + 9, pr + 13); pl('подушечка к подушечке', pr + 9, SH);
+    goS(TIPp, pr + 13); vis(needle, pr + 14, pr + 15.6); pl('кончик к кончику', pr + 13.2, SH);
+    goS(SIDEp, pr + 15.6); vis(keyS, pr + 16.4, m('pcm')); pl('подушечка к боковой стороне', pr + 15.8, SH);
+    goS(PADp, m('pcm', .2));
+    prog(q => { const k = Math.sin(2 * Math.PI * 2 * q); h.set({ ...PADp, mp: PADp.mp + 6 * k, tmp: PADp.tmp - 4 * k }); h.act({ fdp: .5, fds: .5, then: .6 + .3 * k, lum: .5 + .4 * k }); }, m('pcm', 1.3), Math.max(2, m('comb') - m('pcm') - 1.6));
+    vis(coin, m('pcm', 1.2), m('comb'));
+    pl('мелкие движения: межкостные, возвышение, червеобразные', m('pcm', .5), SH);
+    vis(pen, m('comb', .5), m('pinch')); pl('I–II точно, III–V подпирают с силой', m('comb', .3), FUN);
+    prog(() => h.act({ fdp: .3, fds: .3, then: .4, lum: .2 }), m('comb', .3), .2);
+    vis(card, m('pinch', .5)); pl('щипок: удержание', m('pinch', .3), FUN);
+    prog(q => h.act({ then: q, add: q, io: .7 * q, fdp: .7 * q, fds: .7 * q, lum: .6 * q }), m('pinch', 1), 1);
+    infoCard(p, 800, 90, 760, 150, 'силовой захват', 'предмет прижат пальцами к ладони, большой давит навстречу; работа изометрическая', MU, m('power'), { size: 19 });
+    infoCard(p, 800, 255, 760, 175, 'мышцы', 'запястье — в лёгком разгибании и локтевом отклонении; главная сила — глубокий сгибатель IV–V; разгибатель прижимает ПФ', MU, m('pm'), { size: 18 });
+    infoCard(p, 800, 445, 760, 150, 'точный захват', 'между противопоставленным большим и пальцами, без ладони; изотонически, на чувствительных подушечках', SH, m('prec'), { size: 18 });
+    infoCard(p, 800, 610, 760, 120, 'комбинированный', 'I–II (III) точно, III–V добавляют силу', FUN, m('comb'), { size: 19 });
+    infoCard(p, 800, 745, 760, 120, 'щипок', 'как точный захват, но удержание изометрическое', FUN, m('pinch'), { size: 19 });
+  }],
+
+  ['nerves', 'Нервы у запястья', (m, D) => {
+    const p = panel(0);
+    txt(p, 'нервы', 400, 56, m('med'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const a = handFront(p, 250, 880, 1.35, m('med'), { view: 'palm' });
+    a.set({ f: [5, 5, 5] });
+    const tn = a.tunnel(m('med', .3));
+    const tx = tunnelX(p, 250, 230, .8, m('med', .6));
+    txt(p, 'срез запястного канала', 250, 330, m('med', .6), { size: 14, fill: COL.dim, anchor: 'middle' });
+    pulse(tx.med, m('med', 1), 1.2);
+    lab(p, 'срединный', 40, 140, 250 - 70 * .8, 230 - 24 * .8, NERVE_C, m('med', 1), { size: 16, anchor: 'start' });
+    pulse(tx.uln, m('uln', .3), 1.2);
+    lab(p, 'локтевой', 440, 150, 250 + 120 * .8, 230 - 46 * .8, NERVE_C, m('uln', .3), { size: 16 });
+    const an = armNerves(p, 640, 110, .95, m('roots'));
+    ['med', 'uln', 'rad'].forEach((k, i) => an.hl(k, m('roots', 1 + i * 1.2)));
+    txt(p, 'C6 · C7 · C8 · T1', 640, 98, m('roots', .5), { size: 17, fill: NERVE_C, weight: 700, anchor: 'middle' });
+    pill(p, 'лечим источник, а не место боли', 400, 380, m('source', .5), { col: COL.good, size: 17 });
+    infoCard(p, 800, 90, 760, 120, 'срединный нерв', 'чаще всего сдавливается в запястном канале', NERVE_C, m('med'), { size: 20 });
+    infoCard(p, 800, 225, 760, 120, 'локтевой нерв', 'чаще всего — в локтевом канале (канале Гийона); подробно — глава 13', NERVE_C, m('uln'), { size: 19 });
+    infoCard(p, 800, 360, 760, 200, 'корешки C6–T1', 'через срединный, локтевой и лучевой нервы; нерв страдает на любом участке от шеи, боль бывает и от тканей того же сегмента', SH, m('roots'), { size: 19 });
+    infoCard(p, 800, 575, 760, 175, 'обследование', 'анамнез и весь верхний квадрант, включая шейный отдел, если есть отражённая боль или нарушения чувствительности', COL.good, m('source'), { size: 19 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-grip', prompt: ['Какой захват?'],
+    build: grid([
+      { parts: ['Держать молоток'], ans: ['p'], why: 'Силовой, цилиндрический.' },
+      { parts: ['Нести сумку на согнутых пальцах'], ans: ['p'], why: 'Силовой, крючковой.' },
+      { parts: ['Взять иголку кончиками пальцев'], ans: ['s'], why: 'Точный: кончик к кончику.' },
+      { parts: ['Перебирать монету подушечками'], ans: ['s'], why: 'Точный: подушечка к подушечке, изотонически.' },
+      { parts: ['Большой и указательный точно, III–V держат с силой'], ans: ['c'], why: 'Комбинированный.' },
+    ], [['p', 'Силовой', MU], ['s', 'Точный', SH], ['c', 'Комбинированный', FUN]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Запястье управляет длиной внешних мышц пальцев: при хвате его держат разгибатели, при разгибании пальцев — сгибатели.', 'w1'],
+     ['Разгибатель пальцев разгибает ПФ; межфаланговые разгибаются через аппарат с внутренними мышцами; одни внешние мышцы дают «коготь».', 'w2'],
+     ['Силовой захват — изометрия, запястье в лёгком разгибании и локтевом отклонении; точный — изотонически, на подушечках.', 'w3'],
+     ['Нерв может пострадать на всём пути от шеи — обследуем весь верхний квадрант.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SH }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-grip', prompt: ['При попытке сильно сжать кулак у пациента сгибается запястье, и хват слабый. Что не работает как нужно?'],
+    build: choice([
+      ['Разгибатели запястья не стабилизируют его'],
+      ['Червеобразные мышцы'],
+      ['Ладонные межкостные'],
+      ['Длинная ладонная мышца'],
+    ], 0, 'Без стабилизации разгибателями сгибатели пальцев сгибают и запястье и оказываются слишком короткими.',
+    [null, 'В силовом захвате они почти не участвуют.', 'Они приводят пальцы, запястье не держат.', 'Это сгибатель запястья — он только усилит сгибание.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-nerve', prompt: ['Пациента беспокоит онемение пальцев, а запястье при осмотре в норме. Что сделать?'],
+    build: choice([
+      ['Обследовать весь верхний квадрант, включая шейный отдел'],
+      ['Лечить только запястье'],
+      ['Сразу надеть ортез на кисть'],
+      ['Ограничиться растяжкой сгибателей'],
+    ], 0, 'Нерв может страдать на любом участке от шеи до кисти — лечат источник, а не место ощущений.',
+    [null, 'Источник может быть выше.', 'Сначала найти источник.', 'Это не ищет причину.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

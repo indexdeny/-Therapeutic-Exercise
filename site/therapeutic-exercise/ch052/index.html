@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мобилизация бедра и колена — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 52, title: 'Мобилизация: тазобедренный сустав и колено', minutes: 9, language: 'ru', next: '../ch053/' };
+// bio begin: places of the biomechanics layer (B switches); made by tools/therapeutic-exercise/bio.py from content/therapeutic-exercise/ch052/bio.ru.json
+const BIO = [
+  {"beat": "kpost", "fig": 1, "level": "angle", "joint": "kN", "load": {"type": "none"}},
+];
+// bio end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch052/cards.ru.json
+const CARDS_SHORT = {
+  "осторожно: проблемы с коленом\nвариант — бедро и колено согнуты, стопа на столе; руки на мыщелках бедра, надколенник не сдавливать": "бедро и колено согнуты, стопа на столе",
+  "вперёд: на животе\nбёдра за краем стола, другая стопа на полу; рука — сзади на верхней части бедра, ниже ягодицы": "рука сзади на бедре, ниже ягодицы",
+  "тракция по длинной оси\nсидя, на спине или на животе; руки над лодыжками; от покоя — к пределу": "руки над лодыжками; от покоя к пределу",
+  "до тракции — ротация голени\nу конца сгибания — внутренняя, у конца разгибания — наружная": "сгибание — внутренняя, разгибание — наружная",
+  "бедро фиксируют\nремнём или столом": "ремнём или столом",
+  "варианты\nсидя, колено за краем стола: до 90° с внутренней ротацией голени; > 90° — на животе, валик над надколенником": "до 90° сидя, > 90° — на животе",
+};
+// cards-short end
+
+const HAND = '#b9cfe0', LINE = mix(ANAT.bone, '#000000', .5);
+const gripOval = (p, k = 1) => { const e = mk('ellipse', { rx: 24 * k, ry: 16 * k, fill: HAND, 'fill-opacity': .9, stroke: '#7d93a3', 'stroke-width': 2 }, p); put(e, { o: 0 }); return e; };
+// A point on a figure segment from joint a toward joint b: k of the way, off units to the side (+ anterior on a leg
+// segment of a supine figure, as in muscleOn).
+const segPt = (f, a, b, k, off) => { const A = onStage(f, a), B = onStage(f, b), dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy); return [A[0] + dx * k - dy / L * off * f.s * f.dir, A[1] + dy * k + dx / L * off * f.s * f.dir]; };
+// A grip oval held on segPt; follows the figure.
+function gripSeg(p, f, a, b, k, off, sz = 1) {
+  const e = gripOval(p, sz), upd = () => { const P = segPt(f, a, b, k, off), A = onStage(f, a), B = onStage(f, b); put(e, { x: P[0], y: P[1], r: Math.atan2(B[1] - A[1], B[0] - A[0]) * 180 / Math.PI }); };
+  f.onSet.push(upd); upd();
+  return e;
+}
+// A joint in a sagittal close-up: the proximal bone on the left, the distal one to the right; up is anterior.
+function sagJoint(p, x, y, s, t0, opts = {}) {
+  const j = jointGlide(p, { x, y, s, r: -90, shaft: 170, t0, ...opts });
+  const g = G(p, { o: 0 });
+  T(g, '↑ вперёд', { x: x - 190 * s, y: y - 140 * s, size: 20, fill: COL.dim, anchor: 'middle' });
+  T(g, '↓ назад', { x: x - 190 * s, y: y + 160 * s, size: 20, fill: COL.dim, anchor: 'middle' });
+  show(g, t0);
+  return j;
+}
+// The knee from the side: the femoral condyles (convex) above, the tibial plateau (concave) moving below, the menisci
+// in the gap and the patella in front. a < 0 flexes the knee (the leg swings back); front is to the right.
+function kneeSide(p, x, y, s, t0) {
+  const j = jointGlide(p, { x, y, s, convexMoves: false, shaft: 190, w: 70, t0 });
+  const men = [-1, 1].map(k => mk('path', { fill: ANAT.tendon, 'fill-opacity': .8, stroke: LINE, 'stroke-width': 1.5 }, j.g));
+  const pat = mk('ellipse', { rx: 20, ry: 34, fill: ANAT.bone, stroke: LINE, 'stroke-width': 2 }, j.g);
+  const upd = () => {
+    [-1, 1].forEach((k, i) => { const A = j.cupAt(k * 50), B = j.cupAt(k * 25), C = j.headAt(k * 38), f = v => v.toFixed(1); men[i].setAttribute('d', `M${f(A[0])} ${f(A[1])}L${f(B[0])} ${f(B[1])}L${f(C[0])} ${f(C[1])}Z`); });
+    const fl = clamp(-j.a / 90, 0, 1), P = rotPt(j.R + 26, 0, -lerp(70, 10, fl));   // the patella slides down the front of the femur as the knee bends
+    put(pat, { x: P[0], y: P[1] });
+  };
+  j.onSet.push(upd); upd();
+  j.pat = pat;
+  return j;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Бедро и колено', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 5 · Урок 52', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Мобилизация:', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'тазобедренный сустав и колено', { x: 800, y: 380, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'глубокая впадина, плато большеберцовой кости и надколенник', 800, 460, m('sub'), { size: 28, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), j = kneeSide(art, 800, 640, .62, 0);
+    show(art, m('sub', .2));
+    prog(q => j.set({ a: -70 * (1 - Math.cos(2 * Math.PI * q)) / 2 }), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['hip', 'Тазобедренный сустав', (m) => {
+    const p = panel(0);
+    // the hip from the front: the acetabulum opens down and out, so traction along its axis slides the roof sideways;
+    // a pull straight down (caudal) opens the weight-bearing roof
+    const j = jointGlide(p, { x: 330, y: 400, s: 1, r: -40, span: 75, gap: 5, shaft: 210, t0: .2 });
+    txt(p, 'вид спереди', 330, 100, .2, { size: 20, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'вогнутая впадина', 200, 330, m('hip', .5), { size: 21, fill: COL.whole, anchor: 'end' });
+    txt(p, 'выпуклая головка', 470, 360, m('hip', 1.5), { size: 21, fill: COL.task });
+    show(j.tp, m('rest', 3));
+    pill(p, 'покой: сгибание 30°, отведение 30°, лёгкая НР', 330, 160, m('rest'), { col: COL.whole, size: 20 });
+    const roof = j.stage(j.cupAt(40));
+    const gap = mk('circle', { cx: roof[0], cy: roof[1], r: 14, fill: 'none', stroke: COL.good, 'stroke-width': 4, opacity: 0 }, p);
+    prog(q => j.set({ n: 10 * io(q) }), m('deep', .5), 1.2, lin);
+    txt(p, 'тракция ⊥: свод скользит вбок', 330, 760, m('deep', .5), { size: 22, weight: 700, fill: COL.dim, anchor: 'middle' });
+    // caudal: straight down on the screen, which is down and medial in the frame of the joint
+    const dv = rotPt(0, 1, 40);
+    prog(q => { const k = 13 * io(q); j.set({ n: lerp(10, 0, io(q)) + dv[1] * k, d: dv[0] * k, raw: true }); }, m('deep', 5), 1.6, lin);
+    show(gap, m('deep', 6.5));
+    txt(p, 'вниз: опорный свод расходится', 330, 805, m('deep', 6.5), { size: 22, weight: 700, fill: COL.good, anchor: 'middle' });
+    // the patient: supine, a strap from the therapist's trunk over the foot; the therapist leans back
+    const top = 610, s = .7;
+    bench(p, 720, 1175, top, m('how'), COL.dim, 155 * s);
+    const pt = supine(p, 1020, top, s, m('how'), { hN: 0 });
+    const th = fig(p, { x: 1232, y: top + 155 * s - 182 * s, s, dir: -1, col: HAND, o: 0, pose: { t: 24, hN: 20, hF: 8, kN: 10, kF: 6 } });
+    show(th.g, m('how'));
+    const strap = path(p, '', { stroke: COL.real, 'stroke-width': 6 }, { o: 0 });
+    // reach() poses the therapist, which runs this again: the flag stops the recursion
+    let busy = false;
+    const upd = () => { if (busy) return; busy = true; const A = onStage(pt, 'AN'), H = onStage(th, 'H'); reach(th, 'N', A[0] + 8, A[1] - 6); reach(th, 'F', A[0] + 14, A[1] + 2); strap.setAttribute('d', `M${H[0]} ${H[1] - 10}L${A[0]} ${A[1] - 8}M${H[0]} ${H[1] - 10}L${A[0]} ${A[1] + 6}`); busy = false; };
+    th.onSet.push(upd); upd();
+    show(strap, m('how', 2));
+    prog(q => th.set({ t: lerp(24, 8, io(q)) }), m('how', 5), 1.6, lin);
+    const pb = mk('rect', { x: 980, y: top - 30, width: 90, height: 34, rx: 8, fill: COL.real, 'fill-opacity': .8, opacity: 0 }, p);
+    show(pb, m('rest', 3));
+    txt(p, 'таз — ремнями', 1025, top - 45, m('rest', 3), { size: 19, fill: COL.real, anchor: 'middle' });
+    arrowTo(p, [1300, 520], [1390, 520], m('how', 5), { col: COL.whole, w: 5 });
+    txt(p, 'отклониться назад', 1345, 495, m('how', 5), { size: 20, fill: COL.whole, anchor: 'middle' });
+    infoCard(p, 720, 110, 820, 180, 'осторожно: проблемы с коленом', 'вариант — бедро и колено согнуты, стопа на столе; руки на мыщелках бедра, надколенник не сдавливать', COL.bad, m('knee'), { size: 21 });
+  }],
+
+  ['hipg', 'Скольжения бедра', (m) => {
+    const p = panel(0), top = 470, s = .9;
+    bench(p, 60, 640, top, .2, COL.dim, 155 * s);
+    // supine, the other thigh held to the chest; the near hip in its resting position
+    const pt = supine(p, 520, top, s, .2, { hN: 30, kN: 30, hF: 125, kF: 125, aF: 120, eF: 60 });
+    const gP = gripSeg(p, pt, 'H', 'KN', .3, -18), gD = gripSeg(p, pt, 'H', 'KN', .85, 14);
+    show(gP, m('ph', 3)); show(gD, m('ph', 2));
+    const P0 = segPt(pt, 'H', 'KN', .3, -18);
+    arrowTo(p, [P0[0], P0[1] - 100], [P0[0], P0[1] - 30], m('ph', 5), { col: COL.whole, w: 5 });
+    txt(p, 'назад', P0[0] + 14, P0[1] - 80, m('ph', 5), { size: 21, weight: 700, fill: COL.whole });
+    txt(p, 'другое бедро — к груди', 300, 300, m('post', 2), { size: 20, fill: COL.dim, anchor: 'middle' });
+    const j = sagJoint(p, 1080, 330, .8, m('post'));
+    show(j.tp, m('post'));
+    prog(q => j.set({ d: -12 * io(q) }), m('ph', 5), 1.2, lin);
+    pill(p, 'назад → сгибание, внутренняя ротация', 1080, 570, m('post'), { col: COL.whole, size: 21 });
+    txt(p, 'задняя часть капсулы', 1080, 622, m('ph', 6), { size: 21, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    // anterior glide (prone) and the side-lying variant
+    prog(q => j.set({ d: lerp(-12, 12, io(q)) }), m('ant', 1), 1.6, lin);
+    pill(p, 'вперёд → разгибание, наружная ротация', 1080, 712, m('ant'), { col: COL.task, size: 21 });
+    infoCard(p, 60, 640, 620, 220, 'вперёд: на животе', 'бёдра за краем стола, другая стопа на полу; рука — сзади на верхней части бедра, ниже ягодицы', COL.task, m('ant'), { size: 21 });
+    infoCard(p, 760, 760, 780, 110, 'на боку: таз у ПВПО, толкать большой вертел вперёд', null, COL.dim, m('side'), { size: 21 });
+    NOTE(p, 1080, 656, m('ph', 6));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-hip', prompt: ['Какое скольжение головки бедренной кости?'],
+    build: grid([
+      { parts: ['Увеличить сгибание'], ans: ['p'], why: 'Назад.' },
+      { parts: ['Увеличить внутреннюю ротацию'], ans: ['p'], why: 'Назад.' },
+      { parts: ['Увеличить разгибание'], ans: ['a'], why: 'Вперёд.' },
+      { parts: ['Увеличить наружную ротацию'], ans: ['a'], why: 'Вперёд.' },
+      { parts: ['Развести опорную поверхность'], ans: ['c'], why: 'Каудальное скольжение — тракция по длинной оси.' },
+    ], [['p', 'Назад', COL.whole], ['a', 'Вперёд', COL.task], ['c', 'Вниз', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['knee', 'Колено', (m) => {
+    const p = panel(0), j = kneeSide(p, 400, 360, 1, .2);
+    txt(p, 'вид сбоку, перед — справа', 400, 95, .2, { size: 20, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'мыщелки бедра', 490, 345, m('knee', .5), { size: 20, fill: COL.task });
+    txt(p, 'мениски', 490, 410, m('knee', 2), { size: 20, fill: ANAT.tendon });
+    txt(p, 'плато большеберцовой', 490, 470, m('tf', .5), { size: 20, fill: COL.whole });
+    txt(p, 'надколенник', 470, 232, m('knee', 4), { size: 20, fill: COL.dim });
+    prog(q => j.set({ a: -80 * Math.sin(Math.PI * q) }), m('knee', 5), 3.5, lin);
+    pill(p, 'сгибание: голень — внутрь, надколенник — вниз', 400, 780, m('knee', 5), { col: COL.task, size: 20 });
+    prog(q => j.set({ a: -25 * io(q) }), m('tf', 2), 1, lin);
+    show(j.tp, m('tf', 3));
+    pill(p, 'покой: сгибание 25° · плоскость — по плато, движется с голенью', 400, 835, m('tf', 2), { col: COL.whole, size: 19 });
+    // traction along the leg
+    prog(q => j.set({ a: -25, n: 11 * io(q) }), m('dist', 2), 1.2, lin);
+    infoCard(p, 840, 110, 700, 210, 'тракция по длинной оси', 'сидя, на спине или на животе; руки над лодыжками; от покоя — к пределу', COL.good, m('dist'), { size: 22 });
+    infoCard(p, 840, 350, 700, 200, 'до тракции — ротация голени', 'у конца сгибания — внутренняя, у конца разгибания — наружная', COL.task, m('dist', 5), { size: 22 });
+    infoCard(p, 840, 580, 700, 140, 'бедро фиксируют', 'ремнём или столом', COL.real, m('tf', 6), { size: 22 });
+  }],
+
+  ['kpost', 'Голень назад', (m) => {
+    const p = panel(0), top = 470, s = .9;
+    bench(p, 60, 720, top, .2, COL.dim, 155 * s);
+    const pt = supine(p, 380, top, s, .2, { hN: 50, kN: 100, fN: 10 });
+    // the therapist sits on the patient's foot and pushes the tibia back
+    const A = onStage(pt, 'AN');
+    const th = fig(p, { x: A[0] + 70, y: top - 30, s, dir: -1, col: HAND, o: 0, pose: { ...SIT, t: 28, hN: 95, kN: 100, hF: 95, kF: 100 } });
+    show(th.g, m('post', 2));
+    const T0 = segPt(pt, 'KN', 'AN', .2, 12);
+    reach(th, 'N', T0[0] + 4, T0[1]); reach(th, 'F', T0[0] + 10, T0[1] + 14);
+    arrowTo(p, [T0[0] + 90, T0[1]], [T0[0] + 30, T0[1]], m('post', 6), { col: COL.whole, w: 5 });
+    txt(p, 'назад', T0[0] + 100, T0[1] - 20, m('post', 6), { size: 21, weight: 700, fill: COL.whole });
+    txt(p, 'положение «выдвижного ящика»', 380, 120, m('post'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pill(p, 'тракцию I здесь добавить нельзя', 380, 170, m('post', 8), { col: COL.bad, size: 20 });
+    const j = kneeSide(p, 1080, 330, .8, m('post'));
+    j.set({ a: -90 });
+    show(j.tp, m('post'));
+    prog(q => j.set({ a: -90, d: -12 * io(q) }), m('post', 6), 1.2, lin);
+    txt(p, 'передняя часть капсулы', 1180, 560, m('post', 7), { size: 21, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    NOTE(p, 1180, 600, m('post', 7));
+    infoCard(p, 60, 660, 700, 200, 'варианты', 'сидя, колено за краем стола: до 90° с внутренней ротацией голени; > 90° — на животе, валик над надколенником', COL.task, m('alt'), { size: 21 });
+  }],
+
+  ['kant', 'Голень вперёд и надколенник', (m) => {
+    const p = panel(0), j = kneeSide(p, 320, 330, .8, .2);
+    txt(p, 'на животе: подушка под бедром', 320, 95, .2, { size: 20, fill: COL.dim, anchor: 'middle' });
+    prog(q => j.set({ d: 12 * io(q) }), m('ant', 2), 1.2, lin);
+    pill(p, 'вперёд → разгибание', 320, 610, m('ant'), { col: COL.task, size: 22 });
+    txt(p, 'задняя часть капсулы', 320, 665, m('ant', 4), { size: 21, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    NOTE(p, 320, 705, m('ant', 4));
+    pill(p, 'можно на одно плато', 320, 770, m('ant', 6), { col: COL.dim, size: 20 });
+    // the patella: distal glide (side view), then medial / lateral (from above)
+    const defs = mk('defs', {}, p), fem = G(p, { o: 0 });
+    limbEl(fem, defs, ANAT.bone, 30, 36, LINE).set([980, 140], [980, 470]);
+    mk('circle', { cx: 990, cy: 500, r: 58, fill: ANAT.bone, stroke: LINE, 'stroke-width': 2 }, fem);
+    const pat = mk('ellipse', { cx: 1058, cy: 430, rx: 18, ry: 40, fill: ANAT.bone, stroke: LINE, 'stroke-width': 2 }, fem);
+    T(fem, 'сбоку', { x: 980, y: 110, size: 20, fill: COL.dim, anchor: 'middle' });
+    show(fem, m('pf'));
+    const web = gripOval(p, 1); put(web, { x: 1060, y: 380, r: 0 }); show(web, m('pf', 3));
+    prog(q => { const v = io(q); put(pat, { y: 40 * v }); put(web, { x: 1060, y: 380 + 40 * v }); }, m('pf', 4), 1.6, lin);
+    arrowTo(p, [1110, 380], [1110, 460], m('pf', 4), { col: COL.whole, w: 5 });
+    txt(p, 'вниз, ∥ бедру — не прижимать', 1120, 560, m('pf', 5), { size: 21, weight: 700, fill: COL.whole });
+    const topG = G(p, { o: 0 });
+    mk('ellipse', { cx: 1310, cy: 720, rx: 120, ry: 70, fill: ANAT.bone, 'fill-opacity': .5, stroke: LINE, 'stroke-width': 2 }, topG);
+    const pt2 = mk('ellipse', { cx: 1310, cy: 720, rx: 42, ry: 30, fill: ANAT.bone, stroke: LINE, 'stroke-width': 2 }, topG);
+    T(topG, 'сверху', { x: 1310, y: 630, size: 20, fill: COL.dim, anchor: 'middle' });
+    show(topG, m('ml'));
+    prog(q => put(pt2, { x: 22 * Math.sin(2 * Math.PI * q) }), m('ml', .5), 2.4, lin);
+    pill(p, 'медиально и латерально — подвижность надколенника', 1100, 860, m('ml', .5), { col: COL.good, size: 20 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-knee', prompt: ['Колено уже сгибается больше 90°. Как продолжить скольжение голени назад?'],
+    build: choice([
+      ['Лёжа на животе, с маленьким валиком над надколенником'],
+      ['Сидя, колено свисает с края стола'],
+      ['В положении «выдвижного ящика» с тракцией I степени'],
+      ['Скольжением голени вперёд'],
+    ], 0, 'После 90° — на животе; валик бережёт надколенник от сдавления.',
+    [null, 'Сидя прогрессируют до 90°.', 'В этом положении тракцию добавить нельзя.', 'Вперёд — для разгибания.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Тазобедренный: опорный свод разводят скольжением вниз по длинной оси; назад — сгибание и ВР, вперёд — разгибание и НР.', 'w1'],
+     ['Колено: вогнутые плато движутся по выпуклым мыщелкам — голень назад для сгибания, вперёд для разгибания.', 'w2'],
+     ['Ротация голени перед приёмом: внутренняя — к сгибанию, наружная — к разгибанию.', 'w3'],
+     ['Надколенник скользит вниз для сгибания; его не прижимают к бедру.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-hip', prompt: ['Ограничено сгибание тазобедренного сустава; колено у пациента после операции. Что выбрать для тракции опорной поверхности?'],
+    build: choice([
+      ['Бедро и колено согнуты, стопа на столе; тянуть за мыщелки бедра вниз'],
+      ['Тянуть за лодыжку с ремнём, колено разогнуто'],
+      ['Тракцию перпендикулярно плоскости лечения'],
+      ['Скольжение вперёд лёжа на животе'],
+    ], 0, 'При проблемах с коленом — вариант с согнутыми бедром и коленом, руки на мыщелках бедра.',
+    [null, 'Это положение нагружает колено — при его проблемах не используют.', 'Так свод скользит вбок, а не расходится.', 'Вперёд — для разгибания и НР.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Покой тазобедренного — сгибание 30°, отведение 30°, лёгкая НР.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Покой колена — полное разгибание.'], ans: ['f'], why: 'Неверно: сгибание 25°.' },
+      { parts: ['Плоскость лечения колена движется вместе с голенью.'], ans: ['t'], why: 'Верно: она лежит на плато.' },
+      { parts: ['Скольжение голени вперёд увеличивает сгибание.'], ans: ['f'], why: 'Неверно: разгибание.' },
+      { parts: ['Надколенник при скольжении вниз прижимают к мыщелкам.'], ans: ['f'], why: 'Неверно: не прижимают.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Температура, бассейны, снаряды — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 97, title: 'Температура, бассейны, оборудование, безопасность', minutes: 8, language: 'ru', next: '../ch098/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch097/cards.ru.json
+const CARDS_SHORT = {
+  "горячая вода\nнагрузка на сердце и сосуды ↑ — и в покое, и при упражнениях": "нагрузка на сердце ↑",
+  "≥ 37 °C\nсердечный выброс заметно растёт уже в покое": "сердечный выброс растёт в покое",
+  "ревматоидный артрит\nвода теплее — кроме острой стадии": "вода теплее — кроме острой стадии",
+  "спастичность\nвода прохладнее (и при погружении 20–45 мин)": "вода прохладнее (и при погружении 20–45 мин)",
+};
+// cards-short end
+
+const AQ = COL.whole, HOT = '#e2574c', COOL = '#4f9cc8', HEAT = '#ff8a5c', SKIN = '#d8d1c1', SKL = mix('#d8d1c1', COL.board, .6);
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+// A thermometer with a value label.
+function thermo(p, x, y, val, lab, col, t0) {
+  const g = G(p, { x, y, o: 0 });
+  mk('rect', { x: -12, y: -150, width: 24, height: 156, rx: 12, fill: PANEL, stroke: COL.chalk, 'stroke-width': 2.5 }, g);
+  mk('circle', { cy: 20, r: 22, fill: col, stroke: COL.chalk, 'stroke-width': 2.5 }, g);
+  const h = (val - 20) * 6.5;
+  mk('rect', { x: -6, y: 6 - h, width: 12, height: h + 8, fill: col }, g);
+  T(g, val + ' °C', { x: 0, y: -168, size: 26, weight: 700, fill: col, anchor: 'middle' });
+  T(g, lab, { x: 0, y: 72, size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// A horizontal temperature scale from 20 to 40 °C, cool to hot; returns X(t).
+function tempScale(p, x0, x1, y, t0) {
+  const g = G(p, { o: 0 }), defs = mk('defs', {}, g), X = t => lerp(x0, x1, (t - 20) / 20);
+  const gr = mk('linearGradient', { id: 'ts' + (++SHADE_ID), x1: 0, y1: 0, x2: 1, y2: 0 }, defs);
+  mk('stop', { offset: 0, 'stop-color': COOL }, gr); mk('stop', { offset: .6, 'stop-color': '#e8c35a' }, gr); mk('stop', { offset: 1, 'stop-color': HOT }, gr);
+  mk('rect', { x: x0, y: y - 8, width: x1 - x0, height: 16, rx: 8, fill: `url(#${gr.id})` }, g);
+  for (let t = 20; t <= 40; t += 1) {
+    path(g, `M${X(t)} ${y + 10}V${y + (t % 2 ? 16 : 22)}`, { stroke: COL.dim, 'stroke-width': 2 });
+    if (t % 2 === 0) T(g, String(t), { x: X(t), y: y + 44, size: 18, fill: COL.dim, anchor: 'middle' });
+  }
+  T(g, '°C', { x: x1 + 18, y: y + 44, size: 18, fill: COL.dim });
+  if (t0 !== null) show(g, t0);
+  return X;
+}
+// A band from a to b °C above the scale (row y, height h) with a label.
+function band(p, X, a, b, y, h, col, lab, t0, { size = 19, sub = null, scaleY = 760 } = {}) {
+  const g = G(p, { o: 0, y: 10 });
+  path(g, `M${X(a)} ${y + h}V${scaleY - 12}M${X(b)} ${y + h}V${scaleY - 12}`, { stroke: col, 'stroke-width': 2, 'stroke-dasharray': '5 6' });
+  mk('rect', { x: X(a), y, width: X(b) - X(a), height: h, rx: 10, fill: mix(col, COL.board, .62), stroke: col, 'stroke-width': 2.5 }, g);
+  const tx = X(b) - X(a) < 300 ? X(b) + 16 : X(a) + 12;
+  T(g, `${a}–${b} °C`, { x: tx, y: y + 26, size: size + 1, weight: 700, fill: col });
+  T(g, lab, { x: tx, y: y + 52, size, weight: 600, fill: COL.chalk });
+  if (sub) T(g, sub, { x: tx, y: y + 76, size: size - 2, fill: COL.dim });
+  tw(g, { o: 1, y: 0 }, t0, .5);
+  return g;
+}
+// Equipment, drawn small and shaded.
+const DEV = FLOAT_C, DEVL = mix(FLOAT_C, '#000000', .42);
+function glove(p, x, y, s = 1) {
+  const g = G(p, { x, y, s }), defs = mk('defs', {}, g);
+  mk('path', { d: 'M-30 -18L-34 -70L-14 -78L0 -84L16 -78L32 -66L34 -20Z', fill: AQ, 'fill-opacity': .35, stroke: AQ, 'stroke-width': 2 }, g);
+  [[-30, -20, -36, -74], [-12, -24, -14, -88], [6, -24, 6, -92], [22, -20, 28, -82]].forEach(([a, b, c, d]) => limbEl(g, defs, SKIN, 8, 7, SKL).set([a, b], [c, d]));
+  limbEl(g, defs, SKIN, 9, 8, SKL).set([30, 6], [56, -18]);
+  limbEl(g, defs, SKIN, 34, 30, SKL).set([0, -4], [0, 26]);
+  return g;
+}
+function paddle(p, x, y, k = 1) {
+  const g = G(p, { x, y, s: k });
+  mk('rect', { x: -38, y: -56, width: 76, height: 112, rx: 24, fill: '#e07a5f', stroke: mix('#e07a5f', '#000000', .4), 'stroke-width': 2.5 }, g);
+  [[-14, -30], [14, -30], [-14, 0], [14, 0], [-14, 30], [14, 30]].forEach(([a, b]) => mk('circle', { cx: a, cy: b, r: 5, fill: COL.board }, g));
+  mk('rect', { x: -26, y: -8, width: 52, height: 10, rx: 4, fill: '#3d4a52' }, g);
+  return g;
+}
+function bell(p, x, y, s = 1) {
+  const g = G(p, { x, y, s }), col = '#7fb0d0', ln = mix(col, '#000000', .45);
+  path(g, 'M-40 0H40', { stroke: '#9fb0bf', 'stroke-width': 9 });
+  [-1, 1].forEach(k => {
+    mk('path', { d: `M${k * 34} -12C${k * 46} -46 ${k * 92} -50 ${k * 100} -44V44C${k * 92} 50 ${k * 46} 46 ${k * 34} 12Z`, fill: col, stroke: ln, 'stroke-width': 2.5 }, g);
+    [-26, -9, 9, 26].forEach(v => path(g, `M${k * 56} ${v}H${k * 92}`, { stroke: COL.board, 'stroke-width': 5 }));
+  });
+  return g;
+}
+function fin(p, x, y, s = 1) {
+  const g = G(p, { x, y, s });
+  mk('path', { d: 'M-40 -14C-40 -30 -6 -30 10 -24L110 -40L120 20L10 18C-10 22 -40 14 -40 -14Z', fill: '#4fb38a', stroke: mix('#4fb38a', '#000000', .45), 'stroke-width': 2.5 }, g);
+  [30, 60, 90].forEach(v => path(g, `M${v} ${-28 + v * .02}L${v + 6} 14`, { stroke: mix('#4fb38a', '#000000', .3), 'stroke-width': 2 }));
+  return g;
+}
+function hBoot(p, x, y, s = 1) {
+  const g = G(p, { x, y, s }), col = '#6d9cbf';
+  mk('path', { d: 'M-34 -70H10V-20L60 -10C76 -6 80 14 66 20L-34 24Z', fill: col, stroke: mix(col, '#000000', .45), 'stroke-width': 2.5 }, g);
+  [-50, -36, -22].forEach(v => path(g, `M-24 ${v}H0`, { stroke: COL.board, 'stroke-width': 5 }));
+  [10, 30, 50].forEach(v => path(g, `M${v} -6V14`, { stroke: COL.board, 'stroke-width': 5 }));
+  return g;
+}
+function kickboard(p, x, y, s = 1, r = 0) {
+  const g = G(p, { x, y, s, r });
+  mk('path', { d: 'M-46 70V-40C-46 -76 46 -76 46 -40V70Z', fill: DEV, stroke: DEVL, 'stroke-width': 2.5 }, g);
+  mk('rect', { x: -30, y: -46, width: 22, height: 12, rx: 6, fill: COL.board }, g); mk('rect', { x: 8, y: -46, width: 22, height: 12, rx: 6, fill: COL.board }, g);
+  return g;
+}
+function swimBar(p, x, y, long = false, s = 1, r = 0) {
+  const g = G(p, { x, y, s, r }), defs = mk('defs', {}, g);
+  if (long) { limbEl(g, defs, DEV, 16, 16, DEVL).set([-110, 0], [110, 0]); return g; }
+  path(g, 'M-46 0H46', { stroke: '#9fb0bf', 'stroke-width': 6 });
+  [-1, 1].forEach(k => limbEl(g, defs, DEV, 18, 18, DEVL).set([k * 30, 0], [k * 62, 0]));
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Температура, бассейны, снаряды', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 9 · Урок 97', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Температура, бассейны, снаряды', { x: 800, y: 215, size: 54, weight: 600, anchor: 'middle' });
+    T(g, 'и безопасность', { x: 800, y: 278, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как выбрать воду, бассейн и снаряды', 800, 356, m('sub'), { size: 30, fill: AQ, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const w = pool(art, 380, 1220, 620, 850, null, { rim: 40 });
+    w.wave(.3, D, 4);
+    const f = floater(w.mid, 760, 620, .72, null, {}, { collar: true, belt: true, rings: true }); put(f.g, { o: 1 });
+    const kb = kickboard(art, 1060, 614, .55, 90), sb = swimBar(art, 520, 612, false, .8);
+    thermo(art, 1300, 760, 30, 'вода', COOL, null); put(art.lastChild, { o: 1 });
+    prog(q => { const T0 = q * D; put(kb, { y: 614 + 3 * Math.sin(T0 * 1.6) }); put(sb, { y: 612 + 3 * Math.sin(T0 * 1.6 + 1) }); }, .3, D, lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['temp', 'Как выбрать температуру', (m, D) => {
+    const p = panel(0);
+    txt(p, 'температура воды и терморегуляция', 800, 56, m('temp'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    txt(p, 'выбор — по нарушениям пациента и целям', 400, 104, m('temp', .5), { size: 21, fill: COL.dim, anchor: 'middle' });
+    pill(p, 'интенсивнее нагрузка → вода прохладнее', 400, 150, m('rule'), { col: COOL, size: 21 });
+    pill(p, 'подвижность, гибкость, расслабление → теплее', 400, 196, m('rule', 1.5), { col: HOT, size: 21 });
+    thermo(p, 260, 470, 30, 'вода', COOL, m('air'));
+    thermo(p, 520, 470, 33, 'воздух', HEAT, m('air', .6));
+    txt(p, '+3 °C', 390, 330, m('air', .6), { size: 30, weight: 700, fill: HEAT, anchor: 'middle' });
+    // heat into deeper tissue: thin and thick subcutaneous fat
+    const xs = [[200, 10, 'тонкий жир'], [520, 30, 'толстый жир']].map(([x, fat, lab]) => {
+      const g = G(p, { o: 0 }), y = 720, R = 100;
+      mk('circle', { cx: x, cy: y, r: R, fill: mix(SKIN, COL.board, .2), stroke: SKIN, 'stroke-width': 3 }, g);
+      mk('circle', { cx: x, cy: y, r: R - 6, fill: '#e6cf98' }, g);
+      mk('circle', { cx: x, cy: y, r: R - 6 - fat, fill: ANAT.muscle }, g);
+      mk('circle', { cx: x, cy: y, r: 22, fill: ANAT.bone }, g);
+      const wave = mk('circle', { cx: x, cy: y, r: R, fill: 'none', stroke: COOL, 'stroke-width': 7, 'stroke-opacity': .8 }, g);
+      T(g, lab, { x, y: y + R + 30, size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      show(g, m('deep'));
+      return { wave, R, fat };
+    });
+    prog(q => xs.forEach(c => { const u = (q * 3) % 1, depth = c.fat === 10 ? 80 : 40; c.wave.setAttribute('r', (c.R - u * depth).toFixed(1)); c.wave.setAttribute('stroke-opacity', (.85 * (1 - u)).toFixed(2)); }), m('deep'), Math.max(3, D - m('deep')), lin);
+    txt(p, 'внутренняя температура меняется обратно толщине жира', 360, 590, m('deep'), { size: 18, fill: COL.chalk, anchor: 'middle' });
+    // regulation in water
+    const w = pool(p, 820, 1540, 530, 800, m('reg'), { rim: 170 });
+    w.wave(m('reg'), Math.max(3, D - m('reg')), 3);
+    const f = fig(w.mid, { s: 1.05, o: 0 }); plant(f, 'AN', 1000, 800); show(f.g, m('reg'));
+    const sw = G(p, { o: 0 });
+    const [hcx, hcy] = onStage(f, 'Hc');
+    [[hcx - 10, hcy - 10], [hcx + 14, hcy + 4], [hcx - 24, hcy + 34]].forEach(([x, y]) => mk('path', { d: `M${x} ${y}C${x - 6} ${y + 10} ${x - 6} ${y + 16} ${x} ${y + 16}C${x + 6} ${y + 16} ${x + 6} ${y + 10} ${x} ${y}Z`, fill: '#bfe6f5' }, sw));
+    show(sw, m('skin'));
+    txt(p, 'меньше кожи на воздухе → хуже потоотделение', 1180, 300, m('skin'), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const ha = G(p, { o: 0 });
+    [[1040, 570], [1050, 630], [1040, 690], [1040, 750]].forEach(([x, y]) => { const e = mk('path', { d: '', stroke: HEAT, 'stroke-width': 3.5, fill: 'none' }, ha); let d = `M${x} ${y}`; for (let i = 1; i <= 14; i++) d += `L${x + i * 7} ${y + 5 * Math.sin(i * .9)}`; d += `M${x + 88} ${y - 7}L${x + 98} ${y + 4}L${x + 86} ${y + 11}`; e.setAttribute('d', d); });
+    show(ha, m('cond'));
+    prog(q => ha.setAttribute('transform', `translate(${(14 * ((q * 4) % 1)).toFixed(1)} 0)`), m('cond'), Math.max(3, D - m('cond')), lin);
+    txt(p, 'вода проводит тепло × 25', 1330, 600, m('cond'), { size: 22, weight: 700, fill: HEAT, anchor: 'middle' });
+    txt(p, 'в движении — ещё быстрее', 1330, 632, m('cond', 1), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    txt(p, '±1 °C в воде ощущается сильнее,', 1330, 400, m('feel'), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'чем ±1 °C в воздухе', 1330, 428, m('feel'), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+  }],
+
+  ['limits', 'Границы температуры', (m, D) => {
+    const p = panel(0);
+    txt(p, 'слишком холодно и слишком горячо', 800, 56, m('low'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const X = tempScale(p, 140, 1460, 420, m('low'));
+    const lo = G(p, { o: 0 }); mk('rect', { x: X(20), y: 330, width: X(25) - X(20), height: 70, rx: 10, fill: mix(COOL, COL.board, .55), stroke: COOL, 'stroke-width': 2.5 }, lo);
+    T(lo, '< 25 °C', { x: X(20) + 14, y: 360, size: 22, weight: 700, fill: COOL }); T(lo, 'тепло в центре тела не удержать', { x: X(20) + 14, y: 388, size: 17, fill: COL.chalk }); show(lo, m('low'));
+    const hi = G(p, { o: 0 }); mk('rect', { x: X(37), y: 300, width: X(40) - X(37), height: 100, rx: 10, fill: mix(HOT, COL.board, .55), stroke: HOT, 'stroke-width': 2.5 }, hi);
+    T(hi, '> 37 °C', { x: X(37) + 14, y: 330, size: 22, weight: 700, fill: HOT }); T(hi, 'вред, если долго', { x: X(37) + 14, y: 358, size: 17, fill: COL.chalk }); T(hi, 'или интенсивно', { x: X(37) + 14, y: 382, size: 17, fill: COL.chalk }); show(hi, m('high'));
+    infoCard(p, 940, 500, 600, 150, 'горячая вода', 'нагрузка на сердце и сосуды ↑ — и в покое, и при упражнениях', HOT, m('high', 1), { size: 21 });
+    infoCard(p, 940, 670, 600, 160, '≥ 37 °C', 'сердечный выброс заметно растёт уже в покое', HOT, m('co'), { size: 21 });
+    // waist-deep at 37 °C: heat wins over the central shift of blood
+    const w = pool(p, 100, 560, 640, 840, m('hr'), { rim: 30 });
+    const f = fig(w.mid, { s: 1, o: 0 }); plant(f, 'AN', 300, 840); show(f.g, m('hr'));
+    const ht = heartEl(p, ...figPt(f, [16, -96]), .13, m('hr'));
+    const hrT = txt(p, '', 760, 560, m('hr'), { size: 30, weight: 700, fill: HOT, anchor: 'middle' });
+    const T0 = m('hr');
+    prog(q => { const T = T0 + q * (D - T0), bpm = Math.round(lerp(72, 96, clamp((T - T0) / 4, 0, 1))); ht.beat((1 - Math.cos(2 * Math.PI * T * bpm / 60)) / 2); hrT.textContent = bpm + ' уд/мин'; }, T0, Math.max(3, D - T0), lin);
+    txt(p, '37 °C, по пояс:', 760, 620, m('hr'), { size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'тепло учащает пульс сильнее,', 760, 650, m('hr', .5), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'чем давление смещает кровь', 760, 676, m('hr', .5), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'к центру', 760, 702, m('hr', .5), { size: 19, fill: COL.chalk, anchor: 'middle' });
+  }],
+
+  ['ranges', 'Диапазоны температуры', (m, D) => {
+    const p = panel(0);
+    txt(p, 'температура воды по задачам', 800, 56, m('ranges'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const X = tempScale(p, 140, 1460, 760, m('ranges'));
+    band(p, X, 26, 35, 120, 110, COL.good, 'гибкость, укрепление, ходьба, расслабление', m('mob'), { size: 20 });
+    const t33 = G(p, { o: 0 });
+    path(t33, `M${X(33)} 360V748`, { stroke: COL.task, 'stroke-width': 4, 'stroke-dasharray': '8 6' });
+    mk('rect', { x: X(33) - 10, y: 250, width: 520, height: 110, rx: 12, fill: PANEL, stroke: COL.task, 'stroke-width': 2.5 }, t33);
+    T(t33, '33 °C — острая болезненная травма', { x: X(33) + 6, y: 282, size: 21, weight: 700, fill: COL.task });
+    T(t33, 'расслабление · порог боли ↑ · спазм ↓', { x: X(33) + 6, y: 314, size: 19, fill: COL.chalk });
+    T(t33, 'опорно-двигательного аппарата', { x: X(33) + 6, y: 342, size: 17, fill: COL.dim });
+    show(t33, m('warm'));
+    band(p, X, 26, 28, 400, 110, AQ, 'аэробная тренировка', m('aer'), { sub: 'эффективнее, ударный объём ↑, ЧСС ниже' });
+    band(p, X, 22, 26, 560, 110, COOL, 'интенсивная: > 80 % ЧСС макс', m('int'), { sub: 'меньше риск теплового поражения' });
+  }],
+
+  ['tip', 'Время и температура: советы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'совет из клиники: время и температура', 800, 56, m('tip'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    // immersion time: start with 10 min, generally up to 20
+    const x0 = 140, x1 = 1460, Xm = t => lerp(x0, x1, t / 45), y = 230;
+    const tl = G(p, { o: 0 });
+    path(tl, `M${x0} ${y}H${x1}`, { stroke: COL.dim, 'stroke-width': 4 });
+    [0, 10, 20, 30, 45].forEach(t => { path(tl, `M${Xm(t)} ${y - 10}V${y + 10}`, { stroke: COL.dim, 'stroke-width': 3 }); T(tl, t + ' мин', { x: Xm(t), y: y + 38, size: 18, fill: COL.dim, anchor: 'middle' }); });
+    show(tl, m('time'));
+    const s10 = G(p, { o: 0 }); mk('rect', { x: Xm(0), y: y - 46, width: Xm(10) - Xm(0), height: 30, rx: 8, fill: mix(COL.good, COL.board, .4), stroke: COL.good, 'stroke-width': 2 }, s10); T(s10, 'начать с 10 мин', { x: Xm(0) + 10, y: y - 56, size: 19, weight: 700, fill: COL.good }); show(s10, m('time', .5));
+    const s20 = G(p, { o: 0 }); mk('rect', { x: Xm(10), y: y - 46, width: Xm(20) - Xm(10), height: 30, rx: 8, fill: mix(AQ, COL.board, .5), stroke: AQ, 'stroke-width': 2 }, s20); T(s20, '↑ по переносимости, обычно ≤ 20 мин', { x: Xm(10) + 10, y: y - 56, size: 19, weight: 700, fill: AQ }); show(s20, m('time', 2));
+    const s45 = G(p, { o: 0 }); mk('rect', { x: Xm(20), y: y + 52, width: Xm(45) - Xm(20), height: 30, rx: 8, fill: mix(COOL, COL.board, .5), stroke: COOL, 'stroke-width': 2, 'stroke-dasharray': '7 5' }, s45); T(s45, '20–45 мин → вода прохладнее', { x: Xm(20) + 10, y: y + 106, size: 19, weight: 700, fill: COOL }); show(s45, m('spas'));
+    txt(p, 'при здоровых сердце и лёгких', Xm(15), 300, m('time', 1), { size: 18, fill: COL.dim, anchor: 'middle' });
+    // vital signs
+    const vs = G(p, { o: 0 });
+    heartEl(vs, 230, 480, .3, null);
+    T(vs, 'жизненные показатели —', { x: 320, y: 470, size: 22, weight: 700, fill: COL.chalk });
+    T(vs, 'всегда под контролем', { x: 320, y: 500, size: 22, weight: 700, fill: COL.chalk });
+    show(vs, m('vit'));
+    // what the book calls high and low
+    const X = tempScale(p, 760, 1460, 520, m('hilo'));
+    const lo = G(p, { o: 0 }); mk('rect', { x: X(26), y: 430, width: X(35) - X(26), height: 58, rx: 10, fill: mix(COOL, COL.board, .55), stroke: COOL, 'stroke-width': 2.5 }, lo); T(lo, '26–35 °C — «низкие»', { x: X(26) + 12, y: 467, size: 20, weight: 700, fill: COL.chalk }); show(lo, m('hilo'));
+    const hi = G(p, { o: 0 }); mk('rect', { x: X(36), y: 430, width: X(37.6) - X(36), height: 58, rx: 10, fill: mix(HOT, COL.board, .55), stroke: HOT, 'stroke-width': 2.5 }, hi); T(hi, '36–37 — «высокие»', { x: X(36) - 4, y: 418, size: 19, weight: 700, fill: HOT }); show(hi, m('hilo', .8));
+    txt(p, '+ утомляемость пациента', 1110, 610, m('hilo', 2), { size: 19, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 140, 650, 640, 150, 'ревматоидный артрит', 'вода теплее — кроме острой стадии', HOT, m('ra'), { size: 22 });
+    infoCard(p, 820, 650, 640, 150, 'спастичность', 'вода прохладнее (и при погружении 20–45 мин)', COOL, m('spas'), { size: 22 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-temp', prompt: ['Какую температуру воды выбрать?'],
+    build: grid([
+      { parts: ['Интервальная тренировка выше 80 % ЧСС макс'], ans: ['a'], why: 'Интенсивная аэробная — 22–26 °C: меньше риск теплового поражения.' },
+      { parts: ['Аэробная тренировка в глубокой воде'], ans: ['b'], why: 'Аэробная — 26–28 °C.' },
+      { parts: ['Острая болезненная травма плеча: расслабить мышцы, снять спазм'], ans: ['c'], why: 'Тёплая вода 33 °C: расслабление, порог боли ↑, спазм ↓.' },
+      { parts: ['Ревматоидный артрит вне обострения'], ans: ['d'], why: 'При ревматоидном артрите — более высокие температуры, кроме острой стадии.' },
+    ], [['a', '22–26 °C', COOL], ['b', '26–28 °C', AQ], ['c', '33 °C', COL.task], ['d', '36–37 °C', HOT]], { multi: false, text: true }),
+  }], done) }],
+
+  ['pools', 'Бассейны', (m, D) => {
+    const p = panel(0);
+    txt(p, 'бассейны для занятий', 800, 56, m('pools'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    pillRow(p, ['вентиляция: без конденсата', 'раздевалка и душ'], 800, 102, m('pools', 1.5), { col: COL.dim, size: 19, gap: .6 });
+    // a traditional pool: sloping bottom, a ramp and a lift, a group with the therapist in the water
+    txt(p, 'традиционный лечебный бассейн', 470, 160, m('trad'), { size: 24, weight: 700, fill: AQ, anchor: 'middle' });
+    const SY = 330, w = pool(p, 120, 860, SY, 720, m('trad'), { floor: [[120, 430], [470, 430], [700, 720], [860, 720]], rim: 30 });
+    w.wave(m('trad'), Math.max(3, D - m('trad')), 3);
+    const S = .5;
+    [[200, 'N'], [270, 'F'], [340, 'N']].forEach(([x], i) => { const f = fig(w.mid, { s: S, o: 0, pose: { ...STAND, aN: 40 + i * 20, eN: 20, aF: 20, eF: 10 } }); plant(f, 'AN', x, 430); show(f.g, m('group', i * .3)); });
+    const th = fig(w.mid, { s: S, o: 0, dir: -1, pose: { ...STAND, aN: 60, eN: 20 } }); plant(th, 'AN', 430, 430); show(th.g, m('group', 1));
+    txt(p, 'терапевт в воде', 450, 250, m('group', 1), { size: 18, fill: COL.chalk, anchor: 'middle' });
+    // ramp, stairs and lift
+    const en = G(p, { o: 0 });
+    path(en, 'M20 300L120 330', { stroke: COL.dim, 'stroke-width': 5 });
+    T(en, 'пандус', { x: 30, y: 280, size: 17, fill: COL.chalk });
+    path(en, 'M820 300V230H760M760 230V262', { stroke: COL.dim, 'stroke-width': 5 }); mk('rect', { x: 736, y: 262, width: 48, height: 12, rx: 4, fill: COL.dim }, en);
+    T(en, 'подъёмник', { x: 790, y: 216, size: 17, fill: COL.chalk, anchor: 'middle' });
+    show(en, m('enter'));
+    const dims = G(p, { o: 0 });
+    path(dims, 'M120 760H860', { stroke: COL.chalk, 'stroke-width': 2 }); path(dims, 'M120 750V770M860 750V770', { stroke: COL.chalk, 'stroke-width': 2 });
+    T(dims, '≥ ≈ 30 × 7,6 м (в книге — 100 × 25 футов)', { x: 490, y: 796, size: 18, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    T(dims, '≈ 0,9–1,2 м', { x: 300, y: 470, size: 18, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    T(dims, '→ ≈ 2,7–3 м', { x: 780, y: 690, size: 18, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    T(dims, '(в книге — 3–4 → 9–10 футов)', { x: 600, y: 826, size: 16, fill: COL.dim, anchor: 'middle' });
+    show(dims, m('trad', 1));
+    pill(p, 'хлорирование и фильтрация', 490, 868, m('enter', 1.5), { col: AQ, size: 18 });
+    // an individual pool: a self-contained tank with a door, steps, a treadmill and a current
+    txt(p, 'индивидуальный бассейн', 1240, 160, m('ind'), { size: 24, weight: 700, fill: AQ, anchor: 'middle' });
+    const w2 = pool(p, 1000, 1480, 420, 720, m('ind'), { rim: 70 });
+    const door = G(p, { o: 0 }); mk('rect', { x: 994, y: 520, width: 12, height: 180, rx: 3, fill: COL.task }, door); T(door, 'дверца', { x: 1010, y: 510, size: 17, fill: COL.task }); path(door, 'M930 720H960V700H980V680H1000', { stroke: COL.dim, 'stroke-width': 4 }); show(door, m('ind', 1));
+    const tm = treadmill(w2.mid, 1290, 720, .5, m('tread'));
+    prog(q => tm.set({ ph: q * 8 }), m('tread'), Math.max(3, D - m('tread')), lin);
+    const cur = G(p, { o: 0 }); [470, 520, 570].forEach(y => fArrow(cur, 1440, y, -90, 0, DRAG_C, { w: 4, head: 12 })); show(cur, m('tread', 1));
+    txt(p, 'течение', 1395, 455, m('tread', 1), { size: 17, fill: DRAG_C, anchor: 'middle' });
+    const out0 = fig(p, { s: .5, o: 0, dir: -1, pose: { ...STAND, aN: 70, eN: 40 } }); plant(out0, 'AN', 1530, 720); show(out0.g, m('out'));
+    ground(p, 1480, 1580, 720, m('out'));
+    const bub = G(p, { o: 0 }); mk('rect', { x: 1488, y: 560, width: 106, height: 46, rx: 16, fill: PANEL, stroke: COL.good, 'stroke-width': 2.5 }, bub); T(bub, 'указания', { x: 1541, y: 590, size: 19, weight: 700, fill: COL.good, anchor: 'middle' }); show(bub, m('out', .5));
+    pillRow(p, ['дорожка', 'течение', 'глубина меняется'], 1240, 780, m('tread', 1.5), { col: AQ, size: 18, gap: .4, space: 10 });
+  }],
+
+  ['support', 'Снаряды для опоры', (m, D) => {
+    const p = panel(0);
+    txt(p, 'снаряды: плавучая опора', 800, 56, m('equip'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    pillRow(p, ['опора телу или конечности', 'равновесие: облегчить или усложнить', 'сопротивление'], 800, 104, m('equip', .5), { col: AQ, size: 19, gap: .7 });
+    txt(p, 'добавить или убрать снаряд → другая интенсивность; выбор — по уровню функции и целям', 800, 148, m('equip', 3), { size: 19, fill: COL.dim, anchor: 'middle' });
+    const SY = 360, w = pool(p, 60, 1540, SY, 830, m('collar'), { rim: 40 });
+    w.wave(m('collar'), Math.max(3, D - m('collar')), 3);
+    // a supine patient with a collar, rings and a belt
+    const f = floater(w.mid, 420, SY, .9, m('collar'), {}, { collar: true, belt: true, rings: true });
+    [f.dev.collar.e, f.dev.belt.e, f.dev.ringN.e, f.dev.ringF.e].forEach(e => put(e, { o: 0 }));
+    show(f.dev.collar.e, m('collar')); show(f.dev.ringN.e, m('rings')); show(f.dev.ringF.e, m('rings')); show(f.dev.belt.e, m('belt'));
+    const lab = (s, P, t0, dy = 70) => { const g = G(p, { o: 0 }); path(g, `M${P[0]} ${P[1] + 14}V${P[1] + dy - 18}`, { stroke: COL.chalk, 'stroke-width': 2 }); T(g, s, { x: P[0], y: P[1] + dy, size: 19, weight: 700, fill: FLOAT_C, anchor: 'middle' }); show(g, t0); };
+    lab('шейный воротник', onStage(f, 'Hc').map((v, i) => i ? v + 10 : v + 22), m('collar'), 80);
+    lab('пояс', figPt(f, [0, -32]), m('belt'), 120);
+    lab('кольца', onStage(f, 'AN'), m('rings'), 80);
+    txt(p, 'голова над водой', 260, 300, m('collar', 1), { size: 18, fill: COL.chalk, anchor: 'middle' });
+    // a vertical patient in a vest
+    const v = fig(w.mid, { x: 860, y: SY + 128 * .85, s: .85, o: 0, pose: { ...STAND, hN: 8, kN: 16, hF: -4, kF: 10, aN: 30, eN: 30, aF: 24, eF: 24 } });
+    floats(v, { vest: true }); show(v.g, m('vest'));
+    txt(p, 'жилет: вертикально', 860, 720, m('vest'), { size: 19, weight: 700, fill: FLOAT_C, anchor: 'middle' });
+    txt(p, 'пояса и жилеты: на спине, на животе, вертикально', 860, 750, m('vest', .5), { size: 17, fill: COL.chalk, anchor: 'middle' });
+    // short and long swim bars; sitting on a long bar in deep water
+    swimBar(p, 1180, 220, false, .9); put(p.lastChild, { o: 0 }); show(p.lastChild, m('bars'));
+    swimBar(p, 1420, 220, true, .9); put(p.lastChild, { o: 0 }); show(p.lastChild, m('bars', .4));
+    txt(p, 'короткая', 1180, 270, m('bars'), { size: 17, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'длинная плавучая гантель', 1420, 270, m('bars', .4), { size: 17, fill: COL.chalk, anchor: 'middle' });
+    const sb = fig(w.mid, { x: 1300, y: SY + 120, s: .8, o: 0, pose: { ...SIT, t: 4, aN: 50, eN: 20, aF: 70, eF: 10, hN: 85, kN: 80, hF: 85, kF: 80 } });
+    const bar = swimBar(w.mid, 0, 0, true, .9, 0); put(bar, { o: 0 });
+    const [kx, ky] = onStage(sb, 'KN'), [hx, hy] = onStage(sb, 'H'); put(bar, { x: (hx + kx) / 2, y: (hy + ky) / 2 + 22 });
+    w.mid.insertBefore(bar, sb.g);
+    show(sb.g, m('bal')); show(bar, m('bal'));
+    prog(q => { const a = 5 * Math.sin(q * 30); put(sb.g, { r: a }); put(bar, { r: a * .6 }); }, m('bal'), Math.max(3, D - m('bal')), lin);
+    txt(p, 'сидя на длинной гантели:', 1300, 690, m('bal'), { size: 19, weight: 700, fill: FLOAT_C, anchor: 'middle' });
+    txt(p, 'равновесие, проприоцепция,', 1300, 718, m('bal', .5), { size: 18, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'сила туловища', 1300, 744, m('bal', .5), { size: 18, fill: COL.chalk, anchor: 'middle' });
+  }],
+
+  ['resist', 'Снаряды для сопротивления', (m, D) => {
+    const p = panel(0);
+    txt(p, 'снаряды: сопротивление', 800, 56, m('gloves'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const tile = (x, y, w0, h0, t0) => { const g = G(p, { o: 0 }); roundBox(g, x, y, w0, h0, EDGE, PANEL, 2); show(g, t0); return g; };
+    // arms: gloves, paddles, bells — and how much they resist
+    tile(60, 100, 720, 400, m('gloves'));
+    const gl = glove(p, 160, 290, 1); put(gl, { o: 0 }); show(gl, m('gloves'));
+    const pd1 = paddle(p, 330, 280, .75), pd2 = paddle(p, 470, 280, 1.05); [pd1, pd2].forEach(e => put(e, { o: 0 })); show(pd1, m('gloves', 1)); show(pd2, m('gloves', 1.6));
+    txt(p, 'перчатка', 160, 360, m('gloves'), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'лопатки: всё крупнее', 400, 360, m('gloves', 1), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const bl = bell(p, 660, 270, .7); put(bl, { o: 0 }); show(bl, m('bells'));
+    txt(p, 'гантель Hydro-tone', 660, 360, m('bells'), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'не плавучие → сопротивление только по направлению движения', 420, 150, m('nob'), { size: 19, weight: 700, fill: COL.task, anchor: 'middle' });
+    const bars = [['перчатка', 80, m('gloves')], ['лопатка', 150, m('gloves', 1.2)], ['Hydro-tone', 330, m('bells', .5)]];
+    bars.forEach(([s, L, t0], i) => { const g = G(p, { o: 0 }); mk('rect', { x: 230, y: 400 + i * 30, width: L, height: 20, rx: 6, fill: mix(DRAG_C, COL.board, .3), stroke: DRAG_C, 'stroke-width': 2 }, g); T(g, s, { x: 220, y: 416 + i * 30, size: 17, fill: COL.chalk, anchor: 'end' }); show(g, t0); });
+    txt(p, 'сопротивление', 600, 420, m('bells', .5), { size: 17, fill: DRAG_C });
+    pill(p, 'схема', 640, 470, m('bells', .5), { col: COL.dim, size: 16 });
+    // legs: fins and boots
+    tile(820, 100, 720, 400, m('fins'));
+    const fn = fin(p, 920, 280, 1); put(fn, { o: 0 }); show(fn, m('fins'));
+    const bt = hBoot(p, 1340, 290, 1.2); put(bt, { o: 0 }); show(bt, m('boots'));
+    txt(p, 'ласты', 980, 360, m('fins'), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'сила бедра, колена, голеностопа', 980, 392, m('fins', .5), { size: 18, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'ботинки Hydro-tone', 1360, 360, m('boots'), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'ходьба и бег в глубокой воде', 1360, 392, m('boots', .5), { size: 18, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'больше площадь → больше сопротивление', 1180, 150, m('fins'), { size: 19, weight: 700, fill: COL.task, anchor: 'middle' });
+    // a kickboard: three uses
+    tile(60, 530, 1480, 320, m('kick'));
+    txt(p, 'доска для плавания (kickboard)', 800, 576, m('kick'), { size: 22, weight: 700, fill: AQ, anchor: 'middle' });
+    const uses = [[330, 'плавучесть: на животе или на спине'], [800, 'сопротивление: держать вертикально при ходьбе'], [1270, 'равновесие: сидя, на коленях, стоя на глубине']];
+    uses.forEach(([x, s], i) => {
+      const t0 = m('kick', .8 + i * 1.6), g = G(p, { o: 0 });
+      const w = pool(g, x - 200, x + 200, i === 2 ? 640 : 700, 800, null, { walls: false });
+      if (i === 0) { const f = floater(w.mid, x + 30, 700, .5, null, { aN: 160, aF: 160, eN: 6, eF: 6 }); put(f.g, { o: 1 }); kickboard(g, x - 150, 696, .35, 90); }
+      if (i === 1) { const f = fig(w.mid, { s: .42, pose: { ...STRIDE, aN: 80, eN: 20, aF: 80, eF: 20 } }); plant(f, 'AN', x - 30, 800); kickboard(g, x + 50, 730, .4, 0); fArrow(g, x + 90, 740, 50, 0, DRAG_C, { w: 4, head: 11 }); }
+      if (i === 2) { const f = fig(w.mid, { s: .42, pose: { ...STAND, aN: 80, eN: 10, aF: 80, eF: 10 } }); plant(f, 'AN', x, 770); kickboard(w.mid, x, 790, .45, 90); }
+      T(g, s, { x, y: 838, size: 18, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      show(g, t0);
+    });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-equip', prompt: ['Для чего этот снаряд?'],
+    build: grid([
+      { parts: ['Надувной шейный воротник'], ans: ['s'], why: 'Держит голову пациента, лежащего на спине, над водой.' },
+      { parts: ['Лопатки для рук'], ans: ['r'], why: 'Не плавучие: сопротивляются только в направлении движения.' },
+      { parts: ['Гантели Hydro-tone'], ans: ['r'], why: 'Прорези увеличивают сопротивление — сильнее, чем перчатки и лопатки.' },
+      { parts: ['Доска для плавания'], ans: ['b'], why: 'И плавучесть лёжа, и сопротивление при ходьбе, и задача на равновесие.' },
+      { parts: ['Плавательные кольца на лодыжках'], ans: ['s'], why: 'Поддерживают конечности; при ручных техниках — положение и расслабление.' },
+    ], [['s', 'Опора', FLOAT_C], ['r', 'Сопротивление', DRAG_C], ['b', 'И то и другое', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['safety', 'Уход за бассейном и безопасность', (m, D) => {
+    const p = panel(0);
+    txt(p, 'уход за бассейном и безопасность', 800, 56, m('care'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    // Pseudomonas: rod-shaped bacteria with a flagellum
+    infoCard(p, 60, 100, 720, 210, 'синегнойная палочка (Pseudomonas aeruginosa)', 'вызывает фолликулит; частое использование → органический углерод, аммиак, органический азот ↑', COL.bad, m('care'), { size: 20, textW: 470 });
+    const bac = G(p, { o: 0 });
+    [[630, 210, 20], [690, 250, -15], [650, 270, 60]].forEach(([x, y, r]) => { const b = G(bac, { x, y, r }); mk('rect', { x: -26, y: -9, width: 52, height: 18, rx: 9, fill: '#8fd6b0', stroke: mix('#8fd6b0', '#000000', .4), 'stroke-width': 2 }, b); path(b, 'M26 0C34 -6 40 6 48 0S60 -6 66 2', { stroke: '#8fd6b0', 'stroke-width': 2.5 }); });
+    show(bac, m('care', .5));
+    // the schedule
+    infoCard(p, 820, 100, 720, 210, 'график', 'чистка — не реже 2 раз в неделю; хлор и кислотность (pH) — 2 раза в день', AQ, m('clean'), { size: 21 });
+    // floor, rules, rescue
+    infoCard(p, 60, 340, 470, 230, 'пол вокруг бассейна', 'нескользкий, без препятствий; брызги — вытереть сразу', COL.task, m('floor'), { size: 20 });
+    infoCard(p, 565, 340, 470, 230, 'правила', 'правила и порядок при ЧС — на виду; соблюдают все', COL.task, m('rules'), { size: 20 });
+    infoCard(p, 1070, 340, 470, 230, 'спасение', 'круги — под рукой; всё время рядом хотя бы один сотрудник с навыком СЛР', COL.good, m('life'), { size: 20, textW: 300 });
+    const ring = G(p, { x: 1460, y: 500, o: 0 });
+    mk('circle', { r: 46, fill: 'none', stroke: '#f0f0f0', 'stroke-width': 22 }, ring);
+    [0, 90, 180, 270].forEach(a => mk('path', { d: `M${46 * Math.cos(rad(a - 20))} ${46 * Math.sin(rad(a - 20))}A46 46 0 0 1 ${46 * Math.cos(rad(a + 20))} ${46 * Math.sin(rad(a + 20))}`, stroke: COL.bad, 'stroke-width': 22, fill: 'none' }, ring));
+    show(ring, m('life'));
+    // before the first session
+    infoCard(p, 60, 600, 1480, 250, 'перед первым занятием', null, COL.good, m('first'));
+    const items = ['расписание, процедуры, одежда', 'прошлый опыт в бассейне, ожидания', 'кишечник и мочевой пузырь', 'вспомогательные средства', 'лекарства'];
+    items.forEach((s, i) => { const x = 110 + (i % 3) * 480, y = 700 + Math.floor(i / 3) * 70, t0 = m('first', .5 + i * .7); checkMark(p, x, y - 6, t0); txt(p, s, x + 26, y, t0, { size: 21, fill: COL.chalk }); });
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 100, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Интенсивнее — прохладнее; подвижность и расслабление — теплее; воздух на 3 °C теплее воды.', 'w1'],
+     ['26–35 °C — гибкость, сила, ходьба; 33 °C — острая боль; 26–28 °C — аэробная; 22–26 °C — интенсивная.', 'w2'],
+     ['Начинают с 10 минут, обычно не больше 20.', 'w3'],
+     ['Снаряды — опора или сопротивление; перчатки и лопатки не плавучие; Hydro-tone сильнее всего.', 'w4'],
+     ['Безопасность: чистка, хлор и pH, нескользкий пол, правила, круги, сотрудник с навыком СЛР.', 'w5']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 190 + i * 135, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: AQ }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 28, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-acute', prompt: ['Острая болезненная травма плеча, мышцы в спазме; сердце и лёгкие здоровы. Что выбрать для первого занятия в воде?'],
+    build: choice([
+      ['Тёплая вода ≈ 33 °C; начать с 10 минут и увеличивать по переносимости'],
+      ['Прохладная вода 22–26 °C: холод снимет боль'],
+      ['Горячая вода 38 °C на 45 минут'],
+      ['26–28 °C, сразу 30 минут интенсивной работы'],
+    ], 0, 'При острой болезненной травме полезна тёплая вода 33 °C; начинают с 10 минут, обычно не больше 20.',
+    [null, '22–26 °C — для интенсивной аэробной тренировки, а не для расслабления.', 'Выше 37 °C долгое погружение может навредить; и 45 минут — слишком долго.', 'Это режим аэробной тренировки; и начинают с 10 минут.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-safe', prompt: ['Что из этого — обязательное требование безопасности по книге?'],
+    build: choice([
+      ['Всё время рядом хотя бы один сотрудник с навыком сердечно-лёгочной реанимации'],
+      ['Проверять хлор раз в неделю'],
+      ['Чистить бассейн раз в месяц'],
+      ['Держать спасательные круги на складе, чтобы не мешали'],
+    ], 0, 'Сотрудник с навыком СЛР должен быть рядом всё время; круги — под рукой.',
+    [null, 'Хлор и кислотность проверяют дважды в день.', 'Чистят не реже двух раз в неделю.', 'Круги должны быть под рукой.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

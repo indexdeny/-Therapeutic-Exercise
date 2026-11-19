@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Скольжение сухожилий и растяжка — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 188, title: 'Скольжение сухожилий и растяжка', minutes: 14, language: 'ru', next: '../ch189/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch188/cards.ru.json
+const CARDS_SHORT = {
+  "что это\nмягкая статическая работа мышцы рано после шва: минимальная нагрузка и пассивное движение сустава": "мягкая статическая работа",
+  "после сгибателей\nв тыльном или тенодезном ортезе: ПФ согнуты, МФ ставят в частичное сгибание — 5 секунд минимальным усилием": "МФ — в частичное сгибание, 5 секунд",
+  "в тенодезном\nвместе с активным разгибанием запястья; расслабиться — пальцы разогнутся": "+ разгибание запястья",
+  "после разгибателей\nсустав в зоне шва — в нейтральное, потом в лёгкое разгибание, 5–10 секунд: против отставания": "5–10 секунд — против отставания",
+  "зачем\nсвободное движение глубокого и поверхностного сухожилий друг по другу и по костям": "сухожилия скользят",
+  "крючок и полный кулак\nкрючок — глубокий по поверхностному и по кости; полный кулак — глубокий по влагалищу и кости": "глубокий — по поверхностному и кости",
+  "стол и прямой кулак\nиз положения стола сгибают ПМФ при прямом ДМФ — максимум для поверхностного": "максимум для поверхностного",
+  "большой палец\nполное сгибание ПФ и МФ — скольжение длинного сгибателя": "сгибание ПФ и МФ",
+  "прогрессия\nсначала запястье нейтрально; потом в сгибании и разгибании; полная экскурсия — из полного разгибания запястья и пальцев в полное сгибание": "полная экскурсия",
+  "что дают\nскольжение и управление отдельным суставом — следующий шаг после скольжения": "управление отдельным суставом",
+  "положение\nсидя, тыл кисти на столе; другая рука «блокирует»; по одному пальцу": "тыл кисти на столе; по одному",
+  "только ПФ\nчервеобразные и ладонные межкостные": "червеобразные и ладонные межкостные",
+  "только ПМФ\nповерхностный сгибатель: держим основную фалангу": "поверхностный сгибатель: держим основную фалангу",
+  "только ДМФ\nглубокий сгибатель: держим среднюю фалангу; затем — полный кулак и сопротивление": "держим среднюю фалангу",
+  "внешние разгибатели\nповерхностны, легко повреждаются; главное — разгибание ПФ; спайки мешают и разгибанию, и сгибанию": "спайки мешают разгибанию и сгибанию",
+  "отставание\nпассивно разгибается полностью, активно — нет; чаще от спаек, чем от слабости": "чаще от спаек",
+  "по суставам\nПФ — из кулака в крючок; МФ — из кулака в положение стола; затем ладонь на краю стола": "кулак → крючок, стол",
+  "конечное разгибание\nладонь на столе, фалангу — в переразгибание; карандаш под фалангу": "карандаш под фалангу",
+  "скольжение разгибателей\nодин палец сгибают, остальные держат прямо; потом по очереди; «рога» — средний и безымянный согнуты: разгибатели указательного и мизинца": "«рога»: указательный и мизинец",
+  "спайка\nпосле воспаления и иммобилизации: сокращение не двигает суставы дистальнее рубца": "сокращение не двигает суставы",
+  "сгибатели\nпассивное сгибание возможно, полное разгибание — нет: сухожилие не идёт дистально": "сухожилие не идёт дистально",
+  "прогрессия\nразогнуть и подержать → активно согнуть; массаж трением поперёк и вдоль при удлинённом сухожилии, с сокращением; снова скольжение": "подержать → согнуть; массаж",
+  "разгибатели\nпассивно согнуть сустав дистальнее спайки, затем активно разогнуть": "согнуть пассивно → разогнуть",
+  "осторожно\nесли отставание растёт — прекратить пассивное сгибание, делать массаж": "отставание растёт — массаж",
+  "перед растяжкой\nзнать многосуставные мышцы и аппарат; вернуть скольжение сустава; сидя, предплечье на столе; затем — самостоятельно": "вернуть скольжение сустава",
+  "разгибание запястья\nладонь на столе, пальцы свисают, другая рука держит тыл, предплечье поднимается; или ладони под прямым углом": "предплечье поднимается",
+  "сгибание запястья\nтыл на столе и предплечье вверх; или запястье у края и нажим на тыл; или тыльные стороны кистей вместе": "тыл на столе",
+  "отдельные суставы\nфаланга у края стола, проксимальную кость прижать, силу — на дистальную": "силу — на дистальную кость",
+  "червеобразные и межкостные\nПФ разогнуть, МФ согнуть, дожать; межкостные — ладонь на столе, отвести или привести, давить на конец основной фаланги": "ПФ разогнуть, МФ согнуть",
+  "приводящая большого\nкисть на столе локтевым краем, ладонное отведение; скрещёнными пальцами давить на головки пястных I и II": "давить на пястные",
+  "многосуставные\nсначала через самый дистальный сустав, держать — следующий; не переразгибать ПМФ и ПФ, когда тянут через запястье": "сначала дистальный сустав",
+  "сгибатели пальцев\nладонь на столе, разогнуть суставы по очереди, поднять предплечье": "разогнуть по очереди",
+};
+// cards-short end
+
+const SH = '#86c9e8', MU = '#f4a48c', LG = '#f1dfa0', FUN = '#f0c060', SP = '#8fd6b0', ENV = '#c9b8e8', BAD = COL.bad;
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, t = Array.isArray(t0) ? t0[i] : t0 === null ? null : t0 + i * gap, g = pill(p, s, x + ws[i] / 2, y, t, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19, anchor = null } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x, an = anchor || (right ? 'end' : 'start');
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: an });
+  const lx = an === 'start' && right ? x + uiW(str, size) + 8 : an === 'middle' ? x : x + (right ? 8 : -8), ly = an === 'middle' ? y + (ty > y ? 8 : -size) : y - size * .35;
+  path(g, `M${lx} ${ly}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+const arw = (p, x1, y1, x2, y2, col, t0, w = 6) => { const a = Math.atan2(y2 - y1, x2 - x1), h = 14, g = G(p, { o: 0 }); path(g, `M${f1(x1)} ${f1(y1)}L${f1(x2)} ${f1(y2)}M${f1(x2 - h * Math.cos(a - .5))} ${f1(y2 - h * Math.sin(a - .5))}L${f1(x2)} ${f1(y2)}L${f1(x2 - h * Math.cos(a + .5))} ${f1(y2 - h * Math.sin(a + .5))}`, { stroke: col, 'stroke-width': w }); if (t0 !== null) show(g, t0); else put(g, { o: 1 }); return g; };
+const floorLn = (p, x1, x2, y, t0) => show(path(p, `M${x1} ${y}H${x2}`, { stroke: COL.dim, 'stroke-width': 4 }, { o: 0 }), t0);
+const ring = (p, P, r, col, t0) => { const c = mk('circle', { cx: f1(P[0]), cy: f1(P[1]), r, fill: 'none', stroke: col, 'stroke-width': 4, opacity: 0 }, p); show(c, t0); return c; };
+// an arc of the glenoid or the head (radius rr about the centre C of the joint, angles a0..a1) in stage coordinates
+const arcOn = (j, conv, rr, a0, a1) => { const P = []; for (let a = a0; a <= a1; a += 4) P.push(j.at(conv(polar([0, 0], rr, a)))); return P; };
+
+/* ---------- exercise helpers (chapters 17–18) ---------- */
+// Put a hand of the front-view figure on a stage point (two-link arm 72 + 66); flip bends the elbow the other way.
+function fsReach(f, side, X, Y, flip = false) {
+  const S = st(f.g), i = side === 'L' ? 0 : 1, k = i ? 1 : -1, Sh = f.pts.Sh[i];
+  const tx = (X - S.x) / S.s - Sh[0], ty = (Y - S.y) / S.s - Sh[1], D = clamp(Math.hypot(tx, ty), 8, 137.5), dg = 180 / Math.PI;
+  const phi = Math.atan2(k * tx, ty) * dg, be = Math.acos(clamp((72 * 72 + D * D - 66 * 66) / (2 * 72 * D), -1, 1)) * dg, ga = Math.acos(clamp((72 * 72 + 66 * 66 - D * D) / (2 * 72 * 66), -1, 1)) * dg;
+  const sg = flip ? -1 : 1;
+  f.set({ ['a' + side]: phi + sg * be, ['e' + side]: -sg * (180 - ga) });
+}
+// an elastic band between two stage points; set(A, B, rest) — brighter and thinner as it stretches
+function bandLine(p, col = '#e86a8a') {
+  const e = path(p, '', { stroke: col, 'stroke-width': 6, 'stroke-linecap': 'round' }, { o: 0 });
+  return { e, set(A, B, rest = 100) { const L = Math.hypot(B[0] - A[0], B[1] - A[1]), k = clamp(L / rest - 1, 0, 1); e.setAttribute('d', `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`); e.setAttribute('stroke-width', f1(6 - 2.5 * k)); e.setAttribute('stroke', mix(col, '#ffd75e', k * .6)); } };
+}
+const propLine = (p, d, t0, col = COL.dim, w = 5) => { const e = path(p, d, { stroke: col, 'stroke-width': w, 'stroke-linecap': 'round' }, { o: 0 }); if (t0 !== null) show(e, t0); return e; };
+// a ball (side view): set(x, y) moves it
+function ballEl(p, r, col = '#86c9e8') {
+  const defs = mk('defs', {}, p), g = G(p, { o: 0 });
+  mk('circle', { r, fill: ballGrad(defs, col), stroke: mix(col, '#000000', .45), 'stroke-width': 2 }, g);
+  return { g, set(x, y) { put(g, { x, y }); } };
+}
+// a seated rig figure on a chair, ankle at (ax, GY)
+function seatFig(p, ax, GY, s, t0, pose = {}) {
+  const f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...SIT, ...pose } });
+  plant(f, 'AN', ax, GY);
+  const [hx, hy] = onStage(f, 'H');
+  chair(p, hx, hy + 22 * s / .5 * .32, GY, t0);
+  p.appendChild(f.g); show(f.g, t0);
+  return f;
+}
+const QUAD = { ...STAND, t: 66, hN: 66, kN: 90, hF: 66, kF: 90, aN: 66, aF: 66, eN: 0, eF: 0, fN: -90, fF: -90 };
+// a rig figure on all fours: knee at (kx, FY); hands under the shoulders
+function quadFig(p, kx, FY, s, t0, pose = {}) {
+  const f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...QUAD, ...pose } });
+  plant(f, 'KN', kx, FY - 12 * s);
+  const Sh = onStage(f, 'Sh'); f.hand = [Sh[0] + 4, FY - 28 * s];
+  reach(f, 'N', ...f.hand); reach(f, 'F', f.hand[0] - 4, f.hand[1]);
+  show(f.g, t0); return f;
+}
+// a checklist of criteria that tick one by one
+function checklist(p, x, y, items, t0, gap, col = SP, { size = 18, dy = 40 } = {}) {
+  return items.map((s, i) => { const t = t0 + i * gap, g = G(p, {}); checkMark(g, x + 12, y + i * dy - 6, t, col, .9); txt(g, s, x + 34, y + i * dy, t, { size, fill: COL.chalk, weight: 600 }); return g; });
+}
+// horizontal bars with values: rows [label, value, colour]; k — px per unit
+function bars(p, x, y, rows, t0, { k = 5, dy = 46, unit = '%', w0 = 210, size = 17 } = {}) {
+  return rows.map(([s, v, c], i) => {
+    const yy = y + i * dy, g = G(p, { o: 0 }); show(g, t0 + i * .5);
+    T(g, s, { x: x + w0 - 12, y: yy + 6, size, fill: c, weight: 700, anchor: 'end' });
+    const b = mk('rect', { x: x + w0, y: yy - 13, width: 0, height: 24, rx: 7, fill: c }, g);
+    const tv = T(g, '', { x: x + w0 + 8, y: yy + 6, size, fill: COL.chalk, weight: 700 });
+    prog(q => { b.setAttribute('width', f1(k * v * q)); put(tv, { x: x + w0 + 8 + k * v * q }); tv.textContent = (unit === '' ? '' : (v * q).toFixed(v % 1 ? 1 : 0).replace('.', ',')) + unit; }, t0 + i * .5, 1);
+    return g;
+  });
+}
+// a resistance arrow (the hand or a band pushes the other way): a short thick arrow onto point P from direction ang
+function pushArr(p, P, ang, col, t0, L = 70) { const A = polar(P, L + 14, ang), B = polar(P, 14, ang); return arw(p, A[0], A[1], B[0], B[1], col, t0, 7); }
+
+
+/* ---------- chapter 18 helpers (lesson 172) ---------- */
+// a range dial round a stage point: the arc a0..a1 (degrees of flexion, 0 hanging down, turning forward = to the right)
+function flexArc(p, C, r, a0, a1, col, t0, w = 10) { const e = path(p, romArc(C, r, a0, a1, 90, -1), { stroke: col, 'stroke-width': w, 'stroke-linecap': 'round' }, { o: 0 }); if (t0 !== null) show(e, t0); return e; }
+// a forearm-rotation dial for foreEnd: the sector ±a about thumb-up, and a pointer along the thumb
+function rotDial(p, e, r, a, col, t0) {
+  const C = e.at('C'), g = G(p, { o: 0 });
+  path(g, romArc(C, r, -a, a, -90, 1), { stroke: col, 'stroke-width': 10, 'stroke-linecap': 'round' });
+  T(g, 'супинация', { x: C[0] - r - 12, y: C[1] - r * .55, size: 16, fill: col, weight: 700, anchor: 'end' });
+  T(g, 'пронация', { x: C[0] + r + 12, y: C[1] - r * .55, size: 16, fill: col, weight: 700 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a small axial inset of a radioulnar joint (volar side up). kind 'prox': the radial head in the annular ring against
+// the radial notch of the ulna; 'dist': the ulnar notch of the radius going round the head of the ulna. set(pro 0..1)
+function ruInset(p, x, y, kind, t0) {
+  const g = G(p, { x, y, o: 0 }), defs = mk('defs', {}, g), RC = mix(ANAT.bone, '#f6d9a8', .25), line = mix(ANAT.bone, '#000000', .5);
+  roundBox(g, -150, -120, 300, 240, EDGE, PANEL, 2);
+  T(g, 'ладонная сторона', { x: 0, y: -92, size: 15, fill: COL.dim, anchor: 'middle' });
+  T(g, 'тыльная сторона', { x: 0, y: 108, size: 15, fill: COL.dim, anchor: 'middle' });
+  const o = { g };
+  if (kind === 'prox') {
+    mk('path', { d: 'M48 -62Q8 0 48 62L110 62L110 -62Z', fill: boneGrad(defs, 0, 0, 1, 0), stroke: line, 'stroke-width': 2 }, g);   // ulna, radial notch
+    path(g, 'M44 -56Q6 0 44 56', { stroke: CART_C, 'stroke-width': 4 });
+    path(g, 'M44 -56A58 58 0 1 0 44 56', { stroke: ANAT.tendon, 'stroke-width': 9, 'stroke-opacity': .85 });   // annular ligament
+    const head = G(g, { x: -16, y: 0 });
+    mk('circle', { r: 46, fill: ballGrad(defs, RC), stroke: line, 'stroke-width': 2 }, head);
+    const stripe = path(head, 'M0 -44L0 -26', { stroke: line, 'stroke-width': 4 });
+    o.set = pro => { put(head, { x: -16, y: 0, r: -170 * pro }); };
+    o.head = head; o.stripe = stripe;
+  } else {
+    mk('circle', { cx: 30, cy: 6, r: 34, fill: ballGrad(defs), stroke: line, 'stroke-width': 2 }, g);   // head of the ulna
+    const rad = G(g, { x: 30, y: 6 });
+    mk('path', { d: 'M-40 -24A38 38 0 0 1 -40 24L-112 34Q-128 0 -112 -34Z', fill: boneGrad(defs, 0, 0, 1, 0, RC), stroke: line, 'stroke-width': 2 }, rad);
+    path(rad, 'M-40 -24A38 38 0 0 1 -40 24', { stroke: CART_C, 'stroke-width': 4 });
+    o.set = pro => { put(rad, { x: 30, y: 6, r: 55 * pro }); };
+  }
+  o.set(0);
+  if (t0 !== null) show(g, t0);
+  return o;
+}
+
+/* ---------- chapter 18 helpers (lesson 173) ---------- */
+// the flexion range a contracted capsule allows: [extension limit, flexion limit], scanned on the model
+function capRange(j) {
+  let lo = 0, hi = 145;
+  for (let a = 0; a <= 145; a++) { j.set({ flex: a }); if (j.capA.tension < .97) { lo = a; break; } }
+  for (let a = 145; a >= 0; a--) { j.set({ flex: a }); if (j.capP.tension < .97) { hi = a; break; } }
+  return [lo, hi];
+}
+// a hinged elbow brace on an elbowSag model (bars, straps, the hinge); block — the extension stop in degrees
+function hingeBrace(p, j, t0, block = null) {
+  const g = G(p, { o: 0 }), col = '#9fb0bf', sw = 11 * st(j.g).s / .7;
+  const bar1 = path(g, '', { stroke: col, 'stroke-width': sw, 'stroke-linecap': 'round', 'stroke-opacity': .9 });
+  const bar2 = path(g, '', { stroke: col, 'stroke-width': sw, 'stroke-linecap': 'round', 'stroke-opacity': .9 });
+  const straps = [0, 1, 2, 3].map(() => path(g, '', { stroke: '#6fa8c8', 'stroke-width': sw * 1.1, 'stroke-linecap': 'round', 'stroke-opacity': .75 }));
+  const hinge = mk('circle', { r: sw * 1.3, fill: '#6f7f8c', stroke: '#2b343a', 'stroke-width': 2 }, g);
+  const stop = block !== null ? path(g, '', { stroke: COL.bad, 'stroke-width': sw * .9, 'stroke-linecap': 'round' }) : null;
+  const seg = (A, B) => `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`;
+  const across = (P, Q, k) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], L = Math.hypot(dx, dy) || 1, n = [-dy / L * 34 * st(j.g).s / .7, dx / L * 34 * st(j.g).s / .7]; return seg([P[0] + n[0], P[1] + n[1]], [P[0] - n[0], P[1] - n[1]]); };
+  const upd = () => {
+    const C = j.at('C'), A = j.at(j.hum([-.15, -5.6])), B = j.at(j.fore([.1, 6.3]));
+    bar1.setAttribute('d', seg(A, C)); bar2.setAttribute('d', seg(C, B));
+    const a1 = j.at(j.hum([-.18, -4.6])), a2 = j.at(j.hum([-.22, -2.4])), b1 = j.at(j.fore([0, 2.6])), b2 = j.at(j.fore([.1, 5.2]));
+    straps[0].setAttribute('d', across(a1, C, 1)); straps[1].setAttribute('d', across(a2, C, 1)); straps[2].setAttribute('d', across(b1, C, 1)); straps[3].setAttribute('d', across(b2, C, 1));
+    hinge.setAttribute('cx', f1(C[0])); hinge.setAttribute('cy', f1(C[1]));
+    if (stop) { const r = rad(st(j.g).r || 0), P = polar(C, 60 * st(j.g).s / .7, 90 - block + (st(j.g).r || 0)), Q = polar(C, 90 * st(j.g).s / .7, 90 - block + (st(j.g).r || 0)); stop.setAttribute('d', seg(P, Q)); }
+  };
+  j.onSet.push(upd); upd();
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a small scene card: a framed box with a caption
+function sceneBox(p, x, y, w, h, title, col, t0) { const g = G(p, { o: 0 }); roundBox(g, x, y, w, h, EDGE, PANEL, 2); T(g, title, { x: x + w / 2, y: y + h - 16, size: 16, fill: col, weight: 700, anchor: 'middle' }); if (t0 !== null) show(g, t0); return g; }
+
+/* ---------- chapter 18 helpers: a phase strip ---------- */
+// Rehabilitation phases on a time axis: rows [label, from, to, colour] in weeks; ticks [[value, label]].
+// Each phase gets its own row; they appear one by one (t0 + i * gap, or t0[i] if an array).
+function phaseBar(p, x, y, w, max, rows, ticks, t0, { gap = .6, dy = 34, size = 15 } = {}) {
+  const g = G(p, { o: 0 }), X = v => x + w * v / max;
+  path(g, `M${x} ${y}H${x + w}`, { stroke: COL.dim, 'stroke-width': 3 });
+  ticks.forEach(([v, s0]) => { path(g, `M${f1(X(v))} ${y - 6}V${y + 6}`, { stroke: COL.dim, 'stroke-width': 2 }); T(g, s0, { x: X(v), y: y + 26, size: 14, fill: COL.dim, anchor: 'middle' }); });
+  if (t0 !== null) show(g, Array.isArray(t0) ? t0[0] : t0);
+  const els = rows.map(([s0, a, b, c], i) => {
+    const r = G(p, { o: 0 }), yy = y - 26 - (rows.length - 1 - i) * dy;
+    mk('rect', { x: X(a), y: yy - 12, width: Math.max(4, X(b) - X(a)), height: 22, rx: 8, fill: c, 'fill-opacity': .85 }, r);
+    const fits = uiW(s0, size) + 16 <= X(b) - X(a);
+    T(r, s0, { x: fits ? X(a) + 8 : X(b) + 8, y: yy + 5, size, fill: fits ? COL.board : c, weight: 700 });
+    if (t0 !== null) show(r, Array.isArray(t0) ? t0[i] : t0 + i * gap);
+    return r;
+  });
+  return { g, rows: els, X };
+}
+
+/* ---------- chapter 18 helpers (lesson 175) ---------- */
+// a two-column list with marks: items [text, colour], cross (✕) or tick
+function markList(p, x, y, items, t0, gap, { cross: isX = true, size = 16, dy = 36, maxW = 300 } = {}) {
+  return items.map(([s0, c], i) => { const g = G(p, { o: 0 }), yy = y + i * dy; if (isX) cross(g, x + 10, yy - 6, 9, 0, 4); else checkMark(g, x + 10, yy - 6, 0, c, .8); put(para(g, s0, x + 30, yy, null, { size, fill: c, weight: 600, maxW }), { o: 1 }); show(g, t0 + i * gap); return g; });
+}
+// a range bar: [label, lo, hi, mean, colour] on a % scale (k px per %)
+function rangeBars(p, x, y, rows, t0, { k = 6, dy = 48, w0 = 220, size = 15, track = false, unit = ' %', showMean = true } = {}) {
+  return rows.map(([s0, lo, hi, mean, c], i) => {
+    const g = G(p, { o: 0 }), yy = y + i * dy;
+    T(g, s0, { x: x + w0 - 10, y: yy + 5, size, fill: c, weight: 700, anchor: 'end' });
+    if (track) mk('rect', { x: x + w0, y: yy - 9, width: 100 * k, height: 18, rx: 6, fill: COL.faint, 'fill-opacity': .5 }, g);
+    const a0 = track && lo === hi ? 0 : lo;
+    mk('rect', { x: x + w0 + a0 * k, y: yy - 9, width: Math.max(4, (hi - a0) * k), height: 18, rx: 6, fill: c, 'fill-opacity': track ? .9 : .35 }, g);
+    if (mean !== null) mk('rect', { x: x + w0 + mean * k - 3, y: yy - 14, width: 6, height: 28, rx: 2, fill: c }, g);
+    T(g, (mean !== null && showMean ? String(mean).replace('.', ',') + unit : lo === hi ? `${lo}${unit}` : `${lo}–${hi}${unit}`), { x: x + w0 + Math.max(hi, mean ?? 0) * k + 12, y: yy + 5, size, fill: COL.chalk, weight: 700 });
+    show(g, t0 + i * .6);
+    return g;
+  });
+}
+
+/* ---------- chapter 18 helpers (lesson 176) ---------- */
+// a tendon close-up: healthy (parallel collagen) or tendinosis (disorganised fibres, new vessels)
+function tendonPatch(p, x, y, w, h, sick, t0) {
+  const g = G(p, { o: 0 }); roundBox(g, x, y, w, h, EDGE, PANEL, 2);
+  for (let i = 0; i < 9; i++) {
+    const yy = y + 22 + i * (h - 44) / 8;
+    if (!sick) path(g, `M${x + 16} ${yy}H${x + w - 16}`, { stroke: ANAT.tendon, 'stroke-width': 3 });
+    else { let d = `M${x + 16} ${yy}`; for (let k = 1; k <= 6; k++) d += `L${f1(x + 16 + (w - 32) * k / 6)} ${f1(yy + ((i * 7 + k * 5) % 9 - 4) * 2.4)}`; path(g, d, { stroke: ANAT.tendon, 'stroke-width': 2.5, 'stroke-opacity': .8 }); }
+  }
+  if (sick) for (let k = 0; k < 3; k++) path(g, `M${x + 30 + k * 50} ${y + 20}q12 20 -4 40t4 40`, { stroke: COL.bad, 'stroke-width': 3, 'stroke-opacity': .85 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a fingertip that rubs across a point (cross-friction): returns the group; it oscillates along direction ang
+function rubTip(p, P, ang, t0, dur, amp = 16) {
+  const g = G(p, { o: 0 }); mk('ellipse', { rx: 15, ry: 20, fill: '#b9cfe0', 'fill-opacity': .9, stroke: '#4d6b80', 'stroke-width': 2 }, g);
+  const u = polar([0, 0], 1, ang);
+  prog(q => { const s0 = amp * Math.sin(2 * Math.PI * 4 * q); put(g, { x: P[0] + u[0] * s0, y: P[1] + u[1] * s0, r: ang + 90 }); }, t0, dur, lin);
+  show(g, t0);
+  return g;
+}
+
+/* ---------- chapter 18 helpers (lesson 177) ---------- */
+// keep an armSide's wrist on a fixed stage point while it re-poses (forearm on a mat or a table)
+function armHold(a, o, W0) { a.set(o); const W = a.at('W'), S0 = st(a.g); put(a.g, { x: S0.x + W0[0] - W[0], y: S0.y + W0[1] - W[1] }); a.set({}); }
+// a helper hand (pale ellipse) with a push arrow onto stage point P from direction ang
+function helpHand(p, P, ang, t0, col = COL.good) { const g = G(p, { o: 0 }), A = polar(P, 46, ang); mk('ellipse', { cx: A[0], cy: A[1], rx: 24, ry: 16, fill: '#b9cfe0', 'fill-opacity': .9, stroke: '#4d6b80', 'stroke-width': 2, transform: `rotate(${f1(ang)} ${f1(A[0])} ${f1(A[1])})` }, g); const B = polar(P, 28, ang), C2 = polar(P, 8, ang); arw(g, B[0], B[1], C2[0], C2[1], col, null, 5); if (t0 !== null) show(g, t0); return g; }
+
+/* ---------- chapter 18 helpers (lesson 178) ---------- */
+// a dumbbell held by an armSide: it follows the fist
+function armDb(p, a, k = .6, t0 = null) { const g = G(p, { o: 0 }); dumbbell(g, k); a.onSet.push(() => { const P = a.at('grip'); put(g, { x: P[0], y: P[1], r: (a.dir || 0) + 90 }); }); a.set({}); if (t0 !== null) show(g, t0); return g; }
+// resistance torque of gravity over the elbow angle (a scheme): two curves on a small chart
+function torqueChart(p, x, y, w, h, curves, t0) {
+  const g = G(p, { o: 0 });
+  path(g, `M${x} ${y}H${x + w}M${x} ${y}V${y - h}`, { stroke: COL.dim, 'stroke-width': 2.5 });
+  T(g, 'сопротивление', { x: x - 4, y: y - h - 10, size: 14, fill: COL.dim });
+  [[0, '0°'], [90, '90°'], [140, '140°']].forEach(([v, s0]) => T(g, s0, { x: x + w * v / 140, y: y + 22, size: 13, fill: COL.dim, anchor: 'middle' }));
+  T(g, 'сгибание локтя', { x: x + w, y: y + 44, size: 13, fill: COL.dim, anchor: 'end' });
+  curves.forEach(([fn, col, s0, lx, ly]) => { path(g, fnPath(x, y, w, h, v => fn(v * 140)), { stroke: col, 'stroke-width': 4 }); T(g, s0, { x: lx, y: ly, size: 14, fill: col, weight: 700 }); });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+/* ---------- chapter 19 lesson helpers ---------- */
+// sample points of a handSag model at a temporary pose (the model is restored)
+function hPose(h, pose, pts) { const save = { ...h.q }; h.set(pose); const out = pts.map(([k, x, y]) => h.fr(k, [x, y])); h.set(save); return out; }
+// a band polygon along a polyline: from the line (offset d0) outward to d1 on the side sg (+1 / −1 of the normal)
+function hShellD(P, d0, d1, sg = 1) {
+  const off = d => P.map((q, i) => { const a = P[Math.max(0, i - 1)], b = P[Math.min(P.length - 1, i + 1)], L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, nx = -(b[1] - a[1]) / L, ny = (b[0] - a[0]) / L; return [q[0] + sg * nx * d, q[1] + sg * ny * d]; });
+  const A = off(d0), B = off(d1).reverse();
+  return smoothD(A, false).replace(/^M/, 'M') + 'L' + smoothD(B, false).slice(1) + 'Z';
+}
+const ORTH = c => ({ fill: c, 'fill-opacity': .42, stroke: mix(c, '#000000', .35), 'stroke-width': 2, 'stroke-linejoin': 'round' });
+// Orthoses on a handSag model. kind:
+//  'dbo' — static dorsal blocking orthosis (forearm 2/3, hand, fingers) shaped at { wr, mp } flexion with IP straight;
+//  'kl' — the same plus Kleinert traction: an elastic from the nail under a palmar bar to the wrist (follows the finger);
+//  'volar' — a short volar wrist orthosis at wr (default −12, i.e. extension), to the distal palmar crease;
+//  'rest' — a volar resting orthosis to the fingertips at the given pose;
+//  'ten' — a tenodesis orthosis: forearm cuff, a hinge at the wrist, hand piece holding MP at 60° and the IP straight;
+//  'dyn' — a dynamic MP extension orthosis: dorsal base, an outrigger over the finger and an elastic to a sling under P1;
+//  'pip' / 'dip' — finger splints holding the PIP (or DIP, slight hyperextension) straight; 'tpl' — a volar template
+//  that limits PIP flexion to o.pip and DIP flexion to o.dip.
+function hOrth(h, kind, t0, o = {}) {
+  const g = G(h.ovG, { o: 0 }), col = o.col || ORTH_C;
+  const strap = (A, B) => path(g, `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`, { stroke: '#6b7f8c', 'stroke-width': 9, 'stroke-opacity': .85, 'stroke-linecap': 'butt' });
+  if (kind === 'dbo' || kind === 'kl') {
+    const pose = { wr: o.wr ?? 20, mp: o.mp ?? 50, pip: 0, dip: 0 };
+    const D = hPose(h, pose, [['r', -330, -58], ['r', -150, -56], ['r', -40, -52], ['l', 0, -40], ['h', 60, -33], ['h', 150, -28], ['h', 214, -27], ['1', 30, -20], ['1', 70, -18], ['2', 20, -16], ['2', 45, -15], ['3', 20, -14], ['3', 44, -10]]);
+    mk('path', { d: hShellD(D, 1, 12, -1), ...ORTH(col) }, g);
+    const V = hPose(h, pose, [['r', -200, 62], ['h', 120, 50], ['1', 40, 22]]);
+    const Dd = hPose(h, pose, [['r', -200, -60], ['h', 120, -32], ['1', 40, -22]]);
+    [0, 1, 2].forEach(i => strap(Dd[i], V[i]));
+    if (kind === 'kl') {
+      const bar = hPose(h, pose, [['h', 168, 52]])[0];
+      mk('circle', { cx: bar[0], cy: bar[1], r: 7, fill: '#8a9aa6', stroke: '#4d5a63', 'stroke-width': 2 }, g);
+      const band = path(g, '', { stroke: '#e86a8a', 'stroke-width': 4 });
+      const anchor = [-120, 64];
+      const upd = () => { const N = h.fr('3', [40, -6]); band.setAttribute('d', `M${f1(N[0])} ${f1(N[1])}L${f1(bar[0])} ${f1(bar[1] + 7)}L${f1(anchor[0])} ${f1(anchor[1])}`); };
+      h.onSet.push(upd); upd();
+    }
+  }
+  if (kind === 'volar' || kind === 'rest') {
+    const pose = kind === 'volar' ? { wr: o.wr ?? -12 } : { wr: o.wr ?? -10, mp: o.mp ?? 0, pip: o.pip ?? 0, dip: o.dip ?? 0 };
+    const pts = [['r', -300, 62], ['r', -120, 60], ['l', 0, 58], ['h', 60, 56], ['h', 150, 48], ['h', 206, 44]];
+    if (kind === 'rest') pts.push(['1', 30, 22], ['1', 70, 20], ['2', 30, 18], ['3', 30, 16]);
+    const V = hPose(h, { ...h.q, ...pose }, pts);
+    mk('path', { d: hShellD(V, 1, 12, 1), ...ORTH(col) }, g);
+    const Dd = hPose(h, { ...h.q, ...pose }, [['r', -220, -58], ['h', 100, -32]]), Vv = hPose(h, { ...h.q, ...pose }, [['r', -220, 64], ['h', 100, 54]]);
+    [0, 1].forEach(i => strap(Dd[i], Vv[i]));
+  }
+  if (kind === 'ten') {
+    const cuff = hPose(h, h.q, [['r', -300, -60], ['r', -160, -58], ['r', -30, -54]]);
+    mk('path', { d: hShellD(cuff, 1, 12, -1), ...ORTH(col) }, g);
+    const hg = G(h.G.h, { o: 1 }), hand = [[40, -34], [120, -29], [200, -27]].concat([[30, -20], [70, -18], [L1H + 30, -16]].map(([a, b]) => { const v = rotPt(a, b, 60); return [212 + v[0], v[1]]; }));
+    mk('path', { d: hShellD(hand, 1, 11, -1), ...ORTH(col) }, hg);
+    mk('circle', { cx: 0, cy: -48, r: 9, fill: '#8a9aa6', stroke: '#4d5a63', 'stroke-width': 2.5 }, hg);
+    g.hand = hg;
+  }
+  if (kind === 'dyn') {
+    const base = hPose(h, { ...h.q, wr: o.wr ?? -12 }, [['r', -300, -58], ['r', -120, -56], ['l', 0, -40], ['h', 80, -32], ['h', 170, -28]]);
+    mk('path', { d: hShellD(base, 1, 12, -1), ...ORTH(col) }, g);
+    const hg = G(h.G.h, {});
+    path(hg, 'M140 -40L150 -105L268 -105', { stroke: '#8a9aa6', 'stroke-width': 6 });
+    const band = path(g, '', { stroke: '#e86a8a', 'stroke-width': 3.5 }), sling = path(g, '', { stroke: '#6b7f8c', 'stroke-width': 5 });
+    const upd = () => { const T = h.fr('h', [262, -105]), S = h.fr('1', [44, 20]), S0 = h.fr('1', [34, 18]), S1 = h.fr('1', [54, 18]); band.setAttribute('d', `M${f1(T[0])} ${f1(T[1])}L${f1(S[0])} ${f1(S[1])}`); sling.setAttribute('d', `M${f1(S0[0])} ${f1(S0[1])}Q${f1(S[0])} ${f1(S[1] + 8)} ${f1(S1[0])} ${f1(S1[1])}`); };
+    h.onSet.push(upd); upd();
+    g.hand = hg;
+  }
+  if (kind === 'pip' || kind === 'dip' || kind === 'tpl') {
+    const fr = kind === 'dip' ? '2' : '1', fg = G(h.G[fr], {});
+    let P;
+    if (kind === 'pip') P = [[10, 22], [50, 22], [L1H, 21], [L1H + 30, 19], [L1H + 50, 18]];
+    else if (kind === 'dip') P = [[14, 19], [40, 18], [52 + 6, 17], ...[[12, 16], [34, 14]].map(([a, b]) => { const v = rotPt(a, b, -5); return [52 + v[0], v[1]]; })];
+    else { const a = o.pip ?? 30, b = o.dip ?? 22; P = [[10, 23], [50, 22], [L1H - 2, 21]]; [[16, 18], [40, 17]].forEach(([u, w]) => { const v = rotPt(u, w, a); P.push([L1H + v[0], v[1]]); }); const D = rotPt(52, 0, a); [[10, 15], [30, 14]].forEach(([u, w]) => { const v = rotPt(u, w, a + b); P.push([L1H + D[0] + v[0], D[1] + v[1]]); }); }
+    mk('path', { d: hShellD(P, 0, 9, 1), ...ORTH(col) }, fg);
+    g.hand = fg;
+  }
+  if (t0 !== null) { show(g, t0); if (g.hand) { put(g.hand, { o: 0 }); show(g.hand, t0); } }
+  else if (g.hand) put(g.hand, { o: 1 });
+  return g;
+}
+const L1H = 88, MPX19 = 212, L3H = 36;
+// The carpal tunnel in cross-section (palm side up): the carpal arch, the transverse carpal ligament, nine flexor
+// tendons and the median nerve inside; the canal of Guyon (ulnar nerve and artery) on the ulnar side. Radial to the left.
+function tunnelX(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), t = { g };
+  [[[-150, 30], [-120, -10], [-80, 10], [-90, 50], [-140, 60]], [[-80, 20], [-40, 30], [-30, 70], [-70, 80], [-95, 55]], [[-30, 40], [30, 40], [40, 85], [-25, 90]], [[38, 30], [90, 10], [120, -20], [135, -10], [110, 40], [100, 70], [48, 80]], [[130, 50], [160, 30], [175, 60], [150, 80]]]
+    .forEach(P => boneSh(g, defs, P, { ax: [0, 0, 0, 1] }));
+  t.tcl = path(g, 'M-140 -14C-90 -60 60 -62 128 -26', { stroke: CAPS_C, 'stroke-width': 16, 'stroke-opacity': .85 });
+  const tend = (cx, cy, r, col) => mk('circle', { cx, cy, r, fill: col, stroke: mix(col, '#000000', .35), 'stroke-width': 1.5 }, g);
+  t.syn = mk('ellipse', { cx: -2, cy: 6, rx: 112, ry: 34, fill: '#f4a48c', 'fill-opacity': 0, stroke: 'none' }, g);
+  t.fds = [[-46, -14], [-16, -22], [16, -22], [46, -14]].map(([a, b]) => tend(a, b, 11, ANAT.tendon));
+  t.fdp = [[-42, 14], [-14, 18], [14, 18], [42, 14]].map(([a, b]) => tend(a, b, 11, mix(ANAT.tendon, '#d9b860', .3)));
+  t.fpl = tend(-84, 12, 11, mix(ANAT.tendon, '#d9b860', .15));
+  t.med = mk('ellipse', { cx: -70, cy: -24, rx: 15, ry: 10, fill: NERVE_C, stroke: mix(NERVE_C, '#000000', .4), 'stroke-width': 1.5 }, g);
+  mk('path', { d: 'M100 -40C112 -60 150 -62 162 -40', fill: 'none', stroke: CAPS_C, 'stroke-width': 7, 'stroke-opacity': .7 }, g);
+  t.uln = mk('circle', { cx: 120, cy: -46, r: 9, fill: NERVE_C, stroke: mix(NERVE_C, '#000000', .4), 'stroke-width': 1.5 }, g);
+  t.art = mk('circle', { cx: 142, cy: -48, r: 7, fill: VESS_C, stroke: mix(VESS_C, '#000000', .4), 'stroke-width': 1.5 }, g);
+  if (t0 !== null) show(g, t0);
+  return t;
+}
+// a shaded cylinder seen end-on (a handle, a bar) or a ball
+function cylEl(p, r, col = '#9fb0bf') { const g = G(p, {}), defs = mk('defs', {}, g); mk('circle', { r, fill: ballGrad(defs, col), stroke: mix(col, '#000000', .45), 'stroke-width': 2 }, g); return g; }
+// a group clipped to a rounded rectangle (for a close-up of a big model)
+function clipG(p, x, y, w, h) { const id = 'cl' + (++SHADE_ID), d = mk('defs', {}, p), cp = mk('clipPath', { id }, d); mk('rect', { x, y, width: w, height: h, rx: 18 }, cp); return mk('g', { 'clip-path': `url(#${id})` }, p); }
+// A table: cols — column widths; head — header strings; rows — arrays of cell strings. Rows appear at t0s[i]
+// (or t0 + i * gap). Returns the group; g.rows — the row groups.
+function tbl(p, x, y, cols, head, rows, t0s, { size = 15, gap = .5, col = SH, pad = 10, minH = 36 } = {}) {
+  const g = G(p, { o: 0 }), rg = [];
+  let yy = y;
+  const row = (cells, isHead) => {
+    const r = G(g, { o: isHead ? 1 : 0 }), hs = [];
+    let xx = x;
+    cells.forEach((c, i) => { const t = put(para(r, c || '—', xx + pad, yy + size + pad - 2, null, { size: isHead ? size - 1 : size, weight: isHead || i === 0 ? 700 : 500, fill: isHead ? col : i === 0 ? COL.chalk : i === 1 ? COL.chalk : COL.dim, maxW: cols[i] - pad * 2 }), { o: 1 }); hs.push(t._h || size * 1.3); xx += cols[i]; });
+    const hgt = Math.max(minH, Math.max(...hs) + pad * 1.4);
+    const bg = mk('rect', { x, y: yy, width: cols.reduce((a, b) => a + b, 0), height: hgt, fill: isHead ? mix(col, COL.board, .82) : (rg.length % 2 ? PANEL : mix(PANEL, '#ffffff', .03)), stroke: EDGE, 'stroke-width': 1 }, r);
+    r.insertBefore(bg, r.firstChild);
+    yy += hgt;
+    return r;
+  };
+  row(head, true);
+  rows.forEach((c, i) => { const r = row(c, false); rg.push(r); show(r, Array.isArray(t0s) ? t0s[i] : t0s + i * gap, .4); });
+  g.rows = rg; g.h = yy - y;
+  show(g, Array.isArray(t0s) ? t0s[0] - .3 : t0s - .3);
+  return g;
+}
+// horizontal bars with the label above each bar: rows [label, value, colour]; t0s — a time or one per row
+function hbars(p, x, y, rows, t0s, { k = 3, dy = 50, unit = '', size = 15, h = 18 } = {}) {
+  return rows.map(([s, v, c], i) => {
+    const yy = y + i * dy, g = G(p, { o: 0 }), t = Array.isArray(t0s) ? t0s[i] : t0s + i * .5; show(g, t);
+    T(g, s, { x, y: yy - 6, size, fill: c, weight: 700 });
+    const b = mk('rect', { x, y: yy, width: 0, height: h, rx: 6, fill: c }, g);
+    const tv = T(g, '', { x: x + 8, y: yy + h - 3, size, fill: COL.chalk, weight: 700 });
+    prog(q => { b.setAttribute('width', f1(k * v * q)); put(tv, { x: x + 8 + k * v * q }); tv.textContent = (v * q).toFixed(v % 1 ? 1 : 0).replace('.', ',') + unit; }, t, 1);
+    return g;
+  });
+}
+/* ---------- beats ---------- */
+// excursion meters for a handSag: how far the FDP and FDS tendons have slid from the straight hand, and their difference
+function excBars(p, h, x, y, t0) {
+  const g = G(p, { o: 0 }), rows = [['глубокий сгибатель', COL.bad], ['поверхностный', FUN], ['разница', SH]], k = 1.6;
+  const bs = rows.map(([s0, c], i) => { const yy = y + i * 54; T(g, s0, { x, y: yy - 6, size: 15, fill: c, weight: 700 }); mk('rect', { x, y: yy, width: 240, height: 16, rx: 6, fill: COL.faint, 'fill-opacity': .4 }, g); return mk('rect', { x, y: yy, width: 0, height: 16, rx: 6, fill: c }, g); });
+  T(g, 'скольжение от прямой кисти', { x, y: y - 36, size: 14, fill: COL.dim });
+  const upd = () => { const a = Math.max(0, h.exc.fdp || 0), b = Math.max(0, h.exc.fds || 0); [a, b, Math.max(0, a - b)].forEach((v, i) => bs[i].setAttribute('width', f1(Math.min(240, v * k)))); };
+  h.onSet.push(upd); upd();
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const tableTopEl = (p, x1, x2, y, t0) => { const g = G(p, { o: 0 }); mk('rect', { x: x1, y, width: x2 - x1, height: 16, rx: 4, fill: '#8a6d4a', 'fill-opacity': .55, stroke: '#6b5638', 'stroke-width': 2 }, g); if (t0 !== null) show(g, t0); return g; };
+const BEATS = [
+  ['intro', 'Скольжение и растяжка', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 19 · Урок 188', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Скольжение сухожилий и растяжка', { x: 800, y: 215, size: 52, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'удержание · пять положений · блокирующие · отставание · спайки · растяжка', 800, 300, m('sub'), { size: 27, fill: SH, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const h = handSag(art, 560, 600, .85, null, { thumb: false }); put(h.g, { o: 1 });
+    const seq = [[0, 0, 0], [0, 90, 70], [85, 100, 70], [85, 0, 0], [85, 100, 0], [0, 0, 0]];
+    prog(q => { const i = Math.min(4, Math.floor(q * 5)), k = q * 5 - i, A = seq[i], B = seq[i + 1]; h.set({ mp: lerp(A[0], B[0], k), pip: lerp(A[1], B[1], k), dip: lerp(A[2], B[2], k) }); }, .8, Math.max(3, D - 2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['ph', '«Поставить и удержать»', (m, D) => {
+    const p = panel(0);
+    txt(p, '«поставить и удержать»', 400, 56, m('why'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const h = handSag(p, 150, 380, 1.15, m('why'), { thumb: false });
+    h.set({ wr: 20, mp: 50, pip: 0, dip: 0 });
+    const o1 = hOrth(h, 'dbo', m('flex'), { wr: 20, mp: 50 });
+    const hh = helpHand(p, (() => { h.set({ pip: 50, dip: 30 }); const P = h.at('p2'); h.set({ pip: 0, dip: 0 }); return P; })(), 60, m('flex', 3), COL.task);
+    prog(q => h.set({ pip: 50 * q, dip: 30 * q }), m('flex', 3), 1.2);
+    hide(hh, m('flex', 6), .3);
+    prog(q => h.act({ fdp: .25 * cyc(q, 1), fds: .25 * cyc(q, 1) }), m('flex', 6), 5);
+    pill(p, 'держать 5 секунд, минимальное усилие', 400, 600, m('flex', 6), { col: MU, size: 16 });
+    hide(o1, m('ten'), .3);
+    prog(q => h.set({ wr: lerp(20, 10, q), mp: 60, pip: 50, dip: 30 }), m('ten'), .5);
+    const o2 = hOrth(h, 'ten', m('ten', .3));
+    prog(q => { const k = cyc(q, 1); h.set({ wr: lerp(10, -30, k), pip: lerp(0, 50, k), dip: lerp(0, 30, k) }); h.act({ fdp: .25 * k, fds: .25 * k }); }, m('ten', 2), 5);
+    hide(o2, m('ext'), .3); hide(o2.hand, m('ext'), .3);
+    prog(q => h.set({ wr: lerp(10, -10, q), mp: lerp(60, 0, q), pip: 0, dip: 0 }), m('ext'), .6);
+    prog(q => { h.set({ mp: -15 * q }); h.act({ ed: .4 * q }); }, m('ext', 3), 1.5);
+    pill(p, 'после разгибателей: нейтрально, затем лёгкое разгибание, 5–10 с', 400, 650, m('ext', 2), { col: ANAT.tendon, size: 15 });
+    pill(p, 'учиться на здоровой руке или с обратной связью', 400, 700, m('learn', .3), { col: SH, size: 15 });
+    infoCard(p, 800, 90, 760, 175, 'что это', 'мягкая статическая работа мышцы рано после шва: минимальная нагрузка и пассивное движение сустава', SH, m('def'), { size: 19 });
+    infoCard(p, 800, 280, 760, 175, 'после сгибателей', 'в тыльном или тенодезном ортезе: ПФ согнуты, МФ ставят в частичное сгибание — 5 секунд минимальным усилием', MU, m('flex'), { size: 18 });
+    infoCard(p, 800, 470, 760, 120, 'в тенодезном', 'вместе с активным разгибанием запястья; расслабиться — пальцы разогнутся', ORTH_C, m('ten'), { size: 18 });
+    infoCard(p, 800, 605, 760, 150, 'после разгибателей', 'сустав в зоне шва — в нейтральное, потом в лёгкое разгибание, 5–10 секунд: против отставания', ANAT.tendon, m('ext'), { size: 18 });
+  }],
+
+  ['glide', 'Пять положений', (m, D) => {
+    const p = panel(0);
+    txt(p, 'скольжение сгибателей', 400, 56, m('five'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const h = handSag(p, -160, 340, 1.75, m('five'), { thumb: false });
+    h.set({ wr: 0, mp: 0, pip: 0, dip: 0 });
+    excBars(p, h, 470, 610, m('five', 2));
+    const P = [['straight', [0, 0, 0], 'прямая кисть', COL.chalk], ['hook', [0, 90, 70], 'кулак-крючок', SH], ['full', [85, 100, 70], 'полный кулак', COL.bad], ['table', [85, 0, 0], 'положение стола', MU], ['sfist', [85, 100, 0], 'прямой кулак', FUN]];
+    let cur = [0, 0, 0];
+    const pls = [];
+    P.forEach(([k, a0, s0, c]) => {
+      const t = m(k), A = cur.slice();
+      prog(q => h.set({ mp: lerp(A[0], a0[0], q), pip: lerp(A[1], a0[1], q), dip: lerp(A[2], a0[2], q) }), t + .2, 1.2);
+      pls.forEach(e => hide(e, t, .3)); pls.push(pill(p, s0, 400, 120, t + .3, { col: c, size: 18 }));
+      cur = a0;
+    });
+    const n1 = pill(p, 'глубокий скользит по поверхностному', 400, 170, m('hook', 3), { col: SH, size: 15 }); hide(n1, m('full'), .3);
+    const n2 = pill(p, 'глубокий — максимально', 400, 170, m('full', 1), { col: COL.bad, size: 15 }); hide(n2, m('table'), .3);
+    const n3 = pill(p, 'поверхностный — максимально', 400, 170, m('sfist', 2), { col: FUN, size: 15 }); hide(n3, m('thumb'), .3);
+    prog(q => h.set({ mp: lerp(85, 0, q), pip: lerp(100, 0, q), dip: 0 }), m('thumb'), 1);
+    pls.forEach(e => hide(e, m('thumb'), .3));
+    pill(p, 'большой палец: длинный сгибатель', 400, 120, m('thumb', .3), { col: COL.task, size: 18 });
+    prog(q => { const k = cyc(q, 1); h.set({ wr: -40 * k, mp: 0, pip: 0, dip: 0 }); }, m('prog', 2), 3);
+    prog(q => { const k = cyc(q, 1); h.set({ wr: 40 * k, mp: 85 * k, pip: 100 * k, dip: 70 * k }); }, m('prog', 6), 4);
+    infoCard(p, 800, 90, 760, 120, 'зачем', 'свободное движение глубокого и поверхностного сухожилий друг по другу и по костям', SH, m('five'), { size: 18 });
+    infoCard(p, 800, 225, 760, 150, 'крючок и полный кулак', 'крючок — глубокий по поверхностному и по кости; полный кулак — глубокий по влагалищу и кости', COL.bad, m('hook'), { size: 18 });
+    infoCard(p, 800, 390, 760, 150, 'стол и прямой кулак', 'из положения стола сгибают ПМФ при прямом ДМФ — максимум для поверхностного', FUN, m('table'), { size: 18 });
+    infoCard(p, 800, 555, 760, 120, 'большой палец', 'полное сгибание ПФ и МФ — скольжение длинного сгибателя', COL.task, m('thumb'), { size: 18 });
+    infoCard(p, 800, 690, 760, 175, 'прогрессия', 'сначала запястье нейтрально; потом в сгибании и разгибании; полная экскурсия — из полного разгибания запястья и пальцев в полное сгибание', COL.good, m('prog'), { size: 18 });
+  }],
+
+  ['block', 'Блокирующие упражнения', (m, D) => {
+    const p = panel(0);
+    txt(p, 'блокирующие упражнения', 400, 56, m('what'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    pill(p, 'не применять рано после шва сгибателей', 400, 120, m('what', 8), { col: COL.bad, size: 16 });
+    const h = handSag(p, -160, 520, 1.75, m('pos'), { thumb: false, flip: true });
+    h.set({ wr: 0, mp: 0, pip: 0, dip: 0 });
+    tableTopEl(p, 40, 760, 585, m('pos'));
+    txt(p, 'предплечье супинировано, тыл кисти на столе', 400, 620, m('pos', .5), { size: 15, fill: COL.dim, anchor: 'middle' });
+    prog(q => { h.set({ mp: 60 * cyc(q, 1) }); h.act({ lum: cyc(q, 1), io: cyc(q, 1) }); }, m('mp', 1), 4);
+    const b1 = helpHand(p, h.at('p1'), -90, m('pip', .5), COL.task);
+    prog(q => { h.set({ mp: 0, pip: 80 * cyc(q, 1), dip: 0 }); h.act({ fds: cyc(q, 1), lum: 0, io: 0 }); }, m('pip', 1.5), 4);
+    hide(b1, m('dip'), .3);
+    const b2 = helpHand(p, h.at('p2'), -90, m('dip', .5), COL.task);
+    prog(q => { h.set({ pip: 0, dip: 60 * cyc(q, 1) }); h.act({ fdp: cyc(q, 1), fds: 0 }); }, m('dip', 1.5), 4);
+    hide(b2, m('fist'), .3);
+    prog(q => { h.set({ mp: 85 * cyc(q, 1), pip: 100 * cyc(q, 1), dip: 70 * cyc(q, 1) }); h.act({ fdp: cyc(q, 1), fds: cyc(q, 1) }); }, m('fist', .5), 3);
+    infoCard(p, 800, 90, 760, 150, 'что дают', 'скольжение и управление отдельным суставом — следующий шаг после скольжения', SH, m('what'), { size: 18 });
+    infoCard(p, 800, 255, 760, 120, 'положение', 'сидя, тыл кисти на столе; другая рука «блокирует»; по одному пальцу', COL.dim, m('pos'), { size: 18 });
+    infoCard(p, 800, 390, 760, 120, 'только ПФ', 'червеобразные и ладонные межкостные', MU, m('mp'), { size: 18 });
+    infoCard(p, 800, 525, 760, 120, 'только ПМФ', 'поверхностный сгибатель: держим основную фалангу', FUN, m('pip'), { size: 18 });
+    infoCard(p, 800, 660, 760, 150, 'только ДМФ', 'глубокий сгибатель: держим среднюю фалангу; затем — полный кулак и сопротивление', COL.bad, m('dip'), { size: 18 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-pos', prompt: ['Какое положение?'],
+    build: grid([
+      { parts: ['ПФ разогнуты, МФ согнуты'], ans: ['h'], why: 'Кулак-крючок.' },
+      { parts: ['Все суставы согнуты одновременно'], ans: ['f'], why: 'Полный кулак.' },
+      { parts: ['ПФ согнуты, МФ разогнуты'], ans: ['t'], why: 'Положение стола.' },
+      { parts: ['ПФ и ПМФ согнуты, ДМФ разогнут'], ans: ['s'], why: 'Прямой кулак.' },
+      { parts: ['Максимальное скольжение поверхностного сгибателя'], ans: ['s'], why: 'Прямой кулак.' },
+    ], [['h', 'Крючок', SH], ['f', 'Полный кулак', COL.bad], ['t', 'Стол', MU], ['s', 'Прямой кулак', FUN]], { multi: false, text: true }),
+  }], done) }],
+
+  ['lag', 'Отставание разгибания', (m, D) => {
+    const p = panel(0);
+    txt(p, 'отставание разгибания', 400, 56, m('what'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const h = handSag(p, -160, 340, 1.75, m('what'), { thumb: false });
+    h.set({ wr: 0, mp: 85, pip: 100, dip: 70 });
+    pill(p, 'пассивно разгибается полностью, активно — нет', 400, 120, m('def', .5), { col: COL.bad, size: 15 });
+    prog(q => { h.set({ mp: lerp(85, -5, q), pip: 90, dip: 70 }); h.act({ ed: q }); }, m('mp', 1), 2);
+    const pen = G(p, { o: 0 }); { h.set({ mp: -5, pip: 90, dip: 70 }); const P = h.at(h.fr('2', [30, 26])); h.set({ mp: 85, pip: 100, dip: 70 }); mk('rect', { x: f1(P[0] - 120), y: f1(P[1] - 6), width: 240, height: 12, rx: 6, fill: '#e3c35a', stroke: '#7a6420', 'stroke-width': 2, transform: `rotate(70 ${f1(P[0])} ${f1(P[1])})` }, pen); }
+    show(pen, m('mp', 3)); hide(pen, m('ip'), .3);
+    pill(p, 'из кулака в крючок; карандаш помогает держать МФ', 400, 170, m('mp', 2), { col: SH, size: 15 });
+    prog(q => h.set({ mp: lerp(-5, 85, q), pip: lerp(90, 100, q), dip: 70 }), m('ip') - .8, .7);
+    prog(q => { h.set({ mp: 85, pip: lerp(100, 0, q), dip: lerp(70, 0, q) }); h.act({ ed: 0, lum: q, io: q }); }, m('ip', 1), 2);
+    pill(p, 'ПФ удерживать согнутым — работают червеобразные', 400, 220, m('ip', 1.5), { col: MU, size: 15 });
+    prog(q => { h.set({ mp: lerp(85, 0, q), pip: 0, dip: 0 }); h.act({ lum: 0, io: 0 }); }, m('term') - .8, .7);
+    const tb = tableTopEl(p, 40, 760, 380, m('term', .5));
+    prog(q => { h.set({ mp: 0, pip: -10 * cyc(q, 2), dip: -10 * cyc(q, 2) }); h.act({ ed: cyc(q, 2) }); }, m('term', 2), 5);
+    pill(p, 'кисть на столе — приподнять фалангу в переразгибание', 400, 270, m('term', 1), { col: ANAT.tendon, size: 15 });
+    hide(h.g, m('eg'), .4); hide(tb, m('eg'), .4);
+    const a = handFront(p, 300, 900, 1.5, m('eg', .3));
+    a.set({ f: [0, 0, 0], spread: 10 });
+    prog(q => a.set({ f: { 2: [0, 0, 0], 3: [80 * cyc(q, 1), 90 * cyc(q, 1), 60 * cyc(q, 1)], 4: [0, 0, 0], 5: [0, 0, 0] }, spread: 10 }), m('eg', 1), 3);
+    prog(q => a.set({ f: { 2: [0, 0, 0], 3: [80 * q, 90 * q, 60 * q], 4: [80 * q, 90 * q, 60 * q], 5: [0, 0, 0] }, spread: 10 }), m('eg', 12), 1.5);
+    pill(p, '«рога»: указательный и мизинец прямые', 400, 320, m('eg', 13), { col: COL.good, size: 15 });
+    infoCard(p, 800, 90, 760, 150, 'внешние разгибатели', 'поверхностны, легко повреждаются; главное — разгибание ПФ; спайки мешают и разгибанию, и сгибанию', ANAT.tendon, m('what'), { size: 18 });
+    infoCard(p, 800, 255, 760, 120, 'отставание', 'пассивно разгибается полностью, активно — нет; чаще от спаек, чем от слабости', COL.bad, m('def'), { size: 18 });
+    infoCard(p, 800, 390, 760, 150, 'по суставам', 'ПФ — из кулака в крючок; МФ — из кулака в положение стола; затем ладонь на краю стола', SH, m('mp'), { size: 18 });
+    infoCard(p, 800, 555, 760, 120, 'конечное разгибание', 'ладонь на столе, фалангу — в переразгибание; карандаш под фалангу', ANAT.tendon, m('term'), { size: 18 });
+    infoCard(p, 800, 690, 760, 175, 'скольжение разгибателей', 'один палец сгибают, остальные держат прямо; потом по очереди; «рога» — средний и безымянный согнуты: разгибатели указательного и мизинца', COL.good, m('eg'), { size: 18 });
+  }],
+
+  ['scar', 'Спайки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'мобилизация спаек', 400, 56, m('adh'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const h = handSag(p, -160, 340, 1.75, m('adh'), { thumb: false });
+    h.set({ wr: 0, mp: 20, pip: 25, dip: 10 });
+    const sc = G(h.G['1'], { o: 0 }); mk('path', { d: 'M26 18C34 9 50 10 58 18C50 27 34 27 26 18Z', fill: '#c98a8a', 'fill-opacity': .9, stroke: COL.bad, 'stroke-width': 2 }, sc);
+    show(sc, m('adh', 2));
+    lab(p, 'спайка у сухожилия', 470, 620, ...h.at(h.fr('1', [42, 18])), COL.bad, m('adh', 2.5), { size: 15 });
+    prog(q => h.act({ fdp: cyc(q, 1), fds: cyc(q, 1) }), m('adh', 4), 3);
+    pill(p, 'мышца сокращается — дистальные суставы не двигаются', 400, 120, m('adh', 4), { col: COL.bad, size: 15 });
+    prog(q => h.set({ pip: lerp(25, 80, cyc(q, 1)), dip: lerp(10, 60, cyc(q, 1)) }), m('fl', 1), 3);
+    pill(p, 'пассивно сгибается, полностью не разгибается', 400, 170, m('fl', 2), { col: SH, size: 15 });
+    prog(q => h.set({ mp: lerp(20, 0, q), pip: lerp(25, 5, q), dip: lerp(10, 0, q) }), m('f1', .5), 1.5);
+    const rt = rubTip(p, h.at(h.fr('1', [42, 26])), 0, m('f2', .5), Math.max(3, m('ex') - m('f2') - 1));
+    hide(rt, m('ex'), .3);
+    pill(p, 'массаж трением при удлинённом сухожилии', 400, 220, m('f2', 1), { col: COL.good, size: 15 });
+    hide(sc, m('ex'), .3);
+    const sc2 = G(h.G['h'], { o: 0 }); mk('path', { d: 'M150 -20C160 -30 176 -30 184 -20C176 -10 160 -10 150 -20Z', fill: '#c98a8a', 'fill-opacity': .9, stroke: COL.bad, 'stroke-width': 2 }, sc2);
+    show(sc2, m('ex', .5));
+    prog(q => h.set({ mp: 60 * cyc(q, 1) }), m('ex', 2), 3);
+    pill(p, 'отставание растёт → растягивается сухожилие, а не спайка', 400, 270, m('prec', 1), { col: COL.bad, size: 15 });
+    infoCard(p, 800, 90, 760, 150, 'спайка', 'после воспаления и иммобилизации: сокращение не двигает суставы дистальнее рубца', COL.bad, m('adh'), { size: 18 });
+    infoCard(p, 800, 255, 760, 150, 'сгибатели', 'пассивное сгибание возможно, полное разгибание — нет: сухожилие не идёт дистально', SH, m('fl'), { size: 18 });
+    infoCard(p, 800, 420, 760, 175, 'прогрессия', 'разогнуть и подержать → активно согнуть; массаж трением поперёк и вдоль при удлинённом сухожилии, с сокращением; снова скольжение', COL.good, m('f1'), { size: 18 });
+    infoCard(p, 800, 610, 760, 120, 'разгибатели', 'пассивно согнуть сустав дистальнее спайки, затем активно разогнуть', ANAT.tendon, m('ex'), { size: 18 });
+    infoCard(p, 800, 745, 760, 120, 'осторожно', 'если отставание растёт — прекратить пассивное сгибание, делать массаж', COL.bad, m('prec'), { size: 18 });
+  }],
+
+  ['stretch', 'Растяжка', (m, D) => {
+    const p = panel(0);
+    txt(p, 'общие приёмы растяжки', 400, 56, m('pre'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    pill(p, 'сначала — нормальное скольжение сустава', 400, 120, m('pre', 5), { col: COL.good, size: 15 });
+    pill(p, 'запястье — пальцы свободны; суставы пальцев — без натяжения сухожилий', 400, 165, m('pre', 10), { col: SH, size: 14 });
+    const h = handSag(p, 230, 520, 1.15, m('we'), { thumb: false, wmus: true });
+    h.set({ wr: 0, mp: 0, pip: 0, dip: 0 });
+    tableTopEl(p, 40, 485, 578, m('we'));
+    const hh = helpHand(p, h.at('dorsum'), -90, m('we', 1), COL.task);
+    prog(q => { const k = cyc(q, 1); put(h.g, { r: 40 * k }); h.set({ wr: -40 * k, mp: 60 * k, pip: 70 * k, dip: 40 * k }); }, m('we', 2), 5);
+    pill(p, 'ладонь на столе, пальцы за краем — предплечье вверх', 400, 690, m('we', 2), { col: COL.task, size: 15 });
+    hide(hh, m('wf'), .3);
+    pill(p, 'сгибание: тыл кисти на столе или запястье у края', 400, 740, m('wf', 1), { col: SH, size: 15 });
+    prog(q => { const k = cyc(q, 1); put(h.g, { r: 0 }); h.set({ wr: 50 * k, mp: 0, pip: 0, dip: 0 }); }, m('wf', 3), 4);
+    pill(p, 'разгибание пальца — супинация, сгибание — пронация', 400, 790, m('fj', 1), { col: FUN, size: 15 });
+    infoCard(p, 800, 90, 760, 175, 'перед растяжкой', 'знать многосуставные мышцы и аппарат; вернуть скольжение сустава; сидя, предплечье на столе; затем — самостоятельно', SH, m('pre'), { size: 18 });
+    infoCard(p, 800, 280, 760, 175, 'разгибание запястья', 'ладонь на столе, пальцы свисают, другая рука держит тыл, предплечье поднимается; или ладони под прямым углом', COL.task, m('we'), { size: 18 });
+    infoCard(p, 800, 470, 760, 175, 'сгибание запястья', 'тыл на столе и предплечье вверх; или запястье у края и нажим на тыл; или тыльные стороны кистей вместе', SH, m('wf'), { size: 18 });
+    infoCard(p, 800, 660, 760, 150, 'отдельные суставы', 'фаланга у края стола, проксимальную кость прижать, силу — на дистальную', FUN, m('fj'), { size: 18 });
+  }],
+
+  ['intr', 'Внутренние и многосуставные', (m, D) => {
+    const p = panel(0);
+    txt(p, 'внутренние и многосуставные мышцы', 400, 56, m('lum'), { size: 25, weight: 700, anchor: 'middle', fill: SH });
+    const h = handSag(p, -100, 320, 1.55, m('lum'), { thumb: false });
+    h.set({ wr: 0, mp: -10, pip: 90, dip: 70 });
+    const hh = helpHand(p, h.at('p2'), 0, m('lum', 1), COL.task);
+    hide(hh, m('int'), .3);
+    pill(p, 'червеобразные: ПФ разогнуть, МФ согнуть, дожать', 400, 120, m('lum', 1), { col: MU, size: 15 });
+    hide(h.g, m('add'), .4);
+    const a = handFront(p, 300, 900, 1.5, m('add', .3), { view: 'palm' });
+    a.set({ f: [5, 5, 5], pabd: .9, rabd: 15 });
+    const ok = G(p, { o: 0 }); { const P = a.at('MP1'), Q = a.at('MP2'); arw(ok, P[0] + 50, P[1] - 30, P[0] + 10, P[1] - 6, COL.good, null, 6); arw(ok, Q[0] - 50, Q[1] - 30, Q[0] - 10, Q[1] - 8, COL.good, null, 6); }
+    show(ok, m('add', 2));
+    const bad = G(p, { o: 0 }); { const P = a.at('IP1'); mk('path', { d: `M${f1(P[0] - 18)} ${f1(P[1] - 18)}l36 36m0 -36l-36 36`, fill: 'none', stroke: COL.bad, 'stroke-width': 6 }, bad); } show(bad, m('add', 10));
+    pill(p, 'приводящая: сила — на головки пястных', 400, 165, m('add', 2), { col: COL.good, size: 15 });
+    pill(p, 'не на фаланги — нестабильность ПФ большого', 400, 210, m('add', 10), { col: COL.bad, size: 15 });
+    hide(a.g, m('ext'), .4); [ok, bad].forEach(e => hide(e, m('ext'), .3));
+    const s = handSag(p, 120, 560, 1.15, m('ext', .3), { thumb: false, wmus: true });
+    s.set({ wr: 0, mp: 40, pip: 60, dip: 40 });
+    tableTopEl(p, 40, 760, 618, m('ff'));
+    const st = [[20, { dip: 0 }], [24, { pip: 0 }], [28, { mp: 0 }]];
+    st.forEach(([dt, o]) => prog(q => { const A = { ...s.q }; const B = { ...A, ...o }; s.set({ mp: lerp(A.mp, B.mp, q), pip: lerp(A.pip, B.pip, q), dip: lerp(A.dip, B.dip, q) }); }, m('ext', dt - 14), 1));
+    pill(p, 'от дистального сустава к проксимальному', 400, 260, m('ext', 4), { col: SH, size: 15 });
+    pill(p, 'не переразгибать ПМФ и ПФ на запястье', 400, 305, m('ext', 15), { col: COL.bad, size: 15 });
+    prog(q => { put(s.g, { r: 45 * q }); s.set({ wr: -45 * q }); }, m('ff', 6), 3);
+    lab(p, 'сгибатели растянуты', 470, 840, ...s.at('fdpM'), ANAT.stretch, m('ff', 9), { size: 15 });
+    prog(q => { put(s.g, { r: 0 }); s.set({ wr: 60 * q, mp: 85 * q, pip: 100 * q, dip: 70 * q }); }, m('ed'), 2);
+    lab(p, 'разгибатель растянут', 470, 790, ...s.at('edM'), ANAT.stretch, m('ed', 2.5), { size: 15 });
+    infoCard(p, 800, 90, 760, 150, 'червеобразные и межкостные', 'ПФ разогнуть, МФ согнуть, дожать; межкостные — ладонь на столе, отвести или привести, давить на конец основной фаланги', MU, m('lum'), { size: 18 });
+    infoCard(p, 800, 255, 760, 175, 'приводящая большого', 'кисть на столе локтевым краем, ладонное отведение; скрещёнными пальцами давить на головки пястных I и II', COL.good, m('add'), { size: 18 });
+    infoCard(p, 800, 445, 760, 175, 'многосуставные', 'сначала через самый дистальный сустав, держать — следующий; не переразгибать ПМФ и ПФ, когда тянут через запястье', SH, m('ext'), { size: 18 });
+    infoCard(p, 800, 635, 760, 120, 'сгибатели пальцев', 'ладонь на столе, разогнуть суставы по очереди, поднять предплечье', ANAT.taut, m('ff'), { size: 18 });
+    infoCard(p, 800, 770, 760, 95, 'разгибатель пальцев', 'согнуть пальцы с дистальных, затем запястье', ANAT.tendon, m('ed'), { size: 18 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-err', prompt: ['Верно или ошибка?'],
+    build: grid([
+      { parts: ['Растягивают приводящую мышцу, давя на ногтевую фалангу'], ans: ['e'], why: 'Сила — на головки пястных, иначе страдает связка ПФ большого.' },
+      { parts: ['Сгибатели пальцев растягивают сразу через все суставы'], ans: ['e'], why: 'Начинают с дистального сустава.' },
+      { parts: ['Растягивая запястье, пальцы свободно свисают с края'], ans: ['r'], why: 'Так внешние мышцы пальцев не мешают.' },
+      { parts: ['Блокирующие упражнения на первой неделе после шва'], ans: ['e'], why: 'Рано — большая нагрузка на шов.' },
+      { parts: ['Перед растяжкой восстанавливают скольжение сустава'], ans: ['r'], why: 'Иначе можно повредить сустав.' },
+    ], [['r', 'Верно', COL.good], ['e', 'Ошибка', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Удержание позиции — минимальное усилие рано после шва: сгибатели — в ортезе с согнутыми ПФ, разгибатели — в разгибании.', 'w1'],
+     ['Крючок — глубокий по поверхностному, полный кулак — глубокий, прямой кулак — поверхностный; блокирующие — не рано.', 'w2'],
+     ['Отставание: крючок, положение стола, конечное разгибание, скольжение; спайка — массаж трением удлинённого сухожилия.', 'w3'],
+     ['Многосуставные — от дистального сустава; приводящую большого — через головки пястных.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SH }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-lag', prompt: ['После пассивной растяжки в сгибание при спайке разгибателя отставание разгибания выросло. Что делать?'],
+    build: choice([
+      ['Прекратить пассивное сгибание, сделать упор на массаж трением'],
+      ['Растягивать в сгибание сильнее'],
+      ['Добавить сопротивление сгибателям'],
+      ['Ничего не менять'],
+    ], 0, 'Растёт отставание — растягивается сухожилие ниже спайки, а не спайка.',
+    [null, 'Это ещё сильнее растянет сухожилие.', 'Не решает проблему спайки.', 'Признак требует изменить программу.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-fds', prompt: ['Нужно максимально прокатить поверхностный сгибатель по влагалищу и кости. Какое положение?'],
+    build: choice([
+      ['Прямой кулак: ПФ и ПМФ согнуты, ДМФ разогнут'],
+      ['Кулак-крючок'],
+      ['Положение стола'],
+      ['Прямая кисть'],
+    ], 0, 'Из положения стола сгибают ПМФ при прямом ДМФ — максимум для поверхностного.',
+    [null, 'Крючок — для глубокого по поверхностному.', 'Это исходное положение.', 'Сухожилия не скользят.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

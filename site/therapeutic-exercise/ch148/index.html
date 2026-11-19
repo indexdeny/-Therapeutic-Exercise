@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Грудной и поясничный отделы: растяжка и тракция — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 148, title: 'Грудной и поясничный отделы: растяжка и тракция', minutes: 8, language: 'ru', next: '../ch149/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch148/cards.ru.json
+const CARDS_SHORT = {
+  "осторожно\nне делать, если сгибание меняет чувствительность или боль уходит в ногу": "боль в ногу — не делать",
+  "колени к груди\nлёжа, ноги согнуты: подтянуть по одному колену, обхватить бёдра и прижать к груди — крестец отрывается; за голени не держать — нагружает колени": "по одному колену, за бёдра",
+  "на четвереньках\nнаклон таза назад без скругления груди — сгибается поясница; задержать, расслабиться": "наклон таза назад",
+  "таз к пяткам\nзадержать и вернуться; растягиваются и большая ягодичная, четырёхглавая, разгибатели плеча": "+ ягодичная, четырёхглавая",
+  "осторожно\nне делать, если разгибание меняет чувствительность или боль отдаёт в ногу": "боль в ногу — не делать",
+  "прогиб на руках\nлёжа на животе, ладони под плечами: выпрямить руки, грудь вверх, таз на мате; сильнее — таз пристёгнут к столу": "выпрямить руки, таз на мате",
+  "стоя\nладони на пояснице — отклониться назад": "ладони на пояснице — отклониться назад",
+  "на четвереньках\nдать спине провиснуть — поясница разгибается; чередовать с наклоном таза назад — учиться управлять тазом": "провиснуть ↔ наклон таза",
+  "зачем\nасимметрия наклонов и сколиоз; структурную дугу не исправляет и не останавливает — но добавляет гибкости перед спондилодезом и при позной дисфункции": "дугу не исправляет — гибкость",
+  "фиксация\nвыше или ниже дуги; при двойной — одну держать, другую растягивать": "одну держать, другую растягивать",
+  "лёжа на животе\nгребень на вогнутой стороне фиксирован; рука с выпуклой — к колену, другая — вверх; вдох в растягиваемую сторону": "рука к колену, вдох в сторону",
+  "держась за край стола\nгрудной отдел фиксирован; терапевт наклоняет таз и ноги от вогнутости": "терапевт наклоняет таз",
+  "сидя на пятках; на боку\nруки на полу, переставить кисти к выпуклой стороне; на боку — валик под вершиной, рука вверх, гребень фиксирован; или боком с края стола головой вниз": "кисти к выпуклой; валик под вершиной",
+  "почему\nмышцы бедра крепятся к тазу и прямо влияют на позу позвоночника — им нужна достаточная гибкость; приёмы — в главах о растяжке и о тазобедренном суставе": "мышцы бедра влияют на позу",
+  "труднее, чем в шее\nсдвинуть хотя бы половину веса тела и преодолеть трение; помогает стол с раздвижной секцией": "сдвинуть половину веса",
+  "положение\nна спине или на животе; грудь фиксирует ремень к головному концу или помощник держит за руки; натянуть тугие ткани сильнее всего": "ремень или помощник",
+  "направление\nсгибание — бёдра согнуты; наклон — ноги в сторону; одностороннее нарушение — тянуть одну ногу": "одностороннее — одну ногу",
+  "зачем\nнаправить силу на сторону симптомов или на одну фасетку — избирательная растяжка": "избирательная растяжка",
+  "валик\nлёжа на боку, растягиваемая сторона сверху; валик на нужном уровне — наклон от больной стороны": "больная сторона сверху",
+  "поворот и сгибание\nтерапевт прощупывает остистые отростки: поворачивает верх туловища за нижнюю руку до уровня над суставом, затем сгибает верхнее бедро до того же уровня снизу": "поворот туловища + сгибание бедра",
+  "аппараты\nмеханическая тракция даёт большую силу; положения — как при ручной": "большая сила",
+};
+// cards-short end
+
+const SP = '#8fd6b0', FLX = '#f0a04b', EXT = '#86c9e8', LAT = '#c9b8e8', TRC = '#f0c060', PIL = '#c8b8e8', PAIN = '#ff5a3c';
+const BN = ANAT.bone, BL = mix(ANAT.bone, '#000000', .45);
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, t = Array.isArray(t0) ? t0[i] : t0 === null ? null : t0 + i * gap, g = pill(p, s, x + ws[i] / 2, y, t, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19, anchor = null } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x, an = anchor || (right ? 'end' : 'start');
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: an });
+  const lx = an === 'start' && right ? x + uiW(str, size) + 8 : x + (right ? 8 : -8);
+  path(g, `M${lx} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+// Hands and knees: the prone posture figure with its knees on the mat (line FY) and the hands planted where they
+// first land; q.set(o) re-poses the trunk and hips and keeps the hands on the floor.
+function quadFig(p, x, FY, s, t0, pose = {}) {
+  const f = lieFig(p, x, FY, s, t0, 'prone', {});
+  f.set({ thigh: -90, shank: 0, tilt: -10, ft: 90 });
+  const K = f.at('knee'), s0 = st(f.g); put(f.g, { y: s0.y + (FY - 36 * s - K[1]) });
+  const W = [f.geo.K[0] + 28, f.geo.Sh[1] - 10];
+  f.qset = o => { f.set(o); f.set(armIK(f.q, W, 180)); return f; };
+  f.qset(pose);
+  return f;
+}
+const ROCK = { thigh: -150, tilt: -22, lord: 0, kyph: 48, cerv: 44 }, QUAD = { thigh: -90, tilt: -10, lord: 46, kyph: 42, cerv: 34 };
+const mixPose = (a, b, k) => { const o = {}; for (const key in b) o[key] = lerp(a[key], b[key], k); return o; };
+// The spine drawn on a back-view figure (as in lesson 132): set({ lum, tho }) bends a lumbar and a thoracic curve;
+// side(k, col, t) — a band along the curve on one side (k −1 left, +1 right).
+function backSpine(fs, t0) {
+  const g = G(fs.top, { o: 0 }), N = 22, vs = [];
+  const line = path(g, '', { stroke: BN, 'stroke-width': 3, 'stroke-opacity': .5 });
+  for (let i = 0; i < N; i++) vs.push(mk('rect', { x: -7, y: -5, width: 14, height: 10, rx: 3, fill: BN, stroke: BL, 'stroke-width': 1.2 }, g));
+  const S = { lum: 0, tho: 0 }, e = { g };
+  const at = u => {
+    const P = fs.pts.P, C = fs.pts.Sc, top = [C[0], C[1] - 26];
+    let dx = 0;
+    if (u < .34) dx = S.lum * Math.sin(Math.PI * u / .34);
+    else if (u < .86) dx = S.tho * Math.sin(Math.PI * (u - .34) / .52);
+    return [lerp(P[0], top[0], u) + dx, lerp(P[1] - 8, top[1], u)];
+  };
+  e.set = o => {
+    Object.assign(S, o);
+    const pts = []; for (let i = 0; i <= N; i++) pts.push(at(i / N));
+    line.setAttribute('d', 'M' + pts.map(P => f1(P[0]) + ' ' + f1(P[1])).join('L'));
+    vs.forEach((v, i) => { const A = pts[i], B = pts[i + 1], a = Math.atan2(B[0] - A[0], A[1] - B[1]) * 180 / Math.PI; v.setAttribute('transform', `translate(${f1((A[0] + B[0]) / 2)} ${f1((A[1] + B[1]) / 2)}) rotate(${f1(a)})`); });
+    return e;
+  };
+  e.side = (k, col, t, u0 = .34, u1 = .86) => {
+    const b = path(g, '', { stroke: col, 'stroke-width': 6, 'stroke-opacity': .85 }, { o: 0 });
+    let d = ''; for (let i = 0; i <= 20; i++) { const P = at(lerp(u0, u1, i / 20)); d += (i ? 'L' : 'M') + f1(P[0] + k * 11) + ' ' + f1(P[1]); }
+    b.setAttribute('d', d);
+    show(b, t);
+    return b;
+  };
+  e.at = u => fs.at(at(u));
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Растяжка груди и поясницы', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 16 · Урок 148', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Грудной и поясничный отделы', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'растяжка и тракция', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'сгибание, разгибание, боковая гибкость, ручная и позиционная тракция', 800, 360, m('sub'), { size: 30, fill: SP, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    matLine(art, 520, 1100, 820, null); [...art.children].forEach(c => put(c, { o: 1 }));
+    const f = quadFig(art, 580, 820, .6, null); put(f.g, { o: 1 });
+    prog(q => f.qset(mixPose(QUAD, ROCK, cyc(q, 2))), 1, Math.max(3, D - 2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['flex', 'Сгибание поясницы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'сгибание поясницы — самостоятельно', 800, 56, m('pre'), { size: 28, weight: 700, anchor: 'middle', fill: FLX });
+    matLine(p, 80, 760, 400, m('hug'));
+    const f = lieFig(p, 730, 400, .58, m('hug'), 'supine'); f.hold(hookLegs(50));
+    const er = f.mus('erector', { w: 10 });
+    prog(q => { const o = hookLegs(50); f.hold({ thigh: lerp(o.thigh, -128, q), shank: lerp(o.shank, 18, q), ft: lerp(90, 0, q), tilt: -16 * q, lord: 46 - 34 * q }); }, m('hug', 2), 2.5);
+    prog(q => { const Q = f.geo, d = [Q.K[0] - Q.H[0], Q.K[1] - Q.H[1]], L = Math.hypot(...d), n = [d[1] / L, -d[0] / L]; f.set(armIK(f.q, [Q.H[0] + d[0] * .82 + n[0] * 24, Q.H[1] + d[1] * .82 + n[1] * 24])); }, m('hug', 4.6), .4);
+    lab(p, 'обхватить бёдра, не голени', 120, 160, ...f.at('knee'), FLX, m('hug', 7), { anchor: 'start' });
+    lab(p, 'разгибатели спины растягиваются', 120, 470, ...f.unit(3, -30), ANAT.stretch, m('hug', 9), { anchor: 'start' });
+    matLine(p, 80, 760, 820, m('quad'));
+    const qf = quadFig(p, 140, 820, .55, m('quad'));
+    prog(q => qf.qset({ tilt: lerp(-10, -24, cyc(q, 1)), lord: lerp(46, 14, cyc(q, 1)) }), m('quad', 1.5), 5);
+    txt(p, 'наклон таза назад, грудь не скруглять', 420, 560, m('quad', 1.5), { size: 17, fill: FLX, anchor: 'middle', weight: 700 });
+    prog(q => qf.qset(mixPose(QUAD, ROCK, q)), m('back', 1), 2.5);
+    infoCard(p, 800, 90, 760, 150, 'осторожно', 'не делать, если сгибание меняет чувствительность или боль уходит в ногу', COL.bad, m('pre'), { size: 20 });
+    infoCard(p, 800, 255, 760, 230, 'колени к груди', 'лёжа, ноги согнуты: подтянуть по одному колену, обхватить бёдра и прижать к груди — крестец отрывается; за голени не держать — нагружает колени', FLX, m('hug'), { size: 20 });
+    infoCard(p, 800, 500, 760, 170, 'на четвереньках', 'наклон таза назад без скругления груди — сгибается поясница; задержать, расслабиться', FLX, m('quad'), { size: 20 });
+    infoCard(p, 800, 685, 760, 185, 'таз к пяткам', 'задержать и вернуться; растягиваются и большая ягодичная, четырёхглавая, разгибатели плеча', FLX, m('back'), { size: 20 });
+  }],
+
+  ['ext', 'Разгибание поясницы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'разгибание поясницы — самостоятельно', 800, 56, m('pre'), { size: 28, weight: 700, anchor: 'middle', fill: EXT });
+    matLine(p, 80, 760, 400, m('press'));
+    const f = lieFig(p, 100, 400, .55, m('press'), 'prone');
+    const W = [72, -769];
+    prog(q => { const lord = lerp(46, 100, q), kyph = lerp(42, 12, q), o = { ...f.q, lord, kyph }; f.set({ lord, kyph, ...armIK(o, W, 180) }); }, m('press', 1), 2.5);
+    const strap = G(p, { o: 0 }); const Hp = f.at('hip'); mk('rect', { x: Hp[0] - 22, y: Hp[1] - 40, width: 44, height: 46, rx: 6, fill: TRC, 'fill-opacity': .3, stroke: TRC, 'stroke-width': 3 }, strap); show(strap, m('press', 6));
+    lab(p, 'ремень — сильнее', 120, 180, Hp[0], Hp[1] - 30, TRC, m('press', 6), { anchor: 'start' });
+    pill(p, 'сгибатели бедра удлиняются, но не прицельно', 420, 450, m('press', 10), { col: COL.dim, size: 16 });
+    // standing lean back
+    const sf = postureFig(p, 220, 860, .44, m('stand'));
+    prog(q => { const lord = lerp(46, 82, q), o = { ...sf.q, lord, tilt: 10 * q }; const L = postureGeo(o); const Wb = pAnt(L, 3, -36); sf.set({ lord, tilt: 10 * q, ...armIK(o, Wb, 20) }); }, m('stand', .5), 2);
+    txt(p, 'наклон назад стоя', 220, 880 - 6, m('stand'), { size: 16, fill: EXT, anchor: 'middle', weight: 700 });
+    // quadruped sag and tilt
+    matLine(p, 360, 760, 840, m('cat'));
+    const qf = quadFig(p, 400, 840, .42, m('cat'));
+    prog(q => { const k = Math.sin(2 * Math.PI * 1.5 * q); qf.qset({ lord: 46 + 38 * Math.max(0, k) - 30 * Math.max(0, -k), tilt: -10 + 8 * Math.max(0, k) - 12 * Math.max(0, -k) }); }, m('cat', .8), 6, lin);
+    txt(p, 'провисание ↔ наклон таза', 560, 880 - 6, m('cat', .8), { size: 16, fill: EXT, anchor: 'middle', weight: 700 });
+    infoCard(p, 800, 90, 760, 150, 'осторожно', 'не делать, если разгибание меняет чувствительность или боль отдаёт в ногу', COL.bad, m('pre'), { size: 20 });
+    infoCard(p, 800, 255, 760, 250, 'прогиб на руках', 'лёжа на животе, ладони под плечами: выпрямить руки, грудь вверх, таз на мате; сильнее — таз пристёгнут к столу', EXT, m('press'), { size: 20 });
+    infoCard(p, 800, 520, 760, 130, 'стоя', 'ладони на пояснице — отклониться назад', EXT, m('stand'), { size: 20 });
+    infoCard(p, 800, 665, 760, 205, 'на четвереньках', 'дать спине провиснуть — поясница разгибается; чередовать с наклоном таза назад — учиться управлять тазом', EXT, m('cat'), { size: 20 });
+  }],
+
+  ['lat', 'Боковая гибкость', (m, D) => {
+    const p = panel(0);
+    txt(p, 'боковая гибкость и сколиоз: растягивать вогнутую сторону', 800, 56, m('why'), { size: 28, weight: 700, anchor: 'middle', fill: LAT });
+    const fs = frontStand(p, 230, 860, 1.1, m('why'), { muscles: false });
+    put(fs.g, { o: .85 });
+    const bs = backSpine(fs, m('why', 1));
+    prog(q => bs.set({ tho: 22 * q, lum: -14 * q }), m('why', 1.5), 2);
+    txt(p, 'вид сзади', 230, 330, m('why'), { size: 17, fill: COL.dim, anchor: 'middle', weight: 600 });
+    bs.side(-1, PAIN, m('why', 12));
+    lab(p, 'вогнутая сторона — тугие ткани', 60, 300, ...bs.at(.6), PAIN, m('why', 12), { anchor: 'start' });
+    const stab = G(p, { o: 0 }); const P = fs.at([fs.pts.P[0] - 40, fs.pts.P[1] - 46]); mk('ellipse', { cx: P[0], cy: P[1], rx: 30, ry: 14, fill: mix(ANAT.skin, '#c08060', .3), stroke: BL, 'stroke-width': 2 }, stab); show(stab, m('stab'));
+    lab(p, 'фиксировать ниже дуги', 380, 560, ...P, TRC, m('stab'), { anchor: 'start' });
+    pill(p, 'сколиоз растяжкой не исправить', 420, 110, m('why', 5), { col: COL.bad, size: 17 });
+    // side-lying over a roll at the apex
+    const sl = frontStand(p, 600, 700, .62, m('side'), { muscles: false, pose: { aR: 170, eR: 10 } });
+    put(sl.g, { x: 560, y: 760, r: -90 });
+    const sb = backSpine(sl, m('side')); sb.set({ tho: 16 });
+    const rl = mk('ellipse', { cx: 600, cy: 770, rx: 26, ry: 14, fill: PIL, stroke: mix(PIL, '#000000', .35), 'stroke-width': 2, opacity: 0 }, p); show(rl, m('side', 1));
+    show(path(p, 'M380 784H780', { stroke: COL.dim, 'stroke-width': 4 }, { o: 0 }), m('side'));
+    txt(p, 'на боку, валик под вершиной', 580, 840, m('side', 1), { size: 16, fill: LAT, anchor: 'middle', weight: 700 });
+    infoCard(p, 800, 90, 760, 180, 'зачем', 'асимметрия наклонов и сколиоз; структурную дугу не исправляет и не останавливает — но добавляет гибкости перед спондилодезом и при позной дисфункции', LAT, m('why'), { size: 18 });
+    infoCard(p, 800, 285, 760, 110, 'фиксация', 'выше или ниже дуги; при двойной — одну держать, другую растягивать', TRC, m('stab'), { size: 18 });
+    infoCard(p, 800, 410, 760, 140, 'лёжа на животе', 'гребень на вогнутой стороне фиксирован; рука с выпуклой — к колену, другая — вверх; вдох в растягиваемую сторону', LAT, m('pr1'), { size: 18 });
+    infoCard(p, 800, 565, 760, 110, 'держась за край стола', 'грудной отдел фиксирован; терапевт наклоняет таз и ноги от вогнутости', LAT, m('pr2'), { size: 18 });
+    infoCard(p, 800, 690, 760, 180, 'сидя на пятках; на боку', 'руки на полу, переставить кисти к выпуклой стороне; на боку — валик под вершиной, рука вверх, гребень фиксирован; или боком с края стола головой вниз', LAT, m('heel'), { size: 18 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-lat', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Растяжка останавливает структурный сколиоз'], ans: ['f'], why: 'Неверно: не исправляет и не останавливает.' },
+      { parts: ['Растягивают ткани на вогнутой стороне дуги'], ans: ['t'], why: 'Верно.' },
+      { parts: ['При двойной дуге одну фиксируют, другую растягивают'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Колени к груди тянут, обхватив голени'], ans: ['f'], why: 'Неверно: обхватывают бёдра.' },
+      { parts: ['Прогиб на руках: таз остаётся на мате'], ans: ['t'], why: 'Верно.' },
+    ], [['t', 'Верно', COL.good], ['f', 'Неверно', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['hip', 'Мышцы бедра', (m, D) => {
+    const p = panel(0);
+    txt(p, 'мышцы бедра держат таз и позвоночник', 800, 56, m('hip'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const f = postureFig(p, 400, 860, .82, m('hip'));
+    const ms = [['iliopsoas', 'сгибатели бедра', FLX, 1], ['rectFem', 'прямая мышца бедра', FLX, 2.5], ['hams', 'задняя группа бедра', EXT, 4], ['glut', 'большая ягодичная', EXT, 5.5]];
+    ms.forEach(([k, s, c, dt], i) => { f.mus(k, { w: 11 }); });
+    pillRow(p, ['разгибание бедра', 'сгибание бедра', 'вращение', 'задняя группа', 'напрягатель широкой фасции'], 800, 820, m('hip', 6), { col: SP, size: 17, space: 10, gap: .6 });
+    infoCard(p, 800, 120, 760, 300, 'почему', 'мышцы бедра крепятся к тазу и прямо влияют на позу позвоночника — им нужна достаточная гибкость; приёмы — в главах о растяжке и о тазобедренном суставе', SP, m('hip'), { size: 21 });
+  }],
+
+  ['man', 'Ручная тракция поясницы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ручная тракция поясницы', 800, 56, m('why'), { size: 28, weight: 700, anchor: 'middle', fill: TRC });
+    const TY = 650, GY = 860;
+    show(path(p, `M120 ${TY}H780M150 ${TY}V${GY}M750 ${TY}V${GY}M60 ${GY}H1000`, { stroke: COL.dim, 'stroke-width': 5 }, { o: 0 }), m('pos'));
+    const f = lieFig(p, 760, TY, .62, m('pos'), 'supine');
+    const hz = G(p, { o: 0 }); const Sh = f.at('sh'); mk('rect', { x: Sh[0] - 50, y: Sh[1] - 30, width: 100, height: 52, rx: 8, fill: 'none', stroke: PIL, 'stroke-width': 4 }, hz); path(hz, `M${f1(Sh[0] - 50)} ${f1(Sh[1] - 4)}H120`, { stroke: PIL, 'stroke-width': 4 }); show(hz, m('pos', 2));
+    lab(p, 'ремень к головному концу', 140, 470, Sh[0], Sh[1] - 30, PIL, m('pos', 2), { anchor: 'start' });
+    const th = fig(p, { x: 950, y: GY - 182 * .9, s: .9, o: 0, dir: -1, col: '#b9c9dc', pose: { ...STAND } });
+    show(th.g, m('ext'));
+    const A = f.at('ankle');
+    const pull = k => { th.set({ t: lerp(4, -12, k) }); reach(th, 'N', A[0] + 6, A[1]); reach(th, 'F', A[0] + 10, A[1] + 6); };
+    pull(0);
+    prog(q => pull(cyc(q, 2)), m('ext', 1), 3.5, lin);
+    const ar = G(p, { o: 0 }); path(ar, `M${f1(A[0] + 30)} ${f1(A[1] - 50)}H${f1(A[0] + 120)}M${f1(A[0] + 106)} ${f1(A[1] - 62)}L${f1(A[0] + 122)} ${f1(A[1] - 50)}L${f1(A[0] + 106)} ${f1(A[1] - 38)}`, { stroke: TRC, 'stroke-width': 6 }); show(ar, m('ext', 1));
+    pill(p, '≥ ½ веса тела + трение', 440, 140, m('why', 3), { col: TRC, size: 18 });
+    pillRow(p, ['разгибание: бёдра прямые, тяга за лодыжки', 'сгибание: ноги на плече, руки вокруг бёдер или пояс'], 440, 190, [m('ext'), m('fl')], { col: TRC, size: 15, space: 10 });
+    infoCard(p, 1040, 90, 520, 230, 'труднее, чем в шее', 'сдвинуть хотя бы половину веса тела и преодолеть трение; помогает стол с раздвижной секцией', TRC, m('why'), { size: 19 });
+    infoCard(p, 1040, 335, 520, 260, 'положение', 'на спине или на животе; грудь фиксирует ремень к головному концу или помощник держит за руки; натянуть тугие ткани сильнее всего', TRC, m('pos'), { size: 19 });
+    infoCard(p, 1040, 610, 520, 260, 'направление', 'сгибание — бёдра согнуты; наклон — ноги в сторону; одностороннее нарушение — тянуть одну ногу', TRC, m('fl'), { size: 19 });
+  }],
+
+  ['pos', 'Позиционная тракция', (m, D) => {
+    const p = panel(0);
+    txt(p, 'позиционная тракция: две силы встречаются на одном сегменте', 800, 56, m('why'), { size: 28, weight: 700, anchor: 'middle', fill: TRC });
+    const fs = frontStand(p, 420, 600, .9, m('roll'), { muscles: false, pose: { aL: 150, eL: 20 } });
+    put(fs.g, { x: 420, y: 610, r: -90 });
+    const bs = backSpine(fs, m('roll')); bs.set({});
+    prog(q => { fs.set({ lean: -14 * q }); bs.set({ tho: 0 }); }, m('roll', 2), 1.5);
+    const RP = fs.at([fs.pts.P[0], fs.pts.P[1] - 64]), roll = mk('ellipse', { cx: RP[0], cy: 640, rx: 40, ry: 24, fill: PIL, stroke: mix(PIL, '#000000', .35), 'stroke-width': 2, opacity: 0 }, p); show(roll, m('roll', 1));
+    show(path(p, 'M80 666H780', { stroke: COL.dim, 'stroke-width': 5 }, { o: 0 }), m('roll'));
+    txt(p, 'валик 15–20 см (в книге — 6–8 дюймов)', 430, 720, m('roll', 1), { size: 18, fill: PIL, anchor: 'middle', weight: 700 });
+    txt(p, 'на боку, растягиваемая сторона сверху; фасетки сверху скользят вверх', 430, 760, m('roll', 4), { size: 17, fill: COL.dim, anchor: 'middle', weight: 600 });
+    // the two forces meet at one segment
+    const seg = G(p, { o: 0 }), sy = 300;
+    for (let i = 0; i < 6; i++) mk('rect', { x: 150 + i * 92, y: sy - 26, width: 76, height: 52, rx: 10, fill: BN, stroke: BL, 'stroke-width': 2 }, seg);
+    mk('rect', { x: 150 + 2 * 92 + 70, y: sy - 34, width: 28, height: 68, rx: 8, fill: TRC, 'fill-opacity': .45, stroke: TRC, 'stroke-width': 3 }, seg);
+    show(seg, m('rot'));
+    const r1 = G(p, { o: 0 }); path(r1, `M190 ${sy - 70}C260 ${sy - 110} 340 ${sy - 110} 400 ${sy - 60}M386 ${sy - 76}L402 ${sy - 58}L380 ${sy - 54}`, { stroke: EXT, 'stroke-width': 5, fill: 'none' }); T(r1, 'поворот сверху', { x: 290, y: sy - 120, size: 18, fill: EXT, anchor: 'middle', weight: 700 }); show(r1, m('rot', 1));
+    const r2 = G(p, { o: 0 }); path(r2, `M690 ${sy - 70}C620 ${sy - 110} 520 ${sy - 110} 470 ${sy - 60}M484 ${sy - 76}L468 ${sy - 58}L490 ${sy - 54}`, { stroke: FLX, 'stroke-width': 5, fill: 'none' }); T(r2, 'сгибание снизу', { x: 590, y: sy - 120, size: 18, fill: FLX, anchor: 'middle', weight: 700 }); show(r2, m('flex', 1));
+    txt(p, 'здесь — наибольшее разведение', 430, sy + 70, m('flex', 6), { size: 19, fill: TRC, anchor: 'middle', weight: 700 });
+    pill(p, 'схема', 700, 110, m('rot'), { col: COL.dim, size: 15 });
+    infoCard(p, 820, 90, 740, 160, 'зачем', 'направить силу на сторону симптомов или на одну фасетку — избирательная растяжка', TRC, m('why'), { size: 20 });
+    infoCard(p, 820, 265, 740, 190, 'валик', 'лёжа на боку, растягиваемая сторона сверху; валик на нужном уровне — наклон от больной стороны', PIL, m('roll'), { size: 20 });
+    infoCard(p, 820, 470, 740, 230, 'поворот и сгибание', 'терапевт прощупывает остистые отростки: поворачивает верх туловища за нижнюю руку до уровня над суставом, затем сгибает верхнее бедро до того же уровня снизу', TRC, m('rot'), { size: 20 });
+    infoCard(p, 820, 715, 740, 155, 'аппараты', 'механическая тракция даёт большую силу; положения — как при ручной', COL.dim, m('mech'), { size: 20 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-trq', prompt: ['Как направить тракцию?'],
+    build: grid([
+      { parts: ['Растянуть в разгибание'], ans: ['e'], why: 'Бёдра разогнуты, тянуть за лодыжки.' },
+      { parts: ['Растянуть в сгибание'], ans: ['f'], why: 'Бёдра согнуты, ноги на плече или пояс с лямками.' },
+      { parts: ['Нарушение с одной стороны'], ans: ['o'], why: 'Тянуть одну ногу.' },
+      { parts: ['Пояс на тазу с лямками'], ans: ['f'], why: 'Вариант для сгибания.' },
+      { parts: ['Тяга за лодыжки при прямых ногах'], ans: ['e'], why: 'Разгибание.' },
+    ], [['e', 'Разгибание', EXT], ['f', 'Сгибание', FLX], ['o', 'Одна нога', TRC]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Сгибание поясницы: колени к груди с захватом за бёдра, таз к пяткам на четвереньках.', 'w1'],
+     ['Разгибание: прогиб на руках, наклон назад стоя, провисание на четвереньках.', 'w2'],
+     ['При сколиозе растягивают вогнутую сторону, фиксируя другую; структурную дугу это не исправит.', 'w3'],
+     ['Позиционная тракция собирает поворот сверху и сгибание снизу на одном сегменте.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SP }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-kc', prompt: ['Пациенту полезна растяжка поясницы в сгибание, но после колен к груди болят колени. Что поправить?'],
+    build: choice([
+      ['Обхватывать бёдра, а не голени'],
+      ['Тянуть сильнее'],
+      ['Делать с прямыми ногами'],
+      ['Заменить прогибами на руках'],
+    ], 0, 'Захват за голени нагружает коленные суставы.',
+    [null, 'Сила не решит нагрузку на колени.', 'Это другое упражнение и не сгибание поясницы.', 'Прогиб разгибает, а нужно сгибание.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-sc', prompt: ['Подросток с правосторонней грудной дугой спрашивает, исправит ли растяжка его сколиоз. Что ответить?'],
+    build: choice([
+      ['Не исправит и не остановит; растяжка вогнутой стороны может добавить гибкости — например, перед операцией'],
+      ['Да, растяжка выпрямит позвоночник'],
+      ['Растягивать нужно выпуклую сторону'],
+      ['Растяжка при сколиозе запрещена'],
+    ], 0, 'Растяжка не исправляет структурный сколиоз, но помогает с гибкостью; растягивают вогнутую сторону.',
+    [null, 'Это не подтверждено.', 'Тугие ткани — на вогнутой стороне.', 'Её применяют для гибкости.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

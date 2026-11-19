@@ -1,0 +1,11 @@
+[
+ {
+  "beat": "str",
+  "fig": 0,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает rectus, фигура ×0.7",
+  "off": "лупа видна меньше 2 с — мелькает"
+ }
+]

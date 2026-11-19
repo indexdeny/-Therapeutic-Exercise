@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Повреждение нерва и восстановление — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 120, title: 'Повреждение нерва: классификация и восстановление', minutes: 9, language: 'ru', next: '../ch121/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch120/cards.ru.json
+const CARDS_SHORT = {
+  "сдавление\nжгут; кость, опухоль, отёк, мягкие ткани": "жгут, кость, отёк",
+  "рассечение\nнож, пуля, операция, инъекция": "нож, пуля, операция, инъекция",
+  "растяжение\nчрезмерное натяжение, разрыв": "чрезмерное натяжение, разрыв",
+  "электричество\nмолния, ток": "молния, ток",
+  "инъекция\nанестетик, стероид, антибиотик": "анестетик, стероид, антибиотик",
+  "внутри нерва\nнехватка кислорода, демиелинизация, рубец эпиневрия — теряет упругость сама нервная ткань": "ткань теряет упругость",
+  "снаружи\nкровь в ложе, сращение эпиневрия со связкой, отёк рядом — нерв хуже смещается": "хуже смещается",
+  "нейропраксия\nдемиелинизация на участке; проведение блокировано только там; мышцы не атрофируются; восстановление обычно полное": "восстановление обычно полное",
+  "аксонотмезис\nаксон прерван, оболочки целы; валлеровское перерождение ниже; атрофия, потеря чувствительности; неполное восстановление": "атрофия; восстановление неполное",
+  "нейротмезис\nнерв пересечён вместе с оболочками; без операции восстановления нет": "без операции — нет",
+  "проксимальнее — сложнее\nтам больше смешанных волокон, и они могут прорасти не туда": "могут прорасти не туда",
+  "шов нерва\nвовремя, точное сопоставление концов, без натяжения на шве": "точно и без натяжения",
+  "возраст и мотивация\nнервной системе нужно заново научиться пользоваться путями": "заново научиться",
+  "острая фаза\nиммобилизация не меньше 3 недель — защитить нерв от сдавления и натяжения; свободные суставы двигать сразу": "иммобилизация ≥ 3 недель",
+  "обучение\nбезопасные движения, защита участков без чувствительности": "защита участков без чувствительности",
+  "удержать в укороченном положении\nмышцу ставят в укорочение и просят удержать, помогая; усилие подкрепляют электростимуляцией": "+ электростимуляция",
+  "затем — без силы тяжести\nактивные движения с помощью, когда мышца управляет частью объёма; слабые мышцы защищает ортез": "с помощью; ортез",
+  "ёмкости с частицами\nвата, фасоль, макароны, песок — погружать руку или стопу": "вата, фасоль, песок",
+  "возможности реиннервации исчерпаны\nглавное — компенсация функции; ортез и профилактика — пожизненно": "компенсация; ортез пожизненно",
+  "кожа\nрегулярно осматривать, сразу лечить ранки и мозоли; сухую кожу — увлажнять кремом": "осматривать, лечить ранки",
+  "рука\nне брать горячее, холодное, острое, шершавое; не держать хват подолгу, менять инструменты; утолщать ручки; защитные перчатки": "не горячее и не острое; перчатки",
+  "нога\nудобная защитная обувь; осматривать стопы — нет ли покраснений; не ходить босиком, особенно в темноте; почаще переносить вес при долгом стоянии": "защитная обувь, не босиком",
+};
+// cards-short end
+
+const HEAD = COL.whole, NV = NERVE_C, PAIN = '#ff5a3c', PH = [COL.bad, COL.task, COL.good];
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function numLine(p, n, str, x, y, col, t0, { size = 22, maxW = 860 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 20, cy: y - 8, r: 19, fill: col }, g);
+  T(g, String(n), { x: x + 20, y: y, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 54, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+// One myelinated axon along its length (x … x + L at y) in its endoneurial tube, a lesion at fraction lx.
+// set({ demy, cut, wall, tube, grow, block }): demy — myelin gone at the lesion; cut — the axon is broken there;
+// wall — wallerian degeneration of the distal part (it fades in pieces); tube — the endoneurial tube is broken too;
+// grow 0..1 — the sprout grows down the tube; block 0..1 — an impulse stops at the lesion (run(q) moves it).
+function axonLong(p, x, y, L, t0 = null, { lx = .4 } = {}) {
+  const g = G(p, { o: 0 }), X = x + L * lx;
+  const tube = mk('path', { fill: 'none', stroke: ENDO_C, 'stroke-width': 2.5 }, g);
+  const segs = [];
+  for (let i = 0; i < 12; i++) { const a = x + i * L / 12 + 4, b = a + L / 12 - 8; segs.push({ e: mk('rect', { x: a, y: y - 13, width: b - a, height: 26, rx: 12, fill: MYEL_C, stroke: '#b9b2a2', 'stroke-width': 1.5 }, g), a, b }); }
+  const axon = mk('path', { fill: 'none', stroke: NV, 'stroke-width': 8, 'stroke-linecap': 'round' }, g);
+  const dist = mk('path', { fill: 'none', stroke: NV, 'stroke-width': 8, 'stroke-dasharray': '1 0' }, g);
+  const sprout = mk('path', { fill: 'none', stroke: mix(NV, '#ffffff', .3), 'stroke-width': 7, 'stroke-linecap': 'round' }, g);
+  const imp = mk('circle', { r: 10, fill: '#ffffff', opacity: 0 }, g);
+  const S = { demy: 0, cut: 0, wall: 0, tube: 0, grow: 0 }, e = { g, X };
+  e.set = o => {
+    Object.assign(S, o);
+    const gap = 14 * S.tube;
+    tube.setAttribute('d', `M${x} ${y - 20}H${f1(X - gap)}M${f1(X + gap)} ${y - 20}H${x + L}M${x} ${y + 20}H${f1(X - gap)}M${f1(X + gap)} ${y + 20}H${x + L}`);
+    tube.setAttribute('stroke', mix(ENDO_C, '#e2574c', S.tube));
+    segs.forEach(sg => {
+      const near = Math.abs((sg.a + sg.b) / 2 - X) < L / 12;
+      sg.e.setAttribute('opacity', f1(near ? 1 - S.demy : (sg.a > X ? 1 - .85 * S.wall : 1)));
+    });
+    const c = 6 * S.cut;
+    axon.setAttribute('d', `M${x} ${y}H${f1(X - c)}`);
+    dist.setAttribute('d', `M${f1(X + c)} ${y}H${x + L}`);
+    dist.setAttribute('stroke-dasharray', S.wall > 0 ? `${f1(26 - 18 * S.wall)} ${f1(4 + 20 * S.wall)}` : 'none');
+    dist.setAttribute('stroke', mix(NV, '#5b5550', S.wall));
+    sprout.setAttribute('d', S.grow > 0 ? `M${f1(X - c)} ${y}H${f1(X - c + (L * (1 - lx)) * S.grow)}` : '');
+    return e;
+  };
+  e.run = (q, stopAtLesion) => { const xx = x + L * q, lim = stopAtLesion ? Math.min(xx, X - 8) : xx; imp.setAttribute('cx', f1(lim)); imp.setAttribute('cy', y); imp.setAttribute('opacity', q > 0 && q < 1 ? 1 : 0); };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// An axon ending at a target: kind 'ok' (right target, works), 'dead' (right target, degenerated), 'wrongR' (wrong
+// receptor, own territory), 'wrongT' (receptor in another territory), 'none' (no target). Centre (x, y).
+function outcome(p, x, y, kind, t0) {
+  const g = G(p, { x, y, o: 0 });
+  path(g, 'M-120 0H-30', { stroke: NV, 'stroke-width': 7 });
+  const tgt = (cx, cy, col, shape) => shape === 'm' ? mk('ellipse', { cx, cy, rx: 30, ry: 18, fill: col, stroke: mix(col, '#000000', .35), 'stroke-width': 2 }, g) : mk('circle', { cx, cy, r: 16, fill: col, stroke: mix(col, '#000000', .35), 'stroke-width': 2 }, g);
+  if (kind === 'ok') { path(g, 'M-30 0H20', { stroke: NV, 'stroke-width': 7 }); tgt(50, 0, ANAT.muscle, 'm'); }
+  if (kind === 'dead') { path(g, 'M-30 0H20', { stroke: NV, 'stroke-width': 7 }); tgt(50, 0, '#7d7a72', 'm'); }
+  if (kind === 'wrongR') { path(g, 'M-30 0C0 0 10 30 30 34', { stroke: NV, 'stroke-width': 7 }); tgt(50, -22, ANAT.muscle, 'm'); tgt(46, 36, '#5aa7d6', 'r'); }
+  if (kind === 'wrongT') { path(g, 'M-30 0C10 0 30 -40 60 -44', { stroke: NV, 'stroke-width': 7 }); mk('rect', { x: 20, y: -10, width: 60, height: 50, rx: 8, fill: 'none', stroke: COL.dim, 'stroke-dasharray': '5 4' }, g); tgt(76, -48, '#5aa7d6', 'r'); }
+  if (kind === 'none') { path(g, 'M-30 0C-10 -6 0 6 10 0', { stroke: NV, 'stroke-width': 7 }); tgt(60, 0, ANAT.muscle, 'm'); }
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Повреждение нерва', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 13 · Урок 120', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Повреждение нерва', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'классификация и восстановление', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'от лёгкого сдавления до полного разрыва — и путь назад', 800, 360, m('sub'), { size: 30, fill: NV, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const nx = nerveX(art, 520, 640, 160, null); put(nx.g, { o: 1 });
+    const al = axonLong(art, 760, 640, 520, null); put(al.g, { o: 1 });
+    prog(q => { const k = q * 5; nx.set({ demy: clamp(k, 0, 1), ax: clamp(k - 1, 0, 1), endo: clamp(k - 2, 0, 1), peri: clamp(k - 3, 0, 1) }); al.set({ demy: clamp(k, 0, 1), cut: clamp(k - 1, 0, 1), wall: clamp(k - 1.3, 0, 1), tube: clamp(k - 2, 0, 1) }); }, .6, Math.max(2, D - 1.8), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['mech', 'Механизмы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'как повреждается нерв', 800, 56, m('mech'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const M = [['сдавление', 'жгут; кость, опухоль, отёк, мягкие ткани', COL.bad], ['рассечение', 'нож, пуля, операция, инъекция', COL.real], ['растяжение', 'чрезмерное натяжение, разрыв', COL.task], ['облучение', '', COL.whole], ['электричество', 'молния, ток', '#f0a04b'], ['инъекция', 'анестетик, стероид, антибиотик', COL.dim]];
+    M.forEach(([h, s, c], i) => { const x = 60 + (i % 3) * 500, y = 100 + Math.floor(i / 3) * 150; infoCard(p, x, y, 470, 130, h, s || null, c, m('m' + (i + 1)), { size: 20 }); });
+    // compression: venous congestion, slow transport, conduction block
+    const al = axonLong(p, 160, 620, 900, m('bio'), { lx: .5 });
+    const cuff = G(p, { o: 0 }); mk('rect', { x: 580, y: 580, width: 60, height: 80, rx: 8, fill: '#6f8faa', 'fill-opacity': .75, stroke: '#3d5568', 'stroke-width': 2 }, cuff);
+    path(cuff, 'M610 540V578m-10 -12l10 12l10 -12M610 700V662m-10 12l10 -12l10 12', { stroke: PAIN, 'stroke-width': 4 }); show(cuff, m('comp'));
+    const cong = mk('ellipse', { cx: 500, cy: 620, rx: 0, ry: 0, fill: '#7a5aa8', 'fill-opacity': .45 }, p);
+    prog(q => { cong.setAttribute('rx', f1(70 * q)); cong.setAttribute('ry', f1(30 * q)); }, m('comp', 1), 1.5);
+    prog(q => al.run(q * 3 % 1, true), m('comp', 2.5), Math.max(2, D - m('comp', 2.5)), lin);
+    txt(p, 'вены переполнены', 500, 690, m('comp', 1.3), { size: 19, weight: 700, fill: '#b8a0e0', anchor: 'middle' });
+    txt(p, 'импульс блокирован', 760, 560, m('comp', 2.8), { size: 19, weight: 700, fill: PAIN, anchor: 'middle' });
+    pillRow(p, ['трение', 'сдавление', 'растяжение'], 1300, 620, m('bio'), { col: COL.task, size: 20, gap: .5, space: 10 });
+    txt(p, 'чаще всего:', 1300, 570, m('bio'), { size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'вторично — кровь и отёк', 1300, 680, m('bio', 2), { size: 19, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'долгое сдавление повреждает нерв', 600, 790, m('comp', 4), { size: 22, weight: 700, fill: PAIN, anchor: 'middle' });
+  }],
+
+  ['sites', 'Уязвимые места', (m, D) => {
+    const p = panel(0);
+    txt(p, 'где нерв уязвим', 800, 56, m('sites'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    // a tunnel, a branch at a sharp angle, a fixed point over a bony prominence
+    const t1 = G(p, { o: 0 }); mk('ellipse', { cx: 260, cy: 250, rx: 70, ry: 50, fill: 'none', stroke: ANAT.bone, 'stroke-width': 14 }, t1); show(t1, m('tun'));
+    nerveLine(p, [[100, 250], [420, 250]], m('tun'), { w: 12, n: 6 }).set({ hot: .5 });
+    txt(p, 'тоннель', 260, 340, m('tun'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const b1 = nerveLine(p, [[560, 290], [700, 250], [880, 250]], m('br'), { w: 12, n: 6 }), b2 = nerveLine(p, [[700, 250], [760, 150]], m('br'), { w: 9, n: 3 });
+    b2.set({ hot: .6 });
+    txt(p, 'ветвление под острым углом', 720, 340, m('br'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const bp = G(p, { o: 0 }); mk('path', { d: 'M1040 300Q1180 170 1320 300Z', fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .4), 'stroke-width': 2 }, bp); show(bp, m('fix'));
+    nerveLine(p, [[1000, 250], [1180, 200], [1360, 250]], m('fix'), { w: 12, n: 6 }).set({ taut: .7 });
+    txt(p, 'фиксирован у кости', 1180, 340, m('fix'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // intraneural and extraneural changes
+    const ni = nerveX(p, 300, 600, 130, m('intra'));
+    prog(q => ni.set({ demy: q, hl: q > .5 ? 'epi' : null }), m('intra', .5), 1.2);
+    infoCard(p, 460, 470, 380, 270, 'внутри нерва', 'нехватка кислорода, демиелинизация, рубец эпиневрия — теряет упругость сама нервная ткань', COL.real, m('intra'), { size: 20 });
+    const lig = G(p, { o: 0 }); mk('rect', { x: 920, y: 540, width: 300, height: 30, rx: 8, fill: '#c9d2d8' }, lig); show(lig, m('extra'));
+    const ne = nerveLine(p, [[900, 610], [1240, 610]], m('extra'), { w: 14, n: 8 });
+    const adh = G(p, { o: 0 }); [960, 1010, 1060, 1110, 1160].forEach(x => path(adh, `M${x} 570L${x + 8} 600`, { stroke: '#d9cfb8', 'stroke-width': 4 })); show(adh, m('extra', .8));
+    prog(q => ne.set({ slide: 8 * Math.sin(q * 30) * (1 - q * .9) }), m('extra', 1), 2, lin);
+    infoCard(p, 1260, 470, 280, 270, 'снаружи', 'кровь в ложе, сращение эпиневрия со связкой, отёк рядом — нерв хуже смещается', COL.task, m('extra'), { size: 19 });
+  }],
+
+  ['class', 'Седдон и Сандерленд', (m, D) => {
+    const p = panel(0);
+    txt(p, 'тяжесть повреждения (блок 13.3, по мотивам рис. 13.12)', 800, 56, m('class'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const nx = nerveX(p, 250, 330, 170, m('class'));
+    const al = axonLong(p, 520, 330, 1000, m('class'), { lx: .3 });
+    const C = [['нейропраксия', 'демиелинизация на участке; проведение блокировано только там; мышцы не атрофируются; восстановление обычно полное', COL.good, 'neura'],
+      ['аксонотмезис', 'аксон прерван, оболочки целы; валлеровское перерождение ниже; атрофия, потеря чувствительности; неполное восстановление', COL.task, 'axono'],
+      ['нейротмезис', 'нерв пересечён вместе с оболочками; без операции восстановления нет', COL.bad, 'neuro']];
+    C.forEach(([h, s, c, k], i) => infoCard(p, 60 + i * 500, 520, 470, 250, h, s, c, m(k), { size: 19 }));
+    prog(q => { nx.set({ demy: q }); al.set({ demy: q }); }, m('neura', .5), 1);
+    prog(q => al.run(q * 2 % 1, true), m('neura', 1.5), Math.max(1.5, m('axono') - m('neura', 1.5)), lin);
+    prog(q => { nx.set({ ax: q }); al.set({ cut: q, wall: q }); al.run(0, true); }, m('axono', .5), 1.5);
+    lab(p, 'валлеровское перерождение', 1200, 450, 1100, 346, '#8a8478', m('axono', 2));
+    prog(q => { nx.set({ endo: q, peri: q, epi: q }); al.set({ tube: q }); }, m('neuro', .5), 1.5);
+    // Sunderland: five degrees as chips under the Seddon bands
+    const sg = G(p, { o: 0 });
+    [['1', COL.good], ['2', COL.task], ['3', '#f0a04b'], ['4', COL.bad], ['5', '#ff7b6b']].forEach(([n, c], i) => { mk('rect', { x: 300 + i * 220, y: 806, width: 200, height: 46, rx: 12, fill: mix(c, COL.board, .7), stroke: c, 'stroke-width': 2.5 }, sg); T(sg, `${n} степень`, { x: 400 + i * 220, y: 838, size: 21, weight: 700, fill: c, anchor: 'middle' }); });
+    T(sg, 'Сандерленд:', { x: 280, y: 838, size: 21, weight: 700, fill: COL.chalk, anchor: 'end' });
+    show(sg, m('sund'));
+    pill(p, 'схема', 470, 170, m('class'), { col: COL.dim, size: 17 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-seddon', prompt: ['Какая это степень по Седдону?'],
+    build: grid([
+      { parts: ['Нога «отсижена»: онемение прошло через несколько минут'], ans: ['p'], why: 'Нейропраксия: лёгкая ишемия, восстановление полное.' },
+      { parts: ['Ножевая рана предплечья, нерв пересечён'], ans: ['t'], why: 'Нейротмезис: нужна операция.' },
+      { parts: ['После долгого сдавления — атрофия мышц, оболочки нерва целы'], ans: ['a'], why: 'Аксонотмезис.' },
+      { parts: ['Проведение заблокировано только в месте сдавления, мышцы не атрофированы'], ans: ['p'], why: 'Нейропраксия.' },
+      { parts: ['Отрыв нерва при тяжёлой травме'], ans: ['t'], why: 'Нейротмезис.' },
+    ], [['p', 'Нейропраксия', COL.good], ['a', 'Аксонотмезис', COL.task], ['t', 'Нейротмезис', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['recov', 'От чего зависит восстановление', (m, D) => {
+    const p = panel(0);
+    txt(p, 'от чего зависит восстановление', 800, 56, m('recov'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    pillRow(p, ['тяжесть повреждения', 'характер и уровень', 'сроки и техника шва', 'возраст и мотивация'], 800, 112, m('recov', .5), { col: NV, size: 20, gap: 1, space: 12 });
+    // regeneration rate
+    const al = axonLong(p, 120, 260, 760, m('rate'), { lx: .15 });
+    al.set({ cut: 1, wall: 1 });
+    prog(q => al.set({ grow: q }), m('rate', .5), Math.max(2, m('prox') - m('rate', .5)), lin);
+    txt(p, '≈ 1 мм в сутки', 500, 210, m('rate'), { size: 26, weight: 700, fill: NV, anchor: 'middle' });
+    txt(p, 'описано от 0,5 до 9 мм', 500, 330, m('rate', 2), { size: 20, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 960, 160, 580, 180, 'проксимальнее — сложнее', 'там больше смешанных волокон, и они могут прорасти не туда', COL.task, m('prox'), { size: 21 });
+    infoCard(p, 60, 400, 820, 160, 'шов нерва', 'вовремя, точное сопоставление концов, без натяжения на шве', COL.whole, m('rep'), { size: 21 });
+    const P = [['отличная', 'лучевой, мышечно-кожный, бедренный', COL.good], ['умеренная', 'срединный, локтевой, большеберцовый', COL.task], ['плохая', 'малоберцовый', COL.bad]];
+    txt(p, 'регенерация после шва:', 60, 620, m('pot'), { size: 22, weight: 700, fill: COL.chalk });
+    P.forEach(([h, s, c], i) => { const g0 = G(p, { o: 0 }); put(pill(g0, h, 160, 680 + i * 60, null, { col: c, size: 21 }), { o: 1 }); T(g0, s, { x: 270, y: 688 + i * 60, size: 21, fill: COL.chalk }); show(g0, m('pot', .5 + i * 1.5)); });
+    infoCard(p, 960, 400, 580, 200, 'возраст и мотивация', 'нервной системе нужно заново научиться пользоваться путями', COL.real, m('age'), { size: 21 });
+  }],
+
+  ['out', 'Исходы регенерации', (m, D) => {
+    const p = panel(0);
+    txt(p, 'пять возможных исходов регенерации', 800, 56, m('out'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const O = [['ok', 'свой орган — функция вернулась', COL.good], ['dead', 'свой орган, но он уже переродился — функции нет', COL.task], ['wrongR', 'не тот рецептор в своей зоне — неправильный сигнал', '#f0a04b'], ['wrongT', 'рецептор в чужой зоне — ощущение не там', COL.real], ['none', 'связи с органом нет', COL.bad]];
+    O.forEach(([k, s, c], i) => {
+      outcome(p, 300, 160 + i * 150, k, m('o' + (i + 1)));
+      numLine(p, i + 1, s, 480, 168 + i * 150, c, m('o' + (i + 1)), { size: 23, maxW: 1000 });
+    });
+    pill(p, 'схема', 300, 880, m('out'), { col: COL.dim, size: 17 });
+  }],
+
+  ['acute', 'Острая фаза', (m, D) => {
+    const p = panel(0);
+    txt(p, 'три фазы восстановления (блок 13.4)', 800, 56, m('ph'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    pillRow(p, ['острая: заживление', 'восстановление: переобучение', 'хроническая: компенсация'], 800, 112, m('ph', .5), { col: PH, size: 21, gap: 1.2, space: 40 });
+    infoCard(p, 60, 160, 720, 210, 'острая фаза', 'иммобилизация не меньше 3 недель — защитить нерв от сдавления и натяжения; свободные суставы двигать сразу', COL.bad, m('acute'), { size: 21 });
+    pillRow(p, ['возвышенное положение', 'компрессия', 'электростимуляция'], 420, 420, m('pain'), { col: COL.whole, size: 19, gap: .6, space: 10 });
+    infoCard(p, 60, 470, 720, 160, 'обучение', 'безопасные движения, защита участков без чувствительности', COL.real, m('edu'), { size: 21 });
+    // three orthoses
+    txt(p, 'ортезы против деформаций:', 1180, 190, m('orth'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const h = handSide(p, 1170, 290, .8);
+    show(h.g, m('orth', .3)); h.set({ w: -15, mcp: 20, pip: 20, dip: 10 });
+    const sp = G(p, { o: 0 }); mk('rect', { x: 1020, y: 266, width: 190, height: 14, rx: 6, fill: '#6f8faa', 'fill-opacity': .8 }, sp); show(sp, m('orth', .3));
+    txt(p, 'лучевой — против свисающей кисти', 1100, 360, m('orth', .3), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    const hm = handMap(p, 1060, 610, .7, m('orth', 2));
+    const ts = G(p, { o: 0 }); mk('ellipse', { cx: 1060 - 80 * .7, cy: 610 - 30 * .7, rx: 40, ry: 22, fill: '#6f8faa', 'fill-opacity': .7 }, ts); show(ts, m('orth', 2));
+    txt(p, 'срединный — большой палец в противопоставлении', 1060, 760, m('orth', 2), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    const fl = fig(p, { s: .7, o: 0, pose: { fN: 0 } }); plant(fl, 'AN', 1440, 640); show(fl.g, m('orth', 3.5));
+    const afo = mk('path', { d: '', fill: '#6f8faa', 'fill-opacity': .75, stroke: '#3d5568', 'stroke-width': 2, opacity: 0 }, p);
+    const [ax, ay] = onStage(fl, 'AN'), [tx, ty] = onStage(fl, 'toeN'), [kx, ky] = onStage(fl, 'KN');
+    afo.setAttribute('d', `M${f1(ax - 8)} ${f1(ky + 40)}L${f1(ax - 8)} ${f1(ay + 8)}L${f1(tx)} ${f1(ty + 6)}L${f1(tx)} ${f1(ty - 4)}L${f1(ax + 6)} ${f1(ay - 2)}L${f1(ax + 6)} ${f1(ky + 40)}Z`);
+    show(afo, m('orth', 3.8));
+    txt(p, 'малоберцовый — против свисающей стопы', 1330, 690, m('orth', 3.5), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+  }],
+
+  ['rec', 'Фаза восстановления', (m, D) => {
+    const p = panel(0);
+    txt(p, 'фаза восстановления: признаки реиннервации', 800, 56, m('rec'), { size: 28, weight: 700, anchor: 'middle', fill: COL.task });
+    pillRow(p, ['произвольное сокращение', 'повышенная чувствительность'], 800, 108, m('rec', .5), { col: COL.task, size: 20, gap: .8 });
+    // place and hold: the elbow is placed in flexion and held, the therapist's hand is ready
+    const el = elbowModel(p, { x: 100, y: 330, s: 1.2 }); put(el.g, { o: 0 }); show(el.g, m('hold'));
+    el.set(150); prog(q => el.set(150 - 80 * q), m('hold', .3), 1);
+    prog(q => { el.set(70 + 6 * Math.sin(q * 30) * (1 - q)); el.act('biceps', .4 + .3 * Math.sin(q * 30)); }, m('hold', 1.5), Math.max(1, m('aarom') - m('hold', 1.5)), lin);
+    const el2 = G(p, { o: 0 }); [[220, 300], [300, 300]].forEach(([x, y]) => { mk('rect', { x: x - 16, y: y - 10, width: 32, height: 20, rx: 4, fill: '#9fb0bf', stroke: '#3d4a52', 'stroke-width': 1.5 }, el2); path(el2, `M${x} ${y - 10}V${y - 50}`, { stroke: '#e2574c', 'stroke-width': 2.5 }); }); show(el2, m('nmes'));
+    infoCard(p, 460, 160, 520, 200, 'удержать в укороченном положении', 'мышцу ставят в укорочение и просят удержать, помогая; усилие подкрепляют электростимуляцией', COL.task, m('hold'), { size: 20 });
+    infoCard(p, 1020, 160, 520, 200, 'затем — без силы тяжести', 'активные движения с помощью, когда мышца управляет частью объёма; слабые мышцы защищает ортез', COL.whole, m('aarom'), { size: 20 });
+    // desensitization: a row of textures from soft to rough
+    txt(p, 'десенситизация: от наименее раздражающего к самому раздражающему (блок 13.5)', 800, 440, m('des'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const TX = [['хлопок', '#f2efe6', 0], ['ткань', '#b9a88a', 2], ['наждак', '#8a7a5a', 4], ['липучка', '#5b6f8a', 6]];
+    TX.forEach(([s, c, k], i) => {
+      const g0 = G(p, { o: 0 }), x = 220 + i * 230;
+      mk('rect', { x: x - 80, y: 470, width: 160, height: 90, rx: 14, fill: c }, g0);
+      for (let j = 0; j < k * 3; j++) mk('circle', { cx: x - 70 + (j * 37) % 140, cy: 480 + (j * 23) % 70, r: 2.5, fill: mix(c, '#000000', .45) }, g0);
+      T(g0, s, { x, y: 590, size: 20, fill: COL.chalk, anchor: 'middle' });
+      show(g0, m('tex', .4 + i * .8));
+    });
+    const ar = G(p, { o: 0 }); path(ar, 'M160 615H880m-14 -10l14 10l-14 10', { stroke: COL.dim, 'stroke-width': 3 }); show(ar, m('tex', 3.5));
+    txt(p, 'по 1–3 минуты', 520, 645, m('tex', 3.5), { size: 19, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 1020, 470, 520, 175, 'ёмкости с частицами', 'вата, фасоль, макароны, песок — погружать руку или стопу', COL.real, m('tex', 2.5), { size: 20 });
+    // the order in which sensation returns
+    const V = ['боль и сверхчувствительность', 'вибрация 30 Гц', 'движущееся касание', 'постоянное касание', 'вибрация 256 Гц'];
+    V.forEach((s, i) => { const g0 = G(p, { o: 0 }), x = 100 + i * 290; put(pill(g0, s, x + 120, 700, null, { col: COL.task, size: 18 }), { o: 1 }); if (i) path(g0, `M${x - 16} 693h20m-8 -7l8 7l-8 7`, { stroke: COL.dim, 'stroke-width': 2.5 }); show(g0, m('vib', .3 + i * .9)); });
+    txt(p, 'и от проксимальных отделов к дистальным', 800, 750, m('vib', 4.5), { size: 20, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 60, 780, 1480, 100, 'узнавание стимулов', 'касание ластиком — сначала глядя, затем с закрытыми глазами → постоянное касание → ключи, монеты, ложки; стопы — трава, песок, дерево, галька', COL.good, m('disc'), { size: 19 });
+  }],
+
+  ['chron', 'Хроническая фаза и профилактика', (m, D) => {
+    const p = panel(0);
+    txt(p, 'хроническая фаза и профилактика (блок 13.6)', 800, 56, m('chron'), { size: 28, weight: 700, anchor: 'middle', fill: COL.good });
+    infoCard(p, 60, 100, 1480, 140, 'возможности реиннервации исчерпаны', 'главное — компенсация функции; ортез и профилактика — пожизненно', COL.good, m('chron'), { size: 22 });
+    infoCard(p, 60, 270, 1480, 120, 'кожа', 'регулярно осматривать, сразу лечить ранки и мозоли; сухую кожу — увлажнять кремом', COL.whole, m('care'), { size: 21 });
+    const hm = handMap(p, 300, 660, .95, m('hand'));
+    handZone(hm, 'median', '#5aa7d6', m('hand', .3));
+    txt(p, 'без чувствительности', 300, 880, m('hand', .3), { size: 19, weight: 600, fill: '#5aa7d6', anchor: 'middle' });
+    infoCard(p, 520, 420, 1020, 200, 'рука', 'не брать горячее, холодное, острое, шершавое; не держать хват подолгу, менять инструменты; утолщать ручки; защитные перчатки', COL.task, m('hand'), { size: 21 });
+    infoCard(p, 520, 640, 1020, 200, 'нога', 'удобная защитная обувь; осматривать стопы — нет ли покраснений; не ходить босиком, особенно в темноте; почаще переносить вес при долгом стоянии', COL.real, m('foot'), { size: 21 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-phase', prompt: ['В какой фазе это делают?'],
+    build: grid([
+      { parts: ['Иммобилизация 3 недели после шва нерва'], ans: ['a'], why: 'Острая фаза.' },
+      { parts: ['Удержание мышцы в укороченном положении с электростимуляцией'], ans: ['r'], why: 'Фаза восстановления.' },
+      { parts: ['Ткани разной фактуры для сверхчувствительной кожи'], ans: ['r'], why: 'Фаза восстановления: десенситизация.' },
+      { parts: ['Учат приёмам компенсации, ортез — пожизненно'], ans: ['c'], why: 'Хроническая фаза.' },
+      { parts: ['Ортез против свисающей кисти сразу после травмы'], ans: ['a'], why: 'Острая фаза.' },
+    ], [['a', 'Острая', COL.bad], ['r', 'Восстановление', COL.task], ['c', 'Хроническая', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Нерв повреждают сдавление, рассечение, растяжение, облучение, электричество и инъекции; уязвимы тоннели, ветвления и фиксированные участки.', 'w1'],
+     ['Нейропраксия восстанавливается полностью, аксонотмезис — неполностью, нейротмезис — только после операции.', 'w2'],
+     ['Нерв растёт примерно на 1 мм в сутки; хуже всего регенерирует малоберцовый.', 'w3'],
+     ['Острая фаза — защита и ортезы; восстановление — удержание, стимуляция, десенситизация, узнавание стимулов; хроническая — компенсация и профилактика.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: NV }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-hyper', prompt: ['Через три месяца после шва срединного нерва кончики пальцев стали болезненно чувствительны к прикосновению. Что делать?'],
+    build: choice([
+      ['Десенситизация: ткани и частицы от мягких к грубым по 1–3 минуты, затем узнавание стимулов'],
+      ['Избегать прикосновений, пока не пройдёт'],
+      ['Это осложнение — прекратить реабилитацию'],
+      ['Сразу узнавание мелких предметов с закрытыми глазами'],
+    ], 0, 'Сверхчувствительность — признак прорастания нерва; её снижают градуированной десенситизацией, затем переобучают узнавание стимулов.',
+    [null, 'Избегание закрепит сверхчувствительность; нужна градуированная стимуляция.', 'Это ожидаемый признак реиннервации.', 'Узнавание предметов — после того, как сверхчувствительность уменьшится.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-dist', prompt: ['Пример для расчёта (не из книги): шов нерва выше локтя, до мышц кисти около 300 мм. Через сколько примерно ждать первых признаков реиннервации мышц кисти, если нерв растёт на 1 мм в сутки?'],
+    build: choice([
+      ['Около 300 дней — примерно 10 месяцев'],
+      ['Через 3 недели'],
+      ['Через 30 дней'],
+      ['Нерв не восстанавливается'],
+    ], 0, 'При скорости около 1 мм в сутки 300 мм нерв проходит примерно за 300 дней; скорость может быть от 0,5 до 9 мм.',
+    [null, 'Это срок иммобилизации, а не регенерации.', 'За 30 дней нерв вырастет лишь примерно на 30 мм.', 'После шва нерв регенерирует, хотя и медленно.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

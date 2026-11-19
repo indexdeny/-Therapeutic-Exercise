@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Энергетические системы и расход энергии — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 79, title: 'Энергетические системы и расход энергии', minutes: 10, language: 'ru', next: '../ch080/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch079/lupa.ru.json
+const LUPA = [
+  {"beat": "eff", "fig": 1, "target": "rectus", "from": "bike", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch079/cards.ru.json
+const CARDS_SHORT = {
+  "цепочки биохимических реакций\nв итоге — аденозинтрифосфат (АТФ), углекислый газ и вода": "итог — АТФ, углекислый газ, вода",
+  "вклад каждой системы\nзависит от интенсивности и длительности работы": "интенсивность и длительность работы",
+  "работают все три\nменяется только их доля": "меняется доля",
+  "энергетическая стоимость зависит от\nмеханической эффективности и массы тела; при ходьбе и беге — от рельефа, длины шага, сопротивления воздуха": "эффективность и масса тела",
+  "считают по кислороду\nрасход энергии вычисляют по потреблённому O₂; единицы — МЕТ и килокалории": "МЕТ и килокалории",
+  "крупные мышцы: 20–25 %\nвыше чистая кислородная стоимость — ниже эффективность": "стоимость выше — эффективность ниже",
+};
+// cards-short end
+
+const PCC = COL.int, GLY = COL.real, AER = COL.whole, ATPC = '#8fd6b0', O2C = '#9fe0f0';
+const SYS = [['фосфагенная (АТФ–КФ)', PCC], ['анаэробный гликолиз', GLY], ['аэробная', AER]];
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+// A store of energy drawn as a tank (its size — the capacity) with a stream out of its tap (its width — the power).
+// tk.level(v): the liquid level 0..1; tk.flow(q): the stream runs (dash phase).
+function tank(p, cx, bottom, w, h, power, col, t0) {
+  const g = G(p, { o: 0 }), id = 'tk' + (++SHADE_ID), defs = mk('defs', {}, g), gr = mk('linearGradient', { id, x1: 0, y1: 0, x2: 1, y2: 0 }, defs);
+  [[0, mix(col, '#ffffff', .25)], [.5, col], [1, mix(col, '#000000', .35)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, gr));
+  const liq = mk('rect', { x: cx - w / 2 + 4, y: bottom - h, width: w - 8, height: h - 4, fill: `url(#${id})`, 'fill-opacity': .85 }, g);
+  mk('rect', { x: cx - w / 2, y: bottom - h, width: w, height: h, rx: 8, fill: 'none', stroke: COL.chalk, 'stroke-width': 3 }, g);
+  path(g, `M${cx} ${bottom}V${bottom + 22}`, { stroke: COL.chalk, 'stroke-width': power * 6 + 8 });
+  const stream = path(g, `M${cx} ${bottom + 22}V${bottom + 110}`, { stroke: col, 'stroke-width': power * 6, 'stroke-dasharray': '14 8', 'stroke-linecap': 'butt' });
+  if (t0 !== null) show(g, t0);
+  return { g, level(v) { const hh = (h - 4) * clamp(v, 0, 1); liq.setAttribute('y', (bottom - 4 - hh + 4).toFixed(1)); liq.setAttribute('height', hh.toFixed(1)); },
+    flow(q) { stream.setAttribute('stroke-dashoffset', (-q * 220).toFixed(1)); } };
+}
+// One muscle fibre in cross-section: colour (myoglobin), n mitochondria; set(v) makes it glow when recruited.
+function oneFibre(p, cx, cy, r, col, nMito, t0) {
+  const g = G(p, { o: 0 }), id = 'of' + (++SHADE_ID), defs = mk('defs', {}, g), gr = mk('radialGradient', { id, cx: .38, cy: .32, r: .8 }, defs);
+  [[0, mix(col, '#ffffff', .35)], [.6, col], [1, mix(col, '#000000', .4)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, gr));
+  const glow = mk('circle', { cx, cy, r: r + 8, fill: 'none', stroke: '#ff5a4a', 'stroke-width': 10, 'stroke-opacity': 0 }, g);
+  mk('circle', { cx, cy, r, fill: `url(#${id})`, stroke: mix(col, '#000000', .5), 'stroke-width': 2 }, g);
+  let seed = Math.round(cx);
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < nMito; i++) {
+    const a = rnd() * 2 * Math.PI, rr = Math.sqrt(rnd()) * r * .78, x = cx + rr * Math.cos(a), y = cy + rr * Math.sin(a);
+    mk('ellipse', { cx: x.toFixed(1), cy: y.toFixed(1), rx: r * .11, ry: r * .06, fill: '#c97a3a', stroke: '#7a4420', 'stroke-width': 1, transform: `rotate(${Math.round(rnd() * 180)} ${x.toFixed(1)} ${y.toFixed(1)})` }, g);
+  }
+  if (t0 !== null) show(g, t0);
+  return { g, set(v) { glow.setAttribute('stroke-opacity', (.75 * v).toFixed(2)); } };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Энергетические системы', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 7 · Урок 79', { x: 800, y: 150, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Энергетические системы', { x: 800, y: 235, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и расход энергии', { x: 800, y: 300, size: 44, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'откуда мышца берёт энергию и как её посчитать', 800, 380, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const bk = cycleErgo(art, 640, 840, .85);
+    const kc = T(art, '', { x: 1000, y: 640, size: 40, weight: 700, fill: COL.task });
+    prog(q => { bk.crank(2 * Math.PI * 6 * q); kc.textContent = `${(q * 4.9 * 3).toFixed(1).replace('.', ',')} ккал`; }, .4, Math.max(4, D - 1.4), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['atp', 'АТФ', (m, D) => {
+    const p = panel(0);
+    txt(p, 'энергетические системы: всё ради АТФ', 800, 62, m('atp'), { size: 28, weight: 700, anchor: 'middle' });
+    infoCard(p, 60, 100, 700, 150, 'цепочки биохимических реакций', 'в итоге — аденозинтрифосфат (АТФ), углекислый газ и вода', ATPC, m('atp'), { size: 22 });
+    // ATP: adenosine and three phosphates; the last one splits off with energy
+    const ag = G(p, { o: 0 });
+    mk('rect', { x: 110, y: 330, width: 190, height: 80, rx: 26, fill: mix(ATPC, COL.board, .45), stroke: ATPC, 'stroke-width': 3 }, ag);
+    T(ag, 'аденозин', { x: 205, y: 379, size: 24, weight: 700, anchor: 'middle' });
+    path(ag, 'M300 370H520', { stroke: COL.chalk, 'stroke-width': 4 });
+    const ph = [350, 440, 530].map((x, i) => { const c = G(ag, { x, y: 370 }); mk('circle', { r: 32, fill: mix(COL.int, COL.board, .4), stroke: COL.int, 'stroke-width': 3 }, c); T(c, 'Ф', { y: 10, size: 28, weight: 700, anchor: 'middle', fill: COL.int }); return c; });
+    show(ag, m('atp', 1));
+    txt(p, 'АТФ', 330, 460, m('atp', 1), { size: 30, weight: 700, fill: ATPC, anchor: 'middle' });
+    tw(ph[2], { x: 650, y: 420 }, m('split', .8), .9, out);
+    const spark = G(p, { x: 600, y: 330, s: 0, o: 0 });
+    for (let i = 0; i < 8; i++) { const a = rad(i * 45); path(spark, `M${16 * Math.cos(a)} ${16 * Math.sin(a)}L${34 * Math.cos(a)} ${34 * Math.sin(a)}`, { stroke: COL.task, 'stroke-width': 5 }); }
+    pop(spark, m('split', 1.2)); pulse(spark, m('split', 2), 1.3);
+    txt(p, 'энергия', 600, 280, m('split', 1.2), { size: 24, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'АТФ → АДФ + Ф + энергия', 400, 530, m('split', 1.5), { size: 30, weight: 700, anchor: 'middle' });
+    // the energy drives the cross-bridges: the sarcomere shortens
+    const sr = sarcomere(p, 400, 720, 420, 130);
+    put(sr.g, { o: 0 }); show(sr.g, m('cross'));
+    const heads = path(p, '', { stroke: mix(ANAT.muscle, '#000000', .25), 'stroke-width': 3 });
+    const setHeads = () => {
+      const a = 400 - sr.len / 2, b = 400 + sr.len / 2, act = 420 * .36, myo = 420 * .5, f = v => v.toFixed(1);
+      let d = '';
+      [-.3, 0, .3].forEach(k => { const y = 720 + k * 130;
+        for (let x = 400 - myo / 2 + 8; x < 400 + myo / 2 - 8; x += 18) { const inL = x < 400 && x < a + act, inR = x > 400 && x > b - act; if (!inL && !inR) continue; const dir = x < 400 ? -1 : 1; d += `M${f(x)} ${f(y - 3)}L${f(x + dir * 6)} ${f(y - 7)}M${f(x)} ${f(y + 3)}L${f(x + dir * 6)} ${f(y + 7)}`; } });
+      heads.setAttribute('d', d);
+    };
+    put(heads, { o: 0 }); show(heads, m('cross'));
+    prog(q => { sr.set(420 - 90 * cyc(q, 3)); setHeads(); }, m('cross', .5), Math.max(3, m('three') - m('cross', .5)), lin);
+    txt(p, 'поперечные мостики актина и миозина → сокращение', 400, 860, m('cross', .5), { size: 22, fill: ANAT.muscle, anchor: 'middle', weight: 600 });
+    // three systems
+    txt(p, 'три системы', 1170, 140, m('three'), { size: 28, weight: 700, anchor: 'middle' });
+    SYS.forEach(([s, c], i) => pill(p, s, 1170, 230 + i * 90, m('three', .6 + i * .6), { col: c, size: 27 }));
+    infoCard(p, 870, 520, 640, 160, 'вклад каждой системы', 'зависит от интенсивности и длительности работы', COL.chalk, m('three', 2.5), { size: 23 });
+  }],
+
+  ['sys', 'Три системы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'три энергетические системы', 800, 56, m('pc'), { size: 28, weight: 700, anchor: 'middle' });
+    const cols = [[270, 'pc', 90, 70, 3.7, 'ёмкость 0,7 моль АТФ', 'мощность 3,7 моль/мин',
+        ['топливо: креатинфосфат', 'без кислорода', 'запас в мышце, восполняется в покое', 'главная: первые 30 с']],
+      [800, 'gly', 120, 110, 1.6, 'ёмкость 1,2 моль АТФ', 'мощность 1,6 моль/мин',
+        ['топливо: гликоген (глюкоза)', 'без кислорода, в клетке', 'побочный продукт: молочная кислота', 'главная: 30–90 с']],
+      [1330, 'aer', 260, 250, 1, 'ёмкость 90 моль АТФ', 'мощность 1 моль/мин',
+        ['топливо: гликоген, жиры, белки', 'нужен кислород', 'в митохондриях', 'главная: после 2-й минуты']]];
+    const tanks = cols.map(([cx, k, w, h, pw, cap, pow, lines], i) => {
+      const [nm, c] = SYS[i];
+      pill(p, nm, cx, 112, m(k), { col: c, size: 24 });
+      const tk = tank(p, cx, 400, w, h, pw, c, m(k, .5));
+      txt(p, cap, cx, 545, m(k + 'num'), { size: 22, weight: 700, fill: c, anchor: 'middle' });
+      txt(p, pow, cx, 578, m(k + 'num', .6), { size: 22, weight: 700, fill: c, anchor: 'middle' });
+      lines.forEach((s, j) => txt(p, s, cx, 640 + j * 40, m(k, 1 + j * .9), { size: 21, fill: j === 3 ? c : COL.chalk, anchor: 'middle', weight: j === 3 ? 700 : 500 }));
+      return tk;
+    });
+    // the small fast store empties quickly, the huge slow one barely moves
+    const t1 = m('pcnum'), t2 = m('glynum'), t3 = m('aernum');
+    prog(q => { tanks[0].level(1 - .85 * q); tanks[0].flow(q * 8); }, t1, Math.max(2, m('gly') - t1), lin);
+    prog(q => { tanks[1].level(1 - .7 * q); tanks[1].flow(q * 5); }, t2, Math.max(2, m('aer') - t2), lin);
+    prog(q => { tanks[2].level(1 - .06 * q); tanks[2].flow(q * 4); }, t3, Math.max(3, D - t3), lin);
+    tanks.forEach(t => t.level(1));
+    txt(p, 'размер бака — ёмкость, ширина струи — мощность', 800, 838, m('pcnum'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    pill(p, 'баки не в масштабе', 1075, 385, m('aernum'), { col: COL.dim, size: 18 });
+    NOTE(p, 1380, 838, m('pcnum'));
+  }],
+
+  ['time', 'Время работы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'кто главный в каждый момент интенсивной работы', 800, 62, m('time'), { size: 28, weight: 700, anchor: 'middle' });
+    const x0 = 170, y0 = 760, w = 1100, h = 560, T3 = 180, X = s => x0 + s / T3 * w;
+    chartAxes(p, x0, y0, w, h, 'доля энергии', 'время работы', m('time'));
+    [[0, '0'], [30, '30 с'], [90, '90 с'], [120, '2 мин']].forEach(([s, l]) => txt(p, l, X(s), y0 + 32, m('time'), { size: 19, fill: COL.dim, anchor: 'middle' }));
+    const pc = t => Math.exp(-((t / 40) ** 2)), gl = t => (t / 60) ** 2 * Math.exp(2 * (1 - t / 60)), ae = t => 1 - Math.exp(-t / 80);
+    const share = (f, t) => f(t) / (pc(t) + gl(t) + ae(t));
+    [[pc, PCC, 'time', .3], [gl, GLY, 't30', 0], [ae, AER, 't2', 0]].forEach(([f, c, k, dt]) => {
+      draw(path(p, fnPath(x0, y0, w, h * .92, x => share(f, x * T3)), { stroke: c, 'stroke-width': 6 }, { d: 0 }), m(k, dt), 1.6);
+    });
+    [[30, 't30'], [90, 't30'], [120, 't2']].forEach(([s, k]) => show(put(path(p, `M${X(s)} ${y0}V${y0 - h}`, { stroke: COL.faint, 'stroke-width': 2, 'stroke-dasharray': '8 8' }), { o: 0 }), m(k, .5)));
+    txt(p, 'фосфагенная', X(10), y0 - h * .85, m('time', .8), { size: 23, weight: 700, fill: PCC });
+    txt(p, 'гликолиз', X(62), y0 - h * .7, m('t30', .8), { size: 23, weight: 700, fill: GLY, anchor: 'middle' });
+    txt(p, 'аэробная', X(160), y0 - h * .8, m('t2', .8), { size: 23, weight: 700, fill: AER, anchor: 'middle' });
+    pill(p, 'схема', x0 + w + 80, y0 - h + 20, m('time'), { col: COL.dim, size: 18 });
+    infoCard(p, 1290, 300, 270, 190, 'работают все три', 'меняется только их доля', COL.chalk, m('mix'), { size: 22 });
+    // a sprint marker running along the time axis
+    const dotT = put(mk('circle', { r: 10, fill: COL.chalk }, p), { o: 0 });
+    prog(q => put(dotT, { x: X(q * 170), y: y0, o: q > 0 && q < 1 ? 1 : 0 }), m('time', .5), Math.max(3, m('mix') - m('time', .5)), lin);
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-sys', prompt: ['Какая энергетическая система?'],
+    build: grid([
+      { parts: ['Главная в первые 30 секунд интенсивной работы'], ans: ['pc'], why: 'Фосфагенная: мала ёмкость, велика мощность.' },
+      { parts: ['Побочный продукт — молочная кислота'], ans: ['gly'], why: 'Анаэробный гликолиз.' },
+      { parts: ['Огромная ёмкость, малая мощность'], ans: ['aer'], why: 'Аэробная: 90 моль АТФ, 1 моль в минуту.' },
+      { parts: ['Нужен кислород; АТФ образуется в митохондриях'], ans: ['aer'], why: 'Аэробная система.' },
+      { parts: ['Средние ёмкость и мощность; главная с 30-й по 90-ю секунду'], ans: ['gly'], why: 'Анаэробный гликолиз.' },
+    ], [['pc', 'Фосфагенная', PCC], ['gly', 'Гликолиз', GLY], ['aer', 'Аэробная', AER]], { multi: false, text: true }),
+  }], done) }],
+
+  ['fib', 'Типы волокон', (m, D) => {
+    const p = panel(0);
+    txt(p, 'типы мышечных волокон: кого мышца включает', 800, 62, m('fib'), { size: 28, weight: 700, anchor: 'middle' });
+    const FB = [[280, 'I — медленные', '#b8433c', 26, 't1', ['много миоглобина и митохондрий', 'высокая окислительная способность', 'мелкий нейрон, низкий порог', 'выносливость']],
+      [800, 'IIA — промежуточные', '#e08a7a', 13, 't2a', ['черты I и IIB', 'и анаэробная, и аэробная работа']],
+      [1320, 'IIB — быстрые', '#f2cfc2', 4, 't2b', ['мало миоглобина и митохондрий', 'высокая гликолитическая способность', 'мощность']]];
+    const fibs = FB.map(([cx, nm, c, nmito, k, lines]) => {
+      txt(p, nm, cx, 140, m(k), { size: 25, weight: 700, fill: c === '#f2cfc2' ? COL.chalk : c, anchor: 'middle' });
+      const fb = oneFibre(p, cx, 290, 105, c, nmito, m(k, .3));
+      lines.forEach((s, j) => txt(p, s, cx, 450 + j * 38, m(k, 1 + j * .8), { size: 21, anchor: 'middle', fill: j === lines.length - 1 ? COL.task : COL.chalk, weight: j === lines.length - 1 ? 700 : 500 }));
+      return fb;
+    });
+    // a motor neuron for each: small with a low threshold for type I
+    [[280, 9, 't1'], [800, 14, 't2a'], [1320, 18, 't2b']].forEach(([cx, r, k]) => {
+      const g = G(p, { o: 0 });
+      mk('circle', { cx: cx - 150, cy: 200, r, fill: COL.int, stroke: mix(COL.int, '#000000', .4), 'stroke-width': 2 }, g);
+      path(g, `M${cx - 150 + r} ${200}C${cx - 120} 200 ${cx - 110} 240 ${cx - 92} 255`, { stroke: COL.int, 'stroke-width': r / 3 + 1 });
+      show(g, m(k, .6));
+    });
+    // the intensity slider: type I first, type II with higher intensity
+    const sx = 360, sw = 880, sy = 800;
+    const sg = G(p, { o: 0 });
+    mk('rect', { x: sx, y: sy - 8, width: sw, height: 16, rx: 8, fill: mix(COL.dim, COL.board, .5) }, sg);
+    T(sg, 'интенсивность', { x: sx - 20, y: sy + 8, size: 22, fill: COL.dim, anchor: 'end' });
+    T(sg, 'низкая', { x: sx, y: sy + 44, size: 19, fill: COL.dim }); T(sg, 'высокая', { x: sx + sw, y: sy + 44, size: 19, fill: COL.dim, anchor: 'end' });
+    const knob = mk('circle', { r: 16, fill: COL.chalk }, sg);
+    show(sg, m('t1', 3));
+    prog(q => {
+      const v = q < .5 ? q * 2 * .35 : .35 + (q - .5) * 2 * .65;
+      knob.setAttribute('cx', (sx + v * sw).toFixed(1)); knob.setAttribute('cy', sy);
+      fibs[0].set(v > .05 ? 1 : 0); fibs[1].set(clamp((v - .45) / .2, 0, 1)); fibs[2].set(clamp((v - .65) / .2, 0, 1));
+    }, m('t1', 3.5), Math.max(4, D - m('t1', 3.8)), lin);
+    txt(p, 'работающие волокна светятся', 1240, 765, m('t1', 3.5), { size: 19, fill: '#ff7a6a', anchor: 'end' });
+  }],
+
+  ['func', 'Что тренирует работа', (m, D) => {
+    const p = panel(0);
+    txt(p, 'какая работа что развивает', 800, 62, m('func'), { size: 28, weight: 700, anchor: 'middle' });
+    const rows = [['f1', 'секунды, максимально', [[.06, 1], [.06, 0], [.06, 1], [.06, 0], [.06, 1]], 'сила; крепче сухожилия и связки', [0]],
+      ['f2', '1–2 мин интенсивно, 4 мин отдыха', [[.15, .85], [.3, .15], [.15, .85]], 'анаэробная мощность', [0, 1]],
+      ['f3', '3–5 мин ниже максимума, такой же отдых', [[.25, .65], [.25, .15], [.25, .65]], 'аэробная мощность и выносливость', [0, 1, 2]],
+      ['f4', '20–30 мин и дольше, субмаксимально', [[.9, .5]], 'выносливость', [2]]];
+    rows.forEach(([k, lab, blocks, res, sys], i) => {
+      const y = 140 + i * 180, g = G(p, { o: 0 });
+      mk('rect', { x: 60, y, width: 1480, height: 160, rx: 18, fill: PANEL, stroke: EDGE, 'stroke-width': 2 }, g);
+      T(g, lab, { x: 90, y: y + 40, size: 23, weight: 700 });
+      let x = 90;
+      blocks.forEach(([bw, hgt]) => { const W = bw * 520; if (hgt > 0) mk('rect', { x, y: y + 140 - 80 * hgt, width: W - 4, height: 80 * hgt, rx: 6, fill: hgt > .3 ? mix(COL.bad, COL.board, .3) : mix(COL.good, COL.board, .4) }, g); x += W; });
+      path(g, `M90 ${y + 140}H${90 + 560}`, { stroke: COL.faint, 'stroke-width': 2 });
+      T(g, '→', { x: 700, y: y + 100, size: 34, fill: COL.dim, anchor: 'middle' });
+      put(para(g, res, 740, y + 70, null, { size: 25, weight: 700, fill: COL.task, maxW: 420 }), { o: 1 });
+      show(g, m(k));
+      sys.forEach((j, n) => pill(p, SYS[j][0], 1370, y + 50 + n * 40 - (sys.length - 1) * 10, m(k, 1.5 + n * .4), { col: SYS[j][1], size: 18 }));
+    });
+    pill(p, 'схема', 1480, 110, m('func'), { col: COL.dim, size: 18 });
+  }],
+
+  ['met', 'МЕТ и килокалории', (m, D) => {
+    const p = panel(0);
+    txt(p, 'расход энергии: МЕТ и килокалории', 800, 62, m('met'), { size: 28, weight: 700, anchor: 'middle' });
+    infoCard(p, 60, 100, 720, 170, 'энергетическая стоимость зависит от', 'механической эффективности и массы тела; при ходьбе и беге — от рельефа, длины шага, сопротивления воздуха', COL.chalk, m('met'), { size: 21 });
+    infoCard(p, 820, 100, 720, 170, 'считают по кислороду', 'расход энергии вычисляют по потреблённому O₂; единицы — МЕТ и килокалории', O2C, m('o2'), { size: 21 });
+    pill(p, '1 МЕТ ≈ 3,5 мл O₂ / кг / мин', 420, 340, m('mdef'), { col: O2C, size: 30 });
+    pill(p, '5 ккал ≈ 1 л O₂', 1180, 340, m('kcal', 3), { col: COL.task, size: 30 });
+    txt(p, 'ккал: нагреть 1 кг воды на 1 °C', 1180, 410, m('kcal'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    // the formula, step by step
+    const fg = G(p, { o: 0 });
+    roundBox(fg, 60, 450, 1480, 110, COL.task, PANEL, 2.5);
+    show(fg, m('form'));
+    const parts = [['МЕТ × 3,5 × масса (кг)', COL.chalk], [' ÷ 1000', COL.chalk], [' = л O₂/мин', O2C], ['  × 5', COL.task], [' = ккал/мин', COL.task]];
+    let fx = 110;
+    parts.forEach(([s, c], i) => { txt(p, s, fx, 518, m('form', .5 + i * 1.1), { size: 30, weight: 700, fill: c }); fx += uiW(s, 30) + 6; });
+    // the worked example: 70 kg at 4 MET
+    const tm = treadmill(p, 1330, 870, .62, m('ex'));
+    prog(q => tm.set({ ph: q * 6 }), m('ex', .2), Math.max(3, D - m('ex', .5)), lin);
+    pill(p, '70 кг', 1330, 610, m('ex'), { col: COL.chalk, size: 22 });
+    const ex = [['4 × 3,5 × 70 = 980 мл/мин', COL.chalk], ['≈ 0,98 л O₂ в минуту', O2C], ['× 5 ≈ 4,9 ккал/мин', COL.task]];
+    ex.forEach(([s, c], i) => txt(p, s, 110, 650 + i * 70, m('ex', 1 + i * 2.5), { size: 34, weight: 700, fill: c }));
+  }],
+
+  ['cls', 'Лёгкая, умеренная, интенсивная', (m, D) => {
+    const p = panel(0);
+    txt(p, 'классификация по расходу энергии', 800, 62, m('cls'), { size: 28, weight: 700, anchor: 'middle' });
+    const x0 = 120, u = 151, X = v => x0 + v * u, y = 280;
+    const sg = G(p, { o: 0 });
+    path(sg, `M${X(0)} ${y}H${X(9)}`, { stroke: COL.dim, 'stroke-width': 3 });
+    for (let v = 0; v <= 9; v++) { path(sg, `M${X(v)} ${y - 8}V${y + 8}`, { stroke: COL.dim, 'stroke-width': 2 }); T(sg, String(v), { x: X(v), y: y + 36, size: 20, fill: COL.dim, anchor: 'middle' }); }
+    T(sg, 'МЕТ', { x: X(9) + 14, y: y + 6, size: 21, fill: COL.dim });
+    show(sg, m('cls'));
+    const Z = [['лёгкая', 1, 2.9, COL.good, 'light'], ['умеренная', 3, 5.9, COL.int, 'mod'], ['интенсивная', 6, 8.8, COL.bad, 'vig']];
+    Z.forEach(([nm, a, b, c, k]) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x: X(a), y: y - 40, width: X(b) - X(a), height: 26, rx: 8, fill: mix(c, COL.board, .4), stroke: c, 'stroke-width': 2 }, g);
+      T(g, nm + (k === 'light' ? ' < 3' : k === 'mod' ? ' 3–5,9' : ' 6–8,8'), { x: (X(a) + X(b)) / 2, y: y - 52, size: 23, weight: 700, fill: c, anchor: 'middle' });
+      show(g, m(k));
+    });
+    const ex = { light: ['сидеть, стоять', 'обслуживать себя', 'заправить кровать', 'сходить за продуктами', 'ходьба < 4 км/ч'],
+      mod: ['спуск по лестнице', 'ходьба 4–5,5 км/ч', 'косить газон за косилкой', 'гольф'],
+      vig: ['ходьба > 5,5 км/ч', 'плавание (умеренно)', 'бег трусцой', 'бег 8 км/ч', 'уборка снега лопатой'] };
+    Z.forEach(([, a, b, c, k]) => ex[k].forEach((s, i) => pill(p, s, (X(a) + X(b)) / 2, 380 + i * 64, m(k, 1 + i * .8), { col: c, size: 21 })));
+    txt(p, 'в книге — мили в час', 1380, 720, m('mod', 3), { size: 19, fill: COL.dim, anchor: 'middle' });
+    // a needle on the scale follows the walker's speed
+    const nd = put(path(p, 'M0 -16L-11 -36H11Z', { fill: COL.chalk, stroke: 'none' }), { o: 0 });
+    show(nd, m('light'));
+    prog(q => put(nd, { x: X(2.5), y: y + 14, r: 180 }), m('light'), .1);
+    prog(q => put(nd, { x: X(lerp(2.5, 4.3, q)), y: y + 14, r: 180 }), m('mod'), 1.2);
+    prog(q => put(nd, { x: X(lerp(4.3, 7, q)), y: y + 14, r: 180 }), m('vig'), 1.2);
+    infoCard(p, 120, 770, 1360, 100, 'большинство видов производственного труда — больше 3 МЕТ; точный расход зависит от навыка, темпа и подготовки', null, COL.chalk, m('job'), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-met', prompt: ['Лёгкая, умеренная или интенсивная работа?'],
+    build: grid([
+      { parts: ['Заправить кровать'], ans: ['l'], why: 'Лёгкая — меньше 3 МЕТ.' },
+      { parts: ['Играть в гольф'], ans: ['m'], why: 'Умеренная — 3–5,9 МЕТ.' },
+      { parts: ['Бег трусцой'], ans: ['v'], why: 'Интенсивная — 6–8,8 МЕТ.' },
+      { parts: ['Спускаться по лестнице'], ans: ['m'], why: 'Умеренная.' },
+      { parts: ['Чистить снег лопатой'], ans: ['v'], why: 'Интенсивная.' },
+    ], [['l', 'Лёгкая', COL.good], ['m', 'Умеренная', COL.int], ['v', 'Интенсивная', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['eff', 'Эффективность', (m, D) => {
+    const p = panel(0);
+    txt(p, 'эффективность', 800, 56, m('eff'), { size: 28, weight: 700, anchor: 'middle' });
+    const fg = G(p, { o: 0 });
+    roundBox(fg, 160, 80, 1280, 80, COL.task, PANEL, 2.5);
+    T(fg, 'эффективность = полезная работа ÷ затраченная энергия × 100 %', { x: 800, y: 132, size: 28, weight: 700, anchor: 'middle', fill: COL.task });
+    show(fg, m('eff'));
+    txt(p, 'работа = сила × путь · мощность = работа ÷ время', 800, 200, m('work'), { size: 23, fill: COL.chalk, anchor: 'middle' });
+    // the treadmill: body weight × the height climbed
+    const tm = treadmill(p, 330, 560, .75, m('tread'));
+    prog(q => tm.set({ grade: 12, ph: q * 6 }), m('tread'), Math.max(3, D - m('tread', .3)), lin);
+    const a = Math.atan(.12), k = .75 / .9, xa = tm.x0 + 20 * k, xb = tm.x0 + tm.L - 20 * k, ya = tm.yAt(xa, a) - 6, yb = tm.yAt(xb, a) - 6;
+    const tri = G(p, { o: 0 });
+    path(tri, `M${xa} ${ya}H${xb}`, { stroke: COL.task, 'stroke-width': 3, 'stroke-dasharray': '8 6' });
+    path(tri, `M${xb} ${ya}V${yb}`, { stroke: COL.task, 'stroke-width': 5 });
+    T(tri, 'подъём', { x: xb + 12, y: (ya + yb) / 2 + 8, size: 21, weight: 700, fill: COL.task });
+    show(tri, m('tread', .8));
+    txt(p, 'дорожка: вес × высота подъёма', 330, 620, m('tread', .5), { size: 22, weight: 700, anchor: 'middle' });
+    // the cycle ergometer: flywheel circumference × revolutions × resistance
+    const bk = cycleErgo(p, 830, 560, .7, m('bike'));
+    prog(q => bk.crank(2 * Math.PI * 8 * q), m('bike', .2), Math.max(3, D - m('bike', .5)), lin);
+    txt(p, 'велоэргометр: окружность маховика × обороты × сопротивление', 960, 620, m('bike', .5), { size: 22, weight: 700, anchor: 'middle' });
+    // VO2 against time: rest, the climb, the steady state; the net cost is above rest
+    const x0 = 140, y0 = 860, w = 760, h = 190, Xs = s => x0 + s / 8 * w, rest = .18, ssv = .85;
+    chartAxes(p, x0, y0, w, h, 'потребление O₂', 'мин', m('net'));
+    [0, 2, 4, 6].forEach(s => txt(p, String(s), Xs(s), y0 + 30, m('net'), { size: 18, fill: COL.dim, anchor: 'middle' }));
+    const vo = x => x < .1 ? rest : rest + (ssv - rest) * (1 - Math.exp(-(x - .1) * 8 / 1.1));
+    const area = put(path(p, fnPath(x0, y0, w, h, vo) + `L${x0 + w} ${y0 - rest * h}L${x0} ${y0 - rest * h}Z`, { fill: O2C, 'fill-opacity': .18, stroke: 'none' }), { o: 0 });
+    show(area, m('net', 1));
+    draw(path(p, fnPath(x0, y0, w, h, vo), { stroke: O2C, 'stroke-width': 5 }, { d: 0 }), m('net'), 1.4);
+    show(put(path(p, `M${x0} ${y0 - rest * h}H${x0 + w}`, { stroke: COL.dim, 'stroke-width': 2.5, 'stroke-dasharray': '8 6' }), { o: 0 }), m('net', .5));
+    txt(p, 'покой', x0 + w + 10, y0 - rest * h + 6, m('net', .5), { size: 19, fill: COL.dim });
+    txt(p, 'чистая стоимость', Xs(5), y0 - h * .5, m('net', 1), { size: 21, weight: 700, fill: O2C, anchor: 'middle' });
+    show(put(mk('rect', { x: Xs(3), y: y0 - h - 6, width: Xs(4) - Xs(3), height: h + 6, fill: COL.good, 'fill-opacity': .14 }, p), { o: 0 }), m('ss'));
+    txt(p, 'устойчивое состояние через 3–4 мин', Xs(3.5), y0 - h - 16, m('ss'), { size: 20, weight: 700, fill: COL.good, anchor: 'middle' });
+    pill(p, 'схема', x0 + w + 45, y0 - h, m('net'), { col: COL.dim, size: 18 });
+    infoCard(p, 1010, 670, 530, 190, 'крупные мышцы: 20–25 %', 'выше чистая кислородная стоимость — ниже эффективность', COL.good, m('low'), { size: 22 });
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Фосфагенная: малая ёмкость, большая мощность, первые 30 с; гликолиз — 30–90 с; аэробная: огромная ёмкость, малая мощность, после 2-й минуты.', 'w1'],
+     ['Волокна I типа — для выносливости, II типа — для мощности.', 'w2'],
+     ['1 МЕТ ≈ 3,5 мл O₂/кг/мин; 1 л O₂ ≈ 5 ккал; лёгкая работа — до 3 МЕТ, интенсивная — от 6.', 'w3'],
+     ['Эффективность — полезная работа к затраченной энергии; у крупных мышц 20–25 %.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-kcal', prompt: ['Пациент весом 80 кг ходит 30 минут на 5 МЕТ. Посчитайте.'],
+    build: blanks([
+      { parts: ['Кислород: 5 × 3,5 × 80 = ', { box: '1400' }, ' мл/мин'], why: '5 × 3,5 = 17,5; × 80 = 1400 мл в минуту.' },
+      { parts: ['Энергия: 1400 ÷ 1000 × 5 = ', { box: '7' }, ' ккал/мин'], why: '1,4 л O₂ × 5 ккал.' },
+      { parts: ['За 30 минут: ', { box: '210' }, ' ккал'], why: '7 × 30 = 210.' },
+    ]),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-interval', prompt: ['Спортсмен выполняет 1–2 минуты интенсивной работы, затем 4 минуты лёгкой — и так несколько раз. Что он развивает и какие системы дают энергию?'],
+    build: choice([
+      ['Анаэробную мощность; фосфагенная система и гликолиз'],
+      ['Силу и прочность сухожилий; только фосфагенная система'],
+      ['Выносливость; почти только аэробная система'],
+      ['Аэробную мощность; все три системы'],
+    ], 0, 'Интенсивная работа по 1–2 минуты с 4 минутами отдыха повышает анаэробную мощность.',
+    [null, 'Так работают вспышки по несколько секунд.', 'Это работа по 20–30 минут и дольше.', 'Это интервалы по 3–5 минут ниже максимума с таким же отдыхом.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

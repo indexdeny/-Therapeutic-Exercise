@@ -1,0 +1,37 @@
+[
+ {
+  "beat": "intro",
+  "fig": 1,
+  "target": "biceps",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает biceps, фигура ×0.62"
+ },
+ {
+  "beat": "adv",
+  "fig": 0,
+  "target": "biceps",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает biceps, фигура ×0.55",
+  "off": "места для лупы нет"
+ },
+ {
+  "beat": "dis",
+  "fig": 0,
+  "target": "biceps",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает biceps, фигура ×0.55",
+  "off": "места для лупы нет"
+ },
+ {
+  "beat": "kids",
+  "fig": 0,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает rectus, фигура ×0.62",
+  "off": "лупа видна меньше 2 с — мелькает"
+ }
+]

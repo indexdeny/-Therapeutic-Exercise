@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Позвоночник: компоненты, движения, фасеточные суставы — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 126, title: 'Позвоночник: компоненты, движения, фасеточные суставы', minutes: 9, language: 'ru', next: '../ch127/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch126/cards.ru.json
+const CARDS_SHORT = {
+  "положение частей тела стоя, сидя или лёжа\nописывают положением суставов и сегментов тела и балансом мышц, которые пересекают суставы": "положение суставов + баланс мышц",
+  "многие жалобы — от привычной позы\nповторяющиеся или длительные занятия в неправильной позе нагружают ткани": "неправильная поза нагружает ткани",
+  "сочленения\nрёбра — с грудным отделом; череп — в атланто-затылочном суставе; таз — в крестцово-подвздошных суставах": "рёбра, череп, таз",
+  "передний столб\nтела позвонков и диски: гидравлическая, опорная, амортизирующая часть; размер диска определяет, сколько движения между позвонками": "тела и диски: амортизирующая часть",
+  "задний столб — дуга позвонка\nсуставные отростки и фасеточные суставы: скольжение; ориентация фасеток задаёт направление; поперечные и остистый отростки — рычаги для мышц": "фасетки задают направление",
+  "сегмент\nдва позвонка + два фасеточных сустава + один диск": "два позвонка + диск",
+  "как называть движение\nпо тому, что делает передняя часть тела верхнего позвонка": "по передней части верхнего позвонка",
+  "сопряжённые движения\nпостоянная связь движения вокруг одной оси с движением вокруг другой; зависят от отдела, позы, ориентации фасеток, растяжимости тканей": "связь движения вокруг одной оси с другой",
+  "наклон + ротация\nоткрытие межпозвонкового отверстия определяет наклон": "отверстие определяет наклон",
+  "унковертебральные суставы (Лушки)\nкостные выступы по бокам тел: дают боковую устойчивость и укрепляют диск сзади и сбоку": "боковая устойчивость + укрепляют диск",
+  "при сгибании и разгибании\nв поясничном отделе сопряжение бывает разным": "в поясничном отделе сопряжение бывает разным",
+};
+// cards-short end
+
+const SP = '#8fd6b0', ANTC = '#86c9e8', POSTC = '#bba8ee', SAME = COL.good, OPP = '#f0a04b';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const swing = (q, n) => Math.sin(2 * Math.PI * n * q);
+const f1 = v => v.toFixed(1);
+const BN = ANAT.bone, BL = mix(ANAT.bone, '#000000', .45);
+// Two vertebral bodies seen from behind with the disc; set({ sb (deg, + to the right), lsh (px, + right) }).
+function frontSeg(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 });
+  const body = (par, cy) => {
+    [-1, 1].forEach(k => mk('path', { d: `M${k * 70} ${cy - 24}L${k * 128} ${cy - 30}L${k * 130} ${cy - 10}L${k * 70} ${cy - 2}Z`, fill: BN, stroke: BL, 'stroke-width': 2 }, par));
+    mk('rect', { x: -80, y: cy - 46, width: 160, height: 92, rx: 16, fill: BN, stroke: BL, 'stroke-width': 2 }, par);
+    mk('ellipse', { cx: 0, cy: cy - 4, rx: 13, ry: 22, fill: mix(BN, '#000000', .12), stroke: BL, 'stroke-width': 2 }, par);
+  };
+  const low = G(g, {}); body(low, 62);
+  const disc = mk('path', { fill: DISC_C, stroke: mix(DISC_C, '#000000', .35), 'stroke-width': 2 }, g);
+  const up = G(g, {}); body(up, -62);
+  const S = { sb: 0, lsh: 0 }, e = { g };
+  e.set = o => {
+    Object.assign(S, o);
+    put(up, { x: S.lsh, r: S.sb });
+    const U = P => { const [a, b] = rotPt(P[0], P[1], S.sb); return [a + S.lsh, b]; };
+    const a = U([-80, -16]), b = U([80, -16]);
+    disc.setAttribute('d', `M${f1(a[0])} ${f1(a[1])}L${f1(b[0])} ${f1(b[1])}Q${f1(b[0] + 6)} 0 80 16L-80 16Q${f1(a[0] - 6)} 0 ${f1(a[0])} ${f1(a[1])}Z`);
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// A vertebra seen from above (anterior up) over a dimmed lower one; set({ rot }) turns the upper one about the body
+// centre (+ = to the right: the body goes right, the spinous process left).
+function topVert(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 });
+  const shape = (par, op) => {
+    const a = { fill: BN, stroke: BL, 'stroke-width': 2, 'stroke-linejoin': 'round', 'fill-opacity': op, 'stroke-opacity': op };
+    mk('path', { d: 'M-30 40L-40 74L-62 70L-112 62L-114 80L-58 92L-26 116L-10 172L10 172L26 116L58 92L114 80L112 62L62 70L40 74L30 40Z', ...a }, par);
+    mk('path', { d: 'M-70 16Q-76 -36 0 -40Q76 -36 70 16Q62 36 30 40L-30 40Q-62 36 -70 16Z', ...a }, par);
+    mk('circle', { cx: 0, cy: 78, r: 24, fill: COL.board, stroke: BL, 'stroke-width': 2, 'stroke-opacity': op }, par);
+  };
+  const low = G(g, { x: 6, y: 6 }); shape(low, .3);
+  const pivot = G(g, { x: 0, y: 0 }), up = G(pivot, {}); shape(up, 1);
+  const e = { g };
+  e.set = ({ rot = 0 }) => { put(pivot, { r: rot }); return e; };
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// The atlanto-occipital joint from the side: the convex occipital condyle rocks in the concave atlas (nodding).
+function oaJoint(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 });
+  mk('path', { d: 'M-96 -6Q0 54 96 -6L96 56Q0 74 -96 56Z', fill: BN, stroke: BL, 'stroke-width': 2 }, g);
+  const sk = G(g, { x: 0, y: -62 });
+  mk('path', { d: 'M-150 -10Q-176 -170 -10 -196Q160 -200 186 -60L150 -30Q120 -6 80 -4L66 0A66 66 0 0 1 -66 0L-150 -10Z', fill: mix(BN, COL.board, .55), stroke: BL, 'stroke-width': 2 }, sk);
+  mk('path', { d: 'M-66 0A66 66 0 0 0 66 0Z', fill: BN, stroke: BL, 'stroke-width': 2.5 }, sk);
+  mk('path', { d: 'M150 -96L196 -96M184 -106L198 -96L184 -86', stroke: COL.dim, 'stroke-width': 3, fill: 'none' }, sk);
+  T(sk, 'лицо', { x: 112, y: -110, size: 18, fill: COL.dim, weight: 600 });
+  const e = { g, set: ({ nod = 0 }) => { put(sk, { r: nod }); return e; } };
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// The atlanto-axial joint from above (anterior up): the atlas ring turns about the dens; the right lateral mass moves
+// back with a turn to the right (Fig. 14.5).
+function aaJoint(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 });
+  mk('path', { d: 'M-80 30Q-86 -40 0 -46Q86 -40 80 30Q60 70 0 74Q-60 70 -80 30Z', fill: BN, 'fill-opacity': .25, stroke: BL, 'stroke-width': 2, 'stroke-opacity': .5 }, g);
+  mk('circle', { cx: 0, cy: -14, r: 17, fill: BN, stroke: BL, 'stroke-width': 2 }, g);
+  T(g, 'зуб', { x: 0, y: -8, size: 15, fill: COL.board, weight: 700, anchor: 'middle' });
+  const ring = G(g, { x: 0, y: -14 }), a = { fill: BN, stroke: BL, 'stroke-width': 2, 'stroke-linejoin': 'round' };
+  mk('path', { d: 'M-40 -30Q0 -56 40 -30L34 -20Q0 -42 -34 -20Z', ...a }, ring);
+  mk('path', { d: 'M-60 40Q0 104 60 40L52 32Q0 86 -52 32Z', ...a }, ring);
+  const lm = [-1, 1].map(k => mk('ellipse', { cx: k * 64, cy: 4, rx: 26, ry: 38, ...a }, ring));
+  [-1, 1].forEach(k => mk('path', { d: `M${k * 88} -6L${k * 120} -14L${k * 122} 8L${k * 88} 14Z`, ...a }, ring));
+  const e = { g, lm, set: ({ rot = 0 }) => { put(ring, { r: rot }); return e; } };
+  e.at = k => { const s0 = st(g), [rx, ry] = rotPt(k * 64, 4, st(ring).r); return [s0.x + rx * s0.s, s0.y + (ry - 14) * s0.s]; };
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// A typical cervical segment from the side (anterior right) with the facet plane at 45° to the horizontal.
+function cervFacet(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), a = { fill: BN, stroke: BL, 'stroke-width': 2, 'stroke-linejoin': 'round' };
+  mk('rect', { x: -10, y: -76, width: 100, height: 56, rx: 10, ...a }, g);
+  mk('rect', { x: -10, y: 8, width: 100, height: 56, rx: 10, ...a }, g);
+  mk('rect', { x: -6, y: -18, width: 92, height: 24, rx: 6, fill: DISC_C, stroke: mix(DISC_C, '#000000', .35), 'stroke-width': 1.5 }, g);
+  mk('path', { d: 'M-10 -62L-46 -56L-50 -36L-10 -40Z', ...a }, g);
+  mk('path', { d: 'M-118 -46L-62 10L-36 -16L-92 -72Z', ...a }, g);
+  mk('path', { d: 'M-10 22L-56 26L-60 46L-10 44Z', ...a }, g);
+  mk('path', { d: 'M-118 -38L-62 18L-86 42L-142 -14Z', ...a }, g);
+  const jl = path(g, 'M-120 -42L-62 14', { stroke: SP, 'stroke-width': 5 });
+  path(g, 'M-62 14H-2', { stroke: COL.dim, 'stroke-width': 2, 'stroke-dasharray': '5 5' });
+  path(g, 'M-26 14A36 36 0 0 0 -36 -11', { stroke: SP, 'stroke-width': 2.5 });
+  T(g, '45°', { x: -24, y: -14, size: 20, fill: SP, weight: 700, anchor: 'end' });
+  if (t0 !== null) show(g, t0);
+  return { g, jl };
+}
+// A cervical body from the front with the uncovertebral lips (joints of Luschka) rising at its upper corners.
+function luschka(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), a = { fill: BN, stroke: BL, 'stroke-width': 2, 'stroke-linejoin': 'round' };
+  mk('path', { d: 'M-70 -56H70L74 -14Q60 -6 50 -8H-50Q-60 -6 -74 -14Z', ...a }, g);
+  mk('path', { d: 'M-56 -4H56Q62 -2 66 -10L76 -24L82 -4L80 50H-80L-82 -4L-76 -24L-66 -10Q-62 -2 -56 -4Z', ...a }, g);
+  mk('path', { d: 'M-50 -8H50Q56 -8 56 -4H-56Q-56 -8 -50 -8Z', fill: DISC_C }, g);
+  const lips = [-1, 1].map(k => mk('path', { d: `M${k * 66} -10L${k * 76} -24L${k * 82} -4Z`, fill: SP, stroke: SP, 'stroke-width': 2 }, g));
+  if (t0 !== null) show(g, t0);
+  return { g, lips };
+}
+// A vertebra from above with its facets: 'T' — in the frontal plane, with a rib meeting the body and the transverse
+// process; 'L' — in the sagittal plane, the upper facets concave and the lower convex.
+function facetTop(p, x, y, s, t0, kind) {
+  const g = G(p, { x, y, s, o: 0 }), a = { fill: BN, stroke: BL, 'stroke-width': 2, 'stroke-linejoin': 'round' };
+  mk('path', { d: 'M-66 10Q-72 -46 0 -50Q72 -46 66 10Q58 30 28 34L-28 34Q-58 30 -66 10Z', ...a }, g);
+  mk('path', { d: 'M-28 34L-38 70L-108 58L-112 76L-50 92L-22 116L-10 176L10 176L22 116L50 92L112 76L108 58L38 70L28 34Z', ...a }, g);
+  mk('circle', { cx: 0, cy: 72, r: 22, fill: COL.board, stroke: BL, 'stroke-width': 2 }, g);
+  const fc = { stroke: SP, 'stroke-width': 7, fill: 'none', 'stroke-linecap': 'round' };
+  if (kind === 'T') {
+    [-1, 1].forEach(k => {
+      path(g, `M${k * 30} 98L${k * 62} 98`, fc);
+      path(g, `M${k * 66} 4Q${k * 150} 0 ${k * 170} 80Q${k * 172} 130 ${k * 150} 170`, { stroke: BN, 'stroke-width': 9, 'stroke-opacity': .7 });
+      mk('circle', { cx: k * 110, cy: 66, r: 7, fill: SP }, g);
+      mk('circle', { cx: k * 70, cy: 6, r: 7, fill: SP }, g);
+    });
+  } else {
+    [-1, 1].forEach(k => {
+      path(g, `M${k * 34} 82Q${k * 50} 108 ${k * 40} 128`, fc);
+      path(g, `M${k * 52} 84Q${k * 66} 108 ${k * 56} 130`, { ...fc, stroke: mix(SP, '#ffffff', .4), 'stroke-width': 5 });
+    });
+  }
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// A small curved arrow (a turn) around (x, y).
+function turnArrow(p, x, y, r, col, t0, ccw = false) {
+  const g = G(p, { x, y, o: 0 }), k = ccw ? -1 : 1;
+  path(g, `M${-r} 0A${r} ${r * .45} 0 0 ${ccw ? 1 : 0} ${r} 0`, { stroke: col, 'stroke-width': 3.5 });
+  path(g, `M${r - 10 * k} ${-8}L${r} 0L${r - 12 * k} 6`, { stroke: col, 'stroke-width': 3.5 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Позвоночник', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Часть IV · Глава 14 · Урок 126', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Позвоночник: компоненты, движения,', { x: 800, y: 215, size: 52, weight: 600, anchor: 'middle' });
+    T(g, 'фасеточные суставы', { x: 800, y: 280, size: 44, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'упражнения по областям тела: начинаем с позвоночника', 800, 360, m('sub'), { size: 30, fill: SP, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const f = postureFig(art, 1180, 890, .5, null, { arm: false, regions: true }); put(f.g, { o: 1 }); f.ghost(.35);
+    const sg = spineSeg(art, 640, 640, .82, null); put(sg.g, { o: 1 });
+    prog(q => sg.set({ flex: 9 * swing(q, 2) }), .6, Math.max(2, D - 1.6), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['posture', 'Что такое осанка', (m, D) => {
+    const p = panel(0);
+    txt(p, 'осанка', 800, 56, m('post'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    plumb(p, 300, 880, 70, m('post'));
+    const f = postureFig(p, 300, 880, .82, m('post'));
+    f.to('round', m('habit', .5), 1.8);
+    infoCard(p, 620, 90, 940, 150, 'положение частей тела стоя, сидя или лёжа', 'описывают положением суставов и сегментов тела и балансом мышц, которые пересекают суставы', SP, m('post', .5), { size: 21 });
+    const box = (x, str, col, t) => { const b = G(p, { o: 0 }); roundBox(b, x, 300, 400, 120, col, PANEL, 2.5); put(para(b, str, x + 200, 350, null, { size: 22, weight: 600, fill: col, maxW: 360, anchor: 'middle' }), { o: 1 }); show(b, t); return b; };
+    box(620, 'нарушения в суставах, мышцах, соединительной ткани', ANAT.muscle, m('loop'));
+    box(1160, 'неправильная осанка', COL.task, m('loop', 1));
+    arrowTo(p, [1030, 320], [1150, 320], m('loop', 2), { c: [1090, 270], col: COL.chalk });
+    arrowTo(p, [1150, 400], [1030, 400], m('loop', 4), { c: [1090, 450], col: COL.chalk });
+    txt(p, 'и наоборот', 1090, 488, m('loop', 4), { size: 19, fill: COL.dim, anchor: 'middle', weight: 600 });
+    infoCard(p, 620, 530, 940, 150, 'многие жалобы — от привычной позы', 'повторяющиеся или длительные занятия в неправильной позе нагружают ткани', COL.bad, m('habit'), { size: 21 });
+    txt(p, 'в этой главе:', 1090, 742, m('plan'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pillRow(p, ['строение и функция', 'управление осанкой', 'нарушения', 'ведение'], 1090, 800, m('plan', .4), { col: SP, size: 20, space: 12 });
+  }],
+
+  ['column', 'Позвоночный столб', (m, D) => {
+    const p = panel(0);
+    txt(p, 'позвоночный столб (по мотивам рис. 14.1)', 1110, 56, m('col'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const f = postureFig(p, 380, 885, .9, m('col'), { arm: false });
+    f.ghost(.22, m('col', .6));
+    const reg = (from, to, col, t) => { for (let i = from; i < to; i++) tw(f.verts[i], { c_fill: col }, t + (i - from) * .04, .4); };
+    const brk = (u0, u1, str, col, t) => {
+      const a = f.unit(u0, 34), b = f.unit(u1, 34), x0 = Math.max(a[0], b[0]) + 70;
+      const g = G(p, { o: 0 });
+      path(g, `M${f1(a[0] + 8)} ${f1(a[1])}H${f1(x0)}V${f1(b[1])}H${f1(b[0] + 8)}`, { stroke: col, 'stroke-width': 3 });
+      T(g, str, { x: x0 + 18, y: (a[1] + b[1]) / 2 + 8, size: 24, weight: 700, fill: col });
+      show(g, t);
+    };
+    reg(17, 24, REG_C.C, m('cerv')); brk(23.6, 17, '7 шейных', REG_C.C, m('cerv'));
+    reg(5, 17, REG_C.T, m('thor')); brk(16.8, 5.2, '12 грудных', REG_C.T, m('thor'));
+    reg(0, 5, REG_C.L, m('lumb')); brk(4.8, 0.2, '5 поясничных', REG_C.L, m('lumb'));
+    tw(f.sacrum, { c_fill: REG_C.S }, m('sacr'), .5);
+    const S2 = f.at('S2'), cc = f.at('cocc');
+    lab(p, '5 крестцовых (сросшиеся)', 660, S2[1] - 10, S2[0], S2[1], REG_C.S, m('sacr'), { size: 22 });
+    tw(f.cocc, { c_fill: REG_C.Co }, m('cocc'), .5);
+    lab(p, '3–4 копчиковых', 660, cc[1] + 30, cc[0], cc[1], REG_C.Co, m('cocc'), { size: 22 });
+    tw(f.ribsP, { 'a_stroke-opacity': .9, c_stroke: '#f1dfa0' }, m('ribs'), .6);
+    const rb = f.unit(11, 70);
+    lab(p, '12 пар рёбер', 700, rb[1] - 60, rb[0], rb[1], '#f1dfa0', m('ribs'), { size: 22 });
+    const oa = f.at('OA');
+    lab(p, 'череп — атланто-затылочный сустав', 520, 120, oa[0], oa[1], COL.chalk, m('skull'), { size: 21 });
+    const si = f.at('SI');
+    tw(f.ilium, { c_stroke: COL.task, 'a_stroke-width': 4 }, m('pelv'), .5);
+    lab(p, 'таз — крестцово-подвздошные суставы', 640, si[1] + 150, si[0], si[1], COL.task, m('pelv'), { size: 21 });
+    const C = [['шейные', '7', REG_C.C, 'cerv'], ['грудные', '12', REG_C.T, 'thor'], ['поясничные', '5', REG_C.L, 'lumb'], ['крестцовые', '5', REG_C.S, 'sacr'], ['копчиковые', '3–4', REG_C.Co, 'cocc']];
+    const card = G(p, { o: 0 }); roundBox(card, 1110, 120, 450, 420, SP, PANEL, 2.5); show(card, m('col', .5));
+    T(card, '33 позвонка + диски', { x: 1335, y: 172, size: 26, weight: 700, fill: SP, anchor: 'middle' });
+    C.forEach(([n, k, c, mk2], i) => {
+      const r = G(p, { o: 0 });
+      mk('rect', { x: 1140, y: 204 + i * 64, width: 22, height: 40, rx: 6, fill: c }, r);
+      T(r, n, { x: 1180, y: 234 + i * 64, size: 24, fill: COL.chalk, weight: 600 });
+      T(r, k, { x: 1530, y: 234 + i * 64, size: 26, fill: c, weight: 700, anchor: 'end' });
+      show(r, m(mk2));
+    });
+    infoCard(p, 1110, 570, 450, 300, 'сочленения', 'рёбра — с грудным отделом; череп — в атланто-затылочном суставе; таз — в крестцово-подвздошных суставах', COL.chalk, m('ribs'), { size: 21 });
+  }],
+
+  ['pillars', 'Передний и задний столбы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'сегмент сбоку: два функциональных столба (по мотивам рис. 14.2)', 800, 56, m('pil'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const sg = spineSeg(p, 860, 400, 1.25, m('pil'));
+    txt(p, 'вперёд →', 1160, 400, m('pil'), { size: 20, fill: COL.dim, weight: 600 });
+    sg.hl(['bodyU', 'bodyL', 'disc', 'nuc'], ANTC, m('ant'), { a: .35 });
+    prog(q => sg.set({ comp: 7 * cyc(q, 3) }), m('ant', 1), Math.max(1.5, m('post') - m('ant', 1)), lin);
+    sg.hl(['pedU', 'pedL', 'archU', 'archL', 'sap', 'iap'], POSTC, m('post'), { a: .45 });
+    prog(q => sg.set({ comp: 0, flex: 7 * swing(q, 1.5) }), m('post', 1), Math.max(1.5, m('lev') - m('post', 1)), lin);
+    sg.hl(['spinU', 'spinL', 'transU', 'transL'], ANAT.muscle, m('lev'), { a: .45 });
+    prog(q => sg.set({ flex: -5 * q }), m('lev', .3), 1);
+    const pullU = path(p, '', { stroke: ANAT.muscle, 'stroke-width': 10, 'stroke-opacity': .85 }, { o: 0 }), pullL = path(p, '', { stroke: ANAT.muscle, 'stroke-width': 10, 'stroke-opacity': .85 }, { o: 0 });
+    prog(() => { const a = sg.at('spinU'), b = sg.at('spinL'); pullU.setAttribute('d', `M${f1(a[0])} ${f1(a[1])}L${f1(a[0] - 120)} ${f1(a[1] - 70)}`); pullL.setAttribute('d', `M${f1(b[0])} ${f1(b[1])}L${f1(b[0] - 120)} ${f1(b[1] + 70)}`); }, m('lev'), Math.max(.5, D - m('lev')), lin);
+    show(pullU, m('lev', .5)); show(pullL, m('lev', .5));
+    txt(p, 'мышцы', 330, 250, m('lev', .8), { size: 20, fill: ANAT.muscle, weight: 700, anchor: 'middle' });
+    lab(p, 'тело', 1150, 260, ...sg.at('bodyU'), COL.chalk, m('pil', .5));
+    lab(p, 'диск', 1150, 470, ...sg.at('ant'), DISC_C, m('pil', .8));
+    lab(p, 'ножка дуги', 760, 230, ...sg.at('pedU'), COL.chalk, m('post', .4));
+    lab(p, 'фасеточный сустав', 540, 600, ...sg.at('facet'), POSTC, m('post', 1));
+    lab(p, 'остистый отросток', 320, 480, ...sg.at('spinL'), ANAT.muscle, m('lev', .4));
+    infoCard(p, 820, 640, 740, 240, 'передний столб', 'тела позвонков и диски: гидравлическая, опорная, амортизирующая часть; размер диска определяет, сколько движения между позвонками', ANTC, m('ant'), { size: 21 });
+    infoCard(p, 40, 640, 760, 240, 'задний столб — дуга позвонка', 'суставные отростки и фасеточные суставы: скольжение; ориентация фасеток задаёт направление; поперечные и остистый отростки — рычаги для мышц', POSTC, m('post'), { size: 21 });
+  }],
+
+  ['unit', 'Двигательный сегмент', (m, D) => {
+    const p = panel(0);
+    txt(p, 'позвоночно-двигательный сегмент', 800, 56, m('seg'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const sg = spineSeg(p, 640, 440, 1.15, m('seg'));
+    lab(p, 'верхний позвонок', 820, 200, ...sg.at('bodyU'), COL.chalk, m('parts'));
+    lab(p, 'нижний позвонок', 820, 690, ...sg.at('bodyL'), COL.chalk, m('parts', .5));
+    lab(p, 'диск', 880, 470, ...sg.at('ant'), DISC_C, m('parts', 1));
+    lab(p, 'фасеточный сустав (второй — с другой стороны)', 560, 730, ...sg.at('facet'), POSTC, m('parts', 1.5));
+    const ax = G(p, { o: 0, s: 0 }), N = sg.at('nuc');
+    put(ax, { x: N[0], y: N[1] });
+    mk('circle', { r: 13, fill: 'none', stroke: COL.task, 'stroke-width': 3.5 }, ax);
+    path(ax, 'M-22 0H22M0 -22V22', { stroke: COL.task, 'stroke-width': 2.5 });
+    pop(ax, m('axis')); pulse(ax, m('axis', .6));
+    txt(p, 'ось — в пульпозном ядре', 640, 790, m('axis', .4), { size: 22, weight: 700, fill: COL.task, anchor: 'middle' });
+    prog(q => { sg.set({ flex: 10 * cyc(q, 2.5) }); const P = sg.at('nuc'); put(ax, { x: P[0], y: P[1] }); }, m('def'), Math.max(2, D - m('def') - .5), lin);
+    const arc = G(p, { o: 0 }); path(arc, 'M760 300Q812 320 812 380', { stroke: COL.whole, 'stroke-width': 4 }); path(arc, 'M800 366L812 384L824 366', { stroke: COL.whole, 'stroke-width': 4 }); show(arc, m('def', .5));
+    infoCard(p, 1000, 110, 560, 180, 'сегмент', 'два позвонка + два фасеточных сустава + один диск', SP, m('parts'), { size: 22 });
+    infoCard(p, 1000, 320, 560, 230, 'как называть движение', 'по тому, что делает передняя часть тела верхнего позвонка', COL.whole, m('def'), { size: 22 });
+    pill(p, 'сверху вниз или снизу вверх — название по верхнему позвонку', 1280, 600, m('def', 2), { col: COL.dim, size: 17 });
+  }],
+
+  ['six', 'Шесть степеней свободы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'шесть степеней свободы сегмента (по мотивам рис. 14.3)', 800, 56, m('six'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const cell = (i, title, sub, k) => {
+      const x = 40 + (i % 3) * 513, y = 90 + Math.floor(i / 3) * 400, g = G(p, { o: 0 });
+      const b = roundBox(g, x, y, 493, 380, EDGE, PANEL, 2.5);
+      T(g, title, { x: x + 246, y: y + 330, size: 24, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      T(g, sub, { x: x + 246, y: y + 362, size: 18, fill: COL.dim, anchor: 'middle', weight: 600 });
+      show(g, m('six', .3 + i * .15));
+      tw(b, { c_stroke: SP, 'a_stroke-width': 4 }, m(k), .4);
+      return [x + 246, y + 160];
+    };
+    const end = Math.max(2, D - .5);
+    let c = cell(0, 'сгибание и разгибание', 'сагиттальная плоскость', 'fe');
+    const s1 = spineSeg(p, c[0] + 60, c[1] - 6, .62, m('six', .3), { root: false });
+    prog(q => s1.set({ flex: 10 * swing(q, 2.25) }), m('fe'), end - m('fe'), lin);
+    c = cell(1, 'наклон в сторону', 'фронтальная плоскость · вид сзади', 'sb');
+    const s2 = frontSeg(p, c[0], c[1], .72, m('six', .45));
+    prog(q => s2.set({ sb: 9 * swing(q, 2.25) }), m('sb'), end - m('sb'), lin);
+    c = cell(2, 'ротация', 'поперечная плоскость · вид сверху', 'rot');
+    const s3 = topVert(p, c[0], c[1] - 50, .82, m('six', .6));
+    prog(q => s3.set({ rot: 16 * Math.min(1, q * 4) }), m('rot', .5), 2);
+    turnArrow(p, c[0], c[1] - 140, 50, COL.whole, m('rot', .5));
+    txt(p, 'тело → вправо, остистый ← влево', c[0], c[1] + 130, m('rot', 1.2), { size: 17, fill: COL.whole, anchor: 'middle', weight: 600 });
+    c = cell(3, 'передний и задний сдвиг', 'тело верхнего скользит по нижнему', 'aps');
+    const s4 = spineSeg(p, c[0] + 60, c[1] - 6, .62, m('six', .75), { root: false });
+    prog(q => s4.set({ shear: 12 * swing(q, 2.25) }), m('aps'), end - m('aps'), lin);
+    c = cell(4, 'боковой сдвиг', 'смещение вбок · вид сзади', 'ls');
+    const s5 = frontSeg(p, c[0], c[1], .72, m('six', .9));
+    prog(q => s5.set({ lsh: 16 * swing(q, 2.25) }), m('ls'), end - m('ls'), lin);
+    c = cell(5, 'сжатие и растяжение', 'продольная сила', 'cd');
+    const s6 = spineSeg(p, c[0] + 60, c[1] - 6, .62, m('six', 1.05), { root: false });
+    prog(q => s6.set({ comp: 9 * swing(q, 2.25) }), m('cd'), end - m('cd'), lin);
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-motion', prompt: ['Какое это движение сегмента?'],
+    build: grid([
+      { parts: ['Передние края тел сближаются, остистые отростки расходятся'], ans: ['f'], why: 'Сгибание.' },
+      { parts: ['Остистые отростки сближаются, передние края тел расходятся'], ans: ['e'], why: 'Разгибание.' },
+      { parts: ['Тело верхнего позвонка уходит вправо, его остистый отросток — влево'], ans: ['r'], why: 'Ротация вправо.' },
+      { parts: ['Боковые края тел сближаются справа и расходятся слева'], ans: ['s'], why: 'Наклон вправо.' },
+      { parts: ['Тело верхнего позвонка скользит вперёд по нижнему'], ans: ['t'], why: 'Передний сдвиг.' },
+    ], [['f', 'Сгибание', ANTC], ['e', 'Разгибание', POSTC], ['s', 'Наклон', SP], ['r', 'Ротация', COL.whole], ['t', 'Сдвиг', COL.task]], { multi: false, text: true }),
+  }], done) }],
+
+  ['facets', 'Сопряжение и шейный отдел', (m, D) => {
+    const p = panel(0);
+    txt(p, 'сопряжённые движения и шейный отдел', 800, 56, m('cpl'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    infoCard(p, 40, 86, 900, 150, 'сопряжённые движения', 'постоянная связь движения вокруг одной оси с движением вокруг другой; зависят от отдела, позы, ориентации фасеток, растяжимости тканей', SP, m('cpl'), { size: 19 });
+    infoCard(p, 960, 86, 600, 150, 'наклон + ротация', 'открытие межпозвонкового отверстия определяет наклон', COL.whole, m('for'), { size: 20 });
+    // atlanto-occipital: nodding
+    const box = (x, t) => { const g = G(p, { o: 0 }); roundBox(g, x, 260, 493, 440, EDGE, PANEL, 2.5); show(g, t); };
+    box(40, m('oa'));
+    const oa = oaJoint(p, 270, 530, .75, m('oa'));
+    prog(q => oa.set({ nod: 15 * swing(q, 2) }), m('oa', .8), Math.max(2, m('aa') - m('oa', .8)), lin);
+    txt(p, 'атланто-затылочный: кивок', 286, 300, m('oa'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'выпуклый затылок в вогнутом атланте', 286, 616, m('oa', .5), { size: 18, fill: COL.dim, anchor: 'middle', weight: 600 });
+    txt(p, 'кивок ≈ 15° вперёд и назад (рис. 14.4)', 286, 644, m('oa', 1), { size: 18, fill: COL.dim, anchor: 'middle', weight: 600 });
+    pill(p, 'наклон + ротация — в разные стороны', 286, 682, m('oa', 4), { col: OPP, size: 17 });
+    box(553, m('aa'));
+    const aa = aaJoint(p, 800, 470, .95, m('aa'));
+    prog(q => aa.set({ rot: 22 * Math.min(1, q * 3) }), m('aa', 1), 3);
+    txt(p, 'атлантоосевой: поворот', 800, 300, m('aa'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'вид сверху · поворот вправо', 800, 330, m('aa'), { size: 17, fill: COL.dim, anchor: 'middle', weight: 600 });
+    txt(p, 'правая сторона — назад, как разгибание;', 800, 610, m('aa', 2.5), { size: 18, fill: COL.chalk, anchor: 'middle', weight: 600 });
+    txt(p, 'левая — вперёд, как сгибание (рис. 14.5)', 800, 638, m('aa', 2.5), { size: 18, fill: COL.chalk, anchor: 'middle', weight: 600 });
+    pill(p, 'выпуклое на выпуклом; вокруг зуба', 800, 682, m('aa', .8), { col: COL.dim, size: 17 });
+    box(1066, m('typ'));
+    cervFacet(p, 1340, 470, 1.2, m('typ'));
+    txt(p, 'C2–C7: фасетки под 45°', 1312, 300, m('typ'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'к горизонтали; вид сбоку', 1312, 610, m('typ', .5), { size: 18, fill: COL.dim, anchor: 'middle', weight: 600 });
+    pill(p, 'наклон + ротация — в одну сторону', 1312, 682, m('typ', 1.5), { col: SAME, size: 17 });
+    const lu = luschka(p, 200, 800, .9, m('lus'));
+    infoCard(p, 330, 730, 1230, 150, 'унковертебральные суставы (Лушки)', 'костные выступы по бокам тел: дают боковую устойчивость и укрепляют диск сзади и сбоку', SP, m('lus'), { size: 20 });
+    lu.lips.forEach(e => pulse(e, m('lus', 1)));
+  }],
+
+  ['thorlum', 'Грудной и поясничный отделы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'грудной и поясничный отделы', 800, 56, m('flat'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    infoCard(p, 40, 86, 980, 110, 'шея ниже C2 и грудной отдел: фасетки почти плоские — скользят', null, COL.chalk, m('flat'), { size: 20 });
+    facetTop(p, 270, 330, 1.05, m('th'), 'T');
+    txt(p, 'грудной: фасетки во фронтальной плоскости', 270, 560, m('th'), { size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, '→ к поясничному поворачиваются в сагиттальную', 270, 590, m('th', 1), { size: 18, fill: COL.dim, anchor: 'middle', weight: 600 });
+    txt(p, 'рёбра — к телу, диску и поперечному отростку', 270, 620, m('th', 2.5), { size: 18, fill: COL.dim, anchor: 'middle', weight: 600 });
+    facetTop(p, 780, 330, 1.05, m('lu'), 'L');
+    txt(p, 'поясничный: от сагиттальной к фронтальной', 780, 560, m('lu'), { size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'верхние фасетки вогнутые, нижние выпуклые', 780, 590, m('lu', 1), { size: 18, fill: COL.dim, anchor: 'middle', weight: 600 });
+    txt(p, 'часть — сразу в двух плоскостях', 780, 620, m('lu', 2), { size: 18, fill: COL.dim, anchor: 'middle', weight: 600 });
+    txt(p, 'вид сверху, вперёд ↑', 525, 230, m('th'), { size: 17, fill: COL.dim, anchor: 'middle', weight: 600 });
+    // the coupling table
+    const tb = G(p, { o: 0 }); roundBox(tb, 1060, 86, 500, 794, SP, PANEL, 2.5); show(tb, m('thc', -1.5));
+    T(tb, 'наклон + ротация', { x: 1310, y: 134, size: 25, weight: 700, fill: SP, anchor: 'middle' });
+    const R = [['затылок — атлант', 'в разные', OPP, 'thc', -1], ['C2–C7', 'в одну', SAME, 'thc', -.8], ['верхний грудной', 'в одну', SAME, 'thc', 0], ['нижний грудной', 'в разные', OPP, 'thc', 2.2],
+      ['поясничный: наклон →', 'ротация в ту же', SAME, 'luc', 0], ['поясничный: ротация →', 'наклон в другую', OPP, 'luc', 2.5]];
+    R.forEach(([a, b, c, k, d], i) => {
+      const r = G(p, { o: 0 });
+      T(r, a, { x: 1084, y: 196 + i * 112, size: 21, fill: COL.chalk, weight: 600 });
+      put(pill(r, b, 1310, 242 + i * 112, null, { col: c, size: 19 }), { o: 1 });
+      show(r, m(k, d));
+    });
+    pill(p, 'есть вариабельность', 1310, 860, m('thc', 4), { col: COL.dim, size: 16 });
+    infoCard(p, 40, 680, 980, 130, 'при сгибании и разгибании', 'в поясничном отделе сопряжение бывает разным', COL.chalk, m('luc', 5), { size: 21 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-couple', prompt: ['Как сопряжены наклон и ротация?'],
+    build: grid([
+      { parts: ['Атланто-затылочный сустав'], ans: ['o'], why: 'В разные стороны.' },
+      { parts: ['Шейный отдел от C2 до C7'], ans: ['s'], why: 'В одну сторону; фасетки под 45°.' },
+      { parts: ['Верхний грудной отдел, стоя'], ans: ['s'], why: 'Обычно в одну сторону.' },
+      { parts: ['Нижний грудной отдел, стоя'], ans: ['o'], why: 'Обычно в разные стороны.' },
+      { parts: ['Поясничный отдел: наклон вызывает ротацию'], ans: ['s'], why: 'Ротация в ту же сторону; а при ротации наклон — в противоположную.' },
+    ], [['s', 'В одну сторону', SAME], ['o', 'В разные стороны', OPP]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['33 позвонка в пяти отделах; передний столб несёт нагрузку и амортизирует, задний скользит и служит рычагом для мышц.', 'w1'],
+     ['Сегмент — два позвонка, диск и два фасеточных сустава; движение называют по телу верхнего позвонка.', 'w2'],
+     ['Шесть степеней свободы: сгибание и разгибание, наклон, ротация, передне-задний и боковой сдвиг, сжатие и растяжение.', 'w3'],
+     ['Сопряжение наклона и ротации зависит от отдела и ориентации фасеток.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SP }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-turn', prompt: ['Пациент поворачивает голову вправо. В каком суставе поворот — основное движение и что в нём происходит?'],
+    build: choice([
+      ['Атлантоосевой: атлант вращается вокруг зуба, одна его сторона уходит вперёд, другая — назад'],
+      ['Атланто-затылочный: основное движение там — поворот'],
+      ['Унковертебральные суставы: они и дают поворот'],
+      ['Поясничные фасеточные суставы'],
+    ], 0, 'Основное движение атлантоосевого сустава — поворот вокруг зуба; при повороте вправо правая сторона уходит назад, левая — вперёд.',
+    [null, 'В атланто-затылочном суставе основное движение — кивок.', 'Суставы Лушки дают боковую устойчивость и укрепляют диск.', 'К повороту головы поясничный отдел отношения не имеет.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-nums', prompt: ['Заполните числа из урока:'],
+    build: blanks([
+      { parts: ['Шейных позвонков: ', { box: '7' }], why: 'Семь шейных.' },
+      { parts: ['Грудных: ', { box: '12' }, ', поясничных: ', { box: '5' }], why: 'Двенадцать грудных и пять поясничных.' },
+      { parts: ['Фасетки C2–C7 к горизонтали: ', { box: '45' }, '°'], why: 'Сорок пять градусов.' },
+    ]),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

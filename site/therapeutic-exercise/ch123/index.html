@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Синдром грудного выхода — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 123, title: 'Синдром грудного выхода', minutes: 9, language: 'ru', next: '../ch124/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch123/cards.ru.json
+const CARDS_SHORT = {
+  "заподозрить\nесли симптомы в руке не совпадают со схемой корешков и нервов": "не совпадают со схемой",
+  "истинный неврогенный\nредок: шейное ребро или длинный отросток C7; покалывание по внутренней стороне руки, атрофия мелких мышц кисти, изменения на ЭМГ": "редок: шейное ребро",
+  "неспецифический неврогенный — чаще всего\nнет аномалий, атрофии и изменений ЭМГ; сдавление время от времени: осанка, работа, спорт; хуже от рук над головой, плеч вперёд и вверх, опускания пояса; и в покое, и ночью": "сдавление: осанка, работа, спорт",
+  "артериальный\nредок, обычно с аномалией; артерия сдавливается при движениях руки, особенно над головой": "руки над головой",
+  "венозный\nсдавление вены обычно не бывает; внезапный болезненный синюшный отёк руки — скорее тромбоз: сразу к врачу": "синюшный отёк → сразу к врачу",
+  "сдавление\nгипертрофия лестничных или малой грудной, шейное ребро, перелом ключицы, укороченная фасция, объёмное образование": "лестничные, малая грудная, ребро",
+  "осанка\nголова вперёд, усиленный кифоз, лопатки отведены, плечи вперёд → проходы сужаются; ключица ниже грудино-ключичного сустава тянет сплетение; тяжёлые сумки давят на пояс": "голова и плечи вперёд → проходы уже",
+  "данные\n485 пациентов: у 70 % — неврогенный синдром от осанки (плечи вперёд — 78 %, голова вперёд — 71 %); у 44 % из 165 — ещё и сдавление ниже, чаще в запястном канале": "у 70 % — от осанки",
+  "защемление спайками\nпосле травмы — «боль → неподвижность → фиброз» → нерв хуже переносит натяжение": "боль → неподвижность → фиброз",
+  "межлестничный треугольник\nпередняя и средняя лестничные + первое ребро; проба Адсона, пульс слабеет; пальпация лестничных": "проба Адсона",
+  "рёберно-ключичное пространство\nключица опущена (чемодан, рюкзак, сутулость) или ребро приподнято (грудное дыхание); проба «военной выправки», вдох в ней": "проба «военной выправки»",
+  "под малой грудной мышцей\nмышца укорочена, лопатка наклонена вперёд; руки вверх — тест Руса": "тест Руса",
+  "обучение\nосанка, изменить провоцирующие позы и занятия, домашняя программа": "осанка, позы, дом",
+  "мобилизация нерва\nесли нейродинамические тесты положительны": "если тесты положительны",
+  "суставы и мышцы\nверхнегрудные, лопаточно-грудной, плечевой, грудино-ключичный, первое ребро; растяжка лестничных, поднимающей лопатку, грудных, подзатылочных": "суставы + растяжка лестничных",
+  "выносливость постуральных мышц\nприводящие и поворачивающие вверх лопатку, наружные ротаторы плеча, глубокие сгибатели шеи, разгибатели грудного отдела": "лопатка, ротаторы, сгибатели шеи",
+  "предосторожность\nпри сосудистом синдроме упражнения для плечевого пояса иногда усиливают симптомы; нарастание неврологических или сосудистых симптомов — повреждение аксонов или кровотока: к врачу, может понадобиться операция": "нарастание симптомов → к врачу",
+};
+// cards-short end
+
+const HEAD = COL.whole, NV = NERVE_C, PAIN = '#ff5a3c', ART = '#e2574c', VEN = '#4a6fb5', TOS = '#e8b04a';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function numLine(p, n, str, x, y, col, t0, { size = 22, maxW = 860 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 20, cy: y - 8, r: 19, fill: col }, g);
+  T(g, String(n), { x: x + 20, y: y, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 54, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+// The right thoracic outlet seen from the front (scheme): neck to the left, arm to the right. Scalenes, the first rib,
+// the clavicle, the pectoralis minor, the plexus (yellow), the subclavian artery (behind the anterior scalene) and vein
+// (in front of it). set({ isc, cc, pm, ribUp, clavDown, armUp }) 0..1 squeeze the three spaces; the bundle pinches and
+// reddens there; pulse(t) beats the artery. at(k) gives the stage point of 'isc' | 'cc' | 'pm'.
+function outlet(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), B = ANAT.bone, line = mix(B, '#000000', .45), M = ANAT.muscle;
+  mk('path', { d: 'M-260 -260C-250 -120 -240 0 -250 160', stroke: B, 'stroke-width': 60, fill: 'none', 'stroke-opacity': .35 }, g);   // cervical spine
+  const rib = mk('path', { fill: 'none', stroke: B, 'stroke-width': 26, 'stroke-linecap': 'round' }, g);
+  const rib2 = path(g, 'M-230 120C-60 170 120 160 240 110', { stroke: B, 'stroke-width': 20, 'stroke-opacity': .7 });
+  const scA = mk('path', { fill: M, 'fill-opacity': .85, stroke: mix(M, '#000000', .35), 'stroke-width': 2 }, g);
+  const scM = mk('path', { fill: M, 'fill-opacity': .7, stroke: mix(M, '#000000', .35), 'stroke-width': 2 }, g);
+  const bundle = { pl: [], art: null, vein: null };
+  bundle.pl = [0, 1, 2].map(() => mk('path', { fill: 'none', stroke: NERVE_C, 'stroke-width': 9, 'stroke-linecap': 'round' }, g));
+  bundle.art = mk('path', { fill: 'none', stroke: ART, 'stroke-width': 11, 'stroke-linecap': 'round' }, g);
+  bundle.vein = mk('path', { fill: 'none', stroke: VEN, 'stroke-width': 12, 'stroke-linecap': 'round' }, g);
+  const pm = mk('path', { fill: M, 'fill-opacity': .75, stroke: mix(M, '#000000', .35), 'stroke-width': 2 }, g);
+  const cor = mk('circle', { cx: 300, cy: -20, r: 22, fill: B, stroke: line, 'stroke-width': 2 }, g);
+  const clav = mk('path', { fill: 'none', stroke: B, 'stroke-width': 28, 'stroke-linecap': 'round' }, g);
+  const clavL = mk('path', { fill: 'none', stroke: line, 'stroke-width': 2, 'stroke-opacity': .6 }, g);
+  const rings = {};
+  const S = { isc: 0, cc: 0, pm: 0, ribUp: 0, clavDown: 0, armUp: 0, pulse: 1 }, e = { g, st: S };
+  const P = { isc: [-150, 40], cc: [40, 30], pm: [270, 40] };
+  e.set = o => {
+    Object.assign(S, o);
+    const rU = 22 * S.ribUp, cD = 34 * S.clavDown;
+    rib.setAttribute('d', `M-250 ${f1(70 - rU)}C-100 ${f1(110 - rU)} 60 ${f1(110 - rU)} 200 ${f1(70 - rU * .6)}`);
+    clav.setAttribute('d', `M-140 ${f1(-30 + cD * .3)}C-20 ${f1(-10 + cD)} 140 ${f1(-30 + cD)} 280 ${f1(-60 + cD * .6)}`);
+    clavL.setAttribute('d', clav.getAttribute('d'));
+    const w = 1 - .55 * S.isc;
+    scA.setAttribute('d', `M-200 -260C${f1(-185 + 20 * S.isc)} -150 ${f1(-170 + 18 * S.isc)} -40 ${f1(-140 + 12 * S.isc)} ${f1(80 - rU)}L${f1(-118 + 12 * S.isc)} ${f1(80 - rU)}C${f1(-150 + 16 * S.isc)} -40 -168 -150 -186 -260Z`);
+    scM.setAttribute('d', `M-250 -260C-240 -150 ${f1(-225 - 8 * S.isc)} -40 ${f1(-205 - 10 * S.isc)} ${f1(78 - rU)}L${f1(-182 - 10 * S.isc)} ${f1(80 - rU)}C-200 -40 -222 -150 -232 -260Z`);
+    pm.setAttribute('d', `M230 140C250 60 ${f1(275 - 6 * S.pm)} 0 300 -20L316 -10C${f1(300 - 10 * S.pm)} 20 ${f1(286 - 14 * S.pm)} 80 270 150Z`);
+    // the bundle runs left → right between the scalenes, over the rib, under the clavicle, behind the pectoralis minor
+    const yIsc = 40 - rU * .8, yCc = 30 - rU * .5 + cD * .6;
+    const lift = 40 * S.armUp, pinch = k => 1 - .6 * k;
+    const route = (dy, sp) => `M-260 ${f1(-120 + dy * 2)}C-200 ${f1(-40 + dy)} -170 ${f1(yIsc + dy * sp * pinch(S.isc))} -120 ${f1(yIsc + dy * sp * pinch(S.isc))}C-40 ${f1(yIsc + 10 + dy * sp)} 0 ${f1(yCc + dy * sp * pinch(S.cc))} 60 ${f1(yCc + dy * sp * pinch(S.cc))}C160 ${f1(yCc + dy * sp)} 220 ${f1(40 - lift * .4 + dy * sp * pinch(S.pm))} 280 ${f1(40 - lift * .5 + dy * sp * pinch(S.pm))}C330 ${f1(44 - lift + dy * sp)} 380 ${f1(60 - lift * 2 + dy)} 430 ${f1(80 - lift * 3 + dy)}`;
+    bundle.pl.forEach((pl, i) => { pl.setAttribute('d', route(-18 + i * 12, 1)); pl.setAttribute('stroke', mix(NERVE_C, '#ff8a5c', Math.max(S.isc, S.cc, S.pm) * .7)); });
+    bundle.art.setAttribute('d', route(22, 1)); bundle.art.setAttribute('stroke-width', f1(11 * S.pulse * (1 - .5 * Math.max(S.isc, S.cc, S.pm))));
+    const vr = `M-120 ${f1(yIsc + 40)}C-40 ${f1(yIsc + 46)} 0 ${f1(yCc + 34 * pinch(S.cc))} 60 ${f1(yCc + 34 * pinch(S.cc))}C160 ${f1(yCc + 36)} 220 ${f1(40 - lift * .4 + 36 * pinch(S.pm))} 280 ${f1(40 - lift * .5 + 36 * pinch(S.pm))}C330 ${f1(80 - lift)} 380 ${f1(96 - lift * 2)} 430 ${f1(116 - lift * 3)}`;
+    bundle.vein.setAttribute('d', vr);
+    P.isc = [-150, yIsc]; P.cc = [40, yCc]; P.pm = [270, 40 - lift * .5];
+    return e;
+  };
+  e.at = k => { const s0 = st(g); return [s0.x + P[k][0] * s0.s, s0.y + P[k][1] * s0.s]; };
+  e.ring = (k, col, t) => { const [rx, ry] = P[k], r = G(g, { x: rx, y: ry, s: 0, o: 0 }); mk('circle', { r: 46, fill: col, 'fill-opacity': .12, stroke: col, 'stroke-width': 4 }, r); pop(r, t); pulse(r, t + .6, 1.3); return r; };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Синдром грудного выхода', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 13 · Урок 123', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Синдром грудного выхода', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'сплетение и сосуды на пути к руке', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'осанка, дыхание и упражнения — главное лечение', 800, 360, m('sub'), { size: 30, fill: TOS, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const o = outlet(art, 800, 640, .95, null); put(o.g, { o: 1 });
+    prog(q => o.set({ isc: cyc(q, 2) * .8, cc: cyc(q + .25, 2) * .8, pulse: 1 + .15 * Math.sin(q * 60) }), .6, Math.max(2, D - 1.6), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['anat', 'Грудной выход', (m, D) => {
+    const p = panel(0);
+    txt(p, 'грудной выход справа, вид спереди (по мотивам рис. 13.19)', 800, 56, m('anat'), { size: 28, weight: 700, anchor: 'middle', fill: TOS });
+    const o = outlet(p, 540, 470, 1.1, m('anat'));
+    prog(q => o.set({ pulse: 1 + .15 * Math.sin(q * 80) }), m('anat'), D, lin);
+    pill(p, 'схема', 120, 870, m('anat'), { col: COL.dim, size: 17 });
+    lab(p, 'передняя лестничная', 230, 160, 540 - 160 * 1.1, 470 - 120 * 1.1, ANAT.muscle, m('bord'));
+    lab(p, 'средняя лестничная', 230, 230, 540 - 222 * 1.1, 470 - 80 * 1.1, ANAT.muscle, m('bord', .4));
+    lab(p, 'первое ребро', 230, 720, 540 - 60 * 1.1, 470 + 100 * 1.1, ANAT.bone, m('bord', .8));
+    lab(p, 'ключица', 640, 180, 540 + 100 * 1.1, 470 - 20 * 1.1, ANAT.bone, m('bord', 1.6));
+    lab(p, 'малая грудная', 760, 790, 540 + 280 * 1.1, 470 + 90 * 1.1, ANAT.muscle, m('bord', 2.2));
+    lab(p, 'сплетение', 1000, 240, 540 + 200 * 1.1, 470 + 20 * 1.1, NERVE_C, m('route'));
+    lab(p, 'артерия — за передней лестничной', 1000, 300, 540 + 130 * 1.1, 470 + 54 * 1.1, ART, m('route', 1.5));
+    lab(p, 'вена — перед ней', 1000, 640, 540 + 150 * 1.1, 470 + 80 * 1.1, VEN, m('route', 3));
+    infoCard(p, 1060, 100, 480, 110, 'от отверстий до подмышки', null, TOS, m('anat'), { size: 20 });
+    infoCard(p, 1060, 680, 480, 180, 'заподозрить', 'если симптомы в руке не совпадают со схемой корешков и нервов', COL.real, m('susp'), { size: 20 });
+  }],
+
+  ['types', 'Формы синдрома', (m, D) => {
+    const p = panel(0);
+    txt(p, 'формы синдрома грудного выхода', 800, 56, m('types'), { size: 28, weight: 700, anchor: 'middle', fill: TOS });
+    pillRow(p, ['боль', 'покалывание', 'онемение', 'слабость', 'цвет', 'отёк', 'пульс', 'головная боль'], 800, 108, m('types', .5), { col: COL.dim, size: 18, gap: .3, space: 8 });
+    // the split: > 90 % neurogenic, ≈ 1 % arterial, 3–5 % venous
+    const X0 = 160, W = 1280, Y = 170;
+    const seg = (a, b, col, s, t) => { const g0 = G(p, { o: 0 }); mk('rect', { x: X0 + a * W, y: Y, width: (b - a) * W - 2, height: 56, rx: 10, fill: col, 'fill-opacity': .85 }, g0); T(g0, s, { x: X0 + (a + b) / 2 * W, y: Y + 37, size: 21, weight: 700, fill: COL.board, anchor: 'middle' }); show(g0, t); };
+    seg(0, .92, NERVE_C, 'неврогенный > 90 %', m('pct', .5));
+    seg(.92, .96, VEN, '', m('pct', 2.5)); seg(.96, 1, ART, '', m('pct', 1.8));
+    txt(p, 'артериальный ≈ 1 %, венозный 3–5 %', X0 + W, Y + 90, m('pct', 2), { size: 19, weight: 700, fill: COL.chalk, anchor: 'end' });
+    pill(p, 'доли не в масштабе', X0 + 80, Y + 90, m('pct', 2), { col: COL.dim, size: 16 });
+    const C = [['истинный неврогенный', 'редок: шейное ребро или длинный отросток C7; покалывание по внутренней стороне руки, атрофия мелких мышц кисти, изменения на ЭМГ', NERVE_C, 'true'],
+      ['неспецифический неврогенный — чаще всего', 'нет аномалий, атрофии и изменений ЭМГ; сдавление время от времени: осанка, работа, спорт; хуже от рук над головой, плеч вперёд и вверх, опускания пояса; и в покое, и ночью', TOS, 'disp'],
+      ['артериальный', 'редок, обычно с аномалией; артерия сдавливается при движениях руки, особенно над головой', ART, 'art'],
+      ['венозный', 'сдавление вены обычно не бывает; внезапный болезненный синюшный отёк руки — скорее тромбоз: сразу к врачу', VEN, 'ven']];
+    C.forEach(([h, s, c, k], i) => infoCard(p, 60 + (i % 2) * 750, 310 + Math.floor(i / 2) * 290, 730, 270, h, s, c, m(k), { size: 19 }));
+  }],
+
+  ['cause', 'Причины', (m, D) => {
+    const p = panel(0);
+    txt(p, 'причины (блок 13.7)', 800, 56, m('cause'), { size: 28, weight: 700, anchor: 'middle', fill: TOS });
+    const o = outlet(p, 380, 340, .75, m('comp'));
+    prog(q => o.set({ isc: .8 * q }), m('comp', .8), 1.2);
+    prog(q => o.set({ isc: .8 * (1 - q), clavDown: q, cc: .8 * q }), m('post', 3), 1.5);
+    infoCard(p, 760, 96, 780, 190, 'сдавление', 'гипертрофия лестничных или малой грудной, шейное ребро, перелом ключицы, укороченная фасция, объёмное образование', COL.bad, m('comp'), { size: 20 });
+    // posture: head forward, rounded shoulders, a heavy bag
+    const f = fig(p, { s: .8, o: 0, pose: { t: 4, hd: 0 } }); plant(f, 'AN', 380, 870); show(f.g, m('post'));
+    prog(q => { f.set({ t: 10 * q, hd: -16 * q }); plant(f, 'AN', 380, 870); }, m('post', .5), 1.5);
+    const bag = G(p, { o: 0 }); mk('rect', { x: -26, y: 0, width: 52, height: 44, rx: 8, fill: '#8a6a4a', stroke: '#5a4430', 'stroke-width': 2 }, bag); show(bag, m('post', 4));
+    f.onSet.push(() => { const [wx, wy] = onStage(f, 'WN'); put(bag, { x: wx, y: wy + 6 }); }); f.set({});
+    infoCard(p, 760, 300, 780, 230, 'осанка', 'голова вперёд, усиленный кифоз, лопатки отведены, плечи вперёд → проходы сужаются; ключица ниже грудино-ключичного сустава тянет сплетение; тяжёлые сумки давят на пояс', TOS, m('post'), { size: 20 });
+    infoCard(p, 760, 546, 780, 160, 'данные', '485 пациентов: у 70 % — неврогенный синдром от осанки (плечи вперёд — 78 %, голова вперёд — 71 %); у 44 % из 165 — ещё и сдавление ниже, чаще в запястном канале', COL.whole, m('ev'), { size: 19 });
+    infoCard(p, 760, 720, 780, 150, 'защемление спайками', 'после травмы — «боль → неподвижность → фиброз» → нерв хуже переносит натяжение', COL.real, m('trap'), { size: 20 });
+  }],
+
+  ['sites', 'Три места сдавления', (m, D) => {
+    const p = panel(0);
+    txt(p, 'три места сдавления', 800, 56, m('sites'), { size: 28, weight: 700, anchor: 'middle', fill: TOS });
+    const o = outlet(p, 520, 380, 1.1, m('sites'));
+    o.ring('isc', '#e2574c', m('isc'));
+    prog(q => o.set({ isc: .8 * cyc(q, 2), pulse: 1 - .3 * cyc(q, 2) }), m('isc', 1), Math.max(1.5, m('cc') - m('isc', 1)), lin);
+    o.ring('cc', '#f0a04b', m('cc'));
+    prog(q => o.set({ isc: 0, clavDown: cyc(q, 2), cc: .8 * cyc(q, 2), ribUp: .6 * cyc(q, 2) }), m('cc', 1), Math.max(1.5, m('pm') - m('cc', 1)), lin);
+    o.ring('pm', '#bba8ee', m('pm'));
+    prog(q => o.set({ cc: 0, clavDown: 0, ribUp: 0, armUp: cyc(q, 1.5), pm: .8 * cyc(q, 1.5) }), m('pm', 1), Math.max(1.5, D - m('pm', 1)), lin);
+    const C = [['межлестничный треугольник', 'передняя и средняя лестничные + первое ребро; проба Адсона, пульс слабеет; пальпация лестничных', '#e2574c', 'isc'],
+      ['рёберно-ключичное пространство', 'ключица опущена (чемодан, рюкзак, сутулость) или ребро приподнято (грудное дыхание); проба «военной выправки», вдох в ней', '#f0a04b', 'cc'],
+      ['под малой грудной мышцей', 'мышца укорочена, лопатка наклонена вперёд; руки вверх — тест Руса', '#bba8ee', 'pm']];
+    C.forEach(([h, s, c, k], i) => infoCard(p, 60 + i * 500, 660, 480, 210, h, s, c, m(k), { size: 18 }));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-site', prompt: ['Где, скорее всего, сдавление?'],
+    build: grid([
+      { parts: ['Симптомы при пробе Адсона, ослабевает пульс; лестничные болезненны'], ans: ['i'], why: 'Межлестничный треугольник.' },
+      { parts: ['Хуже с тяжёлым рюкзаком; проба «военной выправки» положительна'], ans: ['c'], why: 'Рёберно-ключичное пространство.' },
+      { parts: ['Хуже с руками над головой; укорочена малая грудная'], ans: ['p'], why: 'Пространство под малой грудной.' },
+      { parts: ['Глубокий вдох в позе «военной выправки» вызывает симптомы'], ans: ['c'], why: 'Приподнятое первое ребро сужает рёберно-ключичное пространство.' },
+      { parts: ['Лопатка наклонена вперёд, давление на мышцу воспроизводит симптомы'], ans: ['p'], why: 'Малая грудная.' },
+    ], [['i', 'Межлестничный', '#e2574c'], ['c', 'Рёберно-ключичное', '#f0a04b'], ['p', 'Под малой грудной', '#bba8ee']], { multi: false, text: true }),
+  }], done) }],
+
+  ['imp', 'Нарушения', (m, D) => {
+    const p = panel(0);
+    txt(p, 'типичные нарушения и ограничения', 800, 56, m('imp'), { size: 28, weight: 700, anchor: 'middle', fill: TOS });
+    const I = ['перемежающиеся неврологические и сосудистые симптомы', 'укорочены передние и внутренние структуры, слабы задние и наружные', 'плохое ощущение осанки, слабая выносливость постуральных мышц', 'плохой контроль лопатки', 'поверхностное грудное дыхание', 'тугоподвижность ключицы и первого ребра', 'симптомы при натяжении сплетения'];
+    I.forEach((s, i) => numLine(p, i + 1, s, 60, 130 + i * 84, TOS, m('imp', .5 + i * 1.6), { size: 21, maxW: 820 }));
+    const A = ['сон', 'сумка или рюкзак на больной стороне', 'руки над головой', 'компьютер', 'вождение', 'телефон плечом'];
+    txt(p, 'в быту трудно:', 1180, 130, m('act'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    A.forEach((s, i) => pill(p, s, 1180, 190 + i * 62, m('act', .4 + i * .7), { col: COL.real, size: 20 }));
+    const f = fig(p, { s: .7, o: 0, pose: { aN: 160, eN: 20, aF: 150, eF: 30 } }); plant(f, 'AN', 1180, 880); show(f.g, m('act', 2));
+  }],
+
+  ['mgmt', 'Лечение', (m, D) => {
+    const p = panel(0);
+    txt(p, 'консервативное лечение (блок 13.8)', 800, 56, m('mgmt'), { size: 28, weight: 700, anchor: 'middle', fill: TOS });
+    txt(p, 'без острых или прогрессирующих нарушений: лекарства, инъекции, покой, изменение активности + физическая терапия', 800, 98, m('mgmt', .5), { size: 19, fill: COL.dim, anchor: 'middle' });
+    const C = [['edu', 'обучение', 'осанка, изменить провоцирующие позы и занятия, домашняя программа', COL.whole], ['nerve', 'мобилизация нерва', 'если нейродинамические тесты положительны', NERVE_C],
+      ['mob', 'суставы и мышцы', 'верхнегрудные, лопаточно-грудной, плечевой, грудино-ключичный, первое ребро; растяжка лестничных, поднимающей лопатку, грудных, подзатылочных', COL.task],
+      ['str', 'выносливость постуральных мышц', 'приводящие и поворачивающие вверх лопатку, наружные ротаторы плеча, глубокие сгибатели шеи, разгибатели грудного отдела', COL.good]];
+    C.forEach(([k, h, s, c], i) => infoCard(p, 60 + (i % 2) * 500, 130 + Math.floor(i / 2) * 260, 480, 240, h, s, c, m(k), { size: 19 }));
+    // breathing: from upper chest to the diaphragm
+    const lu = lungsEl(p, 1280, 330, .8, m('breath'));
+    const dia = path(p, 'M1160 470Q1280 420 1400 470', { stroke: ANAT.muscle, 'stroke-width': 8 }, { o: 0 }); show(dia, m('breath'));
+    const sc = path(p, 'M1220 160L1240 230M1340 160L1320 230', { stroke: ANAT.muscle, 'stroke-width': 7 }, { o: 0 }); show(sc, m('breath'));
+    prog(q => { const c = cyc(q, 4), k = clamp(q * 2, 0, 1); lu.breathe(c); dia.setAttribute('transform', `translate(0 ${f1(26 * c * k)})`); sc.setAttribute('stroke', mix('#ff5a3c', ANAT.muscle, k)); sc.setAttribute('stroke-width', f1(9 - 4 * k)); }, m('breath', .5), Math.max(2, m('prec') - m('breath', .5)), lin);
+    txt(p, 'лестничные расслабить — дышать диафрагмой', 1280, 520, m('breath', 1), { size: 20, weight: 700, fill: COL.good, anchor: 'middle' });
+    infoCard(p, 60, 660, 1480, 210, 'предосторожность', 'при сосудистом синдроме упражнения для плечевого пояса иногда усиливают симптомы; нарастание неврологических или сосудистых симптомов — повреждение аксонов или кровотока: к врачу, может понадобиться операция', COL.bad, m('prec'), { size: 21 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-tos', prompt: ['Подходит ли это при синдроме грудного выхода?'],
+    build: grid([
+      { parts: ['Укрепление приводящих лопатку и глубоких сгибателей шеи на выносливость'], ans: ['y'], why: 'Да.' },
+      { parts: ['Носить тяжёлую сумку на плече больной стороны'], ans: ['n'], why: 'Нет: опускает ключицу и нагружает пояс.' },
+      { parts: ['Диафрагмальное дыхание и расслабление верхней части грудной клетки'], ans: ['y'], why: 'Да.' },
+      { parts: ['Продолжать упражнения, хотя симптомы быстро нарастают'], ans: ['n'], why: 'Нет: нарастание — к врачу.' },
+      { parts: ['Растяжка малой грудной и лестничных мышц'], ans: ['y'], why: 'Да.' },
+    ], [['y', 'Подходит', COL.good], ['n', 'Нет', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Больше 90 % — неврогенный синдром, чаще неспецифический: без аномалий и атрофии.', 'w1'],
+     ['Причины — сдавление, осанка и защемление спайками.', 'w2'],
+     ['Три места: межлестничный треугольник, рёберно-ключичное пространство, под малой грудной мышцей.', 'w3'],
+     ['Лечение: обучение и осанка, мобилизация нерва, суставов и мышц, выносливость постуральных мышц, диафрагмальное дыхание; нарастание симптомов — к врачу.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: TOS }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-mech', prompt: ['Автомеханик: покалывание и тяжесть в руках, когда работает с руками над головой. Голова вперёд, плечи округлены. Что вероятнее и с чего начать?'],
+    build: choice([
+      ['Неспецифический неврогенный синдром грудного выхода: осанка, растяжка грудных и лестничных, выносливость стабилизаторов лопатки, изменить работу'],
+      ['Синдром запястного канала: ночной ортез'],
+      ['Истинный неврогенный синдром: сразу операция'],
+      ['Это норма для такой работы'],
+    ], 0, 'Симптомы с руками над головой при плохой осанке без атрофии типичны для неспецифической формы; лечение — консервативное.',
+    [null, 'Запястный канал не объясняет связь с поднятыми руками и осанкой.', 'Истинная форма редка и требует аномалии, атрофии и изменений ЭМГ.', 'Симптомы — повод для лечения.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-vein', prompt: ['После тяжёлой работы руками у пациентки внезапно отекла и посинела рука, она болит. Что делать?'],
+    build: choice([
+      ['Сразу направить к врачу: возможен тромбоз'],
+      ['Мобилизовать первое ребро'],
+      ['Растянуть малую грудную мышцу'],
+      ['Продолжить программу упражнений'],
+    ], 0, 'Внезапный болезненный синюшный отёк руки — подозрение на тромбоз, а не обычный синдром грудного выхода.',
+    [null, 'Мануальные техники при подозрении на тромбоз недопустимы.', 'Растяжка не поможет и может навредить.', 'Нужна срочная медицинская помощь.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+[
+ {
+  "beat": "intro",
+  "fig": 0,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает rectus, фигура ×0.8"
+ },
+ {
+  "beat": "intro",
+  "fig": 1,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает rectus, фигура ×0.7"
+ },
+ {
+  "beat": "contro",
+  "fig": 0,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает rectus, фигура ×0.75",
+  "off": "лупа видна меньше 2 с — мелькает"
+ },
+ {
+  "beat": "contro",
+  "fig": 1,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает rectus, фигура ×0.75",
+  "to": "fix"
+ },
+ {
+  "beat": "char",
+  "fig": 0,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает rectus, фигура ×0.45",
+  "off": "список признаков занимает место — линии лупы ложатся на строки"
+ },
+ {
+  "beat": "char",
+  "fig": 1,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает rectus, фигура ×0.42",
+  "off": "список признаков занимает место — линии лупы ложатся на строки"
+ },
+ {
+  "beat": "impl",
+  "fig": 0,
+  "target": "m0",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает m0, фигура ×0.75",
+  "off": "линии лупы ложатся на подпись под фигурой"
+ }
+]

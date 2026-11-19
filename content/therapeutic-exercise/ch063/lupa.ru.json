@@ -1,0 +1,32 @@
+[
+ {
+  "beat": "kinds",
+  "fig": 0,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает rectus, фигура ×0.62",
+  "from": "set",
+  "to": "stab"
+ },
+ {
+  "beat": "kinds",
+  "fig": 1,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает rectus, фигура ×0.62",
+  "from": "stab",
+  "to": "multi"
+ },
+ {
+  "beat": "kinds",
+  "fig": 2,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает rectus, фигура ×0.62",
+  "from": "multi",
+  "off": "рядом сразу появляется карточка — места для лупы нет"
+ }
+]

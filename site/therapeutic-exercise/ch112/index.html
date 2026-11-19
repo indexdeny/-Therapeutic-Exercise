@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Иммобилизация и восстановление после перелома — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 112, title: 'Иммобилизация и восстановление после перелома', minutes: 9, language: 'ru', next: '../ch113/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch112/lupa.ru.json
+const LUPA = [
+  {"beat": "period", "fig": 3, "target": "rectus", "from": "b3", "to": "b4", "zoom": 3},
+  {"beat": "inter", "fig": 1, "target": "biceps", "from": "light", "to": "pre", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch112/cards.ru.json
+const CARDS_SHORT = {
+  "ранние щадящие движения\nв пределах переносимости перелома — идеальны, но обычно возможны только при внутренней фиксации": "обычно при внутренней фиксации",
+  "соседние области\nдержать как можно ближе к норме, не нарушая положения отломков": "ближе к норме",
+  "постельный режим\nвторичные изменения во всём организме → сразу общие упражнения для незатронутых частей тела": "сразу общие упражнения",
+  "ходьба при переломе ноги\nкостыли или ходунки; устройство и схему — по месту перелома, иммобилизации и возможностям пациента; нагрузку весом определяет врач": "костыли; нагрузку определяет врач",
+  "нерастяжимый рубец\nесли мягкие ткани были повреждены — ограничивает подвижность": "ограничивает подвижность",
+  "пока нет рентгенологического\nосторожно с любой нагрузкой через место перелома: сопротивление, растяжка, опора": "осторожно: сопротивление, растяжка, опора",
+  "после рентгенологического\nкость выдерживает обычные нагрузки": "кость выдерживает обычные нагрузки",
+  "мобилизация сустава\nначинать с I–II, наращивать, когда реакция сустава предсказуема": "с I–II",
+  "«напряжение — расслабление», «сокращение агониста»\nсилу сокращения контролирует сам пациент": "силу сокращения контролирует сам пациент",
+  "обычные дела — осторожно\nпосле перелома ноги ещё несколько недель — частичная нагрузка, пока перелом полностью не срастётся": "частичная нагрузка несколько недель",
+  "первые 2–3 недели после гипса\nтолько лёгкая изометрия: кость и хрящ ещё не выдерживают больших сжимающих и сгибающих сил": "только лёгкая изометрия",
+  "суставная игра и объём лучше\nлёгкое сопротивление в доступном объёме — проксимальнее перелома": "лёгкое сопротивление в объёме",
+  "рентгенологическое сращение\nпрогрессирующее сопротивление и более интенсивные динамические упражнения": "прогрессирующее сопротивление",
+  "ограничивающий рубец\nмобилизуют ручными техниками, выбранными по ткани": "ручные техники по ткани",
+  "предосторожности\nдо рентгенологического сращения — никаких растягивающих и сопротивляющихся сил дистальнее перелома; несколько недель — без чрезмерного сжатия и сдвига в суставе; опора — защищённая": "ни растяжки, ни сопротивления дистальнее",
+};
+// cards-short end
+
+const HEAD = COL.whole, PAIN = '#ff5a3c', FR = '#e8b04a', SKIN = '#c99a86', CAST = '#ece9e0', ICE = '#a8d8ea';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function numLine(p, n, str, x, y, col, t0, { size = 22, maxW = 860 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 20, cy: y - 8, r: 19, fill: col }, g);
+  T(g, String(n), { x: x + 20, y: y, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 54, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+function arw(p, x1, y1, x2, y2, col = FR, w = 5) {
+  const g = G(p, { o: 0 }), L = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / L, uy = (y2 - y1) / L, f = v => v.toFixed(1);
+  path(g, `M${f(x1)} ${f(y1)}L${f(x2)} ${f(y2)}M${f(x2 - ux * 14 - uy * 9)} ${f(y2 - uy * 14 + ux * 9)}L${f(x2)} ${f(y2)}L${f(x2 - ux * 14 + uy * 9)} ${f(y2 - uy * 14 - ux * 9)}`, { stroke: col, 'stroke-width': w });
+  return g;
+}
+// A limb segment in close-up (horizontal): skin, a healed long bone, a muscle above it and a cast round it.
+// set({ cast, atro, act }): cast 0..1 — the cast is on; atro 0..1 — the muscle thins; act 0..1 — it contracts.
+function limb(p, x, y, L, t0 = null) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x, y: y - 74, width: L, height: 148, rx: 74, fill: SKIN, 'fill-opacity': .2, stroke: SKIN, 'stroke-width': 2 }, g);
+  const lb = longBone(g, x + 40, y + 22, L - 80, null, { r: 22 }); put(lb.g, { o: 1 }); lb.set({ line: 'trans', hard: .9, remodel: .5 });
+  const mg = mk('g', {}, g), mu = muscleEl(mg, { rest: L - 120, w: 24 }); mu.set([x + 60, 0], [x + L - 60, 0]);
+  const cast = G(g, { o: 0 });
+  mk('rect', { x: x + 50, y: y - 84, width: L - 100, height: 168, rx: 40, fill: CAST, 'fill-opacity': .42, stroke: '#b8b2a4', 'stroke-width': 3 }, cast);
+  for (let i = 0; i < 14; i++) path(cast, `M${x + 70 + i * (L - 140) / 14} ${y - 84}l26 168`, { stroke: '#b8b2a4', 'stroke-width': 1.5, 'stroke-opacity': .5 });
+  const s0 = { cast: 0, atro: 0, act: 0 }, e = { g, lb, mu, st: s0 };
+  e.set = o => {
+    Object.assign(s0, o);
+    mg.setAttribute('transform', `translate(0 ${y - 30}) scale(1 ${(1 - .5 * s0.atro).toFixed(3)})`);
+    mu.act(s0.act);
+    put(cast, { o: s0.cast });
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// A cast round the near shank and foot of a side-view figure; it follows the pose.
+function castOn(f) {
+  const g = mk('g', { opacity: .6 }, f.g);
+  f.g.insertBefore(g, f.parts.ftN.e.nextSibling);
+  const sh = mk('path', { fill: CAST, stroke: '#b8b2a4', 'stroke-width': 2.5 }, g), ft = mk('path', { fill: CAST, stroke: '#b8b2a4', 'stroke-width': 2.5 }, g);
+  const upd = () => { const K = f.pts.KN, A = f.pts.AN, K2 = [K[0] + (A[0] - K[0]) * .15, K[1] + (A[1] - K[1]) * .15]; sh.setAttribute('d', capsuleD(K2, A, 17, 14)); ft.setAttribute('d', capsuleD(f.pts.heelN, f.pts.toeN, 13, 10)); };
+  f.onSet.push(upd); upd();
+  return g;
+}
+// A figure on two crutches (side view); touch: the near foot rests on the floor (partial weight bearing).
+function crutchFig(p, x, gy, s, t0, { touch = false } = {}) {
+  const back = G(p, { o: 0 }), cF = crutch(back);
+  const f = fig(p, { x, y: gy - 182 * s, s, o: 0, pose: touch ? { t: 6, hN: 8, kN: 10, fN: 0, hF: -2, kF: 2, fF: 0 } : { t: 8, hN: 22, kN: 48, fN: -12, hF: -2, kF: 2, fF: 0 } });
+  plant(f, 'AF', x, gy);
+  const front = G(p, { o: 0 }), cN = crutch(front);
+  const [sx, sy] = onStage(f, 'Sh'), [fx] = onStage(f, 'AF');
+  cF.set([sx + 10 * s, sy + 26 * s], [fx + 58 * s, gy]); cN.set([sx + 4 * s, sy + 28 * s], [fx + 70 * s, gy]);
+  reach(f, 'F', ...cF.grip); reach(f, 'N', ...cN.grip);
+  if (t0 !== null) { show(back, t0); show(f.g, t0); show(front, t0); }
+  return { f, groups: [back, f.g, front] };
+}
+// Elevation with ice (supine, the near leg on a pillow).
+function elevScene(p, hx, top, s, t0) {
+  const g = G(p, { o: 0 });
+  bench(g, hx - 300 * s, hx + 330 * s, top, null, COL.dim, 120 * s); put(g.lastChild, { o: 1 });
+  const pillow = G(g, {}), pt = supine(g, hx, top, s, null, { hN: 26, kN: 4 }); put(pt.g, { o: 1 });
+  const [kx, ky] = onStage(pt, 'KN'), [ax, ay] = onStage(pt, 'AN');
+  const mx = (kx + ax) / 2, my = (ky + ay) / 2 + 12 * s;
+  mk('path', { d: `M${(kx - 30 * s).toFixed(1)} ${top}Q${(kx - 20 * s).toFixed(1)} ${(my + 4).toFixed(1)} ${mx.toFixed(1)} ${(my + 2).toFixed(1)}T${(ax + 40 * s).toFixed(1)} ${(ay + 22 * s).toFixed(1)}L${(ax + 50 * s).toFixed(1)} ${top}Z`, fill: '#5b6f8a', stroke: '#9fb3cf', 'stroke-width': 2.5 }, pillow);
+  g.insertBefore(pillow, pt.g);
+  castOn(pt);
+  const ang = Math.atan2(ay - ky, ax - kx), u = [Math.cos(ang), Math.sin(ang)], n = [-u[1], u[0]], I = [kx + (ax - kx) * .5 + n[0] * -30 * s, ky + (ay - ky) * .5 + n[1] * -30 * s];
+  const ice = G(g, { o: 0 });
+  mk('rect', { x: I[0] - 34 * s, y: I[1] - 20 * s, width: 68 * s, height: 30 * s, rx: 10 * s, fill: ICE, stroke: '#ffffff', 'stroke-width': 2 }, ice);
+  if (t0 !== null) show(g, t0);
+  return { g, pt, ice };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Иммобилизация и восстановление', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 11 · Урок 112', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Иммобилизация', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и восстановление после перелома', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'пока кость обездвижена — и после снятия гипса', 800, 360, m('sub'), { size: 30, fill: FR, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const lm = limb(art, 380, 620, 840, null); put(lm.g, { o: 1 });
+    prog(q => lm.set({ cast: 1 - clamp(q * 3 - 1.4, 0, 1), atro: clamp(q * 2, 0, 1) * (1 - clamp(q * 3 - 2, 0, 1) * .6), act: clamp(q * 3 - 2, 0, 1) * cyc(q, 4) }), .6, Math.max(2, D - 1.6), lin);
+    lm.set({ cast: 1 });
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['imm', 'Что делает иммобилизация', (m, D) => {
+    const p = panel(0);
+    txt(p, 'последствия иммобилизации', 800, 56, m('imm'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    const lm = limb(p, 80, 250, 660, m('imm'));
+    lm.set({ cast: 1 });
+    prog(q => lm.set({ atro: q }), m('imm', 1), 5);
+    lab(p, 'мышца атрофируется', 300, 140, 300, 214, ANAT.muscle, m('imm', 3));
+    ['соединительная ткань слабеет', 'суставной хрящ дегенерирует', 'мышцы атрофируются', 'развиваются контрактуры', 'кровообращение замедляется'].forEach((s, i) => numLine(p, i + 1, s, 820, 130 + i * 54, COL.bad, m('imm', .5 + i * 1.4), { size: 22, maxW: 660 }));
+    // the scar cannot line up along the lines of stress
+    const hv = healView(p, 80, 410, 660, 230, m('scar'));
+    prog(q => hv.set({ coll: q, fib: .6 * q, align: 0, cap: .4 * q }), m('scar', .3), 2.5);
+    txt(p, 'кость обездвижена → рубец не выстраивается по линиям нагрузки', 410, 690, m('scar', 2), { size: 20, weight: 700, fill: COL.task, anchor: 'middle' });
+    infoCard(p, 820, 430, 720, 180, 'ранние щадящие движения', 'в пределах переносимости перелома — идеальны, но обычно возможны только при внутренней фиксации', COL.good, m('early'), { size: 21 });
+    infoCard(p, 820, 630, 720, 180, 'соседние области', 'держать как можно ближе к норме, не нарушая положения отломков', COL.whole, m('near'), { size: 21 });
+    const lb = longBone(p, 140, 790, 520, m('early', 1), { r: 20 });
+    lb.set({ line: 'trans', plate: 1 });
+    txt(p, 'внутренняя фиксация', 400, 856, m('early', 1), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+  }],
+
+  ['comp', 'Осложнения перелома', (m, D) => {
+    const p = panel(0);
+    txt(p, 'осложнения переломов (блок 11.7)', 800, 56, m('comp'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    // a compartment in a tight cast: swelling squeezes the nerve and the artery
+    const cx = 300, cy = 330, cg = G(p, { o: 0 });
+    mk('circle', { cx, cy, r: 176, fill: 'none', stroke: CAST, 'stroke-width': 18, 'stroke-opacity': .7 }, cg);
+    mk('circle', { cx, cy, r: 160, fill: SKIN, 'fill-opacity': .18, stroke: '#e8e2d0', 'stroke-width': 4 }, cg);
+    const mus = [[-60, -60, 70, 50], [60, -50, 60, 55], [0, 70, 90, 45]].map(([dx, dy, rx, ry]) => mk('ellipse', { cx: cx + dx, cy: cy + dy, rx, ry, fill: ANAT.muscle, 'fill-opacity': .8, stroke: mix(ANAT.muscle, '#000000', .35), 'stroke-width': 1.5 }, cg));
+    mk('circle', { cx: cx + 10, cy: cy + 5, r: 28, fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 2 }, cg);
+    const art = mk('ellipse', { cx: cx - 95, cy: cy + 40, rx: 13, ry: 13, fill: '#e2574c', stroke: '#8a2a22', 'stroke-width': 2 }, cg);
+    const nv = mk('ellipse', { cx: cx - 70, cy: cy + 70, rx: 10, ry: 10, fill: '#f1dfa0', stroke: '#8a7a40', 'stroke-width': 2 }, cg);
+    show(cg, m('c1'));
+    prog(q => {
+      mus.forEach((e, i) => e.setAttribute('transform', `translate(${cx} ${cy}) scale(${(1 + .18 * q).toFixed(3)}) translate(${-cx} ${-cy})`));
+      art.setAttribute('ry', (13 - 8 * q).toFixed(1)); art.setAttribute('fill', mix('#e2574c', '#6b2b26', q)); nv.setAttribute('ry', (10 - 5 * q).toFixed(1));
+    }, m('c1', 1), 2.5);
+    lab(p, 'тесный гипс', 560, 150, cx + 120, cy - 128, CAST, m('c1', .3));
+    lab(p, 'артерия', 130, 560, cx - 95, cy + 52, '#e2574c', m('c1', 2));
+    lab(p, 'нерв', 300, 560, cx - 70, cy + 78, '#f1dfa0', m('c1', 2));
+    // fat embolism: from the marrow of a long bone to the lungs
+    const lb = longBone(p, 80, 720, 320, m('c2'), { r: 24 });
+    lb.set({ line: 'obl', shift: 8 });
+    const lu = lungsEl(p, 610, 690, .8, m('c2'));
+    const drops = [0, 1, 2, 3, 4, 5].map(i => { const d = mk('circle', { r: 7, fill: '#f3d36b', stroke: '#a88a2a', 'stroke-width': 1.5, opacity: 0 }, p); return d; });
+    prog(q => drops.forEach((d, i) => { const u = (q * 3 + i / 6) % 1, x = 250 + (590 - 250) * u, y = 700 - 120 * Math.sin(u * Math.PI); d.setAttribute('cx', x.toFixed(1)); d.setAttribute('cy', y.toFixed(1)); d.setAttribute('opacity', (Math.sin(u * Math.PI)).toFixed(2)); }), m('c2', .8), Math.max(2, m('c3') - m('c2', .8)), lin);
+    txt(p, 'жир → сосуды лёгких', 420, 820, m('c2', 1), { size: 20, weight: 700, fill: COL.bad, anchor: 'middle' });
+    const L = [['c1', 'отёк в замкнутом пространстве (фасциальный футляр, тесный гипс) сдавливает нервы и сосуды'],
+      ['c2', 'жировая эмболия: переломы длинных костей и таза — угроза жизни'],
+      ['c3', 'изъязвление кожи, повреждение нерва, нарушение кровообращения'],
+      ['c4', 'проблемы с фиксаторами: смещение винтов, поломка спиц'],
+      ['c5', 'местная или общая инфекция'],
+      ['c6', 'повторный перелом, замедленное или неправильное сращение']];
+    L.forEach(([k, s], i) => numLine(p, i + 1, s, 800, 150 + i * 115, COL.bad, m(k), { size: 22, maxW: 680 }));
+  }],
+
+  ['period', 'Во время иммобилизации', (m, D) => {
+    const p = panel(0);
+    txt(p, 'во время иммобилизации', 800, 56, m('bed'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    // bed rest with skeletal traction; the free arms exercise
+    bench(p, 80, 720, 330, m('bed'), COL.dim, 110);
+    const f = supine(p, 380, 330, .82, m('bed'), { aN: 10, eN: 10 });
+    const [ax, ay] = onStage(f, 'AN'), tr = G(p, { o: 0 });
+    path(tr, `M${ax} ${ay}H790`, { stroke: '#d9d4c4', 'stroke-width': 2.5 });
+    mk('circle', { cx: 790, cy: ay + 10, r: 12, fill: 'none', stroke: COL.dim, 'stroke-width': 3 }, tr);
+    path(tr, `M802 ${ay + 10}V${ay + 110}`, { stroke: '#d9d4c4', 'stroke-width': 2.5 });
+    mk('rect', { x: 786, y: ay + 110, width: 32, height: 40, rx: 4, fill: '#7d8a93', stroke: '#5f6b72', 'stroke-width': 2 }, tr);
+    show(tr, m('bed'));
+    prog(q => f.set({ aN: 10 + 150 * cyc(q, 4), eN: 10 }), m('bed', 2), Math.max(2, m('gait') - m('bed', 2)), lin);
+    lab(p, 'скелетное вытяжение', 760, 190, 790, ay, COL.dim, m('bed', .5));
+    infoCard(p, 60, 470, 700, 190, 'постельный режим', 'вторичные изменения во всём организме → сразу общие упражнения для незатронутых частей тела', FR, m('bed'), { size: 21 });
+    txt(p, 'риск растёт:', 60, 720, m('risk'), { size: 22, weight: 700, fill: COL.bad });
+    pillRow(p, ['тромбоз глубоких вен', 'тромбоэмболия', 'пневмония'], 470, 774, m('risk', .3), { col: COL.bad, size: 20, gap: .7, space: 12 });
+    // crutches
+    const cf = crutchFig(p, 1180, 600, .95, m('gait'));
+    infoCard(p, 840, 640, 700, 220, 'ходьба при переломе ноги', 'костыли или ходунки; устройство и схему — по месту перелома, иммобилизации и возможностям пациента; нагрузку весом определяет врач', COL.whole, m('gait'), { size: 20 });
+    // the guidelines on a fresh panel
+    const p2 = panel(m('box'));
+    txt(p2, 'рекомендации на время иммобилизации (блок 11.8)', 800, 56, m('box'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    [['b1', 'обучить: функциональные приспособления, безопасная ходьба, движения в постели'], ['b2', 'холод и возвышенное положение в остром периоде'],
+     ['b3', 'установочное напряжение мышц под гипсом; активные движения в суставах выше и ниже иммобилизации'],
+     ['b4', 'объём движений во всех необездвиженных областях; сопротивление для крупных мышц — особенно для ходьбы']]
+      .forEach(([k, s], i) => numLine(p2, i + 1, s, 60, 130 + i * 66, FR, m(k), { size: 22, maxW: 1400 }));
+    const es = elevScene(p2, 330, 640, .7, m('b2'));
+    show(es.ice, m('b2', .5));
+    txt(p2, 'холод и возвышенное положение', 330, 790, m('b2'), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    const cs = supine(p2, 900, 640, .7, m('b3'), { aN: 6, eN: 8 });
+    const gas = muscleOn(cs, ...MUSCLE.gastroc, { after: 'shN', w: 10 }), rec = muscleOn(cs, ...MUSCLE.rectus, { after: 'thN', w: 11 });
+    castOn(cs);
+    bench(p2, 900 - 210, 900 + 230, 640, m('b3'), COL.dim, 84);
+    prog(q => gas.act(cyc(q, 3)), m('b3', .3), 2.6, lin);
+    prog(q => { const c = cyc(q, 3); cs.set({ hN: 35 * c }); rec.act(c); gas.act(0); }, m('b3', 3), Math.max(2, D - m('b3', 3)), lin);
+    txt(p2, 'напряжение под гипсом,', 900, 790, m('b3'), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    txt(p2, 'движения выше гипса', 900, 816, m('b3'), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    const cu = curlFig(p2, 1360, 760, .8, 1, m('b4'));
+    curls(cu, m('b4', .5), Math.max(2, D - m('b4', .5)), Math.max(2, Math.round((D - m('b4', .5)) / 1.6)));
+    txt(p2, 'сопротивление для крупных мышц', 1390, 816, m('b4'), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-imm', prompt: ['Голень в гипсе. Можно ли это во время иммобилизации?'],
+    build: grid([
+      { parts: ['Установочное напряжение икроножной мышцы под гипсом'], ans: ['y'], why: 'Да: установочное напряжение под гипсом.' },
+      { parts: ['Активные движения в тазобедренном и коленном суставах'], ans: ['y'], why: 'Да: движения в суставах выше иммобилизации.' },
+      { parts: ['Сопротивление, приложенное к загипсованной голени'], ans: ['n'], why: 'Нет: сила через место перелома.' },
+      { parts: ['Сопротивление для рук перед ходьбой на костылях'], ans: ['y'], why: 'Да: крупные мышцы, особенно для ходьбы.' },
+      { parts: ['Полный покой без упражнений до снятия гипса'], ans: ['n'], why: 'Нет: вторичные изменения во всём организме.' },
+    ], [['y', 'Можно', COL.good], ['n', 'Нельзя', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['post', 'После снятия гипса', (m, D) => {
+    const p = panel(0);
+    txt(p, 'после иммобилизации', 800, 56, m('post'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    const lm = limb(p, 80, 230, 660, m('post'));
+    lm.set({ cast: 1, atro: 1 });
+    prog(q => lm.set({ cast: 1 - q }), m('post', .3), 1);
+    pillRow(p, ['объём движений ↓', 'суставная игра ↓', 'гибкость мышц ↓'], 410, 370, m('post', 1.2), { col: COL.task, size: 19, gap: .5, space: 10 });
+    pillRow(p, ['атрофия и слабость'], 410, 424, m('post', 3), { col: COL.bad, size: 19 });
+    // pain fades (schematic)
+    const X0 = 120, Y0 = 800, W = 600, H = 250;
+    chartAxes(p, X0, Y0, W, H, '', 'дни →', m('pain'));
+    show(T(p, 'боль при движении', { x: X0 - 12, y: Y0 - H - 14, size: 20, fill: COL.dim, o: 0 }), m('pain'));
+    draw(path(p, fnPath(X0 + 6, Y0, W - 30, H, u => .82 * Math.exp(-u * 2.6) + .08, 0, 1, 100), { stroke: PAIN, 'stroke-width': 4.5 }, { d: 0 }), m('pain', .5), 2);
+    pill(p, 'схема', X0 + W - 40, Y0 - H + 20, m('pain'), { col: COL.dim, size: 17 });
+    txt(p, 'должна постепенно уменьшаться', X0 + W * .55, Y0 - H * .55, m('pain', 1.5), { size: 19, weight: 700, fill: COL.good, anchor: 'middle' });
+    infoCard(p, 820, 92, 720, 150, 'нерастяжимый рубец', 'если мягкие ткани были повреждены — ограничивает подвижность', COL.real, m('scar'), { size: 21 });
+    txt(p, 'с врачом уточнить, какое сращение:', 820, 300, m('doc'), { size: 22, weight: 700, fill: COL.chalk });
+    pillRow(p, ['клиническое', 'рентгенологическое'], 1180, 350, m('doc', .5), { col: [COL.whole, COL.good], size: 22, gap: .6 });
+    infoCard(p, 820, 400, 720, 220, 'пока нет рентгенологического', 'осторожно с любой нагрузкой через место перелома: сопротивление, растяжка, опора', COL.bad, m('care'), { size: 21 });
+    infoCard(p, 820, 640, 720, 170, 'после рентгенологического', 'кость выдерживает обычные нагрузки', COL.good, m('after'), { size: 21 });
+  }],
+
+  ['inter', 'Упражнения после иммобилизации', (m, D) => {
+    const p = panel(0);
+    txt(p, 'мобилизация и растяжка', 800, 56, m('mob'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    const j = jointGlide(p, { x: 380, y: 400, s: 1.05, shaft: 150, t0: m('mob') });
+    prog(q => j.set({ d: (q < .55 ? 3 : 9) * Math.sin(q * 70) }), m('mob', .8), Math.max(3, m('pnf') - m('mob', .8)), lin);
+    pillRow(p, ['I–II', '→', 'III–IV'], 380, 700, m('mob', 1), { col: [COL.good, COL.dim, COL.task], size: 24, gap: 2.2 });
+    infoCard(p, 60, 740, 700, 130, 'мобилизация сустава', 'начинать с I–II, наращивать, когда реакция сустава предсказуема', COL.good, m('mob', 1), { size: 20 });
+    // hold-relax / agonist contraction: the patient controls the force
+    const mu = muscleEl(p, { rest: 420, w: 30 }); put(mu.g, { o: 0 }); show(mu.g, m('pnf'));
+    const ph = ['напряжение', 'расслабление', 'растяжка'], phT = ph.map((s, i) => { const t = txt(p, s, 1160, 300, null, { size: 24, weight: 700, fill: [COL.bad, COL.whole, COL.good][i], anchor: 'middle' }); return t; });
+    prog(q => {
+      const c = q * 3 % 1, k = Math.floor(q * 3 % 3), L = 420 + (k === 2 ? 50 * Math.sin(c * Math.PI) : 0) + 14 * Math.floor(q * 3);
+      mu.set([1160 - L / 2, 420], [1160 + L / 2, 420]); mu.act(k === 0 ? Math.sin(c * Math.PI) : 0);
+      phT.forEach((t, i) => put(t, { o: i === k ? 1 : 0 }));
+    }, m('pnf'), Math.max(3, m('prox') - m('pnf')), lin);
+    infoCard(p, 840, 560, 700, 170, '«напряжение — расслабление», «сокращение агониста»', 'силу сокращения контролирует сам пациент', COL.whole, m('pnf', .5), { size: 21 });
+    // proximal vs distal force: a fresh panel
+    const p2 = panel(m('prox'));
+    txt(p2, 'до рентгенологического сращения: куда прикладывать силу', 800, 56, m('prox'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    const row = (y, distal, t0) => {
+      const g0 = G(p2, { o: 0 });
+      mk('circle', { cx: 120, cy: y, r: 30, fill: PANEL, stroke: COL.dim, 'stroke-width': 3 }, g0);
+      show(g0, t0);
+      const lb = longBone(p2, 150, y, 600, t0, { r: 24, fx: .5 });
+      lb.set({ line: 'trans', soft: .7, hard: .2 });
+      const ax = distal ? 700 : 300, a = arw(p2, ax, y - 110, ax, y - 34, FR, 6);
+      show(a, t0 + .6);
+      const ring = mk('circle', { cx: 450, cy: y, r: 46, fill: 'none', stroke: distal ? PAIN : COL.good, 'stroke-width': 4, opacity: 0 }, p2);
+      show(ring, t0 + 1.2);
+      if (distal) prog(q => lb.set({ angle: 6 * cyc(q, 3) }), t0 + 1, 3, lin);
+      return lb;
+    };
+    row(260, true, m('prox', .3));
+    cross(p2, 830, 230, 24, m('prox', 1.8), 8);
+    txt(p2, 'дистальнее перелома — сгибающая сила через перелом', 450, 360, m('prox', 1.2), { size: 21, weight: 700, fill: COL.bad, anchor: 'middle' });
+    row(520, false, m('prox', 3.5));
+    checkMark(p2, 830, 500, m('prox', 4.5), COL.good, 1.6);
+    txt(p2, 'проксимальнее перелома — перелом не нагружается', 450, 620, m('prox', 4.5), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    const cf = crutchFig(p2, 1220, 600, .9, m('func'), { touch: true });
+    infoCard(p2, 920, 650, 620, 210, 'обычные дела — осторожно', 'после перелома ноги ещё несколько недель — частичная нагрузка, пока перелом полностью не срастётся', COL.whole, m('func'), { size: 20 });
+    // strengthening steps: a fresh panel
+    const p3 = panel(m('str'));
+    txt(p3, 'укрепление: по шагам', 800, 56, m('str'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    const S = [['str', 'первые 2–3 недели после гипса', 'только лёгкая изометрия: кость и хрящ ещё не выдерживают больших сжимающих и сгибающих сил', COL.whole],
+      ['light', 'суставная игра и объём лучше', 'лёгкое сопротивление в доступном объёме — проксимальнее перелома', COL.task],
+      ['pre', 'рентгенологическое сращение', 'прогрессирующее сопротивление и более интенсивные динамические упражнения', COL.good]];
+    S.forEach(([k, h, s, c], i) => {
+      const x = 60 + i * 500, g0 = G(p3, { o: 0 });
+      mk('rect', { x, y: 104, width: 480, height: 16, rx: 8, fill: c }, g0);
+      if (i < 2) path(g0, `M${x + 482} 112h14m-8 -7l8 7l-8 7`, { stroke: COL.dim, 'stroke-width': 2.5 });
+      show(g0, m(k));
+      infoCard(p3, x, 140, 480, 250, h, s, c, m(k), { size: 20 });
+    });
+    const im = muscleEl(p3, { rest: 300, w: 30 }); put(im.g, { o: 0 }); im.set([150, 560], [450, 560]); show(im.g, m('str', .5));
+    prog(q => im.act(cyc(q, 3) * .8), m('str', 1), Math.max(2, m('light') - m('str', 1)), lin);
+    txt(p3, 'длина не меняется', 300, 640, m('str', 1), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    const c1 = curlFig(p3, 760, 760, .8, .6, m('light'));
+    curls(c1, m('light', .5), Math.max(2, m('pre') - m('light', .5)), 4, { lvl: .6 });
+    txt(p3, 'лёгкое сопротивление', 790, 810, m('light'), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    const c2 = curlFig(p3, 1260, 760, .8, 1.4, m('pre'));
+    txt(p3, 'прогрессирующее сопротивление', 1290, 810, m('pre'), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    curls(c2, m('pre', .5), Math.max(2, D - m('pre', .5)), 4);
+    infoCard(p3, 60, 690, 600, 170, 'ограничивающий рубец', 'мобилизуют ручными техниками, выбранными по ткани', COL.real, m('scarm'), { size: 20 });
+  }],
+
+  ['box', 'Цели после иммобилизации', (m, D) => {
+    const p = panel(0);
+    txt(p, 'после иммобилизации: цели (блок 11.9)', 800, 56, m('box'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    [['g1', 'объяснить ограничения до рентгенологического сращения; домашняя программа'], ['g2', 'защищать перелом: частичная нагрузка на ногу, щадящие действия рукой'],
+     ['g3', 'активные движения и мягкая изометрия под разными углами'], ['g4', 'подвижность суставов и мягких тканей: III–IV степень, сила проксимальнее перелома'],
+     ['g5', 'с ростом объёма и сращением — упражнения с сопротивлением и повторениями'], ['g6', 'безопасная аэробная нагрузка, которая не нагружает перелом']]
+      .forEach(([k, s], i) => numLine(p, i + 1, s, 60, 130 + i * 76, FR, m(k), { size: 23, maxW: 1400 }));
+    infoCard(p, 60, 600, 1480, 250, 'предосторожности', 'до рентгенологического сращения — никаких растягивающих и сопротивляющихся сил дистальнее перелома; несколько недель — без чрезмерного сжатия и сдвига в суставе; опора — защищённая', COL.bad, m('prec'), { size: 23 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-prox', prompt: ['Рентгенологического сращения ещё нет. Можно так?'],
+    build: grid([
+      { parts: ['Перелом середины плечевой: сопротивление отведению — на плечо выше перелома'], ans: ['y'], why: 'Да: сила проксимальнее перелома.' },
+      { parts: ['Перелом середины плечевой: сопротивление отведению — на запястье'], ans: ['n'], why: 'Нет: сила дистальнее перелома сгибает его.' },
+      { parts: ['Перелом середины бедра: растяжка сгибателей колена с силой на голень'], ans: ['n'], why: 'Нет: растягивающая сила дистальнее перелома.' },
+      { parts: ['Перелом середины бедра: изометрия четырёхглавой'], ans: ['y'], why: 'Да: мягкая изометрия.' },
+      { parts: ['Перелом середины бедра: сопротивление сгибанию бедра — выше перелома'], ans: ['y'], why: 'Да: проксимальнее перелома.' },
+    ], [['y', 'Можно', COL.good], ['n', 'Нельзя', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Иммобилизация ослабляет ткани, хрящ и мышцы; за осложнениями перелома следят.', 'w1'],
+     ['Во время иммобилизации: обучение, холод и возвышенное положение, установочное напряжение, движения выше и ниже, упражнения для остального тела.', 'w2'],
+     ['После снятия, до рентгенологического сращения: сила только проксимальнее перелома, частичная опора, сначала лёгкая изометрия.', 'w3'],
+     ['Мобилизация I–II с прогрессией, «напряжение — расслабление», позже — прогрессирующее сопротивление.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: FR }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-squat', prompt: ['Перелом голени, гипс сняли неделю назад, сращение клиническое. Пациент хочет приседать со штангой. Что ответить?'],
+    build: choice([
+      ['Пока лёгкая изометрия и активные движения; прогрессирующее сопротивление — после рентгенологического сращения'],
+      ['Можно: кость уже срослась'],
+      ['Полный покой до рентгенологического сращения'],
+      ['Растяжка икроножной с силой на стопу через перелом'],
+    ], 0, 'Первые 2–3 недели после гипса — только лёгкая изометрия; большие нагрузки — после рентгенологического сращения.',
+    [null, 'Клиническое сращение — ещё не рентгенологическое: кость не готова к большим нагрузкам.', 'Покой усиливает последствия иммобилизации; движения и лёгкая изометрия нужны.', 'До рентгенологического сращения силу дистальнее перелома не прикладывают.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-mob', prompt: ['Перелом лучевой кости, гипс снят, суставная игра в лучезапястном суставе снижена. С чего начать мобилизацию?'],
+    build: choice([
+      ['С I–II степени; наращивать, когда реакция сустава станет предсказуемой'],
+      ['Сразу IV степень, с силой дистальнее перелома'],
+      ['Мобилизация запрещена ещё полгода'],
+      ['Только пассивная растяжка с отягощением на кисть'],
+    ], 0, 'Мобилизация возвращает суставную игру, не травмируя хрящ и не нагружая перелом: начинают с I–II и наращивают по реакции.',
+    [null, 'Начинают мягко, а сила дистальнее перелома до сращения опасна.', 'Мобилизация нужна — начинают с щадящих степеней.', 'Отягощение на кисть — сила дистальнее перелома.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

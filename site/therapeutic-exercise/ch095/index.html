@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Упражнения в воде — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 95, title: 'Упражнения в воде: цели, показания, противопоказания', minutes: 8, language: 'ru', next: '../ch096/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch095/cards.ru.json
+const CARDS_SHORT = {
+  "Холл с соавторами\nисследования поддерживают эти цели, но нужны работы с надёжным дизайном: температура воды, глубина погружения, условия лечения": "нужны работы с надёжным дизайном",
+  "давление на грудную стенку\nгидростатическое давление мешает лёгким расправляться": "давление мешает лёгким расправляться",
+  "кровь — к центру тела\nбольше крови в груди → ещё меньше места для лёгких": "кровь в груди → меньше места для лёгких",
+  "Курабаяши: нос и рот под водой\n38 °C, 30 мин × 5 дней в неделю × 2 месяца → показатели дыхания и PaO₂ ↑; рекомендуют при хронической эмфиземе": "38 °C → PaO₂ ↑; при эмфиземе",
+  "Пехтер: аэробика в воде и на суше\n30 мин × 2 в неделю × 12 недель → пиковое VO₂ и нагрузка ↑; АД, холестерин, креатинин ↓; при хронической почечной недостаточности": "VO₂ ↑, АД ↓; почечная недостаточность",
+  "данные в пользу воды\nСидер: сердечная недостаточность + диабет 2 типа → мощность, пиковое VO₂, ходьба, мышцы ↑ · Теффаха: сердечная недостаточность или ИБС с нормальной функцией левого желудочка → пиковое VO₂ ↑": "сердечная недостаточность → VO₂ ↑",
+};
+// cards-short end
+
+const AQ = COL.whole, PREC = COL.task, CONTRA = COL.bad;
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A numbered line: a badge and a paragraph.
+function numLine(p, n, str, x, y, col, t0, { size = 22, maxW = 860 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 20, cy: y - 8, r: 19, fill: col }, g);
+  T(g, String(n), { x: x + 20, y: y, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 54, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// A small thermometer icon with a mark at a temperature.
+function thermoIcon(p, x, y, t0, lab, col = COL.bad) {
+  const g = G(p, { x, y, o: 0 });
+  mk('rect', { x: -9, y: -80, width: 18, height: 84, rx: 9, fill: PANEL, stroke: COL.chalk, 'stroke-width': 2.5 }, g);
+  mk('circle', { cy: 14, r: 17, fill: col, stroke: COL.chalk, 'stroke-width': 2.5 }, g);
+  mk('rect', { x: -4, y: -56, width: 8, height: 66, fill: col }, g);
+  path(g, 'M12 -56H26', { stroke: COL.chalk, 'stroke-width': 3 });
+  T(g, lab, { x: 32, y: -49, size: 22, weight: 700, fill: col });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+
+// Chalk icons for the nine goals (centre cx, cy; about 80 across).
+function goalIcon(p, i, cx, cy, col = AQ) {
+  const g = G(p, { x: cx, y: cy }), L = (d, w = 4, extra = {}) => path(g, d, { stroke: col, 'stroke-width': w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', ...extra });
+  if (i === 0) { mk('circle', { cx: -24, cy: 26, r: 6, fill: col }, g); L('M-24 26L36 26', 4, { 'stroke-opacity': .35 }); L('M-24 26L4 -28'); L('M30 16A54 54 0 0 0 0 -22', 3, { 'stroke-dasharray': '5 6' }); L('M-4 -18L4 -28L12 -20', 3); }
+  if (i === 1) { L('M-26 0H26', 6); mk('rect', { x: -40, y: -18, width: 14, height: 36, rx: 4, fill: col }, g); mk('rect', { x: 26, y: -18, width: 14, height: 36, rx: 4, fill: col }, g); }
+  if (i === 2) { L('M-36 30H36', 3, { 'stroke-opacity': .5 }); L('M-4 -34V22H20', 6); L('M24 -34V-6M16 -14L24 -4L32 -14', 3); }
+  if (i === 3) { L('M-38 8H38', 16, { 'stroke-opacity': .45 }); mk('ellipse', { cx: -16, cy: 8, rx: 12, ry: 17, fill: COL.board, stroke: col, 'stroke-width': 3.5 }, g); mk('ellipse', { cx: 18, cy: 8, rx: 12, ry: 17, fill: COL.board, stroke: col, 'stroke-width': 3.5 }, g); }
+  if (i === 4) { L('M0 6V-34M-8 -26L0 -36L8 -26'); L('M0 6H38M30 -2L40 6L30 14'); L('M0 6L-28 30M-26 20L-30 32L-18 32'); }
+  if (i === 5) { mk('path', { d: 'M0 30C-40 2 -38 -30 -16 -30C-6 -30 0 -22 0 -16C0 -22 6 -30 16 -30C38 -30 40 2 0 30Z', fill: 'none', stroke: col, 'stroke-width': 4 }, g); L('M-40 0H-18L-12 -10L-4 12L4 -6H40', 3); }
+  if (i === 6) { mk('circle', { cx: 2, cy: -30, r: 7, fill: col }, g); L('M2 -22L-2 6L-16 30M-2 6L14 18L12 32M0 -14L-16 -2M0 -14L18 -6'); }
+  if (i === 7) { L('M0 -34L28 -24V0C28 16 14 28 0 34C-14 28 -28 16 -28 0V-24Z', 4); L('M-11 0L-2 9L13 -9', 4); }
+  if (i === 8) { [-14, 2, 18].forEach(y => L(`M-36 ${y}q9 -9 18 0t18 0t18 0t18 0`, 3.5)); }
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Упражнения в воде', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 9 · Урок 95', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Упражнения в воде', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'цели, показания, противопоказания', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'вода как среда для лечебных упражнений', 800, 360, m('sub'), { size: 30, fill: AQ, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const w = pool(art, 330, 1270, 610, 850, null);
+    const th = fig(w.mid, { s: .85, pose: { ...STAND, t: 6 } }); plant(th, 'AN', 735, 850);
+    const pt = floater(w.mid, 980, 610, .8, null, {}, { collar: true, belt: true, rings: true });
+    put(pt.g, { o: 1 });
+    holdHand(th, 'F', pt, () => { const [x, y] = onStage(pt, 'Hc'); return [x - 2, y + 20]; });
+    holdHand(th, 'N', pt, () => { const [x, y] = onStage(pt, 'Hc'); return [x + 6, y + 16]; });
+    prog(q => { const T0 = q * D; w.set({ t: T0, amp: 4 }); put(pt.g, { y: 610 + 6.4 + 3 * Math.sin(T0 * 1.7) }); pt.set({}); }, .3, D, lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['def', 'Что такое упражнения в воде', (m, D) => {
+    const p = panel(0);
+    txt(p, 'упражнения в воде (aquatic exercise)', 800, 56, m('def'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    txt(p, 'вода для восстановления — уже несколько веков', 800, 96, m('def', 1), { size: 20, fill: COL.dim, anchor: 'middle' });
+    const SY = 290, S = .62;
+    const w = pool(p, 70, 1010, SY, 760, m('what'), { floor: [[70, 455], [470, 455], [650, 760], [1010, 760]] });
+    w.wave(m('what'), Math.max(3, D - m('what')), 3);
+    txt(p, 'бассейны разной глубины или ванны', 540, 210, m('what'), { size: 21, weight: 700, fill: AQ, anchor: 'middle' });
+    // standing in shallow water; floating supine with devices; vertical in deep water without the floor
+    const a = fig(w.mid, { s: S, o: 0 }); plant(a, 'AN', 250, 455); show(a.g, m('pos'));
+    floater(w.mid, 640, SY, S, m('pos', 1), {}, { collar: true, belt: true, rings: true });
+    const c = fig(w.mid, { x: 890, y: SY + 122 * S, s: S, o: 0, pose: { ...STAND, hN: 22, kN: 34, hF: -8, kF: 18, aN: 26, eN: 40, aF: 16, eF: 30 } });
+    floats(c, { belt: 'back' }); show(c.g, m('pos', 2));
+    txt(p, 'стоя: часть веса — на дне', 250, 495, m('pos'), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'на спине с поплавками', 640, 390, m('pos', 1), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'вертикально на глубине', 890, 650, m('pos', 2), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'без опоры на дно', 890, 678, m('pos', 2), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    // what the water helps with
+    txt(p, 'облегчает привычные вмешательства:', 1290, 160, m('list'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ['растяжка', 'укрепление мышц', 'мобилизация суставов', 'равновесие и ходьба', 'выносливость'].forEach((s, i) => pill(p, s, 1290, 210 + i * 50, m('list', .5 + i * .7), { col: AQ, size: 21 }));
+    txt(p, 'положения:', 1290, 490, m('pos'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pillRow(p, ['на спине', 'сидя', 'на коленях'], 1290, 535, m('pos', .3), { col: COL.irr, size: 19, gap: .3, space: 10 });
+    pillRow(p, ['на животе', 'на боку', 'вертикально'], 1290, 580, m('pos', 1.2), { col: COL.irr, size: 19, gap: .3, space: 10 });
+    txt(p, 'и любая нужная нагрузка весом', 1290, 630, m('pos', 2.5), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'успешно применяют:', 540, 812, m('who'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pillRow(p, ['дети', 'ортопедия', 'неврология', 'сердце и лёгкие'], 540, 856, m('who', .4), { col: COL.task, size: 20, gap: .5 });
+  }],
+
+  ['goals', 'Девять целей', (m, D) => {
+    const p = panel(0);
+    txt(p, 'цели упражнений в воде', 800, 56, m('goals'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    txt(p, 'среда, в которой пациенту и терапевту легче выполнять вмешательства → восстановление функции', 800, 96, m('goals', .5), { size: 20, fill: COL.dim, anchor: 'middle' });
+    const G9 = ['облегчить упражнения на объём движений', 'начать тренировку с сопротивлением', 'облегчить упражнения с нагрузкой весом',
+      'улучшить выполнение ручных техник', 'доступ к пациенту со всех сторон (в 3D)', 'облегчить упражнения для сердца и сосудов',
+      'начать повторять функциональные действия', 'снизить риск травмы и повторной травмы', 'помочь пациенту расслабиться'];
+    G9.forEach((s, i) => {
+      const x = 70 + (i % 3) * 495, y = 130 + Math.floor(i / 3) * 165, g = G(p, { o: 0, y: 14 });
+      roundBox(g, x, y, 470, 145, AQ, PANEL, 2);
+      mk('circle', { cx: x + 38, cy: y + 44, r: 22, fill: AQ }, g);
+      T(g, String(i + 1), { x: x + 38, y: y + 52, size: 24, weight: 700, fill: COL.board, anchor: 'middle' });
+      put(para(g, s, x + 74, y + 52, null, { size: 24, weight: 600, maxW: 285 }), { o: 1 });
+      goalIcon(g, i, x + 412, y + 78);
+      tw(g, { o: 1, y: 0 }, m('g' + (i + 1)), .5);
+    });
+    infoCard(p, 70, 650, 1460, 130, 'Холл с соавторами', 'исследования поддерживают эти цели, но нужны работы с надёжным дизайном: температура воды, глубина погружения, условия лечения', COL.task, m('hall'), { size: 21 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-goal', prompt: ['Это цель упражнений в воде (по книге)?'],
+    build: grid([
+      { parts: ['Облегчить упражнения на объём движений'], ans: ['y'], why: 'Одна из девяти целей.' },
+      { parts: ['Полностью заменить упражнения на суше'], ans: ['n'], why: 'Такой цели нет: вода облегчает вмешательства, а не заменяет сушу.' },
+      { parts: ['Доступ к пациенту со всех сторон, в трёх измерениях'], ans: ['y'], why: 'Плавучесть даёт терапевту доступ к пациенту в трёх измерениях.' },
+      { parts: ['Снизить риск травмы и повторной травмы при реабилитации'], ans: ['y'], why: 'Одна из девяти целей.' },
+      { parts: ['Поднять VO₂max выше, чем при тех же упражнениях на суше'], ans: ['n'], why: 'Наоборот: при большинстве упражнений в воде VO₂max ниже, чем на суше.' },
+    ], [['y', 'Цель', COL.good], ['n', 'Нет', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['fear', 'Предосторожности: страх, нервная система', (m, D) => {
+    const p = panel(0);
+    txt(p, 'предосторожности (precautions)', 800, 56, m('prec'), { size: 28, weight: 700, anchor: 'middle', fill: PREC });
+    txt(p, 'большинство пациентов переносят воду легко — но погружение влияет на тело и на психику', 800, 96, m('prec', 1), { size: 20, fill: COL.dim, anchor: 'middle' });
+    // fear of water: a tense patient clutching the edge of the pool
+    txt(p, 'страх воды', 380, 150, m('fear'), { size: 26, weight: 700, fill: PREC, anchor: 'middle' });
+    txt(p, 'симптомы во время и после погружения ↑ из-за:', 380, 186, m('fear', 1), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    pillRow(p, ['защитного напряжения мышц', 'стресса', 'неправильной техники'], 380, 230, m('why'), { col: COL.bad, size: 18, gap: .6, space: 10 });
+    const S = .85, GY = 720, w = pool(p, 70, 700, 487, GY, m('fear'), { rim: 22 });
+    w.wave(m('fear'), Math.max(3, D - m('fear')), 5);
+    const f = fig(w.mid, { s: S, o: 0, pose: { ...STAND, t: 12, hN: 18, kN: 16, fN: 4, hF: 12, kF: 12, fF: 2 } });
+    plant(f, 'AN', 588, GY);
+    reach(f, 'N', 694, 466); reach(f, 'F', 690, 468);
+    show(f.g, m('fear'));
+    const trap = muscleOn(f, ['Sh', 'Hc', 24, -15], ['Sh', 'H', 8, 26], { w: 10, after: 'torso' });
+    trap.act(0);
+    prog(q => { const k = q > 0 ? .55 + .45 * Math.abs(Math.sin(q * 40)) : 0; trap.act(k); plant(f, 'AN', 588 + 1.5 * Math.sin(q * 90), GY); }, m('why'), Math.max(2, D - m('why')), lin);
+    txt(p, 'мышцы напряжены', 420, 400, m('why'), { size: 19, weight: 700, fill: '#ff5a3c', anchor: 'middle' });
+    show(path(p, 'M486 404L562 444', { stroke: '#ff5a3c', 'stroke-width': 2.5 }, { o: 0 }), m('why'));
+    NOTE(p, 420, 362, m('why', .5));
+    txt(p, 'вводный период:', 380, 772, m('orient'), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    pillRow(p, ['погружение и равновесие', 'управление телом в воде'], 380, 815, m('orient', .5), { col: COL.good, size: 19, gap: .7, space: 10 });
+    pill(p, 'как пользоваться поплавками', 380, 858, m('orient', 2), { col: COL.good, size: 19 });
+    // neurological disorders
+    txt(p, 'неврологические нарушения', 1170, 150, m('neuro'), { size: 26, weight: 700, fill: PREC, anchor: 'middle' });
+    infoCard(p, 790, 180, 760, 150, 'атаксия', 'ещё труднее управлять целенаправленными движениями', PREC, m('neuro', 1), { size: 21, textW: 520 });
+    const at = G(p, { o: 0 }); path(at, 'M1340 290L1520 290', { stroke: COL.faint, 'stroke-width': 3, 'stroke-dasharray': '6 6' });
+    path(at, 'M1340 290C1360 262 1372 318 1392 290S1424 262 1444 296S1478 314 1496 284L1520 290', { stroke: COL.bad, 'stroke-width': 4 }); show(at, m('neuro', 1.5));
+    infoCard(p, 790, 350, 760, 190, 'рассеянный склероз с непереносимостью жары', 'вода теплее 33 °C → утомление', PREC, m('ms'), { size: 22, textW: 540 });
+    thermoIcon(p, 1390, 490, m('ms', .5), '> 33 °C');
+    infoCard(p, 790, 560, 760, 170, 'контролируемая эпилепсия', 'пристальное наблюдение в воде; лекарства — до занятия', PREC, m('epi'), { size: 22, textW: 560 });
+    const ep = G(p, { o: 0 });
+    path(ep, 'M1380 690C1400 666 1440 666 1460 690C1440 714 1400 714 1380 690Z', { stroke: COL.chalk, 'stroke-width': 3.5 });
+    mk('circle', { cx: 1420, cy: 690, r: 11, fill: AQ }, ep);
+    mk('rect', { x: 1478, y: 676, width: 50, height: 26, rx: 13, fill: COL.chalk }, ep); mk('rect', { x: 1503, y: 676, width: 25, height: 26, rx: 0, fill: PREC }, ep);
+    show(ep, m('epi', .6));
+  }],
+
+  ['resp', 'Дыхательные нарушения', (m, D) => {
+    const p = panel(0);
+    txt(p, 'дыхательные нарушения', 800, 56, m('resp'), { size: 28, weight: 700, anchor: 'middle', fill: PREC });
+    const GY = 820, S = 1.15;
+    ground(p, 120, 400, GY, m('resp'));
+    const fL = frontStand(p, 260, GY, S, m('resp'), { muscles: false });
+    const lgL = lungsEl(p, ...fL.at([0, -268]), .3 * S, m('resp'));
+    txt(p, 'на суше', 260, 860, m('resp'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const w = pool(p, 470, 820, GY - 318 * S, GY, m('resp'));
+    w.wave(m('resp'), Math.max(3, D - m('resp')), 3);
+    const fW = frontStand(w.mid, 645, GY, S, m('resp'), { muscles: false });
+    const lgW = lungsEl(w.mid, ...fW.at([0, -268]), .3 * S, m('resp'));
+    txt(p, 'по шею в воде', 645, 860, m('resp'), { size: 21, weight: 700, fill: AQ, anchor: 'middle' });
+    // hydrostatic pressure on the chest wall and the legs: longer arrows deeper
+    const arr = G(p, { o: 0 });
+    [[-282, 48], [-238, 42], [-190, 54], [-130, 48], [-72, 42], [-26, 38]].forEach(([ly, hw]) => {
+      const [cx, cy] = fW.at([0, ly]), L = 16 + (ly + 318) * S * .1;
+      [-1, 1].forEach(k => fArrow(arr, cx + k * (hw * S + 6 + L), cy, -k * L, 0, DRAG_C, { w: 5, head: 12 }));
+    });
+    show(arr, m('press'));
+    // blood moves from the legs toward the chest
+    const dots = [];
+    for (let i = 0; i < 14; i++) { const e = mk('circle', { r: 5, fill: BLOOD_A, stroke: COL.board, 'stroke-width': 1.5 }, w.mid); put(e, { o: 0 }); dots.push(e); }
+    const T0 = m('blood');
+    prog(q => dots.forEach((e, i) => {
+      const k = clamp(q * 1.6 - i * .045, 0, 1), side = i % 2 ? 1 : -1;
+      const [x0, y0] = fW.at([side * 30, -30 - (i % 4) * 22]), [x1, y1] = fW.at([side * (6 + (i % 3) * 9), -250 + (i % 5) * 9]);
+      put(e, { x: lerp(x0, x1, io(k)), y: lerp(y0, y1, io(k)), o: q > 0 ? 1 : 0 });
+    }), T0, Math.max(3, D - T0 - .5), lin);
+    prog(q => { const T = q * D, b = cyc(T / D, D / 3.2); lgL.breathe(b); lgW.breathe(T >= m('press') ? .35 * b : b); }, 0, D, lin);
+    txt(p, 'вдох полный', 260, 380, m('press'), { size: 19, fill: COL.good, anchor: 'middle' });
+    txt(p, 'лёгким труднее расправиться', 645, 380, m('press'), { size: 19, weight: 700, fill: COL.bad, anchor: 'middle' });
+    infoCard(p, 880, 110, 670, 120, 'давление на грудную стенку', 'гидростатическое давление мешает лёгким расправляться', AQ, m('press'), { size: 20 });
+    infoCard(p, 880, 245, 670, 120, 'кровь — к центру тела', 'больше крови в груди → ещё меньше места для лёгких', BLOOD_A, m('blood'), { size: 20 });
+    infoCard(p, 880, 380, 670, 90, 'VO₂max в воде обычно ниже, чем на суше', null, COL.task, m('vo2'));
+    infoCard(p, 880, 485, 670, 175, 'Курабаяши: нос и рот под водой', '38 °C, 30 мин × 5 дней в неделю × 2 месяца → показатели дыхания и PaO₂ ↑; рекомендуют при хронической эмфиземе', COL.good, m('ev1'), { size: 19 });
+    infoCard(p, 880, 675, 670, 175, 'Пехтер: аэробика в воде и на суше', '30 мин × 2 в неделю × 12 недель → пиковое VO₂ и нагрузка ↑; АД, холестерин, креатинин ↓; при хронической почечной недостаточности', COL.good, m('ev2'), { size: 19 });
+  }],
+
+  ['heart', 'Сердечные нарушения', (m, D) => {
+    const p = panel(0);
+    txt(p, 'сердечные нарушения', 800, 56, m('heart'), { size: 28, weight: 700, anchor: 'middle', fill: PREC });
+    const GY = 820, S = 1.15, NECK = GY - 318 * S, XIPH = GY - 266 * S;
+    const w = pool(p, 190, 530, NECK, GY, m('heart'));
+    const f = frontStand(w.mid, 360, GY, S, m('heart'), { muscles: false });
+    const ht = heartEl(w.mid, ...f.at([14, -284]), .2 * S, m('heart'));
+    prog(q => { const T = q * D; ht.beat(cyc(T, 1.4)); }, 0, D, lin);
+    pillRow(p, ['стенокардия', 'нарушения АД', 'болезни сердца', 'слабая насосная функция'], 1075, 110, m('heart', 1), { col: PREC, size: 18, gap: .5, space: 8 });
+    infoCard(p, 600, 145, 950, 160, 'данные в пользу воды', 'Сидер: сердечная недостаточность + диабет 2 типа → мощность, пиковое VO₂, ходьба, мышцы ↑ · Теффаха: сердечная недостаточность или ИБС с нормальной функцией левого желудочка → пиковое VO₂ ↑', COL.good, m('cider'), { size: 19 });
+    txt(p, 'алгоритм Мейер и Леблан (Meyer, Leblanc)', 600, 350, m('ml'), { size: 23, weight: 700, fill: COL.chalk });
+    const PTS = ['погружение до шеи → временные отклонения гемодинамики', 'декомпенсированная сердечная недостаточность → вода абсолютно противопоказана',
+      'хорошее самочувствие в воде ≠ левый желудочек переносит объёмную нагрузку', 'может спать на спине → возможно, ванна полусидя, погружение не выше мечевидного отростка',
+      'инфаркт с зубцом Q давностью > 6 недель → бассейн по ортопедическим показаниям: вертикально, не выше мечевидного отростка'];
+    PTS.forEach((s, i) => numLine(p, i + 1, s, 600, 400 + i * 92, i === 1 ? CONTRA : PREC, m('m' + (i + 1)), { size: 20, maxW: 880 }));
+    // the water level: from the neck down to the xiphoid
+    const lv = G(p, { o: 0 });
+    path(lv, `M190 ${NECK}H530`, { stroke: COL.bad, 'stroke-width': 3, 'stroke-dasharray': '8 6' });
+    T(lv, 'до шеи', { x: 180, y: NECK + 6, size: 18, weight: 700, fill: COL.bad, anchor: 'end' });
+    show(lv, m('m1'));
+    const lx = G(p, { o: 0 });
+    path(lx, `M190 ${XIPH}H530`, { stroke: COL.good, 'stroke-width': 3, 'stroke-dasharray': '8 6' });
+    T(lx, 'мечевидный', { x: 180, y: XIPH, size: 18, weight: 700, fill: COL.good, anchor: 'end' });
+    T(lx, 'отросток', { x: 180, y: XIPH + 22, size: 18, weight: 700, fill: COL.good, anchor: 'end' });
+    show(lx, m('m4'));
+    prog(q => w.set({ y: lerp(NECK, XIPH, q) }), m('m4', .5), 1.2);
+  }],
+
+  ['lines', 'Раны и линии', (m, D) => {
+    const p = panel(0);
+    txt(p, 'небольшие раны и открытые линии', 800, 56, m('lines'), { size: 28, weight: 700, anchor: 'middle', fill: PREC });
+    const defs = mk('defs', {}, p);
+    // a forearm with a waterproof dressing
+    infoCard(p, 60, 110, 720, 330, 'раны, трахеостома', 'закрыть водонепроницаемой повязкой', PREC, m('lines'), { size: 22 });
+    const arm = G(p, { o: 0 });
+    const SK = '#d8d1c1', SL = mix('#d8d1c1', COL.board, .62);
+    limbEl(arm, defs, SK, 36, 24, SL).set([150, 360], [470, 334]);
+    limbEl(arm, defs, SK, 9, 7, SL).set([492, 314], [526, 298]);
+    limbEl(arm, defs, SK, 23, 16, SL).set([478, 333], [560, 330]);
+    path(arm, 'M318 340L348 336', { stroke: COL.bad, 'stroke-width': 4 });
+    mk('rect', { x: 290, y: 310, width: 90, height: 56, rx: 10, fill: '#ffffff', 'fill-opacity': .25, stroke: COL.chalk, 'stroke-width': 2.5, 'stroke-dasharray': '6 4' }, arm);
+    T(arm, 'повязка', { x: 410, y: 300, size: 18, fill: COL.chalk });
+    show(arm, m('lines', 1));
+    // an intravenous line, clamped and fixed with tape
+    infoCard(p, 820, 110, 720, 330, 'внутривенные линии, катетер Хикмана', 'правильно пережать и закрепить', PREC, m('iv'), { size: 22 });
+    const iv = G(p, { o: 0 });
+    path(iv, 'M900 380C980 300 1080 400 1160 330S1340 300 1440 350', { stroke: '#cfe6f2', 'stroke-width': 7 });
+    mk('rect', { x: 1150, y: 316, width: 36, height: 30, rx: 5, fill: COL.task, stroke: COL.board, 'stroke-width': 2 }, iv);
+    mk('rect', { x: 1150, y: 334, width: 36, height: 8, fill: COL.board }, iv);
+    T(iv, 'зажим', { x: 1168, y: 300, size: 18, fill: COL.task, anchor: 'middle' });
+    [[960, 340], [1360, 325]].forEach(([x, y]) => mk('rect', { x: x - 26, y: y - 10, width: 52, height: 20, rx: 4, fill: '#ece8dc', 'fill-opacity': .55, transform: `rotate(-20 ${x} ${y})` }, iv));
+    show(iv, m('iv', 1));
+    infoCard(p, 60, 480, 720, 230, 'гастростома, надлобковые устройства', 'тоже требуют осторожности', PREC, m('gt'), { size: 22, textW: 420 });
+    const gs = G(p, { o: 0 });
+    path(gs, 'M560 560C560 540 680 540 680 560V680C680 700 560 700 560 680Z', { stroke: COL.chalk, 'stroke-width': 3.5 });
+    mk('circle', { cx: 604, cy: 620, r: 7, fill: PREC }, gs);
+    path(gs, 'M604 620C640 630 690 640 730 606', { stroke: '#cfe6f2', 'stroke-width': 5 });
+    mk('rect', { x: 724, y: 594, width: 18, height: 18, rx: 4, fill: PREC }, gs);
+    show(gs, m('gt', .5));
+    infoCard(p, 820, 480, 720, 230, 'наблюдение', 'всегда следить за нежелательными реакциями на занятие в воде', COL.good, m('obs'), { size: 22, textW: 380 });
+    const ob = G(p, { o: 0 });
+    path(ob, 'M1270 610C1316 556 1444 556 1490 610C1444 664 1316 664 1270 610Z', { stroke: COL.chalk, 'stroke-width': 4 });
+    mk('circle', { cx: 1380, cy: 610, r: 28, fill: AQ }, ob); mk('circle', { cx: 1380, cy: 610, r: 12, fill: COL.board }, ob);
+    show(ob, m('obs', .5));
+  }],
+
+  ['contra', 'Противопоказания', (m, D) => {
+    const p = panel(0);
+    txt(p, 'противопоказания (contraindications)', 800, 56, m('contra'), { size: 28, weight: 700, anchor: 'middle', fill: CONTRA });
+    txt(p, 'любая ситуация, в которой возможен вред пациенту или воде бассейна', 800, 96, m('contra', 1), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const C = ['начинающаяся сердечная недостаточность, нестабильная стенокардия', 'дыхательные нарушения: ЖЕЛ < 1 литра', 'тяжёлые заболевания периферических сосудов',
+      'угроза кровотечения', 'тяжёлые болезни почек: не приспосабливаются к потере жидкости при погружении', 'открытые раны без герметичной повязки, колостома, кожные инфекции (грибок стопы, лишай)',
+      'недержание кала или мочи: эвакуация, химическая обработка, возможно слив', 'менструация без внутренней защиты', 'инфекции через воду и воздух: грипп, кишечные, брюшной тиф, холера, полиомиелит',
+      'неконтролируемые судороги за последний год: может понадобиться немедленно вынуть из воды'];
+    C.forEach((s, i) => {
+      const x = 60 + Math.floor(i / 5) * 755, y = 128 + (i % 5) * 148, g = G(p, { o: 0, y: 12 });
+      roundBox(g, x, y, 725, 132, CONTRA, PANEL, 2);
+      mk('circle', { cx: x + 38, cy: y + 46, r: 21, fill: CONTRA }, g);
+      T(g, String(i + 1), { x: x + 38, y: y + 54, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+      put(para(g, s, x + 72, y + 52, null, { size: 22, maxW: 630 }), { o: 1 });
+      tw(g, { o: 1, y: 0 }, m('c' + (i + 1)), .5);
+    });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-prec', prompt: ['Предосторожность или противопоказание?'],
+    build: grid([
+      { parts: ['Страх воды'], ans: ['p'], why: 'Предосторожность: поможет вводный период.' },
+      { parts: ['Жизненная ёмкость лёгких меньше 1 литра'], ans: ['c'], why: 'Противопоказание.' },
+      { parts: ['Контролируемая эпилепсия'], ans: ['p'], why: 'Предосторожность: пристальное наблюдение и лекарства до занятия.' },
+      { parts: ['Неконтролируемые судороги за последний год'], ans: ['c'], why: 'Противопоказание: может понадобиться немедленно вынуть пациента из воды.' },
+      { parts: ['Небольшая рана под водонепроницаемой повязкой'], ans: ['p'], why: 'Предосторожность; противопоказана рана без герметичной повязки.' },
+    ], [['p', 'Предосторожность', PREC], ['c', 'Противопоказание', CONTRA]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Вода облегчает привычные вмешательства: любое положение и любая нагрузка весом.', 'w1'],
+     ['Девять целей: от объёма движений и силы до расслабления и защиты от повторной травмы.', 'w2'],
+     ['Предосторожности: страх воды; неврологические, дыхательные, сердечные нарушения; раны и линии.', 'w3'],
+     ['Противопоказания: всё, что может навредить пациенту или воде бассейна.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: AQ }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-ms', prompt: ['У пациентки рассеянный склероз, жару она переносит плохо. Вода в бассейне 34 °C. Что учесть?'],
+    build: choice([
+      ['Выше 33 °C она может быстро утомиться: нужна вода прохладнее и наблюдение'],
+      ['Чем теплее вода, тем лучше: тепло расслабляет'],
+      ['Рассеянный склероз — абсолютное противопоказание к воде'],
+      ['Температура воды при рассеянном склерозе значения не имеет'],
+    ], 0, 'При непереносимости жары погружение в воду теплее 33 °C может вызвать утомление.',
+    [null, 'Для этой пациентки тепло выше 33 °C как раз опасно утомлением.', 'Это предосторожность, а не противопоказание.', 'Имеет: порог — 33 °C.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-mi', prompt: ['Девять недель назад у пациента был инфаркт с зубцом Q. Он хочет заниматься в бассейне из-за колена. Что советуют Мейер и Леблан?'],
+    build: choice([
+      ['Можно: вертикально и при погружении не выше мечевидного отростка'],
+      ['Можно: лёжа на спине, по шею в воде'],
+      ['Нельзя ни при каких условиях'],
+      ['Можно, если в воде он чувствует себя хорошо'],
+    ], 0, 'Через шесть недель и позже после инфаркта с зубцом Q — вертикально и не глубже мечевидного отростка.',
+    [null, 'Погружение до шеи может вызвать временные отклонения гемодинамики.', 'Через шесть недель и позже по ортопедическим показаниям — можно, с ограничениями.', 'Хорошее самочувствие ещё не значит, что левый желудочек переносит объёмную нагрузку.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

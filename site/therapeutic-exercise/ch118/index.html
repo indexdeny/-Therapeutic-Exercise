@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Строение и подвижность нервов — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 118, title: 'Строение и подвижность нервной системы', minutes: 7, language: 'ru', next: '../ch119/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch118/cards.ru.json
+const CARDS_SHORT = {
+  "миелин изолирует аксон и ускоряет проведение\nсамые тонкие волокна — без миелина; нерв — из одного пучка или из нескольких": "тонкие — без миелина",
+  "устроена, чтобы двигаться\nвыдерживать механические силы — и при этом проводить импульсы": "выдерживать силы и проводить импульсы",
+  "прежде чем вырастет натяжение\nсмещается весь нерв, а оболочки скользят относительно нервной ткани": "смещается весь нерв, оболочки скользят",
+  "сплетения и корешки\nустроены так, что натяжение одной части расходится по всей системе": "натяжение расходится по системе",
+  "оболочки\nэпиневрий, периневрий и эндоневрий принимают силу раньше, чем растянется сам нерв": "принимают силу раньше нерва",
+  "периневрий — главная защита\nпрочен и упруг вдоль волокон: выдерживает растяжение на 18–22 %, прежде чем порвётся": "выдерживает 18–22 %",
+  "в положении теста срединного нерва\nрастяжение нерва — всего 2,5–3 %": "растяжение нерва — всего 2,5–3 %",
+};
+// cards-short end
+
+const HEAD = COL.whole, NV = NERVE_C;
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+// An arm in side view (shoulder at S, upper arm to the right), with a nerve on the flexor side across the elbow.
+// set(ang): the inside elbow angle (180 = straight). The nerve is wavy when the elbow is bent and straightens as it
+// extends; slide(u-profile) moves its beads.
+function armGlide(p, S, s, t0) {
+  const g = G(p, { o: 0 }), defs = mk('defs', {}, g), col = '#d8d1c1', line = mix(col, COL.board, .62);
+  const ua = limbEl(g, defs, col, 34 * s, 28 * s, line), fa = limbEl(g, defs, col, 27 * s, 20 * s, line), hd = limbEl(g, defs, col, 18 * s, 14 * s, line);
+  const UA = 260 * s, FA = 240 * s;
+  const nv = nerveLine(p, [[0, 0], [1, 0]], null, { w: 8, n: 16 }); put(nv.g, { o: 1 });
+  g.appendChild(nv.g);
+  const e = { g, nv };
+  e.set = (ang, { slide = 0, prof = null } = {}) => {
+    const E = [S[0] + UA, S[1]], a = rad(180 - ang), W = [E[0] + FA * Math.cos(-a), E[1] + FA * Math.sin(-a)];
+    ua.set(S, E); fa.set(E, W); hd.set(W, [W[0] + 70 * s * Math.cos(-a), W[1] + 70 * s * Math.sin(-a)]);
+    // the nerve runs on the front (upper) side of both segments
+    const n1 = [0, -1], n2 = [-Math.sin(-a), Math.cos(-a)].map(v => -v);
+    const off = 18 * s, P = [[S[0] + 40 * s, S[1] - off], [E[0] - 20 * s, E[1] - off], [E[0] + 10 * s * Math.cos(-a) + n2[0] * off * 1.2, E[1] + 10 * s * Math.sin(-a) + n2[1] * off * 1.2], [W[0] + n2[0] * off, W[1] + n2[1] * off]];
+    nv.pts = P;
+    nv.set({ wave: clamp((150 - ang) / 70, 0, 1), slide, prof });
+    e.E = E; e.W = W;
+    return e;
+  };
+  e.set(110);
+  if (t0 !== null) { show(g, t0); }
+  return e;
+}
+// The spinal cord in section with the cell bodies of Box 13.1: anterior horn (alpha, gamma), dorsal root ganglion
+// (sensory), sympathetic ganglion. Centre (x, y). Effector icons sit on the nerve to the right.
+function cordX(p, x, y, t0) {
+  const g = G(p, { x, y, o: 0 });
+  mk('ellipse', { cx: 0, cy: 0, rx: 110, ry: 86, fill: '#e9e3d4', stroke: '#9b8f74', 'stroke-width': 3 }, g);
+  mk('path', { d: 'M-12 -10C-30 -70 -70 -70 -66 -40C-62 -20 -40 -10 -36 0C-46 20 -70 40 -58 66C-40 78 -20 40 -10 12ZM12 -10C30 -70 70 -70 66 -40C62 -20 40 -10 36 0C46 20 70 40 58 66C40 78 20 40 10 12Z', fill: '#b7a9a0', stroke: '#8a7a70', 'stroke-width': 1.5 }, g);
+  mk('rect', { x: -12, y: -14, width: 24, height: 28, fill: '#b7a9a0' }, g);
+  // the right half: dorsal root (up) with its ganglion, ventral root (down), joining into the spinal nerve
+  path(g, 'M50 -50C110 -90 170 -80 230 -40', { stroke: NERVE_C, 'stroke-width': 7 });
+  path(g, 'M50 52C110 90 170 80 230 30', { stroke: NERVE_C, 'stroke-width': 7 });
+  mk('ellipse', { cx: 160, cy: -76, rx: 34, ry: 20, fill: '#e6c96a', stroke: '#9b7d24', 'stroke-width': 2 }, g);
+  path(g, 'M230 -40C250 -20 250 10 230 30M240 -6H470', { stroke: NERVE_C, 'stroke-width': 9 });
+  path(g, 'M300 -6C300 60 300 90 300 120', { stroke: NERVE_C, 'stroke-width': 5, 'stroke-dasharray': '7 5' });
+  mk('ellipse', { cx: 300, cy: 140, rx: 26, ry: 18, fill: '#e6c96a', stroke: '#9b7d24', 'stroke-width': 2 }, g);
+  const cells = {
+    a: mk('circle', { cx: 50, cy: 46, r: 9, fill: '#e2574c' }, g), g: mk('circle', { cx: 34, cy: 36, r: 6, fill: '#f0a04b' }, g),
+    s: mk('circle', { cx: 160, cy: -76, r: 9, fill: '#5aa7d6' }, g), v: mk('circle', { cx: 300, cy: 140, r: 8, fill: '#9b6fd0' }, g),
+  };
+  if (t0 !== null) show(g, t0);
+  return { g, cells, at: k => { const c = cells[k]; return [x + +c.getAttribute('cx'), y + +c.getAttribute('cy')]; } };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Строение и подвижность нервов', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 13 · Урок 118', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Строение и подвижность', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'нервной системы', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'нерв скользит и растягивается — и при этом проводит импульсы', 800, 360, m('sub'), { size: 30, fill: NV, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const nx = nerveX(art, 480, 620, 170, null); put(nx.g, { o: 1 });
+    const ag = armGlide(art, [780, 640], .75, null); put(ag.g, { o: 1 });
+    prog(q => { const c = cyc(q, 2); ag.set(110 + 60 * c, { slide: 26 * c }); nx.set({ hl: ['epi', 'peri', 'endo', 'myel'][Math.floor(q * 8) % 4] }); }, .6, Math.max(2, D - 1.6), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['struct', 'Строение нерва', (m, D) => {
+    const p = panel(0);
+    txt(p, 'периферический нерв в разрезе (по мотивам рис. 13.1)', 800, 56, m('struct'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const nx = nerveX(p, 340, 500, 260, m('struct'));
+    pill(p, 'схема', 340, 870, m('struct'), { col: COL.dim, size: 17 });
+    pillRow(p, ['двигательные', 'чувствительные', 'вегетативные'], 1120, 120, m('struct', 1), { col: ['#e2574c', '#5aa7d6', '#9b6fd0'], size: 21, gap: 1.6 });
+    const H = [['endo', 'endo', 'эндоневрий — вокруг каждого аксона', ENDO_C], ['peri', 'peri', 'периневрий — вокруг пучка', PERI_C], ['epi', 'epi', 'эпиневрий — весь нерв', EPI_C], ['myel', 'myel', 'миелин (шванновские клетки)', MYEL_C]];
+    H.forEach(([k, hl], i) => {
+      prog(q => nx.set({ hl }), m(k), .2);
+      txt(p, H[i][2], 720, 240 + i * 70, m(k), { size: 23, weight: 700, fill: H[i][3] });
+    });
+    prog(q => nx.set({ hl: null }), m('unmy'), .2);
+    const [f1x, f1y] = nx.fasc(1);
+    lab(p, 'эпиневрий', 720, 560, 340 + 260 * Math.cos(rad(25)), 500 + 260 * Math.sin(rad(25)), EPI_C, m('epi', .4));
+    lab(p, 'периневрий', 720, 610, f1x + 83, f1y, PERI_C, m('peri', .4));
+    lab(p, 'сосуды', 720, 660, 340 + 260 * .8 * Math.cos(rad(30)), 500 + 260 * .8 * Math.sin(rad(30)), VESS_C, m('epi', 1));
+    infoCard(p, 720, 520 + 200, 820, 150, 'миелин изолирует аксон и ускоряет проведение', 'самые тонкие волокна — без миелина; нерв — из одного пучка или из нескольких', MYEL_C, m('myel', 1), { size: 21 });
+  }],
+
+  ['box', 'Какие волокна в нерве', (m, D) => {
+    const p = panel(0);
+    txt(p, 'что несёт периферический нерв (блок 13.1)', 800, 56, m('box'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const c = cordX(p, 300, 420, m('box'));
+    pill(p, 'схема', 300, 660, m('box'), { col: COL.dim, size: 17 });
+    const R = [['a', 'альфа-мотонейроны', 'передние рога → скелетные мышцы', '#e2574c'], ['g', 'гамма-мотонейроны', '→ волокна мышечного веретена', '#f0a04b'], ['s', 'чувствительные', 'спинномозговой ганглий → рецепторы', '#5aa7d6'], ['v', 'симпатические', 'симпатический ганглий → потовые железы, сосуды, органы', '#9b6fd0']];
+    R.forEach(([k, h, s, col], i) => {
+      const y = 150 + i * 150, g0 = G(p, { o: 0 });
+      roundBox(g0, 860, y, 680, 128, col, PANEL, 2.5);
+      mk('circle', { cx: 900, cy: y + 40, r: 12, fill: col }, g0);
+      T(g0, h, { x: 924, y: y + 48, size: 25, weight: 700, fill: col });
+      put(para(g0, s, 884, y + 92, null, { size: 21, maxW: 640 }), { o: 1 });
+      show(g0, m(k));
+      const [cx, cy] = c.at(k), ring = G(p, { x: cx, y: cy, s: 0, o: 0 }); mk('circle', { r: 18, fill: 'none', stroke: col, 'stroke-width': 4 }, ring); pop(ring, m(k, .3)); pulse(ring, m(k, 1), 1.5);
+    });
+    // a muscle at the end of the nerve
+    const mu = muscleEl(p, { rest: 150, w: 24 }); put(mu.g, { o: 0 }); mu.set([580, 414], [730, 414]); show(mu.g, m('a'));
+    prog(q => mu.act(cyc(q, 3)), m('a', .5), 2.5, lin);
+  }],
+
+  ['tract', 'Единый тракт', (m, D) => {
+    const p = panel(0);
+    txt(p, 'единый непрерывный тракт', 800, 56, m('tract'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const f = frontStand(p, 420, 860, 1.6, m('tract'), { muscles: false, pose: { aL: 30, aR: 30, eL: 4, eR: 4, w: 46 } }), Q = f.pts;
+    put(f.g, { o: 0 }); tw(f.g, { o: .45 }, m('tract'), .6);
+    const S = P => f.at(P);
+    const cord = nerveLine(p, [S([Q.Hc[0], Q.Hc[1] + 10]), S(Q.Nk), S([Q.P[0], Q.P[1] - 20])], m('tract', .5), { w: 12, n: 10 });
+    const arms = [0, 1].map(i => nerveLine(p, [S([Q.Nk[0], Q.Nk[1] + 18]), S(Q.Sh[i]), S(Q.arms[i][0]), S(Q.arms[i][1]), S(Q.arms[i][2])], m('tract', 1), { w: 8, n: 10 }));
+    const legs = [0, 1].map(i => nerveLine(p, [S([Q.P[0], Q.P[1] - 20]), S(Q.H[i]), S(Q.legs[i][0]), S(Q.legs[i][1])], m('tract', 1.5), { w: 9, n: 10 }));
+    const all = [cord, ...arms, ...legs];
+    const hg = G(p, { x: 1010, y: 300, o: 0 }); T(hg, 'Н', { x: 0, y: 0, size: 160, weight: 700, fill: NV, anchor: 'middle' }); put(hg.lastChild, { r: 90 }); show(hg, m('tract', 2));
+    txt(p, 'как буква «Н», положенная на бок', 1160, 310, m('tract', 2), { size: 22, weight: 700, fill: COL.chalk });
+    pillRow(p, ['соединительная ткань', 'передача импульсов', 'ток веществ'], 1180, 450, m('cont', .3), { col: NV, size: 21, gap: 1 });
+    txt(p, 'всё непрерывно', 1180, 400, m('cont'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 820, 540, 720, 200, 'устроена, чтобы двигаться', 'выдерживать механические силы — и при этом проводить импульсы', COL.good, m('design'), { size: 22 });
+    // an impulse runs and the arm moves: tension spreads through the whole tract
+    prog(q => { const c = cyc(q, 2); f.set({ aR: 30 + 70 * c, eR: 4 }); arms[1].reroute([S([Q.Nk[0], Q.Nk[1] + 18]), S(Q.Sh[1]), S(Q.arms[1][0]), S(Q.arms[1][1]), S(Q.arms[1][2])]); all.forEach((n, i) => n.set({ taut: c * (i === 2 ? 1 : .5), slide: 10 * c })); }, m('design', .5), Math.max(2, D - m('design', .5)), lin);
+  }],
+
+  ['glide', 'Нерв скользит', (m, D) => {
+    const p = panel(0);
+    txt(p, 'нерв скользит относительно тканей', 800, 56, m('glide'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const ag = armGlide(p, [120, 560], 1.35, m('glide'));
+    ag.set(70);
+    // the elbow extends: beads near the elbow move first, then further away
+    const t0 = m('near'), t1 = m('far');
+    prog(q => ag.set(70 + 40 * q), m('ex'), Math.max(.5, t0 - m('ex')), lin);
+    prog(q => { const k = .06 + .5 * q; ag.set(110 + 40 * q, { slide: 40 * q, prof: u => Math.exp(-Math.abs(u - .55) / k) }); }, t0, Math.max(1, t1 - t0), lin);
+    prog(q => { const k = .56 + 2 * q; ag.set(150 + 25 * q, { slide: 40 + 20 * q, prof: u => Math.exp(-Math.abs(u - .55) / k) }); }, t1, Math.max(1, m('whole') - t1), lin);
+    prog(q => ag.set(175, { slide: 60, prof: null }), m('whole'), .5);
+    lab(p, 'у сустава — первым', 760, 640, ag.E[0], ag.E[1] - 30, ANAT.taut, m('near'));
+    txt(p, 'смещение рассеивает натяжение', 1180, 620, m('ex'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pillRow(p, ['вдоль', 'поперёк'], 1180, 680, m('glide', .5), { col: NV, size: 22, gap: .6 });
+    infoCard(p, 820, 720, 720, 150, 'прежде чем вырастет натяжение', 'смещается весь нерв, а оболочки скользят относительно нервной ткани', COL.good, m('whole'), { size: 21 });
+  }],
+
+  ['why', 'Почему подвижность не вредит', (m, D) => {
+    const p = panel(0);
+    txt(p, 'почему нерв выдерживает движение', 800, 56, m('why'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    // a plexus: tension on one nerve spreads to several roots
+    const roots = [0, 1, 2, 3, 4].map(i => [140, 150 + i * 60]), nerves = [[560, 190], [560, 300], [560, 410]];
+    const lines = [];
+    roots.forEach((r, i) => nerves.forEach((nv2, j) => { if (Math.abs(i - j * 2) <= 2) lines.push({ i, j, nl: nerveLine(p, [r, [300, r[1] + (nv2[1] - r[1]) * .4], [420, nv2[1]], nv2], m('plex'), { w: 6, n: 4 }) }); }));
+    ['C5', 'C6', 'C7', 'C8', 'T1'].forEach((s, i) => txt(p, s, 100, 157 + i * 60, m('plex'), { size: 19, weight: 700, fill: COL.dim, anchor: 'end' }));
+    const hand = G(p, { o: 0 }); path(hand, 'M600 300h70m-14 -10l14 10l-14 10', { stroke: COL.bad, 'stroke-width': 5 }); show(hand, m('plex', 1));
+    prog(q => lines.forEach(L => L.nl.set({ taut: L.j === 1 ? q : q * .6 })), m('plex', 1.5), 1.5);
+    txt(p, 'натяжение рассеивается по системе — без ишемии', 380, 520, m('plex', 2), { size: 20, weight: 700, fill: COL.good, anchor: 'middle' });
+    infoCard(p, 820, 100, 720, 170, 'сплетения и корешки', 'устроены так, что натяжение одной части расходится по всей системе', NV, m('plex'), { size: 21 });
+    infoCard(p, 820, 290, 720, 170, 'оболочки', 'эпиневрий, периневрий и эндоневрий принимают силу раньше, чем растянется сам нерв', EPI_C, m('ct'), { size: 21 });
+    // the perineurium: strain before failure
+    const X0 = 140, Y = 700, L0 = 500, nl = nerveLine(p, [[X0, Y], [X0 + L0, Y]], m('peri'), { w: 14, n: 12 });
+    const ruler = G(p, { o: 0 }); path(ruler, `M${X0} ${Y + 40}H${X0 + L0 * 1.3}`, { stroke: COL.dim, 'stroke-width': 2 });
+    [0, 10, 20, 30].forEach(v => { const x = X0 + L0 * (1 + v / 100); path(ruler, `M${x} ${Y + 32}V${Y + 48}`, { stroke: COL.dim, 'stroke-width': 2 }); });
+    T(ruler, 'длина в покое', { x: X0 + L0, y: Y + 74, size: 17, fill: COL.dim, anchor: 'end' });
+    mk('rect', { x: X0 + L0 * 1.18, y: Y + 30, width: L0 * .04, height: 22, fill: COL.bad, 'fill-opacity': .7 }, ruler);
+    T(ruler, 'разрыв: +18–22 %', { x: X0 + L0 * 1.2, y: Y + 74, size: 17, fill: COL.bad, anchor: 'start', weight: 700 });
+    show(ruler, m('peri'));
+    const pct = T(p, '', { x: X0 + L0 / 2, y: Y - 34, size: 24, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    prog(q => { const k = .2 * q; nl.reroute([[X0, Y], [X0 + L0 * (1 + k), Y]]); nl.set({ taut: q, slide: 30 * q, prof: u => u }); pct.textContent = `+${Math.round(k * 100)} %`; }, m('peri', 1), 3);
+    infoCard(p, 820, 480, 720, 230, 'периневрий — главная защита', 'прочен и упруг вдоль волокон: выдерживает растяжение на 18–22 %, прежде чем порвётся', PERI_C, m('peri'), { size: 22 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-layer', prompt: ['Что это за структура?'],
+    build: grid([
+      { parts: ['Окружает каждый аксон'], ans: ['en'], why: 'Эндоневрий.' },
+      { parts: ['Окружает пучок аксонов; выдерживает 18–22 % растяжения'], ans: ['pe'], why: 'Периневрий.' },
+      { parts: ['Окружает весь нерв, в нём идут сосуды'], ans: ['ep'], why: 'Эпиневрий.' },
+      { parts: ['Образуют миелин, ускоряющий проведение'], ans: ['sc'], why: 'Шванновские клетки.' },
+      { parts: ['Главная защита от чрезмерного натяжения'], ans: ['pe'], why: 'Периневрий.' },
+    ], [['en', 'Эндоневрий', ENDO_C], ['pe', 'Периневрий', PERI_C], ['ep', 'Эпиневрий', EPI_C], ['sc', 'Шванновские', MYEL_C]], { multi: false, text: true }),
+  }], done) }],
+
+  ['move', 'Насколько нерв смещается', (m, D) => {
+    const p = panel(0);
+    txt(p, 'насколько нерв смещается', 800, 56, m('move'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    txt(p, 'исследования на трупах и ультразвук у людей; зависит от положения и движения суставов', 800, 98, m('move', .5), { size: 20, fill: COL.dim, anchor: 'middle' });
+    const AX = 380, MM = 70, B = [['срединный', .1, 12.5, 'med'], ['локтевой', .1, 4.0, 'uln'], ['большеберцовый', .7, 5.2, 'tib'], ['седалищный', .1, 3.5, 'sci']];
+    const ax = G(p, { o: 0 }); path(ax, `M${AX} 470H${AX + 13 * MM}`, { stroke: COL.dim, 'stroke-width': 2 });
+    [0, 2, 4, 6, 8, 10, 12].forEach(v => { path(ax, `M${AX + v * MM} 464V476`, { stroke: COL.dim, 'stroke-width': 2 }); T(ax, String(v), { x: AX + v * MM, y: 500, size: 17, fill: COL.dim, anchor: 'middle' }); });
+    T(ax, 'мм', { x: AX + 13 * MM, y: 500, size: 17, fill: COL.dim, anchor: 'end' }); show(ax, m('med'));
+    B.forEach(([s, a, b, k], i) => {
+      const y = 150 + i * 75, g0 = G(p, { o: 0 });
+      T(g0, s, { x: AX - 16, y: y + 27, size: 22, fill: COL.chalk, anchor: 'end', weight: 600 });
+      const r = mk('rect', { x: AX + a * MM, y, width: 0, height: 36, rx: 9, fill: NV, 'fill-opacity': .85 }, g0);
+      const tv = T(g0, `${String(a).replace('.', ',')}–${String(b).replace('.', ',')} мм`, { x: AX + 10, y: y + 27, size: 21, weight: 700, fill: NV });
+      show(g0, m(k)); prog(q => { r.setAttribute('width', f1((b - a) * MM * q)); put(tv, { x: AX + b * MM * q + 12 }); }, m(k, .2), .9, out);
+    });
+    // slack wavy, taut straight
+    const sl = nerveLine(p, [[140, 640], [700, 640]], m('wave'), { w: 12, n: 10 });
+    sl.set({ wave: 1 });
+    prog(q => sl.set({ wave: 1 - q, taut: q }), m('wave', 1.5), 1.5);
+    txt(p, 'без нагрузки — волнистый', 420, 600, m('wave'), { size: 21, weight: 700, fill: NV, anchor: 'middle' });
+    txt(p, 'под натяжением — прямой', 420, 700, m('wave', 1.6), { size: 21, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    infoCard(p, 820, 560, 720, 230, 'в положении теста срединного нерва', 'растяжение нерва — всего 2,5–3 %', COL.good, m('strain'), { size: 24 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-nums', prompt: ['Числа из книги:'],
+    build: blanks([
+      { parts: ['Периневрий выдерживает растяжение на ', { box: '18' }, '–', { box: '22' }, ' %'], why: '18–22 % до разрыва.' },
+      { parts: ['Локтевой нерв смещается до ', { box: '4' }, ' мм'], why: 'От 0,1 до 4 мм.' },
+    ]),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Аксон окружён эндоневрием, пучок — периневрием, весь нерв — эпиневрием; миелин образуют шванновские клетки.', 'w1'],
+     ['Нервная система — единый непрерывный тракт: двигается и при этом проводит импульсы.', 'w2'],
+     ['Нерв скользит сначала у движущегося сустава, затем дальше; натяжение рассеивается, оболочки принимают нагрузку.', 'w3'],
+     ['Периневрий выдерживает 18–22 % растяжения; в положении теста нерв растягивается лишь на 2,5–3 %.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: NV }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-glide', prompt: ['Пациент медленно разгибает локоть. Где срединный нерв начнёт смещаться первым?'],
+    build: choice([
+      ['Рядом с локтем, затем смещение распространится дальше'],
+      ['Сразу на всём протяжении одинаково'],
+      ['Только у шеи'],
+      ['Нерв не смещается — он только растягивается'],
+    ], 0, 'Смещение начинается у движущегося сустава и при продолжении движения распространяется всё дальше.',
+    [null, 'Сначала смещается участок у сустава.', 'Смещение начинается у движущегося сустава — локтя.', 'Нервы скользят относительно тканей; это и рассеивает натяжение.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-protect', prompt: ['Почему при обычных движениях нерв не страдает от натяжения?'],
+    build: choice([
+      ['Натяжение рассеивается по сплетениям и корешкам, оболочки принимают силу, периневрий выдерживает 18–22 %'],
+      ['Нервы вообще не нагружаются при движении'],
+      ['Миелин делает нерв растяжимым'],
+      ['Нерв растягивается вдвое без вреда'],
+    ], 0, 'Подвижность обеспечивают устройство сплетений, соединительнотканные оболочки и прочный периневрий.',
+    [null, 'Нагружаются, но натяжение рассеивается.', 'Миелин изолирует аксон и ускоряет проведение, а не отвечает за растяжимость.', 'Периневрий рвётся уже при 18–22 % растяжения.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

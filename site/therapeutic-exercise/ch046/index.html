@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Степени мобилизации — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 46, title: 'Обследование и степени мобилизации', minutes: 9, language: 'ru', next: '../ch047/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch046/cards.ru.json
+const CARDS_SHORT = {
+  "мягкие приёмы, тормозящие боль\nсохраняют суставную игру; растяжка противопоказана": "сохраняют игру; растяжка противопоказана",
+  "осторожная мягкая растяжка\nточно на тугую структуру, не повреждая ткань снова": "точно на тугую структуру",
+  "энергичная растяжка\nсуставной игрой; околосуставные ткани — приёмами главы 4": "суставной игрой",
+  "капсулярный паттерн\nпассивный объём ограничен по паттерну сустава (главы 17–22)": "пассивный объём ограничен по паттерну",
+  "твёрдое капсулярное ощущение\nв конце движения при надавливании": "в конце движения при надавливании",
+  "суставная игра снижена\nпри пробах на подвижность": "при пробах на подвижность",
+  "спаянная или укороченная связка\nигра снижена, натяжение связки болезненно → мобилизация вдоль линии её натяжения": "мобилизация вдоль линии натяжения",
+  "подвывих, вывих, свободные тела\nблокируют движение → могут ответить на толчок": "блокируют движение → могут ответить на толчок",
+  "I–II: боль, защитное напряжение\nмеханорецепторы тормозят болевые пути; жидкость питает хрящ": "механорецепторы тормозят боль",
+  "скорость\nмалая амплитуда и высокая скорость — тормозят боль; медленно — расслабляют защитное напряжение": "малая амплитуда",
+  "I степень\nсо всеми скольжениями; от боли — прерывисто: 7–10 с тракции, пауза в несколько секунд, несколько циклов": "от боли: 7–10 с тракции, пауза",
+  "II степень\nпервая процедура — узнать чувствительность; прерывисто — от боли; скольжения II — сохранить игру": "первая процедура — узнать чувствительность",
+  "III степень\nрастяжение не меньше 6 с → ослабить до I–II → повтор с интервалом 3–4 с": "≥ 6 с → ослабить → повтор",
+  "боль\nколебания I–II или медленная прерывистая тракция I–II": "колебания или тракция I–II",
+  "потеря суставной игры\nустойчивые приёмы циклами: дольше растяжение — больше ползучесть и пластическая деформация": "устойчивые приёмы циклами",
+  "сохранить объём\nколебания II или устойчивая II": "колебания II или устойчивая II",
+  "у предела, слабина выбрана\nбыстрый толчок в ограничивающую ткань; амплитуда мала — контроль и без вреда другим тканям": "быстрый толчок малой амплитуды",
+  "зачем\nразорвать спайки · вправить вывихнутую структуру": "разорвать спайки · вправить вывихнутую структуру",
+};
+// cards-short end
+
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// Maitland's oscillation grades on a range bar (redrawn as a scheme): x0 the start of the range, x1 the limit.
+// Each grade is a band of the range with a dot oscillating in it; returns the bands (for pickEls).
+const OSC = [['I', 0, .12, 'быстро, как вибрация', COL.good], ['II', .15, .78, '2–3 в секунду, 1–2 мин', COL.whole], ['III', .35, 1, '2–3 в секунду, 1–2 мин', COL.task], ['IV', .88, 1, 'быстро, как вибрация', COL.bad]];
+function oscChart(p, x0, x1, y0, dy, t0s, { anim = true, rates = true } = {}) {
+  const f = v => v.toFixed(1), out = [];
+  const defs = mk('defs', {}, p), id = 'rs' + (++SHADE_ID), gr = mk('linearGradient', { id, x1: 0, x2: 1 }, defs);
+  [[0, COL.bad, 0], [1, COL.bad, .45]].forEach(([o, c, a]) => mk('stop', { offset: o, 'stop-color': c, 'stop-opacity': a }, gr));
+  OSC.forEach(([n, a, b, rate, col], i) => {
+    const y = y0 + i * dy, g = G(p, { o: 0 }), xa = lerp(x0, x1, a), xb = lerp(x0, x1, b);
+    mk('rect', { x: x0, y: y - 8, width: x1 - x0, height: 16, rx: 8, fill: COL.faint, 'fill-opacity': .5 }, g);
+    mk('rect', { x: lerp(x0, x1, .82), y: y - 26, width: (x1 - x0) * .18, height: 52, fill: `url(#${id})` }, g);
+    mk('rect', { x: xa, y: y - 22, width: xb - xa, height: 44, rx: 12, fill: col, 'fill-opacity': .25, stroke: col, 'stroke-width': 3 }, g);
+    path(g, `M${x1} ${y - 34}V${y + 34}`, { stroke: COL.bad, 'stroke-width': 6 });
+    T(g, n, { x: x0 - 40, y: y + 12, size: 34, weight: 700, fill: col, anchor: 'middle' });
+    if (rates) T(g, rate, { x: x1 + 30, y: y + 8, size: 21, fill: COL.dim });
+    const dot = mk('circle', { cx: xa + 8, cy: y, r: 10, fill: col }, g);
+    show(g, t0s[i]);
+    if (anim) prog(q => { const k = b - a < .2 ? 8 : 3; dot.setAttribute('cx', f(xa + 8 + (xb - xa - 16) * wave(q, k))); }, t0s[i] + .4, 3, lin);
+    out.push({ g, box: [x0 - 70, y - 40, x1 - x0 + 90, 80], label: `Степень ${n}` });
+  });
+  return out;
+}
+let GRADES = [];
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Степени мобилизации', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 5 · Урок 46', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Обследование', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и степени мобилизации', { x: 800, y: 380, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'сколько силы и как быстро', 800, 460, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    oscChart(art, 520, 1080, 560, 70, [0, .3, .6, .9], { rates: false });
+    show(art, m('sub', .2));
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['pain', 'Характер боли', (m) => {
+    const p = panel(0), x0 = 140, x1 = 760;
+    txt(p, 'характер боли при проверке объёма → на что направить лечение', 800, 95, m('pain'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const row = (y, painAt, limAt, title, act, col, t0) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x: x0, y: y - 9, width: x1 - x0, height: 18, rx: 9, fill: COL.faint, 'fill-opacity': .5 }, g);
+      path(g, `M${lerp(x0, x1, limAt)} ${y - 36}V${y + 36}`, { stroke: ANAT.taut, 'stroke-width': 7 });
+      T(g, 'ограничение', { x: lerp(x0, x1, limAt), y: y + 62, size: 19, fill: ANAT.taut, anchor: 'middle' });
+      const pm = G(g, { x: lerp(x0, x1, painAt), y: y - 40 });
+      mk('path', { d: 'M0 22L-14 -4H14Z', fill: COL.bad }, pm);
+      T(pm, 'боль', { x: 0, y: -12, size: 19, weight: 700, fill: COL.bad, anchor: 'middle' });
+      T(g, title, { x: x0, y: y - 88, size: 23, weight: 700, fill: COL.chalk });
+      const dot = mk('circle', { cx: x0, cy: y, r: 12, fill: COL.chalk }, g);
+      show(g, t0);
+      prog(q => dot.setAttribute('cx', lerp(x0, lerp(x0, x1, Math.min(painAt, limAt) + .01), io(q)).toFixed(1)), t0 + .8, 1.6, lin);
+      infoCard(p, 860, y - 75, 670, 150, act[0], act[1], col, t0 + 1.5, { size: 22 });
+    };
+    row(250, .4, .8, 'боль раньше ограничения', ['мягкие приёмы, тормозящие боль', 'сохраняют суставную игру; растяжка противопоказана'], COL.good, m('before'));
+    row(490, .7, .7, 'боль вместе с ограничением', ['осторожная мягкая растяжка', 'точно на тугую структуру, не повреждая ткань снова'], COL.int, m('with'));
+    row(730, .88, .62, 'боль после ограничения', ['энергичная растяжка', 'суставной игрой; околосуставные ткани — приёмами главы 4'], ANAT.taut, m('after'));
+  }],
+
+  ['caps', 'Ограничивает капсула', (m) => {
+    const p = panel(0), j = jointGlide(p, { x: 360, y: 440, s: 1.05, shaft: 160, t0: .2 });
+    j.tight = [.55, .55]; j.set({});
+    txt(p, 'тугая капсула', 360, 100, m('caps'), { size: 25, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    // joint-play test: only a small glide before the capsule stops it
+    prog(q => j.set({ d: 6 * Math.sin(2 * Math.PI * 3 * q) }), m('c3', .3), 3.5, lin);
+    pill(p, 'суставная игра мала', 360, 790, m('c3'), { col: ANAT.taut, size: 22 });
+    infoCard(p, 760, 100, 770, 130, 'капсулярный паттерн', 'пассивный объём ограничен по паттерну сустава (главы 17–22)', COL.whole, m('c1'), { size: 22 });
+    infoCard(p, 760, 250, 770, 130, 'твёрдое капсулярное ощущение', 'в конце движения при надавливании', COL.whole, m('c2'), { size: 22 });
+    infoCard(p, 760, 400, 770, 130, 'суставная игра снижена', 'при пробах на подвижность', COL.whole, m('c3'), { size: 22 });
+    infoCard(p, 760, 550, 770, 150, 'спаянная или укороченная связка', 'игра снижена, натяжение связки болезненно → мобилизация вдоль линии её натяжения', COL.real, m('lig'), { size: 22 });
+    infoCard(p, 760, 720, 770, 140, 'подвывих, вывих, свободные тела', 'блокируют движение → могут ответить на толчок', COL.task, m('sub2'), { size: 22 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-pain', prompt: ['Что делать?'],
+    build: grid([
+      { parts: ['Боль появляется раньше, чем ощущается ограничение'], ans: ['g'], why: 'Мягкие приёмы, тормозящие боль; растяжка противопоказана.' },
+      { parts: ['Боль одновременно с ограничением, ткань заживает'], ans: ['c'], why: 'Осторожная мягкая растяжка тугой структуры.' },
+      { parts: ['Боль только после ограничения, при растяжении капсулы'], ans: ['v'], why: 'Тугой сустав можно растягивать энергично.' },
+      { parts: ['Острая травма, защитное напряжение мышц'], ans: ['g'], why: 'Боль раньше ограничения — мягкие приёмы.' },
+    ], [['g', 'Мягко, без растяжки', COL.good], ['c', 'Осторожная растяжка', COL.int], ['v', 'Энергичная растяжка', ANAT.taut]], { multi: false, text: true }),
+  }], done) }],
+
+  ['doc', 'Как описать приём', (m) => {
+    const p = panel(0);
+    txt(p, 'шесть характеристик для записи приёма', 800, 95, m('doc'), { size: 26, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const rows = [['скорость силы', 'устойчиво, медленно'], ['где в объёме', 'в конце доступного сгибания'], ['направление', 'кзади'], ['цель', 'головка плечевой кости спереди'],
+      ['что движется / что стабильно', 'плечевая кость / лопатка'], ['положение пациента', 'лёжа на спине']];
+    rows.forEach(([a, b], i) => {
+      const y = 170 + i * 105, g = G(p, { o: 0 });
+      roundBox(g, 120, y, 1360, 88, COL.whole, PANEL, 2);
+      mk('circle', { cx: 168, cy: y + 44, r: 22, fill: COL.whole }, g);
+      T(g, String(i + 1), { x: 168, y: y + 54, size: 26, weight: 700, fill: COL.board, anchor: 'middle' });
+      T(g, a, { x: 210, y: y + 54, size: 25, weight: 700, fill: COL.whole });
+      show(g, m('d' + (i + 1)));
+      txt(p, b, 760, y + 54, m('d' + (i + 1), 1), { size: 24, fill: COL.task });
+    });
+    NOTE(p, 1300, 140, m('d1', 1));
+  }],
+
+  ['osc', 'Колебательные степени', (m) => {
+    const p = panel(0);
+    txt(p, 'колебательные степени (по Мейтленду) — схема', 640, 95, m('osc'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'начало объёма', 200, 160, m('osc'), { size: 20, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'предел · сопротивление', 1000, 160, m('osc'), { size: 20, fill: COL.bad, anchor: 'middle' });
+    oscChart(p, 200, 1000, 240, 110, [m('g1'), m('g2'), m('g3'), m('g4')]);
+    infoCard(p, 120, 690, 640, 170, 'I–II: боль, защитное напряжение', 'механорецепторы тормозят болевые пути; жидкость питает хрящ', COL.whole, m('use'), { size: 22 });
+    infoCard(p, 800, 690, 400, 170, 'III–IV: растяжка', null, COL.task, m('use', 4), { size: 22 });
+    infoCard(p, 1230, 640, 320, 220, 'скорость', 'малая амплитуда и высокая скорость — тормозят боль; медленно — расслабляют защитное напряжение', COL.good, m('speed'), { size: 21 });
+  }],
+
+  ['sus', 'Устойчивые степени', (m) => {
+    const p = panel(0), j = jointGlide(p, { x: 300, y: 470, s: .95, shaft: 150, t0: .2 });
+    txt(p, 'устойчивая тракция (по Кальтенборну)', 300, 100, m('sus'), { size: 24, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const lab = txt(p, '', 300, 820, m('k1'), { size: 26, weight: 700, fill: COL.good, anchor: 'middle' });
+    prog(q => { j.set({ n: 2.5 * io(q) }); lab.textContent = 'I — ослабить'; }, m('k1', .3), 1, lin);
+    prog(q => { j.set({ n: lerp(2.5, 8, io(q)) }); lab.textContent = 'II — натянуть, выбрать слабину'; lab.setAttribute('fill', COL.whole); }, m('k2', .3), 1.2, lin);
+    prog(q => { j.set({ n: lerp(8, 12.5, io(q)) }); lab.textContent = 'III — растянуть'; lab.setAttribute('fill', ANAT.taut); }, m('k3', .3), 1.2, lin);
+    // the slack scale
+    const sx0 = 660, sx1 = 1500, sy = 170, g = G(p, { o: 0 });
+    mk('rect', { x: sx0, y: sy - 14, width: (sx1 - sx0) * .66, height: 28, rx: 14, fill: COL.whole, 'fill-opacity': .2, stroke: COL.whole, 'stroke-width': 2 }, g);
+    mk('rect', { x: sx0 + (sx1 - sx0) * .66, y: sy - 14, width: (sx1 - sx0) * .34, height: 28, rx: 14, fill: ANAT.taut, 'fill-opacity': .25, stroke: ANAT.taut, 'stroke-width': 2 }, g);
+    T(g, 'слабина', { x: sx0 + (sx1 - sx0) * .33, y: sy - 26, size: 20, fill: COL.whole, anchor: 'middle' });
+    T(g, 'растяжение', { x: sx0 + (sx1 - sx0) * .83, y: sy - 26, size: 20, fill: ANAT.taut, anchor: 'middle' });
+    [['I', .06, COL.good], ['II', .5, COL.whole], ['III', .83, ANAT.taut]].forEach(([n, k, col]) => T(g, n, { x: sx0 + (sx1 - sx0) * k, y: sy + 50, size: 26, weight: 700, fill: col, anchor: 'middle' }));
+    show(g, m('sus'));
+    // dosing: intermittent blocks on a time line
+    const blocks = (y, list, col, t0) => { const b = G(p, { o: 0 }); let x = 680; list.forEach(([w, on]) => { if (on) mk('rect', { x, y, width: w, height: 24, rx: 6, fill: col, 'fill-opacity': .7 }, b); x += w; }); show(b, t0); };
+    infoCard(p, 660, 245, 860, 150, 'I степень', 'со всеми скольжениями; от боли — прерывисто: 7–10 с тракции, пауза в несколько секунд, несколько циклов', COL.good, m('i1'), { size: 21 });
+    blocks(408, [[100, 1], [30, 0], [100, 1], [30, 0], [100, 1], [30, 0], [100, 1]], COL.good, m('i1', 1.5));
+    infoCard(p, 660, 450, 860, 150, 'II степень', 'первая процедура — узнать чувствительность; прерывисто — от боли; скольжения II — сохранить игру', COL.whole, m('i2'), { size: 21 });
+    infoCard(p, 660, 620, 860, 150, 'III степень', 'растяжение не меньше 6 с → ослабить до I–II → повтор с интервалом 3–4 с', ANAT.taut, m('i3'), { size: 21 });
+    blocks(783, [[90, 1], [40, 0], [90, 1], [40, 0], [90, 1], [40, 0], [90, 1]], ANAT.taut, m('i3', 1.5));
+  }],
+
+  ['comp', 'Сравнение и выбор', (m) => {
+    const p = panel(0), x0 = 260, x1 = 1100, f = v => v.toFixed(1);
+    const bar = (y, label, bands, t0) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x: x0, y: y - 9, width: x1 - x0, height: 18, rx: 9, fill: COL.faint, 'fill-opacity': .5 }, g);
+      T(g, label, { x: x0 - 20, y: y + 8, size: 22, weight: 700, fill: COL.chalk, anchor: 'end' });
+      bands.forEach(([n, a, b, col]) => { mk('rect', { x: lerp(x0, x1, a), y: y - 22, width: (b - a) * (x1 - x0), height: 44, rx: 12, fill: col, 'fill-opacity': .25, stroke: col, 'stroke-width': 3 }, g); T(g, n, { x: lerp(x0, x1, (a + b) / 2), y: y + 9, size: 24, weight: 700, fill: col, anchor: 'middle' }); });
+      show(g, t0);
+    };
+    path(p, `M${lerp(x0, x1, .7)} 150V380`, { stroke: ANAT.taut, 'stroke-width': 3, 'stroke-dasharray': '8 8' });
+    txt(p, 'конец слабины', lerp(x0, x1, .7), 140, .2, { size: 20, fill: ANAT.taut, anchor: 'middle' });
+    bar(220, 'колебания', [['II', .25, .62, COL.whole], ['III', .5, 1, COL.task], ['IV', .9, 1, COL.bad]], m('same'));
+    bar(330, 'устойчивые', [['II', .08, .7, COL.whole], ['III', .7, 1, ANAT.taut]], m('same', 2));
+    txt(p, 'устойчивая II выбирает слабину, колебания II — внутри неё', 800, 430, m('same', 3), { size: 23, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'III–IV колебания и III устойчивая — одинаково у предела; разный ритм', 800, 475, m('hi'), { size: 23, fill: COL.task, anchor: 'middle' });
+    infoCard(p, 80, 540, 460, 300, 'боль', 'колебания I–II или медленная прерывистая тракция I–II', COL.good, m('choose', 2), { size: 22 });
+    infoCard(p, 570, 540, 460, 300, 'потеря суставной игры', 'устойчивые приёмы циклами: дольше растяжение — больше ползучесть и пластическая деформация', ANAT.taut, m('lose'), { size: 22 });
+    infoCard(p, 1060, 540, 460, 300, 'сохранить объём', 'колебания II или устойчивая II', COL.whole, m('keep'), { size: 22 });
+  }],
+
+  ['hvt', 'Толчок', (m) => {
+    const p = panel(0), j = jointGlide(p, { x: 380, y: 440, s: 1.05, shaft: 160, t0: .2 });
+    const adh = G(p, {});
+    [-30, -10, 14].forEach(al => { const P = j.stage(j.cupAt(al)), Q = j.stage(j.headAt(al)); path(adh, `M${P[0].toFixed(1)} ${P[1].toFixed(1)}L${((P[0] + Q[0]) / 2 + 4).toFixed(1)} ${((P[1] + Q[1]) / 2).toFixed(1)}L${Q[0].toFixed(1)} ${Q[1].toFixed(1)}`, { stroke: COL.chalk, 'stroke-width': 3 }); });
+    txt(p, 'спайки', 500, 330, .4, { size: 22, fill: COL.dim });
+    // take up the slack, then one quick small thrust
+    prog(q => j.set({ n: 8 * io(q) }), m('how', .5), 2, lin);
+    prog(q => j.set({ n: 8 + 5 * Math.sin(Math.PI * q) }), m('how', 3.5), .25, lin);
+    hide(adh, m('how', 3.6), .15);
+    const ctr = txt(p, '1 раз', 380, 820, m('one'), { size: 32, weight: 700, fill: COL.task, anchor: 'middle' });
+    pulse(ctr, m('one', .2), 1.2);
+    infoCard(p, 820, 110, 700, 150, 'малая амплитуда, высокая скорость', null, COL.task, m('hvt'), { size: 22 });
+    infoCard(p, 820, 290, 700, 190, 'у предела, слабина выбрана', 'быстрый толчок в ограничивающую ткань; амплитуда мала — контроль и без вреда другим тканям', COL.whole, m('how'), { size: 22 });
+    infoCard(p, 820, 510, 700, 110, 'один раз', null, COL.good, m('one'), { size: 22 });
+    infoCard(p, 820, 650, 700, 150, 'зачем', 'разорвать спайки · вправить вывихнутую структуру', COL.nat, m('why'), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => {
+    const p = panel(0);
+    GRADES = oscChart(p, 260, 1060, 300, 120, [.2, .2, .2, .2], { anim: false });
+  }, { ask: done => quiz({ x: 200, y: 40, w: 1200, cls: 'side' }, [{
+    id: 'c-grade', prompt: ['Нажмите на степень: большая амплитуда до предела, с нажимом в сопротивление.'],
+    build: pickEls(GRADES.map(b => ({ el: b.g, box: b.box, label: b.label })), 2,
+      'III степень: большая амплитуда до самого предела.',
+      i => ['I — малая амплитуда в начале объёма.', 'II — большая, но не доходит до предела.', '', 'IV — малая амплитуда у предела.'][i]),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Боль раньше ограничения — мягкие приёмы; вместе с ним — осторожная растяжка; после — энергичная.', 'w1'],
+     ['Колебания: I и IV — малая амплитуда в начале и у предела; II и III — большая, внутри объёма и до предела.', 'w2'],
+     ['Устойчивые: I ослабляет, II выбирает слабину, III растягивает — не меньше 6 с.', 'w3'],
+     ['Толчок — один раз, у предела, малая амплитуда и высокая скорость.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-count', prompt: ['Посчитайте.'],
+    build: blanks([
+      { parts: ['2 колебания в секунду × 60 с = ', { box: '120' }, ' колебаний'], why: '2 × 60 = 120.' },
+      { parts: ['3 колебания в секунду × 2 мин = ', { box: '360' }, ' колебаний'], why: '3 × 120 = 360.' },
+      { parts: ['Тракция 10 с + пауза 5 с: за минуту ', { box: '4' }, ' цикла'], why: '60 / 15 = 4.' },
+    ]),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-grade', prompt: ['Какая это степень?'],
+    build: grid([
+      { parts: ['Колебания малой амплитуды в начале объёма'], ans: ['1'], why: 'I степень.' },
+      { parts: ['Колебания большой амплитуды до предела'], ans: ['3'], why: 'III степень.' },
+      { parts: ['Устойчиво: выбрать слабину'], ans: ['2'], why: 'II степень.' },
+      { parts: ['Устойчиво: растягивать капсулу не меньше 6 с'], ans: ['3'], why: 'III степень.' },
+      { parts: ['Колебания малой амплитуды у предела, в сопротивление'], ans: ['4'], why: 'IV степень.' },
+    ], [['1', 'I', COL.good], ['2', 'II', COL.whole], ['3', 'III', COL.task], ['4', 'IV', COL.bad]], { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Растяжка по методу ПНФ — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 35, title: 'PNF-растяжка', minutes: 8, language: 'ru', next: '../ch036/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch035/lupa.ru.json
+const LUPA = [
+  {"beat": "intro", "fig": 1, "target": "hamstrings", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch035/cards.ru.json
+const CARDS_SHORT = {
+  "классическое объяснение\nаутогенное или реципрокное торможение в спинном мозге": "торможение в спинном мозге",
+  "современный взгляд\nсложная обработка сигналов в нервной системе + вязкоупругость тканей + переносимость растяжения": "нервная система + ткани + переносимость",
+  "«напряжение — расслабление»\nили «сокращение — расслабление»: напрячь укороченную мышцу, расслабить, растянуть": "напрячь, расслабить, растянуть",
+  "сокращение агониста\nсократить мышцу напротив укороченной и удержать": "сократить мышцу напротив",
+  "сочетание\nнапрячь укороченную, расслабить и сразу сократить противоположную": "напрячь и сократить",
+  "грудные мышцы\nтерапевт отводит плечи в стороны, пациент напрягает грудные, расслабляется — плечи дальше; 10 с отдыха — повтор": "расслабляется → плечи дальше",
+  "«сокращение — расслабление»\nротаторы конечности сокращаются с движением, остальные мышцы паттерна — изометрически": "ротаторы сокращаются с движением",
+  "«напряжение — расслабление»\nвсе мышцы паттерна напрягаются изометрически": "все мышцы — изометрически",
+  "достаточно умеренно\n5 с умеренного напряжения, дыхание ровное, без натуживания; сильного пациента так легче удержать": "5 с умеренно, без натуживания",
+  "агонист\nмышца напротив укороченной; медленно, без рывка, удержание несколько секунд": "медленно, без рывка, удержание",
+  "нужна нормальная иннервация\nи произвольный контроль укороченной или противоположной мышцы; при параличе и спастичности метод не работает": "паралич, спастичность → не работает",
+  "действует на сократительную часть\nлучше при мышечном спазме, хуже при давней фиброзной контрактуре": "лучше при спазме, хуже при фиброзе",
+};
+// cards-short end
+
+const HAND = '#b9cfe0';
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A step chip: a numbered circle and a label; returns the group (lit up at t0).
+function stepChip(p, x, y, n, str, col, t0) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x, cy: y, r: 24, fill: col }, g);
+  T(g, n, { x, y: y + 9, size: 26, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 36, y + 8, null, { size: 23, weight: 700, fill: col, maxW: 330 }), { o: 1 });
+  show(g, t0);
+  return g;
+}
+// A five-second countdown above a point.
+function countdown(p, x, y, t0, col = COL.bad) {
+  const t = T(p, '5', { x, y, size: 40, weight: 700, fill: col, anchor: 'middle', o: 0 });
+  show(t, t0, .2);
+  prog(q => { t.textContent = String(Math.max(1, 5 - Math.floor(q * 5))); }, t0, 5, lin);
+  hide(t, t0 + 5, .3);
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'ПНФ-растяжка', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 4 · Урок 35', { x: 800, y: 240, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Растяжка по методу ПНФ', { x: 800, y: 335, size: 60, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как активное сокращение помогает растянуть мышцу', 800, 430, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const sc = tableScene(art, { hx: 820, top: 680, s: .55, t0: 0 });
+    const ham = muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 13 });
+    show(art, m('sub', .2));
+    prog(q => { const v = wave(q, 1); sc.pt.set({ hN: 60 + 20 * v }); ham.act(q > .2 && q < .5 ? .8 : 0); }, m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['what', 'Как это работает', (m) => {
+    const p = panel(0);
+    labelBox(p, 800, 120, 1300, ['активные сокращения в растяжке — чтобы растягиваемая мышца была как можно расслабленнее'], COL.real, m('pnf'), { size: 25 });
+    const oldC = infoCard(p, 120, 240, 620, 220, 'классическое объяснение', 'аутогенное или реципрокное торможение в спинном мозге', COL.dim, m('old'), { size: 23 });
+    infoCard(p, 860, 240, 620, 260, 'современный взгляд', 'сложная обработка сигналов в нервной системе + вязкоупругость тканей + переносимость растяжения', COL.good, m('new'), { size: 23 });
+    tw(oldC, { o: .4 }, m('new', .5), .6);   // the classic explanation fades as the current one appears
+    labelBox(p, 800, 640, 1100, ['объём растёт, возможно, больше, чем от статической; лучший приём — не определён'], COL.int, m('ev'), { size: 24 });
+  }],
+
+  ['types', 'Три приёма', (m) => {
+    const p = panel(0);
+    const card = (x, title, body, col, t0) => infoCard(p, x, 200, 440, 300, title, body, col, t0, { size: 22 });
+    card(80, '«напряжение — расслабление»', 'или «сокращение — расслабление»: напрячь укороченную мышцу, расслабить, растянуть', COL.bad, m('t'));
+    card(580, 'сокращение агониста', 'сократить мышцу напротив укороченной и удержать', COL.nat, m('ac'));
+    card(1080, 'сочетание', 'напрячь укороченную, расслабить и сразу сократить противоположную', COL.real, m('hrac'));
+    pill(p, 'классически — в диагональных паттернах (глава 6), сейчас часто — в одной плоскости', 800, 600, m('diag'), { col: COL.dim, size: 22 });
+  }],
+
+  ['hr', '«Напряжение — расслабление»', (m) => {
+    const p = panel(0);
+    const sc = tableScene(p, { hx: 560, top: 580, s: 1.15, t0: .2 });
+    const ham = muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 14, slack: 1.03 });
+    // 1 lengthen to resistance, 2 contract isometrically ~5 s, 3 relax, 4 move into the new range
+    prog(q => sc.pt.set({ hN: 62 * io(q) }), m('pos', .3), 1.6, lin);
+    prog(q => ham.act(.9 * Math.min(1, q * 6)), m('iso', .2), 5, lin);
+    countdown(p, 760, 140, m('iso', .2));
+    prog(q => ham.act(.9 * (1 - q)), m('rel'), .6, lin);
+    prog(q => sc.pt.set({ hN: lerp(62, 78, io(q)) }), m('move', .3), 1.6, lin);
+    const C = [1170, 140];
+    stepChip(p, C[0], 140, '1', 'удлинить до сопротивления', COL.whole, m('pos'));
+    stepChip(p, C[0], 210, '2', 'напрячь именно её ~5 с', COL.bad, m('iso'));
+    stepChip(p, C[0], 280, '3', 'расслабиться', COL.good, m('rel'));
+    stepChip(p, C[0], 350, '4', 'провести в новый объём', COL.task, m('move'));
+    txt(p, 'изометрически: нога не двигается', 560, 820, m('iso', 1.5), { size: 23, weight: 700, fill: COL.bad, anchor: 'middle' });
+    infoCard(p, 1060, 450, 460, 280, 'грудные мышцы', 'терапевт отводит плечи в стороны, пациент напрягает грудные, расслабляется — плечи дальше; 10 с отдыха — повтор', COL.real, m('pec'), { size: 22 });
+  }],
+
+  ['cr', 'Отличие в классике', (m) => {
+    const p = panel(0);
+    infoCard(p, 120, 220, 640, 260, '«сокращение — расслабление»', 'ротаторы конечности сокращаются с движением, остальные мышцы паттерна — изометрически', COL.nat, m('cr'), { size: 24 });
+    infoCard(p, 840, 220, 640, 260, '«напряжение — расслабление»', 'все мышцы паттерна напрягаются изометрически', COL.bad, m('cr', 2.5), { size: 24 });
+    pill(p, 'в обиходе названия часто используют как синонимы', 800, 580, m('cr', 4), { col: COL.dim, size: 22 });
+  }],
+
+  ['prec', 'Осторожно: давление', (m) => {
+    const p = panel(0), Y0 = 640;
+    txt(p, 'артериальное давление при максимальных напряжениях', 470, 130, m('bp'), { size: 24, weight: 700, fill: COL.bad, anchor: 'middle' });
+    [1, 2, 3].forEach((n, i) => {
+      const h = [120, 190, 300][i], r = mk('rect', { x: 200 + i * 180, y: Y0 - h, width: 120, height: h, rx: 10, fill: i === 2 ? COL.bad : COL.int, 'fill-opacity': .85 }, p);
+      put(r, { o: 0 }); show(r, m('bp', .6 + i * .6));
+      txt(p, `${n}-й повтор`, 260 + i * 180, Y0 + 40, m('bp', .6 + i * .6), { size: 21, fill: COL.chalk, anchor: 'middle' });
+    });
+    path(p, `M160 ${Y0}H760`, { stroke: COL.dim, 'stroke-width': 3 });
+    pill(p, 'схема', 700, 210, m('bp'), { col: COL.dim, size: 19 });
+    infoCard(p, 860, 200, 640, 300, 'достаточно умеренно', '5 с умеренного напряжения, дыхание ровное, без натуживания; сильного пациента так легче удержать', COL.good, m('sub'), { size: 24 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-hr', prompt: ['Расставьте шаги «напряжения — расслабления» по порядку.'],
+    build: grid([
+      { parts: ['Пациент расслабляется'], ans: ['3'], why: 'Третий шаг.' },
+      { parts: ['Удлинить мышцу до точки сопротивления'], ans: ['1'], why: 'Первый шаг.' },
+      { parts: ['Терапевт проводит конечность в новый объём'], ans: ['4'], why: 'Последний.' },
+      { parts: ['Изометрическое напряжение укороченной мышцы около 5 с'], ans: ['2'], why: 'Второй.' },
+    ], [['1', '1', COL.whole], ['2', '2', COL.bad], ['3', '3', COL.good], ['4', '4', COL.task]], { multi: false, text: true }),
+  }], done) }],
+
+  ['ac', 'Сокращение агониста', (m) => {
+    const p = panel(0);
+    // prone: the hip extensors lift the leg and hold it; the short hip flexors are lengthened
+    const sc = tableScene(p, { hx: 560, top: 560, s: 1.15, t0: .2, prone: true, hands: null });
+    const rf = muscleOn(sc.pt, ...MUSCLE.rectus, { after: 'ftN', w: 13, slack: .97 }), ham = muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 13 });
+    prog(q => { const v = q < .3 ? io(q / .3) : 1; sc.pt.set({ hN: -22 * v }); ham.act(.85 * Math.min(1, q * 4)); }, m('ex', .3), 5, lin);
+    prog(q => { sc.pt.set({ hN: -22 * (1 - io(q)) }); ham.act(.85 * (1 - q)); }, m('ex', 5.5), 1, lin);
+    txt(p, 'сам поднимает ногу и держит', 560, 130, m('ex', .5), { size: 24, weight: 700, fill: COL.nat, anchor: 'middle' });
+    infoCard(p, 1000, 110, 520, 170, 'агонист', 'мышца напротив укороченной; медленно, без рывка, удержание несколько секунд', COL.nat, m('ac'), { size: 22 });
+    const bar = (y, w, col, label, t0) => { const r = mk('rect', { x: 1000, y, width: w, height: 40, rx: 8, fill: col, 'fill-opacity': .85 }, p); put(r, { o: 0 }); show(r, t0); txt(p, label, 1010 + w, y + 28, t0, { size: 20, weight: 700, fill: col }); };
+    txt(p, 'в одном исследовании:', 1000, 330, m('ev'), { size: 21, fill: COL.dim });
+    bar(350, 300, COL.good, '30 с статически ×1', m('ev', .5));
+    bar(400, 100, COL.nat, '5 с ×6', m('ev', 1));
+    ['при защитном напряжении', 'если укороченной мышце больно сокращаться', 'учиться управлять новым объёмом'].forEach((str, i) => pill(p, str, 1260, 500 + i * 56, m('good', i * .8), { col: COL.good, size: 21 }));
+    pill(p, 'мышца в очень укороченном положении — отдых, иначе судорога', 800, 820, m('cramp'), { col: COL.int, size: 22 });
+  }],
+
+  ['hrac', 'Сочетание', (m) => {
+    const p = panel(0);
+    // knee flexors: extend the knee to a comfortable limit, contract the flexors, relax, then actively extend
+    const sc = tableScene(p, { hx: 560, top: 580, s: 1.15, t0: .2, pose: { hN: 90, kN: 70 } });
+    const ham = muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 14, slack: 1.02 }), rf = muscleOn(sc.pt, ...MUSCLE.rectus, { after: 'ftN', w: 13 });
+    prog(q => sc.pt.set({ hN: 90, kN: lerp(70, 40, io(q)) }), m('knee', .3), 1.5, lin);
+    prog(q => ham.act(.9 * Math.min(1, q * 6)), m('knee', 2), 5, lin);
+    countdown(p, 760, 140, m('knee', 2));
+    prog(q => ham.act(.9 * (1 - q)), m('knee', 7), .5, lin);
+    prog(q => { sc.pt.set({ hN: 90, kN: lerp(40, 22, io(q)) }); rf.act(.85 * Math.sin(Math.PI * Math.min(1, q * 1.3))); }, m('knee', 7.6), 2.4, lin);
+    const C = 1170;
+    stepChip(p, C, 140, '1', 'удлинить до сопротивления', COL.whole, m('hrac'));
+    stepChip(p, C, 210, '2', 'напрячь её против руки', COL.bad, m('hrac', 1));
+    stepChip(p, C, 280, '3', 'расслабить', COL.good, m('hrac', 2));
+    stepChip(p, C, 350, '4', 'сразу сам — противоположной мышцей', COL.real, m('hrac', 3));
+    txt(p, 'сгибатели колена: разогнуть, напрячь, расслабить, разогнуть самому', 560, 830, m('knee'), { size: 23, weight: 700, fill: COL.chalk, anchor: 'middle' });
+  }],
+
+  ['lim', 'Ограничения', (m) => {
+    const p = panel(0);
+    infoCard(p, 120, 200, 640, 300, 'нужна нормальная иннервация', 'и произвольный контроль укороченной или противоположной мышцы; при параличе и спастичности метод не работает', COL.bad, m('innerv'), { size: 24 });
+    infoCard(p, 840, 200, 640, 300, 'действует на сократительную часть', 'лучше при мышечном спазме, хуже при давней фиброзной контрактуре', COL.int, m('spasm'), { size: 24 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-tech', prompt: ['Какой это приём? НР — «напряжение — расслабление», СА — сокращение агониста.'],
+    build: grid([
+      { parts: ['Пациент сам поднимает ногу лёжа на животе и держит'], ans: ['ac'], why: 'Сокращение агониста.' },
+      { parts: ['Пациент напрягает грудные мышцы против рук терапевта, потом терапевт отводит плечи дальше'], ans: ['hr'], why: '«Напряжение — расслабление».' },
+      { parts: ['Напрячь сгибатели колена, расслабить и сразу самому разогнуть колено'], ans: ['both'], why: 'Сочетание приёмов.' },
+      { parts: ['Укороченной мышце больно сокращаться'], ans: ['ac'], why: 'Сокращение агониста: укороченная мышца не напрягается.' },
+      { parts: ['Учиться управлять новым объёмом'], ans: ['ac'], why: 'Сокращение агониста.' },
+    ], [['hr', 'НР', COL.bad], ['ac', 'СА', COL.nat], ['both', 'НР + СА', COL.real]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['«Напряжение — расслабление»: удлинить, напрячь укороченную ~5 с, расслабить, провести дальше.', 'w1'],
+     ['Сокращение агониста: пациент сам медленно сокращает противоположную мышцу и держит.', 'w2'],
+     ['Сочетание: напряжение, расслабление и сразу активное движение.', 'w3'],
+     ['Усилие умеренное, дыхание ровное; при параличе и спастичности метод не работает.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-spast', prompt: ['Пациент после инсульта со спастичностью руки. Подойдёт ли растяжка по методу ПНФ?'],
+    build: choice([
+      ['Нет: нужна нормальная иннервация и произвольный контроль'],
+      ['Да, это лучший способ при спастичности'],
+      ['Да, если напрягать мышцы максимально'],
+      ['Да, но только сокращение агониста с рывком'],
+    ], 0, 'При параличе и спастичности приёмы ПНФ не работают.',
+    [null, 'Метод требует произвольного контроля.', 'Максимальные напряжения ещё и повышают давление.', 'Рывки нельзя ни в одном приёме.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['При «напряжении — расслаблении» пациент напрягает укороченную мышцу.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Нужно максимальное напряжение с задержкой дыхания.'], ans: ['f'], why: 'Неверно: умеренно, дыхание ровное.' },
+      { parts: ['При сокращении агониста движение быстрое, с рывком.'], ans: ['f'], why: 'Неверно: медленно, без рывка.' },
+      { parts: ['ПНФ лучше подходит при спазме, чем при давней фиброзной контрактуре.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Реципрокное торможение при сокращении агониста доказано у людей.'], ans: ['f'], why: 'Неверно: только на животных.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

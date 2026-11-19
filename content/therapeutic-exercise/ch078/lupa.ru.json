@@ -1,0 +1,11 @@
+[
+ {
+  "beat": "act",
+  "fig": 1,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает rectus, фигура ×0.62",
+  "off": "места для лупы нет"
+ }
+]

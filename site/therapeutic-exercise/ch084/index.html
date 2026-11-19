@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кардиореабилитация и детренированность — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 84, title: 'Кардиореабилитация и детренированность', minutes: 11, language: 'ru', next: '../ch085/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch084/lupa.ru.json
+const LUPA = [
+  {"beat": "intro", "fig": 0, "target": "rectus", "zoom": 3},
+  {"beat": "arm", "fig": 1, "target": "rectus", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch084/cards.ru.json
+const CARDS_SHORT = {
+  "основа кардиореабилитации\nаэробная тренировка вместе со вторичной профилактикой и изменением факторов риска": "+ вторичная профилактика",
+  "обучение: факторы риска\nпитание, курение — с первых дней": "питание, курение — с первых дней",
+  "подготовка к дому\nпациента и семьи — к продолжению реабилитации": "пациента и семьи — к продолжению реабилитации",
+  "частота\n3 раза в неделю": "3 раза в неделю",
+  "интенсивность\n40–80 % резерва ЧСС или 11–16 по шкале; старт — по диагнозу, возрасту, прежней форме": "40–80 % резерва ЧСС",
+  "время\n10–15 мин → 20–60 мин; + 5–10 мин разминки и заминки": "10–15 мин → 20–60 мин; + 5–10 мин разминки и заминки",
+  "тип\nнепрерывно, крупные мышцы: велотренажёр, гребной, степпер, эллипс, дорожка": "велотренажёр, дорожка, эллипс",
+  "поддерживающая программа\nв больнице или по месту жительства, без телеметрии: пульс считает сам пациент, АД может измерить сотрудник; цель — сохранить форму и продолжать вторичную профилактику": "пульс считает сам пациент",
+  "при ИБС руками — на 35 % меньше работы\nдо появления симптомов, чем ногами": "до появления симптомов, чем ногами",
+  "упражнения обращают эти сдвиги\nЧСС покоя и на нагрузке ↓, потери кальция ↓; ударный объём, выброс, объём сердца и лёгких, ЖЕЛ, VO₂max, объём крови, плазмы и эритроцитов, безжировая масса ↑; азотистый и белковый баланс выправляется; митохондриальные ферменты и запасы энергии ↑; анаэробные системы нужны меньше": "ЧСС ↓, ударный объём и VO₂max ↑",
+  "программа\nупор на руки и на управление коляской": "руки + управление коляской",
+  "как начать\n1. тренировочный пульс — по Карвонену как ориентиру, с поправкой на болезнь, лекарства и ощущения; 2. сначала занятия, которые не поднимают пульс выше тренировочного: ходьба, повторяющиеся движения, лёгкая гимнастика; 3. письменные инструкции; 4. обучение: симптомы перегрузки, предосторожности, подсчёт пульса": "Карвонен → ходьба → инструкции → обучение",
+  "как развивать\n1. максимальный или ограниченный симптомами пульс — ступенчатый тест с ЭКГ; 2. порог — процент от него; 3. частота, интенсивность, время; 4. тип — по возможностям и интересам; 5. письменная программа; 6. прогрессия: время → частота → интенсивность": "тест → порог → прогрессия",
+};
+// cards-short end
+
+const PH = [['стационар', '3–5 дней', COL.bad], ['ранняя амбулаторная', 'до 36 занятий', COL.task], ['поддерживающая', 'надолго', COL.good]];
+const ARMC = COL.task, LEGC = COL.whole, DOWN = COL.bad, O2C = '#9fe0f0';
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function row(p, x, y, w, s, col, t0, { size = 21, h = 64 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x, y, width: w, height: h, rx: 12, fill: PANEL, stroke: col, 'stroke-width': 2 }, g);
+  mk('circle', { cx: x + 24, cy: y + h / 2, r: 8, fill: col }, g);
+  const t = para(g, s, x + 44, y + h / 2 + size * .35, null, { size, maxW: w - 60 });
+  put(t, { o: 1, y: -(t._h - size * 1.32) / 2 });
+  show(g, t0);
+  return g;
+}
+// The three phases of cardiac rehabilitation as a strip; cur (0..2) is highlighted, −1 — none.
+function phaseBar(p, y, cur, t0, { x0 = 100, w = 1400, h = 54 } = {}) {
+  const g = G(p, { o: 0 }), ws = [.22, .43, .35];
+  let x = x0;
+  PH.forEach(([s, sub, c], i) => {
+    const W = w * ws[i], on = cur < 0 || i === cur;
+    mk('rect', { x, y, width: W - 8, height: h, rx: 14, fill: on ? mix(c, COL.board, .45) : PANEL, stroke: c, 'stroke-width': on ? 3 : 1.5, opacity: on ? 1 : .55 }, g);
+    T(g, s, { x: x + (W - 8) / 2, y: y + 24, size: 20, weight: 700, fill: on ? COL.chalk : c, anchor: 'middle' });
+    T(g, sub, { x: x + (W - 8) / 2, y: y + 46, size: 17, fill: on ? COL.chalk : COL.dim, anchor: 'middle' });
+    x += W;
+  });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// A wheelchair from the side (facing right) with its user: { g, f }. The seat is at (x, gy − 120·k).
+function wheelchair(p, x, gy, s, t0) {
+  const k = s / .7, g = G(p, { o: 0 }), sy = gy - 118 * k;
+  mk('circle', { cx: x + 10 * k, cy: gy - 72 * k, r: 72 * k, fill: 'none', stroke: ERGO, 'stroke-width': 6 * k }, g);
+  mk('circle', { cx: x + 10 * k, cy: gy - 72 * k, r: 60 * k, fill: 'none', stroke: '#5b6b78', 'stroke-width': 3 * k }, g);
+  mk('circle', { cx: x + 10 * k, cy: gy - 72 * k, r: 7 * k, fill: ERGO }, g);
+  mk('circle', { cx: x + 100 * k, cy: gy - 16 * k, r: 16 * k, fill: 'none', stroke: ERGO, 'stroke-width': 5 * k }, g);
+  path(g, `M${x - 40 * k} ${sy - 110 * k}L${x - 30 * k} ${sy}H${x + 70 * k}L${x + 100 * k} ${gy - 34 * k}H${x + 130 * k}M${x + 70 * k} ${sy}L${x + 100 * k} ${gy - 16 * k}`, { stroke: ERGO, 'stroke-width': 6 * k });
+  const f = fig(g, { s, pose: { ...SIT, t: 4, kN: 80, kF: 80, hN: 92, hF: 92, aN: 20, eN: 40, aF: 20, eF: 40 } });
+  plant(f, 'H', x, sy - 8 * k);
+  if (t0 !== null) show(g, t0);
+  return { g, f };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Кардиореабилитация', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 7 · Урок 84', { x: 800, y: 150, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Кардиореабилитация', { x: 800, y: 235, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и детренированность', { x: 800, y: 300, size: 44, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'принципы аэробной тренировки для пациента с болезнью сердца', 800, 380, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    phaseBar(art, 450, -1, null);
+    const bk = cycleErgo(art, 640, 850, .75), h = heartEl(art, 1060, 690, .75);
+    prog(q => { bk.crank(2 * Math.PI * 6 * q, .7); h.beat(cyc(q, 10)); }, .4, Math.max(4, D - 1.4), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['why', 'Этапы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'кардиореабилитация: тренировка + вторичная профилактика', 800, 62, m('why'), { size: 28, weight: 700, anchor: 'middle' });
+    const ht = heartEl(p, 250, 330, 1, m('why'));
+    prog(q => ht.beat(cyc(q, 20)), m('why'), Math.max(3, D - m('why')), lin);
+    infoCard(p, 480, 110, 1060, 140, 'основа кардиореабилитации', 'аэробная тренировка вместе со вторичной профилактикой и изменением факторов риска', COL.good, m('why', .5), { size: 22 });
+    ['инфаркт миокарда', 'реваскуляризация', 'замена клапана', 'аортокоронарное шунтирование', 'пересадка сердца', 'сердечная недостаточность'].forEach((s, i) =>
+      pill(p, s, 680 + (i % 2) * 520, 310 + Math.floor(i / 2) * 64, m('why', 3 + i * .8), { col: COL.bad, size: 23 }));
+    phaseBar(p, 620, -1, m('ph'), { h: 80 });
+    [['выписка', 100 + 1400 * .22 - 4], ['через 1–3 недели', 100 + 1400 * .22 + 120]].forEach(([s, x], i) => {
+      show(put(path(p, `M${x} 710V740`, { stroke: COL.dim, 'stroke-width': 2 }), { o: 0 }), m('ph', 1.5 + i));
+      txt(p, s, x, 770 + i * 32, m('ph', 1.5 + i), { size: 20, fill: COL.dim, anchor: i ? 'start' : 'end' });
+    });
+  }],
+
+  ['inpt', 'Стационар', (m, D) => {
+    const p = panel(0);
+    txt(p, 'стационарный этап: 3–5 дней после стабилизации', 800, 52, m('inpt'), { size: 28, weight: 700, anchor: 'middle' });
+    phaseBar(p, 80, 0, m('inpt'));
+    // days 1–5: lying, sitting, standing, walking with a monitor
+    const gy = 470;
+    bench(p, 90, 330, 400, m('self'), COL.dim, 70);
+    const f1 = supine(p, 210, 400, .55, m('self'));
+    txt(p, 'день 1', 210, 520, m('self'), { size: 21, weight: 700, fill: COL.dim, anchor: 'middle' });
+    bench(p, 400, 560, 400, m('self', 1.2), COL.dim, 70);
+    const f2 = fig(p, { x: 0, y: 0, s: .55, o: 0, pose: { ...SIT, t: 0 } });
+    plant(f2, 'H', 520, 392); show(f2.g, m('self', 1.2));
+    txt(p, 'день 2: сидя', 500, 520, m('self', 1.2), { size: 21, weight: 700, fill: COL.dim, anchor: 'middle' });
+    const f3 = fig(p, { x: 730, y: gy - 182 * .55, s: .55, o: 0 });
+    show(f3.g, m('self', 2.4)); ground(p, 650, 1500, gy, m('self', 2.4));
+    txt(p, 'день 3: стоя', 730, 520, m('self', 2.4), { size: 21, weight: 700, fill: COL.dim, anchor: 'middle' });
+    const f4 = fig(p, { x: 900, y: gy - 182 * .55, s: .55, o: 0 });
+    show(f4.g, m('orth'));
+    const tel = G(f4.g, {}); mk('rect', { x: -16, y: -12, width: 32, height: 24, rx: 4, fill: '#2c353d', stroke: COL.good, 'stroke-width': 3 }, tel);
+    f4.onSet.push(() => { const S = f4.pts.Sh, H = f4.pts.H; put(tel, { x: lerp(S[0], H[0], .35) + 30, y: lerp(S[1], H[1], .35) }); }); f4.set({});
+    walk(f4, m('orth', .3), Math.max(3, D - m('orth', .6)), { cycles: 6, dx: 380 });
+    txt(p, 'дни 3–5: ходьба под наблюдением', 1100, 520, m('orth'), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    pillRow(p, ['ЭКГ', 'пульс', 'частота дыхания', 'АД'], 1100, 570, m('orth', 3), { col: COL.good, size: 20, gap: .5 });
+    // the MET range
+    const mx = 160, mw = 900, my = 650, Xm = v => mx + v / 5 * mw;
+    const mg = G(p, { o: 0 });
+    mk('rect', { x: mx, y: my, width: mw, height: 26, rx: 10, fill: PANEL, stroke: COL.faint, 'stroke-width': 2 }, mg);
+    [0, 1, 2, 3, 4, 5].forEach(v => T(mg, String(v), { x: Xm(v), y: my + 54, size: 19, fill: COL.dim, anchor: 'middle' }));
+    T(mg, 'МЕТ', { x: mx + mw + 16, y: my + 20, size: 20, fill: COL.dim });
+    mk('rect', { x: Xm(1), y: my, width: Xm(2) - Xm(1), height: 26, rx: 10, fill: COL.int }, mg);
+    show(mg, m('met'));
+    const to = put(mk('rect', { x: Xm(3), y: my, width: Xm(4) - Xm(3), height: 26, rx: 10, fill: COL.good }, p), { o: 0 });
+    show(to, m('met', 2));
+    txt(p, 'старт 1–2', Xm(1.5), my - 14, m('met'), { size: 21, weight: 700, fill: COL.int, anchor: 'middle' });
+    txt(p, 'к выписке 3–4, если переносит', Xm(3.5), my - 14, m('met', 2), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    infoCard(p, 60, 740, 700, 120, 'обучение: факторы риска', 'питание, курение — с первых дней', COL.task, m('edu'), { size: 21 });
+    infoCard(p, 840, 740, 700, 120, 'подготовка к дому', 'пациента и семьи — к продолжению реабилитации', COL.whole, m('fam'), { size: 21 });
+  }],
+
+  ['outpt', 'Ранняя амбулаторная программа', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ранняя амбулаторная программа', 800, 52, m('out'), { size: 28, weight: 700, anchor: 'middle' });
+    phaseBar(p, 80, 1, m('out'));
+    const bk = cycleErgo(p, 130, 400, .62, m('out'));
+    prog(q => bk.crank(2 * Math.PI * 10 * q, .7), m('out'), Math.max(3, D - m('out')), lin);
+    const e = ecgStrip(p, 60, 445, 420, 30, { win: 3, t0: m('out', 1) });
+    prog(q => e.set(105, q * 30), m('out', 1), Math.max(3, D - m('out', 1)), lin);
+    txt(p, 'телеметрия: пульс и ритм; АД; дыхание', 270, 492, m('out', 1), { size: 19, fill: COL.good, anchor: 'middle' });
+    txt(p, 'через 1–3 нед после выписки · до 36 занятий', 1040, 166, m('out', .5), { size: 21, weight: 700, fill: COL.task, anchor: 'middle' });
+    const G6 = ['толерантность к нагрузке ↑ — безопасно и постепенно', 'работа сердца ↑, его затраты ↓: позже стенокардия и изменения ST', 'благоприятные обменные сдвиги', 'видно действие лекарств на нагрузку', 'тревога и депрессия ↓', 'путь к самостоятельным занятиям'];
+    G6.forEach((s, i) => row(p, 540 + (i % 2) * 505, 182 + Math.floor(i / 2) * 74, 490, s, COL.task, m('goal', .4 + i * 1.7), { h: 66, size: 19 }));
+    // the RPE scale 6–20 with 11–16
+    const rx = 560, rw = 960, ry = 446, Xr = v => rx + (v - 6) / 14 * rw;
+    const rg = G(p, { o: 0 });
+    path(rg, `M${rx} ${ry}H${rx + rw}`, { stroke: COL.dim, 'stroke-width': 3 });
+    for (let v = 6; v <= 20; v++) { path(rg, `M${Xr(v)} ${ry - 6}V${ry + 6}`, { stroke: COL.dim, 'stroke-width': 2 }); T(rg, String(v), { x: Xr(v), y: ry + 30, size: 17, fill: COL.dim, anchor: 'middle' }); }
+    mk('rect', { x: Xr(11), y: ry - 22, width: Xr(16) - Xr(11), height: 16, rx: 6, fill: COL.task }, rg);
+    T(rg, 'шкала воспринимаемой нагрузки 6–20: 11–16', { x: Xr(13.5), y: ry - 32, size: 19, weight: 700, fill: COL.task, anchor: 'middle' });
+    show(rg, m('fitt', 3));
+    const F = [['частота', '3 раза в неделю', COL.whole, 'fitt', 0], ['интенсивность', '40–80 % резерва ЧСС или 11–16 по шкале; старт — по диагнозу, возрасту, прежней форме', COL.bad, 'fitt', 1.5],
+      ['время', '10–15 мин → 20–60 мин; + 5–10 мин разминки и заминки', COL.task, 'time', 0], ['тип', 'непрерывно, крупные мышцы: велотренажёр, гребной, степпер, эллипс, дорожка', COL.good, 'type', 0]];
+    F.forEach(([t, b, c, k, dt], i) => infoCard(p, 60 + (i % 2) * 750, 520 + Math.floor(i / 2) * 170, 730, 155, t, b, c, m(k, dt), { size: 20 }));
+  }],
+
+  ['risk', 'Риск и поддержка', (m, D) => {
+    const p = panel(0);
+    txt(p, 'число занятий и ЭКГ-контроль — по риску', 800, 52, m('risk'), { size: 28, weight: 700, anchor: 'middle' });
+    phaseBar(p, 80, 1, m('risk'));
+    const ax = 420, aw = 1080, Xs = v => ax + v / 40 * aw;
+    const ag = G(p, { o: 0 });
+    path(ag, `M${ax} 560H${ax + aw}`, { stroke: COL.dim, 'stroke-width': 2 });
+    [0, 6, 12, 18, 24, 28, 36].forEach(v => { path(ag, `M${Xs(v)} 552V568`, { stroke: COL.dim, 'stroke-width': 2 }); T(ag, String(v), { x: Xs(v), y: 594, size: 18, fill: COL.dim, anchor: 'middle' }); });
+    T(ag, 'занятия', { x: ax + aw, y: 624, size: 19, fill: COL.dim, anchor: 'end' });
+    show(ag, m('risk', .5));
+    const R = [['низкий риск', 6, 18, 6, 12, COL.good, 'low'], ['средний риск', 12, 24, 12, 18, COL.int, 'mid'], ['высокий риск', 28, 36, 32, 36, COL.bad, 'high']];
+    R.forEach(([s, a, b, c0, c1, col, k], i) => {
+      const y = 200 + i * 115, g = G(p, { o: 0 });
+      T(g, s, { x: 60, y: y + 30, size: 25, weight: 700, fill: col });
+      mk('rect', { x: Xs(a), y, width: Xs(b) - Xs(a), height: 40, rx: 10, fill: mix(col, COL.board, .45), stroke: col, 'stroke-width': 2 }, g);
+      T(g, `${a}–${b} занятий`, { x: (Xs(a) + Xs(b)) / 2, y: y + 28, size: 19, weight: 700, anchor: 'middle' });
+      mk('rect', { x: Xs(0), y: y + 50, width: Xs(c0) - Xs(0), height: 14, rx: 6, fill: COL.good }, g);
+      const id = 'hz' + (++SHADE_ID), defs = mk('defs', {}, g), pt = mk('pattern', { id, width: 10, height: 10, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
+      mk('rect', { width: 4, height: 10, fill: COL.good }, pt);
+      mk('rect', { x: Xs(c0), y: y + 50, width: Xs(c1) - Xs(c0), height: 14, rx: 6, fill: `url(#${id})` }, g);
+      show(g, m(k));
+    });
+    const lg = G(p, { o: 0 });
+    mk('rect', { x: 820, y: 160, width: 40, height: 14, rx: 6, fill: COL.good }, lg); T(lg, 'постоянная ЭКГ', { x: 870, y: 173, size: 18, fill: COL.dim });
+    show(lg, m('low', 1));
+    txt(p, 'штриховка — переход на периодический контроль', 1060, 173, m('mid', 1), { size: 18, fill: COL.dim });
+    // maintenance
+    infoCard(p, 60, 650, 1050, 210, 'поддерживающая программа', 'в больнице или по месту жительства, без телеметрии: пульс считает сам пациент, АД может измерить сотрудник; цель — сохранить форму и продолжать вторичную профилактику', COL.good, m('maint'), { size: 21 });
+    const wf = fig(p, { x: 1200, y: 860 - 182 * .5, s: .5, o: 0 });
+    show(wf.g, m('maint')); ground(p, 1150, 1520, 860, m('maint'));
+    walk(wf, m('maint', .3), Math.max(3, D - m('maint', .6)), { cycles: 4, dx: 240 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-phase', prompt: ['Какой это этап кардиореабилитации?'],
+    build: grid([
+      { parts: ['Ходьба под наблюдением, 1–2 МЕТ'], ans: ['in'], why: 'Стационар, 3–5-й день.' },
+      { parts: ['Телеметрия, до 36 занятий, 3 раза в неделю'], ans: ['out'], why: 'Ранняя амбулаторная программа.' },
+      { parts: ['Пульс считает сам пациент, давление измеряет сотрудник'], ans: ['main'], why: 'Поддерживающая программа, без телеметрии.' },
+      { parts: ['Обучение по факторам риска сразу после стабилизации'], ans: ['in'], why: 'Это задача стационарного этапа.' },
+      { parts: ['Интенсивность 40–80 % резерва ЧСС'], ans: ['out'], why: 'Ранняя амбулаторная программа.' },
+    ], [['in', 'Стационар', COL.bad], ['out', 'Ранняя амбулаторная', COL.task], ['main', 'Поддерживающая', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['arm', 'Руки и ноги', (m, D) => {
+    const p = panel(0);
+    txt(p, 'упражнения для рук и для ног; что даёт тренировка', 800, 52, m('arm'), { size: 28, weight: 700, anchor: 'middle' });
+    // the arm ergometer and the cycle
+    const K = [330, 250], kr = 26, ef = fig(p, { x: 190, y: 400 - 182 * .6, s: .6, o: 0, pose: { aN: 70, eN: 40, aF: 70, eF: 40 } });
+    const eg = G(p, { o: 0 });
+    path(eg, `M${K[0]} ${K[1]}V400M${K[0] - 30} 400H${K[0] + 30}`, { stroke: ERGO, 'stroke-width': 6 });
+    mk('circle', { cx: K[0], cy: K[1], r: kr, fill: 'none', stroke: ERGO, 'stroke-width': 3 }, eg);
+    show(eg, m('arm')); show(ef.g, m('arm'));
+    prog(q => { const a = 2 * Math.PI * 7 * q; reach(ef, 'N', K[0] - 8 + kr * Math.cos(a), K[1] + kr * Math.sin(a)); reach(ef, 'F', K[0] - 8 - kr * Math.cos(a), K[1] - kr * Math.sin(a)); }, m('arm'), Math.max(3, D - m('arm')), lin);
+    txt(p, 'руки', 260, 440, m('arm'), { size: 23, weight: 700, fill: ARMC, anchor: 'middle' });
+    const bk = cycleErgo(p, 520, 400, .6, m('arm', .5));
+    prog(q => bk.crank(2 * Math.PI * 7 * q, .7), m('arm', .5), Math.max(3, D - m('arm', .5)), lin);
+    txt(p, 'ноги', 600, 440, m('arm', .5), { size: 23, weight: 700, fill: LEGC, anchor: 'middle' });
+    // comparisons (shape only)
+    const cmp = (y, lab, a, l, k) => { const g = G(p, { o: 0 });
+      T(g, lab, { x: 60, y: y + 18, size: 20, weight: 700 });
+      mk('rect', { x: 400, y, width: 300 * a, height: 18, rx: 6, fill: ARMC }, g); mk('rect', { x: 400, y: y + 22, width: 300 * l, height: 18, rx: 6, fill: LEGC }, g);
+      show(g, m(k)); };
+    cmp(490, 'механическая эффективность', .55, .85, 'eff');
+    cmp(560, 'O₂ при той же нагрузке', .9, .6, 'o2');
+    cmp(630, 'двойное произведение', .9, .62, 'rpp');
+    pill(p, 'схема', 660, 470, m('eff'), { col: COL.dim, size: 18 });
+    infoCard(p, 60, 700, 700, 160, 'при ИБС руками — на 35 % меньше работы', 'до появления симптомов, чем ногами', COL.bad, m('prec'), { size: 22 });
+    // what training gives a patient with heart disease
+    txt(p, 'что даёт тренировка при болезни сердца', 1180, 110, m('adapt'), { size: 23, weight: 700, fill: COL.good, anchor: 'middle' });
+    ['аэробная работоспособность миокарда ↑', 'функциональные возможности ↑ — в основном за счёт a-v разницы', 'ударный объём ↑ — после интенсивной тренировки, через 6–12 мес', 'потребность миокарда в O₂ ↓; доставка ↑: пульс реже, диастола длиннее', 'стенокардия — только при большей нагрузке', 'ЧСС на субмаксимальной нагрузке ↓ → резерв больше', 'психологическое состояние лучше'].forEach((s, i) =>
+      row(p, 820, 130 + i * 104, 720, s, COL.good, m('adapt', 2 + i * 2.6), { h: 90, size: 20 }));
+  }],
+
+  ['decond', 'Детренированность', (m, D) => {
+    const p = panel(0);
+    txt(p, 'детренированность: что происходит', 800, 52, m('dec'), { size: 28, weight: 700, anchor: 'middle' });
+    txt(p, 'хроническая болезнь, пожилой возраст, вынужденная неподвижность', 800, 92, m('dec'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    // standing up after bed rest: dizziness
+    const gy = 560, f = fig(p, { x: 0, y: 0, s: .75, o: 0, pose: { ...SIT } });
+    plant(f, 'AN', 300, gy);
+    const an = onStage(f, 'AN'), hp = onStage(f, 'H');
+    chair(p, hp[0], hp[1] + 10, gy, m('d2'));
+    p.appendChild(f.g); show(f.g, m('d2'));
+    poseTo(f, STAND, m('d2', 2), 1, io, ['AN', an[0], an[1]]);
+    const dz = G(p, { o: 0 });
+    path(dz, 'M0 0C20 -16 40 16 60 0S100 -16 120 0', { stroke: COL.int, 'stroke-width': 4 });
+    show(dz, m('d2', 3));
+    f.onSet.push(() => { const H = onStage(f, 'Hc'); put(dz, { x: H[0] - 60, y: H[1] - 50 }); }); f.set({});
+    pill(p, 'тахикардия, головокружение, обморок', 300, 620, m('d2', 3.5), { col: COL.int, size: 20 });
+    // blood volume
+    const bv = G(p, { o: 0 });
+    mk('rect', { x: 120, y: 660, width: 360, height: 40, rx: 12, fill: PANEL, stroke: BLOOD_A, 'stroke-width': 2 }, bv);
+    const lvl = mk('rect', { x: 124, y: 664, width: 352, height: 32, rx: 10, fill: BLOOD_A }, bv);
+    show(bv, m('d2'));
+    prog(q => lvl.setAttribute('width', (352 * (1 - .15 * q)).toFixed(1)), m('d2', .5), 1.5);
+    txt(p, 'объём крови ↓ до 700–800 мл', 300, 735, m('d2', .5), { size: 21, weight: 700, fill: BLOOD_A, anchor: 'middle' });
+    pill(p, 'схема', 300, 780, m('d2', .5), { col: COL.dim, size: 17 });
+    const L = [['d1', 'работоспособность ↓: VO₂max и сердечный выброс ↓ — главный ограничитель'], ['d2', 'объём крови ↓ (до 700–800 мл): ортостатическая гипотензия при вставании'], ['d3', 'плазма и эритроциты ↓: риск тромбоэмболий, выздоровление дольше'], ['d4', 'безжировая масса ↓: трудно на костылях и на лестнице'], ['d5', 'кальций с мочой ↑: кости теряют минералы, остеопороз, переломы']];
+    L.forEach(([k, s], i) => row(p, 620, 130 + i * 92, 920, s, DOWN, m(k), { h: 80, size: 20 }));
+    infoCard(p, 620, 600, 920, 260, 'упражнения обращают эти сдвиги', 'ЧСС покоя и на нагрузке ↓, потери кальция ↓; ударный объём, выброс, объём сердца и лёгких, ЖЕЛ, VO₂max, объём крови, плазмы и эритроцитов, безжировая масса ↑; азотистый и белковый баланс выправляется; митохондриальные ферменты и запасы энергии ↑; анаэробные системы нужны меньше', COL.good, m('rev'), { size: 19 });
+  }],
+
+  ['adapt', 'Ограничения активности', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ограничение активности — не повод исключать из тренировки', 800, 52, m('adapt'), { size: 28, weight: 700, anchor: 'middle' });
+    pillRow(p, ['инвалидная коляска', 'параплегия', 'гемиплегия', 'ампутация', 'артродез'], 800, 120, m('adapt', 1), { col: COL.whole, size: 22, gap: .7 });
+    const wc = wheelchair(p, 300, 640, .8, m('test'));
+    const K = [520, 400], kr = 28;
+    const eg = G(p, { o: 0 });
+    path(eg, `M${K[0]} ${K[1]}V640M${K[0] - 34} 640H${K[0] + 34}`, { stroke: ERGO, 'stroke-width': 7 });
+    mk('circle', { cx: K[0], cy: K[1], r: kr, fill: 'none', stroke: ERGO, 'stroke-width': 3 }, eg);
+    show(eg, m('test'));
+    prog(q => { const a = 2 * Math.PI * 7 * q; reach(wc.f, 'N', K[0] - 8 + kr * Math.cos(a), K[1] + kr * Math.sin(a)); reach(wc.f, 'F', K[0] - 8 - kr * Math.cos(a), K[1] - kr * Math.sin(a)); }, m('test', .3), Math.max(3, D - m('test', .5)), lin);
+    ground(p, 120, 640, 640, m('test'));
+    txt(p, 'ручной эргометр — чаще всего', 380, 700, m('test'), { size: 22, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'или дорожка для коляски', 380, 735, m('test', 1), { size: 20, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 760, 200, 780, 150, 'программа', 'упор на руки и на управление коляской', COL.task, m('test', 2.5), { size: 22 });
+    // energy cost (shape only)
+    const cmp = [['обычная ходьба', .45, COL.good], ['изменённая походка', .75, COL.int], ['передвижение на коляске', .7, COL.task]];
+    txt(p, 'расход энергии', 1150, 420, m('cost'), { size: 23, weight: 700, anchor: 'middle' });
+    cmp.forEach(([s, v, c], i) => { const g = G(p, { o: 0 }); T(g, s, { x: 760, y: 478 + i * 70, size: 20, fill: COL.chalk }); mk('rect', { x: 1060, y: 458 + i * 70, width: 460 * v, height: 30, rx: 8, fill: c }, g); show(g, m('cost', .5 + i * 1)); });
+    pill(p, 'схема', 1480, 420, m('cost'), { col: COL.dim, size: 18 });
+    txt(p, 'на коляске — менее экономно, чем обычная ходьба', 1150, 700, m('cost', 3), { size: 19, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['plan', 'Нарушения, цели, план', (m, D) => {
+    const p = panel(0);
+    txt(p, 'нарушения → цели → программа', 800, 52, m('plan'), { size: 28, weight: 700, anchor: 'middle' });
+    const tbl = G(p, {});
+    const IM = [['тромбоэмболии, пневмония, ателектаз, переломы', 'предупредить'], ['тахикардия, головокружение, ортостатическая гипотензия при вставании', 'меньше ортостатическая реакция'],
+      ['слабость и одышка на лестнице', 'лестница без одышки'], ['малая дистанция ходьбы', 'ходить дальше без утомления и симптомов'],
+      ['высокое двойное произведение; стенокардия при малых нагрузках', 'ниже пульс и АД на той же нагрузке; выше переносимое двойное произведение без ишемии']];
+    txt(tbl, 'нарушения', 400, 110, m('plan'), { size: 23, weight: 700, fill: DOWN, anchor: 'middle' });
+    txt(tbl, 'цели', 1200, 110, m('goals'), { size: 23, weight: 700, fill: COL.good, anchor: 'middle' });
+    IM.forEach(([a, b], i) => {
+      row(tbl, 60, 130 + i * 96, 680, a, DOWN, m('plan', .5 + i * 1.6), { h: 84, size: 20 });
+      txt(tbl, '→', 780, 180 + i * 96, m('goals', i * 1.2), { size: 30, fill: COL.dim, anchor: 'middle' });
+      row(tbl, 820, 130 + i * 96, 720, b, COL.good, m('goals', i * 1.2), { h: 84, size: 20 });
+    });
+    hide(tbl, m('start'), .5);
+    // Box 7.8 and Box 7.9
+    infoCard(p, 60, 110, 720, 470, 'как начать', '1. тренировочный пульс — по Карвонену как ориентиру, с поправкой на болезнь, лекарства и ощущения; 2. сначала занятия, которые не поднимают пульс выше тренировочного: ходьба, повторяющиеся движения, лёгкая гимнастика; 3. письменные инструкции; 4. обучение: симптомы перегрузки, предосторожности, подсчёт пульса', COL.task, m('start', .5), { size: 21 });
+    infoCard(p, 820, 110, 720, 470, 'как развивать', '1. максимальный или ограниченный симптомами пульс — ступенчатый тест с ЭКГ; 2. порог — процент от него; 3. частота, интенсивность, время; 4. тип — по возможностям и интересам; 5. письменная программа; 6. прогрессия: время → частота → интенсивность', COL.whole, m('progr'), { size: 21 });
+    txt(p, 'обучение пациента', 800, 640, m('teach'), { size: 24, weight: 700, fill: COL.good, anchor: 'middle' });
+    pillRow(p, ['при симптомах — прекратить и сообщить', 'считать пульс: покой, во время, после'], 800, 700, m('teach', .5), { col: COL.good, size: 21, gap: 1.5 });
+    pillRow(p, ['держаться рекомендаций', 'регулярно и долго', 'менять факторы риска'], 800, 770, m('teach', 4), { col: COL.good, size: 21, gap: 1.2 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-rehab', prompt: ['Верно или нет?'],
+    build: grid([
+      { parts: ['Пациенты с ИБС выполняют руками больше работы до появления симптомов, чем ногами.'], ans: ['f'], why: 'Наоборот: руками — на 35 % меньше.' },
+      { parts: ['Упражнения для рук повышают двойное произведение сильнее, чем для ног.'], ans: ['t'], why: 'Потребление O₂ миокардом при работе руками выше.' },
+      { parts: ['При детренированности объём крови может уменьшиться на 700–800 мл.'], ans: ['t'], why: 'Отсюда тахикардия и ортостатическая гипотензия при вставании.' },
+      { parts: ['Человека в инвалидной коляске в аэробную тренировку не включают.'], ans: ['f'], why: 'Включают: тест — на ручном эргометре, упор на руки и управление коляской.' },
+      { parts: ['Ударный объём у кардиологических пациентов растёт после 6–12 месяцев интенсивной тренировки.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Стационар: 3–5 дней, самообслуживание и ходьба, от 1–2 до 3–4 МЕТ.', 'w1'],
+     ['Ранняя амбулаторная: до 36 занятий, 3 раза в неделю, 40–80 % резерва ЧСС или 11–16 по шкале; дальше — поддерживающая, без телеметрии.', 'w2'],
+     ['Работа руками дороже для сердца: при ИБС симптомы — после работы на 35 % меньше.', 'w3'],
+     ['Детренированность снижает выброс, объём крови, мышцы и кости; тренировка это обращает; прогрессия — время, частота, интенсивность.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-day4', prompt: ['Четвёртый день после аортокоронарного шунтирования, состояние стабильно. Что уместно?'],
+    build: choice([
+      ['Ходьба под наблюдением с ЭКГ-контролем, около 1–2 МЕТ, к выписке — до 3–4 МЕТ'],
+      ['Велотренажёр 30 минут при 70 % резерва ЧСС'],
+      ['Только лежать до выписки'],
+      ['Упражнения с гантелями для рук'],
+    ], 0, 'На 3–5-й день — ортостатическая нагрузка: ходьба под наблюдением; от 1–2 МЕТ до 3–4 МЕТ к выписке.',
+    [null, 'Это уровень амбулаторной программы, а не 4-го дня в стационаре.', 'Постельный режим усиливает детренированность; уже в 1–3-й день — самообслуживание и вставание.', 'Работа руками дороже для сердца; в стационаре — ходьба.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-outpt', prompt: ['Ранняя амбулаторная программа: заполните параметры.'],
+    build: blanks([
+      { parts: ['Занятия ', { box: '3' }, ' раза в неделю, всего до ', { box: '36' }, ' занятий'], why: 'Обычно три раза в неделю, до 36 занятий.' },
+      { parts: ['Интенсивность: ', { box: '40' }, '–', { box: '80' }, ' % резерва ЧСС'], why: 'По резерву ЧСС — 40–80 %.' },
+      { parts: ['или ', { box: '11' }, '–', { box: '16' }, ' по шкале воспринимаемой нагрузки 6–20'], why: '11–16 на шкале от 6 до 20.' },
+    ]),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Рекомендации по физической активности; люди с инвалидностью — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 17, title: 'Рекомендации по физической активности; люди с инвалидностью', minutes: 7, language: 'ru', next: '../ch018/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch017/cards.ru.json
+const CARDS_SHORT = {
+  "выученная беспомощность\nот отношения близких к возможностям человека": "от отношения близких",
+};
+// cards-short end
+
+// Activity types — one colour each.
+const ACT = { mod: COL.good, vig: COL.task, str: COL.whole, bal: COL.real };
+const DAYS = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'];
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+// A week of minute bars. mins[i] = minutes on day i, cols[i] = colour; scale px per minute.
+function week(p, x0, yBase, mins, cols, t0, { scale = 2.2, gap = 92, label = true } = {}) {
+  const g = G(p, { o: 0 });
+  path(g, `M${x0 - 20} ${yBase}H${x0 + 7 * gap - 10}`, { stroke: COL.faint, 'stroke-width': 3 });
+  DAYS.forEach((d, i) => T(g, d, { x: x0 + i * gap + 34, y: yBase + 32, size: 21, fill: COL.dim, anchor: 'middle' }));
+  show(g, t0);
+  mins.forEach((v, i) => {
+    if (!v) return;
+    const h = v * scale, r = mk('rect', { x: x0 + i * gap, y: yBase, width: 68, height: 0, rx: 8, fill: cols[i], 'fill-opacity': .8 }, p);
+    prog(q => { r.setAttribute('y', (yBase - h * q).toFixed(1)); r.setAttribute('height', (h * q).toFixed(1)); }, t0 + .3 + i * .15, .6, out);
+    if (label) txt(p, String(v), x0 + i * gap + 34, yBase - h - 10, t0 + .8 + i * .15, { size: 21, weight: 700, fill: cols[i], anchor: 'middle' });
+  });
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Рекомендации и инвалидность', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 2 · Урок 17', { x: 800, y: 240, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Рекомендации по физической активности', { x: 800, y: 325, size: 54, weight: 600, anchor: 'middle' });
+    T(g, 'и люди с инвалидностью', { x: 800, y: 395, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'сколько двигаться — и как сделать это доступным для всех', 800, 480, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    show(art, m('sub', .2));
+    week(art, 520, 800, [30, 30, 0, 30, 30, 30, 0], Array(7).fill(ACT.mod), m('sub', .3), { scale: 3, label: false });
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['guide', 'Главные выводы', (m) => {
+    const p = panel(0), X0 = 160, Y0 = 600;
+    head(p, 'Рекомендации по физической активности (США, 2008)', m('doc'), 70, COL.chalk);
+    const ax = G(p, { o: 0 });
+    path(ax, `M${X0} ${Y0 - 420}V${Y0}H${X0 + 640}`, { stroke: COL.dim, 'stroke-width': 3 });
+    T(ax, 'польза для здоровья', { x: X0 - 10, y: Y0 - 432, size: 22, fill: COL.dim });
+    T(ax, 'активность', { x: X0 + 640, y: Y0 + 36, size: 22, fill: COL.dim, anchor: 'end' });
+    show(ax, m('some'));
+    pill(p, 'схема', X0 + 560, Y0 - 380, m('some'), { col: COL.dim, size: 20 });
+    draw(path(p, `M${X0} ${Y0 - 10}C${X0 + 80} ${Y0 - 200} ${X0 + 260} ${Y0 - 320} ${X0 + 620} ${Y0 - 370}`, { stroke: COL.good, 'stroke-width': 5 }, { d: 0 }), m('some', .3), 1.4);
+    [[X0 + 2, Y0 - 12, 'ничего'], [X0 + 90, Y0 - 170, 'немного — лучше'], [X0 + 400, Y0 - 345, 'больше — ещё лучше']].forEach(([x, y, s], i) => {
+      const d = mk('circle', { cx: x, cy: y, r: 10, fill: i ? COL.good : COL.bad }, p); put(d, { o: 0 }); show(d, m('some', .6 + i * 1.2));
+      txt(p, s, x + 18, y + 34, m('some', .6 + i * 1.2), { size: 23, weight: 700, fill: i ? COL.good : COL.bad });
+    });
+    pill(p, 'аэробная нагрузка', 1170, 200, m('ben'), { col: ACT.mod, size: 26 });
+    pill(p, 'силовые упражнения', 1170, 270, m('ben', .5), { col: ACT.str, size: 26 });
+    labelBox(p, 1170, 380, 520, ['польза намного больше рисков'], COL.good, m('ben', 1.4), { size: 27 });
+    labelBox(p, 1170, 540, 520, ['минимум — для основной пользы', 'больше — меньше риск болезней'], COL.chalk, m('min'), { size: 25 });
+  }],
+
+  ['kids', 'Дети и подростки', (m) => {
+    const p = panel(0), GY = 330;
+    txt(p, 'дети и подростки от 6 лет', 800, 80, m('kids'), { size: 32, weight: 700, fill: COL.task, anchor: 'middle' });
+    ground(p, 200, 640, GY, m('kids'));
+    const c = fig(p, { x: 240, y: GY - 182 * .38, s: .38, o: 0 }); show(c.g, m('kids'));
+    walk(c, m('kids', .3), 4, { cycles: 6, dx: 360, running: true });
+    week(p, 760, GY, [60, 60, 60, 60, 60, 60, 60], [ACT.vig, ACT.mod, ACT.vig, ACT.mod, ACT.vig, ACT.mod, ACT.mod], m('kids', .4), { scale: 3 });
+    txt(p, '≥ 60 минут каждый день', 1080, 390, m('kids', 1.6), { size: 27, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const lg = G(p, { o: 0 });
+    mk('rect', { x: 200, y: 470, width: 26, height: 26, rx: 5, fill: ACT.vig }, lg); T(lg, 'интенсивная — не реже 3 дней', { x: 240, y: 492, size: 25 });
+    show(lg, m('vig'));
+    const bn = G(p, { o: 0 });
+    [0, 2, 4].forEach(i => { mk('circle', { cx: 794 + i * 92, cy: 100, r: 13, fill: ACT.str }, bn); });
+    mk('circle', { cx: 213, cy: 553, r: 13, fill: ACT.str }, bn); T(bn, 'кости и мышцы — не реже 3 дней', { x: 240, y: 562, size: 25 });
+    show(bn, m('bone'));
+    labelBox(p, 1080, 640, 520, ['по возрасту и интересно'], COL.good, m('fun'), { size: 28 });
+  }],
+
+  ['adults', 'Взрослые и пожилые', (m) => {
+    const p = panel(0);
+    txt(p, 'взрослые', 400, 80, m('ad'), { size: 32, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    week(p, 90, 330, [30, 30, 0, 30, 30, 30, 0], Array(7).fill(ACT.mod), m('ad', .2), { scale: 4.4, gap: 92 });
+    txt(p, '150 мин умеренной в неделю', 400, 400, m('ad', 1.4), { size: 26, weight: 700, fill: ACT.mod, anchor: 'middle' });
+    txt(p, 'или', 400, 440, m('ad', 2.6), { size: 23, fill: COL.dim, anchor: 'middle' });
+    week(p, 90, 640, [25, 0, 25, 0, 25, 0, 0], Array(7).fill(ACT.vig), m('ad', 2.8), { scale: 4.4, gap: 92 });
+    txt(p, '75 мин интенсивной в неделю', 400, 710, m('ad', 3.8), { size: 26, weight: 700, fill: ACT.vig, anchor: 'middle' });
+    pill(p, 'эпизоды от 10 минут засчитываются', 1150, 140, m('bout'), { col: COL.chalk, size: 24 });
+    pill(p, 'силовые — не реже 2 дней', 1150, 210, m('str'), { col: ACT.str, size: 25 });
+    // older adults: + balance
+    const GY = 520;
+    ground(p, 960, 1340, GY, m('old'));
+    const o = fig(p, { x: 1150, y: GY - 182 * .5, s: .5, o: 0, col: '#cfc6b4' }); show(o.g, m('old'));
+    poseTo(o, { ...SINGLE, aN: 60, aF: 60 }, m('bal', .2), 1, io, ['AF', onStage(o, 'AF')[0], GY]);
+    txt(p, 'пожилые (65+) — то же, насколько могут', 1150, 300, m('old'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pill(p, '+ равновесие против падений', 1150, 580, m('bal'), { col: ACT.bal, size: 25 });
+    labelBox(p, 1150, 700, 640, ['с инвалидностью: по возможностям,', 'без бездействия, программа с врачом'], COL.int, m('dis'), { size: 25 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-min', prompt: ['Посчитайте минуты'],
+    build: blanks([
+      { parts: ['150 минут в неделю = 5 дней по ', { box: '30' }, ' минут'], why: '150 / 5 = 30.' },
+      { parts: ['75 минут интенсивной нагрузки = 3 дня по ', { box: '25' }, ' минут'], why: '75 / 3 = 25.' },
+      { parts: ['Ребёнку за неделю — не меньше ', { box: '420' }, ' минут'], why: '60 × 7 = 420.' },
+    ]),
+  }], done) }],
+
+  ['dis', 'Инвалидность и неравенство', (m) => {
+    const p = panel(0);
+    const big = G(p, { o: 0 });
+    T(big, '≈ 19%', { x: 250, y: 170, size: 90, weight: 700, fill: COL.int, anchor: 'middle' });
+    T(big, 'населения США', { x: 250, y: 214, size: 24, fill: COL.dim, anchor: 'middle' });
+    show(big, m('pop'));
+    // WHO: disability = interaction of a health condition with personal and environmental factors
+    labelBox(p, 980, 110, 420, ['состояние здоровья'], ICF_COL.hc, m('who'), { size: 26 });
+    labelBox(p, 760, 260, 360, ['личные факторы'], ICF_COL.pers, m('who', 1), { size: 25 });
+    labelBox(p, 1200, 260, 360, ['факторы среды'], ICF_COL.env, m('who', 1.4), { size: 25 });
+    arrowTo(p, [940, 140], [820, 228], m('who', 1.2), { col: COL.dim, w: 3 });
+    arrowTo(p, [1020, 140], [1140, 228], m('who', 1.6), { col: COL.dim, w: 3 });
+    ['негативное отношение', 'недоступный транспорт и здания', 'слабая поддержка'].forEach((s, i) => pill(p, s, 1200, 330 + i * 50, m('who', 2.4 + i * .5), { col: ICF_COL.env, size: 20 }));
+    txt(p, 'инвалидность — их взаимодействие', 980, 510, m('who', 3.2), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pill(p, 'меньше профилактики', 320, 300, m('disp', .2), { col: COL.bad, size: 22 });
+    ['ожирение', 'давление', 'болезни сердца', 'инсульт', 'диабет', 'артрит', 'астма', 'депрессия'].forEach((s, i) => pill(p, s, 130 + (i % 3) * 190, 365 + Math.floor(i / 3) * 56, m('disp', .6 + i * .35), { col: COL.bad, size: 21 }));
+    const X = [['2×', 'неподходящие персонал и учреждения'], ['3×', 'отказ в помощи'], ['4×', 'плохое обращение']];
+    X.forEach(([n, s], i) => {
+      const x = 160 + i * 470, g = G(p, { o: 0 });
+      roundBox(g, x, 590, 430, 150, COL.bad, PANEL, 2.5);
+      T(g, n, { x: x + 30, y: 680, size: 60, weight: 700, fill: COL.bad });
+      put(para(g, s, x + 140, 650, null, { size: 23, maxW: 270 }), { o: 1 });
+      show(g, m('x234', .4 + i * 1.2));
+    });
+    txt(p, 'по данным ВОЗ, чаще, чем у людей без инвалидности', 800, 790, m('x234'), { size: 23, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['margin', 'Тонкий запас здоровья', (m) => {
+    const p = panel(0), GY = 560;
+    head(p, '«Более тонкий запас здоровья»', m('thin'), 70, COL.chalk);
+    const mg = (y, w, c, s, t0) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x: 140, y, width: 560, height: 44, rx: 10, fill: COL.faint, 'fill-opacity': .3 }, g);
+      mk('rect', { x: 140, y, width: w, height: 44, rx: 10, fill: c, 'fill-opacity': .7 }, g);
+      T(g, s, { x: 140, y: y - 12, size: 23, fill: c, weight: 700 });
+      show(g, t0);
+    };
+    mg(170, 460, COL.good, 'запас здоровья', m('thin', .3));
+    mg(280, 200, COL.int, 'у людей с инвалидностью', m('thin', .8));
+    txt(p, '→ физическая активность особенно важна', 420, 380, m('thin', 2), { size: 25, weight: 700, fill: COL.good, anchor: 'middle' });
+    labelBox(p, 1150, 200, 600, ['не «больной»', 'чаще всего здоров'], COL.good, m('nsick'), { size: 28 });
+    infoCard(p, 850, 330, 600, 160, 'выученная беспомощность', 'от отношения близких к возможностям человека', COL.bad, m('lh'), { size: 24 });
+    // an inaccessible gym: stairs and no ramp
+    stairs(p, 200, GY + 120, 4, 50, 30, m('fac'), COL.dim);
+    const door = G(p, { o: 0 });
+    mk('rect', { x: 460, y: GY - 60, width: 70, height: 60, rx: 4, fill: 'none', stroke: COL.dim, 'stroke-width': 3 }, door);
+    T(door, 'зал', { x: 495, y: GY - 70, size: 22, fill: COL.dim, anchor: 'middle' });
+    show(door, m('fac'));
+    cross(p, 330, GY + 60, 40, m('fac', .6), 6);
+    txt(p, 'залы часто не приспособлены', 370, GY + 170, m('fac', .4), { size: 24, fill: COL.dim, anchor: 'middle' });
+    const tl = G(p, { o: 0 });
+    mk('rect', { x: 850, y: 620, width: 300, height: 26, rx: 13, fill: COL.good, 'fill-opacity': .7 }, tl);
+    mk('rect', { x: 1150, y: 620, width: 300, height: 26, rx: 13, fill: COL.faint, 'fill-opacity': .5 }, tl);
+    T(tl, 'школа: терапевт рядом', { x: 1000, y: 690, size: 22, fill: COL.good, anchor: 'middle' });
+    T(tl, 'взрослый: доступ теряется', { x: 1300, y: 690, size: 22, fill: COL.bad, anchor: 'middle' });
+    show(tl, m('adult'));
+  }],
+
+  ['equity', 'Равенство и первые шаги', (m) => {
+    const p = panel(0);
+    const top = G(p);
+    head(top, 'Цели для людей с инвалидностью', m('goals'), 70, COL.chalk);
+    ['участие в общественном здравоохранении', 'своевременная помощь', 'среда без барьеров', 'участие в повседневной жизни'].forEach((s, i) => pill(top, s, 420 + (i % 2) * 760, 140 + Math.floor(i / 2) * 64, m('goals', .4 + i * .5), { col: COL.int, size: 24 }));
+    txt(top, 'цели программы благополучия (бокс 2.3)', 800, 300, m('obj'), { size: 25, fill: COL.dim, anchor: 'middle' });
+    ['меньше вторичных болезней', 'независимость всю жизнь', 'отдых и удовольствие', 'меньше барьеров среды'].forEach((s, i) => infoCard(top, 90 + i * 360, 330, 340, 140, s, '', COL.good, m('obj', .4 + i * .5)));
+    hide(top, m('steps', -.3), .4);
+    const S5 = ['сообщить врачу или опекуну', 'нагрузочный тест, если возможно', 'как лекарства влияют на нагрузку', 'совет специалиста по упражнениям', 'цели SMART'];
+    txt(p, 'перед началом занятий (бокс 2.4)', 800, 80, m('steps'), { size: 28, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    S5.forEach((s, i) => {
+      const g = G(p, { o: 0 }), y = 140 + i * 82;
+      mk('circle', { cx: 160, cy: y + 24, r: 22, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 160, y: y + 33, size: 25, weight: 700, fill: COL.board, anchor: 'middle' });
+      T(g, s, { x: 200, y: y + 33, size: 27, weight: 600 });
+      show(g, m(i < 4 ? 'steps' : 'smart', i < 4 ? .3 + i * 1.6 : 0));
+    });
+    [['S', 'конкретные'], ['M', 'измеримые'], ['A', 'достижимые'], ['R', 'значимые'], ['T', 'ограничены по времени']].forEach(([l, s], i) => {
+      const g = G(p, { o: 0 }), y = 160 + i * 100;
+      mk('rect', { x: 960, y, width: 70, height: 70, rx: 12, fill: COL.task, 'fill-opacity': .2, stroke: COL.task, 'stroke-width': 3 }, g);
+      T(g, l, { x: 995, y: y + 50, size: 40, weight: 700, fill: COL.task, anchor: 'middle' });
+      T(g, s, { x: 1050, y: y + 45, size: 27 });
+      show(g, m('smart', .4 + i * .5));
+    });
+  }],
+
+  ['dd', 'Задержка развития: «3–2–1»', (m) => {
+    const p = panel(0);
+    head(p, 'Программа при задержке развития (бокс 2.5)', m('dd'), 70, COL.chalk);
+    const B = [[30, 'кардио', 'с 45–55% от макс. пульса', ACT.mod, 'c30'], [20, 'силовые', 'упор на безопасность', ACT.str, 's20'], [10, 'гибкость', '', COL.real, 'f10']];
+    let x = 120;
+    B.forEach(([v, s, sub, c, k]) => {
+      const w = v * 16, g = G(p, { o: 0 });
+      mk('rect', { x, y: 140, width: w - 8, height: 90, rx: 12, fill: c, 'fill-opacity': .75 }, g);
+      T(g, `${v} мин`, { x: x + 20, y: 196, size: 30, weight: 700, fill: COL.board });
+      T(g, s, { x: x + 4, y: 270, size: 26, weight: 700, fill: c });
+      if (sub) T(g, sub, { x: x + 4, y: 304, size: 21, fill: COL.dim });
+      show(g, m(k));
+      x += w;
+    });
+    // splitting the day
+    txt(p, '30–60 минут в день — можно частями', 400, 400, m('var', 1), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    [[4, 15], [3, 20], [2, 30]].forEach(([n, len], r) => {
+      for (let i = 0; i < n; i++) {
+        const b = mk('rect', { x: 120 + i * (len * 8 + 8), y: 440 + r * 60, width: len * 8, height: 36, rx: 8, fill: ACT.mod, 'fill-opacity': .5 }, p);
+        put(b, { o: 0 }); show(b, m('var', 1.4 + r * .5 + i * .1), .2);
+      }
+      txt(p, `${n} × ${len}`, 640, 466 + r * 60, m('var', 1.4 + r * .5), { size: 24, fill: COL.dim });
+    });
+    txt(p, 'разнообразие: пн/ср/пт · вт/чт · выходные', 400, 660, m('var'), { size: 24, fill: COL.dim, anchor: 'middle' });
+    // adherence
+    const GY = 470;
+    ground(p, 900, 1240, GY, m('adh'));
+    [[1000, 1], [1100, 1]].forEach(([fx], i) => { const f = fig(p, { x: fx, y: GY - 182 * .45, s: .45, o: 0, col: i ? '#b9cfe0' : '#d8d1c1' }); show(f.g, m('adh')); walk(f, m('adh', .3), 3, { cycles: 3, dx: 100 }); });
+    pill(p, 'с другом или помощником', 1070, 530, m('adh', .4), { col: COL.good, size: 24 });
+    pill(p, 'дневник занятий', 1070, 590, m('adh', 1.2), { col: COL.good, size: 24 });
+    pill(p, 'награда — лучше не едой', 1070, 650, m('adh', 2), { col: COL.good, size: 24 });
+    labelBox(p, 1070, 760, 600, ['единой программы для всех нет'], COL.int, m('one'), { size: 27 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => {
+    const p = panel(0), GY = 640;
+    ground(p, 120, 520, GY, .1);
+    fig(p, { x: 320, y: GY - 182 * .6, s: .6 });
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-dis', prompt: ['Взрослый с инвалидностью не может выполнить 150 минут в неделю. Что рекомендуют?'],
+    build: choice([['Заниматься регулярно по своим возможностям и избегать бездействия'], ['Не заниматься совсем, раз норма недостижима'], ['Всё равно выполнять 150 минут через силу']], 0,
+      'По возможностям, регулярно, без бездействия — и программа вместе с врачом.',
+      [null, 'Немного активности лучше, чем ничего; бездействия нужно избегать.', 'Программу подбирают индивидуально, по возможностям.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Немного активности лучше, чем ничего, а больше — лучше.', 'w1'],
+     ['Дети — 60 минут в день; взрослые — 150 умеренной или 75 интенсивной и силовые 2 дня; пожилым — равновесие.', 'w2'],
+     ['Люди с инвалидностью чаще сталкиваются с неравенством; им особенно важна активность.', 'w3'],
+     ['Цели — конкретные и измеримые; программу подбирают индивидуально.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-who', prompt: ['Для кого эта рекомендация? Можно выбрать несколько.'],
+    build: grid([
+      { parts: ['Не меньше 60 минут активности каждый день'], ans: ['k'], why: 'Дети и подростки.' },
+      { parts: ['Интенсивная активность и упражнения для костей — не реже 3 дней'], ans: ['k'], why: 'Дети и подростки.' },
+      { parts: ['150 минут умеренной активности в неделю, силовые — 2 дня'], ans: ['a', 'o'], why: 'Взрослые; пожилые — насколько могут.' },
+      { parts: ['Упражнения на равновесие, чтобы снизить риск падений'], ans: ['o'], why: 'Пожилые.' },
+      { parts: ['Эпизоды от 10 минут засчитываются в норму'], ans: ['a', 'o'], why: 'Взрослые и пожилые.' },
+    ], [['k', 'Дети', ACT.vig], ['a', 'Взрослые', ACT.mod], ['o', 'Пожилые', ACT.bal]], { multi: true, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Человек с инвалидностью чаще всего «болен».'], ans: ['f'], why: 'Неверно: чаще всего он здоров, но более уязвим.' },
+      { parts: ['По данным ВОЗ, людям с инвалидностью втрое чаще отказывают в помощи.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Принцип «3–2–1»: 30 минут кардио, 20 минут силовых, 10 минут гибкости.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Для людей с инвалидностью подходит одна общая программа.'], ans: ['f'], why: 'Неверно: учитывают вид инвалидности, болезни и барьеры.' },
+      { parts: ['Награду за достигнутую цель лучше давать едой.'], ans: ['f'], why: 'Неверно: лучше не едой.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

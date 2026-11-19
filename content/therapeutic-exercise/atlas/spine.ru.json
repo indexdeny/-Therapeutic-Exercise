@@ -1,0 +1,1764 @@
+{
+  "region": "spine",
+  "exercises": [
+    {
+      "id": "chin-tuck",
+      "ru": "Втягивание подбородка",
+      "en": "axial extension (chin tuck)",
+      "joint": [
+        "neck"
+      ],
+      "goal": [
+        "control",
+        "mobility"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "supine",
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "голова вверх и назад, как за нитку",
+        "подбородок назад, шея выпрямлена",
+        "сначала лёжа, потом сидя и стоя"
+      ],
+      "warn": "не продолжать, если симптомы уходят вниз по руке",
+      "page": 435,
+      "moments": [
+        {
+          "n": 133,
+          "beat": "drills",
+          "mark": "ax"
+        },
+        {
+          "n": 139,
+          "beat": "cerv",
+          "mark": "ret",
+          "to": "self"
+        },
+        {
+          "n": 144,
+          "beat": "phases",
+          "mark": "p1"
+        }
+      ]
+    },
+    {
+      "id": "cranio-nod",
+      "ru": "Кивок глубокими сгибателями шеи",
+      "en": "craniocervical flexion training",
+      "joint": [
+        "neck"
+      ],
+      "goal": [
+        "control",
+        "endurance"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "none",
+        "roll"
+      ],
+      "key": [
+        "медленный кивок «да» верхом шеи",
+        "грудино-ключично-сосцевидная в покое",
+        "манжета: +2 мм, держать 10 секунд"
+      ],
+      "page": 516,
+      "moments": [
+        {
+          "n": 150,
+          "beat": "cerv",
+          "mark": "nod",
+          "to": "cuff"
+        },
+        {
+          "n": 137,
+          "beat": "stab",
+          "mark": "deep"
+        },
+        {
+          "n": 142,
+          "beat": "hamg",
+          "mark": "ex"
+        },
+        {
+          "n": 144,
+          "beat": "phases",
+          "mark": "p1"
+        }
+      ]
+    },
+    {
+      "id": "neck-stab-flex",
+      "ru": "Стабилизация шеи лёжа на спине",
+      "en": "cervical stabilization, flexor emphasis",
+      "joint": [
+        "neck"
+      ],
+      "goal": [
+        "control",
+        "endurance"
+      ],
+      "phase": [
+        "max",
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "supine",
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "weight",
+        "band",
+        "ball"
+      ],
+      "key": [
+        "сначала кивок и осевое вытяжение",
+        "руки двигаются — шея неподвижна",
+        "от лёжа к сидя на мяче и стоя"
+      ],
+      "page": 520,
+      "moments": [
+        {
+          "n": 151,
+          "beat": "flex",
+          "mark": "t",
+          "to": "sup"
+        },
+        {
+          "n": 151,
+          "beat": "prog",
+          "mark": "pos",
+          "to": "load"
+        }
+      ]
+    },
+    {
+      "id": "neck-stab-ext",
+      "ru": "Стабилизация шеи лёжа на животе",
+      "en": "cervical stabilization, extensor emphasis",
+      "joint": [
+        "neck"
+      ],
+      "goal": [
+        "control",
+        "strength"
+      ],
+      "phase": [
+        "max",
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "prone",
+        "quad",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "ball"
+      ],
+      "key": [
+        "лоб на столе — чуть оторвать",
+        "подбородок втянут, взгляд в стол",
+        "потом руки: лопатки свести"
+      ],
+      "page": 521,
+      "moments": [
+        {
+          "n": 151,
+          "beat": "ext",
+          "mark": "t",
+          "to": "sup"
+        },
+        {
+          "n": 150,
+          "beat": "cerv",
+          "mark": "ext"
+        }
+      ]
+    },
+    {
+      "id": "neck-iso",
+      "ru": "Изометрия шеи своими руками",
+      "en": "cervical isometrics with self-resistance",
+      "joint": [
+        "neck"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "ладони на лбу — лоб давит в них",
+        "голова не двигается",
+        "так же вбок, назад и в поворот"
+      ],
+      "warn": "отягощение тросом или блоком прямо на голову противопоказано",
+      "page": 529,
+      "moments": [
+        {
+          "n": 153,
+          "beat": "cerv",
+          "mark": "self"
+        },
+        {
+          "n": 153,
+          "beat": "cerv",
+          "mark": "pre"
+        }
+      ]
+    },
+    {
+      "id": "ball-wall-head",
+      "ru": "Мяч между лбом и стеной",
+      "en": "ball between forehead and wall",
+      "joint": [
+        "neck"
+      ],
+      "goal": [
+        "control",
+        "strength"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "ball"
+      ],
+      "key": [
+        "подбородок втянут",
+        "голова не уходит вперёд",
+        "руки двигаются, потом с гантелями"
+      ],
+      "page": 529,
+      "moments": [
+        {
+          "n": 153,
+          "beat": "cerv",
+          "mark": "wall",
+          "crop": [
+            400,
+            420,
+            400,
+            400
+          ]
+        },
+        {
+          "n": 153,
+          "beat": "cman",
+          "mark": "adv"
+        }
+      ]
+    },
+    {
+      "id": "neck-curl",
+      "ru": "Подъём головы лёжа",
+      "en": "dynamic cervical flexion (head curl)",
+      "joint": [
+        "neck"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "none",
+        "wedge"
+      ],
+      "key": [
+        "втянуть подбородок",
+        "«скрутить» голову от мата",
+        "трудно — на наклонной доске"
+      ],
+      "page": 529,
+      "moments": [
+        {
+          "n": 153,
+          "beat": "cerv",
+          "mark": "curl",
+          "to": "scm"
+        }
+      ]
+    },
+    {
+      "id": "scalene",
+      "ru": "Растяжка лестничных мышц",
+      "en": "scalene stretch",
+      "joint": [
+        "neck"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "stand",
+        "sit"
+      ],
+      "gear": [
+        "none",
+        "manual"
+      ],
+      "key": [
+        "сначала осевое вытяжение",
+        "наклон от тугой стороны, поворот к ней",
+        "держаться за край стола снизу"
+      ],
+      "page": 498,
+      "moments": [
+        {
+          "n": 146,
+          "beat": "scal",
+          "mark": "self"
+        },
+        {
+          "n": 146,
+          "beat": "scal",
+          "mark": "man",
+          "to": "br"
+        }
+      ]
+    },
+    {
+      "id": "subocc",
+      "ru": "Растяжка подзатылочных мышц",
+      "en": "suboccipital stretch",
+      "joint": [
+        "neck"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "none",
+        "manual"
+      ],
+      "key": [
+        "втянуть подбородок",
+        "кивнуть — подбородок к горлу",
+        "для одной стороны — поворот до 45°"
+      ],
+      "page": 498,
+      "moments": [
+        {
+          "n": 146,
+          "beat": "subo",
+          "mark": "self",
+          "to": "uni"
+        },
+        {
+          "n": 146,
+          "beat": "subo",
+          "mark": "man"
+        },
+        {
+          "n": 133,
+          "beat": "mob",
+          "mark": "b2"
+        }
+      ]
+    },
+    {
+      "id": "self-trac",
+      "ru": "Самовытяжение шеи",
+      "en": "cervical self-traction",
+      "joint": [
+        "neck"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "sit",
+        "supine"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "пальцы сцеплены за шеей",
+        "края кистей — под затылком",
+        "мягко приподнять голову"
+      ],
+      "page": 499,
+      "moments": [
+        {
+          "n": 146,
+          "beat": "self",
+          "mark": "st"
+        }
+      ]
+    },
+    {
+      "id": "thor-ext",
+      "ru": "Разгибание грудного отдела",
+      "en": "thoracic extension self-stretch",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "stretch",
+        "mobility"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "roll",
+        "chair"
+      ],
+      "key": [
+        "лёжа: кисти за головой, локти на мат",
+        "валик вдоль позвоночника",
+        "сидя: локти в стороны на вдохе"
+      ],
+      "page": 497,
+      "moments": [
+        {
+          "n": 146,
+          "beat": "thor",
+          "mark": "hook",
+          "to": "br"
+        },
+        {
+          "n": 146,
+          "beat": "thor",
+          "mark": "foam",
+          "to": "nn"
+        },
+        {
+          "n": 146,
+          "beat": "thor",
+          "mark": "chair"
+        }
+      ]
+    },
+    {
+      "id": "roll-down",
+      "ru": "Свернуться и развернуться",
+      "en": "total spinal movement and control",
+      "joint": [
+        "trunk",
+        "neck"
+      ],
+      "goal": [
+        "control",
+        "mobility"
+      ],
+      "pos": [
+        "stand",
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "свернуться: шея, грудь, поясница",
+        "развернуться снизу вверх",
+        "в конце — осевое вытяжение"
+      ],
+      "page": 436,
+      "moments": [
+        {
+          "n": 133,
+          "beat": "drills",
+          "mark": "tot"
+        },
+        {
+          "n": 133,
+          "beat": "drills",
+          "mark": "th"
+        }
+      ]
+    },
+    {
+      "id": "pelvic-tilt",
+      "ru": "Наклоны таза и нейтраль",
+      "en": "pelvic tilt and neutral spine",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "control",
+        "mobility"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "supine",
+        "sit",
+        "stand",
+        "quad"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "катать таз вперёд и назад",
+        "середина объёма — нейтраль",
+        "ладонь проходит за поясницей у стены"
+      ],
+      "page": 436,
+      "moments": [
+        {
+          "n": 133,
+          "beat": "drills",
+          "mark": "pt"
+        },
+        {
+          "n": 145,
+          "beat": "lumb",
+          "mark": "tilt"
+        },
+        {
+          "n": 144,
+          "beat": "phases",
+          "mark": "p1"
+        },
+        {
+          "n": 138,
+          "beat": "trac",
+          "mark": "kin"
+        },
+        {
+          "n": 247,
+          "beat": "trunk",
+          "mark": "tilt",
+          "to": "clock"
+        }
+      ]
+    },
+    {
+      "id": "abd-draw",
+      "ru": "Втягивание живота",
+      "en": "abdominal drawing-in maneuver",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "control"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "quad",
+        "supine",
+        "prone",
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "выдох — мягко пупок к позвоночнику",
+        "таз и рёбра не двигаются",
+        "дышать дальше спокойно"
+      ],
+      "page": 517,
+      "moments": [
+        {
+          "n": 150,
+          "beat": "lumb",
+          "mark": "how"
+        },
+        {
+          "n": 150,
+          "beat": "lumb",
+          "mark": "pos",
+          "to": "palp"
+        },
+        {
+          "n": 150,
+          "beat": "lumb",
+          "mark": "fb",
+          "shot": 4
+        },
+        {
+          "n": 137,
+          "beat": "stab",
+          "mark": "deep"
+        },
+        {
+          "n": 140,
+          "beat": "stab2",
+          "mark": "lum"
+        },
+        {
+          "n": 144,
+          "beat": "base",
+          "mark": "stab"
+        }
+      ],
+      "thumb": 2
+    },
+    {
+      "id": "brace",
+      "ru": "Напряжение «корсетом»",
+      "en": "abdominal bracing",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "control"
+      ],
+      "pos": [
+        "supine",
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "талия расширяется в стороны",
+        "без сгибания и подъёма рёбер",
+        "дыхание спокойное"
+      ],
+      "page": 518,
+      "moments": [
+        {
+          "n": 150,
+          "beat": "brace",
+          "mark": "br",
+          "shot": 8,
+          "crop": [
+            0,
+            130,
+            600,
+            600
+          ]
+        }
+      ]
+    },
+    {
+      "id": "multifidus",
+      "ru": "Включение многораздельной мышцы",
+      "en": "multifidus activation",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "control"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "prone",
+        "side",
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "пальцы рядом с остистыми отростками",
+        "«надуть» мышцу под пальцами",
+        "сам — сидя, лёгкий наклон вперёд"
+      ],
+      "page": 518,
+      "moments": [
+        {
+          "n": 150,
+          "beat": "mf",
+          "mark": "palp",
+          "to": "selfp"
+        },
+        {
+          "n": 137,
+          "beat": "stab",
+          "mark": "deep"
+        }
+      ]
+    },
+    {
+      "id": "lumb-stab",
+      "ru": "Стабилизация лёжа: нагрузка ногами",
+      "en": "supine stabilization with progressive leg loading",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "control",
+        "endurance"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "нейтраль и втянутый живот",
+        "нога в сторону, вверх, прямо",
+        "таз не поворачивается"
+      ],
+      "page": 523,
+      "moments": [
+        {
+          "n": 152,
+          "beat": "sup",
+          "mark": "l1",
+          "to": "dose"
+        },
+        {
+          "n": 152,
+          "beat": "start",
+          "mark": "rule",
+          "to": "cuff"
+        },
+        {
+          "n": 137,
+          "beat": "stab",
+          "mark": "bas"
+        },
+        {
+          "n": 144,
+          "beat": "phases",
+          "mark": "p2"
+        }
+      ]
+    },
+    {
+      "id": "bird-dog",
+      "ru": "Четвереньки: рука и нога",
+      "en": "quadruped arm and leg lifts",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "control",
+        "strength"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "quad"
+      ],
+      "gear": [
+        "none",
+        "stick"
+      ],
+      "key": [
+        "нейтраль, взгляд в пол",
+        "рука, нога, потом рука и нога",
+        "палка на спине не скатывается"
+      ],
+      "page": 525,
+      "moments": [
+        {
+          "n": 152,
+          "beat": "quad",
+          "mark": "q"
+        },
+        {
+          "n": 152,
+          "beat": "quad",
+          "mark": "t"
+        },
+        {
+          "n": 152,
+          "beat": "var",
+          "mark": "rod",
+          "to": "alt"
+        },
+        {
+          "n": 144,
+          "beat": "phases",
+          "mark": "p2"
+        }
+      ]
+    },
+    {
+      "id": "back-ext-prone",
+      "ru": "Подъём груди и ног лёжа на животе",
+      "en": "prone thoracic elevation and leg lifts",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "prone"
+      ],
+      "gear": [
+        "none",
+        "ball"
+      ],
+      "key": [
+        "подбородок втянут",
+        "поднять голову и грудь",
+        "ноги — одну, потом обе"
+      ],
+      "warn": "конец объёма разгибания: не при артрозе, спондилолистезе и сдавлении корешка — тогда на четвереньках",
+      "page": 534,
+      "moments": [
+        {
+          "n": 154,
+          "beat": "ex",
+          "mark": "thor",
+          "to": "legs"
+        },
+        {
+          "n": 154,
+          "beat": "ex",
+          "mark": "pre"
+        },
+        {
+          "n": 152,
+          "beat": "quad",
+          "mark": "pr",
+          "to": "tip"
+        }
+      ]
+    },
+    {
+      "id": "side-plank",
+      "ru": "Боковая планка",
+      "en": "side plank (side bridge)",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "side"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "опора на локоть и колено",
+        "поднять таз, держать",
+        "сложнее — на кисть и стопу"
+      ],
+      "page": 528,
+      "moments": [
+        {
+          "n": 152,
+          "beat": "ql",
+          "mark": "how"
+        }
+      ]
+    },
+    {
+      "id": "plank",
+      "ru": "Планка",
+      "en": "plank (prone bridging)",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "prone"
+      ],
+      "gear": [
+        "none",
+        "ball"
+      ],
+      "key": [
+        "на локтях и коленях → на носках",
+        "поднять ногу, потом руку и ногу",
+        "руки или ноги на мяче"
+      ],
+      "page": 533,
+      "moments": [
+        {
+          "n": 153,
+          "beat": "legs",
+          "mark": "pl"
+        }
+      ]
+    },
+    {
+      "id": "ball-stab",
+      "ru": "Стабилизация на мяче",
+      "en": "stabilization on a gym ball",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "control",
+        "balance"
+      ],
+      "pos": [
+        "sit",
+        "supine"
+      ],
+      "gear": [
+        "ball",
+        "roll",
+        "board"
+      ],
+      "key": [
+        "сидя на мяче, стопы на полу",
+        "лёжа спиной на мяче или на валике",
+        "добавить движения рук и ног"
+      ],
+      "page": 527,
+      "moments": [
+        {
+          "n": 152,
+          "beat": "uns",
+          "mark": "v"
+        },
+        {
+          "n": 152,
+          "beat": "uns",
+          "mark": "ball"
+        },
+        {
+          "n": 77,
+          "beat": "ball",
+          "mark": "ball",
+          "to": "harder"
+        }
+      ]
+    },
+    {
+      "id": "trunk-rs",
+      "ru": "Ритмическая стабилизация туловища",
+      "en": "trunk alternating isometrics and rhythmic stabilization",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "control"
+      ],
+      "pos": [
+        "supine",
+        "sit",
+        "kneel",
+        "stand"
+      ],
+      "gear": [
+        "manual",
+        "ball"
+      ],
+      "key": [
+        "нейтраль, втянуть живот",
+        "«встречайте моё сопротивление»",
+        "потом без подсказок и быстрее"
+      ],
+      "page": 530,
+      "moments": [
+        {
+          "n": 153,
+          "beat": "rhy",
+          "mark": "pos",
+          "to": "pr"
+        },
+        {
+          "n": 150,
+          "beat": "box",
+          "mark": "b5"
+        },
+        {
+          "n": 72,
+          "beat": "ai",
+          "mark": "ex"
+        }
+      ]
+    },
+    {
+      "id": "curl-up",
+      "ru": "Скручивание",
+      "en": "curl-up",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "none",
+        "ball"
+      ],
+      "key": [
+        "втянуть живот, поднять плечи",
+        "лопатки оторвать — и хватит",
+        "не выходит — опускаться из сидя"
+      ],
+      "warn": "при боли или корешковых симптомах в сгибании — не делать; при компрессионном переломе — противопоказано",
+      "page": 532,
+      "moments": [
+        {
+          "n": 153,
+          "beat": "curl",
+          "mark": "pos",
+          "to": "down"
+        },
+        {
+          "n": 153,
+          "beat": "curl",
+          "mark": "diag"
+        },
+        {
+          "n": 153,
+          "beat": "curl",
+          "mark": "pre"
+        },
+        {
+          "n": 141,
+          "beat": "frac",
+          "mark": "ci"
+        },
+        {
+          "n": 247,
+          "beat": "trunk",
+          "mark": "curl"
+        }
+      ]
+    },
+    {
+      "id": "rev-curl",
+      "ru": "Колени к груди и подъём таза",
+      "en": "double knee-to-chest and pelvic lift",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "наклонить таз назад",
+        "подтянуть оба колена",
+        "стопы к потолку, руками не помогать"
+      ],
+      "page": 532,
+      "moments": [
+        {
+          "n": 153,
+          "beat": "legs",
+          "mark": "k2c",
+          "to": "lift"
+        }
+      ]
+    },
+    {
+      "id": "dbl-leg",
+      "ru": "Подъём и опускание обеих ног",
+      "en": "bilateral straight-leg raising and lowering",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "таз наклонён назад",
+        "опускать, пока поясница не прогибается",
+        "не задерживать дыхание"
+      ],
+      "warn": "при боли в спине, гипермобильности или нестабильности — не делать",
+      "page": 533,
+      "moments": [
+        {
+          "n": 153,
+          "beat": "legs",
+          "mark": "slr",
+          "to": "pre"
+        },
+        {
+          "n": 248,
+          "beat": "unsafe",
+          "mark": "u"
+        }
+      ]
+    },
+    {
+      "id": "cat-camel",
+      "ru": "«Кошка» на четвереньках",
+      "en": "quadruped pelvic tilts (cat–camel)",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "quad"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "таз назад — поясница сгибается",
+        "спина провисает — разгибается",
+        "грудь не скруглять"
+      ],
+      "warn": "не делать, если меняется чувствительность или боль уходит в ногу",
+      "page": 503,
+      "moments": [
+        {
+          "n": 148,
+          "beat": "flex",
+          "mark": "quad",
+          "crop": [
+            80,
+            300,
+            600,
+            600
+          ]
+        },
+        {
+          "n": 148,
+          "beat": "ext",
+          "mark": "cat"
+        },
+        {
+          "n": 148,
+          "beat": "flex",
+          "mark": "pre"
+        }
+      ]
+    },
+    {
+      "id": "standing-ext",
+      "ru": "Прогиб назад стоя",
+      "en": "standing back extension",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "ладони на пояснице",
+        "отклониться назад",
+        "при долгом сгибании — раз в час"
+      ],
+      "warn": "не делать, если боль отдаёт в ногу",
+      "page": 503,
+      "moments": [
+        {
+          "n": 148,
+          "beat": "ext",
+          "mark": "stand",
+          "shot": 2,
+          "crop": [
+            0,
+            440,
+            440,
+            440
+          ]
+        },
+        {
+          "n": 138,
+          "beat": "trac",
+          "mark": "later"
+        },
+        {
+          "n": 138,
+          "beat": "ext",
+          "mark": "alt"
+        },
+        {
+          "n": 148,
+          "beat": "ext",
+          "mark": "pre"
+        }
+      ]
+    },
+    {
+      "id": "shift-corr",
+      "ru": "Исправление бокового сдвига",
+      "en": "lateral shift correction",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "manual",
+        "chair"
+      ],
+      "key": [
+        "ладонь на смещённых рёбрах",
+        "другая — на гребне таза",
+        "медленно сдвинуть к середине"
+      ],
+      "page": 462,
+      "moments": [
+        {
+          "n": 138,
+          "beat": "shift",
+          "mark": "self"
+        },
+        {
+          "n": 138,
+          "beat": "shift",
+          "mark": "man"
+        },
+        {
+          "n": 139,
+          "beat": "ftech",
+          "mark": "shift"
+        }
+      ]
+    },
+    {
+      "id": "scoliosis-lat",
+      "ru": "Боковая растяжка при сколиозе",
+      "en": "lateral flexibility stretching",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "kneel",
+        "side",
+        "prone"
+      ],
+      "gear": [
+        "roll",
+        "manual"
+      ],
+      "key": [
+        "тянут вогнутую сторону дуги",
+        "сидя на пятках — кисти вбок",
+        "на боку — валик под вершиной"
+      ],
+      "warn": "структурный сколиоз растяжка не исправляет и не останавливает",
+      "page": 503,
+      "moments": [
+        {
+          "n": 148,
+          "beat": "lat",
+          "mark": "heel"
+        },
+        {
+          "n": 148,
+          "beat": "lat",
+          "mark": "side"
+        },
+        {
+          "n": 148,
+          "beat": "lat",
+          "mark": "why",
+          "to": "stab"
+        },
+        {
+          "n": 148,
+          "beat": "lat",
+          "mark": "pr1"
+        }
+      ]
+    },
+    {
+      "id": "side-bend",
+      "ru": "Боковые наклоны с сопротивлением",
+      "en": "trunk side bending strengthening",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "stand",
+        "side"
+      ],
+      "gear": [
+        "band",
+        "weight"
+      ],
+      "key": [
+        "лента или гантель — на вогнутой стороне",
+        "наклон в противоположную сторону",
+        "лёжа — поднять туловище вбок"
+      ],
+      "warn": "при сколиозе одни упражнения дугу не меняют — их сочетают с корсетом",
+      "page": 535,
+      "moments": [
+        {
+          "n": 154,
+          "beat": "side",
+          "mark": "st"
+        },
+        {
+          "n": 154,
+          "beat": "side",
+          "mark": "ly"
+        },
+        {
+          "n": 154,
+          "beat": "side",
+          "mark": "sc"
+        }
+      ]
+    },
+    {
+      "id": "back-ext-band",
+      "ru": "Разгибание спины против ленты",
+      "en": "trunk extension against elastic resistance",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "strength",
+        "function"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "band",
+        "machine"
+      ],
+      "key": [
+        "лента впереди на уровне плеч",
+        "разогнуть спину",
+        "для поворота — тянуть с поворотом"
+      ],
+      "page": 535,
+      "moments": [
+        {
+          "n": 154,
+          "beat": "ex",
+          "mark": "std",
+          "crop": [
+            130,
+            420,
+            480,
+            480
+          ]
+        },
+        {
+          "n": 152,
+          "beat": "var",
+          "mark": "res"
+        }
+      ]
+    },
+    {
+      "id": "log-roll",
+      "ru": "Перекат «бревном»",
+      "en": "log rolling and supine to sit",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "function",
+        "control"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "supine",
+        "side"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "нейтраль, живот втянут",
+        "перекатиться целиком, как стержень",
+        "сесть с бока, оттолкнувшись руками"
+      ],
+      "page": 538,
+      "moments": [
+        {
+          "n": 155,
+          "beat": "early",
+          "mark": "roll",
+          "to": "sit"
+        },
+        {
+          "n": 144,
+          "beat": "base",
+          "mark": "fun"
+        },
+        {
+          "n": 137,
+          "beat": "stab",
+          "mark": "fun"
+        },
+        {
+          "n": 144,
+          "beat": "phases",
+          "mark": "p1"
+        }
+      ]
+    },
+    {
+      "id": "sit-stand",
+      "ru": "Вставание и посадка в машину",
+      "en": "sit to stand and car transfers",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "function"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "chair"
+      ],
+      "key": [
+        "наклон в бёдрах, спина «как доска»",
+        "при слабых ногах — подлокотники",
+        "в машину — спиной, разворот целиком"
+      ],
+      "page": 538,
+      "moments": [
+        {
+          "n": 155,
+          "beat": "early",
+          "mark": "st",
+          "to": "car",
+          "shot": 12,
+          "crop": [
+            0,
+            480,
+            420,
+            420
+          ]
+        },
+        {
+          "n": 137,
+          "beat": "stab",
+          "mark": "fun"
+        },
+        {
+          "n": 230,
+          "beat": "le2",
+          "mark": "chair"
+        }
+      ]
+    },
+    {
+      "id": "walk",
+      "ru": "Ходьба",
+      "en": "walking",
+      "joint": [
+        "trunk",
+        "body"
+      ],
+      "goal": [
+        "endurance",
+        "function"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "нейтраль и втянутый живот",
+        "проверять на каждом перекрёстке",
+        "шея вытянута, руки работают"
+      ],
+      "warn": "бег — ударная нагрузка: при поражении диска и артрозе может не подойти",
+      "page": 537,
+      "moments": [
+        {
+          "n": 154,
+          "beat": "act",
+          "mark": "walk"
+        },
+        {
+          "n": 155,
+          "beat": "early",
+          "mark": "walk",
+          "crop": [
+            230,
+            560,
+            340,
+            340
+          ]
+        },
+        {
+          "n": 138,
+          "beat": "ext",
+          "mark": "pro"
+        },
+        {
+          "n": 137,
+          "beat": "stab",
+          "mark": "fun"
+        },
+        {
+          "n": 93,
+          "beat": "tiers",
+          "mark": "walk"
+        }
+      ],
+      "thumb": 1
+    },
+    {
+      "id": "swim",
+      "ru": "Плавание",
+      "en": "swimming",
+      "joint": [
+        "trunk",
+        "body"
+      ],
+      "goal": [
+        "endurance"
+      ],
+      "pos": [
+        "prone",
+        "supine"
+      ],
+      "gear": [
+        "water"
+      ],
+      "key": [
+        "брасс — голова с грудью «одним блоком»",
+        "кроль — вдох с поворотом всего тела",
+        "на спине — разгибание"
+      ],
+      "page": 537,
+      "moments": [
+        {
+          "n": 154,
+          "beat": "act",
+          "mark": "swim"
+        },
+        {
+          "n": 138,
+          "beat": "nwb",
+          "mark": "pool",
+          "crop": [
+            900,
+            260,
+            640,
+            640
+          ]
+        },
+        {
+          "n": 138,
+          "beat": "trac",
+          "mark": "kin"
+        },
+        {
+          "n": 100,
+          "beat": "mid",
+          "mark": "swim",
+          "to": "prec"
+        }
+      ],
+      "thumb": 1
+    },
+    {
+      "id": "lift-mech",
+      "ru": "Безопасный подъём груза",
+      "en": "lifting body mechanics",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "function"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "weight"
+      ],
+      "key": [
+        "поясница в нейтрали",
+        "груз ближе к телу",
+        "поворачиваться бёдрами, не спиной"
+      ],
+      "page": 541,
+      "moments": [
+        {
+          "n": 155,
+          "beat": "bm",
+          "mark": "load"
+        },
+        {
+          "n": 155,
+          "beat": "bm",
+          "mark": "neu",
+          "to": "ex"
+        },
+        {
+          "n": 155,
+          "beat": "adv",
+          "mark": "lift"
+        }
+      ]
+    },
+    {
+      "id": "trans-stab",
+      "ru": "Стабилизация в переходах",
+      "en": "transitional stabilization",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "control",
+        "strength"
+      ],
+      "phase": [
+        "min"
+      ],
+      "pos": [
+        "quad",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "band",
+        "weight"
+      ],
+      "key": [
+        "с пяток — вперёд в упор на руки",
+        "присед с тягой рук вниз",
+        "поворот — мелкими шагами"
+      ],
+      "page": 540,
+      "moments": [
+        {
+          "n": 155,
+          "beat": "trans",
+          "mark": "q",
+          "to": "turn"
+        },
+        {
+          "n": 150,
+          "beat": "box",
+          "mark": "b6"
+        },
+        {
+          "n": 144,
+          "beat": "phases",
+          "mark": "p3"
+        }
+      ]
+    },
+    {
+      "id": "work-sim",
+      "ru": "Доставание, толкание, тяга, поворот",
+      "en": "repetitive reaching, pushing, pulling and turning",
+      "joint": [
+        "trunk",
+        "body"
+      ],
+      "goal": [
+        "function"
+      ],
+      "phase": [
+        "min"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "band",
+        "machine",
+        "weight"
+      ],
+      "key": [
+        "доставать шагом, не наклоном спины",
+        "толкать и тянуть на рабочей высоте",
+        "поворот бёдрами или шагами"
+      ],
+      "page": 542,
+      "moments": [
+        {
+          "n": 155,
+          "beat": "adv",
+          "mark": "reach",
+          "to": "tr"
+        },
+        {
+          "n": 144,
+          "beat": "phases",
+          "mark": "p3"
+        }
+      ]
+    }
+  ]
+}

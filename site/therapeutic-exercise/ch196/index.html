@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Переломы проксимального отдела бедра — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 196, title: 'Переломы проксимального отдела бедра', minutes: 19, language: 'ru', next: '../ch197/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch196/cards.ru.json
+const CARDS_SHORT = {
+  "показания\nсмещённый внутрикапсульный перелом шейки у пожилых с плохой костью; неудачная фиксация с некрозом; тяжёлая дегенерация головки; при артрозе — тотальный протез": "перелом шейки у пожилых",
+  "однополюсный и биполярный\nфиксированная головка стирала хрящ впадины; биполярный распределяет силы по нескольким поверхностям": "биполярный распределяет силы",
+  "реабилитация\nкак после тотального, но без наибольших сжимающих и сдвиговых нагрузок на впадину": "как после тотального",
+  "результаты\nтипы протезов — сходно; протез лучше винтов при смещённом переломе": "протез лучше винтов",
+  "признаки\nболь в паху или бедре при движении и нагрузке; нога короче на несколько сантиметров и развёрнута наружу": "нога короче и развёрнута наружу",
+  "риск\nслабость и негибкость мышц, равновесие и ходьба, зрение, память, лекарства, остеопороз; медленная ходьба — падение вбок": "равновесие, остеопороз; падение вбок",
+  "последствия\nчерез год многим нужна помощь; страх падения; долгий уход; смертность в США снизилась": "многим нужна помощь",
+  "внутрикапсульные\nголовка, подголовчатый, шейка; угрожают кровоснабжению головки — несращение и некроз, особенно со смещением; чаще у пожилых женщин": "угроза кровоснабжению головки",
+  "внекапсульные\nдо 5 см ниже малого вертела: межвертельные и подвертельные; головка снабжается, несращение — при неудачной фиксации": "ниже малого вертела",
+  "переломовывихи\nу молодых, обычно кзади; позже некроз и артроз": "у молодых, кзади",
+  "без операции\nвытяжение, если нельзя оперировать; потом кресло": "вытяжение, если нельзя оперировать; потом кресло",
+  "показания\nпереломы шейки, переломовывихи, меж- и подвертельные; у пожилых смещённая шейка — чаще протез": "смещённая шейка — чаще протез",
+  "срочно\n24–48 часов, особенно шейка: кровоснабжение головки": "24–48 часов, особенно шейка: кровоснабжение головки",
+  "фиксаторы\nштифт или скользящий винт; винты на месте — несмещённая шейка; динамический винт с пластиной сжимает межвертельный перелом при нагрузке": "штифт или скользящий винт",
+  "доступ снаружи\nрассекают напрягатель, латеральную широкую или среднюю ягодичную; при шейке — капсулу": "напрягатель, латеральная широкая",
+  "решает хирург\nвозраст и кость, тип перелома, фиксатор, устойчивость; часто сразу по переносимости: шейка на винтах, межвертельный на динамическом винте, штифт": "часто сразу по переносимости",
+  "исследование\nпожилые с межвертельным переломом сразу нагружали по переносимости — неудач фиксации через год не больше": "неудач не больше",
+  "неудача фиксации\nболь, нарастающее укорочение, наружная ротация, стойкий Тренделенбург": "укорочение, наружная ротация",
+  "место перелома\nбольшой вертел — средняя ягодичная, малый — подвздошно-поясничная, подвертельный — большая ягодичная": "вертел — средняя ягодичная",
+  "операционный доступ\nнапрягатель и латеральная широкая рассечены — болезненны отведение и сгибание колена; приведение, внутренняя ротация и сгибание колена тянут их": "отведение болезненно",
+  "укорочение\nплечо силы средней ягодичной меньше — слабость и признак Тренделенбурга": "слабость, Тренделенбург",
+  "капсула\nтравма и вскрытие капсулы — склонность к ограничению": "склонность к ограничению",
+  "цели\nобъём бедра, равновесие, сила рук и здоровой ноги для ходьбы со средством опоры": "объём, равновесие, сила рук",
+  "исследование Митчелла\nослабленные пожилые: разгибание колен с сопротивлением с 16-го дня — сильнее и функциональнее, без осложнений; скорость ходьбы та же": "с 16-го дня — сильнее",
+  "что делают\nкачания стопой, дыхание; мост с весом на здоровой ноге; перенос веса, носки, стабилизация; низкая изометрия; сначала скольжение пяткой, потом прямая нога; стоя на здоровой — движения больной": "мост, изометрия, скольжение пяткой",
+  "сроки\nткани — 6 недель, кость — 8–12; трость часто дольше; наблюдение обычно до 7–9 недель": "ткани 6 нед, кость 8–12",
+  "продлённая программа\nс 6 недель до 5–7 месяцев — безопасна; через полгода сломанная нога не слабее здоровой": "с 6 недель — безопасна",
+  "что делают\nрастяжка икроножной, сгибателей бедра, задней группы; закрытая цепь; открытая — разгибание и отведение; задачи, равновесие, ходьба по разным поверхностям, аэробная нагрузка": "растяжка, закрытая цепь, ходьба",
+  "мерило — прежний уровень\nза год треть возвращает самостоятельность; смертность 12–36 %, потом как у ровесников": "треть возвращает самостоятельность",
+  "ходьба и падения\n83–92 % ходят сами, но лишь 41 % — как раньше; больше половины падают снова за полгода": "41 % — как раньше",
+  "реабилитация\nбольше занятий — чаще ходьба и выписка домой; силовые программы — больше силы и функции; не все продлённые программы работают": "больше занятий — чаще домой",
+};
+// cards-short end
+
+const SH = '#86c9e8', MU = '#f4a48c', LG = '#f1dfa0', FUN = '#f0c060', SP = '#8fd6b0', ENV = '#c9b8e8', BAD = COL.bad;
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, t = Array.isArray(t0) ? t0[i] : t0 === null ? null : t0 + i * gap, g = pill(p, s, x + ws[i] / 2, y, t, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19, anchor = null } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x, an = anchor || (right ? 'end' : 'start');
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: an });
+  const lx = an === 'start' && right ? x + uiW(str, size) + 8 : an === 'middle' ? x : x + (right ? 8 : -8), ly = an === 'middle' ? y + (ty > y ? 8 : -size) : y - size * .35;
+  path(g, `M${lx} ${ly}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+const arw = (p, x1, y1, x2, y2, col, t0, w = 6) => { const a = Math.atan2(y2 - y1, x2 - x1), h = 14, g = G(p, { o: 0 }); path(g, `M${f1(x1)} ${f1(y1)}L${f1(x2)} ${f1(y2)}M${f1(x2 - h * Math.cos(a - .5))} ${f1(y2 - h * Math.sin(a - .5))}L${f1(x2)} ${f1(y2)}L${f1(x2 - h * Math.cos(a + .5))} ${f1(y2 - h * Math.sin(a + .5))}`, { stroke: col, 'stroke-width': w }); if (t0 !== null) show(g, t0); else put(g, { o: 1 }); return g; };
+const floorLn = (p, x1, x2, y, t0) => show(path(p, `M${x1} ${y}H${x2}`, { stroke: COL.dim, 'stroke-width': 4 }, { o: 0 }), t0);
+const ring = (p, P, r, col, t0) => { const c = mk('circle', { cx: f1(P[0]), cy: f1(P[1]), r, fill: 'none', stroke: col, 'stroke-width': 4, opacity: 0 }, p); show(c, t0); return c; };
+// an arc of the glenoid or the head (radius rr about the centre C of the joint, angles a0..a1) in stage coordinates
+const arcOn = (j, conv, rr, a0, a1) => { const P = []; for (let a = a0; a <= a1; a += 4) P.push(j.at(conv(polar([0, 0], rr, a)))); return P; };
+
+/* ---------- exercise helpers (chapters 17–18) ---------- */
+// Put a hand of the front-view figure on a stage point (two-link arm 72 + 66); flip bends the elbow the other way.
+function fsReach(f, side, X, Y, flip = false) {
+  const S = st(f.g), i = side === 'L' ? 0 : 1, k = i ? 1 : -1, Sh = f.pts.Sh[i];
+  const tx = (X - S.x) / S.s - Sh[0], ty = (Y - S.y) / S.s - Sh[1], D = clamp(Math.hypot(tx, ty), 8, 137.5), dg = 180 / Math.PI;
+  const phi = Math.atan2(k * tx, ty) * dg, be = Math.acos(clamp((72 * 72 + D * D - 66 * 66) / (2 * 72 * D), -1, 1)) * dg, ga = Math.acos(clamp((72 * 72 + 66 * 66 - D * D) / (2 * 72 * 66), -1, 1)) * dg;
+  const sg = flip ? -1 : 1;
+  f.set({ ['a' + side]: phi + sg * be, ['e' + side]: -sg * (180 - ga) });
+}
+// an elastic band between two stage points; set(A, B, rest) — brighter and thinner as it stretches
+function bandLine(p, col = '#e86a8a') {
+  const e = path(p, '', { stroke: col, 'stroke-width': 6, 'stroke-linecap': 'round' }, { o: 0 });
+  return { e, set(A, B, rest = 100) { const L = Math.hypot(B[0] - A[0], B[1] - A[1]), k = clamp(L / rest - 1, 0, 1); e.setAttribute('d', `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`); e.setAttribute('stroke-width', f1(6 - 2.5 * k)); e.setAttribute('stroke', mix(col, '#ffd75e', k * .6)); } };
+}
+const propLine = (p, d, t0, col = COL.dim, w = 5) => { const e = path(p, d, { stroke: col, 'stroke-width': w, 'stroke-linecap': 'round' }, { o: 0 }); if (t0 !== null) show(e, t0); return e; };
+// a ball (side view): set(x, y) moves it
+function ballEl(p, r, col = '#86c9e8') {
+  const defs = mk('defs', {}, p), g = G(p, { o: 0 });
+  mk('circle', { r, fill: ballGrad(defs, col), stroke: mix(col, '#000000', .45), 'stroke-width': 2 }, g);
+  return { g, set(x, y) { put(g, { x, y }); } };
+}
+// a seated rig figure on a chair, ankle at (ax, GY)
+function seatFig(p, ax, GY, s, t0, pose = {}) {
+  const f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...SIT, ...pose } });
+  plant(f, 'AN', ax, GY);
+  const [hx, hy] = onStage(f, 'H');
+  chair(p, hx, hy + 22 * s / .5 * .32, GY, t0);
+  p.appendChild(f.g); show(f.g, t0);
+  return f;
+}
+const QUAD = { ...STAND, t: 66, hN: 66, kN: 90, hF: 66, kF: 90, aN: 66, aF: 66, eN: 0, eF: 0, fN: -90, fF: -90 };
+// a rig figure on all fours: knee at (kx, FY); hands under the shoulders
+function quadFig(p, kx, FY, s, t0, pose = {}) {
+  const f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...QUAD, ...pose } });
+  plant(f, 'KN', kx, FY - 12 * s);
+  const Sh = onStage(f, 'Sh'); f.hand = [Sh[0] + 4, FY - 28 * s];
+  reach(f, 'N', ...f.hand); reach(f, 'F', f.hand[0] - 4, f.hand[1]);
+  show(f.g, t0); return f;
+}
+// a checklist of criteria that tick one by one
+function checklist(p, x, y, items, t0, gap, col = SP, { size = 18, dy = 40 } = {}) {
+  return items.map((s, i) => { const t = t0 + i * gap, g = G(p, {}); checkMark(g, x + 12, y + i * dy - 6, t, col, .9); txt(g, s, x + 34, y + i * dy, t, { size, fill: COL.chalk, weight: 600 }); return g; });
+}
+// horizontal bars with values: rows [label, value, colour]; k — px per unit
+function bars(p, x, y, rows, t0, { k = 5, dy = 46, unit = '%', w0 = 210, size = 17 } = {}) {
+  return rows.map(([s, v, c], i) => {
+    const yy = y + i * dy, g = G(p, { o: 0 }); show(g, t0 + i * .5);
+    T(g, s, { x: x + w0 - 12, y: yy + 6, size, fill: c, weight: 700, anchor: 'end' });
+    const b = mk('rect', { x: x + w0, y: yy - 13, width: 0, height: 24, rx: 7, fill: c }, g);
+    const tv = T(g, '', { x: x + w0 + 8, y: yy + 6, size, fill: COL.chalk, weight: 700 });
+    prog(q => { b.setAttribute('width', f1(k * v * q)); put(tv, { x: x + w0 + 8 + k * v * q }); tv.textContent = (unit === '' ? '' : (v * q).toFixed(v % 1 ? 1 : 0).replace('.', ',')) + unit; }, t0 + i * .5, 1);
+    return g;
+  });
+}
+// a resistance arrow (the hand or a band pushes the other way): a short thick arrow onto point P from direction ang
+function pushArr(p, P, ang, col, t0, L = 70) { const A = polar(P, L + 14, ang), B = polar(P, 14, ang); return arw(p, A[0], A[1], B[0], B[1], col, t0, 7); }
+
+
+/* ---------- chapter 18 helpers (lesson 172) ---------- */
+// a range dial round a stage point: the arc a0..a1 (degrees of flexion, 0 hanging down, turning forward = to the right)
+function flexArc(p, C, r, a0, a1, col, t0, w = 10) { const e = path(p, romArc(C, r, a0, a1, 90, -1), { stroke: col, 'stroke-width': w, 'stroke-linecap': 'round' }, { o: 0 }); if (t0 !== null) show(e, t0); return e; }
+// a forearm-rotation dial for foreEnd: the sector ±a about thumb-up, and a pointer along the thumb
+function rotDial(p, e, r, a, col, t0) {
+  const C = e.at('C'), g = G(p, { o: 0 });
+  path(g, romArc(C, r, -a, a, -90, 1), { stroke: col, 'stroke-width': 10, 'stroke-linecap': 'round' });
+  T(g, 'супинация', { x: C[0] - r - 12, y: C[1] - r * .55, size: 16, fill: col, weight: 700, anchor: 'end' });
+  T(g, 'пронация', { x: C[0] + r + 12, y: C[1] - r * .55, size: 16, fill: col, weight: 700 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a small axial inset of a radioulnar joint (volar side up). kind 'prox': the radial head in the annular ring against
+// the radial notch of the ulna; 'dist': the ulnar notch of the radius going round the head of the ulna. set(pro 0..1)
+function ruInset(p, x, y, kind, t0) {
+  const g = G(p, { x, y, o: 0 }), defs = mk('defs', {}, g), RC = mix(ANAT.bone, '#f6d9a8', .25), line = mix(ANAT.bone, '#000000', .5);
+  roundBox(g, -150, -120, 300, 240, EDGE, PANEL, 2);
+  T(g, 'ладонная сторона', { x: 0, y: -92, size: 15, fill: COL.dim, anchor: 'middle' });
+  T(g, 'тыльная сторона', { x: 0, y: 108, size: 15, fill: COL.dim, anchor: 'middle' });
+  const o = { g };
+  if (kind === 'prox') {
+    mk('path', { d: 'M48 -62Q8 0 48 62L110 62L110 -62Z', fill: boneGrad(defs, 0, 0, 1, 0), stroke: line, 'stroke-width': 2 }, g);   // ulna, radial notch
+    path(g, 'M44 -56Q6 0 44 56', { stroke: CART_C, 'stroke-width': 4 });
+    path(g, 'M44 -56A58 58 0 1 0 44 56', { stroke: ANAT.tendon, 'stroke-width': 9, 'stroke-opacity': .85 });   // annular ligament
+    const head = G(g, { x: -16, y: 0 });
+    mk('circle', { r: 46, fill: ballGrad(defs, RC), stroke: line, 'stroke-width': 2 }, head);
+    const stripe = path(head, 'M0 -44L0 -26', { stroke: line, 'stroke-width': 4 });
+    o.set = pro => { put(head, { x: -16, y: 0, r: -170 * pro }); };
+    o.head = head; o.stripe = stripe;
+  } else {
+    mk('circle', { cx: 30, cy: 6, r: 34, fill: ballGrad(defs), stroke: line, 'stroke-width': 2 }, g);   // head of the ulna
+    const rad = G(g, { x: 30, y: 6 });
+    mk('path', { d: 'M-40 -24A38 38 0 0 1 -40 24L-112 34Q-128 0 -112 -34Z', fill: boneGrad(defs, 0, 0, 1, 0, RC), stroke: line, 'stroke-width': 2 }, rad);
+    path(rad, 'M-40 -24A38 38 0 0 1 -40 24', { stroke: CART_C, 'stroke-width': 4 });
+    o.set = pro => { put(rad, { x: 30, y: 6, r: 55 * pro }); };
+  }
+  o.set(0);
+  if (t0 !== null) show(g, t0);
+  return o;
+}
+
+/* ---------- chapter 18 helpers (lesson 173) ---------- */
+// the flexion range a contracted capsule allows: [extension limit, flexion limit], scanned on the model
+function capRange(j) {
+  let lo = 0, hi = 145;
+  for (let a = 0; a <= 145; a++) { j.set({ flex: a }); if (j.capA.tension < .97) { lo = a; break; } }
+  for (let a = 145; a >= 0; a--) { j.set({ flex: a }); if (j.capP.tension < .97) { hi = a; break; } }
+  return [lo, hi];
+}
+// a hinged elbow brace on an elbowSag model (bars, straps, the hinge); block — the extension stop in degrees
+function hingeBrace(p, j, t0, block = null) {
+  const g = G(p, { o: 0 }), col = '#9fb0bf', sw = 11 * st(j.g).s / .7;
+  const bar1 = path(g, '', { stroke: col, 'stroke-width': sw, 'stroke-linecap': 'round', 'stroke-opacity': .9 });
+  const bar2 = path(g, '', { stroke: col, 'stroke-width': sw, 'stroke-linecap': 'round', 'stroke-opacity': .9 });
+  const straps = [0, 1, 2, 3].map(() => path(g, '', { stroke: '#6fa8c8', 'stroke-width': sw * 1.1, 'stroke-linecap': 'round', 'stroke-opacity': .75 }));
+  const hinge = mk('circle', { r: sw * 1.3, fill: '#6f7f8c', stroke: '#2b343a', 'stroke-width': 2 }, g);
+  const stop = block !== null ? path(g, '', { stroke: COL.bad, 'stroke-width': sw * .9, 'stroke-linecap': 'round' }) : null;
+  const seg = (A, B) => `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`;
+  const across = (P, Q, k) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], L = Math.hypot(dx, dy) || 1, n = [-dy / L * 34 * st(j.g).s / .7, dx / L * 34 * st(j.g).s / .7]; return seg([P[0] + n[0], P[1] + n[1]], [P[0] - n[0], P[1] - n[1]]); };
+  const upd = () => {
+    const C = j.at('C'), A = j.at(j.hum([-.15, -5.6])), B = j.at(j.fore([.1, 6.3]));
+    bar1.setAttribute('d', seg(A, C)); bar2.setAttribute('d', seg(C, B));
+    const a1 = j.at(j.hum([-.18, -4.6])), a2 = j.at(j.hum([-.22, -2.4])), b1 = j.at(j.fore([0, 2.6])), b2 = j.at(j.fore([.1, 5.2]));
+    straps[0].setAttribute('d', across(a1, C, 1)); straps[1].setAttribute('d', across(a2, C, 1)); straps[2].setAttribute('d', across(b1, C, 1)); straps[3].setAttribute('d', across(b2, C, 1));
+    hinge.setAttribute('cx', f1(C[0])); hinge.setAttribute('cy', f1(C[1]));
+    if (stop) { const r = rad(st(j.g).r || 0), P = polar(C, 60 * st(j.g).s / .7, 90 - block + (st(j.g).r || 0)), Q = polar(C, 90 * st(j.g).s / .7, 90 - block + (st(j.g).r || 0)); stop.setAttribute('d', seg(P, Q)); }
+  };
+  j.onSet.push(upd); upd();
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a small scene card: a framed box with a caption
+function sceneBox(p, x, y, w, h, title, col, t0) { const g = G(p, { o: 0 }); roundBox(g, x, y, w, h, EDGE, PANEL, 2); T(g, title, { x: x + w / 2, y: y + h - 16, size: 16, fill: col, weight: 700, anchor: 'middle' }); if (t0 !== null) show(g, t0); return g; }
+
+/* ---------- chapter 18 helpers: a phase strip ---------- */
+// Rehabilitation phases on a time axis: rows [label, from, to, colour] in weeks; ticks [[value, label]].
+// Each phase gets its own row; they appear one by one (t0 + i * gap, or t0[i] if an array).
+function phaseBar(p, x, y, w, max, rows, ticks, t0, { gap = .6, dy = 34, size = 15 } = {}) {
+  const g = G(p, { o: 0 }), X = v => x + w * v / max;
+  path(g, `M${x} ${y}H${x + w}`, { stroke: COL.dim, 'stroke-width': 3 });
+  ticks.forEach(([v, s0]) => { path(g, `M${f1(X(v))} ${y - 6}V${y + 6}`, { stroke: COL.dim, 'stroke-width': 2 }); T(g, s0, { x: X(v), y: y + 26, size: 14, fill: COL.dim, anchor: 'middle' }); });
+  if (t0 !== null) show(g, Array.isArray(t0) ? t0[0] : t0);
+  const els = rows.map(([s0, a, b, c], i) => {
+    const r = G(p, { o: 0 }), yy = y - 26 - (rows.length - 1 - i) * dy;
+    mk('rect', { x: X(a), y: yy - 12, width: Math.max(4, X(b) - X(a)), height: 22, rx: 8, fill: c, 'fill-opacity': .85 }, r);
+    const fits = uiW(s0, size) + 16 <= X(b) - X(a);
+    T(r, s0, { x: fits ? X(a) + 8 : X(b) + 8, y: yy + 5, size, fill: fits ? COL.board : c, weight: 700 });
+    if (t0 !== null) show(r, Array.isArray(t0) ? t0[i] : t0 + i * gap);
+    return r;
+  });
+  return { g, rows: els, X };
+}
+
+/* ---------- chapter 18 helpers (lesson 175) ---------- */
+// a two-column list with marks: items [text, colour], cross (✕) or tick
+function markList(p, x, y, items, t0, gap, { cross: isX = true, size = 16, dy = 36, maxW = 300 } = {}) {
+  return items.map(([s0, c], i) => { const g = G(p, { o: 0 }), yy = y + i * dy; if (isX) cross(g, x + 10, yy - 6, 9, 0, 4); else checkMark(g, x + 10, yy - 6, 0, c, .8); put(para(g, s0, x + 30, yy, null, { size, fill: c, weight: 600, maxW }), { o: 1 }); show(g, t0 + i * gap); return g; });
+}
+// a range bar: [label, lo, hi, mean, colour] on a % scale (k px per %)
+function rangeBars(p, x, y, rows, t0, { k = 6, dy = 48, w0 = 220, size = 15, track = false, unit = ' %', showMean = true } = {}) {
+  return rows.map(([s0, lo, hi, mean, c], i) => {
+    const g = G(p, { o: 0 }), yy = y + i * dy;
+    T(g, s0, { x: x + w0 - 10, y: yy + 5, size, fill: c, weight: 700, anchor: 'end' });
+    if (track) mk('rect', { x: x + w0, y: yy - 9, width: 100 * k, height: 18, rx: 6, fill: COL.faint, 'fill-opacity': .5 }, g);
+    const a0 = track && lo === hi ? 0 : lo;
+    mk('rect', { x: x + w0 + a0 * k, y: yy - 9, width: Math.max(4, (hi - a0) * k), height: 18, rx: 6, fill: c, 'fill-opacity': track ? .9 : .35 }, g);
+    if (mean !== null) mk('rect', { x: x + w0 + mean * k - 3, y: yy - 14, width: 6, height: 28, rx: 2, fill: c }, g);
+    T(g, (mean !== null && showMean ? String(mean).replace('.', ',') + unit : lo === hi ? `${lo}${unit}` : `${lo}–${hi}${unit}`), { x: x + w0 + Math.max(hi, mean ?? 0) * k + 12, y: yy + 5, size, fill: COL.chalk, weight: 700 });
+    show(g, t0 + i * .6);
+    return g;
+  });
+}
+
+/* ---------- chapter 18 helpers (lesson 176) ---------- */
+// a tendon close-up: healthy (parallel collagen) or tendinosis (disorganised fibres, new vessels)
+function tendonPatch(p, x, y, w, h, sick, t0) {
+  const g = G(p, { o: 0 }); roundBox(g, x, y, w, h, EDGE, PANEL, 2);
+  for (let i = 0; i < 9; i++) {
+    const yy = y + 22 + i * (h - 44) / 8;
+    if (!sick) path(g, `M${x + 16} ${yy}H${x + w - 16}`, { stroke: ANAT.tendon, 'stroke-width': 3 });
+    else { let d = `M${x + 16} ${yy}`; for (let k = 1; k <= 6; k++) d += `L${f1(x + 16 + (w - 32) * k / 6)} ${f1(yy + ((i * 7 + k * 5) % 9 - 4) * 2.4)}`; path(g, d, { stroke: ANAT.tendon, 'stroke-width': 2.5, 'stroke-opacity': .8 }); }
+  }
+  if (sick) for (let k = 0; k < 3; k++) path(g, `M${x + 30 + k * 50} ${y + 20}q12 20 -4 40t4 40`, { stroke: COL.bad, 'stroke-width': 3, 'stroke-opacity': .85 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a fingertip that rubs across a point (cross-friction): returns the group; it oscillates along direction ang
+function rubTip(p, P, ang, t0, dur, amp = 16) {
+  const g = G(p, { o: 0 }); mk('ellipse', { rx: 15, ry: 20, fill: '#b9cfe0', 'fill-opacity': .9, stroke: '#4d6b80', 'stroke-width': 2 }, g);
+  const u = polar([0, 0], 1, ang);
+  prog(q => { const s0 = amp * Math.sin(2 * Math.PI * 4 * q); put(g, { x: P[0] + u[0] * s0, y: P[1] + u[1] * s0, r: ang + 90 }); }, t0, dur, lin);
+  show(g, t0);
+  return g;
+}
+
+/* ---------- chapter 18 helpers (lesson 177) ---------- */
+// keep an armSide's wrist on a fixed stage point while it re-poses (forearm on a mat or a table)
+function armHold(a, o, W0) { a.set(o); const W = a.at('W'), S0 = st(a.g); put(a.g, { x: S0.x + W0[0] - W[0], y: S0.y + W0[1] - W[1] }); a.set({}); }
+// a helper hand (pale ellipse) with a push arrow onto stage point P from direction ang
+function helpHand(p, P, ang, t0, col = COL.good) { const g = G(p, { o: 0 }), A = polar(P, 46, ang); mk('ellipse', { cx: A[0], cy: A[1], rx: 24, ry: 16, fill: '#b9cfe0', 'fill-opacity': .9, stroke: '#4d6b80', 'stroke-width': 2, transform: `rotate(${f1(ang)} ${f1(A[0])} ${f1(A[1])})` }, g); const B = polar(P, 28, ang), C2 = polar(P, 8, ang); arw(g, B[0], B[1], C2[0], C2[1], col, null, 5); if (t0 !== null) show(g, t0); return g; }
+
+/* ---------- chapter 18 helpers (lesson 178) ---------- */
+// a dumbbell held by an armSide: it follows the fist
+function armDb(p, a, k = .6, t0 = null) { const g = G(p, { o: 0 }); dumbbell(g, k); a.onSet.push(() => { const P = a.at('grip'); put(g, { x: P[0], y: P[1], r: (a.dir || 0) + 90 }); }); a.set({}); if (t0 !== null) show(g, t0); return g; }
+// resistance torque of gravity over the elbow angle (a scheme): two curves on a small chart
+function torqueChart(p, x, y, w, h, curves, t0) {
+  const g = G(p, { o: 0 });
+  path(g, `M${x} ${y}H${x + w}M${x} ${y}V${y - h}`, { stroke: COL.dim, 'stroke-width': 2.5 });
+  T(g, 'сопротивление', { x: x - 4, y: y - h - 10, size: 14, fill: COL.dim });
+  [[0, '0°'], [90, '90°'], [140, '140°']].forEach(([v, s0]) => T(g, s0, { x: x + w * v / 140, y: y + 22, size: 13, fill: COL.dim, anchor: 'middle' }));
+  T(g, 'сгибание локтя', { x: x + w, y: y + 44, size: 13, fill: COL.dim, anchor: 'end' });
+  curves.forEach(([fn, col, s0, lx, ly]) => { path(g, fnPath(x, y, w, h, v => fn(v * 140)), { stroke: col, 'stroke-width': 4 }); T(g, s0, { x: lx, y: ly, size: 14, fill: col, weight: 700 }); });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+/* ---------- chapter 19 lesson helpers ---------- */
+// sample points of a handSag model at a temporary pose (the model is restored)
+function hPose(h, pose, pts) { const save = { ...h.q }; h.set(pose); const out = pts.map(([k, x, y]) => h.fr(k, [x, y])); h.set(save); return out; }
+// a band polygon along a polyline: from the line (offset d0) outward to d1 on the side sg (+1 / −1 of the normal)
+function hShellD(P, d0, d1, sg = 1) {
+  const off = d => P.map((q, i) => { const a = P[Math.max(0, i - 1)], b = P[Math.min(P.length - 1, i + 1)], L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, nx = -(b[1] - a[1]) / L, ny = (b[0] - a[0]) / L; return [q[0] + sg * nx * d, q[1] + sg * ny * d]; });
+  const A = off(d0), B = off(d1).reverse();
+  return smoothD(A, false).replace(/^M/, 'M') + 'L' + smoothD(B, false).slice(1) + 'Z';
+}
+const ORTH = c => ({ fill: c, 'fill-opacity': .42, stroke: mix(c, '#000000', .35), 'stroke-width': 2, 'stroke-linejoin': 'round' });
+// Orthoses on a handSag model. kind:
+//  'dbo' — static dorsal blocking orthosis (forearm 2/3, hand, fingers) shaped at { wr, mp } flexion with IP straight;
+//  'kl' — the same plus Kleinert traction: an elastic from the nail under a palmar bar to the wrist (follows the finger);
+//  'volar' — a short volar wrist orthosis at wr (default −12, i.e. extension), to the distal palmar crease;
+//  'rest' — a volar resting orthosis to the fingertips at the given pose;
+//  'ten' — a tenodesis orthosis: forearm cuff, a hinge at the wrist, hand piece holding MP at 60° and the IP straight;
+//  'dyn' — a dynamic MP extension orthosis: dorsal base, an outrigger over the finger and an elastic to a sling under P1;
+//  'pip' / 'dip' — finger splints holding the PIP (or DIP, slight hyperextension) straight; 'tpl' — a volar template
+//  that limits PIP flexion to o.pip and DIP flexion to o.dip.
+function hOrth(h, kind, t0, o = {}) {
+  const g = G(h.ovG, { o: 0 }), col = o.col || ORTH_C;
+  const strap = (A, B) => path(g, `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`, { stroke: '#6b7f8c', 'stroke-width': 9, 'stroke-opacity': .85, 'stroke-linecap': 'butt' });
+  if (kind === 'dbo' || kind === 'kl') {
+    const pose = { wr: o.wr ?? 20, mp: o.mp ?? 50, pip: 0, dip: 0 };
+    const D = hPose(h, pose, [['r', -330, -58], ['r', -150, -56], ['r', -40, -52], ['l', 0, -40], ['h', 60, -33], ['h', 150, -28], ['h', 214, -27], ['1', 30, -20], ['1', 70, -18], ['2', 20, -16], ['2', 45, -15], ['3', 20, -14], ['3', 44, -10]]);
+    mk('path', { d: hShellD(D, 1, 12, -1), ...ORTH(col) }, g);
+    const V = hPose(h, pose, [['r', -200, 62], ['h', 120, 50], ['1', 40, 22]]);
+    const Dd = hPose(h, pose, [['r', -200, -60], ['h', 120, -32], ['1', 40, -22]]);
+    [0, 1, 2].forEach(i => strap(Dd[i], V[i]));
+    if (kind === 'kl') {
+      const bar = hPose(h, pose, [['h', 168, 52]])[0];
+      mk('circle', { cx: bar[0], cy: bar[1], r: 7, fill: '#8a9aa6', stroke: '#4d5a63', 'stroke-width': 2 }, g);
+      const band = path(g, '', { stroke: '#e86a8a', 'stroke-width': 4 });
+      const anchor = [-120, 64];
+      const upd = () => { const N = h.fr('3', [40, -6]); band.setAttribute('d', `M${f1(N[0])} ${f1(N[1])}L${f1(bar[0])} ${f1(bar[1] + 7)}L${f1(anchor[0])} ${f1(anchor[1])}`); };
+      h.onSet.push(upd); upd();
+    }
+  }
+  if (kind === 'volar' || kind === 'rest') {
+    const pose = kind === 'volar' ? { wr: o.wr ?? -12 } : { wr: o.wr ?? -10, mp: o.mp ?? 0, pip: o.pip ?? 0, dip: o.dip ?? 0 };
+    const pts = [['r', -300, 62], ['r', -120, 60], ['l', 0, 58], ['h', 60, 56], ['h', 150, 48], ['h', 206, 44]];
+    if (kind === 'rest') pts.push(['1', 30, 22], ['1', 70, 20], ['2', 30, 18], ['3', 30, 16]);
+    const V = hPose(h, { ...h.q, ...pose }, pts);
+    mk('path', { d: hShellD(V, 1, 12, 1), ...ORTH(col) }, g);
+    const Dd = hPose(h, { ...h.q, ...pose }, [['r', -220, -58], ['h', 100, -32]]), Vv = hPose(h, { ...h.q, ...pose }, [['r', -220, 64], ['h', 100, 54]]);
+    [0, 1].forEach(i => strap(Dd[i], Vv[i]));
+  }
+  if (kind === 'ten') {
+    const cuff = hPose(h, h.q, [['r', -300, -60], ['r', -160, -58], ['r', -30, -54]]);
+    mk('path', { d: hShellD(cuff, 1, 12, -1), ...ORTH(col) }, g);
+    const hg = G(h.G.h, { o: 1 }), hand = [[40, -34], [120, -29], [200, -27]].concat([[30, -20], [70, -18], [L1H + 30, -16]].map(([a, b]) => { const v = rotPt(a, b, 60); return [212 + v[0], v[1]]; }));
+    mk('path', { d: hShellD(hand, 1, 11, -1), ...ORTH(col) }, hg);
+    mk('circle', { cx: 0, cy: -48, r: 9, fill: '#8a9aa6', stroke: '#4d5a63', 'stroke-width': 2.5 }, hg);
+    g.hand = hg;
+  }
+  if (kind === 'dyn') {
+    const base = hPose(h, { ...h.q, wr: o.wr ?? -12 }, [['r', -300, -58], ['r', -120, -56], ['l', 0, -40], ['h', 80, -32], ['h', 170, -28]]);
+    mk('path', { d: hShellD(base, 1, 12, -1), ...ORTH(col) }, g);
+    const hg = G(h.G.h, {});
+    path(hg, 'M140 -40L150 -105L268 -105', { stroke: '#8a9aa6', 'stroke-width': 6 });
+    const band = path(g, '', { stroke: '#e86a8a', 'stroke-width': 3.5 }), sling = path(g, '', { stroke: '#6b7f8c', 'stroke-width': 5 });
+    const upd = () => { const T = h.fr('h', [262, -105]), S = h.fr('1', [44, 20]), S0 = h.fr('1', [34, 18]), S1 = h.fr('1', [54, 18]); band.setAttribute('d', `M${f1(T[0])} ${f1(T[1])}L${f1(S[0])} ${f1(S[1])}`); sling.setAttribute('d', `M${f1(S0[0])} ${f1(S0[1])}Q${f1(S[0])} ${f1(S[1] + 8)} ${f1(S1[0])} ${f1(S1[1])}`); };
+    h.onSet.push(upd); upd();
+    g.hand = hg;
+  }
+  if (kind === 'pip' || kind === 'dip' || kind === 'tpl') {
+    const fr = kind === 'dip' ? '2' : '1', fg = G(h.G[fr], {});
+    let P;
+    if (kind === 'pip') P = [[10, 22], [50, 22], [L1H, 21], [L1H + 30, 19], [L1H + 50, 18]];
+    else if (kind === 'dip') P = [[14, 19], [40, 18], [52 + 6, 17], ...[[12, 16], [34, 14]].map(([a, b]) => { const v = rotPt(a, b, -5); return [52 + v[0], v[1]]; })];
+    else { const a = o.pip ?? 30, b = o.dip ?? 22; P = [[10, 23], [50, 22], [L1H - 2, 21]]; [[16, 18], [40, 17]].forEach(([u, w]) => { const v = rotPt(u, w, a); P.push([L1H + v[0], v[1]]); }); const D = rotPt(52, 0, a); [[10, 15], [30, 14]].forEach(([u, w]) => { const v = rotPt(u, w, a + b); P.push([L1H + D[0] + v[0], D[1] + v[1]]); }); }
+    mk('path', { d: hShellD(P, 0, 9, 1), ...ORTH(col) }, fg);
+    g.hand = fg;
+  }
+  if (t0 !== null) { show(g, t0); if (g.hand) { put(g.hand, { o: 0 }); show(g.hand, t0); } }
+  else if (g.hand) put(g.hand, { o: 1 });
+  return g;
+}
+const L1H = 88, MPX19 = 212, L3H = 36;
+// The carpal tunnel in cross-section (palm side up): the carpal arch, the transverse carpal ligament, nine flexor
+// tendons and the median nerve inside; the canal of Guyon (ulnar nerve and artery) on the ulnar side. Radial to the left.
+function tunnelX(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), t = { g };
+  [[[-150, 30], [-120, -10], [-80, 10], [-90, 50], [-140, 60]], [[-80, 20], [-40, 30], [-30, 70], [-70, 80], [-95, 55]], [[-30, 40], [30, 40], [40, 85], [-25, 90]], [[38, 30], [90, 10], [120, -20], [135, -10], [110, 40], [100, 70], [48, 80]], [[130, 50], [160, 30], [175, 60], [150, 80]]]
+    .forEach(P => boneSh(g, defs, P, { ax: [0, 0, 0, 1] }));
+  t.tcl = path(g, 'M-140 -14C-90 -60 60 -62 128 -26', { stroke: CAPS_C, 'stroke-width': 16, 'stroke-opacity': .85 });
+  const tend = (cx, cy, r, col) => mk('circle', { cx, cy, r, fill: col, stroke: mix(col, '#000000', .35), 'stroke-width': 1.5 }, g);
+  t.syn = mk('ellipse', { cx: -2, cy: 6, rx: 112, ry: 34, fill: '#f4a48c', 'fill-opacity': 0, stroke: 'none' }, g);
+  t.fds = [[-46, -14], [-16, -22], [16, -22], [46, -14]].map(([a, b]) => tend(a, b, 11, ANAT.tendon));
+  t.fdp = [[-42, 14], [-14, 18], [14, 18], [42, 14]].map(([a, b]) => tend(a, b, 11, mix(ANAT.tendon, '#d9b860', .3)));
+  t.fpl = tend(-84, 12, 11, mix(ANAT.tendon, '#d9b860', .15));
+  t.med = mk('ellipse', { cx: -70, cy: -24, rx: 15, ry: 10, fill: NERVE_C, stroke: mix(NERVE_C, '#000000', .4), 'stroke-width': 1.5 }, g);
+  mk('path', { d: 'M100 -40C112 -60 150 -62 162 -40', fill: 'none', stroke: CAPS_C, 'stroke-width': 7, 'stroke-opacity': .7 }, g);
+  t.uln = mk('circle', { cx: 120, cy: -46, r: 9, fill: NERVE_C, stroke: mix(NERVE_C, '#000000', .4), 'stroke-width': 1.5 }, g);
+  t.art = mk('circle', { cx: 142, cy: -48, r: 7, fill: VESS_C, stroke: mix(VESS_C, '#000000', .4), 'stroke-width': 1.5 }, g);
+  if (t0 !== null) show(g, t0);
+  return t;
+}
+// a shaded cylinder seen end-on (a handle, a bar) or a ball
+function cylEl(p, r, col = '#9fb0bf') { const g = G(p, {}), defs = mk('defs', {}, g); mk('circle', { r, fill: ballGrad(defs, col), stroke: mix(col, '#000000', .45), 'stroke-width': 2 }, g); return g; }
+// a group clipped to a rounded rectangle (for a close-up of a big model)
+function clipG(p, x, y, w, h) { const id = 'cl' + (++SHADE_ID), d = mk('defs', {}, p), cp = mk('clipPath', { id }, d); mk('rect', { x, y, width: w, height: h, rx: 18 }, cp); return mk('g', { 'clip-path': `url(#${id})` }, p); }
+// A table: cols — column widths; head — header strings; rows — arrays of cell strings. Rows appear at t0s[i]
+// (or t0 + i * gap). Returns the group; g.rows — the row groups.
+function tbl(p, x, y, cols, head, rows, t0s, { size = 15, gap = .5, col = SH, pad = 10, minH = 36 } = {}) {
+  const g = G(p, { o: 0 }), rg = [];
+  let yy = y;
+  const row = (cells, isHead) => {
+    const r = G(g, { o: isHead ? 1 : 0 }), hs = [];
+    let xx = x;
+    cells.forEach((c, i) => { const t = put(para(r, c || '—', xx + pad, yy + size + pad - 2, null, { size: isHead ? size - 1 : size, weight: isHead || i === 0 ? 700 : 500, fill: isHead ? col : i === 0 ? COL.chalk : i === 1 ? COL.chalk : COL.dim, maxW: cols[i] - pad * 2 }), { o: 1 }); hs.push(t._h || size * 1.3); xx += cols[i]; });
+    const hgt = Math.max(minH, Math.max(...hs) + pad * 1.4);
+    const bg = mk('rect', { x, y: yy, width: cols.reduce((a, b) => a + b, 0), height: hgt, fill: isHead ? mix(col, COL.board, .82) : (rg.length % 2 ? PANEL : mix(PANEL, '#ffffff', .03)), stroke: EDGE, 'stroke-width': 1 }, r);
+    r.insertBefore(bg, r.firstChild);
+    yy += hgt;
+    return r;
+  };
+  row(head, true);
+  rows.forEach((c, i) => { const r = row(c, false); rg.push(r); show(r, Array.isArray(t0s) ? t0s[i] : t0s + i * gap, .4); });
+  g.rows = rg; g.h = yy - y;
+  show(g, Array.isArray(t0s) ? t0s[0] - .3 : t0s - .3);
+  return g;
+}
+// horizontal bars with the label above each bar: rows [label, value, colour]; t0s — a time or one per row
+function hbars(p, x, y, rows, t0s, { k = 3, dy = 50, unit = '', size = 15, h = 18 } = {}) {
+  return rows.map(([s, v, c], i) => {
+    const yy = y + i * dy, g = G(p, { o: 0 }), t = Array.isArray(t0s) ? t0s[i] : t0s + i * .5; show(g, t);
+    T(g, s, { x, y: yy - 6, size, fill: c, weight: 700 });
+    const b = mk('rect', { x, y: yy, width: 0, height: h, rx: 6, fill: c }, g);
+    const tv = T(g, '', { x: x + 8, y: yy + h - 3, size, fill: COL.chalk, weight: 700 });
+    prog(q => { b.setAttribute('width', f1(k * v * q)); put(tv, { x: x + 8 + k * v * q }); tv.textContent = (v * q).toFixed(v % 1 ? 1 : 0).replace('.', ',') + unit; }, t, 1);
+    return g;
+  });
+}
+/* ---------- chapter 20 lesson helpers ---------- */
+// a model point (model frame of hipFront / hipSag) on the stage
+const stg = (j, P) => { const S0 = st(j.g), v = rotPt(P[0] * S0.s, P[1] * S0.s, S0.r || 0); return [S0.x + v[0], S0.y + v[1]]; };
+// the angle between two stage directions from C, drawn as an arc with a label
+function angArc(p, C, A, B, r, str, col, t0, { size = 20, off = 26 } = {}) {
+  const g = G(p, { o: 0 }), a0 = Math.atan2(A[1] - C[1], A[0] - C[0]) / rad(1), a1 = Math.atan2(B[1] - C[1], B[0] - C[0]) / rad(1);
+  let d = a1 - a0; while (d > 180) d -= 360; while (d < -180) d += 360;
+  path(g, smoothD(arcPts(C, r, a0, a0 + d, 6), false), { stroke: col, 'stroke-width': 3.5 });
+  [A, B].forEach(P => path(g, `M${f1(C[0])} ${f1(C[1])}L${f1(P[0])} ${f1(P[1])}`, { stroke: col, 'stroke-width': 2.5, 'stroke-dasharray': '8 6' }));
+  const M = polar(C, r + off, a0 + d / 2);
+  T(g, str, { x: M[0], y: M[1] + size * .35, size, fill: col, weight: 700, anchor: 'middle' });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// the femur from above: the condylar axis and the neck turned forward by the torsion angle
+function torsInset(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g);
+  roundBox(g, -150, -150, 300, 300, EDGE, PANEL, 2);
+  T(g, 'вид сверху', { x: 0, y: -122, size: 17, fill: COL.dim, anchor: 'middle', weight: 600 });
+  mk('ellipse', { cx: 0, cy: 50, rx: 112, ry: 42, fill: boneGrad(defs, 0, 0, 0, 1), stroke: mix(ANAT.bone, '#000000', .5), 'stroke-width': 2 }, g);
+  path(g, 'M-128 50H128', { stroke: SH, 'stroke-width': 3, 'stroke-dasharray': '8 6' });
+  const neck = G(g, {}), head = mk('circle', { r: 30, fill: ballGrad(defs), stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 1.5 }, neck);
+  const nk = mk('path', { fill: boneGrad(defs, 0, 0, 1, 0), stroke: mix(ANAT.bone, '#000000', .5), 'stroke-width': 2 }, neck);
+  neck.insertBefore(nk, head);
+  mk('circle', { cx: 0, cy: 0, r: 26, fill: ballGrad(defs), stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 1.5 }, g);
+  const axis = path(g, '', { stroke: FUN, 'stroke-width': 3, 'stroke-dasharray': '8 6' }), arc = path(g, '', { stroke: FUN, 'stroke-width': 3.5 });
+  const lbl = T(g, '', { x: -60, y: 92, size: 22, fill: FUN, weight: 700, anchor: 'middle' });
+  T(g, 'вперёд ↓', { x: 108, y: 128, size: 15, fill: COL.dim, anchor: 'end' });
+  g.set = a => {
+    const H = [-105 * Math.cos(rad(a)), 105 * Math.sin(rad(a))];
+    head.setAttribute('cx', f1(H[0])); head.setAttribute('cy', f1(H[1]));
+    const n = [-H[1] / 105, H[0] / 105];
+    nk.setAttribute('d', ptsD([[n[0] * 18, n[1] * 18], [H[0] + n[0] * 14, H[1] + n[1] * 14], [H[0] - n[0] * 14, H[1] - n[1] * 14], [-n[0] * 18, -n[1] * 18]], true));
+    axis.setAttribute('d', `M${f1(-H[0] * .3)} ${f1(-H[1] * .3)}L${f1(H[0] * 1.25)} ${f1(H[1] * 1.25)}`);
+    arc.setAttribute('d', smoothD(arcPts([0, 0], 70, 180 - a, 180, 4), false));
+    lbl.textContent = Math.round(a) + '°';
+  };
+  g.set(12);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// the pelvis from above, turning about the stance hip
+function pelvTop(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g);
+  roundBox(g, -170, -150, 340, 300, EDGE, PANEL, 2);
+  T(g, 'вид сверху', { x: 0, y: -122, size: 17, fill: COL.dim, anchor: 'middle', weight: 600 });
+  T(g, 'вперёд ↓', { x: 150, y: 132, size: 15, fill: COL.dim, anchor: 'end' });
+  const pg = G(g, {});
+  mk('path', { d: 'M-118 -40C-130 10 -90 52 -40 58C-15 62 15 62 40 58C90 52 130 10 118 -40C80 -78 -80 -78 -118 -40Z', fill: boneGrad(defs, 0, 0, 0, 1), stroke: mix(ANAT.bone, '#000000', .5), 'stroke-width': 2, opacity: .9 }, pg);
+  mk('circle', { cx: -60, cy: 12, r: 20, fill: ballGrad(defs), stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 1.5 }, g);
+  const free = mk('circle', { cx: 60, cy: 12, r: 20, fill: ballGrad(defs), stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 1.5, opacity: .55 }, pg);
+  T(g, 'опорная', { x: -60, y: 62, size: 15, fill: SH, anchor: 'middle', weight: 700 });
+  void free;
+  // rotation about the stance hip at (-60, 12)
+  g.set = a => pg.setAttribute('transform', `rotate(${f1(a)} -60 12)`);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a translucent zone on the front of the leg (dermatome) between stage points
+function zoneBand(p, P, col, t0) { const e = mk('path', { d: smoothD(P), fill: col, 'fill-opacity': .35, stroke: col, 'stroke-width': 2, opacity: 0 }, p); if (t0 !== null) show(e, t0); return e; }
+// the piriformis and the sciatic nerve from behind (a small inset)
+function piriInset(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g);
+  roundBox(g, -160, -130, 320, 260, EDGE, PANEL, 2);
+  T(g, 'сзади', { x: 0, y: -104, size: 16, fill: COL.dim, anchor: 'middle', weight: 600 });
+  boneSh(g, defs, [[-150, -70], [-95, -82], [-70, -20], [-88, 40], [-140, 60]], { col: mix(ANAT.bone, '#c9d6e0', .2) });
+  boneSh(g, defs, [[75, -40], [118, -52], [140, -20], [130, 110], [92, 110], [86, 10]]);
+  const pm = bellyEl(g, { w: 34, ta: .05, tb: .12 }); pm.set([[-80, -20], [10, -22], [100, -30]]);
+  path(g, smoothD([[-60, -110], [-30, -40], [-10, 20], [10, 110]], false), { stroke: NERVE_C, 'stroke-width': 9, 'stroke-linecap': 'round' });
+  T(g, 'грушевидная', { x: 10, y: -52, size: 15, fill: ANAT.muscle, anchor: 'middle', weight: 700 });
+  T(g, 'седалищный нерв', { x: 40, y: 72, size: 15, fill: NERVE_C, anchor: 'start', weight: 700 });
+  g.pm = pm;
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a cane in hand i (0 — screen left, 1 — screen right) of a frontStand figure, down to the floor beside the foot
+function frontCane(p, f, i, t0, col = '#b9c4c9') {
+  const g = G(p, { o: 0 }), e = path(g, '', { stroke: col, 'stroke-width': 7, 'stroke-linecap': 'round' }), tip = mk('circle', { r: 6, fill: '#55605f' }, g);
+  const upd = () => { const W = f.pts.arms[i][1], A = f.at(W), B = f.at([W[0] + (i ? 14 : -14), -4]); e.setAttribute('d', `M${f1(A[0])} ${f1(A[1] - 8)}L${f1(B[0])} ${f1(B[1])}`); tip.setAttribute('cx', f1(B[0])); tip.setAttribute('cy', f1(B[1])); };
+  f.onSet.push(upd); upd();
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a belt loop round a stage point P with a pull arrow at angle ang (the mobilization belt of MWM)
+function beltEl(p, P, ang, t0, { L = 150, col = '#9fd0e8', r = 26 } = {}) {
+  const g = G(p, { o: 0 }), B = polar(P, L, ang);
+  mk('ellipse', { cx: f1(P[0]), cy: f1(P[1]), rx: r, ry: r * .55, transform: `rotate(${f1(ang + 90)} ${f1(P[0])} ${f1(P[1])})`, fill: 'none', stroke: col, 'stroke-width': 7 }, g);
+  path(g, `M${f1(P[0])} ${f1(P[1])}L${f1(B[0])} ${f1(B[1])}`, { stroke: col, 'stroke-width': 7, 'stroke-linecap': 'round' });
+  const A1 = polar(P, L * .45, ang), A2 = polar(P, L * .8, ang);
+  g.appendChild(arw(p, A1[0], A1[1], A2[0], A2[1], COL.good, null, 5));
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// tint a bellyEl muscle with the alarm colour (cut or detached in surgery) from t0
+const hurtAt = (b, t0, v = 1) => prog(q => { b.hurt = v * q; if (b.last) b.set(...b.last); }, t0, .6);
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Переломы бедра', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 20 · Урок 196', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Переломы проксимального отдела бедра', { x: 800, y: 215, size: 52, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'однополюсный протез · виды переломов · фиксация · нагрузка · упражнения · результаты', 800, 300, m('sub'), { size: 26, fill: SH, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const h = hipFront(art, 650, 470, 1.15, null, { spine: false, muscles: [] }); put(h.g, { o: 1 });
+    h.frac('inter', 'L', 1.2); h.implant('dhs', 'L', 2.5, .8);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['hemi', 'Однополюсный протез', (m, D) => {
+    const p = panel(0);
+    txt(p, 'гемиартропластика', 400, 56, m('ind'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const z = hipFront(p, 150, 360, 1.45, m('ind'), { spine: false, muscles: [] });
+    const fr = z.frac('subcap', 'L', m('ind', 2));
+    z.implant('bipolar', 'L', m('types', 4), 1); hide(fr, m('types', 4), .4);
+    lab(p, 'биполярный: подвижный вкладыш', 760, 150, ...z.at('head', 'L'), IMPL_C, m('types', 6), { anchor: 'end' });
+    markList(p, 460, 600, [['скольжение пяткой без помощи', COL.bad], ['изометрия ягодичных на максимум', COL.bad], ['отведение против руки — постепенно', COL.task]], m('rehab', 4), 2, { cross: true, size: 15, dy: 40, maxW: 300 });
+    pill(p, 'Норвегия, > 4000: меньше боли и повторных операций, чем после винтов', 400, 820, m('out', 8), { col: COL.good, size: 14 });
+    infoCard(p, 800, 90, 760, 175, 'показания', 'смещённый внутрикапсульный перелом шейки у пожилых с плохой костью; неудачная фиксация с некрозом; тяжёлая дегенерация головки; при артрозе — тотальный протез', SH, m('ind'), { size: 16 });
+    infoCard(p, 800, 280, 760, 150, 'однополюсный и биполярный', 'фиксированная головка стирала хрящ впадины; биполярный распределяет силы по нескольким поверхностям', IMPL_C, m('types'), { size: 16 });
+    infoCard(p, 800, 445, 760, 150, 'реабилитация', 'как после тотального, но без наибольших сжимающих и сдвиговых нагрузок на впадину', COL.bad, m('rehab'), { size: 16 });
+    infoCard(p, 800, 610, 760, 120, 'результаты', 'типы протезов — сходно; протез лучше винтов при смещённом переломе', COL.good, m('out'), { size: 16 });
+  }],
+
+  ['epi', 'Кто ломает бедро', (m, D) => {
+    const p = panel(0);
+    txt(p, 'перелом бедра у пожилых', 400, 56, m('who'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const h = hipFront(p, 380, 250, .55, m('who'), { tibia: true, spine: false, muscles: [] });
+    h.frac('neck', 'R', m('who', 3));
+    prog(q => h.set({ rotR: -40 * q, abdR: 5 * q }), m('who', 4), 2);
+    pill(p, 'нога короче и развёрнута наружу', 400, 110, m('who', 5), { col: COL.bad, size: 16 });
+    hbars(p, 60, 725, [['женщины среди 75–85-летних', 77.2, COL.bad], ['связаны с падением', 90, COL.task], ['моложе 50 лет', 3, SH]], [m('who', 8), m('risk', 10), m('who', 14)], { k: 6, dy: 42, unit: ' %', size: 14 });
+    infoCard(p, 800, 90, 760, 150, 'признаки', 'боль в паху или бедре при движении и нагрузке; нога короче на несколько сантиметров и развёрнута наружу', COL.bad, m('who'), { size: 16 });
+    infoCard(p, 800, 255, 760, 175, 'риск', 'слабость и негибкость мышц, равновесие и ходьба, зрение, память, лекарства, остеопороз; медленная ходьба — падение вбок', COL.task, m('risk'), { size: 16 });
+    infoCard(p, 800, 445, 760, 150, 'последствия', 'через год многим нужна помощь; страх падения; долгий уход; смертность в США снизилась', SH, m('after'), { size: 16 });
+  }],
+
+  ['sites', 'Виды переломов', (m, D) => {
+    const p = panel(0);
+    txt(p, 'внутри или вне капсулы', 400, 56, m('two'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const z = hipFront(p, 150, 340, 1.45, m('two'), { spine: false, muscles: [] });
+    z.capsule('L', m('two', 1));
+    ['head', 'subcap', 'neck', 'basi'].forEach((k, i) => z.frac(k, 'L', m('two', 3 + i * 1.5)));
+    const lt = z.at('LT', 'L'), y5 = lt[1] + 1.1 * 40 * 1.45;
+    const fi = z.frac('inter', 'L', m('ext', 1)), fs = z.frac('sub', 'L', m('ext', 3));
+    const ln = path(p, `M${f1(lt[0] - 120)} ${f1(y5)}H${f1(lt[0] + 200)}`, { stroke: COL.dim, 'stroke-width': 2.5, 'stroke-dasharray': '8 6' }, { o: 0 }); show(ln, m('ext', 4));
+    txt(p, '5 см ниже малого вертела', 600, y5 - 10, m('ext', 4), { size: 15, fill: COL.dim, anchor: 'middle', weight: 600 });
+    void fi; void fs;
+    pill(p, 'межвертельные ≈ 50 %', 400, 110, m('ext', 7), { col: COL.task, size: 16 });
+    pill(p, 'вытяжение: нагрузка через 10–12, до 16 недель', 400, 830, m('cons', 4), { col: COL.dim, size: 15 });
+    infoCard(p, 800, 90, 760, 175, 'внутрикапсульные', 'головка, подголовчатый, шейка; угрожают кровоснабжению головки — несращение и некроз, особенно со смещением; чаще у пожилых женщин', COL.bad, m('two'), { size: 16 });
+    infoCard(p, 800, 280, 760, 150, 'внекапсульные', 'до 5 см ниже малого вертела: межвертельные и подвертельные; головка снабжается, несращение — при неудачной фиксации', COL.task, m('ext'), { size: 16 });
+    infoCard(p, 800, 445, 760, 120, 'переломовывихи', 'у молодых, обычно кзади; позже некроз и артроз', SH, m('young'), { size: 16 });
+    infoCard(p, 800, 580, 760, 120, 'без операции', 'вытяжение, если нельзя оперировать; потом кресло', COL.dim, m('cons'), { size: 16 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-caps', prompt: ['Внутри или вне капсулы?'],
+    build: grid([
+      { parts: ['Подголовчатый перелом'], ans: ['i'], why: 'Выше прикрепления капсулы.' },
+      { parts: ['Межвертельный перелом'], ans: ['o'], why: 'Между вертелами — вне капсулы.' },
+      { parts: ['Чрезшеечный перелом'], ans: ['i'], why: 'Шейка — внутри капсулы.' },
+      { parts: ['Подвертельный перелом'], ans: ['o'], why: 'Ниже малого вертела.' },
+      { parts: ['Перелом головки'], ans: ['i'], why: 'Внутри сустава.' },
+    ], [['i', 'Внутри', COL.bad], ['o', 'Вне', COL.task]], { multi: false, text: true }),
+  }], done) }],
+
+  ['orif', 'Фиксация', (m, D) => {
+    const p = panel(0);
+    txt(p, 'внутренняя фиксация', 400, 56, m('ind'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const ip = [pill(p, 'смещённые и несмещённые переломы шейки', 400, 270, m('ind', 2), { col: SH, size: 16 }), pill(p, 'переломовывихи головки', 400, 320, m('ind', 5), { col: SH, size: 16 }),
+      pill(p, 'меж- и подвертельные', 400, 370, m('ind', 7), { col: SH, size: 16 }), pill(p, 'у пожилых при смещении шейки — чаще протез', 400, 440, m('ind', 11), { col: COL.task, size: 16 })];
+    ip.forEach(e => hide(e, m('dev'), .3));
+    const z = hipFront(p, 390, 360, .95, m('dev'), { spine: false, muscles: [] });
+    z.frac('neck', 'R', m('dev', 6)); z.implant('screws', 'R', m('dev', 7));
+    z.frac('inter', 'L', m('dev', 14)); z.implant('dhs', 'L', m('dev', 15));
+    lab(p, 'винты — шейка', 40, 250, ...z.at('neck', 'R'), SH, m('dev', 7), { anchor: 'start' });
+    lab(p, 'динамический винт с пластиной', 760, 660, ...z.at('shaft', 'L'), SH, m('dev', 15), { anchor: 'end' });
+    pill(p, 'штифт со шеечным винтом — меж- и подвертельные', 400, 110, m('dev', 1), { col: SH, size: 15 });
+    pill(p, 'операция в первые 24–48 часов', 400, 155, m('time', 1), { col: COL.bad, size: 16 });
+    infoCard(p, 800, 90, 760, 150, 'показания', 'переломы шейки, переломовывихи, меж- и подвертельные; у пожилых смещённая шейка — чаще протез', SH, m('ind'), { size: 16 });
+    infoCard(p, 800, 255, 760, 120, 'срочно', '24–48 часов, особенно шейка: кровоснабжение головки', COL.bad, m('time'), { size: 16 });
+    infoCard(p, 800, 390, 760, 175, 'фиксаторы', 'штифт или скользящий винт; винты на месте — несмещённая шейка; динамический винт с пластиной сжимает межвертельный перелом при нагрузке', SH, m('dev'), { size: 16 });
+    infoCard(p, 800, 580, 760, 120, 'доступ снаружи', 'рассекают напрягатель, латеральную широкую или среднюю ягодичную; при шейке — капсулу', COL.task, m('soft'), { size: 16 });
+  }],
+
+  ['wb', 'Нагрузка и тревожные признаки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'нагрузка на ногу', 400, 56, m('who'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    pillRow(p, ['без нагрузки', 'касание < 4,5 кг', 'по переносимости'], 400, 120, m('who', 4), { col: [COL.bad, COL.task, COL.good], size: 16, gap: 1 });
+    txt(p, 'в книге — < 10 фунтов', 400, 165, m('who', 5), { size: 15, fill: COL.dim, anchor: 'middle', weight: 600 });
+    const sg = hipSag(p, 370, 340, .5, m('force'), { muscles: ['ilio', 'rf', 'gmax'], farLeg: true, fade: 6 });
+    put(sg.g, { r: -90 }); sg.set({});
+    const bn = bench(p, 60, 760, 386, m('force'));
+    prog(q => { const k = cyc(q, 2); sg.set({ th: 30 * k }); sg.M.ilio.act(k); sg.M.rf.act(k); }, m('force', 1), 5);
+    const pf = pill(p, 'движения в кровати нагружают перелом почти как ходьба', 400, 220, m('force', 1), { col: COL.bad, size: 15 });
+    [pf, bn].forEach(e => hide(e, m('fail'), .3)); hide(sg.g, m('fail'), .4);
+    ['! сильная стойкая боль в паху, бедре, колене', '! нарастающее укорочение ноги', '! стойкая наружная ротация', '! Тренделенбург, который не проходит'].forEach((t, i) => pill(p, t, 400, 300 + i * 56, m('fail', 2 + i * 2.5), { col: COL.bad, size: 17 }));
+    pill(p, 'сразу сообщить хирургу', 400, 560, m('fail', 12), { col: COL.bad, size: 18 });
+    infoCard(p, 800, 90, 760, 175, 'решает хирург', 'возраст и кость, тип перелома, фиксатор, устойчивость; часто сразу по переносимости: шейка на винтах, межвертельный на динамическом винте, штифт', SH, m('who'), { size: 16 });
+    infoCard(p, 800, 280, 760, 150, 'исследование', 'пожилые с межвертельным переломом сразу нагружали по переносимости — неудач фиксации через год не больше', COL.good, m('ev'), { size: 16 });
+    infoCard(p, 800, 445, 760, 150, 'неудача фиксации', 'боль, нарастающее укорочение, наружная ротация, стойкий Тренделенбург', COL.bad, m('fail'), { size: 16 });
+  }],
+
+  ['box', 'Что страдает при переломе', (m, D) => {
+    const p = panel(0);
+    txt(p, 'мышцы и капсула', 400, 56, m('mus'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const z = hipFront(p, 150, 470, 1.4, m('mus'), { spine: false, muscles: ['gmed', 'ilio', 'tfl'] });
+    hurtAt(z.M.L.gmed, m('mus', 3)); hurtAt(z.M.L.ilio, m('mus', 6));
+    pillRow(p, ['большой вертел — средняя ягодичная', 'малый вертел — подвздошно-поясничная'], 400, 110, m('mus', 2), { col: COL.bad, size: 14, gap: 3 });
+    pill(p, 'подвертельный — большая ягодичная', 400, 155, m('mus', 9), { col: COL.bad, size: 14 });
+    hurtAt(z.M.L.tfl, m('cut', 1), .7);
+    pill(p, 'рассекают напрягатель и латеральную широкую — спайки', 400, 200, m('cut', 1), { col: COL.task, size: 14 });
+    const H = z.at('H', 'L'), Gt = z.at('GT', 'L');
+    const lev = path(p, `M${f1(H[0])} ${f1(H[1])}L${f1(Gt[0])} ${f1(Gt[1])}`, { stroke: MU, 'stroke-width': 4 }, { o: 0 }); show(lev, m('short', 1));
+    pill(p, 'нога короче — рычаг средней ягодичной меньше', 400, 800, m('short', 1), { col: MU, size: 15 });
+    z.capsule('L', m('cap', 1));
+    infoCard(p, 800, 90, 760, 150, 'место перелома', 'большой вертел — средняя ягодичная, малый — подвздошно-поясничная, подвертельный — большая ягодичная', COL.bad, m('mus'), { size: 16 });
+    infoCard(p, 800, 255, 760, 175, 'операционный доступ', 'напрягатель и латеральная широкая рассечены — болезненны отведение и сгибание колена; приведение, внутренняя ротация и сгибание колена тянут их', COL.task, m('cut'), { size: 16 });
+    infoCard(p, 800, 445, 760, 150, 'укорочение', 'плечо силы средней ягодичной меньше — слабость и признак Тренделенбурга', MU, m('short'), { size: 16 });
+    infoCard(p, 800, 610, 760, 120, 'капсула', 'травма и вскрытие капсулы — склонность к ограничению', CAPS_C, m('cap'), { size: 16 });
+  }],
+
+  ['max', 'Максимальная защита', (m, D) => {
+    const p = panel(0);
+    txt(p, 'с первого дня', 400, 56, m('goal'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    pill(p, 'к 2–4 неделям — 80–90° активного сгибания с согнутым коленом', 400, 110, m('goal', 3), { col: SH, size: 14 });
+    pill(p, 'сопротивление бедру — с 4–6 недель; колену и стопе — сразу', 400, 155, m('goal', 10), { col: MU, size: 14 });
+    const mg = G(p, {});
+    rangeBars(mg, 40, 260, [['нагрузка: 1-я неделя', 50, 50, null, MU], ['к 5-й неделе', 80, 80, null, COL.bad]], m('mitch', 6), { k: 4.4, w0: 230, unit: ' % макс.', track: true, showMean: false });
+    pill(mg, 'Митчелл: 80 человек, 3 × 12, с 16-го дня', 400, 380, m('mitch', 2), { col: MU, size: 15 });
+    hide(mg, m('ex'), .3);
+    const sg = hipSag(p, 370, 520, .5, m('ex', 4), { muscles: ['ilio', 'rf'], farLeg: true, fade: 6 });
+    put(sg.g, { r: -90 }); sg.set({});
+    bench(p, 60, 760, 566, m('ex', 4));
+    prog(q => { const k = cyc(q, 1); sg.set({ kn: 100 * k, th: Math.asin(Math.min(1, 216 * Math.sin(rad(100 * k / 2)) / 221)) / rad(1) * 1.1 }); }, m('ex', 6), 3);
+    const ok = txt(p, '✓ скольжение пяткой — короткий рычаг', 400, 262, m('ex', 6), { size: 17, fill: COL.good, anchor: 'middle', weight: 700 });
+    prog(q => sg.set({ kn: 0, th: 35 * cyc(q, 1) }), m('ex', 10), 3);
+    const nl = txt(p, 'подъём прямой ноги — позже: длинный рычаг', 400, 298, m('ex', 10), { size: 17, fill: COL.task, anchor: 'middle', weight: 700 });
+    void ok; void nl;
+    pill(p, 'подвертельный с реконструкцией — без отводящих и приводящих 4–6 нед', 400, 830, m('prec', .5), { col: COL.bad, size: 14 });
+    infoCard(p, 800, 90, 760, 150, 'цели', 'объём бедра, равновесие, сила рук и здоровой ноги для ходьбы со средством опоры', SH, m('goal'), { size: 16 });
+    infoCard(p, 800, 255, 760, 175, 'исследование Митчелла', 'ослабленные пожилые: разгибание колен с сопротивлением с 16-го дня — сильнее и функциональнее, без осложнений; скорость ходьбы та же', MU, m('mitch'), { size: 16 });
+    infoCard(p, 800, 445, 760, 200, 'что делают', 'качания стопой, дыхание; мост с весом на здоровой ноге; перенос веса, носки, стабилизация; низкая изометрия; сначала скольжение пяткой, потом прямая нога; стоя на здоровой — движения больной', COL.good, m('ex'), { size: 16 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-order', prompt: ['Что начинают раньше?'],
+    build: grid([
+      { parts: ['Скольжение пяткой лёжа'], ans: ['e'], why: 'Короткий рычаг — меньше скручивающая нагрузка.' },
+      { parts: ['Подъём прямой ноги лёжа'], ans: ['l'], why: 'Длинный рычаг — позже.' },
+      { parts: ['Сопротивление разгибанию колена'], ans: ['e'], why: 'Колено и стопу нагружают, как только терпимо.' },
+      { parts: ['Сопротивление отведению бедра'], ans: ['l'], why: 'Бедро — с 4–6 недель.' },
+      { parts: ['Движения больной ногой стоя на здоровой, с опорой'], ans: ['e'], why: 'Раньше, чем подъёмы прямой ноги лёжа.' },
+    ], [['e', 'Раньше', COL.good], ['l', 'Позже', COL.task]], { multi: false, text: true }),
+  }], done) }],
+
+  ['late', 'Умеренная и минимальная защита', (m, D) => {
+    const p = panel(0);
+    txt(p, 'после 6 недель', 400, 56, m('when'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    phaseBar(p, 60, 470, 680, 28, [['мягкие ткани', 0, 6, CAPS_C], ['кость', 0, 12, ANAT.bone], ['наблюдение терапевта: 7–9 (≤ 12) нед', 0, 9, SH], ['продлённая силовая программа', 6, 28, MU]], [[0, '0'], [6, '6'], [12, '12'], [18, '18'], [24, '24'], [28, 'нед']], [m('when', 1), m('when', 4), m('when', 14), m('ext', 1)], { dy: 50, size: 15 });
+    pillRow(p, ['мини-приседания и носки', 'выпады, ступеньки', 'лестница, груз'], 400, 640, m('goals', 8), { col: COL.good, size: 15, gap: 1.5 });
+    pill(p, 'в открытой цепи — до 2,3 кг', 400, 690, m('goals', 14), { col: MU, size: 15 });
+    txt(p, 'в книге — до 5 фунтов', 400, 725, m('goals', 14.5), { size: 14, fill: COL.dim, anchor: 'middle', weight: 600 });
+    infoCard(p, 800, 90, 760, 150, 'сроки', 'ткани — 6 недель, кость — 8–12; трость часто дольше; наблюдение обычно до 7–9 недель', SH, m('when'), { size: 16 });
+    infoCard(p, 800, 255, 760, 150, 'продлённая программа', 'с 6 недель до 5–7 месяцев — безопасна; через полгода сломанная нога не слабее здоровой', MU, m('ext'), { size: 16 });
+    infoCard(p, 800, 420, 760, 200, 'что делают', 'растяжка икроножной, сгибателей бедра, задней группы; закрытая цепь; открытая — разгибание и отведение; задачи, равновесие, ходьба по разным поверхностям, аэробная нагрузка', COL.good, m('goals'), { size: 16 });
+  }],
+
+  ['out', 'Результаты', (m, D) => {
+    const p = panel(0);
+    txt(p, 'результаты', 400, 56, m('func'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    hbars(p, 60, 150, [['вернулись к прежней самостоятельности', 33, COL.bad], ['ходят 15 м сами', 83, COL.good], ['ходят сами', 92, COL.good], ['ходят как до перелома', 41, COL.task], ['упали за полгода', 53.3, COL.bad]], [m('func', 1), m('walk', 1), m('walk', 4), m('walk', 6), m('walk', 10)], { k: 6, dy: 58, unit: ' %', size: 15 });
+    txt(p, 'в книге — 50 футов', 520, 236, m('walk', 1.5), { size: 13, fill: COL.dim, weight: 600 });
+    rangeBars(p, 40, 520, [['смертность за 1-й год', 12, 36, null, COL.bad]], m('func', 5), { k: 4.4, w0: 230, unit: ' %', showMean: false });
+    infoCard(p, 800, 90, 760, 150, 'мерило — прежний уровень', 'за год треть возвращает самостоятельность; смертность 12–36 %, потом как у ровесников', COL.bad, m('func'), { size: 16 });
+    infoCard(p, 800, 255, 760, 150, 'ходьба и падения', '83–92 % ходят сами, но лишь 41 % — как раньше; больше половины падают снова за полгода', COL.task, m('walk'), { size: 16 });
+    infoCard(p, 800, 420, 760, 175, 'реабилитация', 'больше занятий — чаще ходьба и выписка домой; силовые программы — больше силы и функции; не все продлённые программы работают', COL.good, m('rehab'), { size: 16 });
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Однополюсный протез — при смещённом переломе шейки у пожилых; без максимальных сжимающих нагрузок на впадину.', 'w1'],
+     ['Внутрикапсульные переломы угрожают головке; межвертельные — около половины всех.', 'w2'],
+     ['Нагрузку определяет хирург, часто сразу; тревожные признаки — боль, укорочение, наружная ротация, стойкий Тренделенбург.', 'w3'],
+     ['Скольжение пяткой раньше прямой ноги; сопротивление бедру — с 4–6 недель; за год треть возвращается к прежней функции.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SH }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-fail', prompt: ['Через 3 недели после фиксации межвертельного перелома нога заметно укоротилась, появилась сильная боль в паху. Что делать?'],
+    build: choice([
+      ['Сразу сообщить хирургу'],
+      ['Увеличить нагрузку при ходьбе'],
+      ['Растянуть сгибатели бедра'],
+      ['Продолжать программу — это обычно'],
+    ], 0, 'Нарастающее укорочение и сильная боль — признаки возможной неудачи фиксации.',
+    [null, 'Это может усугубить смещение.', 'Причина — не в мышцах.', 'Это тревожный признак.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-mitch', prompt: ['Ослабленная пациентка 82 лет, 16-й день после операции по поводу перелома бедра. Можно ли упражнения с сопротивлением для колен?'],
+    build: choice([
+      ['Да: 3 × 12 на 50 % максимума, к пятой неделе — до 80 %'],
+      ['Нет, до 12 недель'],
+      ['Только изометрия ягодичных'],
+      ['Только ходьба'],
+    ], 0, 'В исследовании Митчелла такое разгибание колен с 16-го дня было полезным и безопасным.',
+    [null, 'Колено и стопу нагружают, как только терпимо.', 'Сила четырёхглавой важна для функции.', 'Силовая тренировка добавляет пользы.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

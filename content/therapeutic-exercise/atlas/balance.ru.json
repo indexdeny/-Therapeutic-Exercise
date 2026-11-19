@@ -1,0 +1,411 @@
+{
+  "region": "balance",
+  "exercises": [
+    {
+      "id": "bal-static",
+      "ru": "Статическое равновесие",
+      "en": "static balance control",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "balance"
+      ],
+      "pos": [
+        "sit",
+        "kneel",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "stick",
+        "weight"
+      ],
+      "key": [
+        "сидя, на колене, на коленях, стоя",
+        "тандем, одна нога, выпад, присед",
+        "мягкая опора, закрытые глаза"
+      ],
+      "warn": "страховочный пояс; терапевт сзади и сбоку, рядом поручень",
+      "page": 277,
+      "moments": [
+        {
+          "n": 92,
+          "beat": "stat",
+          "mark": "stat",
+          "to": "dual",
+          "shot": 14.3,
+          "crop": [
+            0,
+            180,
+            900,
+            400
+          ]
+        },
+        {
+          "n": 92,
+          "beat": "safe",
+          "mark": "safe",
+          "to": "cog"
+        },
+        {
+          "n": 237,
+          "beat": "bal",
+          "mark": "sit",
+          "to": "rec"
+        }
+      ]
+    },
+    {
+      "id": "bal-dynamic",
+      "ru": "Динамическое равновесие",
+      "en": "dynamic balance control",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "balance"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "ball",
+        "board"
+      ],
+      "key": [
+        "мяч не катится, доска горизонтальна",
+        "перенос веса, повороты, руки",
+        "шаги → выпады → подскоки"
+      ],
+      "page": 278,
+      "moments": [
+        {
+          "n": 92,
+          "beat": "dyn",
+          "mark": "dyn",
+          "to": "limbs"
+        }
+      ]
+    },
+    {
+      "id": "bal-anticip",
+      "ru": "Упреждающее равновесие",
+      "en": "anticipatory balance control",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "balance",
+        "function"
+      ],
+      "pos": [
+        "sit",
+        "stand",
+        "kneel"
+      ],
+      "gear": [
+        "ball"
+      ],
+      "key": [
+        "дотягиваться до предметов",
+        "ловить и пинать мяч",
+        "двери, вещи, полоса препятствий"
+      ],
+      "page": 280,
+      "moments": [
+        {
+          "n": 92,
+          "beat": "ant",
+          "mark": "ant",
+          "to": "task",
+          "crop": [
+            180,
+            150,
+            1100,
+            500
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bal-reactive",
+      "ru": "Реактивное равновесие: стратегии",
+      "en": "reactive balance control: ankle, hip and stepping strategies",
+      "joint": [
+        "body",
+        "ankle",
+        "hip"
+      ],
+      "goal": [
+        "balance"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "board"
+      ],
+      "key": [
+        "раскачиваться всё дальше",
+        "одна нога — голеностопная стратегия",
+        "«плетёнка», шаг на скамейку — шаговая"
+      ],
+      "page": 280,
+      "moments": [
+        {
+          "n": 92,
+          "beat": "react",
+          "mark": "react",
+          "to": "force"
+        },
+        {
+          "n": 229,
+          "beat": "uni",
+          "mark": "more"
+        }
+      ]
+    },
+    {
+      "id": "bal-sensory",
+      "ru": "Равновесие с меньшей опорой на зрение и стопы",
+      "en": "sensory organization training",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "balance"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "wedge"
+      ],
+      "key": [
+        "закрыть глаза, двигать головой",
+        "поролон, узкая или наклонная опора",
+        "плюс вторая и третья задача"
+      ],
+      "page": 280,
+      "moments": [
+        {
+          "n": 92,
+          "beat": "sens",
+          "mark": "sens",
+          "to": "rec",
+          "shot": 15,
+          "crop": [
+            30,
+            80,
+            780,
+            320
+          ]
+        }
+      ]
+    },
+    {
+      "id": "otago",
+      "ru": "Программа Отаго",
+      "en": "Otago home exercise program",
+      "joint": [
+        "body",
+        "knee",
+        "hip",
+        "ankle"
+      ],
+      "goal": [
+        "balance",
+        "strength"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "weight",
+        "chair"
+      ],
+      "key": [
+        "дома, 3 раза в неделю, год",
+        "манжеты на голени: 2 подхода по 10",
+        "держаться двумя руками → одной → без"
+      ],
+      "page": 282,
+      "moments": [
+        {
+          "n": 93,
+          "beat": "otago",
+          "mark": "home",
+          "to": "man"
+        },
+        {
+          "n": 93,
+          "beat": "otstr",
+          "mark": "cuff",
+          "to": "slow"
+        },
+        {
+          "n": 93,
+          "beat": "otbal",
+          "mark": "bal",
+          "to": "warm",
+          "shot": 35.1,
+          "crop": [
+            120,
+            220,
+            1160,
+            560
+          ]
+        }
+      ],
+      "thumb": 2
+    },
+    {
+      "id": "fall-group",
+      "ru": "Групповая программа против падений",
+      "en": "multicomponent group program for fall prevention",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "balance",
+        "strength",
+        "function"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "не меньше 2 часов равновесия в неделю",
+        "сила, ходьба, равновесие, координация",
+        "круговая — по станциям"
+      ],
+      "page": 284,
+      "moments": [
+        {
+          "n": 93,
+          "beat": "group",
+          "mark": "mm",
+          "to": "nres",
+          "shot": 42.3,
+          "crop": [
+            740,
+            120,
+            840,
+            720
+          ]
+        },
+        {
+          "n": 93,
+          "beat": "tiers",
+          "mark": "t1",
+          "to": "walk"
+        },
+        {
+          "n": 239,
+          "beat": "falls",
+          "mark": "ex",
+          "to": "dose"
+        },
+        {
+          "n": 239,
+          "beat": "fallex",
+          "mark": "res",
+          "to": "bal"
+        }
+      ]
+    },
+    {
+      "id": "tai-chi",
+      "ru": "Тай-чи",
+      "en": "tai chi",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "balance"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "медленно, плавно, без перерыва",
+        "перенос веса с ноги на ногу",
+        "вертикальная осанка, дыхание"
+      ],
+      "page": 286,
+      "moments": [
+        {
+          "n": 93,
+          "beat": "taichi",
+          "mark": "tc",
+          "to": "part"
+        },
+        {
+          "n": 239,
+          "beat": "fallex",
+          "mark": "tai"
+        }
+      ]
+    },
+    {
+      "id": "mcguine",
+      "ru": "Программа Макгуайна и Кина",
+      "en": "McGuine–Keene balance program (ankle sprain)",
+      "joint": [
+        "ankle",
+        "knee"
+      ],
+      "goal": [
+        "balance"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "board",
+        "ball"
+      ],
+      "key": [
+        "одна нога: пол → качающаяся доска",
+        "глаза открыты и закрыты",
+        "по 30 секунд на ногу"
+      ],
+      "page": 287,
+      "moments": [
+        {
+          "n": 94,
+          "beat": "mcg",
+          "mark": "mcg",
+          "to": "dose",
+          "shot": 23.7,
+          "crop": [
+            140,
+            240,
+            1000,
+            420
+          ]
+        },
+        {
+          "n": 94,
+          "beat": "ankle",
+          "mark": "sls"
+        },
+        {
+          "n": 94,
+          "beat": "ankle",
+          "mark": "prog"
+        }
+      ]
+    }
+  ]
+}

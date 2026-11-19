@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ответ организма на аэробную нагрузку — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 80, title: 'Ответ организма на аэробную нагрузку', minutes: 9, language: 'ru', next: '../ch081/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch080/lupa.ru.json
+const LUPA = [
+  {"beat": "need", "fig": 0, "target": "rectus", "to": "jobs", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch080/cards.ru.json
+const CARDS_SHORT = {
+  "инотропное действие\nволокна миокарда развивают большую силу — сократимость растёт": "сократимость растёт",
+  "сердечный выброс ↑\nсократимость и ударный объём, ЧСС; суженные вены поднимают венозное давление": "ударный объём, ЧСС",
+  "ещё до начала работы\nгазообмен через альвеолярно-капиллярную мембрану растёт с 1–2-го вдоха": "газообмен с 1–2-го вдоха",
+};
+// cards-short end
+
+const SNS = '#e8807a', VAG = COL.whole, O2C = '#9fe0f0', CON = COL.bad, DIL = COL.good;
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+// A working muscle belly between A and B that glows red; the tendons at its ends.
+function bigMuscle(p, A, B, w, t0) {
+  const mu = muscleEl(p, { rest: Math.hypot(B[0] - A[0], B[1] - A[1]), w });
+  mu.set(A, B); mu.act(.85);
+  put(mu.g, { o: 0 }); if (t0 !== null) show(mu.g, t0);
+  return mu;
+}
+// A blood vessel along a path: wall and lumen; v.set(w) changes the lumen width.
+function vessel(p, d, w, col = BLOOD_A) {
+  const g = G(p, {}), wall = path(g, d, { stroke: mix(col, '#000000', .45), 'stroke-width': w + 8 }), lum = path(g, d, { stroke: col, 'stroke-width': w });
+  return { g, set(x) { wall.setAttribute('stroke-width', (x + 8).toFixed(1)); lum.setAttribute('stroke-width', x.toFixed(1)); } };
+}
+// Dots that run along a straight segment from a to b: n dots; f.run(q, speed) moves them.
+function flowDots(p, a, b, n, col, r = 5) {
+  const ds = [...Array(n)].map(() => put(mk('circle', { r, fill: col }, p), { o: 0 }));
+  return { ds, run(q, speed = 1, on = true) { ds.forEach((d, i) => { const u = (q * speed + i / n) % 1; put(d, { x: lerp(a[0], b[0], u), y: lerp(a[1], b[1], u), o: on ? 1 : 0 }); }); } };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Ответ на нагрузку', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 7 · Урок 80', { x: 800, y: 150, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Ответ организма', { x: 800, y: 235, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'на аэробную нагрузку', { x: 800, y: 300, size: 44, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'сердце, сосуды, дыхание и сама мышца', 800, 380, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const h = heartEl(art, 640, 650, .9), l = lungsEl(art, 960, 650, .8);
+    const e = ecgStrip(art, 450, 830, 700, 40, { win: 3 });
+    prog(q => { const n = 10 * q + 6 * q * q; h.beat(cyc(n, 1)); l.breathe(cyc(q, 3 + 2 * q)); e.set(70 + 60 * q, q * 6); }, .4, Math.max(4, D - 1.4), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['need', 'Что нужно мышце', (m, D) => {
+    const p = panel(0);
+    txt(p, 'работа началась: кровообращение перестраивается', 800, 62, m('need'), { size: 28, weight: 700, anchor: 'middle' });
+    const bk = cycleErgo(p, 150, 560, .8, m('need'));
+    prog(q => bk.crank(2 * Math.PI * 9 * q), m('need', .3), Math.max(4, D - m('need', .6)), lin);
+    txt(p, 'потребность в энергии растёт быстро', 260, 610, m('need', 1), { size: 21, fill: COL.dim, anchor: 'middle' });
+    // the working muscle: what comes in and what must go out
+    bigMuscle(p, [720, 300], [1000, 300], 70, m('jobs'));
+    txt(p, 'работающая мышца', 860, 410, m('jobs'), { size: 22, weight: 700, fill: '#ff7a6a', anchor: 'middle' });
+    [['O₂', O2C, 220], ['питательные вещества', COL.good, 300]].forEach(([s, c, y], i) => { arrowTo(p, [560, y], [700, 300 + (i ? 20 : -20)], m('jobs', .5 + i * .6), { col: c, w: 4 }); pill(p, s, 520 - uiW(s, 21) / 2, y, m('jobs', .5 + i * .6), { col: c, size: 21 }); });
+    [['CO₂', COL.dim, 190], ['вода', COL.whole, 250], ['молочная кислота', COL.real, 310], ['тепло', COL.bad, 370]].forEach(([s, c, y], i) => {
+      arrowTo(p, [1020, 300], [1160, y], m('jobs', 2 + i * .6), { col: c, w: 4 }); pill(p, s, 1190 + uiW(s, 21) / 2, y, m('jobs', 2 + i * .6), { col: c, size: 21 });
+    });
+    // all the systems work together
+    txt(p, 'согласованно работают системы:', 800, 500, m('sys'), { size: 23, weight: 700, anchor: 'middle' });
+    pillRow(p, ['нервно-мышечная', 'дыхательная', 'сердечно-сосудистая', 'обменная', 'гормональная'], 900, 560, m('sys', .6), { col: COL.task, size: 21, gap: .5 });
+    txt(p, 'доставка и использование O₂ митохондриями = кровоток + клеточное дыхание', 900, 620, m('sys', 4), { size: 21, fill: O2C, anchor: 'middle' });
+    infoCard(p, 60, 680, 1480, 180, 'на ответ влияют условия', null, COL.int, m('box'), { size: 22 });
+    pillRow(p, ['температура воздуха', 'влажность', 'высота над уровнем моря', 'время суток', 'фаза менструального цикла'], 800, 780, m('box', .5), { col: COL.int, size: 21, gap: .5 });
+    txt(p, 'в исследованиях их стараются контролировать', 800, 840, m('box', 4), { size: 21, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['pressor', 'Прессорный ответ', (m, D) => {
+    const p = panel(0);
+    txt(p, 'прессорный ответ: мышца включает симпатическую систему', 800, 62, m('pr'), { size: 28, weight: 700, anchor: 'middle' });
+    bigMuscle(p, [120, 430], [380, 430], 62, m('pr'));
+    txt(p, 'работающая мышца', 250, 520, m('pr'), { size: 21, weight: 700, fill: '#ff7a6a', anchor: 'middle' });
+    // small nerve fibres up to unknown central pathways, then the sympathetic system
+    const nv = G(p, { o: 0 });
+    path(nv, 'M220 420C200 360 250 320 230 250M270 425C290 360 250 320 280 250', { stroke: COL.int, 'stroke-width': 3 });
+    show(nv, m('pr', 1));
+    txt(p, 'мелкие нервные волокна', 330, 330, m('pr', 1), { size: 19, fill: COL.int });
+    const cl = G(p, { o: 0 });
+    mk('ellipse', { cx: 255, cy: 190, rx: 138, ry: 56, fill: PANEL, stroke: COL.dim, 'stroke-width': 2, 'stroke-dasharray': '8 6' }, cl);
+    T(cl, '?', { x: 255, y: 182, size: 34, weight: 700, fill: COL.dim, anchor: 'middle' });
+    T(cl, 'центральные пути неизвестны', { x: 255, y: 214, size: 16, fill: COL.dim, anchor: 'middle' });
+    show(cl, m('pr', 2));
+    const sg = G(p, { o: 0 });
+    mk('rect', { x: 560, y: 140, width: 480, height: 96, rx: 20, fill: mix(SNS, COL.board, .6), stroke: SNS, 'stroke-width': 3 }, sg);
+    T(sg, 'симпатическая нервная система', { x: 800, y: 198, size: 25, weight: 700, anchor: 'middle' });
+    show(sg, m('pr', 3));
+    arrowTo(p, [380, 190], [550, 190], m('pr', 3), { col: SNS, w: 4 });
+    // effects
+    const ht = heartEl(p, 800, 460, .62, m('snsr', 2.5));
+    prog(q => ht.beat(cyc(q, 30 * q + 10)), m('snsr', 2.5), Math.max(3, D - m('snsr', 2.8)), lin);
+    arrowTo(p, [800, 240], [800, 340], m('snsr', 2.5), { col: SNS, w: 4 });
+    txt(p, '↑ ЧСС · ↑ сократимость', 800, 580, m('snsr', 3), { size: 22, weight: 700, fill: SNS, anchor: 'middle' });
+    const vs = vessel(p, 'M1120 430H1400', 30);
+    put(vs.g, { o: 0 }); show(vs.g, m('snsr', 1));
+    prog(q => vs.set(lerp(30, 12, q)), m('snsr', 1.5), 1.2);
+    arrowTo(p, [960, 240], [1180, 400], m('snsr', 1), { col: SNS, w: 4 });
+    txt(p, 'сосуды неработающих мышц: сужение', 1260, 490, m('snsr', 1.5), { size: 21, weight: 700, fill: CON, anchor: 'middle' });
+    pill(p, '↑ систолическое АД', 1300, 300, m('snsr', 4), { col: SNS, size: 23 });
+    arrowTo(p, [1040, 210], [1180, 290], m('snsr', 4), { col: SNS, w: 4 });
+    infoCard(p, 740, 620, 800, 90, 'сердечный выброс растёт и перераспределяется', null, COL.task, m('snsr', 5.5), { size: 22 });
+    // the response grows with the working muscle mass and the intensity
+    const cf = curlFig(p, 110, 870, .55, .8, m('deg'));
+    curls(cf, m('deg', .3), Math.max(3, D - m('deg', .6)), 6, { lvl: .7 });
+    const bk = cycleErgo(p, 390, 870, .55, m('deg'));
+    prog(q => bk.crank(2 * Math.PI * 7 * q), m('deg', .3), Math.max(3, D - m('deg', .6)), lin);
+    [[210, .25, 'одна рука'], [630, .9, 'обе ноги']].forEach(([x, v, s]) => { const g = G(p, { o: 0 }); mk('rect', { x, y: 860 - 120 * v, width: 50, height: 120 * v, rx: 6, fill: SNS }, g); T(g, s, { x: x + 25, y: 885 - 0, size: 18, fill: COL.dim, anchor: 'middle' }); show(g, m('deg', 1)); });
+    txt(p, 'ответ ∝ масса работающих мышц и интенсивность', 380, 600, m('deg', 1), { size: 21, weight: 700, fill: COL.task, anchor: 'middle' });
+  }],
+
+  ['heart', 'Сердце', (m, D) => {
+    const p = panel(0);
+    txt(p, 'сердце при нагрузке', 800, 62, m('ht'), { size: 28, weight: 700, anchor: 'middle' });
+    const ht = heartEl(p, 360, 470, 1.45, m('ht'));
+    const san = G(ht.body, { x: -62, y: -34, o: 0 });
+    mk('circle', { r: 9, fill: COL.int, stroke: '#7a6a20', 'stroke-width': 2 }, san);
+    show(san, m('ht', .8));
+    txt(p, 'синусовый узел', 120, 230, m('ht', .8), { size: 21, weight: 700, fill: COL.int });
+    path(p, 'M200 240L262 400', { stroke: COL.int, 'stroke-width': 2, 'stroke-dasharray': '6 6' });
+    // the rate rises over the beat; the force of contraction rises from 'ino'
+    const t0 = m('ht'), dur = Math.max(4, D - t0), tI = m('ino');
+    const bpm = t => lerp(70, 140, clamp((t - t0) / Math.max(1, m('vag') - t0 + 2), 0, 1));
+    const e = ecgStrip(p, 760, 330, 760, 80, { col: COL.good, win: 4, t0: m('ht', .5) });
+    const hrT = txt(p, '', 1520, 230, m('ht', .5), { size: 34, weight: 700, fill: COL.good, anchor: 'end' });
+    let ph = 0, last = t0;
+    prog(q => {
+      const t = t0 + q * dur;
+      if (t < last) { ph = 0; last = t0; }
+      const steps = Math.ceil((t - last) / .02);
+      for (let i = 0; i < steps; i++) { const tt = last + (t - last) * (i + 1) / steps; ph += bpm(tt) / 60 * (t - last) / steps; }
+      last = t;
+      const b = ph % 1, k = t > tI ? lerp(1, 1.8, clamp((t - tI) / 1.5, 0, 1)) : 1, sq = b < .3 ? Math.sin(Math.PI * b / .3) : 0;
+      ht.beat(Math.min(1.6, sq * k)); put(san, { s: b < .08 ? 1.6 : 1 });
+      e.set(bpm(t), t - t0); hrT.textContent = `${Math.round(bpm(t))} уд/мин`;
+    }, t0, dur, lin);
+    txt(p, 'частота разрядов синусового узла ↑ → ЧСС ↑', 1140, 470, m('ht', 2), { size: 23, weight: 700, anchor: 'middle' });
+    pill(p, 'блуждающий нерв ↓', 980, 560, m('vag'), { col: VAG, size: 24 });
+    pill(p, 'симпатические влияния ↑', 1320, 560, m('vag', 1.2), { col: SNS, size: 24 });
+    infoCard(p, 760, 640, 760, 180, 'инотропное действие', 'волокна миокарда развивают большую силу — сократимость растёт', COL.task, m('ino'), { size: 23 });
+  }],
+
+  ['periph', 'Периферия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'периферия: кровь уходит к работающим мышцам', 800, 62, m('per'), { size: 28, weight: 700, anchor: 'middle' });
+    const ht = heartEl(p, 150, 470, .62, m('per'));
+    prog(q => ht.beat(cyc(q, 40)), m('per'), Math.max(4, D - m('per')), lin);
+    const man = vessel(p, 'M220 470H360M360 160V800', 30);
+    put(man.g, { o: 0 }); show(man.g, m('per'));
+    const BR = [['неработающие мышцы', 160, CON], ['почки', 280, CON], ['печень', 400, CON], ['селезёнка', 520, CON], ['органы брюшной полости', 640, CON], ['работающие мышцы', 790, DIL]];
+    const brs = BR.map(([s, y, c], i) => {
+      const v = vessel(p, `M360 ${y}H860`, 16);
+      put(v.g, { o: 0 }); show(v.g, m('per', .3));
+      const fd = flowDots(p, [370, y], [855, y], 6, '#ffd0c8', 4);
+      pill(p, s, 870 + uiW(s, 21) / 2 + 15, y, m('per', .3), { col: c, size: 21 });
+      return { v, fd, y };
+    });
+    let w = BR.map(() => 16);
+    prog(q => brs.forEach((b, i) => { if (i < 5) { w[i] = lerp(16, 7, q); b.v.set(w[i]); } }), m('shunt'), 1.5);
+    prog(q => { w[5] = lerp(16, 34, q); brs[5].v.set(w[5]); }, m('loc'), 1.5);
+    prog(q => brs.forEach((b, i) => b.fd.run(q * 6, w[i] / 16, true)), m('per', .5), Math.max(4, D - m('per', .8)), lin);
+    pillRow(p, ['Mg²⁺', 'Ca²⁺', 'АДФ', 'CO₂'], 620, 860, m('loc', 1), { col: DIL, size: 22 });
+    txt(p, 'местные метаболиты расширяют артерии работающей мышцы', 700, 740, m('loc', .5), { size: 20, fill: DIL, anchor: 'middle' });
+    // results on the right
+    infoCard(p, 1200, 100, 360, 150, 'общее периферическое сопротивление ↓', null, COL.whole, m('per', 1), { size: 21 });
+    infoCard(p, 1200, 270, 360, 120, 'вены остаются суженными', null, CON, m('loc', 4), { size: 21 });
+    infoCard(p, 1200, 410, 360, 250, 'сердечный выброс ↑', 'сократимость и ударный объём, ЧСС; суженные вены поднимают венозное давление', COL.task, m('co'), { size: 20 });
+    infoCard(p, 1200, 680, 360, 100, 'систолическое АД ↑', null, SNS, m('sbp'), { size: 21 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-cv', prompt: ['Сердце и сосуды при нагрузке. Верно или нет?'],
+    build: grid([
+      { parts: ['Сосуды неработающих мышц, почек и печени сужаются.'], ans: ['t'], why: 'Кровь уходит к работающим мышцам.' },
+      { parts: ['Общее периферическое сопротивление растёт.'], ans: ['f'], why: 'В итоге оно снижается: артерии работающих мышц расширены.' },
+      { parts: ['Артерии работающей мышцы расширяют местные продукты обмена, независимо от вегетативной системы.'], ans: ['t'], why: 'Mg²⁺, Ca²⁺, АДФ, CO₂.' },
+      { parts: ['Сила прессорного ответа не зависит от массы работающих мышц.'], ans: ['f'], why: 'Зависит: чем больше масса и интенсивность, тем сильнее ответ.' },
+      { parts: ['Влияние блуждающего нерва на сердце ослабевает.'], ans: ['t'], why: 'Вагусное влияние снижается, симпатическое растёт.' },
+    ], TF, { multi: false, text: true }),
+  }], done) }],
+
+  ['resp', 'Дыхание', (m, D) => {
+    const p = panel(0);
+    txt(p, 'дыхание при нагрузке', 800, 62, m('resp'), { size: 28, weight: 700, anchor: 'middle' });
+    const lu = lungsEl(p, 290, 430, 1.25, m('resp'));
+    const t0 = m('resp'), dur = Math.max(4, D - t0);
+    prog(q => { const k = clamp(q * 1.6, 0, 1); lu.breathe(cyc(q, 6 + 6 * q) * (.5 + .5 * k)); }, t0, dur, lin);
+    infoCard(p, 60, 640, 470, 200, 'ещё до начала работы', 'газообмен через альвеолярно-капиллярную мембрану растёт с 1–2-го вдоха', O2C, m('resp', 1), { size: 21 });
+    // what drives breathing
+    txt(p, 'что стимулирует дыхание', 1040, 130, m('stim'), { size: 24, weight: 700, anchor: 'middle' });
+    const st1 = ['CO₂ и H⁺ в венозной крови ↑', 'температура тела ↑', 'адреналин ↑', 'рецепторы суставов и мышц'];
+    const st2 = ['барорефлексы', 'защитные рефлексы', 'боль', 'эмоции', 'произвольное управление'];
+    st1.forEach((s, i) => pill(p, s, 860, 190 + i * 58, m('stim', 1 + i * 1.2), { col: COL.task, size: 21 }));
+    st2.forEach((s, i) => pill(p, s, 1310, 190 + i * 52, m('stim', 7 + i * .8), { col: COL.dim, size: 20 }));
+    // minute ventilation = rate × depth: a spirogram that gets faster and deeper
+    const x0 = 640, y0 = 690, w = 880, hh = 90;
+    const ax = G(p, { o: 0 });
+    path(ax, `M${x0} ${y0}H${x0 + w}`, { stroke: COL.faint, 'stroke-width': 2 });
+    T(ax, 'объём лёгких', { x: x0, y: y0 - hh - 22, size: 19, fill: COL.dim });
+    T(ax, 'время →', { x: x0 + w, y: y0 + 120, size: 19, fill: COL.dim, anchor: 'end' });
+    show(ax, m('mv'));
+    let d = '';
+    for (let i = 0; i <= 400; i++) { const u = i / 400, f = 3 + 9 * u * u, a = .35 + .65 * u; d += `${i ? 'L' : 'M'}${(x0 + u * w).toFixed(1)} ${(y0 - a * hh * Math.sin(2 * Math.PI * (3 * u + 4.5 * u * u * u))).toFixed(1)}`; }
+    draw(path(p, d, { stroke: O2C, 'stroke-width': 4 }, { d: 0 }), m('mv', .3), 3);
+    txt(p, 'минутная вентиляция = частота дыхания × дыхательный объём', 1080, 840, m('mv', .5), { size: 21, weight: 700, fill: O2C, anchor: 'middle' });
+    pill(p, 'схема', x0 + w - 40, y0 - hh - 30, m('mv'), { col: COL.dim, size: 18 });
+    pill(p, 'альвеолярная вентиляция × 10–20', 1080, 500, m('alv'), { col: COL.good, size: 28 });
+    txt(p, 'при тяжёлой работе: больше O₂ внутрь, лишний CO₂ наружу', 1080, 555, m('alv', 1), { size: 20, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['o2', 'Кислород для мышцы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'как мышца получает больше кислорода', 800, 62, m('o2'), { size: 28, weight: 700, anchor: 'middle' });
+    // more blood: the capillary widens, the cells run faster
+    const cap = vessel(p, 'M80 220H540', 18);
+    put(cap.g, { o: 0 }); show(cap.g, m('o2'));
+    const rb = flowDots(p, [90, 220], [535, 220], 7, '#ffb0a6', 7);
+    let cw = 18;
+    prog(q => { cw = lerp(18, 34, q); cap.set(cw); }, m('o2', 1), 1.4);
+    prog(q => rb.run(q * 8, cw / 18), m('o2'), Math.max(4, D - m('o2')), lin);
+    txt(p, '1. больше крови', 80, 160, m('o2'), { size: 24, weight: 700, fill: COL.good });
+    txt(p, '2. больше O₂ из каждого литра', 80, 320, m('ext'), { size: 24, weight: 700, fill: O2C });
+    // the oxyhaemoglobin dissociation curve (shape only): exercise shifts it right
+    const x0 = 680, y0 = 780, w = 820, h = 560, X = v => x0 + v / 100 * w;
+    chartAxes(p, x0, y0, w, h, 'насыщение гемоглобина O₂', 'PO₂ (парциальное давление O₂)', m('ext'));
+    const sat = (po, p50) => po ** 2.7 / (po ** 2.7 + p50 ** 2.7);
+    draw(path(p, fnPath(x0, y0, w, h, x => sat(x * 100, 27)), { stroke: COL.chalk, 'stroke-width': 5 }, { d: 0 }), m('ext', .5), 1.4);
+    const shifted = path(p, fnPath(x0, y0, w, h, x => sat(x * 100, 38)), { stroke: COL.task, 'stroke-width': 5, 'stroke-dasharray': '12 8' }, { o: 0 });
+    show(shifted, m('acid', 2));
+    txt(p, 'покой', X(70), y0 - sat(70, 27) * h - 20, m('ext', 1.5), { size: 20, fill: COL.chalk, weight: 700 });
+    txt(p, 'работающая мышца', X(64), y0 - sat(64, 38) * h + 44, m('acid', 2.5), { size: 20, fill: COL.task, weight: 700 });
+    // PO2 falls in the working muscle: the point slides down the curve
+    const pt = put(mk('circle', { r: 11, fill: O2C, stroke: COL.board, 'stroke-width': 2 }, p), { o: 0 });
+    const lbl = txt(p, '', 0, 0, m('po2'), { size: 19, fill: O2C, weight: 700 });
+    const at = (po, p50) => [X(po), y0 - sat(po, p50) * h];
+    show(pt, m('po2'));
+    prog(q => { const po = lerp(95, 25, q), [x, y] = at(po, 27); put(pt, { x, y }); }, m('po2', .5), 1.8);
+    show(put(path(p, `M${X(25)} ${y0}V${y0 - h}`, { stroke: COL.faint, 'stroke-width': 2, 'stroke-dasharray': '6 6' }), { o: 0 }), m('po2', 2));
+    txt(p, 'PO₂ в мышце', X(25), y0 + 32, m('po2', 2), { size: 19, fill: COL.dim, anchor: 'middle' });
+    whenAt(m('po2', 2.3), () => { put(lbl, { x: X(25) + 18, y: at(25, 27)[1] + 6 }); lbl.textContent = 'O₂ отдан'; });
+    prog(q => { const [x, y] = at(25, lerp(27, 38, q)); put(pt, { x, y }); }, m('acid', 2.2), 1.2);
+    whenAt(m('acid', 3.4), () => { put(lbl, { x: X(25) + 18, y: at(25, 38)[1] + 6 }); lbl.textContent = 'отдано ещё больше'; });
+    pill(p, 'схема', x0 + w - 30, y0 - h + 10, m('ext'), { col: COL.dim, size: 18 });
+    // the reasons, on the left
+    [['PO₂ в мышце ↓ — гемоглобин легче отдаёт O₂', 'po2', O2C], ['CO₂ ↑: закисление (H⁺ ↑)', 'acid', COL.task], ['температура ткани ↑', 'acid', COL.bad], ['2,3-ДФГ в эритроцитах ↑', 'dpg', COL.real]].forEach(([s, k, c], i) => {
+      const g = G(p, { o: 0 }), y = 380 + i * 110;
+      mk('rect', { x: 60, y, width: 560, height: 92, rx: 14, fill: PANEL, stroke: c, 'stroke-width': 2.5 }, g);
+      put(para(g, s, 84, y + 40, null, { size: 22, weight: 600, maxW: 510 }), { o: 1 });
+      show(g, m(k, k === 'acid' ? (i === 1 ? 0 : 1.2) : 0));
+    });
+    txt(p, 'больше O₂ отдаётся при том же PO₂', 1090, 160, m('acid', 3), { size: 22, weight: 700, fill: COL.task, anchor: 'middle' });
+  }],
+
+  ['use', 'Потребление и a-v разница', (m, D) => {
+    const p = panel(0);
+    txt(p, 'сколько кислорода мышца потребит', 800, 62, m('use'), { size: 28, weight: 700, anchor: 'middle' });
+    const fb = fibreX(p, 1250, 300, 170, { t0: m('use') });
+    fb.set({ cap: .8, mito: .8, enz: .6 });
+    ['васкуляризация мышцы', 'состав волокон', 'число митохондрий', 'окислительные ферменты'].forEach((s, i) => pill(p, s, 520, 150 + i * 75, m('use', 1 + i * 1.1), { col: [BLOOD_A, ANAT.muscle, '#e0904a', ANAT.taut][i], size: 25 }));
+    // arterial and venous blood: the a-vO2 difference
+    const yv = 560;
+    const art = vessel(p, `M120 ${yv}H560`, 26, BLOOD_A), ven = vessel(p, `M1040 ${yv}H1480`, 26, mix(BLOOD_A, BLOOD_V, .55));
+    put(art.g, { o: 0 }); put(ven.g, { o: 0 }); show(art.g, m('avo2')); show(ven.g, m('avo2'));
+    const bed = G(p, { o: 0 });
+    mk('rect', { x: 560, y: yv - 60, width: 480, height: 120, rx: 18, fill: mix(ANAT.muscle, COL.board, .45), stroke: ANAT.muscle, 'stroke-width': 2 }, bed);
+    path(bed, `M560 ${yv}C640 ${yv - 50} 720 ${yv + 50} 800 ${yv}S960 ${yv - 50} 1040 ${yv}`, { stroke: mix(BLOOD_A, BLOOD_V, .3), 'stroke-width': 10 });
+    T(bed, 'работающая мышца', { x: 800, y: yv - 72, size: 20, fill: COL.dim, anchor: 'middle' });
+    show(bed, m('avo2'));
+    const o2d = [0, 1, 2, 3, 4].map(() => put(mk('circle', { r: 5, fill: O2C }, p), { o: 0 }));
+    prog(q => o2d.forEach((d, i) => { const u = (q * 5 + i / 5) % 1; put(d, { x: 640 + i * 80, y: yv - 6 + 50 * u, o: 1 - u }); }), m('avo2', .5), Math.max(3, D - m('avo2', .8)), lin);
+    const bar = (x, v, c, s, t0) => { const g = G(p, { o: 0 }); mk('rect', { x, y: 820 - 180 * v, width: 70, height: 180 * v, rx: 8, fill: c }, g); T(g, s, { x: x + 35, y: 850, size: 19, fill: COL.dim, anchor: 'middle' }); show(g, t0); };
+    bar(300, 1, BLOOD_A, 'O₂ в артерии', m('avo2', 1));
+    bar(1230, .45, mix(BLOOD_A, BLOOD_V, .55), 'O₂ в вене', m('avo2', 1.5));
+    const br = G(p, { o: 0 });
+    path(br, 'M370 640H1330', { stroke: COL.faint, 'stroke-width': 1.5, 'stroke-dasharray': '6 6' });
+    path(br, 'M1320 640V739M1310 640H1330M1310 739H1330', { stroke: COL.task, 'stroke-width': 4 });
+    T(br, 'артериовенозная', { x: 1340, y: 680, size: 21, weight: 700, fill: COL.task });
+    T(br, 'разница по O₂', { x: 1340, y: 707, size: 21, weight: 700, fill: COL.task });
+    show(br, m('avo2', 2.5));
+    pill(p, 'схема', 1480, 470, m('avo2'), { col: COL.dim, size: 18 });
+    txt(p, 'отражает окислительную способность мышцы', 800, 440, m('avo2', 3), { size: 23, weight: 700, fill: COL.task, anchor: 'middle' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-hb', prompt: ['Что помогает гемоглобину отдать кислород работающей мышце?'],
+    build: grid([
+      { parts: ['Падение парциального давления O₂ в мышце'], ans: ['y'], why: 'При низком PO₂ гемоглобин легче отдаёт кислород.' },
+      { parts: ['Закисление ткани (больше ионов H⁺)'], ans: ['y'], why: 'Больше O₂ отдаётся при том же PO₂.' },
+      { parts: ['Охлаждение мышцы'], ans: ['n'], why: 'Помогает нагрев ткани, а не охлаждение.' },
+      { parts: ['Рост 2,3-дифосфоглицерата в эритроцитах'], ans: ['y'], why: 'Он образуется при гликолизе и облегчает отдачу O₂.' },
+      { parts: ['Снижение углекислого газа в ткани'], ans: ['n'], why: 'Наоборот: CO₂ растёт, ткань закисляется.' },
+    ], [['y', 'Помогает', COL.good], ['n', 'Нет', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Через симпатическую систему: ЧСС, сократимость и систолическое АД растут; ответ ∝ массе мышц и интенсивности.', 'w1'],
+     ['Кровь уходит от неработающих органов к работающим мышцам; общее сопротивление падает, выброс растёт.', 'w2'],
+     ['Дыхание усиливается ещё до старта; альвеолярная вентиляция — в 10–20 раз.', 'w3'],
+     ['Больше O₂ — за счёт кровотока и отдачи гемоглобином; окислительную способность мышцы отражает a-v разница.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-vessels', prompt: ['Что происходит с этими сосудами во время аэробной нагрузки?'],
+    build: grid([
+      { parts: ['Артерии работающих мышц'], ans: ['dil'], why: 'Их расширяют местные продукты обмена.' },
+      { parts: ['Сосуды почек'], ans: ['con'], why: 'Кровь уходит к работающим мышцам.' },
+      { parts: ['Сосуды неработающих мышц'], ans: ['con'], why: 'Симпатическое сужение.' },
+      { parts: ['Вены работающих мышц'], ans: ['con'], why: 'Вены и в работающих, и в неработающих мышцах остаются суженными.' },
+      { parts: ['Сосуды органов брюшной полости'], ans: ['con'], why: 'Кровь перераспределяется к мышцам.' },
+    ], [['con', 'Сужаются', CON], ['dil', 'Расширяются', DIL]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-mass', prompt: ['Пациент работает с одинаковой интенсивностью: сначала одной рукой на ручном эргометре, потом обеими ногами на велоэргометре. Когда симпатический ответ сильнее?'],
+    build: choice([
+      ['На велоэргометре: работает большая масса мышц'],
+      ['Одинаково: интенсивность ведь та же'],
+      ['При работе рукой: мышцы мельче, им тяжелее'],
+      ['Ответ не зависит от того, какие мышцы работают'],
+    ], 0, 'Сила прессорного ответа соответствует массе работающих мышц и интенсивности нагрузки.',
+    [null, 'Кроме интенсивности важна масса работающих мышц.', 'Сила ответа растёт с массой мышц, а не с их размером по отдельности.', 'Зависит: от массы работающих мышц.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

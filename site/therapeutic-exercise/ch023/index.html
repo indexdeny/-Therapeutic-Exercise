@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROM: локоть, предплечье, запястье, кисть — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 23, title: 'ROM: локоть, предплечье, запястье, кисть', minutes: 8, language: 'ru', next: '../ch024/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch023/cards.ru.json
+const CARDS_SHORT = {
+  "одна рука\nдистальная часть предплечья и запястье; она же управляет супинацией и пронацией": "запястье + супинация и пронация",
+  "другая рука\nподдерживает локоть": "поддерживает локоть",
+  "локоть согнут и разогнут\nпри разогнутом — стабилизировать локоть, чтобы не вращалось плечо": "стабилизировать локоть",
+  "захват за запястье\nуказательный палец поддерживает кисть, остальные — по сторонам предплечья": "указательный палец поддерживает кисть",
+  "захват\nкисть сразу дистальнее сустава, другая рука стабилизирует предплечье; сгибание и разгибание, лучевое и локтевое отведение": "кисть дистальнее сустава; предплечье стабильно",
+};
+// cards-short end
+
+const SKIN = '#d8d1c1', HAND = '#b9cfe0';
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+// Side view of a forearm and hand, palm down. Angles in degrees, positive = flexion: wrist w, finger mcp, pip, dip.
+// The long finger flexor tendon runs on the palm side and the extensor on the back; each brightens when pulled taut.
+function handModel(p, x, y, s = 1) {
+  const g = G(p, { o: 0 }), defs = mk('defs', {}, g), L = [86, 48, 32, 25].map(v => v * s), R = [14, 10, 8.5, 7.5].map(v => v * s);
+  limbEl(g, defs, SKIN, 24 * s, 19 * s, '#8a8476').set([x - 300 * s, y], [x, y]);
+  const segs = R.map(r => limbEl(g, defs, SKIN, r, r * .85, '#8a8476'));
+  const flex = mk('path', { fill: 'none', 'stroke-width': 3.5 * s, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+  const ext = mk('path', { fill: 'none', 'stroke-width': 3.5 * s, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+  const h = { g, ang: { w: 0, mcp: 20, pip: 30, dip: 15 }, tension: { flex: 0, ext: 0 } };
+  h.set = (a = {}) => {
+    Object.assign(h.ang, a);
+    const { w, mcp, pip, dip } = h.ang, phis = [w, w + mcp, w + mcp + pip, w + mcp + pip + dip];
+    let P = [x, y];
+    const joints = [P], f = v => v.toFixed(1);
+    phis.forEach((ph, i) => {
+      const Q = [P[0] + L[i] * Math.cos(rad(ph)), P[1] + L[i] * Math.sin(rad(ph))];
+      segs[i].set(P, Q);
+      joints.push(Q); P = Q;
+    });
+    const side = sg => joints.map((J, i) => { const ph = phis[Math.min(i, 3)]; return [J[0] - sg * Math.sin(rad(ph)) * 11 * s, J[1] + sg * Math.cos(rad(ph)) * 11 * s]; });
+    const line = (pts, start) => `M${f(start[0])} ${f(start[1])}` + pts.map(Q => `L${f(Q[0])} ${f(Q[1])}`).join('');
+    const tot = w + mcp + pip + dip;
+    h.tension.flex = clamp((-tot - 10) / 40, 0, 1);
+    h.tension.ext = clamp((tot - 200) / 60, 0, 1);
+    flex.setAttribute('d', line(side(1), [x - 220 * s, y + 11 * s]));
+    ext.setAttribute('d', line(side(-1), [x - 220 * s, y - 11 * s]));
+    flex.setAttribute('stroke', mix(mix(ANAT.tendon, COL.board, .3), ANAT.taut, h.tension.flex));
+    ext.setAttribute('stroke', mix(mix(ANAT.tendon, COL.board, .3), ANAT.taut, h.tension.ext));
+    return h;
+  };
+  h.set();
+  return h;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Локоть, предплечье, кисть', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 3 · Урок 23', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Объём движений: локоть, предплечье,', { x: 800, y: 315, size: 54, weight: 600, anchor: 'middle' });
+    T(g, 'запястье и кисть', { x: 800, y: 380, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'мелкие суставы и двусуставные мышцы руки', 800, 460, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const hm = handModel(art, 900, 690, 1);
+    show(hm.g, 0);
+    show(art, m('sub', .2));
+    prog(q => { const v = Math.sin(2 * Math.PI * q); hm.set({ w: 60 * v, mcp: 20 - 15 * v, pip: 30 - 25 * v, dip: 15 - 12 * v }); }, m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['elbow', 'Локоть', (m) => {
+    const p = panel(0);
+    const el = elbowModel(p, { x: 150, y: 560, s: 2.3 });
+    put(el.g, { o: 0 }); show(el.g, .2);
+    // the therapist's hands: one at the distal forearm and wrist, the other under the elbow
+    const grip = () => { const e = mk('ellipse', { rx: 34, ry: 24, fill: HAND, 'fill-opacity': .9, stroke: '#7d93a3', 'stroke-width': 2, opacity: 0 }, p); return e; };
+    const gW = grip(), gE = grip(), elSet = el.set;
+    el.set = ang => { elSet(ang); const S2 = v => [150 + v[0] * 2.3, 560 + v[1] * 2.3], W = S2(el.pts.W), E = S2(el.pts.E);
+      put(gW, { x: W[0], y: W[1], r: -ang }); put(gE, { x: E[0] + 4, y: E[1] + 52, r: 0 }); return el; };
+    el.set(150);
+    show(gW, m('grip', .4)); show(gE, m('grip', 2.7));
+    prog(q => el.set(lerp(175, 40, (1 - Math.cos(2 * Math.PI * 2 * q)) / 2)), m('grip', .5), m('scap') - m('grip', .5), lin);
+    infoCard(p, 880, 110, 620, 170, 'одна рука', 'дистальная часть предплечья и запястье; она же управляет супинацией и пронацией', HAND, m('grip'), { size: 23 });
+    infoCard(p, 880, 300, 620, 110, 'другая рука', 'поддерживает локоть', HAND, m('grip', 2.5), { size: 23 });
+    ['в супинации', 'в пронации'].forEach((s, i) => pill(p, s, 1050 + i * 260, 460, m('both', .3 + i * .6), { col: COL.whole, size: 26 }));
+    labelBox(p, 1190, 600, 620, ['лопатка не наклоняется вперёд', 'иначе истинный объём скрыт'], COL.int, m('scap'), { size: 25 });
+    txt(p, 'передняя капсула натягивается у полного разгибания', 470, 760, m('scap', 1.5), { size: 22, fill: ANAT.taut, anchor: 'middle' });
+    pill(p, 'пояснение: не из книги', 470, 810, m('scap', 1.5), { col: COL.dim, size: 19 });
+    prog(q => el.set(lerp(40, 176, q)), m('scap', 1), 1.4, io);
+  }],
+
+  ['biceps', 'Двуглавая мышца', (m) => {
+    const p = panel(0), GY = 680;
+    ground(p, 180, 680, GY, .2);
+    const f = fig(p, { x: 430, y: GY - 182 * .95, s: .95, o: 0 }); show(f.g, .2);
+    muscleOn(f, ...MUSCLE.biceps, { after: 'hdN', w: 13 });
+    txt(p, 'двуглавая мышца — двусуставная', 1080, 120, m('two'), { size: 28, weight: 700, fill: COL.nat, anchor: 'middle' });
+    pill(p, 'край стола · на животе · сидя · стоя', 1080, 180, m('two', 1.5), { col: COL.dim, size: 22 });
+    const S3 = [['1', 'пронировать предплечье', 'pr', 0], ['2', 'разогнуть локоть', 'pr', 1.4], ['3', 'разгибать плечо до сопротивления', 'ext', 0]];
+    S3.forEach(([n, s, k, off], i) => {
+      const g = G(p, { o: 0 }), y = 280 + i * 100;
+      mk('circle', { cx: 830, cy: y, r: 24, fill: COL.task }, g);
+      T(g, n, { x: 830, y: y + 9, size: 26, weight: 700, fill: COL.board, anchor: 'middle' });
+      T(g, s, { x: 870, y: y + 9, size: 27, weight: 600 });
+      show(g, m(k, off));
+    });
+    poseTo(f, { eN: 0, aN: 4 }, m('pr', 1.4), 1);
+    poseTo(f, { aN: -48, t: -2 }, m('ext', .3), 1.6);
+    labelBox(p, 1080, 640, 640, ['сопротивление в передней части плеча', 'полная длина мышцы'], ANAT.stretch, m('ext', 2.2), { size: 25 });
+  }],
+
+  ['triceps', 'Трёхглавая мышца', (m) => {
+    const p = panel(0), GY = 680;
+    ground(p, 180, 680, GY, .2);
+    const f = fig(p, { x: 430, y: GY - 182 * .95, s: .95, o: 0 }); show(f.g, .2);
+    muscleOn(f, ...MUSCLE.triceps, { after: 'hdN', w: 13 });
+    txt(p, 'длинная головка трёхглавой', 1080, 120, m('pos'), { size: 28, weight: 700, fill: COL.nat, anchor: 'middle' });
+    pill(p, 'почти норма — сидя или стоя; сильное ограничение — можно лёжа', 1080, 180, m('pos', 1), { col: COL.dim, size: 21 });
+    const S2 = [['1', 'полностью согнуть локоть', 'flx'], ['2', 'сгибать плечо, поднимая под локтем', 'sh']];
+    S2.forEach(([n, s, k], i) => {
+      const g = G(p, { o: 0 }), y = 300 + i * 110;
+      mk('circle', { cx: 830, cy: y, r: 24, fill: COL.task }, g);
+      T(g, n, { x: 830, y: y + 9, size: 26, weight: 700, fill: COL.board, anchor: 'middle' });
+      T(g, s, { x: 870, y: y + 9, size: 27, weight: 600 });
+      show(g, m(k));
+    });
+    poseTo(f, { eN: 145 }, m('flx', .3), 1.2);
+    poseTo(f, { aN: 160 }, m('sh', .3), 1.8);
+    labelBox(p, 1080, 640, 640, ['дискомфорт в задней части плеча', 'полный объём'], ANAT.taut, m('end'), { size: 25 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => {
+    const p = panel(0), GY = 680;
+    ground(p, 120, 520, GY, .1);
+    muscleOn(fig(p, { x: 320, y: GY - 182 * .8, s: .8, pose: { aN: -45, eN: 0 } }), ...MUSCLE.biceps, { after: 'hdN', w: 12 });
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-where', prompt: ['Предплечье пронировано, локоть разогнут, плечо разогнуто за ноль. Где пациент почувствует растяжение?'],
+    build: choice([['В передней части плеча'], ['В задней части плеча'], ['В предплечье']], 0,
+      'Так удлиняется двуглавая мышца — сопротивление в передней части плеча.',
+      [null, 'Задняя часть плеча — при удлинении длинной головки трёхглавой.', 'Предплечье — при удлинении длинных мышц пальцев.']),
+  }], done) }],
+
+  ['pron', 'Пронация и супинация', (m) => {
+    const p = panel(0), cx = 420, top = 200, bot = 560;
+    txt(p, 'предплечье спереди', cx, 140, .2, { size: 24, fill: COL.dim, anchor: 'middle' });
+    const fd = mk('defs', {}, p), fs = limbEl(p, fd, SKIN, 82, 60, '#8a8476');
+    fs.set([cx + 10, top + 30], [cx + 15, bot - 10]); fs.e.setAttribute('opacity', .32);
+    const ul = mk('path', { fill: 'none', stroke: ANAT.bone, 'stroke-width': 16, 'stroke-linecap': 'round' }, p);
+    ul.setAttribute('d', `M${cx + 40} ${top}L${cx + 40} ${bot}`);
+    const ra = mk('path', { fill: 'none', stroke: '#f1e6c8', 'stroke-width': 18, 'stroke-linecap': 'round' }, p);
+    const hand = mk('rect', { rx: 22, height: 120, fill: SKIN, stroke: '#8a8476', 'stroke-width': 2 }, p);
+    const lab = T(p, 'ладонь', { size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+    T(p, 'локтевая', { x: cx + 70, y: top + 30, size: 21, fill: COL.dim });
+    T(p, 'лучевая', { x: cx - 70, y: top + 30, size: 21, fill: COL.dim, anchor: 'end' });
+    const set = v => {   // v: 0 supination, 1 pronation
+      const dx = lerp(-40, 70, v), ex = cx + dx, f = n => n.toFixed(1);
+      ra.setAttribute('d', `M${cx - 40} ${top}Q${f(cx - 40 + dx * .3)} ${f((top + bot) / 2)} ${f(ex)} ${bot}`);
+      const w = 120 * Math.abs(Math.cos(Math.PI * v)) + 18;
+      hand.setAttribute('x', f(cx + 15 - w / 2)); hand.setAttribute('y', bot + 10); hand.setAttribute('width', f(w));
+      hand.setAttribute('fill', v < .5 ? SKIN : '#b8b0a0');
+      lab.textContent = v < .5 ? 'ладонь' : 'тыл';
+      put(lab, { x: cx + 15, y: bot + 78 });
+    };
+    set(0);
+    prog(q => set((1 - Math.cos(2 * Math.PI * 2 * q)) / 2), m('roll', -.5), m('pre', 3) - m('roll', -.5), lin);
+    infoCard(p, 880, 110, 620, 150, 'локоть согнут и разогнут', 'при разогнутом — стабилизировать локоть, чтобы не вращалось плечо', COL.whole, m('both'), { size: 22 });
+    infoCard(p, 880, 290, 620, 150, 'захват за запястье', 'указательный палец поддерживает кисть, остальные — по сторонам предплечья', HAND, m('grip'), { size: 22 });
+    labelBox(p, 1190, 500, 620, ['лучевая кость перекатывается вокруг локтевой'], COL.task, m('roll'), { size: 25 });
+    pill(p, 'или зажать предплечье между ладонями', 1190, 580, m('alt'), { col: HAND, size: 22 });
+    labelBox(p, 1190, 680, 620, ['не скручивать кисть — бережём запястье'], COL.bad, m('pre'), { size: 25 });
+  }],
+
+  ['wrist', 'Запястье', (m) => {
+    const p = panel(0);
+    txt(p, 'пальцы свободны', 420, 130, m('free'), { size: 27, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'пальцы в кулаке', 1180, 130, m('free', 4), { size: 27, weight: 700, fill: COL.bad, anchor: 'middle' });
+    const a = handModel(p, 560, 330, 1.05), b = handModel(p, 1320, 330, 1.05);
+    show(a.g, m('wr', -.3)); show(b.g, m('free', 4));
+    b.set({ mcp: 85, pip: 100, dip: 70 });
+    prog(q => { const v = (1 - Math.cos(2 * Math.PI * 2 * q)) / 2; a.set({ w: 80 * v, mcp: 20 - 25 * v, pip: 30 - 30 * v, dip: 15 - 15 * v }); }, m('wr', .3), m('free', 4) - m('wr', .3), lin);
+    prog(q => b.set({ w: 45 * Math.sin(Math.PI * q) }), m('free', 4.5), 3, lin);
+    para(p, 'при сгибании запястья пальцы сами разгибаются — полный объём', 420, 560, m('free', 1.5), { size: 23, maxW: 560, anchor: 'middle', fill: COL.good });
+    para(p, 'разгибатель натянут (синий) — запястье сгибается меньше', 1180, 560, m('free', 5.5), { size: 23, maxW: 560, anchor: 'middle', fill: COL.bad });
+    infoCard(p, 90, 640, 1420, 130, 'захват', 'кисть сразу дистальнее сустава, другая рука стабилизирует предплечье; сгибание и разгибание, лучевое и локтевое отведение', HAND, m('wr'), { size: 22 });
+  }],
+
+  ['hand', 'Свод и большой палец', (m) => {
+    const p = panel(0), cx = 420, cy = 380;
+    txt(p, 'головки пястных костей (вид с конца пальцев)', cx, 150, m('arch'), { size: 23, fill: COL.dim, anchor: 'middle' });
+    const heads = [0, 1, 2, 3].map(() => mk('circle', { r: 30, fill: ANAT.bone, stroke: '#9c9585', 'stroke-width': 2 }, p));
+    const arc = mk('path', { fill: 'none', stroke: COL.task, 'stroke-width': 3, 'stroke-dasharray': '8 6' }, p);
+    const setArch = k => {   // k: 0 flat, 1 cupped
+      heads.forEach((c, i) => { const x = cx - 105 + i * 70, y = cy + k * 50 * (1 - ((i - 1.5) / 1.5) ** 2) - 25 * k; c.setAttribute('cx', x); c.setAttribute('cy', y.toFixed(1)); });
+      arc.setAttribute('d', `M${cx - 140} ${cy + 40}Q${cx} ${(cy + 40 + 110 * k).toFixed(1)} ${cx + 140} ${cy + 40}`);
+    };
+    setArch(.3);
+    [...heads, arc].forEach(e => { put(e, { o: 0 }); show(e, m('arch')); });
+    prog(q => setArch(.5 + .5 * Math.sin(2 * Math.PI * 2 * q)), m('arch', .5), m('thumb') - m('arch', .5), lin);
+    txt(p, 'к ладони — свод больше; к тылу — свод плоский', cx, 520, m('arch', 1), { size: 23, fill: COL.task, anchor: 'middle' });
+    // the thumb web space
+    const T0 = [1100, 420], ix = path(p, `M${T0[0]} ${T0[1]}L${T0[0] + 40} ${T0[1] - 230}`, { stroke: SKIN, 'stroke-width': 26 }, { o: 0 });
+    const th = path(p, '', { stroke: SKIN, 'stroke-width': 28 }, { o: 0 }), web = mk('path', { fill: COL.good, 'fill-opacity': .25 }, p);
+    const setTh = k => {   // k: 0 adducted, 1 extended and abducted
+      const a = rad(lerp(-20, -75, k)), E = [T0[0] - 150 * Math.cos(a), T0[1] + 150 * Math.sin(a)];
+      th.setAttribute('d', `M${T0[0]} ${T0[1]}L${E[0].toFixed(1)} ${E[1].toFixed(1)}`);
+      web.setAttribute('d', `M${T0[0]} ${T0[1]}L${E[0].toFixed(1)} ${E[1].toFixed(1)}L${T0[0] + 34} ${T0[1] - 190}Z`);
+    };
+    setTh(0);
+    show(ix, m('thumb')); show(th, m('thumb')); put(web, { o: 0 }); show(web, m('thumb'));
+    prog(q => setTh((1 - Math.cos(2 * Math.PI * q)) / 2), m('thumb', .5), 4, lin);
+    para(p, 'разгибание и отведение большого пальца сохраняют промежуток для функции кисти', 1150, 520, m('thumb', 1), { size: 23, maxW: 600, anchor: 'middle', fill: COL.good });
+    pill(p, 'двигать 1-ю пястную, стабилизируя трапециевидную', 1150, 640, m('thumb', 3), { col: HAND, size: 22 });
+  }],
+
+  ['fingers', 'Суставы пальцев', (m) => {
+    const p = panel(0);
+    const h = handModel(p, 760, 360, 1.6);
+    show(h.g, m('one', -.3));
+    h.set({ w: 0, mcp: 0, pip: 0, dip: 0 });
+    const marks = [['MCP', 'mcp'], ['PIP', 'pip'], ['DIP', 'dip']];
+    marks.forEach(([s, k], i) => prog(q => h.set({ [k]: 70 * Math.sin(Math.PI * q) }), m('one', .5 + i * 1.3), 1.2, lin));
+    txt(p, 'стабилизировать проксимальную кость, двигать дистальную', 800, 130, m('one'), { size: 27, weight: 700, fill: HAND, anchor: 'middle' });
+    pill(p, 'несколько суставов сразу — при хорошей стабилизации', 800, 620, m('sev'), { col: COL.whole, size: 24 });
+    labelBox(p, 800, 720, 900, ['для полного объёма суставов — менять положение запястья'], COL.int, m('ten'), { size: 25 });
+    prog(q => h.set({ mcp: 60 * Math.sin(Math.PI * q), pip: 60 * Math.sin(Math.PI * q) }), m('sev', .4), 2, lin);
+  }],
+
+  ['extr', 'Длинные мышцы пальцев', (m) => {
+    const p = panel(0);
+    const h = handModel(p, 860, 470, 1.5);
+    show(h.g, m('ext', -.3));
+    h.set({ w: 30, mcp: 60, pip: 70, dip: 50 });
+    prog(q => h.set({ dip: lerp(50, 0, q) }), m('dip'), 1, io);
+    prog(q => h.set({ pip: lerp(70, 0, q) }), m('dip', 2.2), 1, io);
+    prog(q => h.set({ mcp: lerp(60, 0, q) }), m('mcp', .3), 1, io);
+    prog(q => h.set({ w: lerp(30, -60, q) }), m('wr', .6), 2, io);
+    const S4 = [['1', 'дистальный межфаланговый', 'dip', 0], ['2', 'проксимальный межфаланговый', 'dip', 2.2], ['3', 'пястно-фаланговый', 'mcp', 0], ['4', 'разгибание запястья', 'wr', 0]];
+    S4.forEach(([n, s, k, off], i) => {
+      const g = G(p, { o: 0 }), x = 110 + i * 370;
+      mk('circle', { cx: x + 24, cy: 130, r: 22, fill: COL.task }, g);
+      T(g, n, { x: x + 24, y: 139, size: 24, weight: 700, fill: COL.board, anchor: 'middle' });
+      put(para(g, s, x + 60, 124, null, { size: 22, maxW: 290, weight: 600 }), { o: 1 });
+      show(g, m(k, off));
+    });
+    labelBox(p, 800, 650, 760, ['сгибатель натянут — дискомфорт в предплечье', 'мышцы удлинены полностью'], ANAT.stretch, m('wr', 2.6), { size: 25 });
+    txt(p, 'с дистального сустава — меньше сдавливание мелких суставов', 800, 760, m('dist'), { size: 23, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-order', prompt: ['Как удлинить длинные сгибатели пальцев?'],
+    build: choice([
+      ['Дистальный межфаланговый → проксимальный → пястно-фаланговый → разгибание запястья'],
+      ['Сначала разогнуть запястье, потом пальцы'],
+      ['Разогнуть все суставы одновременно рывком'],
+    ], 0, 'Начинают с самого дистального сустава, удерживают пальцы и в конце разгибают запястье.',
+    [null, 'Порядок обратный: от дистального сустава пальца к запястью.', 'Рывки недопустимы; движение — по порядку и плавно.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Локоть — в супинации и пронации; лопатка не наклоняется вперёд.', 'w1'],
+     ['Двуглавая: пронация, разгибание локтя, затем плеча; трёхглавая: сгибание локтя, затем плеча.', 'w2'],
+     ['Пронация и супинация — лучевая кость вокруг локтевой, кисть не скручивать.', 'w3'],
+     ['Объём суставов — пальцы свободны; длинные мышцы — от дистального сустава к запястью.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-what', prompt: ['Что удлиняется?'],
+    build: grid([
+      { parts: ['Пронация, разгибание локтя, затем разгибание плеча'], ans: ['b'], why: 'Двуглавая мышца плеча.' },
+      { parts: ['Полное сгибание локтя, затем сгибание плеча'], ans: ['t'], why: 'Длинная головка трёхглавой.' },
+      { parts: ['Пальцы разогнуты по очереди, затем разгибание запястья'], ans: ['f'], why: 'Длинные сгибатели пальцев.' },
+      { parts: ['Пальцы согнуты в кулак, затем сгибание запястья'], ans: ['e'], why: 'Длинные разгибатели пальцев.' },
+      { parts: ['Дискомфорт в задней части плеча'], ans: ['t'], why: 'Длинная головка трёхглавой.' },
+    ], [['b', 'Двуглавая', COL.nat], ['t', 'Трёхглавая', COL.whole], ['f', 'Сгибатели пальцев', COL.task], ['e', 'Разгибатели пальцев', COL.good]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['При разгибании локтя лопатка должна наклоняться вперёд.'], ans: ['f'], why: 'Неверно: это маскирует истинный объём.' },
+      { parts: ['Пронация — перекатывание лучевой кости вокруг локтевой.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Чтобы получить полный объём запястья, пальцы держат в кулаке.'], ans: ['f'], why: 'Неверно: пальцы оставляют свободными.' },
+      { parts: ['Удлинение длинных мышц пальцев начинают с самого дистального сустава.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['При удлинённых длинных мышцах достигается полный объём суставов пальцев.'], ans: ['f'], why: 'Неверно: полного объёма суставов при этом нет.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

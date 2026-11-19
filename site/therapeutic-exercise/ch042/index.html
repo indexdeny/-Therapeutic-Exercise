@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Термины мобилизации — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 42, title: 'Мобилизация и манипуляция: термины', minutes: 7, language: 'ru', next: '../ch043/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch042/cards.ru.json
+const CARDS_SHORT = {
+  "мобилизация = манипуляция\nручные приёмы: уменьшают боль и возвращают движение, которое ограничивает механика самого сустава": "уменьшают боль, возвращают движение",
+  "отличие от растяжки (гл. 4)\nнацелена на капсулу · повторяет движение поверхностей · почти не сжимает хрящ": "на капсулу, почти не сжимает хрящ",
+  "самомобилизация\nпациент сам: тракция или скольжение, сила — на капсулу": "сам: тракция или скольжение",
+  "положение покоя (resting position)\nоткрытое положение: наибольшая подвижность, капсула и связки натянуты меньше всего": "наибольшая подвижность",
+  "в нём\nпроверяют суставную игру · проводят первую процедуру": "суставная игра + первая процедура",
+  "манипуляция под наркозом\nспайки разрывают толчком или растяжкой; терапевт может помогать и продолжать лечение": "спайки разрывают толчком",
+  "мышечная энергия\nглубокая мышца у сустава; крестцово-подвздошный сустав и верх шеи — главы 15, 16": "глубокая мышца у сустава",
+};
+// cards-short end
+
+const HAND = '#b9cfe0';
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const gripOval = (p, k = 1) => { const e = mk('ellipse', { rx: 24 * k, ry: 16 * k, fill: HAND, 'fill-opacity': .9, stroke: '#7d93a3', 'stroke-width': 2 }, p); put(e, { o: 0 }); return e; };
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Термины', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 5 · Урок 42', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Мобилизация и манипуляция:', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'термины', { x: 800, y: 380, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'с чего начинается работа с суставом', 800, 460, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), j = jointGlide(art, { x: 800, y: 690, s: .62, r: -90, t0: 0, shaft: 260 });
+    show(art, m('sub', .2));
+    prog(q => j.set({ d: 14 * Math.sin(2 * Math.PI * 2 * q) }), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['what', 'Что это', (m) => {
+    const p = panel(0), j = jointGlide(p, { x: 400, y: 450, s: 1.05, t0: .2 });
+    const gH = gripOn(j, p, [0, 150], 1.2);
+    show(gH, m('def', 1));
+    txt(p, 'выпуклая головка', 500, 490, .6, { size: 22, fill: COL.dim });
+    txt(p, 'вогнутая поверхность', 490, 360, .6, { size: 22, fill: COL.dim });
+    // the hand glides the bone gently: small, controlled, close to the joint
+    prog(q => j.set({ d: 12 * Math.sin(2 * Math.PI * 3 * q) }), m('def', 1.5), 4, lin);
+    infoCard(p, 820, 110, 700, 210, 'мобилизация = манипуляция', 'ручные приёмы: уменьшают боль и возвращают движение, которое ограничивает механика самого сустава', COL.whole, m('def'), { size: 23 });
+    txt(p, 'что нарушает механику', 840, 380, m('why'), { size: 25, weight: 700, fill: COL.chalk });
+    ['боль и защитное напряжение мышц', 'выпот в суставе', 'контрактуры и спайки капсулы и связок', 'неправильное движение поверхностей'].forEach((str, i) =>
+      pill(p, str, 1170, 430 + i * 58, m('why', .8 + i * 1.1), { col: COL.nat, size: 22 }));
+    infoCard(p, 820, 680, 700, 170, 'отличие от растяжки (гл. 4)', 'нацелена на капсулу · повторяет движение поверхностей · почти не сжимает хрящ', COL.good, m('diff'), { size: 22 });
+    // the capsule takes the glide: shown by a glide held to one side
+    prog(q => j.set({ d: 13 * io(q) }), m('diff', 1.5), 1.4, lin);
+    txt(p, 'капсула натягивается', 500, 640, m('diff', 2.4), { size: 23, weight: 700, fill: ANAT.taut });
+  }],
+
+  ['cont', 'Скорость и амплитуда', (m) => {
+    const p = panel(0), x0 = 140, y0 = 760, W = 620, H = 500;
+    chartAxes(p, x0, y0, W, H, 'амплитуда', 'скорость', .2);
+    pill(p, 'схема', x0 + W - 40, y0 - H + 10, .4, { col: COL.dim, size: 19 });
+    const A = [x0 + 60, y0 - H + 70], B = [x0 + W - 70, y0 - 50];
+    draw(path(p, `M${A[0]} ${A[1]}Q${x0 + 150} ${y0 - 90} ${B[0]} ${B[1]}`, { stroke: COL.whole, 'stroke-width': 6 }, { d: 0 }), m('cont'), 1.2);
+    const sine = (cx, cy, amp, n, len) => { let d = ''; for (let i = 0; i <= 80; i++) { const x = cx - len / 2 + len * i / 80; d += `${i ? 'L' : 'M'}${x.toFixed(1)} ${(cy - amp * Math.sin(2 * Math.PI * n * i / 80)).toFixed(1)}`; } return d; };
+    show(path(p, sine(A[0] + 110, A[1] - 10, 38, 1.2, 150), { stroke: COL.whole, 'stroke-width': 3.5 }, { o: 0 }), m('cont', 1));
+    txt(p, 'большая амплитуда, медленно', A[0] + 40, A[1] + 70, m('cont', 1), { size: 21, fill: COL.whole });
+    show(path(p, sine(B[0] - 70, B[1] - 80, 8, 6, 110), { stroke: COL.task, 'stroke-width': 3.5 }, { o: 0 }), m('cont', 2.2));
+    txt(p, 'малая амплитуда, быстро', B[0] + 10, B[1] - 120, m('cont', 2.2), { size: 21, fill: COL.task, anchor: 'end' });
+    const dot = mk('circle', { r: 12, fill: COL.chalk }, p);
+    put(dot, { o: 0, x: A[0], y: A[1] });
+    prog(q => { const u = io(q), x = (1 - u) ** 2 * A[0] + 2 * u * (1 - u) * (x0 + 150) + u * u * B[0], y = (1 - u) ** 2 * A[1] + 2 * u * (1 - u) * (y0 - 90) + u * u * B[1]; put(dot, { x, y, o: 1 }); }, m('cont', .5), 2.6, lin);
+    labelBox(p, B[0] - 60, y0 + 85, 330, ['толчок (thrust, HVT)'], COL.task, m('thr'), { size: 24 });
+    // the range bar: available range up to the pathological limit, where the thrust is applied
+    const bx = 880, by = 250, bw = 460;
+    show(mk('rect', { x: bx, y: by - 16, width: bw, height: 32, rx: 16, fill: COL.whole, 'fill-opacity': .25, stroke: COL.whole, 'stroke-width': 2, opacity: 0 }, p), m('lim'));
+    show(path(p, `M${bx + bw} ${by - 40}V${by + 40}`, { stroke: COL.bad, 'stroke-width': 8 }, { o: 0 }), m('lim'));
+    show(path(p, `M${bx + bw + 6} ${by}H${bx + bw + 150}`, { stroke: COL.faint, 'stroke-width': 4, 'stroke-dasharray': '8 8' }, { o: 0 }), m('lim'));
+    txt(p, 'доступный объём', bx + bw / 2, by - 36, m('lim'), { size: 22, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'патологический предел', bx + bw, by + 74, m('lim'), { size: 22, weight: 700, fill: COL.bad, anchor: 'middle' });
+    const th = mk('circle', { r: 13, fill: COL.task }, p);
+    put(th, { x: bx + 30, y: by, o: 0 });
+    prog(q => put(th, { x: bx + 30 + (bw - 50) * io(q), o: 1 }), m('lim', 1), 1.2, lin);
+    prog(q => put(th, { x: bx + bw - 20 + 14 * Math.sin(Math.PI * q) }), m('lim', 2.4), .25, lin);
+    ['изменить положение костей', 'разорвать спайки', 'стимулировать рецепторы сустава'].forEach((str, i) => pill(p, str, 1110, 400 + i * 60, m('aim', .5 + i * .9), { col: COL.task, size: 22 }));
+    // manipulation is the umbrella term; the thrust is one kind of it
+    const ring = G(p, { o: 0 });
+    mk('ellipse', { cx: 1110, cy: 720, rx: 330, ry: 110, fill: 'none', stroke: COL.whole, 'stroke-width': 3 }, ring);
+    T(ring, 'манипуляция = мобилизация', { x: 1110, y: 655, size: 23, weight: 700, fill: COL.whole, anchor: 'middle' });
+    mk('ellipse', { cx: 1210, cy: 742, rx: 110, ry: 46, fill: COL.board, stroke: COL.task, 'stroke-width': 3 }, ring);
+    T(ring, 'толчок', { x: 1210, y: 750, size: 23, weight: 700, fill: COL.task, anchor: 'middle' });
+    T(ring, 'медленные, большие', { x: 960, y: 750, size: 21, fill: COL.dim, anchor: 'middle' });
+    show(ring, m('sep'));
+  }],
+
+  ['self', 'Самомобилизация и MWM', (m) => {
+    const p = panel(0);
+    const j = jointGlide(p, { x: 330, y: 500, s: .9, shaft: 150, t0: .2 });
+    prog(q => j.set({ n: 9 * io(q) }), m('self', 1.5), 1.4, lin);
+    arrowTo(p, j.stage([0, 260]), j.stage([0, 330]), m('self', 1.5), { col: COL.whole, w: 5 });
+    infoCard(p, 80, 110, 520, 160, 'самомобилизация', 'пациент сам: тракция или скольжение, сила — на капсулу', COL.whole, m('self'), { size: 22 });
+    txt(p, 'капсула натягивается', 330, 850, m('self', 2.6), { size: 22, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    // MWM: the therapist holds a glide while the patient moves actively, without pain
+    const f = fig(p, { x: 1130, y: 590, s: 1.25, o: 0 });
+    show(f.g, m('mwm'));
+    const gS = gripOval(p, 1.1);
+    const upd = () => { const S = onStage(f, 'Sh'); put(gS, { x: S[0] + 8, y: S[1] + 14 }); };
+    f.onSet.push(upd); upd();
+    show(gS, m('mwm', .8));
+    arrowTo(p, [1210, 470], [1210, 530], m('mwm', 1.1), { col: COL.whole, w: 5 });
+    txt(p, 'скольжение держит терапевт', 1240, 500, m('mwm', 1.1), { size: 21, fill: COL.whole });
+    poseTo(f, { aN: 170, eN: 4 }, m('mwm', 2.2), 2.4);
+    const arc = path(p, '', { stroke: COL.good, 'stroke-width': 4, 'stroke-dasharray': '7 7' }, { o: 0 });
+    prog(q => { const S = onStage(f, 'Sh'); arc.setAttribute('d', romArc(S, 130, 0, 170 * q, 90, -1)); put(arc, { o: 1 }); }, m('mwm', 2.2), 2.4, lin);
+    txt(p, 'пациент двигается сам — до конца объёма', 1130, 110, m('mwm', 2.2), { size: 23, weight: 700, fill: COL.good, anchor: 'middle' });
+    pill(p, 'боли нет', 1350, 170, m('mwm', 4.5), { col: COL.good, size: 22 });
+    pill(p, 'Маллиган · урок 48', 960, 170, m('mwm', 5.5), { col: COL.dim, size: 20 });
+    NOTE(p, 1130, 860, m('mwm', 1));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-term', prompt: ['Что это за приём?'],
+    build: grid([
+      { parts: ['Малая амплитуда, высокая скорость, в конце патологического предела'], ans: ['t'], why: 'Толчок, или высокоскоростная манипуляция.' },
+      { parts: ['Пациент сам растягивает капсулу тракцией или скольжением'], ans: ['s'], why: 'Самомобилизация.' },
+      { parts: ['Терапевт держит скольжение, пациент сам двигается без боли'], ans: ['m'], why: 'Мобилизация с движением.' },
+      { parts: ['Нужен, чтобы разорвать спайку или вправить подвывих'], ans: ['t'], why: 'Это задачи толчка.' },
+    ], [['t', 'Толчок', COL.task], ['s', 'Самомобилизация', COL.whole], ['m', 'С движением', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['phys', 'Физиологические и добавочные', (m) => {
+    const p = panel(0);
+    // physiological: the patient raises the arm
+    const f = fig(p, { x: 200, y: 540, s: 1.1, o: 0 });
+    show(f.g, .2);
+    poseTo(f, { aN: 160, eN: 6 }, m('phys', 1), 2);
+    txt(p, 'физиологическое', 200, 110, m('phys'), { size: 25, weight: 700, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'пациент сам', 200, 150, m('phys'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'остеокинематика', 200, 180, m('phys'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    // component motions: the scapula and clavicle follow the arm
+    const gf = girdleFront(p, 600, 380, .85, m('comp'));
+    prog(q => gf.set(140 * io(q)), m('comp', 1.5), 3, lin);
+    txt(p, 'добавочное: сопутствующее', 690, 110, m('acc'), { size: 25, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'лопатка поворачивается вверх,', 690, 150, m('comp'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'ключица вращается', 690, 180, m('comp'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'вид спереди, правое плечо', 690, 720, m('comp'), { size: 20, fill: COL.dim, anchor: 'middle' });
+    pill(p, 'и малоберцовая кость при движениях голеностопа', 690, 790, m('comp', 5), { col: COL.dim, size: 19 });
+    // joint play: only passively
+    const j = jointGlide(p, { x: 1260, y: 420, s: .75, t0: m('play') });
+    const gH = gripOn(j, p, [0, 130]);
+    show(gH, m('play', .3));
+    txt(p, 'добавочное: суставная игра', 1260, 110, m('play'), { size: 25, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'только пассивно', 1260, 150, m('play'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'артрокинематика', 1260, 180, m('play'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const moves = [['тракция', { n: 10 }], ['скольжение', { d: 13 }], ['сжатие', { n: -7 }], ['качение', { a: 22, d: 9, raw: true }], ['вращение', { a: 30 }]];
+    const pills = moves.map(([str], i) => pill(p, str, 1140 + (i % 2) * 240, 720 + Math.floor(i / 2) * 58, m('play', 1 + i * .3), { col: COL.dim, size: 22 }));
+    moves.forEach(([, to], i) => {
+      const t = m('play', 2.5 + i * 2.1), keys = Object.keys(to);
+      prog(q => { const v = Math.sin(Math.PI * q), o = { a: 0, d: 0, n: 0, raw: !!to.raw }; keys.forEach(k => { if (k !== 'raw') o[k] = to[k] * v; }); j.set(o); }, t, 1.8, lin);
+      tw(pills[i], { s: 1.12 }, t, .3); tw(pills[i], { s: 1 }, t + 1.5, .3);
+    });
+    [0, 1].forEach(i => { const r = pills[i].querySelector('rect'); whenAt(m('base'), () => { r.setAttribute('stroke', COL.good); }); tw(pills[i], { s: 1.15 }, m('base', .3), .4); });
+    txt(p, 'основа приёмов главы', 1260, 885, m('base', .5), { size: 23, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['rest', 'Положение покоя', (m) => {
+    const p = panel(0), j = jointGlide(p, { x: 470, y: 420, s: 1.2, shaft: 150, t0: .2 });
+    txt(p, 'положение покоя: капсула свободна', 470, 110, m('rest'), { size: 25, weight: 700, fill: COL.whole, anchor: 'middle' });
+    const arc = path(p, '', { stroke: COL.whole, 'stroke-width': 4 }, { o: 0 });
+    prog(q => { const a = 32 * io(q); j.set({ a }); arc.setAttribute('d', romArc(j.stage([0, 0]), 300, 0, a, 90, -1)); put(arc, { o: q > 0 ? 1 : 0 }); }, m('end', .5), 2, lin);
+    txt(p, 'конец объёма: капсула натянута', 250, 660, m('end', 1.5), { size: 24, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    arrowTo(p, [290, 630], [360, 500], m('end', 1.5), { col: ANAT.taut, w: 3 });
+    infoCard(p, 920, 140, 600, 230, 'положение покоя (resting position)', 'открытое положение: наибольшая подвижность, капсула и связки натянуты меньше всего', COL.whole, m('rest'), { size: 23 });
+    infoCard(p, 920, 410, 600, 190, 'в нём', 'проверяют суставную игру · проводят первую процедуру', COL.good, m('use'), { size: 23 });
+  }],
+
+  ['other', 'Ещё два приёма', (m) => {
+    const p = panel(0);
+    // manipulation under anaesthesia: adhesions between the surfaces break
+    const j = jointGlide(p, { x: 380, y: 470, s: .85, shaft: 170, t0: .2 });
+    const adh = G(p, {});
+    [-34, -14, 10, 30].forEach(al => { const A = j.stage(j.cupAt(al)), B = j.stage(j.headAt(al)); path(adh, `M${A[0].toFixed(1)} ${A[1].toFixed(1)}L${((A[0] + B[0]) / 2 + 4).toFixed(1)} ${((A[1] + B[1]) / 2).toFixed(1)}L${B[0].toFixed(1)} ${B[1].toFixed(1)}`, { stroke: COL.chalk, 'stroke-width': 3 }); });
+    txt(p, 'спайки', 480, 400, .6, { size: 22, fill: COL.dim });
+    prog(q => j.set({ a: 24 * Math.sin(Math.PI * q) }), m('mua', 3), .7, lin);
+    hide(adh, m('mua', 3.2), .2);
+    infoCard(p, 80, 690, 620, 170, 'манипуляция под наркозом', 'спайки разрывают толчком или растяжкой; терапевт может помогать и продолжать лечение', COL.task, m('mua'), { size: 22 });
+    // muscle energy: a deep muscle near the joint, its distal end held; an isometric contraction moves the joint
+    const k = jointGlide(p, { x: 1180, y: 450, s: .85, r: 180, shaft: 170, t0: m('me') });
+    const A0 = [-48, -(k.Rc + 120)], B0 = () => k.movPt([-46, k.R + 110]);
+    const mu = muscleEl(k.g, { rest: Math.hypot(A0[0] - B0()[0], A0[1] - B0()[1]), w: 13 });
+    k.onSet.push(() => mu.set(A0, B0())); k.set({});
+    const st0 = gripOval(p, 1.1);
+    const Sx = k.stage([0, -(k.Rc + 110)]);
+    put(st0, { x: Sx[0], y: Sx[1] });
+    show(st0, m('me2'));
+    txt(p, 'стабилизировано', Sx[0] + 50, Sx[1] + 8, m('me2'), { size: 21, fill: HAND });
+    prog(q => { mu.act(io(q)); k.set({ d: 9 * io(q) }); }, m('me2', 2.5), 1.2, lin);
+    txt(p, 'изометрическое сокращение → добавочное движение', 1180, 110, m('me2', 2.5), { size: 22, weight: 700, fill: COL.nat, anchor: 'middle' });
+    infoCard(p, 880, 690, 640, 170, 'мышечная энергия', 'глубокая мышца у сустава; крестцово-подвздошный сустав и верх шеи — главы 15, 16', COL.nat, m('me'), { size: 22 });
+    pill(p, 'схема', 1180, 160, m('me'), { col: COL.dim, size: 19 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-acc', prompt: ['Физиологическое или добавочное движение?'],
+    build: grid([
+      { parts: ['Сгибание плеча'], ans: ['p'], why: 'Пациент делает его сам.' },
+      { parts: ['Скольжение головки плечевой кости вниз'], ans: ['a'], why: 'Суставная игра — только пассивно.' },
+      { parts: ['Поворот лопатки вверх при подъёме руки'], ans: ['a'], why: 'Сопутствующее движение: не управляется волей.' },
+      { parts: ['Отведение бедра'], ans: ['p'], why: 'Произвольное движение.' },
+      { parts: ['Тракция в суставе'], ans: ['a'], why: 'Суставная игра.' },
+    ], [['p', 'Физиологическое', COL.whole], ['a', 'Добавочное', COL.task]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Мобилизация = манипуляция: пассивные приёмы разной скорости и амплитуды; толчок — малая амплитуда, высокая скорость.', 'w1'],
+     ['Физиологические движения пациент делает сам; добавочные — сопутствующие и суставная игра — нет.', 'w2'],
+     ['Положение покоя: наибольшая подвижность, капсула свободна; с него начинают.', 'w3'],
+     ['Родственные приёмы: самомобилизация, MWM, манипуляция под наркозом, мышечная энергия.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-rest', prompt: ['Вы впервые проверяете суставную игру плечевого сустава. В каком положении?'],
+    build: choice([
+      ['В положении покоя: капсула свободна, подвижность наибольшая'],
+      ['В конце объёма: там видно ограничение'],
+      ['С опорой на руку, чтобы сустав был нагружен'],
+      ['Положение не важно'],
+    ], 0, 'Проверку и первую процедуру проводят в положении покоя.',
+    [null, 'В конце объёма капсула натянута — с этого не начинают.', 'Опора сжимает сустав.', 'Важно: в положении покоя капсула свободнее всего.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['В книге «мобилизация» и «манипуляция» — синонимы.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['В книге «толчок» и «манипуляция» — синонимы.'], ans: ['f'], why: 'Неверно: толчок — один вид манипуляции.' },
+      { parts: ['Суставную игру пациент может выполнить сам.'], ans: ['f'], why: 'Неверно: только пассивно.' },
+      { parts: ['Тракция и скольжение — основа приёмов главы.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['В положении покоя капсула натянута сильнее всего.'], ans: ['f'], why: 'Неверно: слабее всего.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

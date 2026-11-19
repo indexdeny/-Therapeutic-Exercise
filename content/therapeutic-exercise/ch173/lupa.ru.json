@@ -1,0 +1,11 @@
+[
+ {
+  "beat": "ret",
+  "fig": 2,
+  "target": "biceps",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает biceps, фигура ×0.72",
+  "off": "лупа видна меньше 2 с — мелькает"
+ }
+]

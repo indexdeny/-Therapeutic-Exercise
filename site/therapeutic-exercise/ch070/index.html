@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ручное сопротивление: нога — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 70, title: 'Ручное сопротивление: нижняя конечность', minutes: 8, language: 'ru', next: '../ch071/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch070/lupa.ru.json
+const LUPA = [
+  {"beat": "intro", "fig": 1, "target": "hamstrings", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch070/cards.ru.json
+const CARDS_SHORT = {
+  "таз держат мышцы живота\nесли они достаточно сильны": "если они достаточно сильны",
+  "таз наклоняется, поясница прогибается?\nдругую ногу согнуть в бедре и колене, стопу — на стол: таз стабилен, поясница защищена": "другую ногу согнуть, стопу на стол",
+  "R на нижнюю часть бедра\nснаружи — отведение, изнутри — приведение; или над лодыжками, если колено здорово": "снаружи отведение, изнутри приведение",
+  "подтягивание таза\nквадратная мышца поясницы → стабилизировать таз": "стабилизировать таз",
+  "бедро повернулось наружу\nработу подхватит подвздошно-поясничная мышца": "подхватит подвздошно-поясничная",
+  "бедро и колено выпрямлены (на спине)\nR снаружи на нижнюю часть бедра — наружное вращение, изнутри — внутреннее; таз стабилизировать": "R снаружи бедра — наружное, изнутри — внутреннее",
+  "бедро и колено 90° (на спине)\nR изнутри на голень над лодыжкой — наружное вращение, снаружи — внутреннее; бедро поддержать, таз спереди стабилизировать": "R изнутри голени — наружное, снаружи — внутреннее",
+  "на животе, колено согнуто\nR на внутреннюю и наружную поверхность голени; таз прижать через ягодицы": "R на голень, таз прижать",
+  "пальцы стопы\nR на подошвенную и тыльную поверхности пальцев; суставы выше и ниже — стабилизация": "R на подошвенную и тыльную поверхности",
+};
+// cards-short end
+
+const RES = COL.whole, STABC = COL.good, SKIN = '#d8d1c1';
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A ring marking where the segment is held still.
+const stabRing = (p, t0, r = 24) => { const e = put(mk('circle', { r, fill: 'none', stroke: STABC, 'stroke-width': 5 }, p), { o: 0 }); show(e, t0); return e; };
+// A point on segment a→b of a figure: q along it, off to the side (+ = the side a muscleOn calls anterior for a segment pointing up).
+function segAt(f, a, b, q, off) { const A = f.pts[a], B = f.pts[b], dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy) || 1; return figPt(f, [A[0] + dx * q - dy / L * f.dir * off, A[1] + dy * q + dx / L * f.dir * off]); }
+// The direction across segment a→b (stage), sign picks the side.
+function across(f, a, b, sg) { const A = onStage(f, a), B = onStage(f, b), dx = B[0] - A[0], dy = B[1] - A[1]; return [sg * dy, -sg * dx]; }
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Ручное сопротивление: нога', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 70', { x: 800, y: 170, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Ручное сопротивление', { x: 800, y: 255, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'кисть и нижняя конечность', { x: 800, y: 320, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'куда давить и что держать', 800, 400, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    let tgt = () => [0, 0];
+    const sc = tableScene(art, { hx: 780, top: 640, s: .8, prone: true, hands: ['AN', () => tgt()], t0: 0 });
+    tgt = () => segAt(sc.pt, 'H', 'KN', .05, 14);
+    const ham = muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 11 });
+    prog(q => { sc.pt.set({ kN: 95 * cyc(q, 2) }); ham.act(.9); }, .5, Math.max(4, D - 1.2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['hand', 'Запястье и пальцы', (m) => {
+    const p = panel(0);
+    txt(p, 'запястье и пальцы', 800, 76, m('hand'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // radial and ulnar deviation, palm view
+    const h = palmHand(p, 380, 520, 1);
+    show(h.g, m('dev'));
+    const R = rArrow(p);
+    prog(q => { const u = (q * 2) % 1, rd = u < .5, e = rd ? io(u * 2) : io(u * 2 - 1); h.set({ dev: rd ? lerp(0, -22, e) : lerp(-22, 20, e) }); R.at(h.at(rd ? -44 : 48, -95), rd ? 1 : -1, 0); }, m('dev', .3), 6, lin);
+    show(R, m('dev', .3));
+    stabRing(p, m('dev', .8), 34);
+    put(p.lastChild, { x: 380, y: 730 });
+    txt(p, 'R — на 2-ю или 5-ю пястную кость', 380, 860, m('dev', .5), { size: 22, fill: RES, anchor: 'middle', weight: 600 });
+    // flexion of the PIP joint of a finger, MCP and DIP held
+    const hs = handSide(p, 1000, 560, 1.6, {});
+    show(hs.g, m('fing'));
+    const Rf = rArrow(p, RES, 60);
+    const sM = stabRing(p, m('fing', 1), 18), sD = stabRing(p, m('fing', 1), 16);
+    prog(q => { hs.set({ w: 0, mcp: 10, pip: lerp(5, 85, cyc(q, 2)), dip: 10 }); const P = handAt(hs, 2, .55, 12), ph = rad(hs.phis[2]); Rf.at(P, -Math.sin(ph) * -1, Math.cos(ph) * -1); const a = handAt(hs, 1, .4, 0), b = handAt(hs, 3, .3, 0); put(sM, { x: a[0], y: a[1] }); put(sD, { x: b[0], y: b[1] }); }, m('fing', .3), 6, lin);
+    show(Rf, m('fing', .3));
+    txt(p, 'R — сразу дистальнее сустава', 1150, 760, m('fing', .5), { size: 22, fill: RES, anchor: 'middle', weight: 600 });
+    txt(p, 'выше и ниже — стабилизация', 1150, 800, m('fing', 1), { size: 22, fill: STABC, anchor: 'middle', weight: 600 });
+    txt(p, 'по одному движению за раз', 1150, 840, m('fing', 2), { size: 22, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['hipF', 'Сгибание бедра', (m) => {
+    const p = panel(0);
+    txt(p, 'сгибание бедра с согнутым коленом', 800, 76, m('hipF'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    let a = () => [0, 0], b = () => [0, 0];
+    const sc = tableScene(p, { hx: 520, top: 520, s: 1.05, hands: [() => a(), () => b()], thx: 150, t0: m('hipF', .3) });
+    a = () => segAt(sc.pt, 'H', 'KN', .85, -16); b = () => segAt(sc.pt, 'KN', 'AN', .85, 14);
+    const hf = muscleOn(sc.pt, ['H', 'Sh', 8, 16], ['H', 'KN', 40, -16], { after: 'torso', w: 12 }), ham = muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 11 });
+    const abd = muscleOn(sc.pt, ['H', 'Sh', 14, 20], ['Sh', 'H', 30, -22], { after: 'torso', w: 10 });
+    const R1 = rArrow(p), R2 = rArrow(p);
+    sc.pt.onSet.push(() => { const [u1, v1] = across(sc.pt, 'H', 'KN', -1); R1.at(a(), u1, v1); const [u2, v2] = across(sc.pt, 'KN', 'AN', 1); R2.at(b(), u2, v2); });
+    sc.pt.set({});
+    show(R1, m('r')); show(R2, m('r', 1.5));
+    prog(q => { const e = cyc(q, 2); sc.pt.set({ hN: 95 * e, kN: 100 * e }); hf.act(.9); ham.act(.8); abd.act(.6); }, m('r', .3), 6, lin);
+    prog(q => sc.pt.set({ hF: 50 * io(q), kF: 95 * io(q), fF: 10 }), m('prec', .5), 1.2, lin);
+    txt(p, 'R спереди на бедро', 860, 380, m('r'), { size: 23, fill: RES, weight: 600 });
+    txt(p, 'R сзади на голень', 860, 420, m('r', 1.5), { size: 23, fill: RES, weight: 600 });
+    infoCard(p, 80, 720, 700, 130, 'таз держат мышцы живота', 'если они достаточно сильны', STABC, m('abs'), { size: 23 });
+    infoCard(p, 820, 640, 700, 210, 'таз наклоняется, поясница прогибается?', 'другую ногу согнуть в бедре и колене, стопу — на стол: таз стабилен, поясница защищена', COL.bad, m('prec'), { size: 23 });
+  }],
+
+  ['hipE', 'Разгибание бедра', (m) => {
+    const p = panel(0);
+    txt(p, 'разгибание и переразгибание бедра', 800, 76, m('hipE'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    let a = () => [0, 0], b = () => [0, 0];
+    const sc = tableScene(p, { hx: 420, top: 470, s: .9, hands: [() => a(), () => b()], thx: 150, t0: m('hipE', .3), pose: { hN: 100, kN: 100 } });
+    a = () => segAt(sc.pt, 'H', 'KN', .85, 16); b = () => onStage(sc.pt, 'heelN');
+    const gm = muscleOn(sc.pt, ['H', 'Sh', 10, -18], ['KN', 'H', 40, -12], { after: 'thN', w: 13 }), ham = muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 11 });
+    const R1 = rArrow(p);
+    sc.pt.onSet.push(() => { const [u, v] = across(sc.pt, 'H', 'KN', 1); R1.at(a(), u, v); });
+    sc.pt.set({});
+    show(R1, m('hipE', 1));
+    prog(q => { const e = cyc(q, 1.5); sc.pt.set({ hN: lerp(100, 0, e), kN: lerp(100, 0, e) }); gm.act(.9); ham.act(.9); }, m('hipE', 1), 5, lin);
+    txt(p, 'R сзади на бедро и снизу на пятку; стол держит таз', 420, 690, m('hipE', 1), { size: 21, fill: RES, anchor: 'middle', weight: 600 });
+    // prone hyperextension, the pelvis held
+    let c = () => [0, 0], d = () => [0, 0];
+    const sp = tableScene(p, { hx: 1200, top: 470, s: .8, prone: true, hands: [() => c(), () => d()], t0: m('hyp') });
+    c = () => segAt(sp.pt, 'H', 'KN', .85, 14); d = () => segAt(sp.pt, 'H', 'Sh', .15, -16);
+    const gm2 = muscleOn(sp.pt, ['H', 'Sh', 10, -18], ['KN', 'H', 40, -12], { after: 'thN', w: 12 });
+    const R2 = rArrow(p);
+    sp.pt.onSet.push(() => { const [u, v] = across(sp.pt, 'H', 'KN', 1); R2.at(c(), u, v); });
+    sp.pt.set({});
+    show(R2, m('hyp', .5));
+    prog(q => { sp.pt.set({ hN: -18 * cyc(q, 1.5) }); gm2.act(.9); }, m('hyp', .5), 4, lin);
+    const ring = stabRing(p, m('hyp', 1)); sp.pt.onSet.push(() => { const [x, y] = d(); put(ring, { x, y }); }); sp.pt.set({});
+    txt(p, 'на животе: R сзади на бедро, таз — стабилизация', 1200, 690, m('hyp', .5), { size: 21, fill: RES, anchor: 'middle', weight: 600 });
+  }],
+
+  ['abd', 'Отведение бедра', (m) => {
+    const p = panel(0);
+    txt(p, 'отведение и приведение бедра (вид сверху)', 800, 76, m('abd'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    tableTop(p, 480, 470, 1.1, m('abd', .3));
+    const f = flatFig(p, 480, 470, 1.1, m('abd', .3));
+    const R = rArrow(p), Rm = rArrow(p, RES, 60);
+    const upd = th => { f.leg(th); const K = f.stage(f.pts.K), A = f.stage(f.pts.A), u = f.pts.uL, P = [lerp(K[0], A[0], -.05), lerp(K[1], A[1], -.05)]; R.at([P[0] + 22 * 1.1 * Math.cos(rad(th)), P[1] - 22 * 1.1 * Math.sin(rad(th))], -Math.cos(rad(th)), Math.sin(rad(th))); };
+    upd(3); show(R, m('abd', 1));
+    prog(q => upd(lerp(3, 35, cyc(q, 1.5))), m('abd', 1), 5, lin);
+    const pr = stabRing(p, m('stab'), 30); put(pr, { x: 480 + 60 * 1.1, y: 470 - 20 * 1.1 });
+    infoCard(p, 960, 140, 580, 170, 'R на нижнюю часть бедра', 'снаружи — отведение, изнутри — приведение; или над лодыжками, если колено здорово', RES, m('abd', 1), { size: 22 });
+    infoCard(p, 960, 380, 580, 170, 'подтягивание таза', 'квадратная мышца поясницы → стабилизировать таз', STABC, m('stab'), { size: 22 });
+    infoCard(p, 960, 580, 580, 170, 'бедро повернулось наружу', 'работу подхватит подвздошно-поясничная мышца', COL.bad, m('neut'), { size: 22 });
+  }],
+
+  ['rot', 'Вращение бедра', (m) => {
+    const p = panel(0);
+    txt(p, 'вращение бедра', 800, 76, m('rot'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // hip and knee at 90°: looking along the thigh, the lower leg swings about it; R on the lower leg above the ankle
+    const cx = 330, cy = 560, g = G(p, { o: 0 });
+    const defs = mk('defs', {}, g), leg = limbEl(g, defs, SKIN, 26, 18, mix(SKIN, COL.board, .62));
+    mk('circle', { cx, cy, r: 36, fill: ANAT.bone, stroke: COL.dim, 'stroke-width': 3 }, g);
+    T(g, 'бедро — смотрим вдоль него', { x: cx, y: cy + 90, size: 21, fill: COL.dim, anchor: 'middle' });
+    T(g, 'внутрь', { x: cx - 220, y: cy - 200, size: 21, fill: COL.dim, anchor: 'middle' });
+    T(g, 'наружу', { x: cx + 220, y: cy - 200, size: 21, fill: COL.dim, anchor: 'middle' });
+    show(g, m('flex'));
+    const R = rArrow(p);
+    const setL = (ph, dir) => { const a = rad(ph), A = [cx + 250 * Math.sin(a), cy - 250 * Math.cos(a)]; leg.set([cx, cy], A); R.at([lerp(cx, A[0], .85), lerp(cy, A[1], .85)], -dir * Math.cos(a), -dir * Math.sin(a)); };
+    setL(0, 1); show(R, m('flex', .5));
+    const lab = txt(p, '', cx, 230, m('flex', .5), { size: 23, weight: 700, fill: RES, anchor: 'middle' });
+    // external rotation of the hip swings the lower leg inward (medially), internal rotation outward
+    prog(q => { const u = (q * 2) % 1, er = u < .5, e = er ? io(u * 2) : io(u * 2 - 1); setL(er ? lerp(0, -40, e) : lerp(-40, 40, e), er ? -1 : 1); lab.textContent = er ? 'наружное вращение: R изнутри' : 'внутреннее: R снаружи'; }, m('flex', .5), 7, lin);
+    infoCard(p, 680, 130, 860, 190, 'бедро и колено выпрямлены (на спине)', 'R снаружи на нижнюю часть бедра — наружное вращение, изнутри — внутреннее; таз стабилизировать', RES, m('ext'), { size: 22 });
+    infoCard(p, 680, 340, 860, 200, 'бедро и колено 90° (на спине)', 'R изнутри на голень над лодыжкой — наружное вращение, снаружи — внутреннее; бедро поддержать, таз спереди стабилизировать', RES, m('flex'), { size: 22 });
+    infoCard(p, 680, 560, 860, 170, 'на животе, колено согнуто', 'R на внутреннюю и наружную поверхность голени; таз прижать через ягодицы', RES, m('prone'), { size: 22 });
+    NOTE(p, 330, 160, m('flex', 1));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-lep', prompt: ['Куда прикладывать сопротивление?'],
+    build: grid([
+      { parts: ['Отведение бедра'], ans: ['lat'], why: 'Снаружи на нижнюю часть бедра.' },
+      { parts: ['Сгибание колена лёжа на животе'], ans: ['heel'], why: 'Сзади на голень над пяткой.' },
+      { parts: ['Тыльное сгибание стопы'], ans: ['dors'], why: 'На тыл стопы чуть выше пальцев.' },
+      { parts: ['Сгибание бедра'], ans: ['ant'], why: 'Спереди на нижнюю часть бедра.' },
+    ], [['lat', 'Снаружи на бедро', RES], ['heel', 'Сзади над пяткой', COL.task], ['dors', 'Тыл стопы', COL.good], ['ant', 'Спереди на бедро', COL.real]], { multi: false, text: true }),
+  }], done) }],
+
+  ['knee', 'Колено', (m) => {
+    const p = panel(0);
+    txt(p, 'колено', 800, 76, m('knee'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // prone knee flexion: R above the heel, the pelvis held across the buttocks
+    let a = () => [0, 0], b = () => [0, 0];
+    const sc = tableScene(p, { hx: 420, top: 420, s: .9, prone: true, hands: [() => a(), () => b()], t0: m('flex') });
+    a = () => segAt(sc.pt, 'KN', 'AN', .9, 12); b = () => segAt(sc.pt, 'H', 'Sh', .1, -18);
+    const ham = muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 11 });
+    const R = rArrow(p);
+    sc.pt.onSet.push(() => { const [u, v] = across(sc.pt, 'KN', 'AN', 1); R.at(a(), u, v); });
+    sc.pt.set({});
+    show(R, m('flex', .5));
+    const ring = stabRing(p, m('flex', 1)); sc.pt.onSet.push(() => { const [x, y] = b(); put(ring, { x, y }); }); sc.pt.set({});
+    prog(q => { sc.pt.set({ kN: 100 * cyc(q, 2) }); ham.act(.9); }, m('flex', .5), 6, lin);
+    txt(p, 'сгибание: R над пяткой, таз прижат', 420, 640, m('flex', .5), { size: 22, fill: RES, anchor: 'middle', weight: 600 });
+    // sitting knee extension with a roll under the distal thigh
+    const f = fig(p, { x: 0, y: 0, s: 1, o: 0, pose: { ...SIT, t: 4, kN: 90, aN: 20, eN: 30, aF: 20, eF: 30 } });
+    plant(f, 'H', 1150, 480);
+    bench(p, 1040, 1210, 488, m('ext'), COL.dim, 175);
+    p.appendChild(f.g);
+    const roll = G(p, { o: 0 }), K = onStage(f, 'KN');
+    mk('ellipse', { cx: K[0] - 30, cy: 500, rx: 30, ry: 16, fill: '#7a6a52' }, roll);
+    p.insertBefore(roll, f.g);
+    const q4 = muscleOn(f, ...MUSCLE.rectus, { after: 'ftN', w: 13 });
+    const Rx = rArrow(p);
+    f.onSet.push(() => { const P = segAt(f, 'KN', 'AN', .85, -14), [u, v] = across(f, 'KN', 'AN', -1); Rx.at(P, u, v); });
+    f.set({});
+    show(f.g, m('ext')); show(Rx, m('ext', .5)); show(roll, m('sit'));
+    const sr = stabRing(p, m('ext', 1)); put(sr, { x: (onStage(f, 'H')[0] + K[0]) / 2, y: K[1] - 12 });
+    prog(q => { f.set({ kN: lerp(90, 10, cyc(q, 2)) }); q4.act(.9); }, m('ext', .5), 6, lin);
+    txt(p, 'разгибание: R спереди на голень; бедро — стабилизация', 1150, 720, m('ext', .5), { size: 21, fill: RES, anchor: 'middle', weight: 600 });
+    txt(p, 'валик под бедро', 1000, 540, m('sit'), { size: 21, fill: '#c9a97a', anchor: 'end', weight: 600 });
+    infoCard(p, 80, 760, 700, 100, 'на животе — валик спереди: надколенник скользит', null, COL.task, m('prone'), { size: 22 });
+    infoCard(p, 820, 760, 700, 100, 'на спине, голень с края — не при тугих сгибателях бедра', null, COL.bad, m('sup'), { size: 22 });
+  }],
+
+  ['ankle', 'Голеностоп', (m) => {
+    const p = panel(0);
+    txt(p, 'голеностоп и стопа', 800, 76, m('ankle'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // supine: dorsiflexion against R on the dorsum, plantarflexion against R on the sole; the lower leg held
+    const sp = supine(p, 520, 430, 1.4, m('ankle', .3));
+    bench(p, 100, 800, 430, m('ankle', .3), COL.dim, 120);
+    p.appendChild(sp.g);
+    const ta = muscleOn(sp, ['KN', 'AN', 30, -14], ['AN', 'toeN', 14, 0], { after: 'ftN', w: 9 }), gas = muscleOn(sp, ...MUSCLE.gastroc, { after: 'ftN', w: 10 });
+    const R = rArrow(p, RES, 60);
+    let dfm = true;
+    sp.onSet.push(() => { const T0 = onStage(sp, 'toeN'), Hh = onStage(sp, 'heelN'), An = onStage(sp, 'AN'); const P = dfm ? [lerp(An[0], T0[0], .8), lerp(An[1], T0[1], .8)] : [lerp(Hh[0], T0[0], .8), lerp(Hh[1], T0[1], .8)]; const d = [T0[0] - Hh[0], T0[1] - Hh[1]]; R.at(dfm ? [P[0] - d[1] * .25, P[1] + d[0] * .25] : [P[0] + d[1] * .2, P[1] - d[0] * .2], dfm ? d[1] : -d[1], dfm ? -d[0] : d[0]); });
+    sp.set({});
+    show(R, m('df'));
+    const ring = stabRing(p, m('df', 1)); const Kk = onStage(sp, 'KN'), A0 = onStage(sp, 'AN'); put(ring, { x: lerp(Kk[0], A0[0], .6), y: lerp(Kk[1], A0[1], .6) });
+    prog(q => { dfm = true; sp.set({ fN: lerp(0, 20, cyc(q, 1.5)) }); ta.act(.9); gas.act(0); }, m('df', .3), 3, lin);
+    prog(q => { dfm = false; sp.set({ fN: lerp(0, -35, cyc(q, 1.5)) }); ta.act(0); gas.act(.9); }, m('pf', .3), 3, lin);
+    const lab = txt(p, '', 520, 620, m('df'), { size: 23, fill: RES, anchor: 'middle', weight: 700 });
+    whenAt(m('df'), () => { lab.textContent = 'тыльное: R на тыл выше пальцев'; });
+    whenAt(m('pf', .1), () => { lab.textContent = 'подошвенное: R на подошву у плюсневых'; });
+    // inversion and eversion, the foot seen from the front
+    const fx = 1220, fy = 470, gf = G(p, { o: 0 });
+    path(gf, `M${fx} ${fy - 260}V${fy - 30}`, { stroke: SKIN, 'stroke-width': 46 });
+    const foot = G(gf, { x: fx, y: fy });
+    mk('path', { d: 'M-110 20Q-115 -10 -60 -20H60Q115 -10 110 20Z', fill: SKIN, stroke: mix(SKIN, COL.board, .6), 'stroke-width': 2 }, foot);
+    T(gf, '1-я плюсневая', { x: fx - 140, y: fy + 70, size: 19, fill: COL.dim, anchor: 'middle' });
+    T(gf, '5-я', { x: fx + 140, y: fy + 70, size: 19, fill: COL.dim, anchor: 'middle' });
+    show(gf, m('inv'));
+    const Ri = rArrow(p, RES, 60);
+    prog(q => { const u = (q * 2) % 1, inv = u < .5, e = inv ? io(u * 2) : io(u * 2 - 1); const a = inv ? lerp(0, -22, e) : lerp(-22, 18, e); put(foot, { x: fx, y: fy, r: a }); const P = inv ? rotPt(-112, 0, a) : rotPt(112, 0, a); Ri.at([fx + P[0], fy + P[1]], inv ? 1 : -1, 0); }, m('inv', .3), 6, lin);
+    show(Ri, m('inv', .3));
+    txt(p, 'инверсия — R изнутри на 1-ю, эверсия — снаружи на 5-ю', 1220, 620, m('inv', .5), { size: 21, fill: RES, anchor: 'middle', weight: 600 });
+    infoCard(p, 300, 700, 1000, 140, 'пальцы стопы', 'R на подошвенную и тыльную поверхности пальцев; суставы выше и ниже — стабилизация', COL.good, m('toes'), { size: 23 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-lestab', prompt: ['Что стабилизировать?'],
+    build: grid([
+      { parts: ['Переразгибание бедра лёжа на животе'], ans: ['pel'], why: 'Таз сзади — чтобы не двигалась поясница.' },
+      { parts: ['Сгибание колена лёжа на животе'], ans: ['pel'], why: 'Таз — через ягодицы.' },
+      { parts: ['Тыльное сгибание стопы'], ans: ['leg'], why: 'Голень.' },
+      { parts: ['Сгибание среднего сустава пальца'], ans: ['near'], why: 'Суставы выше и ниже.' },
+      { parts: ['Отклонение запястья'], ans: ['fa'], why: 'Нижнюю часть предплечья.' },
+    ], [['pel', 'Таз', STABC], ['leg', 'Голень', COL.task], ['near', 'Соседние суставы', COL.whole], ['fa', 'Предплечье', COL.real]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Кисть: R сразу дистальнее движущегося сустава, по одному движению; соседние суставы стабилизировать.', 'w1'],
+     ['Бедро: сгибание — R спереди; прогиб поясницы — согнуть другую ногу; отведение — таз не подтягивать, бедро не поворачивать наружу.', 'w2'],
+     ['Колено: сгибание — R над пяткой, таз прижат; разгибание — R спереди на голень, валик под бедро.', 'w3'],
+     ['Голеностоп: тыл у пальцев, подошва у плюсневых, 1-я и 5-я плюсневые.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-subst', prompt: ['Какое обходное движение и как его предотвратить?'],
+    build: grid([
+      { parts: ['Отводя ногу, пациент подтягивает таз вверх'], ans: ['pel'], why: 'Квадратная мышца поясницы — стабилизировать таз.' },
+      { parts: ['Отводя ногу, пациент поворачивает бедро наружу'], ans: ['neu'], why: 'Включается подвздошно-поясничная — держать бедро нейтрально.' },
+      { parts: ['Сгибая бедро, пациент прогибает поясницу'], ans: ['leg'], why: 'Согнуть другую ногу, стопа на столе.' },
+      { parts: ['Отводя плечо, пациент поднимает надплечье'], ans: ['sh'], why: 'Стабилизировать надплечье (урок 69).' },
+    ], [['pel', 'Таз', STABC], ['neu', 'Бедро нейтрально', COL.task], ['leg', 'Другую ногу согнуть', COL.whole], ['sh', 'Надплечье', COL.real]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-kneeext', prompt: ['У пациента тугая прямая мышца бедра. Как укреплять разгибание колена ручным сопротивлением?'],
+    build: choice([
+      ['Сидя, с валиком под нижней частью бедра; R спереди на голень, бедро стабилизировать'],
+      ['Лёжа на спине, бедро отведено, голень свешивается с края стола'],
+      ['Лёжа на животе без валика'],
+      ['R на стопу, бедро не держать'],
+    ], 0, 'Сидя с валиком — безопасный вариант; положение со свешенной голенью при тугих сгибателях бедра наклоняет таз и нагружает поясницу.',
+    [null, 'При тугой прямой мышце бедра так нельзя: таз наклоняется вперёд, нагружается поясница.', 'Лёжа на животе нужен валик спереди под бедро, чтобы скользил надколенник.', 'Сопротивление — на голень, бедро стабилизируют.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

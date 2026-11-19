@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мобилизация запястья — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 51, title: 'Мобилизация: запястье и кисть', minutes: 8, language: 'ru', next: '../ch052/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch051/cards.ru.json
+const CARDS_SHORT = {
+  "положение покоя\nпрямая линия через лучевую и III пястную, лёгкое локтевое отклонение": "линия лучевая — III пястная",
+  "стабилизация\nнижние концы лучевой и локтевой": "нижние концы лучевой и локтевой",
+  "сила — всегда с тыла\nменьше давления на запястный канал и канал Гийона; можно и толчок": "меньше давления на каналы",
+  "суставной диск\nлоктевую — ладонно на фиксированной трёхгранной": "локтевую — ладонно",
+  "II–V пальцы: раскрытие кисти и своды\nтракция пястной по длинной оси; ладонное скольжение пястных — подвижность свода": "тракция по оси + ладонное скольжение",
+  "все суставы пальцев — одинаково\nпокой — лёгкое сгибание; тракция по оси; прогрессия — у конца объёма с лёгкой тракцией, можно с ротацией": "лёгкое сгибание, тракция по оси",
+};
+// cards-short end
+
+const HAND = '#b9cfe0', LINE = mix(ANAT.bone, '#000000', .5);
+const gripOval = (p, k = 1) => { const e = mk('ellipse', { rx: 24 * k, ry: 16 * k, fill: HAND, 'fill-opacity': .9, stroke: '#7d93a3', 'stroke-width': 2 }, p); put(e, { o: 0 }); return e; };
+// The radiocarpal joint from the side, palm down: the radius (concave) on the left, the proximal carpal row (convex)
+// moving on the right; up is dorsal.
+function rcJoint(p, x, y, s, t0) {
+  const j = jointGlide(p, { x, y, s, r: -90, shaft: 170, t0 });
+  const g = G(p, { o: 0 });
+  T(g, '↑ тыльная', { x: x - 190 * s, y: y - 140 * s, size: 20, fill: COL.dim, anchor: 'middle' });
+  T(g, '↓ ладонная', { x: x - 190 * s, y: y + 160 * s, size: 20, fill: COL.dim, anchor: 'middle' });
+  T(g, 'лучевая', { x: x - 200 * s, y: y - 55 * s, size: 20, fill: COL.whole, anchor: 'middle' });
+  T(g, 'ряд запястья', { x: x + 190 * s, y: y - 105 * s, size: 20, fill: COL.task, anchor: 'middle' });
+  show(g, t0);
+  return j;
+}
+// The carpus from the back of a right hand (thumb on the left), recreated as a scheme. Returns the bones by name:
+// { g, box, c } — c is the centre; light(name, col) tints a bone.
+const CARP = { S: [-150, 105, 90, 70], L: [-55, 100, 80, 70], Tri: [30, 105, 70, 65], Tm: [-205, 10, 70, 70], Tz: [-130, 5, 60, 64], C: [-55, 0, 80, 82], H: [32, 5, 76, 76] };
+const CARP_NAMES = { S: 'ладьевидная', L: 'полулунная', Tri: 'трёхгранная', Tm: 'трапеция', Tz: 'трапециевидная', C: 'головчатая', H: 'крючковидная', R: 'лучевая', U: 'локтевая' };
+function carpals(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), out = { g, bones: {} };
+  [[-215, -30, -285, -190], [-135, -32, -150, -250], [-55, -42, -55, -275], [12, -34, 25, -262], [55, -32, 92, -236]].forEach(([a, b, c, d]) => limbEl(g, defs, ANAT.bone, 13, 10, LINE).set([a, b], [c, d]));
+  const add = (n, cx, cy, w, h, label) => {
+    const b = G(g, {}), r = mk('rect', { x: cx - w / 2, y: cy - h / 2, width: w, height: h, rx: Math.min(w, h) * .4, fill: ANAT.bone, stroke: LINE, 'stroke-width': 2 }, b);
+    T(b, label, { x: cx, y: cy + 8, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+    out.bones[n] = { g: b, rect: r, c: [x + cx * s, y + cy * s], box: [x + (cx - w / 2) * s, y + (cy - h / 2) * s, w * s, h * s] };
+  };
+  add('R', -110, 212, 200, 90, 'лучевая'); add('U', 92, 218, 110, 80, 'локтевая');
+  for (const n in CARP) add(n, ...CARP[n], n);
+  out.light = (n, col) => { const r = out.bones[n].rect; r.setAttribute('fill', col ? mix(ANAT.bone, col, .55) : ANAT.bone); r.setAttribute('stroke', col || LINE); r.setAttribute('stroke-width', col ? 4 : 2); };
+  if (t0 !== null) show(g, t0);
+  return out;
+}
+let BONES = null;
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Запястье и кисть', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 5 · Урок 51', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Мобилизация:', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'запястье и кисть', { x: 800, y: 380, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'лучезапястный сустав, кости запястья, пальцы', 800, 460, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), h = handSide(art, 900, 640, .9);
+    show(art, m('sub', .2)); show(h.g, 0);
+    prog(q => { const v = (1 - Math.cos(2 * Math.PI * q)) / 2; h.set({ w: lerp(-40, 50, v), mcp: 20, pip: 25, dip: 10 }); }, m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['rc', 'Лучезапястный сустав', (m) => {
+    const p = panel(0);
+    txt(p, 'сначала — общие приёмы: ряды запястья вместе', 400, 100, m('start'), { size: 23, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // the forearm on the table, the wrist over its edge
+    show(path(p, 'M60 372H400', { stroke: COL.dim, 'stroke-width': 5 }, { o: 0 }), .2);
+    const h = handSide(p, 420, 330, 1.05);
+    h.set({ w: 4, mcp: 20, pip: 25, dip: 12 });
+    show(h.g, .2);
+    txt(p, 'стол', 120, 400, .2, { size: 19, fill: COL.dim });
+    const gF = gripOval(p, 1.2), gC = gripOval(p, 1.1);
+    put(gF, { x: 360, y: 330 }); put(gC, { x: 480, y: 328 });
+    show(gF, m('dist', 1)); show(gC, m('dist', 2.5));
+    txt(p, 'шиловидные отростки к столу', 330, 270, m('dist', 1), { size: 20, fill: HAND, anchor: 'middle' });
+    txt(p, 'дистальный ряд', 520, 270, m('dist', 2.5), { size: 20, fill: HAND });
+    infoCard(p, 60, 470, 700, 200, 'положение покоя', 'прямая линия через лучевую и III пястную, лёгкое локтевое отклонение', COL.whole, m('rest'), { size: 22 });
+    infoCard(p, 60, 690, 700, 160, 'стабилизация', 'нижние концы лучевой и локтевой', COL.real, m('rest', 4), { size: 22 });
+    const j = rcJoint(p, 1180, 430, 1.05, m('rc'));
+    txt(p, 'вогнутая лучевая · выпуклый ряд: ладьевидная, полулунная, трёхгранная', 1150, 120, m('rc'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    show(j.tp, m('rest', 2));
+    prog(q => j.set({ n: 11 * io(q) }), m('dist', 3.5), 1.2, lin);
+    const C = j.stage([0, 0]);
+    arrowTo(p, [C[0] + 120, C[1] + 230], [C[0] + 210, C[1] + 230], m('dist', 3.5), { col: COL.good, w: 6 });
+    txt(p, 'тянуть дистально', C[0] + 160, C[1] + 280, m('dist', 3.5), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['glides', 'Общие скольжения', (m) => {
+    const p = panel(0), j = rcJoint(p, 400, 430, 1.05, .2);
+    show(j.tp, .2);
+    txt(p, 'сбоку, ладонь вниз', 400, 100, .2, { size: 20, fill: COL.dim, anchor: 'middle' });
+    // dorsal glide with flexion, then volar glide with extension
+    prog(q => j.set({ d: 12 * io(q), a: -22 * io(q) }), m('g', .5), 1.6, lin);
+    prog(q => j.set({ d: lerp(12, -12, io(q)), a: lerp(-22, 22, io(q)) }), m('g', 3), 2, lin);
+    pill(p, 'тыльное → сгибание', 280, 760, m('g', .5), { col: COL.whole, size: 22 });
+    pill(p, 'ладонное → разгибание', 540, 815, m('g', 3), { col: COL.task, size: 22 });
+    // radial and ulnar glides seen from the palm
+    const h = palmHand(p, 1100, 560, 1.05);
+    show(h.g, m('rd'));
+    txt(p, 'вид с ладони', 1100, 870, m('rd'), { size: 20, fill: COL.dim, anchor: 'middle' });
+    T(p, 'лучевая сторона', { x: 990, y: 640, size: 19, fill: COL.dim, anchor: 'end', o: 0 }); show(p.lastChild, m('rd'));
+    prog(q => put(h.hand, { x: 1100 - 16 * Math.sin(Math.PI * q), y: 560, r: 0 }), m('rd', .5), 1.6, lin);
+    prog(q => put(h.hand, { x: 1100 + 16 * Math.sin(Math.PI * q), y: 560, r: 0 }), m('rd', 2.5), 1.6, lin);
+    pill(p, 'лучевое → локтевое отклонение', 1100, 115, m('rd', .5), { col: COL.good, size: 21 });
+    pill(p, 'локтевое → лучевое отклонение', 1100, 166, m('rd', 2.5), { col: COL.real, size: 21 });
+    infoCard(p, 1250, 330, 300, 340, 'как', 'тыльное и ладонное — предплечье пронировано; лучевое и локтевое — среднее положение; сила — на дистальном ряде', COL.dim, m('pos'), { size: 20 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-rc', prompt: ['Какое общее скольжение запястья?'],
+    build: grid([
+      { parts: ['Увеличить сгибание'], ans: ['d'], why: 'Выпуклый ряд скользит против движения: тыльно.' },
+      { parts: ['Увеличить разгибание'], ans: ['v'], why: 'Ладонное скольжение.' },
+      { parts: ['Увеличить локтевое отклонение'], ans: ['r'], why: 'Лучевое скольжение.' },
+      { parts: ['Увеличить лучевое отклонение'], ans: ['u'], why: 'Локтевое скольжение.' },
+    ], [['d', 'Тыльное', COL.whole], ['v', 'Ладонное', COL.task], ['r', 'Лучевое', COL.good], ['u', 'Локтевое', COL.real]], { multi: false, text: true }),
+  }], done) }],
+
+  ['carp', 'Отдельные кости', (m) => {
+    const p = panel(0), cb = carpals(p, 420, 520, 1.15, .2);
+    txt(p, 'тыл правой кисти (схема)', 420, 100, .2, { size: 20, fill: COL.dim, anchor: 'middle' });
+    pill(p, '× держат указательные — ладонно', 1150, 110, m('hand'), { col: COL.real, size: 21 });
+    pill(p, '↓ давят большие — с тыла', 1150, 165, m('hand', 1), { col: COL.task, size: 21 });
+    const pairs = (list, t0, title, col) => {
+      const lab = txt(p, '', 1150, 330, t0, { size: 24, weight: 700, fill: col, anchor: 'middle' });
+      const lab2 = txt(p, '', 1150, 370, t0, { size: 22, fill: COL.chalk, anchor: 'middle' });
+      const tt = txt(p, title, 1150, 260, t0, { size: 26, weight: 700, fill: col, anchor: 'middle' });
+      list.forEach(([mv, sb], i) => whenAt(t0 + .5 + i * 2.6, () => {
+        for (const n in cb.bones) cb.light(n, null);
+        mv.forEach(n => cb.light(n, COL.task)); sb.forEach(n => cb.light(n, COL.real));
+        lab.textContent = 'двигают: ' + mv.map(n => CARP_NAMES[n]).join(' + ');
+        lab2.textContent = 'держат: ' + sb.map(n => CARP_NAMES[n]).join(' + ');
+      }));
+      return [lab, lab2, tt];
+    };
+    const f1 = pairs([[['R'], ['S']], [['R'], ['L']], [['Tm', 'Tz'], ['S']], [['L'], ['C']], [['Tri'], ['H']]], m('flex'), 'сгибание: двигают вогнутую', COL.whole);
+    f1.forEach(e => hide(e, m('ext') - .1, .1));
+    const f2 = pairs([[['S'], ['R']], [['L'], ['R']], [['S'], ['Tm', 'Tz']], [['C'], ['L']], [['H'], ['Tri']]], m('ext'), 'разгибание: двигают выпуклую', COL.task);
+    f2.slice(0, 2).forEach(e => hide(e, m('dors'), .3));
+    whenAt(m('dors'), () => { for (const n in cb.bones) cb.light(n, null); });
+    infoCard(p, 850, 470, 690, 200, 'сила — всегда с тыла', 'меньше давления на запястный канал и канал Гийона; можно и толчок', COL.good, m('dors'), { size: 22 });
+    infoCard(p, 850, 690, 690, 160, 'суставной диск', 'локтевую — ладонно на фиксированной трёхгранной', COL.real, m('umt'), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => {
+    const p = panel(0);
+    BONES = carpals(p, 560, 560, 1.2, .2);
+  }, { ask: done => quiz({ x: 200, y: 40, w: 1200, cls: 'side' }, [{
+    id: 'c-carp', prompt: ['Разгибание в суставе головчатая — полулунная: на какую кость кладут большие пальцы?'],
+    build: pickEls(Object.keys(CARP).map(n => ({ el: BONES.bones[n].g, box: BONES.bones[n].box, label: CARP_NAMES[n] })), Object.keys(CARP).indexOf('C'),
+      'Головчатая: для разгибания двигают выпуклую кость, полулунную держат.',
+      i => { const n = Object.keys(CARP)[i]; return n === 'L' ? 'Полулунную держат указательными: для разгибания двигают выпуклую.' : `${CARP_NAMES[n]} в этот сустав не входит.`; }),
+  }], done) }],
+
+  ['thumb', 'Запястно-пястные суставы', (m) => {
+    const p = panel(0), h = palmHand(p, 330, 580, 1.1);
+    show(h.g, .2);
+    txt(p, 'вид с ладони', 330, 100, .2, { size: 20, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 560, 100, 980, 190, 'II–V пальцы: раскрытие кисти и своды', 'тракция пястной по длинной оси; ладонное скольжение пястных — подвижность свода', COL.whole, m('cmc'), { size: 22 });
+    const sd = saddle(p, 820, 520, .75, m('th'));
+    show(sd.conc, m('th', 2)); show(sd.conv, m('th', 4));
+    txt(p, 'седловидный', 820, 380, m('th'), { size: 23, weight: 700, fill: COL.task, anchor: 'middle' });
+    infoCard(p, 1040, 330, 500, 200, 'трапеция', 'ладонные движения — вогнутая (пястная выпуклая); лучевые — выпуклая (пястная вогнутая)', COL.task, m('th', 2), { size: 20 });
+    prog(q => h.set({ thumb: Math.sin(Math.PI * q) }), m('thg', .5), 2, lin);
+    [['локтевое → лучевое приведение', COL.good], ['лучевое → лучевое отведение', COL.real], ['тыльное → ладонное отведение', COL.whole], ['ладонное → ладонное приведение', COL.task]].forEach(([str, col], i) =>
+      pill(p, str, 940 + (i % 2) * 390, 650 + Math.floor(i / 2) * 60, m('thg', .5 + i * 1.4), { col, size: 20 }));
+    pill(p, 'возвышение — с противоположной стороны', 1140, 790, m('thg', 7), { col: HAND, size: 21 });
+    const gT = gripOval(p, .9); put(gT, { x: 330 - 36 * 1.1, y: 580 - 20 * 1.1 });
+    show(gT, m('th', 5));
+  }],
+
+  ['fing', 'Пальцы', (m) => {
+    const p = panel(0), h = handSide(p, 520, 300, 1.25);
+    h.set({ w: 0, mcp: 15, pip: 15, dip: 8 });
+    show(h.g, .2);
+    const gM = gripOval(p, 1), gP = gripOval(p, .9);
+    const upd = () => { const A = handAt(h, 0, .7, -14 * 1.25), B = handAt(h, 1, .35, -12 * 1.25); put(gM, { x: A[0], y: A[1], r: h.phis[0] }); put(gP, { x: B[0], y: B[1], r: h.phis[1] }); };
+    h.onSet.push(upd); upd();
+    show(gM, m('ip', 3)); show(gP, m('ip', 4));
+    txt(p, 'проксимальную кость держат', 520, 120, m('ip', 3), { size: 22, weight: 700, fill: HAND, anchor: 'middle' });
+    const j = jointGlide(p, { x: 1150, y: 430, s: .9, r: -90, convexMoves: false, shaft: 170, t0: m('ip') });
+    T(p, 'выпуклая', { x: 1030, y: 330, size: 20, fill: COL.task, anchor: 'middle', o: 0 }); show(p.lastChild, m('ip', 1));
+    T(p, 'вогнутая', { x: 1270, y: 330, size: 20, fill: COL.whole, anchor: 'middle', o: 0 }); show(p.lastChild, m('ip', 1));
+    show(j.tp, m('ip', 2));
+    prog(q => j.set({ n: 9 * io(q) }), m('dist', .3), 1, lin);
+    prog(q => { const v = io(q); j.set({ n: 2, d: -12 * v, a: -25 * v }); h.set({ mcp: lerp(15, 60, v) }); }, m('gl', .5), 1.6, lin);
+    pill(p, 'ладонное → сгибание', 1150, 700, m('gl', .5), { col: COL.task, size: 22 });
+    pill(p, 'тыльное → разгибание', 1150, 755, m('gl', 2), { col: COL.whole, size: 22 });
+    pill(p, 'лучевое / локтевое → отведение, приведение', 1150, 810, m('gl', 3.5), { col: COL.good, size: 21 });
+    infoCard(p, 80, 560, 700, 280, 'все суставы пальцев — одинаково', 'покой — лёгкое сгибание; тракция по оси; прогрессия — у конца объёма с лёгкой тракцией, можно с ротацией', COL.whole, m('ip'), { size: 22 });
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Лучезапястный: тыльное скольжение — сгибание, ладонное — разгибание, лучевое — локтевое отклонение, локтевое — лучевое.', 'w1'],
+     ['Отдельные кости: для сгибания двигают вогнутую, для разгибания — выпуклую; сила всегда с тыла.', 'w2'],
+     ['Большой палец: седловидный сустав, скольжение зависит от плоскости движения.', 'w3'],
+     ['Пальцы: дистальная поверхность вогнутая — ладонное скольжение для сгибания, тыльное для разгибания.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-ext', prompt: ['После перелома лучевой кости и гипса ограничено разгибание запястья. Какое общее скольжение?'],
+    build: choice([
+      ['Ладонное скольжение ряда запястья'],
+      ['Тыльное скольжение ряда запястья'],
+      ['Лучевое скольжение'],
+      ['Растянуть запястье рычагом за пальцы'],
+    ], 0, 'Выпуклый ряд скользит против движения: разгибание — ладонное скольжение.',
+    [null, 'Тыльное — для сгибания.', 'Лучевое — для локтевого отклонения.', 'Угловая растяжка сжимает сустав.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Покой лучезапястного — прямая линия лучевая — III пястная, лёгкое локтевое отклонение.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Отдельные кости запястья мобилизуют с ладонной стороны.'], ans: ['f'], why: 'Неверно: с тыла — бережнее к каналам.' },
+      { parts: ['Чтобы увеличить сгибание, двигают вогнутую кость.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Запястно-пястный сустав большого пальца — шаровидный.'], ans: ['f'], why: 'Неверно: седловидный.' },
+      { parts: ['В суставах пальцев дистальная поверхность вогнутая.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

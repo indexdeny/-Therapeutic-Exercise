@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Послеоперационное ведение — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 114, title: 'Послеоперационное ведение: принципы', minutes: 9, language: 'ru', next: '../ch115/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch114/lupa.ru.json
+const LUPA = [
+  {"beat": "three", "fig": 1, "target": "biceps", "from": "mod", "to": "min", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch114/cards.ru.json
+const CARDS_SHORT = {
+  "сначала\nуменьшить боль, предотвратить осложнения, безопасно двигаться, защищая место операции": "уменьшить боль + безопасно двигаться",
+  "позже\nобъём движений, сила, нервно-мышечный контроль, стабильность, равновесие, выносливость, функция": "объём, сила, контроль → функция",
+  "фазы — общие ориентиры, а не готовый рецепт\nих подстраивают под пациента по результатам обследования": "подстраивают под пациента",
+  "максимальная защита\nобучение и предосторожности · расслабление, физические факторы, непрерывное пассивное движение · уход за раной · возвышение, насос, компрессия, массаж к центру · дыхание · установочное напряжение · неоперированные области и вспомогательные средства": "обучение, отёк, дыхание",
+  "умеренная защита\nсамоконтроль отёка и боли · активные движения в пределах боли, мобилизация · мягкий массаж вокруг рубца · изометрия под разными углами, ритмическая стабилизация · лёгкое сопротивление в открытой и закрытой цепи · лёгкие функциональные действия": "активные движения + изометрия",
+  "минимальная защита\nсила, подвижность и равновесие — в повседневные действия · самоконтроль перегрузки · мобилизация и самостоятельная растяжка · больше нагрузка и скорость, сложные движения · равновесие, координация, двигательное обучение": "сила → повседневные действия",
+  "предосторожности\nне угрожать шву положениями, движениями и опорой · рана в чистоте, следить за инфекцией · ≥ 6 недель без интенсивной растяжки и сопротивления подшитых тканей · при необходимости менять активность": "шов, рана, ≥ 6 недель без растяжки",
+  "ключ к успеху — самостоятельность пациента\nраннее обучение и домашняя программа, которую терапевт периодически проверяет и меняет": "раннее обучение + домашняя программа",
+};
+// cards-short end
+
+const HEAD = COL.whole, PAIN = '#ff5a3c', SURG = '#7fc8c2', SKIN = '#e7c3ae';
+const PH = [COL.bad, COL.task, COL.good], PH_N = ['максимальная защита', 'умеренная защита', 'минимальная защита'];
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function numLine(p, n, str, x, y, col, t0, { size = 22, maxW = 860 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 20, cy: y - 8, r: 19, fill: col }, g);
+  T(g, String(n), { x: x + 20, y: y, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 54, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// The three phases as overlapping bands over a weeks axis (0 … 26 weeks); returns { X, bands }.
+function phaseBands(p, x, y, w, t0, { h = 34, gap = 46, labels = true } = {}) {
+  const X = wk => x + Math.min(wk, 26) / 26 * w, g = G(p, { o: 0 });
+  path(g, `M${x} ${y + 3 * gap + 6}H${x + w + 20}m-12 -8l12 8l-12 8`, { stroke: COL.dim, 'stroke-width': 2.5 });
+  [0, 2, 4, 6, 8, 10, 12, 16, 20, 24].forEach(v => { path(g, `M${X(v)} ${y + 3 * gap}V${y + 3 * gap + 12}`, { stroke: COL.dim, 'stroke-width': 2 }); T(g, String(v), { x: X(v), y: y + 3 * gap + 36, size: 16, fill: COL.dim, anchor: 'middle' }); });
+  T(g, 'недели', { x: x + w + 22, y: y + 3 * gap + 36, size: 16, fill: COL.dim, anchor: 'end' });
+  if (t0 !== null) show(g, t0);
+  const spans = [[0, 6, 0], [4, 12, 6], [6, 26, 12]];   // start, end, the latest start
+  const bands = spans.map(([a, b, c], i) => {
+    const bg = G(p, { o: 0 }), yy = y + i * gap;
+    const gid = 'ph' + (++SHADE_ID), lg = mk('linearGradient', { id: gid }, mk('defs', {}, bg));
+    [[0, .9], [Math.max(0, (c - a) / (b - a)), .9], [1, i === 2 ? .15 : .9]].forEach(([o, op]) => mk('stop', { offset: o, 'stop-color': PH[i], 'stop-opacity': op }, lg));
+    mk('rect', { x: X(a), y: yy, width: X(b) - X(a), height: h, rx: h / 2, fill: `url(#${gid})` }, bg);
+    if (labels) T(bg, PH_N[i], { x: X(a) + 14, y: yy + h * .7, size: 18, weight: 700, fill: COL.board });
+    return bg;
+  });
+  return { X, bands, axis: g };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Послеоперационное ведение', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 12 · Урок 114', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'После операции', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'принципы послеоперационного ведения', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'три фазы и как переходить от одной к другой', 800, 360, m('sub'), { size: 30, fill: SURG, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const pb = phaseBands(art, 300, 520, 1000, null); put(pb.axis, { o: 1 });
+    pb.bands.forEach((b, i) => show(b, .8 + i * 1.2));
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['fact', 'Что влияет на программу', (m, D) => {
+    const p = panel(0);
+    txt(p, 'что влияет на программу (блок 12.2)', 800, 56, m('fact'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const F = [['ткань', 'объём повреждения, размер поражения', COL.bad, 'f1'], ['операция', 'тип и особенности вмешательства', SURG, 'f2'],
+      ['пациент', 'возраст, исходные нарушения, лекарства и диабет, курение, цели и поддержка, мотивация', COL.task, 'f3'],
+      ['заживление', 'стадия, свойства тканей, ответ на иммобилизацию и движения, соседние структуры', COL.whole, 'f4'], ['хирург', 'его взгляды на ведение', COL.real, 'f5']];
+    F.forEach(([h, s, c, k], i) => {
+      const r = i < 3 ? 0 : 1, x = 60 + (r ? i - 3 : i) * 500, y = r ? 390 : 100;
+      infoCard(p, x, y, 470, 260, h, s, c, m(k), { size: 21 });
+    });
+    const sf = frontStand(p, 1488, 350, .3, m('f3'), { muscles: false });
+    const hf = frontStand(p, 920, 620, .38, m('f5'), { muscles: false, col: '#9fc7e8' });
+    // patient – surgeon – team
+    const kg = G(p, { o: 0 }); roundBox(kg, 1060, 390, 470, 260, COL.chalk, PANEL, 2.5); show(kg, m('know'));
+    T(p, 'терапевт должен', { x: 1082, y: 432, size: 25, weight: 700, fill: COL.chalk, o: 0 }); show(p.lastChild, m('know'));
+    put(para(p, 'понимать показания и суть операции, знать предосторожности, общаться с пациентом, хирургом и командой', 1082, 480, m('know', .3), { size: 21, maxW: 426 }), {});
+    const tri = G(p, { o: 0 }), P3 = [[560, 760], [800, 840], [1040, 760]];
+    path(tri, `M${P3[0]}L${P3[1]}L${P3[2]}Z`, { stroke: COL.dim, 'stroke-width': 2.5, 'stroke-dasharray': '6 6', fill: 'none' });
+    [['пациент', COL.task], ['терапевт', SURG], ['хирург', COL.real]].forEach(([s, c], i) => { mk('circle', { cx: P3[i][0], cy: P3[i][1], r: 12, fill: c }, tri); T(tri, s, { x: P3[i][0], y: P3[i][1] - 22, size: 20, weight: 700, fill: c, anchor: 'middle' }); });
+    show(tri, m('know', 1));
+  }],
+
+  ['inc', 'Осмотр разреза', (m, D) => {
+    const p = panel(0);
+    txt(p, 'осмотр разреза (блок 12.3)', 800, 56, m('exam'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    txt(p, 'до и после каждого занятия', 400, 110, m('before'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // a knee seen from the front with a vertical incision and stitches
+    const kn = G(p, { o: 0 });
+    const legD = 'M300 150C292 260 286 330 300 400C306 440 300 470 296 520C290 620 300 720 310 820H490C500 720 510 620 504 520C500 470 494 440 500 400C514 330 508 260 500 150Z';
+    mk('path', { d: legD, fill: SKIN, stroke: '#b98c78', 'stroke-width': 3 }, kn);
+    mk('ellipse', { cx: 400, cy: 430, rx: 70, ry: 60, fill: '#d9ad98', 'fill-opacity': .5 }, kn);
+    const red = mk('path', { d: 'M400 300V560', stroke: '#e2574c', 'stroke-width': 0, 'stroke-opacity': .35, 'stroke-linecap': 'round', fill: 'none' }, kn);
+    const cut = mk('path', { d: 'M400 300V560', stroke: '#8a3a32', 'stroke-width': 4, 'stroke-linecap': 'round', fill: 'none' }, kn);
+    const st = G(kn, {}); for (let i = 0; i < 10; i++) path(st, `M386 ${312 + i * 26}h28`, { stroke: '#3d4a52', 'stroke-width': 3 });
+    show(kn, m('exam'));
+    const swell = mk('ellipse', { cx: 400, cy: 430, rx: 0, ry: 0, fill: '#e7a08e', 'fill-opacity': .35 }, p);
+    prog(q => red.setAttribute('stroke-width', (28 * q).toFixed(1)), m('i1'), .8);
+    // palpation: a fingertip presses beside the incision
+    const fgr = G(p, { o: 0 }), fsh = shadeGrad(mk('defs', {}, fgr), '#d8d1c1');
+    mk('path', { d: capsuleD([0, -110], [0, -12], 17, 13), fill: fsh.url, stroke: mix('#d8d1c1', COL.board, .62), 'stroke-width': 2 }, fgr); fsh.aim([0, -110], [0, -12], 17);
+    put(fgr, { x: 450, y: 330, r: -25 }); show(fgr, m('i2')); tw(fgr, { x: 440, y: 400 }, m('i2', .3), .5); hide(fgr, m('i3'));
+    prog(q => { swell.setAttribute('rx', (90 * q).toFixed(1)); swell.setAttribute('ry', (80 * q).toFixed(1)); }, m('i2', .6), .8);
+    // warmth: waves above the knee
+    const heat = G(p, { o: 0 }); [-30, 0, 30].forEach(dx => path(heat, `M${400 + dx} 280c-10 -14 10 -24 0 -38s10 -24 0 -38`, { stroke: '#ff8a5c', 'stroke-width': 3.5, fill: 'none' })); show(heat, m('i3'));
+    // a dressing with drainage
+    const dr = G(p, { o: 0 }); mk('rect', { x: 560, y: 360, width: 140, height: 110, rx: 10, fill: '#f2efe6', stroke: '#b8b2a4', 'stroke-width': 2 }, dr);
+    const spot = mk('ellipse', { cx: 630, cy: 415, rx: 0, ry: 0, fill: '#d9a35a', 'fill-opacity': .7 }, dr);
+    show(dr, m('i4')); prog(q => { spot.setAttribute('rx', (34 * q).toFixed(1)); spot.setAttribute('ry', (26 * q).toFixed(1)); }, m('i4', .3), 1);
+    txt(p, 'повязка', 630, 500, m('i4'), { size: 18, fill: COL.chalk, anchor: 'middle' });
+    // across a joint: the wound is stretched when the knee bends (it stays closed)
+    prog(q => { const k = 1 + .12 * cyc(q, 2); cut.setAttribute('transform', `translate(0 ${430 - 430 * k}) scale(1 ${k.toFixed(3)})`); st.setAttribute('transform', `translate(0 ${430 - 430 * k}) scale(1 ${k.toFixed(3)})`); }, m('i5'), Math.max(1.5, m('i6') - m('i5')), lin);
+    // scar mobility: skin glides side to side
+    prog(q => put(kn, { x: 10 * Math.sin(q * 25) }), m('i6', .3), Math.max(1.5, D - m('i6', .3)), lin);
+    const I = ['покраснение или омертвение вдоль разреза и вокруг швов', 'болезненность и отёк при пальпации', 'повышенная температура', 'отделяемое: цвет и количество на повязке',
+      'цел ли разрез над суставом во время и после упражнений', 'по мере заживления — подвижность рубца'];
+    I.forEach((s, i) => numLine(p, i + 1, s, 800, 170 + i * 104, i < 4 ? COL.bad : SURG, m('i' + (i + 1)), { size: 22, maxW: 680 }));
+  }],
+
+  ['phases', 'Фазы реабилитации', (m, D) => {
+    const p = panel(0);
+    txt(p, 'фазы реабилитации называют по-разному', 800, 56, m('ph'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const R = [['по заживлению', ['острая', 'подострая', 'хроническая']], ['по активности', ['начальная', 'промежуточная', 'продвинутая']],
+      ['по защите тканей', ['максимальная', 'умеренная', 'минимальная']], ['номерами', ['I', 'II', 'III']]];
+    R.forEach(([h, a], i) => {
+      const y = 130 + i * 62;
+      txt(p, h, 300, y + 8, m('ph', .5 + i * 1.4), { size: 21, weight: 700, fill: i === 2 ? SURG : COL.dim, anchor: 'end' });
+      a.forEach((s, j) => pill(p, s, 470 + j * 330, y, m('ph', .7 + i * 1.4 + j * .15), { col: PH[j], size: 21 }));
+    });
+    const ar = G(p, { o: 0 }); path(ar, 'M330 400H1470m-14 -10l14 10l-14 10', { stroke: COL.dim, 'stroke-width': 3 }); show(ar, m('early'));
+    infoCard(p, 60, 440, 720, 230, 'сначала', 'уменьшить боль, предотвратить осложнения, безопасно двигаться, защищая место операции', COL.bad, m('early'), { size: 22 });
+    infoCard(p, 820, 440, 720, 230, 'позже', 'объём движений, сила, нервно-мышечный контроль, стабильность, равновесие, выносливость, функция', COL.good, m('late'), { size: 22 });
+    infoCard(p, 60, 700, 1480, 150, 'фазы — общие ориентиры, а не готовый рецепт', 'их подстраивают под пациента по результатам обследования', SURG, m('ind'), { size: 22 });
+  }],
+
+  ['three', 'Три фазы по степени защиты', (m, D) => {
+    const p = panel(0);
+    txt(p, 'три перекрывающиеся фазы', 800, 56, m('three'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const pb = phaseBands(p, 120, 110, 1300, m('three'));
+    ['max', 'mod', 'min'].forEach((k, i) => show(pb.bands[i], m(k)));
+    // criteria between the phases
+    const cr = (x, y, s, t0) => { const g0 = G(p, { o: 0 }); path(g0, `M${x} ${y - 24}v18`, { stroke: COL.chalk, 'stroke-width': 2.5 }); T(g0, s, { x, y: y + 8, size: 17, weight: 600, fill: COL.chalk, anchor: 'middle' }); show(g0, t0); };
+    const C = [['фаза максимальной защиты', 'воспаление и боль; иммобилизация или ранние пассивные и вспомогательные движения в защищённом объёме; установочное напряжение', 'несколько дней — 6 недель', 'max'],
+      ['фаза умеренной защиты', 'нет боли в покое, есть безболезненный объём → объём и артрокинематика, контроль и стабильность, постепенно сила', 'с 4–6 недель ещё 4–6', 'mod'],
+      ['фаза минимальной защиты', 'полный или почти полный безболезненный активный объём, капсула стабильна → функциональная сила и деятельность', 'с 6–12 недель до полугода и дольше', 'min']];
+    C.forEach(([h, s, t, k], i) => {
+      const x = 60 + i * 500;
+      infoCard(p, x, 330, 480, 310, h, s, PH[i], m(k), { size: 19 });
+      pill(p, t, x + 240, 620, m(k, 1), { col: PH[i], size: 17 });
+    });
+    // a figure per phase
+    const f1 = supine(p, 300, 800, .62, m('max'), { aN: 6, eN: 8 });
+    const q1m = muscleOn(f1, ...MUSCLE.rectus, { after: 'thN', w: 10 });
+    bench(p, 140, 460, 800, m('max'), COL.dim, 60);
+    prog(q => q1m.act(cyc(q, 4)), m('max', 1), Math.max(2, m('mod') - m('max', 1)), lin);
+    const f2 = curlFig(p, 800, 870, .5, .6, m('mod')); curls(f2, m('mod', .5), Math.max(2, m('min') - m('mod', .5)), 5, { lvl: .6 });
+    const f3 = fig(p, { x: 1300, y: 870 - 182 * .5, s: .5, o: 0 }); show(f3.g, m('min')); walk(f3, m('min', .3), Math.max(2, D - m('min', .3)), { cycles: 10, running: true });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-phase', prompt: ['Какая это фаза?'],
+    build: grid([
+      { parts: ['Воспаление и боль; установочное напряжение, движения в защищённом объёме'], ans: ['a'], why: 'Максимальная защита.' },
+      { parts: ['Боли в покое нет; восстанавливают объём и артрокинематику'], ans: ['b'], why: 'Умеренная защита.' },
+      { parts: ['Полный безболезненный объём; функциональная сила и навыки'], ans: ['c'], why: 'Минимальная защита и возврат к функции.' },
+      { parts: ['Возвышенное положение и насос дистальными мышцами'], ans: ['a'], why: 'Максимальная защита: против отёка.' },
+      { parts: ['Ритмическая стабилизация и лёгкое сопротивление'], ans: ['b'], why: 'Умеренная защита.' },
+    ], [['a', 'Максимальная', COL.bad], ['b', 'Умеренная', COL.task], ['c', 'Минимальная', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['box', 'Рекомендации по фазам', (m, D) => {
+    const p = panel(0);
+    txt(p, 'рекомендации после операции (блок 12.4)', 800, 56, m('box'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    pillRow(p, ['боль', 'отёк', 'риск для кровообращения и лёгких', 'тугоподвижность', 'атрофия'], 800, 112, m('imp', .3), { col: COL.dim, size: 19, gap: .7, space: 10 });
+    pillRow(p, ['потеря силы', 'ограничение опоры', 'неоперированные суставы'], 800, 162, m('imp', 4), { col: COL.dim, size: 19, gap: .7, space: 10 });
+    const C = [['максимальная защита', 'обучение и предосторожности · расслабление, физические факторы, непрерывное пассивное движение · уход за раной · возвышение, насос, компрессия, массаж к центру · дыхание · установочное напряжение · неоперированные области и вспомогательные средства', 'm1'],
+      ['умеренная защита', 'самоконтроль отёка и боли · активные движения в пределах боли, мобилизация · мягкий массаж вокруг рубца · изометрия под разными углами, ритмическая стабилизация · лёгкое сопротивление в открытой и закрытой цепи · лёгкие функциональные действия', 'm2'],
+      ['минимальная защита', 'сила, подвижность и равновесие — в повседневные действия · самоконтроль перегрузки · мобилизация и самостоятельная растяжка · больше нагрузка и скорость, сложные движения · равновесие, координация, двигательное обучение', 'm3']];
+    C.forEach(([h, s, k], i) => infoCard(p, 60 + i * 500, 200, 480, 430, h, s, PH[i], m(k), { size: 21 }));
+    infoCard(p, 60, 660, 1480, 200, 'предосторожности', 'не угрожать шву положениями, движениями и опорой · рана в чистоте, следить за инфекцией · ≥ 6 недель без интенсивной растяжки и сопротивления подшитых тканей · при необходимости менять активность', COL.bad, m('prec'), { size: 21 });
+  }],
+
+  ['prog', 'Время и критерии', (m, D) => {
+    const p = panel(0);
+    txt(p, 'переход в следующую фазу: время и критерии', 800, 56, m('time'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const AX = 380, AW = 1100, d2x = d => AX + Math.log10(1 + d) / Math.log10(43) * AW;
+    const ax = G(p, { o: 0 }); path(ax, `M${AX} 300H${AX + AW}`, { stroke: COL.dim, 'stroke-width': 2.5 });
+    [[1, '1 день'], [7, '1 нед.'], [14, '2 нед.'], [28, '4 нед.'], [42, '6 нед.']].forEach(([d, s]) => { path(ax, `M${d2x(d)} 294V306`, { stroke: COL.dim, 'stroke-width': 2 }); T(ax, s, { x: d2x(d), y: 330, size: 17, fill: COL.dim, anchor: 'middle' }); });
+    show(ax, m('time'));
+    const bar = (y, d, s, t0) => { const g0 = G(p, { o: 0 }); T(g0, s, { x: AX - 16, y: y + 24, size: 20, fill: COL.chalk, anchor: 'end', weight: 600 }); const r = mk('rect', { x: AX, y, width: 0, height: 34, rx: 9, fill: COL.bad, 'fill-opacity': .85 }, g0); show(g0, t0); prog(q => r.setAttribute('width', ((d2x(d) - AX) * q).toFixed(1)), t0 + .2, 1, out); };
+    bar(130, 1, 'удаление мениска', m('time', .8));
+    bar(200, 28, 'шов сухожилия кисти', m('hand'));
+    T(p, 'максимальная защита', { x: AX + AW, y: 110, size: 18, fill: COL.bad, anchor: 'end', weight: 700, o: 0 }); show(p.lastChild, m('time', .8));
+    pill(p, 'схема', AX - 120, 110 - 6, m('time', .8), { col: COL.dim, size: 17 });
+    // a gate: time alone is not enough
+    const clock = G(p, { o: 0 }), cx = 300, cy = 520;
+    mk('circle', { cx, cy, r: 60, fill: PANEL, stroke: COL.dim, 'stroke-width': 4 }, clock);
+    const hand = path(clock, `M${cx} ${cy}V${cy - 44}`, { stroke: COL.dim, 'stroke-width': 4 }); path(clock, `M${cx} ${cy}H${cx + 30}`, { stroke: COL.dim, 'stroke-width': 4 });
+    T(clock, 'время', { x: cx, y: cy + 92, size: 21, weight: 700, fill: COL.dim, anchor: 'middle' });
+    show(clock, m('crit')); prog(q => hand.setAttribute('transform', `rotate(${(q * 720).toFixed(1)} ${cx} ${cy})`), m('crit'), Math.max(2, D - m('crit')), lin);
+    T(p, '+', { x: 470, y: 540, size: 56, weight: 700, fill: COL.chalk, anchor: 'middle', o: 0 }); show(p.lastChild, m('crit', .5));
+    const ck = G(p, { o: 0 }); roundBox(ck, 540, 430, 420, 200, COL.good, PANEL, 2.5);
+    ['нет боли', 'нужный объём', 'нужная сила'].forEach((s, i) => { T(ck, s, { x: 610, y: 482 + i * 52, size: 22, fill: COL.chalk }); }); show(ck, m('crit', .5));
+    ['нет боли', 'нужный объём', 'нужная сила'].forEach((s, i) => checkMark(p, 580, 474 + i * 52, m('crit', 1 + i * .5), COL.good, .8));
+    const ar = G(p, { o: 0 }); path(ar, 'M990 530H1110m-14 -10l14 10l-14 10', { stroke: COL.good, 'stroke-width': 4 }); show(ar, m('crit', 2.5));
+    pill(p, 'следующая фаза', 1250, 538, m('crit', 2.5), { col: COL.good, size: 22 });
+    txt(p, 'пока большинство протоколов — по срокам', 800, 690, m('now'), { size: 22, weight: 700, fill: COL.task, anchor: 'middle' });
+    infoCard(p, 60, 720, 1480, 140, 'ключ к успеху — самостоятельность пациента', 'раннее обучение и домашняя программа, которую терапевт периодически проверяет и меняет', COL.good, m('self'), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-next', prompt: ['Можно ли переходить в следующую фазу?'],
+    build: grid([
+      { parts: ['Прошло 5 недель, но сильная боль в покое'], ans: ['n'], why: 'Рано: для умеренной защиты нужна безболезненность в покое.' },
+      { parts: ['Боли в покое нет, есть небольшой безболезненный объём'], ans: ['y'], why: 'Можно в фазу умеренной защиты.' },
+      { parts: ['Активный объём полный и безболезненный, капсула стабильна'], ans: ['y'], why: 'Можно в фазу минимальной защиты.' },
+      { parts: ['Прошло 12 недель, но активный объём далеко не полный'], ans: ['n'], why: 'Рано: критерий не выполнен, хотя срок прошёл.' },
+      { parts: ['3 недели после шва сухожилия — пора интенсивно растягивать'], ans: ['n'], why: 'Рано: не меньше 6 недель без интенсивной растяжки.' },
+    ], [['y', 'Можно', COL.good], ['n', 'Рано', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['На программу влияют ткань и операция, сам пациент, стадия заживления и взгляды хирурга.', 'w1'],
+     ['Разрез осматривают до и после каждого занятия.', 'w2'],
+     ['Три фазы: максимальная защита — до 6 недель, умеренная — с 4–6 недель, минимальная — с 6–12 недель до полугода и дольше.', 'w3'],
+     ['Переход — по критериям, а не только по времени; ключ к успеху — самостоятельность пациента.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SURG }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-wound', prompt: ['Перед занятием: разрез покраснел, кожа вокруг горячая, на повязке мутное отделяемое. Что делать?'],
+    build: choice([
+      ['Не начинать упражнения и сообщить хирургу: это признаки инфекции'],
+      ['Сделать массаж рубца, чтобы улучшить кровоток'],
+      ['Провести занятие по плану'],
+      ['Растянуть сустав, чтобы не было спаек'],
+    ], 0, 'Покраснение, жар и отделяемое — признаки возможной инфекции; разрез осматривают как раз для того, чтобы вовремя их заметить.',
+    [null, 'Массаж воспалённого разреза противопоказан.', 'Признаки инфекции требуют врача, а не занятия.', 'Растяжка не поможет при инфекции и может навредить.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-cuff', prompt: ['Через 3 недели после шва сухожилия пациент хочет интенсивно растягиваться и заниматься с весом. Что ответить?'],
+    build: choice([
+      ['Не меньше 6 недель — без интенсивной растяжки и сопротивления; сейчас движения в защищённом объёме'],
+      ['Можно, если терпимо'],
+      ['Полный покой до 6 месяцев'],
+      ['Только интенсивная растяжка, без силовых'],
+    ], 0, 'Подшитые мышцы, сухожилия и капсулу не меньше 6 недель защищают от интенсивной растяжки и сопротивления.',
+    [null, 'Терпимость не гарантирует целость шва.', 'Покой ведёт к тугоподвижности и атрофии; нужны защищённые движения.', 'Интенсивная растяжка так же опасна для шва.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

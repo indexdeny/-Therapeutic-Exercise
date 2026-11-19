@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Запястный канал и канал Гийона — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 124, title: 'Запястный канал и канал Гийона', minutes: 10, language: 'ru', next: '../ch125/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch124/cards.ru.json
+const CARDS_SHORT = {
+  "синдром запястного канала\nпотеря чувствительности и слабость, когда срединный нерв сдавлен в канале": "срединный нерв сдавлен",
+  "местные причины\nутолщение синовиальной оболочки, рубцы, воспаление и отёк сухожилий от повторяющихся сгибаний, разгибаний и хвата — перегрузка": "повторяющиеся сгибания и хват",
+  "общие и другие\nтравма запястья, вывих костей, артроз; беременность, ревматоидный артрит, диабет; неудобные позы, давление инструментов, вибрация": "травма, беременность, диабет, вибрация",
+  "жалобы\nчувствительность меняется в зоне срединного нерва; ночью онемение и боль — проходят, если встряхнуть кистями": "ночью — проходит, если встряхнуть",
+  "исключить другие места\nмежпозвонковое отверстие, грудной выход, предплечье — круглый пронатор и передний межкостный нерв": "круглый пронатор, грудной выход",
+  "«двойное сдавление»\nпри раздражённом нерве симптомы и в других точках по его ходу": "и в других точках",
+  "изменить занятия и обучить\nкисть нейтрально, хват не сильный; беречь участки без чувствительности; домашняя программа с упражнениями для осанки": "кисть нейтрально, хват не сильный",
+  "подвижность\nмобилизация костей запястья; скольжение сухожилий — мягко, без отёка": "мобилизация запястья + скольжение сухожилий",
+  "как\nдо первого покалывания и обратно на шаг; без симптомов — дальше; 3–4 раза в день, при обострении — реже и мягче, но не бросать": "до покалывания; 3–4 раза в день",
+  "сила\nсначала только мягкая изометрия без симптомов; затем проксимальные отделы, осанка, выносливость; потом скорость, координация, тонкие захваты": "мягкая изометрия → координация",
+  "данные: 21 исследование, 884 человека\nортез заметно уменьшал симптомы через 4 недели, мобилизация костей запястья — через 3": "ортез — 4 недели, мобилизация — 3",
+  "максимальная защита\nобъёмная повязка или ортез; уход за раной, отёк, боль; скольжение сухожилий против спаек; упражнения для предплечья, локтя, плеча; хват и щипок сначала слабее, первым возвращается лёгкое касание": "повязка, скольжение сухожилий, касание",
+  "дальше\nмобилизация рубца, ловкость: мелкие предметы, карты, шашки, письмо; десенситизация рубца — в первую очередь; симптомы стихают за 1–6 месяцев": "рубец, ловкость; 1–6 месяцев",
+  "причины\nдолгое давление (письмо, велосипед), хват безымянным и мизинцем (вязание, плоскогубцы, степлер), падение на локтевой край, ганглий": "давление, хват, падение, ганглий",
+  "лечение — как при запястном канале\nне давить на основание ладони, ортез на локтевую сторону; мобилизация локтевого нерва; нет улучшения за 6–12 недель — операция, затем 3–5 дней покоя": "ортез, мобилизация; 6–12 недель",
+};
+// cards-short end
+
+const HEAD = COL.whole, NV = NERVE_C, PAIN = '#ff5a3c', MED = '#5aa7d6', ULN = '#bba8ee';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function numLine(p, n, str, x, y, col, t0, { size = 22, maxW = 860 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 20, cy: y - 8, r: 19, fill: col }, g);
+  T(g, String(n), { x: x + 20, y: y, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 54, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+// The wrist in cross-section, palm up (scheme, by Fig. 13.20): carpal bones below, the transverse carpal ligament
+// arching over nine flexor tendons and the median nerve; Guyon's canal at the ulnar side (right) between the pisiform
+// and the hook of the hamate with the ulnar nerve and artery. set({ swell, squeeze, cut, guyon }).
+function wristX(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), B = ANAT.bone, line = mix(B, '#000000', .45);
+  [[-150, 40, 52, 40], [-70, 70, 48, 36], [10, 74, 50, 38], [90, 64, 46, 36], [150, 20, 30, 28]].forEach(([cx, cy, rx, ry]) => mk('ellipse', { cx, cy, rx, ry, fill: B, stroke: line, 'stroke-width': 2 }, g));
+  const hook = mk('path', { d: 'M110 30C130 0 140 -30 130 -50L146 -46C160 -20 150 20 130 40Z', fill: B, stroke: line, 'stroke-width': 2 }, g);
+  const pisi = mk('ellipse', { cx: 196, cy: -14, rx: 26, ry: 22, fill: B, stroke: line, 'stroke-width': 2 }, g);
+  const tendons = [[-120, 0], [-80, -14], [-40, -20], [0, -18], [40, -12], [-90, 22], [-50, 18], [-10, 20], [30, 18]].map(([cx, cy]) => mk('circle', { cx, cy, r: 17, fill: ANAT.tendon, stroke: mix(ANAT.tendon, '#000000', .4), 'stroke-width': 1.5 }, g));
+  const fpl = mk('circle', { cx: -150, cy: -16, r: 16, fill: ANAT.tendon, stroke: mix(ANAT.tendon, '#000000', .4), 'stroke-width': 1.5 }, g);
+  const nerve = mk('ellipse', { cx: -60, cy: -54, rx: 26, ry: 18, fill: MED, stroke: '#2f6f99', 'stroke-width': 2 }, g);
+  const lig = mk('path', { fill: 'none', stroke: '#c9d2d8', 'stroke-width': 14, 'stroke-linecap': 'round' }, g);
+  const gLig = mk('path', { d: 'M130 -56C150 -82 200 -76 218 -40', fill: 'none', stroke: '#c9d2d8', 'stroke-width': 9, 'stroke-linecap': 'round' }, g);
+  const un = mk('circle', { cx: 168, cy: -40, r: 12, fill: ULN, stroke: '#6b5aa0', 'stroke-width': 2 }, g);
+  const ua = mk('circle', { cx: 192, cy: -50, r: 8, fill: '#e2574c' }, g);
+  const S = { swell: 0, squeeze: 0, cut: 0, guyon: 0 }, e = { g, st: S };
+  e.set = o => {
+    Object.assign(S, o);
+    const sw = S.swell, sq = clamp(S.squeeze + sw * .7, 0, 1) * (1 - S.cut);
+    tendons.forEach(t => t.setAttribute('r', f1(17 + 4 * sw)));
+    nerve.setAttribute('ry', f1(18 - 9 * sq)); nerve.setAttribute('rx', f1(26 + 6 * sq)); nerve.setAttribute('cy', f1(-54 + 8 * sq));
+    nerve.setAttribute('fill', mix(MED, PAIN, sq * .8));
+    const top = -80 + 10 * sq, op = 60 * S.cut;
+    lig.setAttribute('d', S.cut > 0 ? `M-196 0C-190 -50 -150 ${f1(top - 4)} ${f1(-70 - op)} ${f1(top - op * .4)}M${f1(-50 + op)} ${f1(top - op * .4)}C40 ${f1(top - 4)} 110 -50 120 -20` : `M-196 0C-190 -50 -150 ${f1(top - 4)} -60 ${f1(top)}C40 ${f1(top - 4)} 110 -50 120 -20`);
+    un.setAttribute('r', f1(12 - 5 * S.guyon)); un.setAttribute('fill', mix(ULN, PAIN, S.guyon * .8));
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// A wrist and hand from the side for the median nerve glide positions (Fig. 13.21): set(k) k = 0 … 5 picks A … F.
+function glideHand(p, x, y, s, t0) {
+  const h = handSide(p, x, y, s, { tendons: true });
+  const POS = [{ w: 0, mcp: 80, pip: 90, dip: 60 }, { w: 0, mcp: 0, pip: 0, dip: 0 }, { w: -50, mcp: 0, pip: 0, dip: 0 }, { w: -55, mcp: -15, pip: 0, dip: 0 }, { w: -60, mcp: -15, pip: 0, dip: 0 }, { w: -65, mcp: -20, pip: 0, dip: 0 }];
+  const e = { h, set: k => { const a = POS[Math.floor(k)], b = POS[Math.min(5, Math.floor(k) + 1)], q = k % 1, o = {}; for (const key in a) o[key] = a[key] + (b[key] - a[key]) * q; h.set(o); return e; } };
+  e.set(0);
+  if (t0 !== null) show(h.g, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Запястный канал и канал Гийона', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 13 · Урок 124', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Запястный канал', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и канал Гийона', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'срединный и локтевой нервы у запястья', 800, 360, m('sub'), { size: 30, fill: MED, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const w = wristX(art, 600, 640, 1.2, null); put(w.g, { o: 1 });
+    const hm = handMap(art, 1080, 640, 1.05, null); put(hm.g, { o: 1 });
+    const z1 = handZone(hm, 'median', MED, null), z2 = handZone(hm, 'ulnar', ULN, null);
+    prog(q => { const c = cyc(q, 2); w.set({ squeeze: c, guyon: 1 - c }); z1.setAttribute('opacity', f1(c)); z2.setAttribute('opacity', f1(1 - c)); }, .6, Math.max(2, D - 1.6), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['cts', 'Запястный канал', (m, D) => {
+    const p = panel(0);
+    txt(p, 'запястный канал в разрезе (по мотивам рис. 13.20)', 800, 56, m('cts'), { size: 28, weight: 700, anchor: 'middle', fill: MED });
+    const w = wristX(p, 420, 340, 1.2, m('cts'));
+    pill(p, 'схема', 110, 870, m('cts'), { col: COL.dim, size: 17 });
+    lab(p, 'поперечная связка запястья', 640, 150, 420 - 60 * 1.2, 340 - 80 * 1.2, '#c9d2d8', m('cts', 1));
+    lab(p, 'срединный нерв', 720, 210, 420 - 40 * 1.2, 340 - 54 * 1.2, MED, m('cont'));
+    lab(p, 'сухожилия сгибателей', 720, 470, 420 - 10 * 1.2, 340 + 20 * 1.2, ANAT.tendon, m('cont', .5));
+    lab(p, 'кости запястья', 720, 520, 420 + 60 * 1.2, 340 + 70 * 1.2, ANAT.bone, m('cts', 1.5));
+    prog(q => w.set({ squeeze: q }), m('def', 1), 1.5);
+    prog(q => w.set({ squeeze: 1 - q, swell: q }), m('local', 1), 2);
+    infoCard(p, 960, 100, 580, 160, 'синдром запястного канала', 'потеря чувствительности и слабость, когда срединный нерв сдавлен в канале', MED, m('def'), { size: 21 });
+    infoCard(p, 960, 280, 580, 220, 'местные причины', 'утолщение синовиальной оболочки, рубцы, воспаление и отёк сухожилий от повторяющихся сгибаний, разгибаний и хвата — перегрузка', COL.task, m('local'), { size: 20 });
+    infoCard(p, 960, 520, 580, 220, 'общие и другие', 'травма запястья, вывих костей, артроз; беременность, ревматоидный артрит, диабет; неудобные позы, давление инструментов, вибрация', COL.real, m('sys'), { size: 20 });
+    const hm = handMap(p, 380, 760, .75, m('def')); handZone(hm, 'median', MED, m('def', .5));
+    txt(p, 'зона срединного нерва', 560, 760, m('def', .5), { size: 19, weight: 700, fill: MED });
+  }],
+
+  ['exam', 'Как распознать', (m, D) => {
+    const p = panel(0);
+    txt(p, 'что повышает вероятность синдрома', 800, 56, m('exam'), { size: 28, weight: 700, anchor: 'middle', fill: MED });
+    const hm = handMap(p, 260, 470, 1.2, m('hist'));
+    const z = handZone(hm, 'median', MED, m('hist', .4));
+    txt(p, 'ладонь не немеет: ветвь отходит выше канала', 260, 720, m('hist', 1.5), { size: 18, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 520, 100, 1020, 170, 'жалобы', 'чувствительность меняется в зоне срединного нерва; ночью онемение и боль — проходят, если встряхнуть кистями', MED, m('hist'), { size: 21 });
+    // Phalen and Tinel
+    const hL = handSide(p, 700, 380, .55); const hR = handSide(p, 1000, 380, .55);
+    put(hL.g, { o: 0 }); put(hR.g, { o: 0 }); show(hL.g, m('find', 1)); show(hR.g, m('find', 1));
+    prog(q => { hL.set({ w: 80 * q, mcp: 20, pip: 20, dip: 10 }); hR.set({ w: 80 * q, mcp: 20, pip: 20, dip: 10 }); }, m('find', 1.3), 1);
+    txt(p, 'тест Фалена: долгое сгибание кисти', 850, 330, m('find', 1), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const tap = G(p, { x: 1330, y: 420, o: 0 }); path(tap, 'M0 -70V-10M-14 -24l14 14l14 -14', { stroke: COL.task, 'stroke-width': 4 }); show(tap, m('find', 3));
+    prog(q => put(tap, { y: 420 + 10 * Math.abs(Math.sin(q * 30)) }), m('find', 3), 3, lin);
+    txt(p, 'симптом Тинеля', 1330, 330, m('find', 3), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pillRow(p, ['атрофия возвышения большого пальца', 'слабость его мышц', 'различение двух точек ↓'], 1030, 500, m('find', 4.5), { col: COL.dim, size: 17, gap: .5, space: 8 });
+    pillRow(p, ['тест сдавления канала', 'электрофизиология'], 1030, 545, m('find', 6), { col: COL.dim, size: 17, gap: .5, space: 8 });
+    infoCard(p, 520, 580, 500, 280, 'исключить другие места', 'межпозвонковое отверстие, грудной выход, предплечье — круглый пронатор и передний межкостный нерв', COL.task, m('clear'), { size: 20 });
+    infoCard(p, 1040, 580, 500, 280, '«двойное сдавление»', 'при раздражённом нерве симптомы и в других точках по его ходу', COL.real, m('double'), { size: 20 });
+  }],
+
+  ['imp', 'Нарушения', (m, D) => {
+    const p = panel(0);
+    txt(p, 'нарушения и ограничения', 800, 56, m('imp'), { size: 28, weight: 700, anchor: 'middle', fill: MED });
+    const I = ['боль и покалывание, нарастающие при повторяющейся работе', 'слабость или атрофия мышц большого пальца и первых двух червеобразных', 'чувствительность повышена или снижена', 'тугоподвижность запястья и пястно-фаланговых суставов', 'вегетативные изменения', 'голова вперёд, ограничены движения шеи'];
+    I.forEach((s, i) => numLine(p, i + 1, s, 60, 130 + i * 80, MED, m('imp', .4 + i * 1.6), { size: 21, maxW: 680 }));
+    // a tip-to-tip pinch that fails, then a button
+    const hm = handMap(p, 1180, 400, 1.05, m('act'));
+    const pin = G(p, { o: 0 }); show(pin, m('act', .5));
+    prog(q => { pin.replaceChildren(); const A = hm.at('TIP1'), Bq = hm.at('TIP2'), k = .5 * cyc(q, 3); path(pin, `M${f1(A[0])} ${f1(A[1])}L${f1(A[0] + (Bq[0] - A[0]) * k)} ${f1(A[1] + (Bq[1] - A[1]) * k)}`, { stroke: COL.bad, 'stroke-width': 4, 'stroke-dasharray': '6 5' }); }, m('act', .5), 3, lin);
+    txt(p, 'тонкий захват кончиками пальцев страдает', 1180, 670, m('act', .5), { size: 20, weight: 700, fill: COL.bad, anchor: 'middle' });
+    pillRow(p, ['пуговицы', 'мелкие предметы', 'касса', 'конвейер', 'стрижка', 'печать', 'сон'], 1150, 720, m('act', 2), { col: COL.real, size: 18, gap: .4, space: 8 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-cts', prompt: ['Говорит ли это о синдроме запястного канала?'],
+    build: grid([
+      { parts: ['Ночью немеют большой, указательный и средний пальцы, проходит от встряхивания'], ans: ['y'], why: 'Да: типичная жалоба.' },
+      { parts: ['Онемение мизинца и локтевой стороны безымянного'], ans: ['n'], why: 'Нет: это зона локтевого нерва.' },
+      { parts: ['Немеет вся ладонь'], ans: ['n'], why: 'Нет: ладонь иннервирует ветвь, отходящая выше канала.' },
+      { parts: ['Долгое сгибание кисти вызывает покалывание'], ans: ['y'], why: 'Да: тест Фалена.' },
+      { parts: ['Атрофия возвышения большого пальца'], ans: ['y'], why: 'Да, при выраженном синдроме.' },
+    ], [['y', 'Да', MED], ['n', 'Нет', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['mgmt', 'Без операции', (m, D) => {
+    const p = panel(0);
+    txt(p, 'консервативное лечение (блок 13.9)', 800, 56, m('mgmt'), { size: 28, weight: 700, anchor: 'middle', fill: MED });
+    const hs = handSide(p, 300, 230, .8);
+    show(hs.g, m('orth')); hs.set({ w: 0, mcp: 20, pip: 25, dip: 10 });
+    const sp = G(p, { o: 0 }); mk('rect', { x: 150, y: 204, width: 220, height: 16, rx: 6, fill: '#6f8faa', 'fill-opacity': .85 }, sp); show(sp, m('orth', .5));
+    txt(p, 'ночной ортез: кисть нейтрально', 300, 300, m('orth'), { size: 20, weight: 700, fill: COL.good, anchor: 'middle' });
+    infoCard(p, 520, 96, 1020, 130, 'изменить занятия и обучить', 'кисть нейтрально, хват не сильный; беречь участки без чувствительности; домашняя программа с упражнениями для осанки', COL.whole, m('mod'), { size: 20 });
+    infoCard(p, 520, 240, 1020, 110, 'подвижность', 'мобилизация костей запястья; скольжение сухожилий — мягко, без отёка', COL.task, m('mob'), { size: 20 });
+    // the six glide positions A–F
+    const gh = glideHand(p, 330, 560, .85, m('glide'));
+    const Ls = ['A', 'B', 'C', 'D', 'E', 'F'];
+    const lt = T(p, '', { x: 200, y: 470, size: 40, weight: 700, fill: MED, anchor: 'middle', o: 0 }); show(lt, m('glide'));
+    const t0 = m('glide', .5), span = Math.max(4, m('str') - t0 - 1);
+    prog(q => { const k = Math.min(4.999, q * 5); gh.set(k); lt.textContent = Ls[Math.round(k)]; }, t0, span * .6, lin);
+    prog(q => { const k = 3 + cyc(q, 3); gh.set(k); lt.textContent = Ls[Math.round(k)]; }, t0 + span * .6, span * .4, lin);
+    const POS = ['A кисть нейтрально, пальцы согнуты', 'B пальцы разогнуты', 'C кисть и пальцы разогнуты', 'D + большой палец', 'E + супинация', 'F + растяжение большого'];
+    POS.forEach((s, i) => pill(p, s, 860, 410 + i * 50, m('glide', .3 + i * .5), { col: MED, size: 18 }));
+    infoCard(p, 1060, 380, 480, 260, 'как', 'до первого покалывания и обратно на шаг; без симптомов — дальше; 3–4 раза в день, при обострении — реже и мягче, но не бросать', COL.good, m('glide', 3), { size: 19 });
+    infoCard(p, 60, 680, 740, 180, 'сила', 'сначала только мягкая изометрия без симптомов; затем проксимальные отделы, осанка, выносливость; потом скорость, координация, тонкие захваты', COL.task, m('str'), { size: 19 });
+    infoCard(p, 820, 680, 720, 180, 'данные: 21 исследование, 884 человека', 'ортез заметно уменьшал симптомы через 4 недели, мобилизация костей запястья — через 3', COL.whole, m('ev'), { size: 20 });
+  }],
+
+  ['surg', 'После операции', (m, D) => {
+    const p = panel(0);
+    txt(p, 'после рассечения поперечной связки', 800, 56, m('surg'), { size: 28, weight: 700, anchor: 'middle', fill: MED });
+    const w = wristX(p, 300, 280, 1.15, m('surg'));
+    w.set({ squeeze: 1 });
+    prog(q => w.set({ cut: q }), m('surg', 1.5), 1.2);
+    txt(p, 'связку пересекают открыто или эндоскопически', 300, 450, m('surg', 1.5), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pill(p, 'редко: боль в возвышениях большого пальца и мизинца — проходит', 300, 490, m('pain'), { col: COL.dim, size: 16 });
+    // the timeline: weeks after surgery
+    const AX = 620, AW = 900, X = wk => AX + wk / 12 * AW;
+    const ax = G(p, { o: 0 }); path(ax, `M${AX} 520H${AX + AW + 20}m-12 -8l12 8l-12 8`, { stroke: COL.dim, 'stroke-width': 2.5 });
+    [0, 2, 4, 6, 8, 10, 12].forEach(v => { path(ax, `M${X(v)} 514V526`, { stroke: COL.dim, 'stroke-width': 2 }); T(ax, v ? `${v} нед.` : 'операция', { x: X(v), y: 552, size: 16, fill: COL.dim, anchor: 'middle' }); });
+    show(ax, m('max'));
+    const bar = (a, b, y, c, s, t) => { const g0 = G(p, { o: 0 }), w = X(b) - X(a), out = uiW(s, 16) + 16 > w; mk('rect', { x: X(a), y, width: w, height: 30, rx: 8, fill: c, 'fill-opacity': .85 }, g0); T(g0, s, { x: out ? X(b) + 10 : X(a) + 8, y: y + 21, size: 16, weight: 700, fill: out ? c : COL.board }); show(g0, t); };
+    bar(0, 2, 120, COL.bad, 'без активного сгибания и разгибания кисти', m('max'));
+    bar(1.5, 1.8, 170, COL.task, '', m('mod')); show(T(p, 'швы — 10–12-й день', { x: X(1.9), y: 191, size: 16, weight: 700, fill: COL.task, o: 0 }), m('mod'));
+    bar(2, 12, 220, COL.whole, 'мобилизация нерва — с 2–3 недель, рубец', m('mod', 2));
+    bar(4, 12, 270, COL.good, 'изометрия — с 4-й недели', m('mod', 4));
+    bar(6, 12, 320, COL.good, 'хват и щипок — к 6-й', m('mod', 5));
+    bar(6, 12, 370, '#8fd6b0', 'полная активность — 6–12 недель', m('mod', 8));
+    pill(p, 'сроки — по книге; полосы — схема', AX + AW / 2, 460, m('max'), { col: COL.dim, size: 16 });
+    infoCard(p, 60, 600, 740, 260, 'максимальная защита', 'объёмная повязка или ортез; уход за раной, отёк, боль; скольжение сухожилий против спаек; упражнения для предплечья, локтя, плеча; хват и щипок сначала слабее, первым возвращается лёгкое касание', COL.bad, m('max'), { size: 19 });
+    infoCard(p, 820, 600, 720, 260, 'дальше', 'мобилизация рубца, ловкость: мелкие предметы, карты, шашки, письмо; десенситизация рубца — в первую очередь; симптомы стихают за 1–6 месяцев', COL.good, m('mod', 6), { size: 19 });
+  }],
+
+  ['guyon', 'Канал Гийона', (m, D) => {
+    const p = panel(0);
+    txt(p, 'локтевой нерв в канале Гийона', 800, 56, m('guyon'), { size: 28, weight: 700, anchor: 'middle', fill: ULN });
+    const w = wristX(p, 360, 300, 1.2, m('guyon'));
+    prog(q => w.set({ guyon: q }), m('guyon', 1), 1.2);
+    lab(p, 'гороховидная', 720, 160, 360 + 196 * 1.2, 300 - 14 * 1.2, ANAT.bone, m('guyon', .6));
+    lab(p, 'крючок крючковидной', 720, 220, 360 + 140 * 1.2, 300 - 40 * 1.2, ANAT.bone, m('guyon', .9));
+    lab(p, 'локтевой нерв', 720, 280, 360 + 168 * 1.2, 300 - 40 * 1.2, ULN, m('guyon', 1.2));
+    const Z = [['зона 1', 'до ветвления: движения и чувствительность', ULN], ['зона 2', 'после ветвления: мышцы кисти', COL.task], ['зона 3', 'чувствительная ветвь: мизинец, часть безымянного', COL.whole]];
+    Z.forEach(([h, s, c], i) => { const g0 = G(p, { o: 0 }); put(pill(g0, h, 830, 380 + i * 60, null, { col: c, size: 20 }), { o: 1 }); T(g0, s, { x: 890, y: 387 + i * 60, size: 20, fill: COL.chalk }); show(g0, m('zones', .4 + i * 1.5)); });
+    const hm = handMap(p, 360, 640, .85, m('sign'));
+    handZone(hm, 'ulnar', ULN, m('sign', .3));
+    txt(p, 'зона локтевого нерва', 360, 870, m('sign', 3), { size: 19, weight: 700, fill: PAIN, anchor: 'middle' });
+    infoCard(p, 640, 580, 900, 140, 'причины', 'долгое давление (письмо, велосипед), хват безымянным и мизинцем (вязание, плоскогубцы, степлер), падение на локтевой край, ганглий', COL.task, m('cause'), { size: 19 });
+    infoCard(p, 640, 730, 900, 140, 'лечение — как при запястном канале', 'не давить на основание ладони, ортез на локтевую сторону; мобилизация локтевого нерва; нет улучшения за 6–12 недель — операция, затем 3–5 дней покоя', COL.good, m('tx'), { size: 19 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-postop', prompt: ['После операции на запястном канале — когда это можно?'],
+    build: grid([
+      { parts: ['Активное сгибание и разгибание кисти'], ans: ['2'], why: 'Не раньше чем через 2 недели.' },
+      { parts: ['Скольжение сухожилий, упражнения для локтя и плеча'], ans: ['0'], why: 'Сразу, в фазе максимальной защиты.' },
+      { parts: ['Изометрия для кисти'], ans: ['4'], why: 'Примерно с 4-й недели.' },
+      { parts: ['Упражнения на хват и щипок'], ans: ['6'], why: 'К 6-й неделе.' },
+      { parts: ['Уход за раной, отёк и боль'], ans: ['0'], why: 'Сразу.' },
+    ], [['0', 'Сразу', COL.good], ['2', 'С 2 недель', COL.task], ['4', 'С 4-й', COL.whole], ['6', 'К 6-й', '#8fd6b0']], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Запястный канал — срединный нерв: ночное онемение, проходит от встряхивания; тесты Фалена и Тинеля; исключить шею, грудной выход, предплечье.', 'w1'],
+     ['Без операции: ночной ортез в нейтральном положении, изменение занятий, мобилизация запястья, скольжение сухожилий и нерва, мягкая изометрия.', 'w2'],
+     ['После операции: 2 недели без активного сгибания и разгибания кисти, швы — 10–12-й день, изометрия — с 4-й недели, хват и щипок — к 6-й.', 'w3'],
+     ['Канал Гийона — локтевой нерв: мизинец и безымянный, когтеобразная кисть; лечение то же, с мобилизацией локтевого нерва.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 200 + i * 165, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: MED }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 28, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-cashier', prompt: ['Кассир: ночью немеют первые три пальца, днём хуже от сканирования товаров. Атрофии нет. С чего начать?'],
+    build: choice([
+      ['Ночной ортез в нейтральном положении, изменить движения на работе, скольжение сухожилий и нерва, мягкая изометрия'],
+      ['Сразу операция'],
+      ['Силовые упражнения с большим весом для кисти'],
+      ['Ортез, держащий кисть в сгибании'],
+    ], 0, 'При лёгких и умеренных симптомах лечение консервативное: защита нерва, изменение нагрузки, подвижность, мягкое укрепление.',
+    [null, 'Операция — если консервативное лечение не помогло или симптомы тяжёлые.', 'Сначала только мягкая изометрия без симптомов.', 'Сгибание повышает давление в канале; ортез держит кисть нейтрально.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-cyclist', prompt: ['Велосипедист после долгой поездки: онемение мизинца и локтевой стороны безымянного, слабость мелких мышц кисти. Что вероятнее?'],
+    build: choice([
+      ['Сдавление локтевого нерва в канале Гийона — не давить на основание ладони, ортез на локтевую сторону'],
+      ['Синдром запястного канала'],
+      ['Поражение лучевого нерва'],
+      ['Растяжение связок запястья'],
+    ], 0, 'Упор на разогнутые кисти давит на канал Гийона; онемение мизинца и слабость мелких мышц — локтевой нерв.',
+    [null, 'Запястный канал — срединный нерв: первые три пальца.', 'Лучевой нерв даёт свисающую кисть, а не онемение мизинца.', 'Неврологические симптомы указывают на нерв.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

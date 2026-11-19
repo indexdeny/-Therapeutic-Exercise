@@ -1,0 +1,223 @@
+{
+  "region": "aerobic",
+  "exercises": [
+    {
+      "id": "aerobic-session",
+      "ru": "Аэробное занятие: разминка, работа, заминка",
+      "en": "aerobic session: warm-up, aerobic period, cool-down",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "endurance"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "machine"
+      ],
+      "key": [
+        "разминка около 10 минут",
+        "работа 20–60 минут без перерыва",
+        "заминка 5–10 минут и растяжка"
+      ],
+      "page": 255,
+      "moments": [
+        {
+          "n": 82,
+          "beat": "aer",
+          "mark": "aer",
+          "to": "cont"
+        },
+        {
+          "n": 82,
+          "beat": "warm",
+          "mark": "parts",
+          "to": "wg",
+          "shot": 39.2,
+          "crop": [
+            20,
+            90,
+            900,
+            470
+          ]
+        },
+        {
+          "n": 82,
+          "beat": "cool",
+          "mark": "cool",
+          "to": "safe"
+        },
+        {
+          "n": 82,
+          "beat": "hr",
+          "mark": "hr",
+          "to": "pcmp"
+        },
+        {
+          "n": 82,
+          "beat": "int",
+          "mark": "zone"
+        },
+        {
+          "n": 237,
+          "beat": "aer",
+          "mark": "g",
+          "to": "talk"
+        }
+      ],
+      "thumb": 1
+    },
+    {
+      "id": "interval",
+      "ru": "Интервальная и круговая аэробная тренировка",
+      "en": "interval, circuit and circuit-interval training",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "endurance"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "machine"
+      ],
+      "key": [
+        "работа чередуется с отдыхом",
+        "отдых — от 1:1 до 1:5 к работе",
+        "по кругу — сила и выносливость"
+      ],
+      "page": 256,
+      "moments": [
+        {
+          "n": 82,
+          "beat": "aer",
+          "mark": "intv",
+          "to": "ci",
+          "shot": 35.5,
+          "crop": [
+            40,
+            180,
+            1520,
+            650
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cardiac-rehab",
+      "ru": "Кардиореабилитация",
+      "en": "cardiac rehabilitation exercise",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "endurance"
+      ],
+      "pos": [
+        "stand",
+        "sit"
+      ],
+      "gear": [
+        "none",
+        "machine"
+      ],
+      "key": [
+        "стационар: ходьба под контролем ЭКГ",
+        "3 раза в неделю, 40–80% резерва пульса",
+        "велотренажёр, гребля, дорожка"
+      ],
+      "warn": "при ишемической болезни руками выполняют на 35% меньше работы, чем ногами",
+      "page": 257,
+      "moments": [
+        {
+          "n": 84,
+          "beat": "outpt",
+          "mark": "out",
+          "to": "type",
+          "crop": [
+            0,
+            150,
+            560,
+            420
+          ]
+        },
+        {
+          "n": 84,
+          "beat": "inpt",
+          "mark": "inpt",
+          "to": "fam"
+        },
+        {
+          "n": 84,
+          "beat": "risk",
+          "mark": "maint"
+        },
+        {
+          "n": 84,
+          "beat": "arm",
+          "mark": "prec"
+        }
+      ]
+    },
+    {
+      "id": "decond",
+      "ru": "Тренировка при детренированности",
+      "en": "aerobic training for the deconditioned patient",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "endurance",
+        "function"
+      ],
+      "pos": [
+        "stand",
+        "sit"
+      ],
+      "gear": [
+        "none",
+        "machine"
+      ],
+      "key": [
+        "пульс по Карвонену — ориентир",
+        "сначала время, потом частота и сила",
+        "в коляске — ручной эргометр"
+      ],
+      "warn": "при симптомах занятие прекращают и сообщают о них",
+      "page": 259,
+      "moments": [
+        {
+          "n": 84,
+          "beat": "plan",
+          "mark": "start",
+          "to": "teach"
+        },
+        {
+          "n": 84,
+          "beat": "adapt",
+          "mark": "adapt",
+          "to": "cost",
+          "shot": 15.4,
+          "crop": [
+            0,
+            300,
+            600,
+            500
+          ]
+        },
+        {
+          "n": 84,
+          "beat": "decond",
+          "mark": "rev"
+        }
+      ],
+      "thumb": 1
+    }
+  ]
+}

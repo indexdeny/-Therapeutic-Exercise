@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Подострая стадия — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 104, title: 'Подострая стадия: контролируемое движение', minutes: 10, language: 'ru', next: '../ch105/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch104/cards.ru.json
+const CARDS_SHORT = {
+  "обучение\nчего ждать и в какие сроки; признаки перегрузки; обычные дела без роста симптомов — но пока не спорт, тяжёлая работа, активный отдых; домашняя программа": "сроки, признаки перегрузки, дом",
+  "каждый новый шаг — проверить ответ пациента\nсимптомы усилились → интенсивность снизить": "симптомы усилились → интенсивность снизить",
+  "зачем\nбез лишней нагрузки начать контроль и укрепление мышц; помочь почувствовать нужные мышцы": "контроль и укрепление без нагрузки",
+  "заживает мышца\nукороченное или расслабленное положение — новый рубец не отрывается от места разрыва": "рубец не отрывается",
+  "поражён сустав\nчасто удобнее положение покоя; сила сокращения — ниже порога боли": "положение покоя, ниже порога боли",
+  "вначале\nизолированные движения в одной плоскости; лёгкое сопротивление, концентрическая работа, упор на контроль": "одна плоскость, лёгкое сопротивление",
+  "диагонали — с осторожностью\nне схемы, где сильные мышцы работают за слабые": "сильные не работают за слабые",
+  "выносливость\nпри отёке, травме, иммобилизации первыми атрофируются медленные волокна → сначала контроль, потом малая интенсивность, много повторений": "малая интенсивность, много повторений",
+  "частичная нагрузка — рано\nв пределах переносимости: дозированно нагружает область и включает стабилизирующие совместные сокращения": "стабилизирующие совместные сокращения",
+  "терапевт помогает\nпочувствовать нужные сокращения": "почувствовать нужные сокращения",
+  "прогрессия\nбольше амплитуда · меньше опоры и защиты": "больше амплитуда · меньше опоры и защиты",
+  "затем сопротивление\nукрепить опорные и стабилизирующие мышцы": "укрепить опорные и стабилизирующие мышцы",
+  "после травмы мышцы\nв ранней подострой стадии — без эксцентрических и тяжёлых упражнений: заживающая ткань ещё непрочна": "без эксцентрики и тяжёлых",
+  "травма других тканей\nэксцентрика может не повредить, но сопротивление низкое — чтобы не вызвать отсроченной мышечной боли": "сопротивление низкое",
+  "допустимо\nнебольшой дискомфорт при росте нагрузки — не дольше пары часов": "дискомфорт не дольше пары часов",
+  "признаки избытка\nболь в покое, утомление, нарастающая слабость, спазм дольше суток": "боль в покое, слабость, спазм",
+};
+// cards-short end
+
+const HEAD = STG[1], PAIN = '#ff5a3c';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function numLine(p, n, str, x, y, col, t0, { size = 22, maxW = 860 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 20, cy: y - 8, r: 19, fill: col }, g);
+  T(g, String(n), { x: x + 20, y: y, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 54, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// The upper body from the front (schematic, shaded): trunk, head, both arms. set({ abd, hike }): abduction of the right arm
+// (degrees from the side) and elevation of the right shoulder girdle (px). The upper trapezius runs from the neck to each
+// shoulder; on the hiking side it shortens and glows red.
+function shrugFig(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), col = '#d8d1c1', line = mix(col, COL.board, .62);
+  const L = (ra, rb) => limbEl(g, defs, col, ra, rb, line);
+  const trunk = L(50, 56), neck = L(14, 14);
+  const hg = mk('radialGradient', { id: 'sf' + (++SHADE_ID), cx: .38, cy: .32, r: .78 }, defs);
+  [[0, mix(col, '#ffffff', .5)], [.55, col], [1, mix(col, '#000000', .45)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, hg));
+  const head = mk('circle', { cx: 0, cy: -232, r: 34, fill: `url(#${hg.id})`, stroke: line, 'stroke-width': 2 }, g);
+  const clav = path(g, '', { stroke: mix(col, '#000000', .3), 'stroke-width': 3 });
+  const armL = [L(15, 12), L(12, 8)], armR = [L(15, 12), L(12, 8)];
+  const SL0 = [-74, -150], SR0 = [74, -150], NK = [[-16, -192], [16, -192]];
+  const lenT = Math.hypot(SR0[0] - 8 - NK[1][0], SR0[1] - 6 - NK[1][1]);
+  const trL = muscleEl(g, { rest: lenT, w: 13 }), trR = muscleEl(g, { rest: lenT, w: 13 });
+  const sf = { g, st: { abd: 0, hike: 0 } };
+  sf.set = o => {
+    const S = Object.assign(sf.st, o), SR = [SR0[0], SR0[1] - S.hike], SL = SL0;
+    trunk.set([0, 70], [0, -138]); neck.set([0, -160], [0, -200]);
+    const dl = [-.1, 1], EL = [SL[0] + dl[0] * 86, SL[1] + dl[1] * 86]; armL[0].set(SL, EL); armL[1].set(EL, [EL[0] - 6, EL[1] + 80]);
+    const a = rad(S.abd), dr = [Math.sin(a), Math.cos(a)], ER = [SR[0] + dr[0] * 86, SR[1] + dr[1] * 86]; armR[0].set(SR, ER); armR[1].set(ER, [ER[0] + dr[0] * 80, ER[1] + dr[1] * 80]);
+    clav.setAttribute('d', `M${SL[0] + 6} ${SL[1] - 8}L0 -164L${SR[0] - 6} ${(SR[1] - 8).toFixed(1)}`);
+    trL.set(NK[0], [SL[0] + 8, SL[1] - 6]); trR.act(clamp(S.hike / 18, 0, 1) * .9); trR.set(NK[1], [SR[0] - 8, SR[1] - 6]);
+    return sf;
+  };
+  sf.set({});
+  if (t0 !== null) show(g, t0);
+  return sf;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Подострая стадия', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 10 · Урок 104', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Подострая стадия', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'фаза II — контролируемое движение', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'нагружать новую ткань, не травмируя её снова', 800, 360, m('sub'), { size: 30, fill: HEAD, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const hv = healView(art, 560, 420, 480, 300, null); put(hv.g, { o: 1 });
+    const A1 = fArrow(art, 0, 0, 0, 0, COL.whole, { w: 6, head: 15 }), A2 = fArrow(art, 0, 0, 0, 0, COL.whole, { w: 6, head: 15 });
+    prog(q => { const T = q * D, sw = .5 + .5 * Math.sin(T * 2.4); hv.set({ cap: clamp(q * 3, 0, 1), fib: clamp(q * 3, 0, 1), coll: clamp(q * 2.5, 0, 1), align: .6 * clamp(q * 2 - .6, 0, 1) }); A1.set(552, 570, -40 * sw, 0); A2.set(1048, 570, 40 * sw, 0); }, .3, D - 1.2, lin);
+    stageChips(art, 800, 790, 1, null).forEach(c => put(c, { o: 1 }));
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['resp', 'Ответ ткани: восстановление', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ответ ткани: пролиферация, восстановление, заживление', 800, 56, m('resp'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    const hv = healView(p, 60, 100, 560, 330, m('resp'));
+    hv.set({ exud: .6, clot: .6, cells: .6 });
+    prog(q => hv.set({ exud: .6 * (1 - q), clot: .6 * (1 - q), cells: .6 * (1 - q) }), m('resp', .5), 2);
+    prog(q => hv.set({ cap: q }), m('coll', .5), 1.5);
+    prog(q => hv.set({ fib: q, coll: q }), m('fib'), 2);
+    prog(q => hv.set({ shrink: .45 * q }), m('myo', .3), 1.6);
+    txt(p, 'день 2–4: воспаление стихает, сгусток рассасывается', 680, 140, m('resp'), { size: 22, weight: 700, fill: COL.chalk });
+    numLine(p, 1, 'синтез и отложение коллагена; капилляры врастают', 680, 210, HEAD, m('coll'), { size: 22, maxW: 800 });
+    numLine(p, 2, 'фибробластов, коллагена, грануляционной ткани всё больше', 680, 280, HEAD, m('fib'), { size: 22, maxW: 800 });
+    numLine(p, 3, 'миофибробласты: рубец сокращается', 680, 350, HEAD, m('myo'), { size: 22, maxW: 800 });
+    // a day axis 0–42
+    const X = d => 140 + d * 31.5, Y = 820, g = G(p, { o: 0 });
+    path(g, `M${X(0)} ${Y}H${X(42)}`, { stroke: COL.dim, 'stroke-width': 3 });
+    [0, 4, 7, 14, 21, 28, 35, 42].forEach(d => { path(g, `M${X(d)} ${Y - 7}V${Y + 7}`, { stroke: COL.dim, 'stroke-width': 2.5 }); T(g, d ? `${d}` : '0', { x: X(d), y: Y + 30, size: 18, fill: COL.dim, anchor: 'middle' }); });
+    T(g, 'дни после травмы', { x: X(42), y: Y + 58, size: 18, fill: COL.dim, anchor: 'end' });
+    show(g, m('dur'));
+    const bar = (d0, d1, y, c, t0, label, o = .85) => {
+      const e = G(p, { o: 0 });
+      mk('rect', { x: X(d0), y, width: X(d1) - X(d0), height: 26, rx: 13, fill: c, 'fill-opacity': o }, e);
+      T(e, label, { x: X(d1) + 12, y: y + 20, size: 19, fill: c, weight: 700 });
+      show(e, t0); return e;
+    };
+    bar(2, 21, 470, HEAD, m('dur'), 'обычно до 14–21-го дня');
+    bar(21, 42, 470, HEAD, m('dur', 2.5), '', .35);
+    txt(p, 'может затянуться до 6 недель', X(31.5), 530, m('dur', 2.5), { size: 19, fill: HEAD, anchor: 'middle' });
+    bar(4, 21, 570, FIBRO_C, m('fib', 1.5), 'фибробластов очень много: с 4-го до ~21-го дня');
+    bar(5, 21, 630, COL.real, m('myo'), 'миофибробласты: с ~5-го дня');
+    bar(5, 8, 690, ANAT.muscle, m('close'), 'рана закрыта: мышца и кожа — 5–8 дней');
+    bar(21, 42, 750, ANAT.tendon, m('close', 1.5), '', .85);
+    txt(p, 'сухожилия и связки — 3–6 недель', X(21) - 12, 769, m('close', 1.5), { size: 19, weight: 700, fill: ANAT.tendon, anchor: 'end' });
+  }],
+
+  ['fragile', 'Хрупкая новая ткань', (m, D) => {
+    const p = panel(0);
+    txt(p, 'незрелая ткань: тонкая, неупорядоченная, хрупкая', 800, 56, m('fragile'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    // overload: thin fibres snap
+    const h1 = healView(p, 60, 120, 680, 360, m('fragile')); h1.set({ coll: 1, fib: .8, cap: .7 });
+    const big = [fArrow(p, 0, 0, 0, 0, PAIN, { w: 9, head: 22 }), fArrow(p, 0, 0, 0, 0, PAIN, { w: 9, head: 22 })];
+    const tear = G(p, { o: 0 });
+    [[330, 230], [420, 330], [380, 400]].forEach(([x, y]) => path(tear, `M${x - 14} ${y - 10}l10 6l-8 6l12 6`, { stroke: PAIN, 'stroke-width': 4 }));
+    prog(q => { const k = io(clamp(q * 2, 0, 1)); big.forEach((a, i) => a.set(i ? 748 : 52, 300, (i ? 1 : -1) * 90 * k, 0)); put(tear, { o: q > .5 ? 1 : 0 }); }, m('fragile', 1), 2.5);
+    txt(p, 'перегрузка → ткань рвётся', 400, 530, m('fragile', 2), { size: 24, weight: 700, fill: COL.bad, anchor: 'middle' });
+    // right: proper tensile loading along the normal line of stress
+    const h2 = healView(p, 860, 120, 680, 360, m('load')); h2.set({ coll: 1, fib: .8, cap: .7, adhere: 1 });
+    const sm = [fArrow(p, 0, 0, 0, 0, COL.whole, { w: 6, head: 15 }), fArrow(p, 0, 0, 0, 0, COL.whole, { w: 6, head: 15 })];
+    prog(q => { const T = q * (D - m('load')), k = io(clamp(T / 5, 0, 1)), sw = .5 + .5 * Math.sin(T * 2.6); h2.set({ align: .9 * k, thick: .35 * k }); sm.forEach((a, i) => a.set(i ? 1548 : 852, 300, (i ? 1 : -1) * 45 * sw, 0)); }, m('load', .4), Math.max(2, D - m('load', .4)), lin);
+    prog(q => h2.set({ adhere: 1 - q }), m('adh'), 1.6);
+    txt(p, 'правильная растягивающая нагрузка', 1200, 530, m('load'), { size: 24, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'по линии обычных для ткани нагрузок → волокна растут и выравниваются', 1200, 566, m('load', .5), { size: 20, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'и меньше прилипают к соседним тканям', 1200, 640, m('adh'), { size: 22, weight: 700, fill: COL.good, anchor: 'middle' });
+    pill(p, 'схема', 800, 700, m('fragile', 1), { col: COL.dim, size: 18 });
+  }],
+
+  ['role', 'Щадящая нагрузка', (m, D) => {
+    const p = panel(0);
+    txt(p, 'роль терапевта решающая', 800, 56, m('role'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    txt(p, 'боль уже не постоянная — можно начинать активные движения', 800, 96, m('role', .5), { size: 21, fill: COL.dim, anchor: 'middle' });
+    // a dose window: too little ← tolerance → too much
+    const X0 = 160, W = 1280, Y = 230, g = G(p, { o: 0 });
+    mk('rect', { x: X0, y: Y - 20, width: W, height: 40, rx: 20, fill: COL.board, stroke: EDGE, 'stroke-width': 2 }, g);
+    mk('rect', { x: X0 + W * .38, y: Y - 20, width: W * .26, height: 40, rx: 12, fill: COL.good, 'fill-opacity': .75 }, g);
+    mk('rect', { x: X0, y: Y - 20, width: W * .2, height: 40, rx: 20, fill: COL.int, 'fill-opacity': .35 }, g);
+    mk('rect', { x: X0 + W * .8, y: Y - 20, width: W * .2, height: 40, rx: 20, fill: COL.bad, 'fill-opacity': .55 }, g);
+    T(g, 'мало', { x: X0, y: Y + 54, size: 20, fill: COL.dim }); T(g, 'много', { x: X0 + W, y: Y + 54, size: 20, fill: COL.dim, anchor: 'end' });
+    show(g, m('risk'));
+    pill(p, 'схема', 1480, 160, m('risk'), { col: COL.dim, size: 18 });
+    const mk1 = mk('path', { d: 'M0 -34L-14 -56H14Z', fill: COL.chalk }, p); put(mk1, { o: 0 });
+    prog(q => { const T = q * (m('key') - m('risk')), x = X0 + W * (.5 + .4 * Math.sin(T * 1.6) * (1 - clamp((T - 3) / 1.5, 0, 1)) + 0); put(mk1, { x, y: Y, o: 1 }); }, m('risk'), Math.max(2, m('edu') - m('risk')), lin);
+    txt(p, 'слишком осторожно: медленный прогресс', X0 + W * .1, Y + 90, m('risk', .5), { size: 20, weight: 700, fill: COL.int, anchor: 'middle' });
+    txt(p, 'слишком много, слишком рано: повторная травма', X0 + W * .87, Y + 90, m('risk', .2), { size: 20, weight: 700, fill: COL.bad, anchor: 'middle' });
+    txt(p, 'щадящие упражнения — в пределах того, что выдерживает ткань', X0 + W * .51, Y - 40, m('key'), { size: 22, weight: 700, fill: COL.good, anchor: 'middle' });
+    infoCard(p, 60, 380, 720, 280, 'обучение', 'чего ждать и в какие сроки; признаки перегрузки; обычные дела без роста симптомов — но пока не спорт, тяжёлая работа, активный отдых; домашняя программа', COL.whole, m('edu'), { size: 21 });
+    txt(p, 'начинать активные упражнения и растяжку, если:', 820, 410, m('crit'), { size: 22, weight: 700, fill: COL.chalk });
+    ['отёк уменьшился', 'боль не постоянная', 'боль не усиливается от движений в доступном объёме'].forEach((s, i) => {
+      checkMark(p, 845, 460 + i * 52, m('crit', .6 + i * .8));
+      txt(p, s, 875, 466 + i * 52, m('crit', .6 + i * .8), { size: 22, fill: COL.chalk });
+    });
+    infoCard(p, 60, 690, 1480, 150, 'каждый новый шаг — проверить ответ пациента', 'симптомы усилились → интенсивность снизить', COL.task, m('mon'), { size: 22 });
+  }],
+
+  ['iso', 'Изометрия под разными углами', (m, D) => {
+    const p = panel(0);
+    txt(p, 'субмаксимальная изометрия под разными углами', 800, 56, m('iso'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    // sitting on a high table: knee at three angles, a light hold against the therapist's hand
+    const GY = 820, s = 1.05;
+    bench(p, 160, 520, 520, .2, COL.dim, GY - 520);
+    const f = fig(p, { s, o: 0, pose: { ...SIT, aN: 10, eN: 30, aF: 10, eF: 30, kN: 90, kF: 90 } });
+    put(f.g, { x: 380, y: 520 - 22 * s }); f.set({}); show(f.g, .2);
+    const qd = muscleOn(f, ...MUSCLE.quads, { after: 'ftN', w: 13 });
+    const hand = mk('ellipse', { rx: 18, ry: 13, fill: '#b9cfe0', stroke: '#6f8796', 'stroke-width': 2 }, p); put(hand, { o: 0 });
+    const R = fArrow(p, 0, 0, 0, 0, COL.whole, { w: 6, head: 15 });
+    const ANG = [90, 60, 30], t0 = m('iso', .6);
+    prog(q => {
+      const T = q * (D - t0), seg = Math.min(2, Math.floor(T / 4)), loc = T - seg * 4;
+      const from = seg ? ANG[seg - 1] : 90, k = ANG[seg] + (from - ANG[seg]) * (1 - io(clamp(loc / .8, 0, 1)));
+      f.set({ kN: k }); qd.act(loc > 1 && loc < 3.4 ? .35 : 0);
+      const [ax, ay] = onStage(f, 'AN'), [kx, ky] = onStage(f, 'KN'), ux = (ax - kx), uy = (ay - ky), L = Math.hypot(ux, uy);
+      const hx = ax - ux / L * 26 + uy / L * 18, hy = ay - uy / L * 26 - ux / L * 18;
+      put(hand, { x: hx, y: hy, o: 1, r: Math.atan2(uy, ux) * 180 / Math.PI });
+      R.set(hx + uy / L * 20, hy - ux / L * 20, uy / L * 46, -ux / L * 46);
+    }, t0, D - t0, lin);
+    txt(p, '90° · 60° · 30°', 380, 140, m('iso', 1), { size: 26, weight: 700, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'лёгкое удержание против руки', 380, 176, m('iso', 1.4), { size: 20, fill: COL.chalk, anchor: 'middle' });
+    NOTE(p, 380, 220, m('iso', 1.4));
+    infoCard(p, 680, 110, 860, 170, 'зачем', 'без лишней нагрузки начать контроль и укрепление мышц; помочь почувствовать нужные мышцы', COL.whole, m('why'), { size: 22 });
+    infoCard(p, 680, 300, 860, 120, 'интенсивность и углы — так, чтобы не было боли', null, COL.good, m('pain'), { size: 22 });
+    infoCard(p, 680, 440, 860, 190, 'заживает мышца', 'укороченное или расслабленное положение — новый рубец не отрывается от места разрыва', ANAT.muscle, m('mus'), { size: 22 });
+    infoCard(p, 680, 650, 860, 190, 'поражён сустав', 'часто удобнее положение покоя; сила сокращения — ниже порога боли', COL.whole, m('jnt'), { size: 22 });
+  }],
+
+  ['arom', 'Активные движения и выносливость', (m, D) => {
+    const p = panel(0);
+    txt(p, 'активные движения в безболезненном объёме', 800, 56, m('arom'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    infoCard(p, 850, 100, 690, 160, 'вначале', 'изолированные движения в одной плоскости; лёгкое сопротивление, концентрическая работа, упор на контроль', COL.whole, m('iso1'), { size: 21 });
+    infoCard(p, 850, 275, 690, 160, 'диагонали — с осторожностью', 'не схемы, где сильные мышцы работают за слабые', COL.task, m('diag'), { size: 21 });
+    infoCard(p, 850, 450, 690, 190, 'выносливость', 'при отёке, травме, иммобилизации первыми атрофируются медленные волокна → сначала контроль, потом малая интенсивность, много повторений', COL.nat, m('endur'), { size: 21 });
+    infoCard(p, 850, 655, 690, 120, 'стоп — при утомлении мышцы или симптомах', null, COL.bad, m('stop'), { size: 21 });
+    // substitution: hiking the shoulder blade during abduction
+    txt(p, 'без замещения', 400, 110, m('subst'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const A = shrugFig(p, 230, 470, .95, m('subst')), B = shrugFig(p, 590, 470, .95, m('subst'));
+    prog(q => { const k = cyc(q, 2); A.set({ abd: 85 * k }); B.set({ abd: 85 * k, hike: 22 * k }); }, m('subst', .5), Math.max(3, m('leg') - m('subst', .5)), lin);
+    checkMark(p, 230, 160, m('subst', 1), COL.good, 1.4);
+    txt(p, 'правильно', 230, 200, m('subst', 1), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    cross(p, 590, 158, 13, m('subst', 1.3), 6);
+    txt(p, 'лопатка поднимается', 590, 200, m('subst', 1.3), { size: 21, weight: 700, fill: COL.bad, anchor: 'middle' });
+    txt(p, 'верхняя', 692, 296, m('subst', 2), { size: 18, fill: '#ff5a3c' }); txt(p, 'трапециевидная', 692, 318, m('subst', 2), { size: 18, fill: '#ff5a3c' });
+    NOTE(p, 400, 650, m('subst', 2));
+    // leg lifts with the pelvis held
+    const b = bench(p, 120, 700, 790, m('leg'), COL.dim, 60);
+    const lf = supine(p, 330, 790, .62, m('leg'), { hN: 0 });
+    prog(q => lf.set({ hN: 40 * cyc(q, 2) }), m('leg', .3), Math.max(2, m('stop') - m('leg', .3)), lin);
+    txt(p, 'подъём ноги: таз и позвоночник стабилизированы', 410, 730, m('leg'), { size: 20, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['wb', 'Защищённая нагрузка весом', (m, D) => {
+    const p = panel(0);
+    txt(p, 'защищённая нагрузка весом', 800, 56, m('wb'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    const GY = 820, f = frontStand(p, 420, GY, 1.3, .2, { pose: { aL: 22, aR: 22, eL: 18, eR: 18 } });
+    ground(p, 120, 720, GY, .2);
+    // parallel bars at the hands
+    const [wl, wr] = [f.pts.arms[0][1], f.pts.arms[1][1]].map(P => f.at(P));
+    const bars = G(p, { o: 0 });
+    [wl, wr].forEach(([x, y], i) => { path(bars, `M${x + (i ? -60 : -100)} ${y + 6}H${x + (i ? 100 : 60)}`, { stroke: '#9aa7ad', 'stroke-width': 9 }); path(bars, `M${x + (i ? 80 : -80)} ${y + 6}V${GY}`, { stroke: '#9aa7ad', 'stroke-width': 6 }); });
+    show(bars, .2);
+    const tS = m('shift'), tP = m('prog'), tR = m('res');
+    prog(q => {
+      const T = q * (D - tS), amp = T < tP - tS ? 22 : 34, sup = clamp((T - (tP - tS) - 1) / 1.5, 0, 1);
+      const sh = amp * Math.sin(T * 1.8);
+      f.set({ shift: sh, aL: lerp(22, 12, sup), aR: lerp(22, 12, sup), eL: lerp(18, 8, sup), eR: lerp(18, 8, sup) });
+      const k = .35 + .3 * Math.abs(Math.sin(T * 1.8));
+      ['medL', 'medR', 'addL', 'addR'].forEach(n => f.mus[n].act(k));
+    }, tS, D - tS, lin);
+    txt(p, 'перенос веса', 420, 140, tS, { size: 24, weight: 700, fill: COL.whole, anchor: 'middle' });
+    txt(p, 'из стороны в сторону или вперёд-назад', 420, 174, tS, { size: 20, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'совместные сокращения', 420, 214, m('wb', 2), { size: 20, weight: 700, fill: '#ff5a3c', anchor: 'middle' });
+    NOTE(p, 420, 252, m('wb', 2));
+    // resistance: an elastic band at the pelvis
+    const band = path(p, '', { stroke: '#e6a3c2', 'stroke-width': 5 }, { o: 0 });
+    prog(q => { const [px, py] = f.at(f.pts.P); band.setAttribute('d', `M${(px - 40).toFixed(1)} ${(py + 10).toFixed(1)}L130 ${(py + 10).toFixed(1)}`); }, tR, Math.max(1, D - tR), lin);
+    show(band, tR);
+    infoCard(p, 820, 110, 720, 200, 'частичная нагрузка — рано', 'в пределах переносимости: дозированно нагружает область и включает стабилизирующие совместные сокращения', COL.whole, m('wb'), { size: 21 });
+    infoCard(p, 820, 330, 720, 150, 'терапевт помогает', 'почувствовать нужные сокращения', COL.good, tS, { size: 21 });
+    infoCard(p, 820, 500, 720, 150, 'прогрессия', 'больше амплитуда · меньше опоры и защиты', COL.task, tP, { size: 21 });
+    infoCard(p, 820, 670, 720, 150, 'затем сопротивление', 'укрепить опорные и стабилизирующие мышцы', COL.nat, tR, { size: 21 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-sub', prompt: ['Подходит ли это для ранней подострой стадии?'],
+    build: grid([
+      { parts: ['Субмаксимальная изометрия в безболезненных углах'], ans: ['y'], why: 'Да: так и начинают.' },
+      { parts: ['Тяжёлые эксцентрические упражнения после разрыва мышцы'], ans: ['n'], why: 'Нет: прочность заживающей ткани ещё мала.' },
+      { parts: ['Активное движение в одной плоскости с упором на контроль'], ans: ['y'], why: 'Да: вначале изолированные движения в одной плоскости.' },
+      { parts: ['Диагональ, в которой сильные мышцы работают за слабые'], ans: ['n'], why: 'Нет: такие схемы на этой стадии не берут.' },
+      { parts: ['Частичная нагрузка весом с переносом веса'], ans: ['y'], why: 'Да: защищённая нагрузка весом начинается рано.' },
+    ], [['y', 'Подходит', COL.good], ['n', 'Пока нет', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['prec', 'Признаки перегрузки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'осторожно: эксцентрика и большое сопротивление', 800, 56, m('prec'), { size: 28, weight: 700, anchor: 'middle', fill: COL.bad });
+    infoCard(p, 60, 100, 720, 190, 'после травмы мышцы', 'в ранней подострой стадии — без эксцентрических и тяжёлых упражнений: заживающая ткань ещё непрочна', COL.bad, m('prec'), { size: 21 });
+    infoCard(p, 820, 100, 720, 190, 'травма других тканей', 'эксцентрика может не повредить, но сопротивление низкое — чтобы не вызвать отсроченной мышечной боли', COL.task, m('non'), { size: 21 });
+    txt(p, 'признаки чрезмерной нагрузки (блок 10.3)', 60, 345, m('box'), { size: 24, weight: 700, fill: COL.chalk });
+    const BX = ['болезненность не уменьшается через 4 часа и не проходит за 24 часа', 'боль раньше или сильнее, чем на прошлом занятии', 'от занятия к занятию — скованность ↑, объём ↓', 'отёк, покраснение, жар в заживающей ткани', 'слабость нарастает от занятия к занятию', 'поражённой частью пользуются меньше'];
+    BX.forEach((s, i) => numLine(p, i + 1, s, 60, 400 + i * 74, COL.bad, m('b' + (i + 1)), { size: 21, maxW: 640 }));
+    // soreness after a session: fine if it fades within 4 h (schematic)
+    const X0 = 880, Y0 = 760, W = 620, H = 300;
+    chartAxes(p, X0, Y0, W, H, 'болезненность', '', m('b1')); txt(p, 'часы после занятия', X0 + W, Y0 + 62, m('b1'), { size: 20, fill: COL.dim, anchor: 'end' });
+    const X = h => X0 + h / 30 * W;
+    [0, 4, 24].forEach(h => { path(p, `M${X(h)} ${Y0}V${Y0 + 8}`, { stroke: COL.dim, 'stroke-width': 2.5 }, { o: 0 }); txt(p, `${h} ч`, X(h), Y0 + 30, m('b1'), { size: 18, fill: COL.dim, anchor: 'middle' }); });
+    const okD = fnPath(X0, Y0, W, H, u => .7 * Math.exp(-u * 30 / 1.6), 0, 1, 120);
+    const badD = fnPath(X0, Y0, W, H, u => .75 * Math.exp(-u * 30 / 40) + .02, 0, 1, 120);
+    draw(path(p, badD, { stroke: COL.bad, 'stroke-width': 4 }, { d: 0 }), m('b1', .5), 1.6);
+    txt(p, 'не проходит за сутки', X(14), Y0 - H * .62, m('b1', 1.2), { size: 19, weight: 700, fill: COL.bad });
+    draw(path(p, okD, { stroke: COL.good, 'stroke-width': 4 }, { d: 0 }), m('ok'), 1.4);
+    txt(p, 'до 4 часов — допустимо', X(4.5), Y0 - H * .2, m('ok', .5), { size: 19, weight: 700, fill: COL.good });
+    pill(p, 'схема', X0 + W - 40, Y0 - H - 10, m('b1'), { col: COL.dim, size: 18 });
+    labelBox(p, 1190, 360, 680, ['есть признаки → нагрузку уменьшить или изменить'], COL.task, m('ok', 1.5), { size: 22 });
+  }],
+
+  ['stretch', 'Начало растяжки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'растяжка — на нужные ткани; часто несколько техник', 800, 56, m('stretch'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    txt(p, 'вернуть подвижность и выровнять волокна рубца', 800, 96, m('stretch', .8), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const ST = [['warm', 'разогреть', 'физические факторы или активные движения', COL.bad], ['relax', 'расслабить', '«напряжение — расслабление», если мышцы не расслаблены', COL.real],
+      ['jmob', 'мобилизация сустава', 'III с удержанием или колебания III–IV — до растяжки, чтобы не сдавить хрящ', COL.whole], ['pass', 'растяжка', 'пассивная, самостоятельная, длительная механическая + нервно-мышечное торможение', COL.task],
+      ['fric', 'поперечный фрикционный массаж', 'связки, послеоперационные рубцы, рубцы в мышцах, спайки сухожилий', ANAT.tendon], ['use', 'использовать новый объём', 'лёгкое сопротивление агонистом, самостоятельная растяжка, обычные дела', COL.good]];
+    ST.forEach(([k, a, b, c], i) => {
+      const x = 60 + (i % 3) * 500, y = 140 + Math.floor(i / 3) * 370, g = G(p, { o: 0, y: 12 });
+      roundBox(g, x, y, 470, 340, c, PANEL, 2.5);
+      mk('circle', { cx: x + 40, cy: y + 40, r: 22, fill: c }, g);
+      T(g, String(i + 1), { x: x + 40, y: y + 49, size: 24, weight: 700, fill: COL.board, anchor: 'middle' });
+      put(para(g, a, x + 76, y + 48, null, { size: 24, weight: 700, fill: c, maxW: 370 }), { o: 1 });
+      put(para(g, b, x + 24, y + 250, null, { size: 20, fill: COL.chalk, maxW: 420 }), { o: 1 });
+      tw(g, { o: 1, y: 0 }, m(k), .5);
+    });
+    // small pictures in the cards
+    const th = G(p, { o: 0 }); mk('rect', { x: 283, y: 180, width: 16, height: 56, rx: 8, fill: PANEL, stroke: COL.chalk, 'stroke-width': 2.5 }, th); mk('circle', { cx: 291, cy: 244, r: 14, fill: COL.bad, stroke: COL.chalk, 'stroke-width': 2.5 }, th);
+    const tl = mk('rect', { x: 287, y: 232, width: 8, height: 6, fill: COL.bad }, th); show(th, m('warm'));
+    prog(q => { const h = 6 + 40 * q; tl.setAttribute('y', (238 - h).toFixed(1)); tl.setAttribute('height', h.toFixed(1)); }, m('warm', .3), 1.5);
+    const rm = muscleEl(p, { rest: 200, w: 22 }); put(rm.g, { o: 0 }); rm.set([630, 280], [830, 280]); show(rm.g, m('relax'));
+    prog(q => { const T = q * 6; rm.act(T < 2 ? .9 : 0); rm.set([630, 280], [830 + (T > 2.5 ? 30 * io(clamp((T - 2.5) / 1.5, 0, 1)) : 0), 280]); }, m('relax', .3), 6, lin);
+    const j = jointGlide(p, { x: 1300, y: 260, s: .42, shaft: 100, t0: m('jmob') });
+    prog(q => j.set({ d: 10 * Math.sin(q * 2 * Math.PI * 4) }), m('jmob', .4), Math.max(2, D - m('jmob', .4)), lin);
+    const sm = muscleEl(p, { rest: 200, w: 22 }); put(sm.g, { o: 0 }); show(sm.g, m('pass'));
+    prog(q => sm.set([130, 640], [330 + 40 * io(clamp(q * 2, 0, 1)), 640]), m('pass', .3), 2);
+    const ts = tendonSheath(p, 590, 640, 380, m('fric'), { r: 18 }); ts.set({ adh: .6 });
+    const fg = mk('circle', { r: 15, fill: '#d8d1c1', stroke: '#8a8476', 'stroke-width': 2 }, p); put(fg, { o: 0 });
+    prog(q => put(fg, { x: 780, y: 640 + 26 * Math.sin(q * 40), o: 1 }), m('fric', .4), Math.max(2, D - m('fric', .4)), lin);
+    const ar = fig(p, { s: .42, o: 0 }); plant(ar, 'AN', 1470, 745); show(ar.g, m('use'));
+    prog(q => ar.set({ aN: lerp(10, 150, cyc(q, 2)) }), m('use', .4), Math.max(2, D - m('use', .4)), lin);
+  }],
+
+  ['factors', 'Соседние области и блок 10.2', (m, D) => {
+    const p = panel(0);
+    txt(p, 'исправить то, что вызвало проблему', 800, 56, m('fac'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    pillRow(p, ['осанка', 'биомеханика', 'стабильность', 'гибкость', 'сила'], 800, 120, m('list'), { col: COL.whole, size: 21, gap: .4 });
+    txt(p, 'малоинтенсивные дела без роста симптомов; регулярная оценка прогресса', 800, 180, m('act'), { size: 21, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'блок 10.2: подострая стадия — примерно до 3 недель после травмы', 800, 250, m('box'), { size: 24, weight: 700, fill: HEAD, anchor: 'middle' });
+    const GL = ['обучить пациента', 'помочь заживлению', 'восстановить подвижность мягких тканей, мышц, сустава', 'развить нервно-мышечный контроль, выносливость и силу', 'сохранить функцию соседних областей'];
+    GL.forEach((s, i) => numLine(p, i + 1, s, 120, 320 + i * 70, HEAD, m('g', i * 1.4), { size: 24, maxW: 1300 }));
+    infoCard(p, 60, 680, 700, 170, 'допустимо', 'небольшой дискомфорт при росте нагрузки — не дольше пары часов', COL.good, m('pre'), { size: 22 });
+    infoCard(p, 820, 680, 720, 170, 'признаки избытка', 'боль в покое, утомление, нарастающая слабость, спазм дольше суток', COL.bad, m('pre', 2), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-sore', prompt: ['После вчерашнего занятия болезненность не уменьшилась и через 5 часов, а к утру не прошла. Что делать с нагрузкой?'],
+    build: choice([
+      ['Уменьшить или изменить: это признак чрезмерной нагрузки'],
+      ['Продолжать так же: болезненность — признак прогресса'],
+      ['Увеличить, чтобы ткань привыкла'],
+      ['Сразу перейти к эксцентрическим упражнениям'],
+    ], 0, 'Болезненность, которая не уменьшается через 4 часа и не проходит за сутки, — признак чрезмерной нагрузки (блок 10.3).',
+    [null, 'Допустима временная болезненность до 4 часов, а не дольше суток.', 'Это перегрузит хрупкую новую ткань и продлит воспаление.', 'Эксцентрика и большое сопротивление на этой стадии — осторожно, особенно после травмы мышцы.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 100, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Подострая стадия: коллаген, капилляры, фибробласты; с 5-го дня рубец сокращается; новая ткань хрупкая.', 'w1'],
+     ['Активные упражнения — когда отёк меньше, боль не постоянна и не усиливается от движения.', 'w2'],
+     ['Изометрия без боли под разными углами, активные движения с контролем, выносливость, частичная нагрузка; эксцентрика после травмы мышцы — пока нет.', 'w3'],
+     ['Растяжка: разогрев → расслабление → мобилизация сустава → растяжка → фрикционный массаж → новый объём в деле.', 'w4'],
+     ['Следите за признаками перегрузки.', 'w5']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 190 + i * 135, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: HEAD }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 28, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-ham', prompt: ['Десятый день после надрыва задней группы мышц бедра. Отёк меньше, боль не постоянная. Что подходит?'],
+    build: choice([
+      ['Субмаксимальная изометрия в укороченном положении под разными углами, активные движения без боли, лёгкие упражнения на выносливость'],
+      ['Тяжёлые эксцентрические упражнения для задней поверхности бедра'],
+      ['Полный покой ещё две недели'],
+      ['Спринт, чтобы проверить мышцу'],
+    ], 0, 'В ранней подострой стадии — щадящая нагрузка: изометрия без боли (мышца в укороченном положении), контроль, выносливость.',
+    [null, 'Эксцентрика и большое сопротивление после травмы мышцы на этой стадии не используют.', 'Пора начинать контролируемое движение: иначе ткань не выровняется и прилипнет.', 'Это высокая нагрузка — для фазы возврата к функции.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-order', prompt: ['Объём сгибания колена ограничен, суставная игра снижена. С чего начать растяжку после разогрева и расслабления?'],
+    build: choice([
+      ['С мобилизации сустава (III степень), чтобы вернуть скольжение'],
+      ['С сильной пассивной растяжки в конце объёма'],
+      ['С поперечного массажа мышцы'],
+      ['С упражнений с большим сопротивлением'],
+    ], 0, 'При сниженной суставной игре сначала мобилизация: скольжение возвращают до физиологической растяжки, чтобы не сдавить хрящ.',
+    [null, 'Без скольжения растяжка сдавливает уязвимый хрящ.', 'Фрикционный массаж — для связок, рубцов, спаек; суставную игру он не вернёт.', 'Сопротивление не восстанавливает суставную игру.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

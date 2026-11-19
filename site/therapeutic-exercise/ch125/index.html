@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Комплексный регионарный болевой синдром — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 125, title: 'Комплексный регионарный болевой синдром', minutes: 10, language: 'ru', next: '../ch126/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch125/cards.ru.json
+const CARDS_SHORT = {
+  "болезненный, инвалидизирующий, часто хронический\nв США — около 50 000 новых случаев в год": "≈ 50 000 случаев в год",
+  "диагноз — только по клинике\n1) боль продолжается и несоразмерна событию; 2) нет другого диагноза, который объяснял бы симптомы": "боль несоразмерна + нет другого диагноза",
+  "I тип\nпосле повреждающего события без повреждения нерва: размозжение, травма, иммобилизация, тугая повязка, операция": "без повреждения нерва",
+  "II тип\nпосле повреждения нерва; симптомы не ограничены его зоной": "повреждение нерва",
+  "неуточнённый\nпричина не установлена": "причина не установлена",
+  "после травмы воспаление естественно\nа здесь оно не прекращается: много провоспалительных веществ, мало противовоспалительных": "воспаление не прекращается",
+  "нарушается связь ощущений и движения\nтеряется двигательная функция, искажается представление о теле, вегетативные расстройства": "теряется функция, искажается тело",
+  "острое → хроническое\nпериферические признаки сменяются центральными: сенситизация, стойкая боль, нарушения мышления и настроения": "периферические → центральные",
+  "клинический совет\nраспознать раннюю тёплую фазу: раннее вмешательство может не дать перейти в холодную": "ранняя тёплая фаза",
+  "замечать\nболь, которая сильнее ожидаемой реакции на, казалось бы, небольшую травму": "боль сильнее ожидаемой",
+  "золотого стандарта нет\nфункциональная физическая терапия + лекарства + психотерапия; лечение только лекарствами ведёт к неиспользованию конечности и психологическим последствиям жизни с болью": "терапия + лекарства + психотерапия",
+  "боль и отёк\nэлектростимуляция; тепло или холод — по сосудистой реакции; массаж от периферии к центру, возвышение, компрессионные рукава и перчатки, пневмокомпрессия": "электростимуляция, массаж, компрессия",
+  "подвижность\nмягкие активные движения каждым суставом — понемногу, но часто, не усиливая боль; кисть — скольжение сухожилий; стопа — полотенце пальцами, доска сидя, постепенная опора; вода облегчает опору": "понемногу, но часто; вода",
+  "сила\nактивные сокращения, в том числе в плече или бедре; опора в закрытой цепи — нагрузка тканей при минимальном движении в суставах; отвлекающие задания — например, нести лёгкую сумку": "закрытая цепь, лёгкая сумка",
+  "общее кровообращение\nмалоударная аэробная нагрузка; вначале — упражнения в воде": "малоударная; вначале — вода",
+  "обучение\nпользоваться конечностью в быту, даже если боль немного усиливается, — в пределах переносимости; самому справляться с реакциями: мягкое тепло, короткие упражнения; состояние — управляемое, а не «конечность надо беречь»; встреча с пугающими ситуациями — постепенно": "пользоваться конечностью; управляемое",
+  "хроническая стадия\n+ мобилизация верхнегрудного или поясничного отдела (там симпатические ганглии), мобилизация нерва, растяжка": "+ мобилизация отделов и нерва",
+  "данные\nэффективна при раннем начале; в поздних стадиях — противоречиво; в хронической фазе лучше результат у тех, у кого вначале выше функция, больше объём и сила, меньше боль": "эффективна при раннем начале",
+};
+// cards-short end
+
+const HEAD = COL.whole, PAIN = '#ff5a3c', WARM = '#e8734f', COLD = '#6f9fd8', CR = '#d98ab0';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function numLine(p, n, str, x, y, col, t0, { size = 22, maxW = 860 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 20, cy: y - 8, r: 19, fill: col }, g);
+  T(g, String(n), { x: x + 20, y: y, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 54, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+// A hand (handMap) whose skin can change: set({ warm, cold, swell, shiny, sweat, pit }) 0..1 — warm red or cold blue
+// tint, a puffy dorsum (pitting edema with a lasting dent when pit > 0), shiny thin skin, sweat beads.
+function crpsHand(p, x, y, s, t0) {
+  const hm = handMap(p, x, y, s, null), g = hm.g;
+  const tint = mk('path', { d: 'M-66 40C-78 0 -80 -60 -70 -96C-40 -110 32 -112 72 -92C82 -44 78 0 64 40C30 58 -30 58 -66 40Z', fill: WARM, opacity: 0 }, g);
+  const puff = mk('ellipse', { cx: 0, cy: -40, rx: 0, ry: 0, fill: '#e7b3a0', 'fill-opacity': .55, stroke: '#c98a76', 'stroke-width': 2 }, g);
+  const dent = mk('ellipse', { cx: 10, cy: -46, rx: 0, ry: 0, fill: '#b98070', 'fill-opacity': .7 }, g);
+  const shine = mk('path', { d: 'M-40 -70C-20 -84 20 -84 40 -70', fill: 'none', stroke: '#ffffff', 'stroke-width': 5, 'stroke-linecap': 'round', opacity: 0 }, g);
+  const drops = [[-30, -20], [20, -60], [40, 0], [-10, 20], [50, -40]].map(([cx, cy]) => mk('ellipse', { cx, cy, rx: 4, ry: 6, fill: '#bfe6f5', opacity: 0 }, g));
+  const S = { warm: 0, cold: 0, swell: 0, shiny: 0, sweat: 0, pit: 0 }, e = { hm, g, st: S };
+  e.set = o => {
+    Object.assign(S, o);
+    tint.setAttribute('fill', S.cold > S.warm ? COLD : WARM);
+    tint.setAttribute('opacity', f1(.45 * Math.max(S.warm, S.cold)));
+    puff.setAttribute('rx', f1(62 * S.swell)); puff.setAttribute('ry', f1(46 * S.swell));
+    dent.setAttribute('rx', f1(12 * S.pit)); dent.setAttribute('ry', f1(8 * S.pit));
+    shine.setAttribute('opacity', f1(.7 * S.shiny));
+    drops.forEach(d => d.setAttribute('opacity', f1(S.sweat)));
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Комплексный регионарный болевой синдром', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 13 · Урок 125', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Комплексный регионарный', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'болевой синдром', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'боль, несоразмерная травме, — распознать рано и вернуть движение', 800, 360, m('sub'), { size: 30, fill: CR, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const h = crpsHand(art, 640, 640, 1.1, null); put(h.g, { o: 1 });
+    const h2 = handMap(art, 960, 640, 1.1, null); put(h2.g, { o: 1 });
+    prog(q => h.set({ warm: clamp(q * 3, 0, 1) * (1 - clamp(q * 3 - 1.5, 0, 1)), cold: clamp(q * 3 - 1.5, 0, 1), swell: clamp(q * 3, 0, 1) * (1 - .5 * clamp(q * 3 - 1.5, 0, 1)), shiny: clamp(q * 3 - 1.8, 0, 1) }), .6, Math.max(2, D - 1.6), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['def', 'Что это', (m, D) => {
+    const p = panel(0);
+    txt(p, 'комплексный регионарный болевой синдром (блок 13.10)', 800, 56, m('def'), { size: 28, weight: 700, anchor: 'middle', fill: CR });
+    infoCard(p, 60, 96, 720, 150, 'болезненный, инвалидизирующий, часто хронический', 'в США — около 50 000 новых случаев в год', CR, m('def'), { size: 21 });
+    // ≈ 7 % after limb fractures and operations: 100 dots, 7 lit
+    const dg = G(p, { o: 0 }); show(dg, m('inc', 1));
+    for (let i = 0; i < 100; i++) { const c = mk('circle', { cx: 120 + (i % 20) * 30, cy: 300 + Math.floor(i / 20) * 30, r: 10, fill: COL.dim, 'fill-opacity': .35 }, dg); if ([13, 27, 44, 58, 66, 81, 95].includes(i)) { put(c, {}); tw(c, { 'c_fill': CR, 'a_fill-opacity': 1 }, m('inc', 2 + i * .02), .4); } }
+    txt(p, '≈ 7 из 100 после переломов и операций на конечностях', 420, 470, m('inc', 2), { size: 20, weight: 700, fill: CR, anchor: 'middle' });
+    pill(p, 'особенно после операций на кисти', 420, 510, m('inc', 3), { col: COL.task, size: 18 });
+    infoCard(p, 820, 96, 720, 230, 'диагноз — только по клинике', '1) боль продолжается и несоразмерна событию; 2) нет другого диагноза, который объяснял бы симптомы', COL.whole, m('dx'), { size: 22 });
+    const T3 = [['I тип', 'после повреждающего события без повреждения нерва: размозжение, травма, иммобилизация, тугая повязка, операция', 't1', CR], ['II тип', 'после повреждения нерва; симптомы не ограничены его зоной', 't2', COL.real], ['неуточнённый', 'причина не установлена', 'nos', COL.dim]];
+    T3.forEach(([h, s, k, c], i) => infoCard(p, 60 + i * 500, 570, 480, 230, h, s, c, m(k), { size: 20 }));
+    pill(p, 'при любой форме — междисциплинарная помощь вокруг функции', 800, 840, m('team'), { col: COL.good, size: 20 });
+  }],
+
+  ['signs', 'Признаки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'признаки: вегетативные и воспалительные изменения', 800, 56, m('signs'), { size: 28, weight: 700, anchor: 'middle', fill: CR });
+    const h = crpsHand(p, 380, 470, 1.6, m('signs'));
+    const fg = G(p, { o: 0 }), fsh = shadeGrad(mk('defs', {}, fg), '#d8d1c1');
+    mk('path', { d: capsuleD([0, -110], [0, -12], 15, 12), fill: fsh.url, stroke: mix('#d8d1c1', COL.board, .62), 'stroke-width': 2 }, fg); fsh.aim([0, -110], [0, -12], 15);
+    put(fg, { x: 420, y: 330 }); show(fg, m('s1')); tw(fg, { y: 362 }, m('s1', .4), .4); hide(fg, m('s2'));
+    const zap = G(p, { x: 420, y: 380, s: 0, o: 0 }); mk('circle', { r: 30, fill: PAIN, 'fill-opacity': .3, stroke: PAIN, 'stroke-width': 4 }, zap); pop(zap, m('s1', .8)); hide(zap, m('s2'));
+    prog(q => h.set({ swell: q }), m('s2'), 1); prog(q => h.set({ sweat: q }), m('s2', 1.5), .6);
+    prog(q => h.set({ warm: q }), m('s3'), 1);
+    prog(q => h.set({ shiny: q }), m('s4'), 1);
+    const S = [['s1', 'жгучая боль, аллодиния — боль от прикосновения', PAIN], ['s2', 'отёк, изменения потоотделения', COL.whole], ['s3', 'разница температуры и цвета кожи', WARM], ['s4', 'волосы и ногти растут иначе, кожа тонкая и блестит', COL.real], ['s5', 'слабость, тремор, дистония; эмоциональные реакции', COL.task]];
+    S.forEach(([k, s, c], i) => numLine(p, i + 1, s, 760, 150 + i * 100, c, m(k), { size: 22, maxW: 720 }));
+    pillRow(p, ['сильнее дистально', 'распространяется проксимально', 'меняется со временем'], 1120, 690, m('dist'), { col: CR, size: 19, gap: .8, space: 10 });
+  }],
+
+  ['mech', 'Механизм', (m, D) => {
+    const p = panel(0);
+    txt(p, 'механизм: воспаление, которое не прекращается', 800, 56, m('mech'), { size: 28, weight: 700, anchor: 'middle', fill: CR });
+    // a balance of pro- and anti-inflammatory mediators
+    const bal = G(p, { x: 400, y: 330, o: 0 });
+    path(bal, 'M0 0L-30 64H30Z', { fill: PANEL, stroke: COL.dim, 'stroke-width': 3 });
+    const beam = G(bal, {}); path(beam, 'M-210 0H210', { stroke: COL.chalk, 'stroke-width': 6 });
+    const pan = (k, col, str, n) => { const pg = G(beam, { x: k * 190 }); path(pg, 'M0 0V36', { stroke: COL.dim, 'stroke-width': 2 }); for (let i = 0; i < n; i++) mk('circle', { cx: -50 + (i % 5) * 25, cy: 52 - Math.floor(i / 5) * 22, r: 10, fill: col }, pg); T(pg, str, { x: 0, y: 106, size: 18, weight: 700, fill: col, anchor: 'middle' }); return pg; };
+    const pL = pan(-1, PAIN, 'провоспалительные', 12), pR = pan(1, COL.good, 'противовоспалительные', 3);
+    show(bal, m('mech', 1));
+    prog(q => { const a = -14 * q; put(beam, { r: a }); put(pL, { r: -a }); put(pR, { r: -a }); }, m('mech', 2), 1.2);
+    infoCard(p, 820, 96, 720, 180, 'после травмы воспаление естественно', 'а здесь оно не прекращается: много провоспалительных веществ, мало противовоспалительных', CR, m('mech'), { size: 21 });
+    const chain = ['сенсибилизация периферических и спинальных болевых систем', 'признаки воспаления сильнее', 'костные клетки и фибробласты, сосуды работают иначе'];
+    chain.forEach((s, i) => numLine(p, i + 1, s, 820, 340 + i * 80, PAIN, m('sens', .3 + i * 1.5), { size: 21, maxW: 680 }));
+    // body map distortion: the felt hand is bigger and blurred
+    handMap(p, 190, 730, .6, m('map'));
+    const felt = G(p, { x: 480, y: 690, o: 0 }); const fh = handMap(felt, 0, 0, .72, null); put(fh.g, { o: .5 }); show(felt, m('map', 1));
+    prog(q => put(felt, { s: 1 + .06 * Math.sin(q * 20), r: 4 * Math.sin(q * 13) }), m('map', 1), Math.max(2, D - m('map', 1)), lin);
+    txt(p, 'настоящая', 190, 880, m('map'), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'как её «видит» мозг', 500, 880, m('map', 1), { size: 19, weight: 600, fill: CR, anchor: 'middle' });
+    pill(p, 'схема', 340, 540, m('map'), { col: COL.dim, size: 17 });
+    infoCard(p, 820, 620, 720, 200, 'нарушается связь ощущений и движения', 'теряется двигательная функция, искажается представление о теле, вегетативные расстройства', COL.real, m('map'), { size: 21 });
+  }],
+
+  ['course', 'Течение', (m, D) => {
+    const p = panel(0);
+    txt(p, 'течение: от тёплой фазы к холодной', 800, 56, m('course'), { size: 28, weight: 700, anchor: 'middle', fill: CR });
+    const h = crpsHand(p, 330, 400, 1.4, m('course'));
+    prog(q => h.set({ warm: q, swell: q, pit: 0 }), m('course', .5), 1.2);
+    prog(q => h.set({ pit: q }), m('course', 3), .6);
+    lab(p, 'ямка от надавливания', 520, 760, 330 + 10 * 1.4, 400 - 46 * 1.4, '#c98a76', m('course', 3.2), { size: 18 });
+    pill(p, 'по мотивам рис. 13.22', 330, 840, m('course', 3.2), { col: COL.dim, size: 16 });
+    prog(q => h.set({ warm: 1 - q, cold: q, swell: 1 - .7 * q, pit: 1 - q, shiny: q }), m('central', 1), 2);
+    // a temperature/time line
+    const X0 = 760, W = 760, Y = 360, X = u => X0 + u * W;
+    const ax = G(p, { o: 0 }); path(ax, `M${X0} ${Y}H${X0 + W + 20}m-12 -8l12 8l-12 8`, { stroke: COL.dim, 'stroke-width': 2.5 }); T(ax, 'время', { x: X0 + W + 20, y: Y + 30, size: 18, fill: COL.dim, anchor: 'end' }); show(ax, m('course'));
+    const gid = 'tc' + (++SHADE_ID), lg = mk('linearGradient', { id: gid }, mk('defs', {}, p));
+    [[0, WARM], [.45, WARM], [.6, COLD], [1, COLD]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, lg));
+    const band = mk('rect', { x: X0, y: Y - 70, width: 0, height: 50, rx: 12, fill: `url(#${gid})`, 'fill-opacity': .85 }, p);
+    prog(q => band.setAttribute('width', f1(W * q)), m('course', .5), Math.max(2, m('central', 3) - m('course', .5)), lin);
+    txt(p, 'тёплая: чувствительная, отёчная, горячая', X0, Y - 90, m('course', .8), { size: 20, weight: 700, fill: WARM });
+    txt(p, 'холодная: воспаления нет, боль осталась', X0 + W, Y + 60, m('central', 1), { size: 20, weight: 700, fill: COLD, anchor: 'end' });
+    pill(p, 'схема', X0 + W / 2, Y + 110, m('course'), { col: COL.dim, size: 17 });
+    infoCard(p, 760, 500, 780, 170, 'острое → хроническое', 'периферические признаки сменяются центральными: сенситизация, стойкая боль, нарушения мышления и настроения', COL.real, m('central'), { size: 20 });
+    infoCard(p, 760, 690, 780, 170, 'клинический совет', 'распознать раннюю тёплую фазу: раннее вмешательство может не дать перейти в холодную', COL.good, m('tip'), { size: 21 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-phase', prompt: ['Тёплая или холодная фаза?'],
+    build: grid([
+      { parts: ['Кисть горячая, отёчная, болезненная'], ans: ['w'], why: 'Тёплая (острая) фаза.' },
+      { parts: ['Отёк ушёл, кожа прохладная и блестит, боль осталась'], ans: ['c'], why: 'Холодная (хроническая) фаза.' },
+      { parts: ['Отёк с ямкой от надавливания на тыле кисти'], ans: ['w'], why: 'Ранняя тёплая фаза.' },
+      { parts: ['Центральная сенситизация, нарушения настроения'], ans: ['c'], why: 'Хроническая фаза — центральные изменения.' },
+      { parts: ['Лучшее время для раннего вмешательства'], ans: ['w'], why: 'Тёплая фаза.' },
+    ], [['w', 'Тёплая', WARM], ['c', 'Холодная', COLD]], { multi: false, text: true }),
+  }], done) }],
+
+  ['early', 'Рано — значит лучше', (m, D) => {
+    const p = panel(0);
+    txt(p, 'лечение: распознать и вмешаться рано', 800, 56, m('early'), { size: 28, weight: 700, anchor: 'middle', fill: CR });
+    const B = [['лечение начато в первый год', 80, COL.good], ['позже года', 50, COL.task]];
+    txt(p, 'заметно улучшаются', 420, 140, m('pct'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    B.forEach(([s, v, c], i) => { const y = 180 + i * 90, g0 = G(p, { o: 0 }); T(g0, s, { x: 330, y: y + 30, size: 20, fill: COL.chalk, anchor: 'end' }); const r = mk('rect', { x: 350, y, width: 0, height: 44, rx: 10, fill: c }, g0); const tv = T(g0, `${v} %`, { x: 360, y: y + 32, size: 24, weight: 700, fill: c }); show(g0, m('pct', .5 + i * 1.5)); prog(q => { r.setAttribute('width', f1(v * 4.2 * q)); put(tv, { x: 360 + v * 4.2 * q }); }, m('pct', .6 + i * 1.5), 1, out); });
+    infoCard(p, 820, 100, 720, 210, 'замечать', 'боль, которая сильнее ожидаемой реакции на, казалось бы, небольшую травму', COL.task, m('alert'), { size: 22 });
+    infoCard(p, 60, 400, 1480, 200, 'золотого стандарта нет', 'функциональная физическая терапия + лекарства + психотерапия; лечение только лекарствами ведёт к неиспользованию конечности и психологическим последствиям жизни с болью', CR, m('nogold'), { size: 22 });
+    pillRow(p, ['стероиды в острой фазе', 'обезболивающие', 'блокады при нестерпимой боли', 'противосудорожные, антидепрессанты'], 800, 680, m('med', .5), { col: COL.real, size: 20, gap: 1.2, space: 12 });
+    txt(p, 'лекарства помогают участвовать в терапии', 800, 640, m('med'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+  }],
+
+  ['pt', 'Физическая терапия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'физическая терапия (блок 13.11)', 800, 56, m('pt'), { size: 28, weight: 700, anchor: 'middle', fill: CR });
+    pillRow(p, ['меньше отёка', 'меньше сверхчувствительности', 'нормальные ощущения и положение', 'меньше защитного напряжения', 'конечность — в работу'], 800, 108, m('pt', .5), { col: COL.good, size: 18, gap: .8, space: 10 });
+    const h = crpsHand(p, 260, 380, 1.05, m('edema'));
+    h.set({ warm: .8, swell: 1 });
+    // retrograde massage: strokes from the fingers toward the wrist
+    const st = G(p, { o: 0 }); show(st, m('edema', 2));
+    prog(q => { st.replaceChildren(); const k = q * 4 % 1; const y0 = 380 - 150 * 1.05 + k * 220; path(st, `M200 ${f1(y0)}h120`, { stroke: COL.whole, 'stroke-width': 5, 'stroke-opacity': f1(Math.sin(k * Math.PI)) }); }, m('edema', 2), 3, lin);
+    prog(q => h.set({ swell: 1 - .6 * q, warm: .8 - .5 * q }), m('edema', 3), 2);
+    infoCard(p, 480, 160, 1060, 160, 'боль и отёк', 'электростимуляция; тепло или холод — по сосудистой реакции; массаж от периферии к центру, возвышение, компрессионные рукава и перчатки, пневмокомпрессия', COL.whole, m('edema'), { size: 19 });
+    infoCard(p, 480, 340, 1060, 160, 'подвижность', 'мягкие активные движения каждым суставом — понемногу, но часто, не усиливая боль; кисть — скольжение сухожилий; стопа — полотенце пальцами, доска сидя, постепенная опора; вода облегчает опору', COL.task, m('mob'), { size: 19 });
+    infoCard(p, 480, 520, 1060, 160, 'сила', 'активные сокращения, в том числе в плече или бедре; опора в закрытой цепи — нагрузка тканей при минимальном движении в суставах; отвлекающие задания — например, нести лёгкую сумку', COL.good, m('load'), { size: 19 });
+    // closed-chain loading: a hand pressing on a table, a light bag
+    const f = fig(p, { s: .7, o: 0, pose: { t: 10, aN: 40, eN: 10 } }); plant(f, 'AN', 220, 870); show(f.g, m('load'));
+    const tb = G(p, { o: 0 }); path(tb, 'M240 760H400M260 760V870M380 760V870', { stroke: COL.dim, 'stroke-width': 5 }); show(tb, m('load'));
+    reach(f, 'N', 300, 752); f.set({});
+    prog(q => { reach(f, 'N', 300, 752 + 4 * cyc(q, 3)); f.set({}); }, m('load', .5), 3, lin);
+    txt(p, 'опора на руку — закрытая цепь', 640, 760, m('load', .5), { size: 20, weight: 700, fill: COL.good });
+  }],
+
+  ['mirror', 'Зеркальная терапия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'зеркальная терапия и двигательная визуализация', 800, 56, m('mirror'), { size: 28, weight: 700, anchor: 'middle', fill: CR });
+    // the box (hidden hand behind the mirror) and the visible hand with its reflection
+    const box = G(p, { o: 0 });
+    mk('rect', { x: 140, y: 230, width: 300, height: 340, rx: 10, fill: '#3d4a52', stroke: '#9fb0bf', 'stroke-width': 3 }, box);
+    const mir = mk('rect', { x: 440, y: 200, width: 14, height: 400, fill: '#cfe6f0', stroke: '#9fb0bf', 'stroke-width': 2 }, box);
+    show(box, m('set'));
+    const hid = crpsHand(p, 290, 430, .9, m('set')); hid.set({ warm: .7, swell: .7 });
+    const vis = handMap(p, 620, 430, .9, m('set'));
+    const refl = G(p, { o: 0 }); const rh = handMap(refl, 0, 0, .9, null); put(rh.g, { o: .45 }); put(refl, { x: 290, y: 430 }); show(refl, m('set', 1.5));
+    txt(p, 'спрятана', 290, 640, m('set'), { size: 19, weight: 700, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'видна в зеркале', 620, 640, m('set'), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'в зеркале — «больная» рука здорова', 380, 180, m('set', 1.5), { size: 20, weight: 700, fill: COL.good, anchor: 'middle' });
+    pill(p, 'украшения и часы снять', 450, 690, m('set', 2), { col: COL.dim, size: 18 });
+    // progression: both still → visible moves → hidden moves a little while visible moves a lot → both equal
+    const t0 = m('prog'), span = Math.max(4, m('gmi') - t0);
+    prog(q => { const ph = Math.floor(q * 4), c = cyc(q * 4 % 1, 1); put(vis.g, { r: ph >= 1 ? 20 * c : 0 }); put(rh.g, { r: ph >= 1 ? -20 * c : 0 }); put(hid.g, { r: ph >= 2 ? (ph === 2 ? 6 : 20) * c : 0 }); }, t0, span, lin);
+    const P = ['обе неподвижны', 'двигается видимая', 'спрятанная — в своих пределах, видимая — крупно', 'обе одинаково'];
+    P.forEach((s, i) => numLine(p, i + 1, s, 760, 150 + i * 70, CR, t0 + span * i / 4, { size: 21, maxW: 720 }));
+    // graded motor imagery: left/right, imagined movement, mirror
+    txt(p, 'градуированная двигательная визуализация:', 760, 480, m('gmi'), { size: 22, weight: 700, fill: COL.chalk });
+    const lr = G(p, { o: 0 }); const a = handMap(lr, 900, 600, .45, null); put(a.g, { o: 1 }); const b = handMap(lr, 1000, 600, .45, null); put(b.g, { o: 1, r: 180 }); show(lr, m('g1'));
+    show(T(p, 'правая? левая?', { x: 950, y: 745, size: 18, weight: 700, fill: COL.whole, anchor: 'middle', o: 0 }), m('g1'));
+    const think = G(p, { x: 1200, y: 600, o: 0 }); [[0, 0, 40], [-40, 46, 12], [-56, 66, 7]].forEach(([dx, dy, r]) => mk('circle', { cx: dx, cy: dy, r, fill: 'none', stroke: COL.real, 'stroke-width': 3 }, think)); show(think, m('g2'));
+    show(T(p, 'представить движение', { x: 1200, y: 745, size: 18, weight: 700, fill: COL.real, anchor: 'middle', o: 0 }), m('g2'));
+    const mm = G(p, { o: 0 }); mk('rect', { x: 1380, y: 560, width: 10, height: 90, fill: '#cfe6f0' }, mm); show(mm, m('g3'));
+    show(T(p, 'зеркало', { x: 1385, y: 745, size: 18, weight: 700, fill: COL.good, anchor: 'middle', o: 0 }), m('g3'));
+    pill(p, 'схема', 1150, 800, m('gmi'), { col: COL.dim, size: 17 });
+  }],
+
+  ['more', 'Ещё и обучение', (m, D) => {
+    const p = panel(0);
+    txt(p, 'кровообращение, десенситизация, обучение', 800, 56, m('aer'), { size: 28, weight: 700, anchor: 'middle', fill: CR });
+    infoCard(p, 60, 96, 720, 140, 'общее кровообращение', 'малоударная аэробная нагрузка; вначале — упражнения в воде', COL.whole, m('aer'), { size: 21 });
+    // desensitization from the edge toward the most sensitive point
+    const h = crpsHand(p, 420, 530, 1.2, m('des')); h.set({ warm: .6 });
+    const hot = G(p, { x: 420 + 10 * 1.2, y: 530 - 40 * 1.2, s: 0, o: 0 }); mk('circle', { r: 16, fill: PAIN, 'fill-opacity': .4, stroke: PAIN, 'stroke-width': 3 }, hot); pop(hot, m('des', .3));
+    [130, 95, 62, 32].forEach((r, i) => { const c = mk('circle', { cx: 420 + 10 * 1.2, cy: 530 - 40 * 1.2, r, fill: 'none', stroke: COL.good, 'stroke-width': 3, 'stroke-dasharray': '6 6', opacity: 0 }, p); show(c, m('des', 1 + i * .8)); });
+    txt(p, 'с края — к самой чувствительной точке; 5 раз в день', 420, 805, m('des', 1), { size: 20, weight: 700, fill: COL.good, anchor: 'middle' });
+    pillRow(p, ['ткани', 'постукивание', 'давление', 'вибрация'], 420, 852, m('des', 2), { col: COL.good, size: 19, gap: .4 });
+    infoCard(p, 820, 96, 720, 330, 'обучение', 'пользоваться конечностью в быту, даже если боль немного усиливается, — в пределах переносимости; самому справляться с реакциями: мягкое тепло, короткие упражнения; состояние — управляемое, а не «конечность надо беречь»; встреча с пугающими ситуациями — постепенно', COL.task, m('edu'), { size: 20 });
+    infoCard(p, 820, 446, 720, 190, 'хроническая стадия', '+ мобилизация верхнегрудного или поясничного отдела (там симпатические ганглии), мобилизация нерва, растяжка', COL.real, m('chronic'), { size: 20 });
+    infoCard(p, 820, 656, 720, 210, 'данные', 'эффективна при раннем начале; в поздних стадиях — противоречиво; в хронической фазе лучше результат у тех, у кого вначале выше функция, больше объём и сила, меньше боль', COL.whole, m('ev'), { size: 20 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-crps', prompt: ['Подходит ли это при комплексном регионарном болевом синдроме?'],
+    build: grid([
+      { parts: ['Короткие активные движения много раз в день'], ans: ['y'], why: 'Да.' },
+      { parts: ['Держать кисть неподвижной, пока боль не пройдёт'], ans: ['n'], why: 'Нет: неиспользование ухудшает состояние.' },
+      { parts: ['Зеркальная терапия'], ans: ['y'], why: 'Да.' },
+      { parts: ['Только лекарства, без упражнений'], ans: ['n'], why: 'Нет: лечение только лекарствами ведёт к неиспользованию конечности.' },
+      { parts: ['Десенситизация с края к самой чувствительной зоне'], ans: ['y'], why: 'Да, короткими сеансами 5 раз в день.' },
+    ], [['y', 'Подходит', COL.good], ['n', 'Нет', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Боль, несоразмерная травме, с отёком, сосудистыми, потовыми и трофическими изменениями; I тип — без повреждения нерва, II тип — с ним.', 'w1'],
+     ['Тёплая острая фаза переходит в холодную хроническую; лечение в первый год помогает 80 %.', 'w2'],
+     ['Лечение — восстановление функции: отёк и боль, частые короткие движения, опора, зеркальная терапия, двигательная визуализация.', 'w3'],
+     ['Десенситизация — от края к самой чувствительной зоне, 5 раз в день; учить пользоваться конечностью, а не беречь её.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: CR }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-early', prompt: ['Через три недели после гипса по поводу перелома запястья кисть горячая, отёчная, болит при лёгком прикосновении. Что делать?'],
+    build: choice([
+      ['Заподозрить ранний комплексный регионарный болевой синдром: сообщить врачу и сразу начать функциональную программу'],
+      ['Ждать, пока пройдёт само'],
+      ['Полностью обездвижить кисть в ортезе'],
+      ['Интенсивная растяжка через боль'],
+    ], 0, 'Несоразмерная боль, отёк и жар после гипса — признаки тёплой фазы; раннее вмешательство помогает лучше всего.',
+    [null, 'Ожидание упускает время: лечение в первый год эффективнее.', 'Неподвижность усиливает неиспользование конечности.', 'Нельзя усиливать боль — движения мягкие и частые.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-mirror', prompt: ['Пациентка с синдромом на кисти не может пошевелить пальцами из-за боли. С чего начать в зеркальной терапии?'],
+    build: choice([
+      ['Обе кисти неподвижны: она смотрит на отражение здоровой кисти на месте больной'],
+      ['Сразу двигать больной кистью как можно больше'],
+      ['Смотреть прямо на больную кисть'],
+      ['Зеркальная терапия при сильной боли запрещена'],
+    ], 0, 'Начинают с неподвижных рук, затем двигают видимой, потом осторожно — спрятанной, и в конце обеими одинаково.',
+    [null, 'Это последний этап, а не первый.', 'Смысл в том, чтобы видеть отражение здоровой руки на месте больной.', 'Наоборот, она помогает при боли, особенно рано.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

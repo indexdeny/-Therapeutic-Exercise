@@ -1,0 +1,854 @@
+{
+  "chapter": 10,
+  "terms": [
+    {
+      "id": "muscle-strain",
+      "ru": "Растяжение мышцы",
+      "en": "strain",
+      "def": "Перерастяжение, перенапряжение или перегрузка мягкой ткани; обычно легче растяжения связки. Чаще так называют частичное нарушение целости мышечно-сухожильной единицы.",
+      "page": 321,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "strain",
+          "mark": "strain",
+          "to": "mtu"
+        }
+      ],
+      "see": [
+        "sprain",
+        "muscle-tendon-rupture"
+      ]
+    },
+    {
+      "id": "sprain",
+      "ru": "Растяжение связки",
+      "en": "sprain",
+      "def": "Сильная нагрузка, растяжение или разрыв мягких тканей — капсулы, связки, сухожилия, мышцы; чаще так называют травму связки. Бывает первой (лёгкой), второй (средней) и третьей (тяжёлой) степени.",
+      "page": 321,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "strain",
+          "mark": "sprain",
+          "to": "deg"
+        }
+      ],
+      "see": [
+        "muscle-strain",
+        "injury-severity"
+      ]
+    },
+    {
+      "id": "dislocation",
+      "ru": "Вывих",
+      "en": "dislocation",
+      "def": "Смещение части тела, обычно суставных концов костей, с нарушением их анатомического соотношения; повреждает мягкие ткани и вызывает воспаление, боль и мышечный спазм.",
+      "page": 321,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "disl",
+          "mark": "disl",
+          "to": "soft"
+        },
+        {
+          "n": 164,
+          "beat": "disl",
+          "mark": "ant",
+          "to": "les"
+        }
+      ],
+      "see": [
+        "subluxation",
+        "bankart-lesion",
+        "shoulder-instability"
+      ]
+    },
+    {
+      "id": "subluxation",
+      "ru": "Подвывих",
+      "en": "subluxation",
+      "def": "Неполный, частичный вывих; часто сопровождается вторичной травмой окружающих мягких тканей.",
+      "page": 321,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "disl",
+          "mark": "subl"
+        }
+      ],
+      "see": [
+        "dislocation"
+      ]
+    },
+    {
+      "id": "muscle-tendon-rupture",
+      "ru": "Разрыв мышцы или сухожилия",
+      "en": "muscle/tendon rupture or tear",
+      "def": "При частичном разрыве больно растягивать мышцу и сокращать её против сопротивления. При полном мышца не тянет за место повреждения, и ни растяжение, ни сокращение боли не вызывают.",
+      "page": 321,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "tear",
+          "mark": "tear",
+          "to": "nopain"
+        }
+      ],
+      "see": [
+        "muscle-strain",
+        "injury-severity"
+      ]
+    },
+    {
+      "id": "tendinopathy",
+      "ru": "Тендинопатия",
+      "en": "tendinopathy",
+      "def": "Общий термин для повреждений сухожилия, связанных с механической нагрузкой. При повторяющихся микротравмах сухожилие перерождается, воспаление в основном уходит, а функция теряется.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "tendon",
+          "mark": "tendon"
+        },
+        {
+          "n": 106,
+          "beat": "tend",
+          "mark": "tend",
+          "to": "slow"
+        },
+        {
+          "n": 176,
+          "beat": "tend",
+          "mark": "osis"
+        }
+      ],
+      "see": [
+        "tendinitis",
+        "tendinosis",
+        "lateral-elbow-tendinopathy"
+      ]
+    },
+    {
+      "id": "tenosynovitis",
+      "ru": "Теносиновит",
+      "en": "tenosynovitis",
+      "def": "Воспаление синовиальной оболочки, покрывающей сухожилие.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "tendon",
+          "mark": "teno"
+        }
+      ],
+      "see": [
+        "tendinopathy",
+        "tenovaginitis"
+      ]
+    },
+    {
+      "id": "tendinitis",
+      "ru": "Тендинит",
+      "en": "tendinitis",
+      "def": "Воспаление самого сухожилия; после него могут остаться рубцы или отложения кальция.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "tendon",
+          "mark": "itis"
+        }
+      ],
+      "see": [
+        "tendinopathy",
+        "tendinosis"
+      ]
+    },
+    {
+      "id": "tenovaginitis",
+      "ru": "Тендовагинит",
+      "en": "tenovaginitis",
+      "alt": [
+        "теновагинит"
+      ],
+      "def": "Воспаление с утолщением влагалища сухожилия.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "tendon",
+          "mark": "vag"
+        }
+      ],
+      "see": [
+        "tenosynovitis"
+      ]
+    },
+    {
+      "id": "tendinosis",
+      "ru": "Тендиноз",
+      "en": "tendinosis",
+      "def": "Дегенерация сухожилия из-за повторяющейся микротравмы.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "tendon",
+          "mark": "osis"
+        }
+      ],
+      "see": [
+        "tendinopathy",
+        "tendinitis"
+      ]
+    },
+    {
+      "id": "synovitis",
+      "ru": "Синовит",
+      "en": "synovitis",
+      "def": "Воспаление синовиальной оболочки: в суставе или во влагалище сухожилия скапливается лишняя синовиальная жидкость — из-за травмы или болезни.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "joint",
+          "mark": "syn"
+        }
+      ],
+      "see": [
+        "hemarthrosis",
+        "joint-effusion"
+      ]
+    },
+    {
+      "id": "hemarthrosis",
+      "ru": "Гемартроз",
+      "en": "hemarthrosis",
+      "def": "Кровоизлияние в сустав, обычно после тяжёлой травмы; если сустав отекает быстро, нужна помощь врача.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "joint",
+          "mark": "hem"
+        },
+        {
+          "n": 103,
+          "beat": "box",
+          "mark": "blood"
+        }
+      ],
+      "see": [
+        "synovitis",
+        "joint-effusion"
+      ]
+    },
+    {
+      "id": "ganglion",
+      "ru": "Ганглий",
+      "en": "ganglion",
+      "alt": [
+        "сухожильная киста"
+      ],
+      "def": "Выпячивание стенки суставной капсулы или влагалища сухожилия, как воздушный шарик; бывает после травмы, иногда при ревматоидном артрите.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "joint",
+          "mark": "gang",
+          "to": "ra"
+        }
+      ]
+    },
+    {
+      "id": "bursitis",
+      "ru": "Бурсит",
+      "en": "bursitis",
+      "def": "Воспаление синовиальной сумки.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "bursa",
+          "mark": "burs"
+        }
+      ]
+    },
+    {
+      "id": "contusion",
+      "ru": "Ушиб",
+      "en": "contusion",
+      "def": "Повреждение от прямого удара: рвутся капилляры, появляются кровоизлияние, отёк и воспаление.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "bursa",
+          "mark": "cont"
+        }
+      ]
+    },
+    {
+      "id": "overuse-syndrome",
+      "ru": "Синдром перегрузки",
+      "en": "overuse syndromes (cumulative trauma, repetitive strain injury)",
+      "alt": [
+        "кумулятивная травма",
+        "повреждение от повторяющейся нагрузки"
+      ],
+      "def": "Повторяющаяся субмаксимальная перегрузка или трение мышцы либо сухожилия: микротравмы копятся быстрее, чем ткань восстанавливается; воспаление сначала незаметно, затем даёт боль и нарушение функции.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "bursa",
+          "mark": "over"
+        },
+        {
+          "n": 106,
+          "beat": "overuse",
+          "mark": "over",
+          "to": "thr"
+        }
+      ],
+      "see": [
+        "chronic-inflammation",
+        "contributing-factors",
+        "tendinopathy"
+      ]
+    },
+    {
+      "id": "dysfunction",
+      "ru": "Дисфункция",
+      "en": "dysfunction",
+      "def": "Потеря нормальной функции ткани или области из-за адаптивного укорочения, спаек, слабости мышц или любой другой потери подвижности.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "cond",
+          "mark": "dysf"
+        }
+      ],
+      "see": [
+        "joint-dysfunction",
+        "adhesion"
+      ]
+    },
+    {
+      "id": "joint-dysfunction",
+      "ru": "Дисфункция сустава",
+      "en": "joint dysfunction",
+      "def": "Механическая потеря нормальной суставной игры в синовиальном суставе, обычно с болью и потерей функции; её вызывают травма, иммобилизация, бездействие, возраст или болезнь.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "cond",
+          "mark": "joint",
+          "to": "jc"
+        }
+      ],
+      "see": [
+        "joint-play",
+        "dysfunction"
+      ]
+    },
+    {
+      "id": "adhesion",
+      "ru": "Спайка",
+      "en": "adhesion",
+      "def": "Патологическое прилипание коллагеновых волокон к окружающим структурам при иммобилизации, после травмы или операции: ткани теряют эластичность и перестают скользить друг по другу.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "cond",
+          "mark": "adh"
+        },
+        {
+          "n": 105,
+          "beat": "remodel",
+          "mark": "adh"
+        }
+      ],
+      "see": [
+        "contracture",
+        "cross-fiber-massage"
+      ]
+    },
+    {
+      "id": "reflex-muscle-guarding",
+      "ru": "Рефлекторное защитное напряжение",
+      "en": "reflex muscle guarding",
+      "alt": [
+        "защитное напряжение мышц"
+      ],
+      "def": "Длительное сокращение мышцы в ответ на боль: мышца, как шина, удерживает повреждённую ткань от движения; напряжение проходит, когда боль устраняют.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "spasm",
+          "mark": "guard",
+          "to": "stop"
+        }
+      ],
+      "see": [
+        "intrinsic-muscle-spasm"
+      ]
+    },
+    {
+      "id": "intrinsic-muscle-spasm",
+      "ru": "Собственный мышечный спазм",
+      "en": "intrinsic muscle spasm",
+      "def": "Длительное сокращение мышцы в ответ на местные изменения кровообращения и обмена в долго сокращённой мышце; оно поддерживает само себя, даже когда первичное повреждение успокоилось.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "spasm",
+          "mark": "spasm",
+          "to": "causes"
+        }
+      ],
+      "see": [
+        "reflex-muscle-guarding"
+      ]
+    },
+    {
+      "id": "muscle-weakness",
+      "ru": "Слабость мышц",
+      "en": "muscle weakness",
+      "def": "Уменьшение силы сокращения мышцы: от поражения нерва (центрального или периферического) или нервно-мышечного соединения, от прямого повреждения мышцы или просто от бездействия.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "weak",
+          "mark": "weak",
+          "to": "wc"
+        }
+      ],
+      "see": [
+        "strength"
+      ]
+    },
+    {
+      "id": "compartment-syndrome",
+      "ru": "Миофасциальный компартмент-синдром",
+      "en": "myofascial compartment syndrome",
+      "def": "Рост давления в замкнутом нерастяжимом футляре из фасции: нарушается работа сосудов, мышц и нервов, без вмешательства — ишемия и гибель мышцы. Причины — переломы, раздавливание, тесные повязки, гипс.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "weak",
+          "mark": "comp",
+          "to": "cause"
+        },
+        {
+          "n": 112,
+          "beat": "comp",
+          "mark": "c1"
+        }
+      ],
+      "see": [
+        "fracture"
+      ]
+    },
+    {
+      "id": "injury-severity",
+      "ru": "Степени тяжести повреждения",
+      "en": "severity of tissue injury (grades 1–3)",
+      "def": "Первая — лёгкая боль, небольшой отёк; вторая — боль средняя, занятие прекращают, у связки часть волокон порвана; третья — почти полный или полный разрыв, нагрузка безболезненна, сустав нестабилен.",
+      "page": 322,
+      "moments": [
+        {
+          "n": 101,
+          "beat": "grade",
+          "mark": "grade",
+          "to": "g3c"
+        }
+      ],
+      "see": [
+        "sprain",
+        "muscle-tendon-rupture"
+      ]
+    },
+    {
+      "id": "irritability",
+      "ru": "Раздражимость ткани",
+      "en": "irritability",
+      "def": "Чувствительность ткани, следствие воспалительного ответа на повреждение; от неё зависит, какую нагрузку ткань выдерживает.",
+      "page": 323,
+      "moments": [
+        {
+          "n": 102,
+          "beat": "same",
+          "mark": "irr"
+        },
+        {
+          "n": 121,
+          "beat": "princ",
+          "mark": "int"
+        }
+      ],
+      "see": [
+        "acute-stage",
+        "chronic-inflammation",
+        "neural-tissue-mobilization"
+      ]
+    },
+    {
+      "id": "acute-stage",
+      "ru": "Острая стадия",
+      "en": "acute stage (inflammation)",
+      "def": "Стадия воспаления: отёк, покраснение, жар, боль в покое, потеря функции; при движении боль появляется раньше сопротивления ткани. Обычно 4–6 дней, если повреждение не повторяется.",
+      "page": 323,
+      "moments": [
+        {
+          "n": 102,
+          "beat": "acute",
+          "mark": "acute",
+          "to": "dur"
+        },
+        {
+          "n": 103,
+          "beat": "resp",
+          "mark": "vasc",
+          "to": "dur"
+        }
+      ],
+      "see": [
+        "subacute-stage",
+        "maximum-protection-phase"
+      ]
+    },
+    {
+      "id": "subacute-stage",
+      "ru": "Подострая стадия",
+      "en": "subacute stage (proliferation, repair, and healing)",
+      "def": "Воспаление стихает, боль совпадает с сопротивлением ткани; синтез коллагена, с 5-го дня рубец сокращается, новая ткань хрупкая. До 14–21-го дня, в сухожилиях — до 6 недель.",
+      "page": 324,
+      "moments": [
+        {
+          "n": 102,
+          "beat": "sub",
+          "mark": "sub",
+          "to": "tend"
+        },
+        {
+          "n": 104,
+          "beat": "resp",
+          "mark": "resp",
+          "to": "close"
+        }
+      ],
+      "see": [
+        "acute-stage",
+        "chronic-stage",
+        "controlled-motion-phase"
+      ]
+    },
+    {
+      "id": "chronic-stage",
+      "ru": "Хроническая стадия",
+      "en": "chronic stage (maturation and remodeling)",
+      "alt": [
+        "созревание и перестройка"
+      ],
+      "def": "Признаков воспаления нет, боль — при растяжении укороченных тканей; коллаген созревает и выстраивается по нагрузке, к 14-й неделе рубец почти не перестраивается. От 6 месяцев до года.",
+      "page": 324,
+      "moments": [
+        {
+          "n": 102,
+          "beat": "chr",
+          "mark": "chr",
+          "to": "dur"
+        },
+        {
+          "n": 105,
+          "beat": "resp",
+          "mark": "resp",
+          "to": "time"
+        },
+        {
+          "n": 105,
+          "beat": "remodel",
+          "mark": "cov",
+          "to": "w14"
+        }
+      ],
+      "see": [
+        "subacute-stage",
+        "return-to-function-phase"
+      ]
+    },
+    {
+      "id": "maximum-protection-phase",
+      "ru": "Фаза максимальной защиты",
+      "en": "maximum protection (phase I)",
+      "def": "Первая фаза реабилитации, в острой стадии: обучение, покой, холод, компрессия, возвышенное положение, щадящие движения; растяжка и сопротивление в месте воспаления противопоказаны.",
+      "page": 323,
+      "moments": [
+        {
+          "n": 102,
+          "beat": "phases",
+          "mark": "p1",
+          "to": "p1b"
+        },
+        {
+          "n": 103,
+          "beat": "protect",
+          "mark": "protect",
+          "to": "man"
+        },
+        {
+          "n": 114,
+          "beat": "three",
+          "mark": "max"
+        }
+      ],
+      "see": [
+        "acute-stage",
+        "controlled-motion-phase"
+      ]
+    },
+    {
+      "id": "controlled-motion-phase",
+      "ru": "Фаза контролируемого движения",
+      "en": "moderate protection/controlled motion (phase II)",
+      "def": "Вторая фаза, в подострой стадии: щадящие активные упражнения, изометрия без боли, защищённая нагрузка весом, начало растяжки — в пределах того, что выдерживает заживающая ткань.",
+      "page": 323,
+      "moments": [
+        {
+          "n": 102,
+          "beat": "phases",
+          "mark": "p2",
+          "to": "p2b"
+        },
+        {
+          "n": 104,
+          "beat": "role",
+          "mark": "role",
+          "to": "mon"
+        },
+        {
+          "n": 114,
+          "beat": "three",
+          "mark": "mod"
+        }
+      ],
+      "see": [
+        "subacute-stage",
+        "excessive-stress-signs",
+        "return-to-function-phase"
+      ]
+    },
+    {
+      "id": "return-to-function-phase",
+      "ru": "Фаза возврата к функции",
+      "en": "minimum to no protection/return to function (phase III)",
+      "def": "Третья фаза, в хронической стадии: нарастающая нагрузка на созревающий рубец, растяжка контрактур, функциональные и специальные упражнения; для спорта и тяжёлого труда — ещё интенсивнее.",
+      "page": 323,
+      "moments": [
+        {
+          "n": 102,
+          "beat": "phases",
+          "mark": "p3",
+          "to": "p3b"
+        },
+        {
+          "n": 105,
+          "beat": "role",
+          "mark": "role",
+          "to": "iv"
+        },
+        {
+          "n": 114,
+          "beat": "three",
+          "mark": "min"
+        }
+      ],
+      "see": [
+        "chronic-stage",
+        "controlled-motion-phase",
+        "criterion-based-progression"
+      ]
+    },
+    {
+      "id": "chronic-inflammation",
+      "ru": "Хроническое воспаление",
+      "en": "chronic inflammation",
+      "def": "Затянувшееся воспаление, когда ткань снова и снова нагружают сверх её способности восстанавливаться: незрелый коллаген вытесняет зрелый, ткань слабеет, боль и отёк держатся часами после нагрузки.",
+      "page": 324,
+      "moments": [
+        {
+          "n": 102,
+          "beat": "chinf",
+          "mark": "chinf",
+          "to": "s3"
+        },
+        {
+          "n": 106,
+          "beat": "resp",
+          "mark": "rep",
+          "to": "myo"
+        }
+      ],
+      "see": [
+        "overuse-syndrome",
+        "chronic-pain-syndrome"
+      ]
+    },
+    {
+      "id": "chronic-pain-syndrome",
+      "ru": "Хронический болевой синдром",
+      "en": "chronic pain syndrome",
+      "def": "Состояние дольше шести месяцев, когда боль уже нельзя связать с источником раздражения или воспаления, а ограничения активности и участия затрагивают многие стороны жизни.",
+      "page": 324,
+      "moments": [
+        {
+          "n": 102,
+          "beat": "chinf",
+          "mark": "cps",
+          "to": "cps2"
+        }
+      ],
+      "see": [
+        "chronic-inflammation"
+      ]
+    },
+    {
+      "id": "myofibroblasts",
+      "ru": "Миофибробласты",
+      "en": "myofibroblasts",
+      "def": "Клетки, которые сокращают рубец: начинают работать примерно с 5-го дня и обычно заканчивают к 21-му; при хроническом воспалении продолжают, и подвижность постепенно уменьшается.",
+      "page": 326,
+      "moments": [
+        {
+          "n": 104,
+          "beat": "resp",
+          "mark": "myo"
+        },
+        {
+          "n": 105,
+          "beat": "resp",
+          "mark": "resp"
+        },
+        {
+          "n": 106,
+          "beat": "resp",
+          "mark": "myo"
+        }
+      ],
+      "see": [
+        "subacute-stage",
+        "chronic-inflammation"
+      ]
+    },
+    {
+      "id": "cross-fiber-massage",
+      "ru": "Поперечный фрикционный массаж",
+      "en": "cross-fiber friction massage",
+      "alt": [
+        "фрикционный массаж"
+      ],
+      "def": "Массаж поперёк волокон: в острой стадии — мягко, чтобы сгладить поверхность сухожилия; позже мобилизует связки, рубцы и спайки, интенсивность наращивают постепенно.",
+      "page": 329,
+      "moments": [
+        {
+          "n": 104,
+          "beat": "stretch",
+          "mark": "fric"
+        },
+        {
+          "n": 103,
+          "beat": "massage",
+          "mark": "tend",
+          "to": "taut"
+        },
+        {
+          "n": 106,
+          "beat": "later",
+          "mark": "scar"
+        }
+      ],
+      "see": [
+        "adhesion"
+      ]
+    },
+    {
+      "id": "protected-weight-bearing",
+      "ru": "Защищённая нагрузка весом",
+      "en": "protected weight bearing",
+      "def": "Частичная нагрузка весом в пределах переносимости, которую начинают рано: дозированно нагружает область и включает стабилизирующие мышцы; затем больше амплитуда, меньше опоры, сопротивление.",
+      "page": 328,
+      "moments": [
+        {
+          "n": 104,
+          "beat": "wb",
+          "mark": "wb",
+          "to": "res"
+        }
+      ],
+      "see": [
+        "controlled-motion-phase"
+      ]
+    },
+    {
+      "id": "excessive-stress-signs",
+      "ru": "Признаки перегрузки",
+      "en": "signs of excessive stress with exercise",
+      "def": "Болезненность не уменьшается через 4 часа и не проходит за сутки, боль раньше или сильнее, чем прежде, растут скованность и слабость, отёк, жар; тогда нагрузку уменьшают.",
+      "page": 328,
+      "moments": [
+        {
+          "n": 104,
+          "beat": "prec",
+          "mark": "box",
+          "to": "ok"
+        },
+        {
+          "n": 105,
+          "beat": "edu",
+          "mark": "too"
+        }
+      ],
+      "see": [
+        "controlled-motion-phase",
+        "doms"
+      ]
+    },
+    {
+      "id": "contributing-factors",
+      "ru": "Поддерживающие факторы",
+      "en": "contributing factors",
+      "def": "То, что поддерживает кумулятивную травму: дисбаланс мышц, слабость, неправильное положение костей, возраст, резкий рост нагрузки, ранний возврат, неудобные позы, среда, ошибки тренировки.",
+      "page": 332,
+      "moments": [
+        {
+          "n": 106,
+          "beat": "fac1",
+          "mark": "fac",
+          "to": "f5"
+        },
+        {
+          "n": 106,
+          "beat": "fac2",
+          "mark": "f6",
+          "to": "f11"
+        }
+      ],
+      "see": [
+        "overuse-syndrome",
+        "chronic-inflammation"
+      ]
+    }
+  ]
+}

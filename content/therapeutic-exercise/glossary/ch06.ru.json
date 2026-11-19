@@ -1,0 +1,1617 @@
+{
+  "chapter": 6,
+  "terms": [
+    {
+      "id": "resistance-exercise",
+      "ru": "Упражнение с сопротивлением",
+      "en": "resistance exercise",
+      "def": "Динамическое или статическое сокращение мышцы, которому противостоит внешняя сила: рука терапевта (ручное сопротивление) или груз, лента, тренажёр (механическое).",
+      "page": 167,
+      "moments": [
+        {
+          "n": 54,
+          "beat": "res",
+          "mark": "def",
+          "to": "both"
+        }
+      ],
+      "see": [
+        "manual-resistance",
+        "mechanical-resistance",
+        "overload-principle"
+      ]
+    },
+    {
+      "id": "strength",
+      "ru": "Сила мышцы",
+      "en": "muscle strength",
+      "alt": [
+        "сила"
+      ],
+      "def": "Насколько сократительные элементы мышцы производят усилие; на практике — наибольшее измеримое усилие при одном максимальном сокращении против сопротивления.",
+      "page": 167,
+      "moments": [
+        {
+          "n": 54,
+          "beat": "str",
+          "mark": "str",
+          "to": "func"
+        },
+        {
+          "n": 2,
+          "beat": "perf",
+          "mark": "s"
+        }
+      ],
+      "see": [
+        "power",
+        "muscular-endurance",
+        "functional-strength"
+      ]
+    },
+    {
+      "id": "functional-strength",
+      "ru": "Функциональная сила",
+      "en": "functional strength",
+      "def": "Способность нервно-мышечной системы дать нужное усилие плавно и согласованно во время повседневных действий.",
+      "page": 167,
+      "moments": [
+        {
+          "n": 54,
+          "beat": "str",
+          "mark": "func"
+        }
+      ],
+      "see": [
+        "strength"
+      ]
+    },
+    {
+      "id": "strength-training",
+      "ru": "Силовая тренировка",
+      "en": "strength training",
+      "def": "Систематическая работа с тяжёлым грузом при небольшом числе повторений; сила растёт сначала за счёт нервной системы, затем за счёт роста мышцы.",
+      "page": 167,
+      "moments": [
+        {
+          "n": 54,
+          "beat": "str",
+          "mark": "tr",
+          "to": "ad"
+        }
+      ],
+      "see": [
+        "strength",
+        "hypertrophy",
+        "neural-adaptation"
+      ]
+    },
+    {
+      "id": "power",
+      "ru": "Мощность",
+      "en": "power",
+      "def": "Работа мышцы за единицу времени — связана и с силой, и со скоростью. Бывает разовым всплеском (анаэробная) или серией менее интенсивных усилий (аэробная); основа — сила.",
+      "page": 168,
+      "moments": [
+        {
+          "n": 54,
+          "beat": "pow",
+          "mark": "pow",
+          "to": "base"
+        },
+        {
+          "n": 2,
+          "beat": "perf",
+          "mark": "p"
+        }
+      ],
+      "see": [
+        "strength",
+        "muscular-endurance"
+      ]
+    },
+    {
+      "id": "muscular-endurance",
+      "ru": "Мышечная выносливость",
+      "en": "muscle endurance",
+      "alt": [
+        "местная выносливость"
+      ],
+      "def": "Способность мышцы многократно сокращаться против груза и долго удерживать напряжение, сопротивляясь утомлению; тренируют лёгким грузом и множеством повторений.",
+      "page": 168,
+      "moments": [
+        {
+          "n": 54,
+          "beat": "end",
+          "mark": "loc",
+          "to": "pat"
+        },
+        {
+          "n": 2,
+          "beat": "perf",
+          "mark": "e"
+        }
+      ],
+      "see": [
+        "strength",
+        "power",
+        "muscle-fatigue"
+      ]
+    },
+    {
+      "id": "overload-principle",
+      "ru": "Принцип перегрузки",
+      "en": "overload principle",
+      "def": "Чтобы работоспособность мышцы росла, нагрузка должна быть выше привычной; когда мышца приспособилась, нагрузку постепенно повышают.",
+      "page": 168,
+      "moments": [
+        {
+          "n": 54,
+          "beat": "over",
+          "mark": "over",
+          "to": "prog"
+        }
+      ],
+      "see": [
+        "exercise-intensity",
+        "exercise-volume",
+        "reversibility-principle"
+      ]
+    },
+    {
+      "id": "exercise-intensity",
+      "ru": "Интенсивность нагрузки",
+      "en": "intensity",
+      "def": "Величина внешнего сопротивления в каждом повторении. Малая — при заживлении, обучении технике, для выносливости, у детей и пожилых; высокая — для силы и мощности.",
+      "page": 179,
+      "moments": [
+        {
+          "n": 54,
+          "beat": "apply",
+          "mark": "int"
+        },
+        {
+          "n": 60,
+          "beat": "int",
+          "mark": "int",
+          "to": "reh"
+        },
+        {
+          "n": 60,
+          "beat": "tab",
+          "mark": "tab",
+          "to": "pain"
+        }
+      ],
+      "see": [
+        "exercise-volume",
+        "repetition-maximum"
+      ]
+    },
+    {
+      "id": "exercise-volume",
+      "ru": "Объём нагрузки",
+      "en": "volume",
+      "def": "Общее число повторений и подходов за занятие, умноженное на интенсивность; с интенсивностью связан обратно: чем тяжелее груз, тем меньше повторений.",
+      "page": 181,
+      "moments": [
+        {
+          "n": 54,
+          "beat": "apply",
+          "mark": "vol"
+        },
+        {
+          "n": 61,
+          "beat": "vol",
+          "mark": "vol",
+          "to": "inv"
+        }
+      ],
+      "see": [
+        "exercise-intensity",
+        "set",
+        "repetitions"
+      ]
+    },
+    {
+      "id": "said-principle",
+      "ru": "Принцип специфичности (SAID)",
+      "en": "SAID principle (specific adaptation to imposed demands)",
+      "alt": [
+        "специфическая адаптация к предъявляемым требованиям"
+      ],
+      "def": "Тело приспосабливается именно к тем требованиям, которые к нему предъявляют; поэтому параметры упражнений подбирают под функциональные цели пациента.",
+      "page": 169,
+      "moments": [
+        {
+          "n": 55,
+          "beat": "said",
+          "mark": "said",
+          "to": "use"
+        }
+      ],
+      "see": [
+        "specificity-of-training",
+        "wolffs-law"
+      ]
+    },
+    {
+      "id": "specificity-of-training",
+      "ru": "Специфичность тренировки",
+      "en": "specificity of training",
+      "def": "Эффект тренировки зависит от того, как тренировались: от режима работы мышцы, скорости, положения тела и рисунка движения; поэтому упражнения похожи на будущую функцию.",
+      "page": 169,
+      "moments": [
+        {
+          "n": 55,
+          "beat": "spec",
+          "mark": "spec",
+          "to": "task"
+        }
+      ],
+      "see": [
+        "said-principle",
+        "transfer-of-training"
+      ]
+    },
+    {
+      "id": "transfer-of-training",
+      "ru": "Перенос тренировки",
+      "en": "transfer of training (cross-training effect)",
+      "alt": [
+        "перекрёстный эффект"
+      ],
+      "def": "Небольшой перенос эффекта на другие скорости, виды упражнений и на нетренируемую конечность; он заметно меньше эффекта специфичной тренировки.",
+      "page": 169,
+      "moments": [
+        {
+          "n": 55,
+          "beat": "trans",
+          "mark": "trans",
+          "to": "less"
+        }
+      ],
+      "see": [
+        "specificity-of-training"
+      ]
+    },
+    {
+      "id": "reversibility-principle",
+      "ru": "Принцип обратимости",
+      "en": "reversibility principle",
+      "def": "Приспособление к упражнениям временно: если новые возможности не используют в жизни и нет поддерживающей программы, эффект теряется.",
+      "page": 169,
+      "moments": [
+        {
+          "n": 55,
+          "beat": "rev",
+          "mark": "rev",
+          "to": "life"
+        }
+      ],
+      "see": [
+        "detraining",
+        "overload-principle"
+      ]
+    },
+    {
+      "id": "detraining",
+      "ru": "Детренированность",
+      "en": "detraining (deconditioning)",
+      "def": "Снижение работоспособности, когда упражнения прекращают (уже через одну-две недели) или при долгом постельном режиме: падают потребление кислорода, сердечный выброс, объём крови, мышцы.",
+      "page": 169,
+      "moments": [
+        {
+          "n": 55,
+          "beat": "rev",
+          "mark": "det"
+        },
+        {
+          "n": 78,
+          "beat": "decond",
+          "mark": "dec",
+          "to": "list"
+        },
+        {
+          "n": 84,
+          "beat": "decond",
+          "mark": "d1",
+          "to": "rev"
+        }
+      ],
+      "see": [
+        "reversibility-principle",
+        "vo2max"
+      ]
+    },
+    {
+      "id": "wolffs-law",
+      "ru": "Закон Вольфа",
+      "en": "Wolff's law",
+      "def": "Системы тела со временем приспосабливаются к нагрузкам, которые на них действуют.",
+      "page": 169,
+      "moments": [
+        {
+          "n": 55,
+          "beat": "said",
+          "mark": "wolff"
+        }
+      ],
+      "see": [
+        "said-principle"
+      ]
+    },
+    {
+      "id": "moment-arm",
+      "ru": "Плечо силы",
+      "en": "moment arm",
+      "def": "Расстояние от оси сустава до линии тяги мышцы: чем оно длиннее, тем больше усилие относительно сустава; при движении оно меняется.",
+      "page": 170,
+      "moments": [
+        {
+          "n": 56,
+          "beat": "arm",
+          "mark": "arm",
+          "to": "chg"
+        }
+      ],
+      "see": [
+        "length-tension-relationship"
+      ]
+    },
+    {
+      "id": "length-tension-relationship",
+      "ru": "Соотношение длины и напряжения",
+      "en": "length-tension relationship",
+      "def": "Наибольшее напряжение мышца развивает около своей длины покоя; сильно укороченная или сильно растянутая мышца развивает меньше.",
+      "page": 170,
+      "moments": [
+        {
+          "n": 56,
+          "beat": "lt",
+          "mark": "lt",
+          "to": "long"
+        }
+      ],
+      "see": [
+        "moment-arm",
+        "force-velocity-relationship"
+      ]
+    },
+    {
+      "id": "force-velocity-relationship",
+      "ru": "Соотношение силы и скорости",
+      "en": "force-velocity relationship",
+      "def": "При концентрическом сокращении чем выше скорость, тем меньше напряжение; при эксцентрическом с ростом скорости напряжение сначала растёт.",
+      "page": 170,
+      "moments": [
+        {
+          "n": 56,
+          "beat": "mode",
+          "mark": "fv",
+          "to": "ecc"
+        },
+        {
+          "n": 62,
+          "beat": "vel",
+          "mark": "con",
+          "to": "ecc"
+        }
+      ],
+      "see": [
+        "length-tension-relationship"
+      ]
+    },
+    {
+      "id": "type-i-fibers",
+      "ru": "Волокна первого типа",
+      "en": "type I (slow-twitch) fibers",
+      "alt": [
+        "медленные волокна",
+        "тонические волокна"
+      ],
+      "def": "Тонические, медленные волокна: небольшая сила, медленно набираемая, но высокая устойчивость к утомлению, аэробная энергия, много капилляров. Их много в мышцах осанки.",
+      "page": 170,
+      "moments": [
+        {
+          "n": 56,
+          "beat": "type",
+          "mark": "t1"
+        },
+        {
+          "n": 57,
+          "beat": "fiber",
+          "mark": "r1",
+          "to": "post"
+        }
+      ],
+      "see": [
+        "type-ii-fibers"
+      ]
+    },
+    {
+      "id": "type-ii-fibers",
+      "ru": "Волокна второго типа",
+      "en": "type II (fast-twitch) fibers",
+      "alt": [
+        "быстрые волокна",
+        "фазические волокна"
+      ],
+      "def": "Фазические, быстрые волокна (подтипы два А и два Б): быстро развивают большую силу, но быстро устают; два Б — анаэробные. С возрастом атрофируются избирательно.",
+      "page": 170,
+      "moments": [
+        {
+          "n": 56,
+          "beat": "type",
+          "mark": "t2"
+        },
+        {
+          "n": 57,
+          "beat": "fiber",
+          "mark": "heavy"
+        }
+      ],
+      "see": [
+        "type-i-fibers"
+      ]
+    },
+    {
+      "id": "motor-unit-recruitment",
+      "ru": "Вовлечение двигательных единиц",
+      "en": "recruitment of motor units",
+      "def": "Чем больше двигательных единиц включается и чем синхроннее они работают, а также чем чаще импульсы, тем больше сила мышцы.",
+      "page": 170,
+      "moments": [
+        {
+          "n": 56,
+          "beat": "neur",
+          "mark": "rec",
+          "to": "rate"
+        }
+      ],
+      "see": [
+        "neural-adaptation"
+      ]
+    },
+    {
+      "id": "muscle-fatigue",
+      "ru": "Мышечное утомление",
+      "en": "muscle fatigue",
+      "alt": [
+        "местное утомление"
+      ],
+      "def": "Нормальное обратимое ослабление ответа мышцы на повторные сокращения. Признаки: дрожание, замедление, неполный объём, обходные движения — тогда нагрузку снижают.",
+      "page": 170,
+      "moments": [
+        {
+          "n": 57,
+          "beat": "local",
+          "mark": "local",
+          "to": "norm"
+        },
+        {
+          "n": 57,
+          "beat": "signs",
+          "mark": "signs",
+          "to": "act"
+        }
+      ],
+      "see": [
+        "fatigue-threshold",
+        "cardiopulmonary-fatigue"
+      ]
+    },
+    {
+      "id": "cardiopulmonary-fatigue",
+      "ru": "Общее утомление",
+      "en": "cardiopulmonary fatigue",
+      "alt": [
+        "кардиореспираторное утомление"
+      ],
+      "def": "Ответ всего организма на долгую активность; связан с тем, как тело использует кислород, со снижением сахара крови, запасов гликогена и потерей калия.",
+      "page": 171,
+      "moments": [
+        {
+          "n": 57,
+          "beat": "cardio",
+          "mark": "cardio",
+          "to": "k"
+        }
+      ],
+      "see": [
+        "muscle-fatigue"
+      ]
+    },
+    {
+      "id": "fatigue-threshold",
+      "ru": "Порог утомления",
+      "en": "threshold for fatigue",
+      "def": "Уровень нагрузки, который нельзя поддерживать бесконечно; его записывают как время удержания сокращения или число повторений — это точка отсчёта прогресса.",
+      "page": 171,
+      "moments": [
+        {
+          "n": 57,
+          "beat": "thresh",
+          "mark": "thresh",
+          "to": "fac"
+        }
+      ],
+      "see": [
+        "muscle-fatigue"
+      ]
+    },
+    {
+      "id": "active-recovery",
+      "ru": "Активное восстановление",
+      "en": "active recovery",
+      "def": "Лёгкие упражнения во время отдыха: мышца восстанавливается после нагрузки быстрее, чем при полном покое.",
+      "page": 172,
+      "moments": [
+        {
+          "n": 57,
+          "beat": "recov",
+          "mark": "act"
+        }
+      ],
+      "see": [
+        "muscle-fatigue",
+        "rest-interval"
+      ]
+    },
+    {
+      "id": "neural-adaptation",
+      "ru": "Нервные адаптации",
+      "en": "neural adaptations",
+      "def": "Быстрый прирост силы в первые 4–8 недель программы за счёт нервной системы: включается больше двигательных единиц, чаще и синхроннее, — а не за счёт роста мышцы.",
+      "page": 176,
+      "moments": [
+        {
+          "n": 59,
+          "beat": "neural",
+          "mark": "early",
+          "to": "spec"
+        }
+      ],
+      "see": [
+        "hypertrophy",
+        "motor-unit-recruitment"
+      ]
+    },
+    {
+      "id": "hypertrophy",
+      "ru": "Гипертрофия",
+      "en": "hypertrophy",
+      "def": "Увеличение размера мышечного волокна за счёт объёма миофибрилл; обычно к 4–8-й неделе тренировки средней или высокой интенсивности.",
+      "page": 176,
+      "moments": [
+        {
+          "n": 59,
+          "beat": "hyper",
+          "mark": "hyper",
+          "to": "most"
+        }
+      ],
+      "see": [
+        "hyperplasia",
+        "neural-adaptation"
+      ]
+    },
+    {
+      "id": "hyperplasia",
+      "ru": "Гиперплазия",
+      "en": "hyperplasia",
+      "def": "Увеличение числа мышечных волокон за счёт их продольного расщепления; описана у животных, у человека её вклад незначителен или спорен.",
+      "page": 176,
+      "moments": [
+        {
+          "n": 59,
+          "beat": "hyper",
+          "mark": "plas"
+        }
+      ],
+      "see": [
+        "hypertrophy"
+      ]
+    },
+    {
+      "id": "repetition-maximum",
+      "ru": "Повторный максимум",
+      "en": "repetition maximum (RM)",
+      "alt": [
+        "одноповторный максимум"
+      ],
+      "def": "Наибольший груз, который можно с контролем пройти через весь объём заданное число раз; одноповторный — только один раз. Задаёт начальный груз и исходную силу.",
+      "page": 180,
+      "moments": [
+        {
+          "n": 60,
+          "beat": "rm",
+          "mark": "def",
+          "to": "calc"
+        }
+      ],
+      "see": [
+        "exercise-intensity",
+        "delorme-regimen"
+      ]
+    },
+    {
+      "id": "repetitions",
+      "ru": "Повторения",
+      "en": "repetitions",
+      "def": "Сколько раз подряд выполняют движение через весь объём против заданного груза; с грузом 75 % от одноповторного максимума — обычно около десяти.",
+      "page": 181,
+      "moments": [
+        {
+          "n": 61,
+          "beat": "vol",
+          "mark": "reps",
+          "to": "zone"
+        }
+      ],
+      "see": [
+        "set",
+        "exercise-volume"
+      ]
+    },
+    {
+      "id": "set",
+      "ru": "Подход",
+      "en": "set",
+      "def": "Группа повторений подряд, после которой короткий отдых; взрослым обычно два–четыре подхода.",
+      "page": 181,
+      "moments": [
+        {
+          "n": 61,
+          "beat": "sets",
+          "mark": "sets",
+          "to": "multi"
+        }
+      ],
+      "see": [
+        "repetitions",
+        "rest-interval"
+      ]
+    },
+    {
+      "id": "exercise-order",
+      "ru": "Порядок упражнений",
+      "en": "exercise order",
+      "def": "Крупные группы мышц — раньше мелких, многосуставные упражнения — раньше односуставных, более интенсивные — раньше менее интенсивных.",
+      "page": 182,
+      "moments": [
+        {
+          "n": 61,
+          "beat": "order",
+          "mark": "order",
+          "to": "int"
+        }
+      ]
+    },
+    {
+      "id": "training-frequency",
+      "ru": "Частота занятий",
+      "en": "frequency",
+      "def": "Сколько занятий в день или в неделю: обычно два–три раза в неделю, через день; поддерживающая программа — два раза. Слишком частые занятия ведут к перетренированности.",
+      "page": 183,
+      "moments": [
+        {
+          "n": 61,
+          "beat": "freq",
+          "mark": "freq",
+          "to": "keep"
+        }
+      ],
+      "see": [
+        "rest-interval",
+        "overtraining"
+      ]
+    },
+    {
+      "id": "rest-interval",
+      "ru": "Отдых",
+      "en": "rest interval",
+      "def": "Обязательная часть программы: между подходами при умеренной интенсивности — две-три минуты, между занятиями — около 48 часов.",
+      "page": 183,
+      "moments": [
+        {
+          "n": 61,
+          "beat": "rest",
+          "mark": "rest",
+          "to": "sess"
+        }
+      ],
+      "see": [
+        "set",
+        "active-recovery"
+      ]
+    },
+    {
+      "id": "borg-scale",
+      "ru": "Шкала Борга",
+      "en": "Borg rating of perceived exertion",
+      "alt": [
+        "оценка усилия"
+      ],
+      "def": "Шкала ощущаемого напряжения (от 0 до 10 или от 6 до 20); по ней подбирают нагрузку, когда максимальное усилие нежелательно. В воде у новичков она может неточно отражать интенсивность.",
+      "page": 181,
+      "moments": [
+        {
+          "n": 61,
+          "beat": "base",
+          "mark": "borg"
+        },
+        {
+          "n": 100,
+          "beat": "mon",
+          "mark": "rpe"
+        }
+      ],
+      "see": [
+        "repetition-maximum",
+        "target-heart-rate"
+      ]
+    },
+    {
+      "id": "exercise-mode",
+      "ru": "Режим упражнения",
+      "en": "mode of exercise",
+      "def": "Форма упражнения: вид сокращения (статическое или динамическое), с опорой на конечность или без, с каким сопротивлением и в какой части объёма.",
+      "page": 183,
+      "moments": [
+        {
+          "n": 62,
+          "beat": "mode",
+          "mark": "mode",
+          "to": "iso"
+        }
+      ],
+      "see": [
+        "isometric-exercise",
+        "open-kinetic-chain"
+      ]
+    },
+    {
+      "id": "accommodating-resistance",
+      "ru": "Аккомодирующее сопротивление",
+      "en": "accommodating resistance",
+      "def": "Сопротивление изокинетического динамометра: прибор держит скорость и подстраивает сопротивление под усилие пациента.",
+      "page": 184,
+      "moments": [
+        {
+          "n": 62,
+          "beat": "res",
+          "mark": "acc"
+        }
+      ],
+      "see": [
+        "isokinetic-exercise"
+      ]
+    },
+    {
+      "id": "short-arc-exercise",
+      "ru": "Упражнение по короткой дуге",
+      "en": "short-arc exercise",
+      "def": "Сопротивление только в части объёма — чтобы обойти болезненную или нестабильную дугу или защитить заживающие ткани; по полной дуге сила растёт во всём объёме.",
+      "page": 185,
+      "moments": [
+        {
+          "n": 62,
+          "beat": "arc",
+          "mark": "full",
+          "to": "short"
+        }
+      ]
+    },
+    {
+      "id": "periodization",
+      "ru": "Периодизация",
+      "en": "periodization",
+      "def": "Деление программы на отрезки с системным изменением интенсивности, повторений, подходов или частоты; разработана для тяжелоатлетов, доказательств немного.",
+      "page": 185,
+      "moments": [
+        {
+          "n": 62,
+          "beat": "per",
+          "mark": "per",
+          "to": "ev"
+        }
+      ]
+    },
+    {
+      "id": "isometric-exercise",
+      "ru": "Изометрическое упражнение",
+      "en": "isometric exercise",
+      "alt": [
+        "изометрия",
+        "статическое упражнение"
+      ],
+      "def": "Мышца сокращается и развивает силу без заметного изменения длины и движения в суставе; держат шесть–десять секунд, сила растёт лишь около тренируемого угла.",
+      "page": 188,
+      "moments": [
+        {
+          "n": 63,
+          "beat": "iso",
+          "mark": "iso",
+          "to": "work"
+        },
+        {
+          "n": 63,
+          "beat": "dose",
+          "mark": "dur",
+          "to": "spec"
+        }
+      ],
+      "see": [
+        "setting-exercises",
+        "multiple-angle-isometrics",
+        "valsalva-maneuver"
+      ]
+    },
+    {
+      "id": "setting-exercises",
+      "ru": "Установочные упражнения",
+      "en": "muscle-setting exercises",
+      "def": "Изометрическое напряжение малой интенсивности почти без сопротивления, без боли и без сжатия сустава: уменьшает боль и спазм, помогает расслаблению и кровотоку; уместно уже в острой стадии.",
+      "page": 188,
+      "moments": [
+        {
+          "n": 63,
+          "beat": "kinds",
+          "mark": "set"
+        },
+        {
+          "n": 103,
+          "beat": "setting",
+          "mark": "set",
+          "to": "short"
+        }
+      ],
+      "see": [
+        "isometric-exercise",
+        "stabilization-exercises",
+        "maximum-protection-phase"
+      ]
+    },
+    {
+      "id": "stabilization-exercises",
+      "ru": "Стабилизационные упражнения",
+      "en": "stabilization exercises",
+      "def": "Изометрия, которая развивает субмаксимальное, но длительное совместное сокращение мышц для устойчивости позы или сустава.",
+      "page": 188,
+      "moments": [
+        {
+          "n": 63,
+          "beat": "kinds",
+          "mark": "stab"
+        }
+      ],
+      "see": [
+        "setting-exercises",
+        "rhythmic-stabilization"
+      ]
+    },
+    {
+      "id": "multiple-angle-isometrics",
+      "ru": "Изометрия под несколькими углами",
+      "en": "multiple-angle isometrics",
+      "def": "Изометрическое сопротивление в нескольких положениях сустава, обычно через каждые 10–20°, чтобы укрепить мышцу во всём объёме.",
+      "page": 189,
+      "moments": [
+        {
+          "n": 63,
+          "beat": "kinds",
+          "mark": "multi"
+        },
+        {
+          "n": 63,
+          "beat": "dose",
+          "mark": "spec"
+        },
+        {
+          "n": 104,
+          "beat": "iso",
+          "mark": "iso",
+          "to": "jnt"
+        }
+      ],
+      "see": [
+        "isometric-exercise",
+        "controlled-motion-phase"
+      ]
+    },
+    {
+      "id": "concentric-exercise",
+      "ru": "Концентрическое упражнение",
+      "en": "concentric exercise",
+      "def": "Напряжение мышцы растёт, она укорачивается и преодолевает сопротивление — как при подъёме груза; разгоняет сегменты тела.",
+      "page": 189,
+      "moments": [
+        {
+          "n": 64,
+          "beat": "dyn",
+          "mark": "con"
+        },
+        {
+          "n": 64,
+          "beat": "why",
+          "mark": "acc"
+        }
+      ],
+      "see": [
+        "eccentric-exercise"
+      ]
+    },
+    {
+      "id": "eccentric-exercise",
+      "ru": "Эксцентрическое упражнение",
+      "en": "eccentric exercise",
+      "def": "Мышца удлиняется под нагрузкой, контролируя груз, — как при опускании; тормозит и поглощает энергию. Экономнее концентрического, но чаще даёт отсроченную боль.",
+      "page": 189,
+      "moments": [
+        {
+          "n": 64,
+          "beat": "dyn",
+          "mark": "ecc"
+        },
+        {
+          "n": 64,
+          "beat": "eccT",
+          "mark": "eccT",
+          "to": "res"
+        },
+        {
+          "n": 176,
+          "beat": "ecc",
+          "mark": "ecc",
+          "to": "prog"
+        }
+      ],
+      "see": [
+        "concentric-exercise",
+        "doms",
+        "lateral-elbow-tendinopathy"
+      ]
+    },
+    {
+      "id": "dcer",
+      "ru": "Постоянное внешнее сопротивление",
+      "en": "dynamic constant external resistance (DCER)",
+      "def": "Динамическое упражнение против неизменного груза — гантели, манжеты, простого блока; максимально оно нагружает мышцу лишь в одной точке объёма.",
+      "page": 192,
+      "moments": [
+        {
+          "n": 65,
+          "beat": "dcer",
+          "mark": "dcer",
+          "to": "lim"
+        },
+        {
+          "n": 75,
+          "beat": "free",
+          "mark": "const"
+        }
+      ],
+      "see": [
+        "variable-resistance"
+      ]
+    },
+    {
+      "id": "variable-resistance",
+      "ru": "Переменное сопротивление",
+      "en": "variable resistance",
+      "def": "Сопротивление, которое меняется по ходу объёма: тренажёры с эксцентриком, гидравлика и пневматика, эластичные ленты, ручное сопротивление терапевта.",
+      "page": 192,
+      "moments": [
+        {
+          "n": 65,
+          "beat": "var",
+          "mark": "var",
+          "to": "man"
+        },
+        {
+          "n": 75,
+          "beat": "var",
+          "mark": "var",
+          "to": "hyd"
+        }
+      ],
+      "see": [
+        "dcer",
+        "elastic-resistance"
+      ]
+    },
+    {
+      "id": "isokinetic-exercise",
+      "ru": "Изокинетическое упражнение",
+      "en": "isokinetic exercise",
+      "def": "Динамическое упражнение, при котором прибор задаёт и держит постоянную угловую скорость, а сопротивление подстраивается под усилие; эффект специфичен к скорости.",
+      "page": 193,
+      "moments": [
+        {
+          "n": 65,
+          "beat": "isok",
+          "mark": "isok",
+          "to": "var"
+        },
+        {
+          "n": 65,
+          "beat": "prog",
+          "mark": "prog",
+          "to": "p4"
+        }
+      ],
+      "see": [
+        "accommodating-resistance",
+        "velocity-spectrum"
+      ]
+    },
+    {
+      "id": "velocity-spectrum",
+      "ru": "Тренировка в спектре скоростей",
+      "en": "velocity spectrum rehabilitation (VSR)",
+      "def": "Изокинетическая тренировка на нескольких скоростях, от средних к быстрым, потому что прирост силы переносится лишь на близкие скорости.",
+      "page": 228,
+      "moments": [
+        {
+          "n": 74,
+          "beat": "iso",
+          "mark": "vsr",
+          "to": "prot"
+        }
+      ],
+      "see": [
+        "isokinetic-exercise"
+      ]
+    },
+    {
+      "id": "open-kinetic-chain",
+      "ru": "Открытая кинетическая цепь",
+      "en": "open kinetic chain",
+      "alt": [
+        "открытая цепь"
+      ],
+      "def": "Кисть или стопа свободно движутся, без опоры на конечность; обычно работает один сустав, мышцу легче изолировать и контролировать.",
+      "page": 195,
+      "moments": [
+        {
+          "n": 66,
+          "beat": "char",
+          "mark": "o"
+        },
+        {
+          "n": 62,
+          "beat": "chain",
+          "mark": "open"
+        }
+      ],
+      "see": [
+        "closed-kinetic-chain"
+      ]
+    },
+    {
+      "id": "closed-kinetic-chain",
+      "ru": "Закрытая кинетическая цепь",
+      "en": "closed kinetic chain",
+      "alt": [
+        "закрытая цепь"
+      ],
+      "def": "Тело движется над кистью или стопой, которые стоят на опоре; движутся сразу несколько суставов, суставы сближаются. Усложняют весом, меньшей и неустойчивой опорой.",
+      "page": 195,
+      "moments": [
+        {
+          "n": 66,
+          "beat": "char",
+          "mark": "c",
+          "to": "scope"
+        },
+        {
+          "n": 66,
+          "beat": "prog",
+          "mark": "prog",
+          "to": "p6"
+        }
+      ],
+      "see": [
+        "open-kinetic-chain"
+      ]
+    },
+    {
+      "id": "valsalva-maneuver",
+      "ru": "Проба Вальсальвы",
+      "en": "Valsalva maneuver",
+      "def": "Выдох при закрытой голосовой щели во время усилия: давление в груди и животе растёт; при упражнениях её избегают — дышат ритмично, выдыхают при усилии.",
+      "page": 203,
+      "moments": [
+        {
+          "n": 68,
+          "beat": "val",
+          "mark": "val",
+          "to": "prev"
+        },
+        {
+          "n": 130,
+          "beat": "iap",
+          "mark": "val"
+        },
+        {
+          "n": 130,
+          "beat": "iap",
+          "mark": "risk",
+          "to": "hod"
+        }
+      ],
+      "see": [
+        "isometric-exercise",
+        "intra-abdominal-pressure"
+      ]
+    },
+    {
+      "id": "substitute-motions",
+      "ru": "Обходные движения",
+      "en": "substitute motions",
+      "def": "Включение других мышц вместо целевой — когда сопротивление слишком велико, при утомлении или боли; их предотвращают правильным сопротивлением и стабилизацией.",
+      "page": 203,
+      "moments": [
+        {
+          "n": 68,
+          "beat": "sub",
+          "mark": "sub",
+          "to": "fix"
+        },
+        {
+          "n": 60,
+          "beat": "align",
+          "mark": "sub"
+        }
+      ],
+      "see": [
+        "alignment",
+        "stabilization"
+      ]
+    },
+    {
+      "id": "overtraining",
+      "ru": "Перетренированность",
+      "en": "overtraining",
+      "def": "Снижение работоспособности у здоровых при слишком интенсивных и объёмных тренировках без отдыха; обратима.",
+      "page": 204,
+      "moments": [
+        {
+          "n": 68,
+          "beat": "over",
+          "mark": "ot"
+        }
+      ],
+      "see": [
+        "overwork-weakness",
+        "rest-interval"
+      ]
+    },
+    {
+      "id": "overwork-weakness",
+      "ru": "Слабость от перегрузки",
+      "en": "overwork weakness",
+      "def": "Прогрессирующее ослабление мышц, уже ослабленных нервно-мышечной болезнью, от чрезмерных упражнений; может быть стойким.",
+      "page": 204,
+      "moments": [
+        {
+          "n": 68,
+          "beat": "over",
+          "mark": "ow",
+          "to": "prev"
+        }
+      ],
+      "see": [
+        "overtraining"
+      ]
+    },
+    {
+      "id": "doms",
+      "ru": "Отсроченная мышечная боль",
+      "en": "delayed-onset muscle soreness (DOMS)",
+      "def": "Боль через 12–24 часа после непривычной, особенно эксцентрической нагрузки, с пиком через 48–72 часа; причина — микротравмы волокон и соединительной ткани.",
+      "page": 204,
+      "moments": [
+        {
+          "n": 68,
+          "beat": "doms",
+          "mark": "del",
+          "to": "str"
+        },
+        {
+          "n": 68,
+          "beat": "domsC",
+          "mark": "micro",
+          "to": "bout"
+        }
+      ],
+      "see": [
+        "eccentric-exercise"
+      ]
+    },
+    {
+      "id": "pathological-fracture",
+      "ru": "Патологический перелом",
+      "en": "pathological fracture",
+      "def": "Перелом кости, ослабленной болезнью, от небольшой нагрузки; при остеопорозе силовые упражнения нужны, но с малой интенсивностью и без ударных нагрузок.",
+      "page": 206,
+      "moments": [
+        {
+          "n": 68,
+          "beat": "frac",
+          "mark": "frac",
+          "to": "r5"
+        },
+        {
+          "n": 111,
+          "beat": "types",
+          "mark": "path"
+        }
+      ],
+      "see": [
+        "osteoporosis",
+        "fracture"
+      ]
+    },
+    {
+      "id": "manual-resistance",
+      "ru": "Ручное сопротивление",
+      "en": "manual resistance",
+      "def": "Сопротивление руками терапевта: тонко дозируется и подходит в начале реабилитации и для слабых мышц, но его нельзя измерить и оно ограничено силой терапевта. В воде — в замкнутой цепи: движется тело.",
+      "page": 207,
+      "moments": [
+        {
+          "n": 69,
+          "beat": "def",
+          "mark": "def",
+          "to": "cont"
+        },
+        {
+          "n": 63,
+          "beat": "man",
+          "mark": "man",
+          "to": "lim"
+        },
+        {
+          "n": 99,
+          "beat": "manual",
+          "mark": "manual",
+          "to": "drag"
+        }
+      ],
+      "see": [
+        "mechanical-resistance",
+        "drag"
+      ]
+    },
+    {
+      "id": "mechanical-resistance",
+      "ru": "Механическое сопротивление",
+      "en": "mechanical resistance",
+      "def": "Нагрузку даёт снаряд или тренажёр: её можно измерить и сделать большой, пациент может заниматься сам; не годится для очень слабых мышц и ранней стадии заживления.",
+      "page": 223,
+      "moments": [
+        {
+          "n": 73,
+          "beat": "def",
+          "mark": "def",
+          "to": "fit"
+        },
+        {
+          "n": 73,
+          "beat": "adv",
+          "mark": "adv",
+          "to": "a4"
+        },
+        {
+          "n": 63,
+          "beat": "man",
+          "mark": "mech",
+          "to": "more"
+        }
+      ],
+      "see": [
+        "manual-resistance"
+      ]
+    },
+    {
+      "id": "pnf",
+      "ru": "Проприоцептивное нервно-мышечное облегчение",
+      "en": "proprioceptive neuromuscular facilitation (PNF)",
+      "alt": [
+        "ПНФ"
+      ],
+      "def": "Подход Кабата, Нотт и Восс: функциональные диагональные движения с сенсорными сигналами — ручными контактами, растяжением, командами, — где сильные компоненты облегчают слабые.",
+      "page": 215,
+      "moments": [
+        {
+          "n": 71,
+          "beat": "what",
+          "mark": "what",
+          "to": "cues"
+        },
+        {
+          "n": 71,
+          "beat": "proc",
+          "mark": "proc",
+          "to": "pos"
+        }
+      ],
+      "see": [
+        "pnf-diagonal-patterns",
+        "pnf-stretching"
+      ]
+    },
+    {
+      "id": "pnf-diagonal-patterns",
+      "ru": "Диагональные схемы ПНФ",
+      "en": "PNF diagonal patterns",
+      "def": "Многосуставные многоплоскостные движения с вращением; для руки и ноги — первая и вторая диагонали, каждая в сгибание и в разгибание, названия — по плечу или бедру.",
+      "page": 215,
+      "moments": [
+        {
+          "n": 71,
+          "beat": "diag",
+          "mark": "diag",
+          "to": "bil"
+        },
+        {
+          "n": 71,
+          "beat": "table",
+          "mark": "table",
+          "to": "legs"
+        }
+      ],
+      "see": [
+        "pnf"
+      ]
+    },
+    {
+      "id": "approximation",
+      "ru": "Аппроксимация",
+      "en": "approximation",
+      "def": "Мягкое сжатие суставных поверхностей руками терапевта или опорой; вызывает совместное сокращение мышц и улучшает устойчивость.",
+      "page": 217,
+      "moments": [
+        {
+          "n": 71,
+          "beat": "stretch",
+          "mark": "app"
+        }
+      ],
+      "see": [
+        "pnf",
+        "rhythmic-stabilization"
+      ]
+    },
+    {
+      "id": "rhythmic-initiation",
+      "ru": "Ритмическое начало",
+      "en": "rhythmic initiation",
+      "def": "Приём ПНФ: терапевт сначала пассивно проводит конечность по схеме, затем движение с помощью и активное — так учат последовательность и скорость.",
+      "page": 222,
+      "moments": [
+        {
+          "n": 72,
+          "beat": "ri",
+          "mark": "ri",
+          "to": "act"
+        }
+      ],
+      "see": [
+        "pnf"
+      ]
+    },
+    {
+      "id": "repeated-contractions",
+      "ru": "Повторные сокращения",
+      "en": "repeated contractions",
+      "def": "Приём ПНФ для слабого агониста: в любой точке объёма снова и снова быстрое растяжение, а за ним сопротивление.",
+      "page": 222,
+      "moments": [
+        {
+          "n": 72,
+          "beat": "rep",
+          "mark": "rep",
+          "to": "how"
+        }
+      ],
+      "see": [
+        "pnf"
+      ]
+    },
+    {
+      "id": "reversal-of-antagonists",
+      "ru": "Смена антагонистов",
+      "en": "reversal of antagonists",
+      "alt": [
+        "медленная смена"
+      ],
+      "def": "Приём ПНФ: слабую схему стимулируют сокращением противоположной; медленная смена — сразу концентрически одна и другая, с удержанием — плюс изометрия в конце.",
+      "page": 222,
+      "moments": [
+        {
+          "n": 72,
+          "beat": "rev",
+          "mark": "rev",
+          "to": "srh"
+        }
+      ],
+      "see": [
+        "pnf"
+      ]
+    },
+    {
+      "id": "alternating-isometrics",
+      "ru": "Чередующаяся изометрия",
+      "en": "alternating isometrics",
+      "def": "Приём ПНФ: изометрическое сопротивление в одной плоскости попеременно с разных сторон сегмента — для силы и устойчивости позных мышц.",
+      "page": 222,
+      "moments": [
+        {
+          "n": 72,
+          "beat": "ai",
+          "mark": "ai",
+          "to": "ext"
+        }
+      ],
+      "see": [
+        "rhythmic-stabilization"
+      ]
+    },
+    {
+      "id": "rhythmic-stabilization",
+      "ru": "Ритмическая стабилизация",
+      "en": "rhythmic stabilization",
+      "def": "Следующий шаг после чередующейся изометрии: многонаправленное сопротивление одновременно с разных сторон, обычно с опорой, — совместное сокращение стабилизаторов.",
+      "page": 223,
+      "moments": [
+        {
+          "n": 72,
+          "beat": "rs",
+          "mark": "rs",
+          "to": "sw"
+        },
+        {
+          "n": 153,
+          "beat": "rhy",
+          "mark": "how",
+          "to": "pr"
+        }
+      ],
+      "see": [
+        "alternating-isometrics",
+        "stabilization-exercises",
+        "core-stabilization"
+      ]
+    },
+    {
+      "id": "pre",
+      "ru": "Упражнения с прогрессирующим сопротивлением",
+      "en": "progressive resistance exercise (PRE)",
+      "def": "Динамическая тренировка: постоянную внешнюю нагрузку постепенно повышают, обычно по повторному максимуму; основа — принцип перегрузки.",
+      "page": 225,
+      "moments": [
+        {
+          "n": 74,
+          "beat": "pre",
+          "mark": "pre",
+          "to": "ev"
+        }
+      ],
+      "see": [
+        "delorme-regimen",
+        "dapre",
+        "overload-principle"
+      ]
+    },
+    {
+      "id": "delorme-regimen",
+      "ru": "Схема Делорма",
+      "en": "DeLorme regimen",
+      "alt": [
+        "оксфордская схема"
+      ],
+      "def": "Три подхода по десять повторений с нарастающей нагрузкой: 50, 75 и 100 % от десятиповторного максимума; оксфордская схема — те же доли в обратном порядке.",
+      "page": 226,
+      "moments": [
+        {
+          "n": 74,
+          "beat": "dl",
+          "mark": "dl",
+          "to": "cmp"
+        }
+      ],
+      "see": [
+        "pre",
+        "dapre"
+      ]
+    },
+    {
+      "id": "dapre",
+      "ru": "Система ДАПРЕ",
+      "en": "daily adjustable progressive resistive exercise (DAPRE)",
+      "def": "Ежедневно корректируемые прогрессивные упражнения: по числу повторений в третьем подходе меняют вес для четвёртого подхода и следующего занятия.",
+      "page": 226,
+      "moments": [
+        {
+          "n": 74,
+          "beat": "dapre",
+          "mark": "sys",
+          "to": "q"
+        }
+      ],
+      "see": [
+        "delorme-regimen",
+        "pre"
+      ]
+    },
+    {
+      "id": "circuit-training",
+      "ru": "Круговая тренировка",
+      "en": "circuit weight training",
+      "def": "Заданная последовательность упражнений на станциях, одно за другим, почти без отдыха; группы мышц чередуют. Нагружает и аэробную, и анаэробную системы — растут сила и выносливость.",
+      "page": 227,
+      "moments": [
+        {
+          "n": 74,
+          "beat": "circ",
+          "mark": "circ",
+          "to": "order"
+        },
+        {
+          "n": 82,
+          "beat": "aer",
+          "mark": "circ"
+        }
+      ],
+      "see": [
+        "interval-training",
+        "circuit-interval-training"
+      ]
+    },
+    {
+      "id": "elastic-resistance",
+      "ru": "Эластичное сопротивление",
+      "en": "elastic resistance",
+      "def": "Ленты и трубки: сопротивление растёт с процентом удлинения, почти не завися от скорости; максимальный момент — когда лента под прямым углом к кости.",
+      "page": 232,
+      "moments": [
+        {
+          "n": 76,
+          "beat": "elong",
+          "mark": "elong",
+          "to": "rate"
+        },
+        {
+          "n": 76,
+          "beat": "setup",
+          "mark": "setup",
+          "to": "prog"
+        }
+      ],
+      "see": [
+        "variable-resistance"
+      ]
+    },
+    {
+      "id": "oscillating-pole",
+      "ru": "Осциллирующий шест",
+      "en": "oscillating flexible pole",
+      "def": "Гибкая пластина, которую пациент раскачивает: агонисты и антагонисты быстро попеременно сокращаются, гася колебания, — для динамической устойчивости.",
+      "page": 235,
+      "moments": [
+        {
+          "n": 77,
+          "beat": "blade",
+          "mark": "blade",
+          "to": "prog"
+        }
+      ],
+      "see": [
+        "rhythmic-stabilization"
+      ]
+    }
+  ]
+}

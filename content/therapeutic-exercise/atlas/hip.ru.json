@@ -1,0 +1,1170 @@
+{
+  "region": "hip",
+  "exercises": [
+    {
+      "id": "press-up",
+      "ru": "Отжимание лёжа на животе",
+      "en": "prone press-up",
+      "joint": [
+        "trunk",
+        "hip"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "prone"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "руки на уровне плеч",
+        "поднять грудь, таз провисает"
+      ],
+      "warn": "это и разгибание поясницы: если боль отдаёт в ногу — не делать",
+      "page": 503,
+      "moments": [
+        {
+          "n": 148,
+          "beat": "ext",
+          "mark": "press",
+          "crop": [
+            0,
+            20,
+            560,
+            560
+          ]
+        },
+        {
+          "n": 138,
+          "beat": "ext",
+          "mark": "st",
+          "to": "mon"
+        },
+        {
+          "n": 198,
+          "beat": "ext",
+          "mark": "press"
+        }
+      ]
+    },
+    {
+      "id": "thomas",
+      "ru": "Растяжка в положении Томаса",
+      "en": "Thomas test stretch",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "none",
+        "manual"
+      ],
+      "key": [
+        "другое колено прижать к груди",
+        "бедро медленно опускать к столу",
+        "колено разгибается свободно"
+      ],
+      "warn": "после эндопротеза, особенно переднего доступа, — до нуля и дальше только с разрешения хирурга",
+      "page": 751,
+      "moments": [
+        {
+          "n": 198,
+          "beat": "ext",
+          "mark": "thom"
+        },
+        {
+          "n": 195,
+          "beat": "mod",
+          "mark": "rom"
+        },
+        {
+          "n": 196,
+          "beat": "late",
+          "mark": "goals"
+        }
+      ],
+      "sand": "j=hip&m=flex&pos=supine"
+    },
+    {
+      "id": "fencer",
+      "ru": "Растяжка фехтовальщика",
+      "en": "modified fencer stretch",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "stand",
+        "kneel"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "растягиваемая нога сзади",
+        "сначала задний наклон таза",
+        "потом вес на переднюю ногу"
+      ],
+      "page": 751,
+      "moments": [
+        {
+          "n": 198,
+          "beat": "ext",
+          "mark": "fence",
+          "to": "kneel"
+        },
+        {
+          "n": 198,
+          "beat": "abd",
+          "mark": "fenc"
+        }
+      ]
+    },
+    {
+      "id": "knee-chest",
+      "ru": "Колени к груди",
+      "en": "knee-to-chest stretch",
+      "joint": [
+        "hip",
+        "trunk"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "подтянуть колени, держать бёдра",
+        "одно колено — другая нога прямо",
+        "к другому плечу — большая ягодичная"
+      ],
+      "warn": "таз от мата не отрывать — иначе гнётся поясница",
+      "page": 751,
+      "moments": [
+        {
+          "n": 198,
+          "beat": "flex",
+          "mark": "both",
+          "to": "one"
+        },
+        {
+          "n": 148,
+          "beat": "flex",
+          "mark": "hug"
+        },
+        {
+          "n": 253,
+          "beat": "common",
+          "mark": "com"
+        }
+      ],
+      "sand": "j=hip&m=flex&pos=supine"
+    },
+    {
+      "id": "quad-rock",
+      "ru": "Растяжка на четвереньках",
+      "en": "quadruped stretch",
+      "joint": [
+        "hip",
+        "trunk"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "quad"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "наклонить таз вперёд — лордоз",
+        "ягодицы к пяткам, руки впереди",
+        "конец — когда лордоз не удержать"
+      ],
+      "page": 752,
+      "moments": [
+        {
+          "n": 198,
+          "beat": "flex",
+          "mark": "quad"
+        },
+        {
+          "n": 148,
+          "beat": "flex",
+          "mark": "back"
+        }
+      ]
+    },
+    {
+      "id": "sit-lean",
+      "ru": "Наклон сидя с прогнутой спиной",
+      "en": "short-sitting stretch",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "chair"
+      ],
+      "key": [
+        "бёдра в 90°, поясница прогнута",
+        "наклон только в тазобедренных"
+      ],
+      "page": 752,
+      "moments": [
+        {
+          "n": 198,
+          "beat": "flex",
+          "mark": "sit"
+        }
+      ]
+    },
+    {
+      "id": "wall-abd",
+      "ru": "Разведение ног у стены",
+      "en": "self-stretching of the adductors",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "ноги вверх по стене, колени прямо",
+        "развести как можно шире",
+        "растягивает сила тяжести"
+      ],
+      "page": 752,
+      "moments": [
+        {
+          "n": 198,
+          "beat": "abd",
+          "mark": "wall"
+        }
+      ],
+      "sand": "j=hip&m=abd&pos=supine"
+    },
+    {
+      "id": "butterfly",
+      "ru": "Бабочка",
+      "en": "abduction and external rotation stretch",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit",
+        "supine"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "подошвы вместе",
+        "давить колени к полу",
+        "стопы ближе к телу — сильнее"
+      ],
+      "page": 752,
+      "moments": [
+        {
+          "n": 198,
+          "beat": "abd",
+          "mark": "fly"
+        }
+      ]
+    },
+    {
+      "id": "figure-four",
+      "ru": "Растяжка в положении четвёрки",
+      "en": "figure-four stretch",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit",
+        "supine"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "лодыжка на другом бедре",
+        "наклон вперёд с прямой спиной",
+        "или лёжа колено к груди"
+      ],
+      "page": 752,
+      "moments": [
+        {
+          "n": 198,
+          "beat": "abd",
+          "mark": "fig4"
+        }
+      ]
+    },
+    {
+      "id": "ir-stretch",
+      "ru": "Растяжка во внутреннюю ротацию",
+      "en": "internal rotation self-stretch",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "нога перекинута через другую",
+        "колено вести внутрь"
+      ],
+      "page": 753,
+      "moments": [
+        {
+          "n": 198,
+          "beat": "abd",
+          "mark": "ir"
+        }
+      ]
+    },
+    {
+      "id": "rf-stretch",
+      "ru": "Растяжка прямой мышцы бедра",
+      "en": "rectus femoris stretch",
+      "joint": [
+        "hip",
+        "knee"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "supine",
+        "prone",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "roll"
+      ],
+      "key": [
+        "разгибать бедро при согнутом колене",
+        "лёжа — тянуть лодыжку полотенцем",
+        "стоя — таз в заднем наклоне"
+      ],
+      "warn": "бедро не отводить и не разворачивать, поясницу не прогибать",
+      "page": 753,
+      "moments": [
+        {
+          "n": 198,
+          "beat": "rf",
+          "mark": "thom",
+          "to": "stand"
+        }
+      ],
+      "sand": "j=hip&m=flex&pos=prone&q=kn:100"
+    },
+    {
+      "id": "ham-stretch",
+      "ru": "Растяжка задней группы",
+      "en": "hamstring stretching",
+      "joint": [
+        "hip",
+        "knee"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "supine",
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "roll"
+      ],
+      "key": [
+        "сгибать бедро при прямом колене",
+        "в дверном проёме — нога на косяке",
+        "наклон в тазобедренных, не к носкам"
+      ],
+      "warn": "тянуться к носкам при болях в пояснице нельзя — наклон сильно нагружает поясницу",
+      "page": 754,
+      "moments": [
+        {
+          "n": 198,
+          "beat": "ham",
+          "mark": "slr",
+          "to": "toe"
+        },
+        {
+          "n": 213,
+          "beat": "ext",
+          "mark": "two",
+          "shot": 11
+        },
+        {
+          "n": 210,
+          "beat": "mod",
+          "mark": "ex"
+        },
+        {
+          "n": 206,
+          "beat": "edu",
+          "mark": "flex"
+        },
+        {
+          "n": 207,
+          "beat": "rehab",
+          "mark": "mod"
+        },
+        {
+          "n": 196,
+          "beat": "late",
+          "mark": "goals"
+        }
+      ],
+      "sand": "j=hip&m=flex&pos=supine"
+    },
+    {
+      "id": "tfl-stretch",
+      "ru": "Растяжка напрягателя широкой фасции",
+      "en": "tensor fasciae latae stretch",
+      "joint": [
+        "hip",
+        "knee"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "supine",
+        "side",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "weight"
+      ],
+      "key": [
+        "разогнуть, привести, развернуть наружу",
+        "тракт над вертелом",
+        "туловище не заваливать назад"
+      ],
+      "page": 755,
+      "moments": [
+        {
+          "n": 198,
+          "beat": "tfl",
+          "mark": "sup",
+          "to": "stand"
+        },
+        {
+          "n": 210,
+          "beat": "mod",
+          "mark": "ex"
+        },
+        {
+          "n": 207,
+          "beat": "rehab",
+          "mark": "mod"
+        }
+      ]
+    },
+    {
+      "id": "hip-abd",
+      "ru": "Отведение бедра",
+      "en": "hip abduction",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max",
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "supine",
+        "side",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "weight",
+        "band"
+      ],
+      "key": [
+        "на спине — без силы тяжести",
+        "на боку — без сгибания и ротации",
+        "стоя — таз не поднимать"
+      ],
+      "warn": "после остеотомии вертела — без активного отведения, пока не разрешит хирург",
+      "page": 756,
+      "moments": [
+        {
+          "n": 199,
+          "beat": "abd",
+          "mark": "sup",
+          "to": "stand"
+        },
+        {
+          "n": 195,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 195,
+          "beat": "mod",
+          "mark": "str"
+        },
+        {
+          "n": 196,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 196,
+          "beat": "late",
+          "mark": "goals"
+        },
+        {
+          "n": 194,
+          "beat": "prec",
+          "mark": "tt"
+        }
+      ],
+      "sand": "j=hip&m=abd&pos=side&mode=active"
+    },
+    {
+      "id": "glute-set",
+      "ru": "Изометрия ягодичных",
+      "en": "gluteal setting",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max"
+      ],
+      "pos": [
+        "supine",
+        "prone"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "сжать ягодицы",
+        "почувствовать сокращение"
+      ],
+      "warn": "после однополюсного протеза в острой фазе — без максимального усилия",
+      "page": 757,
+      "moments": [
+        {
+          "n": 199,
+          "beat": "ext",
+          "mark": "set"
+        },
+        {
+          "n": 193,
+          "beat": "add",
+          "mark": "early"
+        },
+        {
+          "n": 195,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 196,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 196,
+          "beat": "hemi",
+          "mark": "rehab"
+        }
+      ]
+    },
+    {
+      "id": "hip-ext-table",
+      "ru": "Разгибание бедра у стола",
+      "en": "standing leg lifts with trunk support",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "weight",
+        "band"
+      ],
+      "key": [
+        "туловище лежит на столе",
+        "разгибать бедро с согнутым коленом",
+        "так работает большая ягодичная"
+      ],
+      "warn": "если сводит заднюю поверхность бедра — работает задняя группа: сначала изометрия ягодичных",
+      "page": 757,
+      "moments": [
+        {
+          "n": 199,
+          "beat": "ext",
+          "mark": "table"
+        }
+      ]
+    },
+    {
+      "id": "quad-hip-ext",
+      "ru": "Разгибание бедра на четвереньках",
+      "en": "quadruped leg lifts",
+      "joint": [
+        "hip",
+        "trunk"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "quad"
+      ],
+      "gear": [
+        "none",
+        "ball"
+      ],
+      "key": [
+        "колено согнуто",
+        "сначала нейтральный таз, живот подтянут",
+        "не дальше доступного объёма"
+      ],
+      "page": 757,
+      "moments": [
+        {
+          "n": 199,
+          "beat": "ext",
+          "mark": "quad",
+          "shot": 6
+        },
+        {
+          "n": 247,
+          "beat": "limbs",
+          "mark": "quad"
+        }
+      ]
+    },
+    {
+      "id": "hip-ext-stand",
+      "ru": "Разгибание бедра стоя",
+      "en": "standing hip extension",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "max",
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "weight",
+        "band",
+        "machine"
+      ],
+      "key": [
+        "стоя на одной ноге, туловище прямо",
+        "не дальше нормального объёма",
+        "опорная нога держит таз"
+      ],
+      "page": 757,
+      "moments": [
+        {
+          "n": 199,
+          "beat": "ext",
+          "mark": "stand"
+        },
+        {
+          "n": 195,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 196,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 196,
+          "beat": "late",
+          "mark": "goals"
+        }
+      ],
+      "sand": "j=hip&m=flex&pos=stand&mode=active"
+    },
+    {
+      "id": "er-prone",
+      "ru": "Изометрия наружных ротаторов на животе",
+      "en": "prone isometrics for external rotators",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "prone"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "колени согнуты и разведены",
+        "давить пятками друг в друга"
+      ],
+      "page": 757,
+      "moments": [
+        {
+          "n": 199,
+          "beat": "er",
+          "mark": "iso"
+        }
+      ]
+    },
+    {
+      "id": "clam",
+      "ru": "«Ракушка»",
+      "en": "clam shell",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "phase": [
+        "max",
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "side"
+      ],
+      "gear": [
+        "none",
+        "band",
+        "weight"
+      ],
+      "key": [
+        "на боку, бёдра и колени согнуты",
+        "пятки вместе, поднимать колено",
+        "резинка вокруг бёдер — сложнее"
+      ],
+      "warn": "после эндопротеза — подушка между бёдрами, не приводить дальше нуля",
+      "page": 757,
+      "moments": [
+        {
+          "n": 199,
+          "beat": "er",
+          "mark": "clam"
+        },
+        {
+          "n": 195,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 197,
+          "beat": "ctrl",
+          "mark": "bal"
+        }
+      ]
+    },
+    {
+      "id": "er-side",
+      "ru": "Наружная ротация на боку",
+      "en": "side-lying external rotation",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "side"
+      ],
+      "gear": [
+        "none",
+        "band",
+        "weight"
+      ],
+      "key": [
+        "верхняя нога прямо, в линии с телом",
+        "развернуть наружу, потом отвести",
+        "туловище не заваливать назад"
+      ],
+      "page": 758,
+      "moments": [
+        {
+          "n": 199,
+          "beat": "er",
+          "mark": "side"
+        }
+      ]
+    },
+    {
+      "id": "er-sit",
+      "ru": "Наружная ротация сидя с резинкой",
+      "en": "sitting external rotation",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "band"
+      ],
+      "key": [
+        "сидя, колени согнуты",
+        "резинка у лодыжки",
+        "вести стопу к другой ноге"
+      ],
+      "page": 758,
+      "moments": [
+        {
+          "n": 199,
+          "beat": "er",
+          "mark": "sit"
+        }
+      ]
+    },
+    {
+      "id": "hip-flex-step",
+      "ru": "Шаг на ступеньку",
+      "en": "hip and knee flexion onto a step",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "step",
+        "weight"
+      ],
+      "key": [
+        "поставить стопу и вернуть на пол",
+        "чередовать ноги",
+        "сложнее — манжета, выше ступенька"
+      ],
+      "page": 758,
+      "moments": [
+        {
+          "n": 199,
+          "beat": "flex",
+          "mark": "step"
+        }
+      ]
+    },
+    {
+      "id": "hip-add",
+      "ru": "Приведение бедра",
+      "en": "hip adduction",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "phase": [
+        "mod",
+        "min"
+      ],
+      "pos": [
+        "side",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "weight",
+        "band"
+      ],
+      "key": [
+        "на боку поднимать нижнюю ногу",
+        "верхняя согнута, стопа на полу",
+        "стоя — вести ногу перед опорной"
+      ],
+      "page": 758,
+      "moments": [
+        {
+          "n": 199,
+          "beat": "add",
+          "mark": "side",
+          "to": "stand"
+        }
+      ]
+    },
+    {
+      "id": "hip-hike",
+      "ru": "Подъём и опускание таза",
+      "en": "hip hiking and pelvic drop",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "phase": [
+        "mod"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "step"
+      ],
+      "key": [
+        "одной ногой на бруске 5–10 см",
+        "опускать и поднимать таз",
+        "работают отводящие опорной ноги"
+      ],
+      "page": 760,
+      "moments": [
+        {
+          "n": 200,
+          "beat": "hike",
+          "mark": "hike",
+          "to": "ev"
+        },
+        {
+          "n": 195,
+          "beat": "mod",
+          "mark": "str"
+        }
+      ]
+    },
+    {
+      "id": "bridge",
+      "ru": "Мост",
+      "en": "bridging",
+      "joint": [
+        "hip",
+        "trunk"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "phase": [
+        "max",
+        "mod"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "none",
+        "ball",
+        "band",
+        "weight"
+      ],
+      "key": [
+        "стопы и верх спины в мат",
+        "поднять таз, разогнуть бёдра",
+        "сложнее — на одной ноге, с мячом"
+      ],
+      "page": 760,
+      "moments": [
+        {
+          "n": 200,
+          "beat": "hike",
+          "mark": "bridge"
+        },
+        {
+          "n": 196,
+          "beat": "max",
+          "mark": "ex"
+        },
+        {
+          "n": 210,
+          "beat": "mod",
+          "mark": "ex"
+        },
+        {
+          "n": 155,
+          "beat": "prep",
+          "mark": "br"
+        },
+        {
+          "n": 230,
+          "beat": "le1",
+          "mark": "bridge"
+        },
+        {
+          "n": 247,
+          "beat": "limbs",
+          "mark": "bridge"
+        }
+      ]
+    },
+    {
+      "id": "deadlift",
+      "ru": "Тяга на одной ноге",
+      "en": "single-limb deadlift",
+      "joint": [
+        "hip",
+        "knee"
+      ],
+      "goal": [
+        "strength",
+        "control",
+        "balance"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "опорное колено согнуто на 30°",
+        "наклон в тазобедренных",
+        "другая нога уходит назад"
+      ],
+      "page": 761,
+      "moments": [
+        {
+          "n": 200,
+          "beat": "squat",
+          "mark": "dl"
+        }
+      ]
+    },
+    {
+      "id": "side-step",
+      "ru": "Ходьба боком с резинкой",
+      "en": "resisted side stepping",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "band"
+      ],
+      "key": [
+        "резинка вокруг коленей или голеней",
+        "8–10 шагов вбок и обратно",
+        "в полуприседе ягодичные сильнее"
+      ],
+      "page": 762,
+      "moments": [
+        {
+          "n": 200,
+          "beat": "steps",
+          "mark": "side"
+        },
+        {
+          "n": 230,
+          "beat": "le2",
+          "mark": "band"
+        }
+      ]
+    }
+  ]
+}

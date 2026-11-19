@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Обратная связь: знание результата, знание выполнения и частота — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 12, title: 'Обратная связь: знание результата, знание выполнения и частота', minutes: 9, language: 'ru', next: '../ch013/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch012/cards.ru.json
+const CARDS_SHORT = {
+  "источник\nвнутренняя или дополнительная": "внутренняя или дополнительная",
+  "фокус\nо выполнении или о результате": "о выполнении или о результате",
+  "расписание\nкогда и как часто": "когда и как часто",
+};
+// cards-short end
+
+// Colours: source (intrinsic / augmented), focus (performance / results), schedule.
+const FB = { intr: COL.task, aug: COL.whole, kp: COL.rat, kr: COL.good, conc: COL.bad, imm: COL.int, del: COL.real, sum: COL.chalk };
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+function bubble(p, x, y, w, str, col, t0, { size = 24 } = {}) {
+  const g = G(p, { o: 0 }), tt = para(g, str, x + 18, y + 36, null, { size, maxW: w - 36 }), h = tt._h + 24;
+  put(tt, { o: 1 });
+  const r = mk('path', { d: `M${x + 16} ${y}H${x + w - 16}Q${x + w} ${y} ${x + w} ${y + 16}V${y + h - 16}Q${x + w} ${y + h} ${x + w - 16} ${y + h}H${x + 56}L${x + 24} ${y + h + 26}L${x + 34} ${y + h}H${x + 16}Q${x} ${y + h} ${x} ${y + h - 16}V${y + 16}Q${x} ${y} ${x + 16} ${y}Z`, fill: PANEL, stroke: col, 'stroke-width': 2.5 }, g);
+  g.insertBefore(r, g.firstChild);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// A target: concentric rings.
+function ring(p, x, y, r, col, t0) {
+  const g = G(p, { o: 0 });
+  [1, .62, .26].forEach((k, i) => mk('circle', { cx: x, cy: y, r: r * k, fill: i === 2 ? col : 'none', stroke: col, 'stroke-width': 3 }, g));
+  show(g, t0);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Обратная связь', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 1 · Урок 12', { x: 800, y: 240, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Обратная связь', { x: 800, y: 330, size: 66, weight: 600, anchor: 'middle' });
+    T(g, 'знание результата, знание выполнения и частота', { x: 800, y: 395, size: 34, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'вторая по важности переменная после практики', 800, 480, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 800;
+    path(art, `M620 ${GY}H980`, { stroke: COL.faint, 'stroke-width': 3 });
+    const f = fig(art, { x: 740, y: GY - 182 * .5, s: .5 });
+    ring(art, 900, GY - 120, 26, COL.good, 0);
+    show(art, m('sub', .2));
+    poseTo(f, { ...LEAN(6), aN: 92, eN: 4 }, m('sub', .4), 1, io, ['AN', onStage(f, 'AN')[0], GY]);
+    checkMark(art, 900, GY - 175, m('sub', 1.4), COL.good, 1.3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['def', 'Что такое обратная связь', (m) => {
+    const p = panel(0);
+    para(p, 'Обратная связь — сенсорная информация, которую ученик получает во время или после попытки выполнить движение', 800, 74, m('def'), { size: 28, weight: 700, maxW: 1300, anchor: 'middle' });
+    // rank: practice first, feedback second
+    const pod = G(p, { o: 0 });
+    mk('rect', { x: 560, y: 230, width: 220, height: 170, rx: 10, fill: COL.task, 'fill-opacity': .25, stroke: COL.task, 'stroke-width': 3 }, pod);
+    mk('rect', { x: 800, y: 290, width: 220, height: 110, rx: 10, fill: COL.whole, 'fill-opacity': .25, stroke: COL.whole, 'stroke-width': 3 }, pod);
+    T(pod, '1', { x: 670, y: 300, size: 46, weight: 700, fill: COL.task, anchor: 'middle' });
+    T(pod, 'практика', { x: 670, y: 360, size: 26, weight: 700, fill: COL.task, anchor: 'middle' });
+    T(pod, '2', { x: 910, y: 345, size: 40, weight: 700, fill: COL.whole, anchor: 'middle' });
+    T(pod, 'обратная связь', { x: 910, y: 385, size: 22, weight: 700, fill: COL.whole, anchor: 'middle' });
+    show(pod, m('rank'));
+    infoCard(p, 110, 480, 440, 170, 'источник', 'внутренняя или дополнительная', FB.aug, m('dims'));
+    infoCard(p, 580, 480, 440, 170, 'фокус', 'о выполнении или о результате', FB.kr, m('focus'));
+    infoCard(p, 1050, 480, 440, 170, 'расписание', 'когда и как часто', FB.imm, m('sched'));
+  }],
+
+  ['src', 'Источник', (m) => {
+    const p = panel(0), GY = 600;
+    txt(p, 'внутренняя', 400, 90, m('intr'), { size: 34, weight: 700, fill: FB.intr, anchor: 'middle' });
+    txt(p, 'дополнительная (внешняя)', 1200, 90, m('aug'), { size: 34, weight: 700, fill: FB.aug, anchor: 'middle' });
+    show(path(p, 'M800 60V780', { stroke: COL.faint, 'stroke-width': 2 }, { o: 0 }), m('aug', -.3));
+    ground(p, 220, 580, GY, m('intr'));
+    const f = fig(p, { x: 400, y: GY - 182 * .65, s: .65, o: 0 }); show(f.g, m('intr'));
+    repeatPose(f, REACH, m('intr', .4), 4, 2);
+    [['положение и движение', 260, 220], ['осязание', 560, 260], ['зрение', 240, 330], ['слух', 590, 360]].forEach(([s, x, y], i) => pill(p, s, x, y, m('intr', .8 + i * .5), { col: FB.intr, size: 23 }));
+    txt(p, 'возникает в самом движении', 400, 680, m('intr', 3), { size: 25, fill: COL.dim, anchor: 'middle' });
+    // augmented: words and touch, then devices
+    ground(p, 900, 1200, GY, m('aug'));
+    const th = fig(p, { x: 960, y: GY - 182 * .55, s: .55, o: 0, col: '#b9cfe0', pose: { aN: 75, eN: 30 } }), pt = fig(p, { x: 1110, y: GY - 182 * .55, s: .55, o: 0, dir: -1 });
+    [th, pt].forEach(x => show(x.g, m('aug')));
+    bubble(p, 880, 200, 250, 'слова и прикосновения', FB.aug, m('aug', 1.4), { size: 23 });
+    const dv = G(p, { o: 0 });
+    mk('rect', { x: 1290, y: 200, width: 210, height: 130, rx: 12, fill: COL.board, stroke: FB.aug, 'stroke-width': 3 }, dv);
+    path(dv, 'M1310 290Q1340 230 1370 290T1430 290T1480 270', { stroke: FB.aug, 'stroke-width': 3 });
+    T(dv, 'ультразвук', { x: 1395, y: 360, size: 22, fill: FB.aug, anchor: 'middle' });
+    mk('rect', { x: 1290, y: 400, width: 210, height: 100, rx: 12, fill: COL.board, stroke: FB.aug, 'stroke-width': 3 }, dv);
+    path(dv, 'M1300 450h30l8 -30l10 60l10 -60l10 60l10 -30h30l8 -20l8 40l8 -20h40', { stroke: FB.aug, 'stroke-width': 3 });
+    T(dv, 'миограф', { x: 1395, y: 530, size: 22, fill: FB.aug, anchor: 'middle' });
+    mk('rect', { x: 1300, y: 570, width: 120, height: 70, rx: 10, fill: COL.board, stroke: FB.aug, 'stroke-width': 3 }, dv);
+    path(dv, 'M1420 590L1470 570V640L1420 620Z', { stroke: FB.aug, 'stroke-width': 3, fill: COL.board });
+    T(dv, 'видео', { x: 1385, y: 675, size: 22, fill: FB.aug, anchor: 'middle' });
+    show(dv, m('dev'));
+    labelBox(p, 1040, 690, 440, ['вид, время, частоту', 'выбирает терапевт'], FB.aug, m('ctrl'), { size: 25 });
+    labelBox(p, 800, 800, 980, ['особенно нужна, когда собственные ощущения нарушены'], COL.int, m('need'), { size: 25 });
+  }],
+
+  ['kpkr', 'Выполнение и результат', (m) => {
+    const p = panel(0), GY = 470;
+    pill(p, 'пояснение: пример, не из книги', 800, 70, m('kp'), { col: COL.dim, size: 20 });
+    txt(p, 'знание выполнения', 400, 130, m('kp'), { size: 32, weight: 700, fill: FB.kp, anchor: 'middle' });
+    txt(p, 'знание результата', 1200, 130, m('kr'), { size: 32, weight: 700, fill: FB.kr, anchor: 'middle' });
+    ground(p, 240, 560, GY, m('kp'));
+    const a = fig(p, { x: 400, y: GY - 182 * .55, s: .55, o: 0 }); show(a.g, m('kp'));
+    const [ax] = onStage(a, 'AN');
+    repeatPose(a, { ...SQUAT, aN: 80, aF: 80 }, m('kp', .3), 4, 2, ['AN', ax, GY]);
+    const kl = path(p, `M${ax + 8} ${GY - 150}V${GY}`, { stroke: FB.kp, 'stroke-width': 3, 'stroke-dasharray': '8 6' }, { o: 0 });
+    show(kl, m('kp', .8));
+    bubble(p, 230, 500, 340, '«Держите колено над стопой»', FB.kp, m('kp', 1), { size: 23 });
+    ground(p, 1000, 1400, GY, m('kr'));
+    const b = fig(p, { x: 1120, y: GY - 182 * .55, s: .55, o: 0 }); show(b.g, m('kr'));
+    ring(p, 1290, GY - 110, 26, FB.kr, m('kr'));
+    poseTo(b, { ...LEAN(5), aN: 95, eN: 4 }, m('kr', .4), 1, io, ['AN', onStage(b, 'AN')[0], GY]);
+    checkMark(p, 1290, GY - 160, m('kr', 1.4), FB.kr, 1.3);
+    bubble(p, 1040, 500, 320, '«Вы дотянулись до цели»', FB.kr, m('kr', 1.2), { size: 23 });
+    labelBox(p, 800, 650, 1100, ['внимание к результату лучше закрепляет навык, чем к деталям движения'], FB.kr, m('shift'), { size: 25 });
+    txt(p, 'перенос веса: цели чуть за площадью опоры', 800, 735, m('ex'), { size: 24, fill: COL.dim, anchor: 'middle' });
+    const bos = path(p, `M1105 ${GY + 12}H1150`, { stroke: COL.int, 'stroke-width': 8, 'stroke-linecap': 'round' }, { o: 0 });
+    show(bos, m('ex', .3));
+    txt(p, 'площадь опоры', 1092, GY - 6, m('ex', .3), { size: 20, fill: COL.int, anchor: 'end' });
+    txt(p, 'задача целенаправленная: пациент оценивает себя по внешним ориентирам', 800, 780, m('goal'), { size: 24, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-kpkr', prompt: ['О выполнении или о результате? (примеры не из книги)'],
+    build: grid([
+      { parts: ['«Вы дотянулись до полки»'], ans: ['r'], why: 'Итог движения — знание результата.' },
+      { parts: ['«Колено уходит внутрь — держите его над стопой»'], ans: ['p'], why: 'Качество движения — знание выполнения.' },
+      { parts: ['«Мяч попал в корзину 7 раз из 10»'], ans: ['r'], why: 'Итог — знание результата.' },
+      { parts: ['«Спина округлилась на подъёме»'], ans: ['p'], why: 'Как выполнено движение — знание выполнения.' },
+      { parts: ['«Вы прошли 10 метров за 12 секунд»'], ans: ['r'], why: 'Итог — знание результата.' },
+    ], [['p', 'О выполнении', FB.kp], ['r', 'О результате', FB.kr]], { multi: false, text: true }),
+  }], done) }],
+
+  ['sched', 'Расписание', (m) => {
+    const p = panel(0);
+    head(p, 'Когда давать обратную связь', .2, 70, COL.chalk);
+    const X0 = 520, rows = [['одновременная', 'во время движения', FB.conc, 'conc'], ['ручное ведение', 'тоже одновременная', FB.conc, 'guide'], ['немедленная', 'сразу после попытки', FB.imm, 'imm'], ['отсроченная', 'после паузы', FB.del, 'del'], ['суммарная', 'после серии, о среднем', FB.sum, 'sum']];
+    rows.forEach(([name, sub, c, k], i) => {
+      const y = 170 + i * 125, g = G(p, { o: 0 });
+      T(g, name, { x: 110, y, size: 28, weight: 700, fill: c });
+      T(g, sub, { x: 110, y: y + 34, size: 22, fill: COL.dim });
+      const n = k === 'sum' ? 5 : 1;
+      for (let j = 0; j < n; j++) mk('rect', { x: X0 + j * 150, y: y - 24, width: 120, height: 34, rx: 8, fill: COL.faint, 'fill-opacity': .6 }, g);
+      T(g, k === 'sum' ? 'попытки' : 'попытка', { x: k === 'sum' ? X0 + 360 : X0 + 60, y: y + (k === 'sum' ? 58 : 50), size: 19, fill: COL.dim, anchor: 'middle' });
+      show(g, m(k));
+      const fx = k === 'conc' || k === 'guide' ? X0 + 60 : k === 'imm' ? X0 + 150 : k === 'del' ? X0 + 330 : X0 + 5 * 150 + 40;
+      const dot = G(p, { o: 0 });
+      if (k === 'conc' || k === 'guide') mk('rect', { x: X0, y: y - 30, width: 120, height: 46, rx: 10, fill: 'none', stroke: c, 'stroke-width': 4 }, dot);
+      else mk('circle', { cx: fx, cy: y - 7, r: 16, fill: c }, dot);
+      if (k === 'sum') path(dot, `M${X0} ${y + 22}V${y + 32}H${X0 + 4 * 150 + 120}V${y + 22}`, { stroke: c, 'stroke-width': 3 });
+      if (k === 'del') path(dot, `M${X0 + 130} ${y - 7}H${X0 + 305}`, { stroke: c, 'stroke-width': 3, 'stroke-dasharray': '6 6' });
+      show(dot, m(k, .6));
+    });
+    pill(p, 'картинка ультразвука: глубокие мышцы живота', 1260, 140, m('conc', 1.2), { col: FB.conc, size: 21 });
+    pill(p, 'нужно для безопасности, но в меру', 1290, 265, m('guide', 1), { col: FB.conc, size: 21 });
+    pill(p, 'ускоряет начало, но нет времени подумать', 1250, 390, m('imm', 1.2), { col: FB.imm, size: 21 });
+  }],
+
+  ['study', 'Исследование: частичная нагрузка', (m) => {
+    const p = panel(0), GY = 600;
+    head(p, 'Исследование: частичная нагрузка на ногу', .2, 70, COL.chalk);
+    ground(p, 120, 560, GY, m('st'));
+    const f = fig(p, { x: 0, y: 0, s: .65, o: 0, pose: STRIDE });
+    plant(f, 'AF', 280, GY);
+    const [hx] = onStage(f, 'heelN'), [tx] = onStage(f, 'toeN'), cx = (hx + tx) / 2;
+    const sc = G(p, { o: 0 });
+    mk('rect', { x: hx - 16, y: GY - 3, width: tx - hx + 32, height: 14, rx: 4, fill: COL.int, 'fill-opacity': .3, stroke: COL.int, 'stroke-width': 3 }, sc);
+    show(f.g, m('st')); show(sc, m('st'));
+    const dial = G(p, { x: cx + 170, y: GY - 150, o: 0 });
+    mk('circle', { r: 56, fill: COL.board, stroke: COL.int, 'stroke-width': 3 }, dial);
+    path(dial, 'M-40 0A40 40 0 0 1 40 0', { stroke: COL.faint, 'stroke-width': 8 });
+    path(dial, 'M-12 -38A40 40 0 0 1 12 -38', { stroke: COL.good, 'stroke-width': 8 });
+    const needle = G(dial);
+    path(needle, 'M0 0V-44', { stroke: COL.chalk, 'stroke-width': 4 });
+    T(dial, 'кг', { x: 0, y: 34, size: 20, fill: COL.dim, anchor: 'middle' });
+    path(dial, 'M-150 140L-40 40', { stroke: COL.faint, 'stroke-width': 2, 'stroke-dasharray': '5 5' });
+    show(dial, m('st', .3));
+    prog(q => put(needle, { r: 50 * Math.sin(2 * Math.PI * 2.5 * q) * (1 - q * .8) }), m('st', .5), 4, lin);
+    // two panels: acquisition and retention two days later (schematic)
+    const panelBars = (x0, title, vals, k, labs) => {
+      txt(p, title, x0 + 190, 180, m(k), { size: 26, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      path(p, `M${x0} 560H${x0 + 380}`, { stroke: COL.dim, 'stroke-width': 3 });
+      vals.forEach(([v, c, s], i) => {
+        const r = mk('rect', { x: x0 + 20 + i * 125, y: 560, width: 95, height: 0, rx: 6, fill: c, 'fill-opacity': .8 }, p);
+        prog(q => { r.setAttribute('y', (560 - 300 * v * q).toFixed(1)); r.setAttribute('height', (300 * v * q).toFixed(1)); }, m(k, .3 + i * .3), .8, out);
+        txt(p, s, x0 + 67 + i * 125, 596, m(k, .2), { size: 20, fill: c, anchor: 'middle' });
+      });
+      if (labs) labs.forEach(([s, i, col]) => txt(p, s, x0 + 67 + i * 125, 230, m(k, 1.2), { size: 21, weight: 700, fill: col, anchor: 'middle' }));
+    };
+    panelBars(660, 'освоение', [[.9, FB.conc, 'одновр.'], [.6, FB.imm, 'немедл.'], [.55, FB.sum, 'суммарн.']], 'c1', [['быстрее всех', 0, FB.conc]]);
+    panelBars(1110, 'через 2 дня', [[.3, FB.conc, 'одновр.'], [.55, FB.imm, 'немедл.'], [.8, FB.sum, 'суммарн.']], 'c2', [['хуже всех', 0, FB.conc]]);
+    txt(p, 'суммарная > немедленная', 1300, 650, m('c3'), { size: 26, weight: 700, fill: FB.sum, anchor: 'middle' });
+    pill(p, 'схема', 1440, 120, m('c1'), { col: COL.dim, size: 20 });
+    txt(p, 'смотрели на весы во время шага', 340, 690, m('c1', -.6), { size: 23, fill: FB.conc, anchor: 'middle' });
+  }],
+
+  ['freq', 'Частота', (m) => {
+    const p = panel(0);
+    labelBox(p, 800, 100, 520, ['меньше — лучше'], COL.task, m('less'), { size: 34 });
+    // frequency fades across the stages
+    const st3 = [['когнитивная', 10, 'cogst'], ['ассоциативная', 5, 'fade'], ['автономная', 1, 'fade']];
+    st3.forEach(([s, n, k], i) => {
+      const y = 240 + i * 90;
+      txt(p, s, 110, y + 8, m(k, i ? .4 + i * .6 : 0), { size: 26, weight: 700, fill: COL.chalk });
+      for (let j = 0; j < 10; j++) {
+        const on = (j * n) % 10 < n, d = mk('circle', { cx: 430 + j * 42, cy: y, r: 13, fill: on ? COL.task : 'none', stroke: on ? COL.task : COL.faint, 'stroke-width': 2 }, p);
+        put(d, { o: 0 }); show(d, m(k, (i ? .4 + i * .6 : 0) + j * .05), .2);
+      }
+    });
+    txt(p, 'обратная связь за 10 попыток', 620, 190, m('cogst'), { size: 22, fill: COL.dim, anchor: 'middle' });
+    labelBox(p, 1220, 260, 560, ['избыток → зависимость', 'мешает самому замечать ошибки'], COL.bad, m('dep'), { size: 26 });
+    // constant vs variable
+    const row = (y, pat, lab, c, k, off) => {
+      txt(p, lab, 110, y + 8, m(k, off), { size: 26, weight: 700, fill: c });
+      [...pat].forEach((ch, j) => { const d = mk('circle', { cx: 430 + j * 42, cy: y, r: 13, fill: ch === '1' ? c : 'none', stroke: ch === '1' ? c : COL.faint, 'stroke-width': 2 }, p); put(d, { o: 0 }); show(d, m(k, off + j * .05), .2); });
+    };
+    row(560, '1111111111', 'постоянная', COL.whole, 'var', 0);
+    row(650, '1001010010', 'переменная', COL.good, 'var', 1);
+    pill(p, 'быстрее улучшает выполнение в начале', 1200, 560, m('var', .6), { col: COL.whole, size: 23 });
+    pill(p, 'лучше закрепляет навык', 1200, 650, m('var', 1.6), { col: COL.good, size: 23 });
+    labelBox(p, 800, 770, 1000, ['постепенно уменьшать: пациент учится исправлять себя сам'], COL.good, m('fade', 2.4), { size: 26 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => {
+    const p = panel(0), GY = 640;
+    ground(p, 120, 520, GY, .1);
+    const f = fig(p, { x: 320, y: GY - 182 * .6, s: .6 });
+    repeatPose(f, REACH, .3, 3, 1);
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-fade', prompt: ['Пациент на ассоциативной стадии. Что лучше закрепит навык?'],
+    build: choice([['Подсказка после каждого повтора'], ['Переменная обратная связь, постепенно всё реже'], ['Постоянное ручное ведение']], 1,
+      'Переменная и постепенно уменьшаемая обратная связь лучше закрепляет навык.',
+      ['Постоянная связь быстрее улучшает выполнение в начале, но создаёт зависимость.', null, 'На ассоциативной стадии ручное ведение уже не нужно.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Обратная связь бывает внутренней и дополнительной; дополнительную дозирует терапевт.', 'w1'],
+     ['Знание результата лучше закрепляет навык, чем внимание к деталям.', 'w2'],
+     ['Одновременная и немедленная ускоряют освоение, отсроченная и суммарная — лучше закрепляют.', 'w3'],
+     ['Меньше — лучше: переменная обратная связь и её постепенное уменьшение.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-sched', prompt: ['Какое это расписание обратной связи?'],
+    build: grid([
+      { parts: ['Пациент видит мышцы на экране ультразвука во время сокращения'], ans: ['c'], why: 'Во время движения — одновременная.' },
+      { parts: ['Терапевт сообщает результат сразу после каждой попытки'], ans: ['i'], why: 'Сразу после — немедленная.' },
+      { parts: ['Терапевт выжидает несколько секунд и только потом комментирует'], ans: ['d'], why: 'После паузы — отсроченная.' },
+      { parts: ['После серии из 5 попыток — как получилось в среднем'], ans: ['s'], why: 'После нескольких повторений — суммарная.' },
+      { parts: ['Терапевт ведёт ногу пациента руками во время шага'], ans: ['c'], why: 'Ручное ведение — одновременная обратная связь.' },
+    ], [['c', 'Одновременная', FB.conc], ['i', 'Немедленная', FB.imm], ['d', 'Отсроченная', FB.del], ['s', 'Суммарная', FB.sum]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['По важности для обучения обратная связь уступает только практике.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Внутренняя обратная связь — это слова терапевта.'], ans: ['f'], why: 'Неверно: внутренняя идёт от собственных органов чувств; слова — дополнительная.' },
+      { parts: ['Одновременная обратная связь лучше всего сохраняет навык.'], ans: ['f'], why: 'Неверно: она ускоряет освоение, но сохранение было хуже всех.' },
+      { parts: ['Суммарная обратная связь закрепила навык лучше немедленной.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Чем больше обратной связи, тем лучше обучение.'], ans: ['f'], why: 'Неверно: меньше — лучше, избыток создаёт зависимость.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

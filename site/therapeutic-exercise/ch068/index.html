@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Предосторожности — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 68, title: 'Предосторожности и противопоказания', minutes: 10, language: 'ru', next: '../ch069/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch068/lupa.ru.json
+const LUPA = [
+  {"beat": "intro", "fig": 0, "target": "biceps", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch068/cards.ru.json
+const CARDS_SHORT = {
+  "когда\nбольшие изометрические и динамические усилия; давление растёт с процентом от максимума": "большие усилия — давление растёт",
+  "особенно опасно\nИБС, инфаркт, нарушения мозгового кровообращения, гипертензия; после нейрохирургии и операций на глазах; патология дисков": "ИБС, инфаркт, гипертензия, диски",
+  "сердечно-сосудистые болезни\nпосле разрешения врача — малая интенсивность: 30–40% руки, 50–60% ноги": "малая: 30–40% руки, 50–60% ноги",
+  "профилактика\nпредупредить; дышать ритмично, считать вслух или говорить; выдох при подъёме; высокий риск — без высокой интенсивности": "дышать ритмично, выдох при подъёме",
+  "профилактика\nподходящее сопротивление и стабилизация": "стабилизация",
+  "перетренированность\nздоровые, интенсивно и объёмно; причины: мало отдыха, быстрая прогрессия, мало еды и воды · обратима": "мало отдыха, быстрая прогрессия · обратима",
+  "слабость от перегрузки\nмышцы, ослабленные непрогрессирующей нервно-мышечной болезнью: полиомиелит, Гийен — Барре, постполиомиелитический синдром": "полиомиелит, Гийен — Барре",
+  "острая\nво время или сразу после работы до изнеможения: мало крови и кислорода, метаболиты · жжение · быстро проходит; помогает заминка": "жжение, быстро проходит",
+  "силовые упражнения нужны\nони стимулируют кость; груз — для перегрузки, но не для перелома": "стимулируют кость, но без перелома",
+  "боль\nсильная боль при движении без нагрузки — не начинать динамику · острая боль при изометрии против сопротивления — не начинать · боль не уходит при меньшем грузе — прекратить": "сильная боль — не начинать",
+  "воспаление\nГийен — Барре (острый), полимиозит, дерматомиозит — абсолютно · острое воспаление сустава — без динамики; мягкие установочные можно": "острое — без динамики",
+  "сердце и лёгкие\nтяжёлая ИБС, кардит, кардиомиопатия, сердечная недостаточность, неконтролируемые гипертензия или аритмии": "ИБС, сердечная недостаточность",
+};
+// cards-short end
+
+const WARN = COL.int, STOP = COL.bad;
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A row of a list with a coloured marker.
+function row(p, x, y, w, s, col, t0, { size = 22, h = 56 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x, y, width: w, height: h, rx: 12, fill: PANEL, stroke: col, 'stroke-width': 2 }, g);
+  mk('circle', { cx: x + 24, cy: y + h / 2, r: 8, fill: col }, g);
+  put(para(g, s, x + 44, y + h / 2 + size * .35, null, { size, maxW: w - 60 }), { o: 1 });
+  show(g, t0);
+  return g;
+}
+// A front-view figure standing (flatFig upright) with a deltoid on the near shoulder; abd(th, lean, hike).
+function frontFig(p, x, y, s, t0) {
+  const f = flatFig(p, x, y, s, t0);
+  const del = muscleEl(f.top, { rest: 92, w: 16 });
+  f.abd = (th, lean = 0, hike = 0) => {
+    f.S = [84, -168 - hike]; f.arm(th);
+    put(f.g, { r: lean });
+    const E = f.pts.E;
+    del.set([f.S[0] - 6, f.S[1] - 14], [lerp(f.S[0], E[0], .5), lerp(f.S[1], E[1], .5)]);
+  };
+  f.del = del;
+  f.abd(6);
+  return f;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Предосторожности', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 68', { x: 800, y: 190, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Предосторожности', { x: 800, y: 275, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и противопоказания', { x: 800, y: 340, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'не только эффективно, но и безопасно', 800, 420, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 830;
+    path(art, `M620 ${GY}H900`, { stroke: COL.faint, 'stroke-width': 3 });
+    const c = curlFig(art, 760, GY, .72, 1.3, 0);
+    const lab = T(art, '', { x: 1000, y: 700, size: 30, weight: 700, fill: COL.whole });
+    prog(q => { const u = (q * 3) % 1, up = u < .5; c.f.set({ aN: 6, eN: up ? lerp(10, 125, io(u * 2)) : lerp(125, 10, io(u * 2 - 1)) }); c.mu.act(.9); lab.textContent = up ? 'выдох' : 'вдох'; }, .4, Math.max(4, D - 1.2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['gen', 'Общие предосторожности', (m) => {
+    const p = panel(0);
+    txt(p, 'общие предосторожности', 800, 76, m('gen'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const L = ['комфортная температура; одежда отводит тепло и пот', 'без боли', 'не с максимума, особенно эксцентрика; в восстановлении — легко', 'без больших грузов: дети, пожилые, остеопороз', 'не через нестабильный сустав, не дистальнее несросшегося перелома', 'не задерживать дыхание; выдох при усилии', 'без рывков и обходных движений', 'не перегружать спину попутно', 'учитывать лекарства', 'избегать накопленного утомления; отдых', 'стоп: боль, головокружение, необычная одышка'];
+    L.forEach((s, i) => row(p, i < 6 ? 80 : 820, 130 + (i % 6) * 118, 700, s, i === 10 ? STOP : WARN, m('g' + (i + 1)), { size: 22, h: 100 }));
+  }],
+
+  ['val', 'Проба Вальсальвы', (m) => {
+    const p = panel(0);
+    txt(p, 'проба Вальсальвы (Valsalva maneuver)', 800, 76, m('val'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'выдох при закрытой голосовой щели', 400, 120, m('val', 1), { size: 23, fill: COL.dim, anchor: 'middle' });
+    const S = ['глубокий вдох', 'голосовая щель закрыта', 'сокращаются мышцы живота', 'давление в животе и груди ↑', 'кровь выталкивается из сердца', 'артериальное давление резко ↑'];
+    S.forEach((s, i) => {
+      labelBox(p, 330, 170 + i * 66, 470, [s], i === 5 ? STOP : COL.whole, m('seq', i * .9), { size: 22 });
+      if (i) arrowTo(p, [330, 170 + i * 66 - 44], [330, 170 + i * 66 - 22], m('seq', i * .9 - .2), { col: COL.dim, w: 3, dur: .25 });
+    });
+    const bp = G(p, { o: 0 });
+    mk('rect', { x: 620, y: 170, width: 40, height: 340, rx: 10, fill: 'none', stroke: COL.dim, 'stroke-width': 2 }, bp);
+    const bar = mk('rect', { x: 625, y: 505, width: 30, height: 0, rx: 7, fill: STOP }, bp);
+    T(bp, 'АД', { x: 640, y: 155, size: 22, fill: COL.dim, anchor: 'middle' });
+    show(bp, m('seq'));
+    prog(q => { const h = 330 * io(q); bar.setAttribute('y', (505 - h).toFixed(1)); bar.setAttribute('height', h.toFixed(1)); }, m('seq', 4.5), 1.5, lin);
+    infoCard(p, 760, 130, 780, 150, 'когда', 'большие изометрические и динамические усилия; давление растёт с процентом от максимума', WARN, m('when'), { size: 22 });
+    infoCard(p, 760, 295, 780, 190, 'особенно опасно', 'ИБС, инфаркт, нарушения мозгового кровообращения, гипертензия; после нейрохирургии и операций на глазах; патология дисков', STOP, m('risk'), { size: 22 });
+    infoCard(p, 760, 500, 780, 150, 'сердечно-сосудистые болезни', 'после разрешения врача — малая интенсивность: 30–40% руки, 50–60% ноги', COL.task, m('card'), { size: 22 });
+    // breathing during a lift
+    const GY = 860, c = curlFig(p, 200, GY, .62, 1.2, m('prev'));
+    const lab = txt(p, '', 380, 770, m('prev', .3), { size: 26, weight: 700, fill: COL.good });
+    prog(q => { const u = (q * 3) % 1, up = u < .5; c.f.set({ aN: 6, eN: up ? lerp(10, 125, io(u * 2)) : lerp(125, 10, io(u * 2 - 1)) }); c.mu.act(.9); lab.textContent = up ? 'поднимает — выдох' : 'опускает — вдох'; }, m('prev', .5), 7, lin);
+    infoCard(p, 760, 665, 780, 190, 'профилактика', 'предупредить; дышать ритмично, считать вслух или говорить; выдох при подъёме; высокий риск — без высокой интенсивности', COL.good, m('prev'), { size: 22 });
+  }],
+
+  ['sub', 'Обходные движения', (m) => {
+    const p = panel(0);
+    txt(p, 'обходные движения', 800, 76, m('sub'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'груз слишком велик, утомление или боль', 800, 120, m('sub', 1), { size: 23, fill: COL.dim, anchor: 'middle' });
+    const A = frontFig(p, 360, 520, .85, m('ex', -.5)), B = frontFig(p, 900, 520, .85, m('ex'));
+    prog(q => { A.abd(lerp(6, 95, io(q))); A.del.act(.9); }, m('ex', -.2), 2, lin);
+    prog(q => { B.abd(lerp(6, 70, io(q)), 0, 18 * io(q)); B.del.act(.4); }, m('ex', .4), 2, lin);
+    prog(q => { B.abd(70, -9 * io(q), 18); B.del.act(.4); }, m('lean', .2), 1.5, lin);
+    txt(p, 'правильно', 360, 200, m('ex', -.5), { size: 26, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'лопатка вверх', 960, 220, m('ex', 1), { size: 23, weight: 700, fill: STOP, anchor: 'middle' });
+    txt(p, 'корпус — в другую сторону', 880, 880, m('lean', .5), { size: 23, weight: 700, fill: STOP, anchor: 'middle' });
+    infoCard(p, 1200, 300, 340, 300, 'профилактика', 'подходящее сопротивление и стабилизация', COL.good, m('fix'), { size: 23 });
+  }],
+
+  ['over', 'Перетренированность и перегрузка', (m) => {
+    const p = panel(0);
+    txt(p, 'перетренированность и слабость от перегрузки', 800, 76, m('over'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'утомление обычно останавливает — но не мотивированного спортсмена и не того, кто его не чувствует', 800, 120, m('over', 2), { size: 22, fill: COL.dim, anchor: 'middle' });
+    const chart = (x0, y0, fn, col, t0) => {
+      const g = G(p, { o: 0 });
+      path(g, `M${x0} ${y0 - 160}V${y0}H${x0 + 600}`, { stroke: COL.dim, 'stroke-width': 2.5 });
+      T(g, 'работоспособность', { x: x0 + 8, y: y0 - 166, size: 19, fill: COL.dim });
+      T(g, 'время →', { x: x0 + 600, y: y0 + 28, size: 19, fill: COL.dim, anchor: 'end' });
+      show(g, t0);
+      draw(path(p, fnPath(x0, y0, 600, 150, fn), { stroke: col, 'stroke-width': 5 }, { d: 0 }), t0 + .5, 2);
+    };
+    chart(120, 400, t => t < .5 ? .8 - .7 * t : t < .6 ? .45 : .45 + .35 * (1 - Math.exp(-(t - .6) / .12)), WARN, m('ot'));
+    txt(p, 'меньше объём и частота → восстановление', 420, 440, m('ot', 3), { size: 20, fill: COL.good, anchor: 'middle' });
+    chart(880, 400, t => .8 - .45 * (1 - Math.exp(-t / .25)), STOP, m('ow'));
+    txt(p, 'потеря силы часто стойкая', 1180, 440, m('ow', 3), { size: 20, fill: STOP, anchor: 'middle' });
+    pill(p, 'схема', 700, 230, m('ot'), { col: COL.dim, size: 19 });
+    infoCard(p, 80, 480, 700, 250, 'перетренированность', 'здоровые, интенсивно и объёмно; причины: мало отдыха, быстрая прогрессия, мало еды и воды · обратима', WARN, m('ot'), { size: 22 });
+    infoCard(p, 820, 480, 700, 250, 'слабость от перегрузки', 'мышцы, ослабленные непрогрессирующей нервно-мышечной болезнью: полиомиелит, Гийен — Барре, постполиомиелитический синдром', STOP, m('ow'), { size: 22 });
+    infoCard(p, 80, 750, 1440, 110, 'профилактика: наблюдать, медленно наращивать, часто переоценивать, не до изнеможения, больше отдыха', null, COL.good, m('prev'), { size: 22 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-overtr', prompt: ['Перетренированность или слабость от перегрузки?'],
+    build: grid([
+      { parts: ['Здоровый спортсмен тренируется много без отдыха, результаты падают'], ans: ['ot'], why: 'Перетренированность.' },
+      { parts: ['После полиомиелита слабые мышцы от нагрузки слабеют ещё больше'], ans: ['ow'], why: 'Слабость от перегрузки.' },
+      { parts: ['Проходит, если периодически снижать объём и частоту'], ans: ['ot'], why: 'Перетренированность обратима.' },
+      { parts: ['Потеря силы может быть стойкой; главное — профилактика'], ans: ['ow'], why: 'Слабость от перегрузки.' },
+      { parts: ['Описана при синдроме Гийена — Барре'], ans: ['ow'], why: 'Слабость от перегрузки.' },
+    ], [['ot', 'Перетренированность', WARN], ['ow', 'Слабость от перегрузки', STOP]], { multi: false, text: true }),
+  }], done) }],
+
+  ['doms', 'Мышечная боль', (m) => {
+    const p = panel(0), x0 = 120, y0 = 620, W = 820, H = 380, X = d => x0 + d / 14 * W;
+    txt(p, 'мышечная боль после нагрузки', 800, 76, m('doms'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 1000, 120, 540, 230, 'острая', 'во время или сразу после работы до изнеможения: мало крови и кислорода, метаболиты · жжение · быстро проходит; помогает заминка', WARN, m('acute'), { size: 21 });
+    const g = G(p, { o: 0 });
+    path(g, `M${x0} ${y0 - H - 10}V${y0}H${x0 + W + 10}`, { stroke: COL.dim, 'stroke-width': 3 });
+    for (let d = 0; d <= 14; d += 2) T(g, String(d), { x: X(d), y: y0 + 30, size: 19, fill: COL.dim, anchor: 'middle' });
+    T(g, 'дни', { x: x0 + W, y: y0 + 60, size: 20, fill: COL.dim, anchor: 'end' });
+    show(g, m('del'));
+    const sore = t => { const d = t * 14; return d < .5 ? 0 : Math.max(0, Math.sin(Math.PI * Math.min(1, (d - .5) / 5.5)) ** 1.5 * .9) * (d < 6 ? 1 : 0); };
+    const str = t => { const d = t * 14; return d < .05 ? 1 : 1 - .3 * Math.exp(-d / 4.5); };
+    draw(path(p, fnPath(x0, y0, W, H, sore, 0, 1, 160), { stroke: STOP, 'stroke-width': 5 }, { d: 0 }), m('del', .5), 2);
+    const pk = G(p, { o: 0 });
+    path(pk, `M${X(2)} ${y0}V${y0 - H}M${X(3)} ${y0}V${y0 - H}`, { stroke: STOP, 'stroke-width': 2, 'stroke-dasharray': '6 6' });
+    T(pk, 'пик 48–72 ч', { x: X(2.5), y: y0 - H - 14, size: 21, fill: STOP, anchor: 'middle', weight: 700 });
+    show(pk, m('peak'));
+    txt(p, 'боль начинается через 12–24 ч', X(6.3), y0 - .12 * H, m('del', 1), { size: 21, fill: STOP, weight: 700 });
+    draw(path(p, fnPath(x0, y0, W, H, str, 0, 1, 160), { stroke: COL.whole, 'stroke-width': 5, 'stroke-dasharray': '12 8' }, { d: 0 }), m('str'), 2);
+    txt(p, 'сила: падает раньше боли,', X(5.2), y0 - H - 58, m('str', 1), { size: 20, fill: COL.whole, weight: 700 });
+    txt(p, 'восстанавливается через 1–2 недели после неё', X(5.2), y0 - H - 32, m('str', 1), { size: 20, fill: COL.whole, weight: 700 });
+    pill(p, 'схема', x0 + W - 30, y0 - H + 40, m('del'), { col: COL.dim, size: 19 });
+    ['болезненность брюшка и перехода в сухожилие', 'боль при растяжении и сокращении', 'отёк и тепло', 'скованность до боли', 'меньше объём движений'].forEach((s, i) => pill(p, s, [330, 900, 1300, 470, 900][i], [725, 725, 725, 790, 790][i], m('signs', .4 + i * .9), { col: WARN, size: 21 }));
+    para(p, 'сильнее всего — после интенсивной эксцентрики; держится до 10–14 дней', 1000, 410, m('peak', 2), { size: 21, fill: COL.dim, maxW: 540 });
+  }],
+
+  ['domsC', 'Причины и лечение', (m) => {
+    const p = panel(0);
+    txt(p, 'отсроченная боль: причина, профилактика, лечение', 800, 76, m('domsC'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    row(p, 80, 120, 700, 'молочная кислота? — нет: уходит за ≈ 1 час', STOP, m('lac'), { size: 22, h: 60 });
+    row(p, 80, 190, 700, 'спазм? — нет: электрическая активность не повышена', STOP, m('spasm'), { size: 22, h: 60 });
+    row(p, 80, 260, 700, 'микротравма волокон и соединительной ткани: креатинкиназа ↑, воспаление, отёк', COL.good, m('micro'), { size: 22, h: 96 });
+    const sr = sarcomere(p, 430, 440, 280, 80);
+    put(sr.g, { o: 0 }); show(sr.g, m('micro', 2));
+    path(p, 'M570 400L560 420L578 438L562 458L576 480', { stroke: STOP, 'stroke-width': 4 }, { o: 0 }); show(p.lastChild, m('micro', 3));
+    txt(p, 'повреждение у Z-линии → сила ↓', 430, 530, m('micro', 3), { size: 21, fill: STOP, anchor: 'middle', weight: 600 });
+    const T2 = [['постепенно, разминка, заминка, растяжка', '≈ нет данных', COL.dim, 'prev'], ['концентрика перед эксцентрикой', 'меньше боль', COL.good, 'conc'], ['регулярная эксцентрика (повторная нагрузка)', 'защищает', COL.good, 'bout'], ['продолжать тренировку', 'не вредит', COL.good, 'cont'], ['лёгкая изокинетика, электростимуляция', 'спорно', WARN, 'tx'], ['холодная вода; массаж, кислород, добавки', 'мало / нет', COL.dim, 'tx'], ['компрессионный рукав, кремы с салицилатами', 'возможно, помогают', COL.good, 'sleeve']];
+    T2.forEach(([a, b, c, k], i) => {
+      const y = 120 + i * 100, g = G(p, { o: 0 });
+      mk('rect', { x: 820, y, width: 720, height: 88, rx: 14, fill: PANEL, stroke: c, 'stroke-width': 2 }, g);
+      put(para(g, a, 840, y + 36, null, { size: 21, maxW: 460 }), { o: 1 });
+      T(g, b, { x: 1520, y: y + 52, size: 22, fill: c, weight: 700, anchor: 'end' });
+      show(g, m(k, i === 5 ? 3 : 0));
+    });
+    txt(p, 'окончательного лечения пока нет', 430, 640, m('sleeve', 3), { size: 24, fill: COL.task, anchor: 'middle', weight: 700 });
+  }],
+
+  ['frac', 'Патологический перелом', (m) => {
+    const p = panel(0), GY = 820, s = 1.15;
+    txt(p, 'патологический перелом и остеопороз', 800, 76, m('frac'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ground(p, 80, 460, GY, m('site', -.5));
+    const f = fig(p, { x: 270, y: GY - 182 * s, s, o: 0 });
+    show(f.g, m('site', -.5));
+    const at = (a, b, k, off) => { const A = f.pts[a], B = f.pts[b], dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy); return figPt(f, [A[0] + dx * k - dy / L * off, A[1] + dy * k + dx / L * off]); };
+    [[at('H', 'Sh', .6, 22), 'позвонки'], [at('H', 'KN', .1, -4), 'бедро'], [onStage(f, 'WN'), 'запястье'], [at('H', 'Sh', .78, -18), 'рёбра']].forEach(([P, s2], i) => {
+      const g = G(p, { x: P[0], y: P[1], o: 0 });
+      mk('circle', { r: 16, fill: STOP, 'fill-opacity': .4, stroke: STOP, 'stroke-width': 3 }, g);
+      show(g, m('site', .4 + i * .5));
+      const right = i === 2, ly = P[1] + [14, 8, 34, -20][i], lx = right ? P[0] + 60 : 196;
+      show(path(p, `M${P[0] + (right ? 14 : -14)} ${P[1]}L${right ? lx - 6 : lx + 6} ${ly - 7}`, { stroke: STOP, 'stroke-width': 2 }, { o: 0 }), m('site', .4 + i * .5));
+      txt(p, s2, lx, ly, m('site', .4 + i * .5), { size: 21, fill: STOP, weight: 600, anchor: right ? 'start' : 'end' });
+    });
+    ['после менопаузы (первичный)', 'иммобилизация, бездействие', 'ограничение опоры', 'кортикостероиды, иммунодепрессанты'].forEach((s2, i) => pill(p, s2, 680, 150 + i * 56, m('risk', .5 + i * .8), { col: WARN, size: 21 }));
+    const R = [['интенсивность', '40–60% от 1ПМ → 60–<80% при необходимости', 'r1'], ['объём, частота', '6–8 недель: 1 подход × 8–12 → 3–4 подхода; 2–3 раза в неделю', 'r2'], ['с опорой, без ударов', 'выпады, шаг на ступеньку с грузом; без прыжков и быстрых движений', 'r3'], ['позвоночник, бёдра', 'без наклона с поворотом и сгибания против сопротивления; без скручиваний', 'r4'], ['безопасность', 'держаться за опору; высокий риск падений — сидя; малые группы', 'r5']];
+    R.forEach(([a, b, k], i) => {
+      const y = 400 + i * 92, g = G(p, { o: 0 });
+      mk('rect', { x: 480, y, width: 1060, height: 80, rx: 14, fill: PANEL, stroke: COL.good, 'stroke-width': 2 }, g);
+      T(g, a, { x: 500, y: y + 48, size: 22, weight: 700, fill: COL.good });
+      put(para(g, b, 740, y + 34, null, { size: 21, maxW: 780 }), { o: 1 });
+      show(g, m(k));
+    });
+    infoCard(p, 940, 120, 600, 260, 'силовые упражнения нужны', 'они стимулируют кость; груз — для перегрузки, но не для перелома', COL.good, m('good'), { size: 22 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-osteo', prompt: ['Пациентке 70 лет, остеопороз позвоночника. Какое упражнение исключить?'],
+    build: choice([
+      ['Наклоны корпуса вперёд с поворотом против сопротивления'],
+      ['Выпады с лёгкими гантелями, держась за опору'],
+      ['Шаг на низкую ступеньку'],
+      ['Разгибание спины без сопротивления'],
+    ], 0, 'Сгибание с поворотом и сгибание против сопротивления в конце объёма грозят компрессионным переломом позвонка.',
+    [null, 'Это низкоударная нагрузка с опорой — подходит.', 'Подходит: опора без ударов.', 'Разгибание не нагружает переднюю часть позвонков.']),
+  }], done) }],
+
+  ['contra', 'Противопоказания', (m) => {
+    const p = panel(0);
+    txt(p, 'противопоказания', 800, 76, m('contra'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'их немного: правильный вид упражнения и малая начальная интенсивность', 800, 120, m('contra', 1), { size: 23, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 60, 160, 480, 420, 'боль', 'сильная боль при движении без нагрузки — не начинать динамику · острая боль при изометрии против сопротивления — не начинать · боль не уходит при меньшем грузе — прекратить', STOP, m('pain'), { size: 22 });
+    infoCard(p, 560, 160, 480, 420, 'воспаление', 'Гийен — Барре (острый), полимиозит, дерматомиозит — абсолютно · острое воспаление сустава — без динамики; мягкие установочные можно', STOP, m('infl'), { size: 22 });
+    infoCard(p, 1060, 160, 480, 420, 'сердце и лёгкие', 'тяжёлая ИБС, кардит, кардиомиопатия, сердечная недостаточность, неконтролируемые гипертензия или аритмии', STOP, m('card'), { size: 22 });
+    // after a myocardial infarction or a bypass graft: at least 5 weeks, 4 of them supervised endurance rehabilitation
+    const x0 = 160, W = 1280, X = w => x0 + w / 6 * W, g = G(p, { o: 0 });
+    path(g, `M${x0} 740H${x0 + W}`, { stroke: COL.dim, 'stroke-width': 3 });
+    for (let w = 0; w <= 6; w++) T(g, w + ' нед.', { x: X(w), y: 780, size: 19, fill: COL.dim, anchor: 'middle' });
+    mk('rect', { x: X(.5), y: 700, width: X(4.5) - X(.5), height: 30, rx: 8, fill: COL.whole, 'fill-opacity': .4 }, g);
+    T(g, 'реабилитация на выносливость под наблюдением', { x: X(2.5), y: 690, size: 20, fill: COL.whole, anchor: 'middle' });
+    mk('rect', { x: X(5), y: 700, width: X(6) - X(5), height: 30, rx: 8, fill: COL.good, 'fill-opacity': .5 }, g);
+    T(g, 'силовые — с разрешения врача', { x: X(5.5), y: 690, size: 20, fill: COL.good, anchor: 'middle' });
+    T(g, 'инфаркт / шунтирование', { x: x0, y: 830, size: 21, fill: STOP, weight: 700 });
+    show(g, m('mi'));
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Без боли, без задержки дыхания, без рывков и обходных движений; осторожно — дети, пожилые, остеопороз.', 'w1'],
+     ['Перетренированность обратима; слабость от перегрузки при нервно-мышечных болезнях — может быть стойкой.', 'w2'],
+     ['Отсроченная боль: с 12–24 ч, пик на 2–3-й день; микротравма; эффект повторной нагрузки.', 'w3'],
+     ['Противопоказания: острое воспаление, миозиты, тяжёлые болезни сердца и лёгких; после инфаркта — ≥ 5 недель.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-contra', prompt: ['Можно ли начинать упражнения с сопротивлением?'],
+    build: grid([
+      { parts: ['Острое воспаление коленного сустава — динамические упражнения'], ans: ['n'], why: 'Противопоказаны: усилят воспаление.' },
+      { parts: ['Острое воспаление сустава — мягкие установочные упражнения'], ans: ['y'], why: 'Допустимы, почти без сопротивления.' },
+      { parts: ['Полимиозит'], ans: ['n'], why: 'Абсолютно противопоказаны.' },
+      { parts: ['Три недели после инфаркта'], ans: ['n'], why: 'Не раньше 5 недель и с разрешения врача.' },
+      { parts: ['Контролируемая гипертензия, врач разрешил — малая интенсивность'], ans: ['y'], why: 'После разрешения — малая интенсивность и ритмичное дыхание.' },
+    ], [['y', 'Можно', COL.good], ['n', 'Нельзя', STOP]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-numbers', prompt: ['Вспомните цифры.'],
+    build: blanks([
+      { parts: ['Отсроченная боль начинается через ', { box: '12' }, '–24 ч'], why: '12–24 ч.' },
+      { parts: ['Пик отсроченной боли — через 48–', { box: '72' }, ' ч'], why: '48–72 ч.' },
+      { parts: ['Остеопороз: начинать с 40–', { box: '60' }, '% от 1ПМ'], why: '40–60%.' },
+      { parts: ['После инфаркта силовые — не раньше ', { box: '5' }, ' недель'], why: 'Минимум 5 недель и разрешение врача.' },
+    ]),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

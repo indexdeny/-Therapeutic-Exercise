@@ -1,0 +1,805 @@
+{
+  "region": "resistance",
+  "exercises": [
+    {
+      "id": "mres-shoulder",
+      "ru": "Ручное сопротивление: плечо и лопатка",
+      "en": "manual resistance: shoulder and scapula",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "supine",
+        "prone",
+        "side",
+        "sit"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "одна рука держит, другая сопротивляется",
+        "сопротивление — низ плеча",
+        "выше 90° — плечо вращается наружу"
+      ],
+      "page": 209,
+      "moments": [
+        {
+          "n": 69,
+          "beat": "sh",
+          "mark": "sh",
+          "to": "scap"
+        },
+        {
+          "n": 69,
+          "beat": "rot",
+          "mark": "rot",
+          "to": "scp"
+        },
+        {
+          "n": 69,
+          "beat": "guide",
+          "mark": "guide",
+          "to": "alt"
+        },
+        {
+          "n": 69,
+          "beat": "cmd",
+          "mark": "cmd",
+          "to": "reps"
+        }
+      ]
+    },
+    {
+      "id": "mres-elbow",
+      "ru": "Ручное сопротивление: локоть и предплечье",
+      "en": "manual resistance: elbow and forearm",
+      "joint": [
+        "elbow"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "supine",
+        "prone"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "сопротивление — низ предплечья",
+        "сгибатели — в супинации и пронации",
+        "ротации — локоть под 90°"
+      ],
+      "page": 211,
+      "moments": [
+        {
+          "n": 69,
+          "beat": "el",
+          "mark": "el",
+          "to": "pro"
+        }
+      ]
+    },
+    {
+      "id": "mres-hand",
+      "ru": "Ручное сопротивление: запястье и пальцы",
+      "en": "manual resistance: wrist and hand",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "sit",
+        "supine"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "запястье — на ладонь или тыл кисти",
+        "отклонения — на 2-ю и 5-ю пястные",
+        "пальцы — сразу за движущимся суставом"
+      ],
+      "page": 212,
+      "moments": [
+        {
+          "n": 69,
+          "beat": "el",
+          "mark": "wr"
+        },
+        {
+          "n": 70,
+          "beat": "hand",
+          "mark": "dev",
+          "to": "fing"
+        }
+      ]
+    },
+    {
+      "id": "mres-hip",
+      "ru": "Ручное сопротивление: бедро",
+      "en": "manual resistance: hip",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "supine",
+        "prone"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "сопротивление — низ бедра",
+        "таз стабилизировать",
+        "при отведении — бедро без ротации"
+      ],
+      "warn": "если растёт поясничный лордоз — согнуть другую ногу и поставить стопу на стол",
+      "page": 212,
+      "moments": [
+        {
+          "n": 70,
+          "beat": "hipF",
+          "mark": "hipF",
+          "to": "prec",
+          "crop": [
+            100,
+            240,
+            900,
+            540
+          ]
+        },
+        {
+          "n": 70,
+          "beat": "hipE",
+          "mark": "hipE",
+          "to": "hyp"
+        },
+        {
+          "n": 70,
+          "beat": "abd",
+          "mark": "abd",
+          "to": "neut"
+        },
+        {
+          "n": 70,
+          "beat": "rot",
+          "mark": "rot",
+          "to": "prone"
+        }
+      ]
+    },
+    {
+      "id": "mres-knee",
+      "ru": "Ручное сопротивление: колено",
+      "en": "manual resistance: knee",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "prone",
+        "sit",
+        "supine"
+      ],
+      "gear": [
+        "manual",
+        "roll"
+      ],
+      "key": [
+        "сгибание — лёжа на животе",
+        "разгибание — валик под бедро",
+        "сопротивление — на голень"
+      ],
+      "warn": "лёжа на спине с голенью за краем стола — нельзя при тугой прямой мышце бедра",
+      "page": 214,
+      "moments": [
+        {
+          "n": 70,
+          "beat": "knee",
+          "mark": "knee",
+          "to": "sup",
+          "crop": [
+            60,
+            180,
+            760,
+            520
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mres-ankle",
+      "ru": "Ручное сопротивление: голеностоп и стопа",
+      "en": "manual resistance: ankle and foot",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "тыльное — на тыл стопы у пальцев",
+        "подошвенное — на подошву",
+        "голень стабилизировать"
+      ],
+      "page": 215,
+      "moments": [
+        {
+          "n": 70,
+          "beat": "ankle",
+          "mark": "ankle",
+          "to": "toes",
+          "crop": [
+            60,
+            220,
+            800,
+            440
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pnf-leg",
+      "ru": "Диагонали ПНФ для ноги",
+      "en": "PNF diagonal patterns (lower extremity)",
+      "joint": [
+        "hip",
+        "knee",
+        "ankle"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "две диагонали — сгибание и разгибание",
+        "руки терапевта — на стопе и бедре",
+        "«стопу вверх, ногу через другую»"
+      ],
+      "page": 220,
+      "moments": [
+        {
+          "n": 71,
+          "beat": "le",
+          "mark": "le",
+          "to": "d2e"
+        },
+        {
+          "n": 71,
+          "beat": "diag",
+          "mark": "diag",
+          "to": "bil"
+        },
+        {
+          "n": 71,
+          "beat": "proc",
+          "mark": "proc",
+          "to": "pos"
+        }
+      ]
+    },
+    {
+      "id": "pnf-tech",
+      "ru": "Особые приёмы ПНФ",
+      "en": "PNF techniques: rhythmic initiation, repeated contractions, reversals",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "control",
+        "strength"
+      ],
+      "pos": [
+        "supine",
+        "side"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "ритмическое начало — сначала пассивно",
+        "повторные — растяжение и сопротивление",
+        "смена антагонистов — без расслабления"
+      ],
+      "page": 222,
+      "moments": [
+        {
+          "n": 72,
+          "beat": "ri",
+          "mark": "ri",
+          "to": "act"
+        },
+        {
+          "n": 72,
+          "beat": "rep",
+          "mark": "rep",
+          "to": "how"
+        },
+        {
+          "n": 72,
+          "beat": "rev",
+          "mark": "rev",
+          "to": "srh"
+        },
+        {
+          "n": 72,
+          "beat": "ai",
+          "mark": "ai",
+          "to": "ext"
+        },
+        {
+          "n": 72,
+          "beat": "rs",
+          "mark": "rs",
+          "to": "sw"
+        }
+      ]
+    },
+    {
+      "id": "isometrics",
+      "ru": "Изометрия: установочная, стабилизационная, под углами",
+      "en": "isometric exercise: setting, stabilization, multiple-angle",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "none",
+        "manual"
+      ],
+      "key": [
+        "держать 6–10 секунд",
+        "дышать, выдыхать при напряжении",
+        "сила растёт только у тренируемого угла"
+      ],
+      "warn": "изометрия высокой интенсивности противопоказана при болезнях сердца и сосудов",
+      "page": 188,
+      "moments": [
+        {
+          "n": 63,
+          "beat": "kinds",
+          "mark": "kinds",
+          "to": "multi"
+        },
+        {
+          "n": 63,
+          "beat": "dose",
+          "mark": "dur"
+        },
+        {
+          "n": 63,
+          "beat": "dose",
+          "mark": "spec"
+        },
+        {
+          "n": 63,
+          "beat": "safe",
+          "mark": "val",
+          "to": "contra"
+        }
+      ]
+    },
+    {
+      "id": "eccentric",
+      "ru": "Уступающая тренировка",
+      "en": "eccentric training",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "weight",
+        "machine",
+        "none"
+      ],
+      "key": [
+        "мышца удлиняется, тормозя груз",
+        "слабая мышца — медленно опускать",
+        "нагрузку наращивать постепенно"
+      ],
+      "warn": "сильнее нагружает сердце — дышать ритмично; при резком росте нагрузки сильнее болят мышцы",
+      "page": 190,
+      "moments": [
+        {
+          "n": 64,
+          "beat": "eccT",
+          "mark": "eccT",
+          "to": "res"
+        },
+        {
+          "n": 64,
+          "beat": "load",
+          "mark": "weak",
+          "shot": 4
+        },
+        {
+          "n": 64,
+          "beat": "why",
+          "mark": "sit",
+          "to": "down"
+        },
+        {
+          "n": 64,
+          "beat": "load",
+          "mark": "cv"
+        },
+        {
+          "n": 64,
+          "beat": "more",
+          "mark": "doms"
+        }
+      ],
+      "thumb": 1
+    },
+    {
+      "id": "isokinetic",
+      "ru": "Изокинетическая тренировка",
+      "en": "isokinetic training",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "strength",
+        "endurance"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "machine"
+      ],
+      "key": [
+        "прибор держит скорость постоянной",
+        "от средних скоростей к быстрым",
+        "уступающая работа — только в конце"
+      ],
+      "warn": "максимальное усилие на медленной скорости почти никогда не показано: велики сдвигающие силы в суставе",
+      "page": 193,
+      "moments": [
+        {
+          "n": 65,
+          "beat": "isok",
+          "mark": "isok",
+          "to": "ev"
+        },
+        {
+          "n": 65,
+          "beat": "prog",
+          "mark": "prog",
+          "to": "p4"
+        },
+        {
+          "n": 74,
+          "beat": "iso",
+          "mark": "vsr"
+        },
+        {
+          "n": 74,
+          "beat": "int",
+          "mark": "prec"
+        },
+        {
+          "n": 74,
+          "beat": "ecc",
+          "mark": "ecc",
+          "to": "e4"
+        },
+        {
+          "n": 77,
+          "beat": "isok",
+          "mark": "isok"
+        }
+      ]
+    },
+    {
+      "id": "pre-dapre",
+      "ru": "Прогрессивное сопротивление: Делорм и ДАПРЕ",
+      "en": "progressive resistive exercise: DeLorme, Oxford, DAPRE",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "strength"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "weight",
+        "machine"
+      ],
+      "key": [
+        "три подхода по 10: 50, 75, 100%",
+        "ДАПРЕ — вес по третьему подходу",
+        "прибавлять 5–10%, когда всё сделано"
+      ],
+      "page": 226,
+      "moments": [
+        {
+          "n": 74,
+          "beat": "dl",
+          "mark": "dl",
+          "to": "cmp",
+          "shot": 6,
+          "crop": [
+            60,
+            140,
+            560,
+            520
+          ]
+        },
+        {
+          "n": 74,
+          "beat": "dapre",
+          "mark": "dapre",
+          "to": "q"
+        },
+        {
+          "n": 74,
+          "beat": "pre",
+          "mark": "pre"
+        }
+      ]
+    },
+    {
+      "id": "circuit",
+      "ru": "Круговая тренировка",
+      "en": "circuit weight training",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "strength",
+        "endurance"
+      ],
+      "pos": [
+        "stand",
+        "sit"
+      ],
+      "gear": [
+        "weight",
+        "machine"
+      ],
+      "key": [
+        "8–12 станций, отдых 15–20 секунд",
+        "чередовать руки, ноги, туловище",
+        "крупные группы — раньше мелких"
+      ],
+      "page": 227,
+      "moments": [
+        {
+          "n": 74,
+          "beat": "circ",
+          "mark": "circ",
+          "to": "order",
+          "shot": 8,
+          "crop": [
+            20,
+            140,
+            860,
+            760
+          ]
+        }
+      ]
+    },
+    {
+      "id": "body-blade",
+      "ru": "Осциллирующий шест",
+      "en": "oscillating pole (BodyBlade)",
+      "joint": [
+        "shoulder",
+        "elbow"
+      ],
+      "goal": [
+        "control"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "stick"
+      ],
+      "key": [
+        "раскачивать гибкую пластину",
+        "сначала в одном положении",
+        "потом в разных плоскостях"
+      ],
+      "page": 235,
+      "moments": [
+        {
+          "n": 77,
+          "beat": "blade",
+          "mark": "blade",
+          "to": "ev",
+          "crop": [
+            80,
+            190,
+            600,
+            670
+          ]
+        },
+        {
+          "n": 168,
+          "beat": "open",
+          "mark": "blade"
+        },
+        {
+          "n": 171,
+          "beat": "eq",
+          "mark": "blade"
+        },
+        {
+          "n": 230,
+          "beat": "ue1",
+          "mark": "blade"
+        }
+      ]
+    },
+    {
+      "id": "stepper",
+      "ru": "Степпер",
+      "en": "stair-stepping machine",
+      "joint": [
+        "knee",
+        "hip"
+      ],
+      "goal": [
+        "endurance",
+        "strength"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "machine"
+      ],
+      "key": [
+        "попеременно отталкиваться",
+        "закрытая цепь без ударов",
+        "на коленях рядом — для рук"
+      ],
+      "page": 237,
+      "moments": [
+        {
+          "n": 77,
+          "beat": "recip",
+          "mark": "step",
+          "shot": 4,
+          "crop": [
+            80,
+            470,
+            430,
+            430
+          ]
+        },
+        {
+          "n": 154,
+          "beat": "act",
+          "mark": "stair"
+        }
+      ]
+    },
+    {
+      "id": "elliptical",
+      "ru": "Эллиптический и лыжный тренажёр",
+      "en": "elliptical trainer and ski machine",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "endurance"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "machine"
+      ],
+      "key": [
+        "без ударов, стоя",
+        "наклон регулируется",
+        "работают и руки"
+      ],
+      "page": 238,
+      "moments": [
+        {
+          "n": 77,
+          "beat": "recip",
+          "mark": "ell",
+          "crop": [
+            100,
+            60,
+            760,
+            840
+          ]
+        },
+        {
+          "n": 154,
+          "beat": "act",
+          "mark": "stair"
+        }
+      ]
+    },
+    {
+      "id": "bwst",
+      "ru": "Дорожка с поддержкой веса тела",
+      "en": "body-weight-supported treadmill",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "function",
+        "endurance"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "machine"
+      ],
+      "key": [
+        "часть веса снимает подвес",
+        "рано — ходьба в функциональном темпе",
+        "другой способ разгрузки — бассейн"
+      ],
+      "page": 199,
+      "moments": [
+        {
+          "n": 66,
+          "beat": "impl",
+          "mark": "bwst",
+          "crop": [
+            860,
+            460,
+            560,
+            440
+          ]
+        },
+        {
+          "n": 66,
+          "beat": "impl",
+          "mark": "unl"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+[
+ {
+  "beat": "stab",
+  "fig": 0,
+  "target": "gastroc",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает gastroc, фигура ×0.72",
+  "from": "prox",
+  "to": "dist"
+ },
+ {
+  "beat": "stab",
+  "fig": 1,
+  "target": "gastroc",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает gastroc, фигура ×0.72",
+  "from": "dist",
+  "to": "int"
+ },
+ {
+  "beat": "stab",
+  "fig": 2,
+  "target": "m0",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает m0, фигура ×0.66",
+  "from": "int",
+  "off": "фигура лёжа в ряду с карточками — места для лупы нет"
+ }
+]

@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мышцы-стабилизаторы позвоночника — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 129, title: 'Мышцы-стабилизаторы позвоночника', minutes: 11, language: 'ru', next: '../ch130/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch129/cards.ru.json
+const CARDS_SHORT = {
+  "глобальные (поверхностные)\nбольшие растяжки: длинные, через много сегментов": "большие растяжки: длинные, через много сегментов",
+  "глубокие (сегментарные)\nкороткие растяжки: от позвонка к позвонку": "короткие растяжки: от позвонка к позвонку",
+  "свойства\nповерхностно, дальше от оси; через много сегментов; дают движение — большие растяжки; при сильном сокращении сжимают позвоночник": "дальше от оси, большие растяжки",
+  "поясница\nпрямая живота, наружная и внутренняя косые, квадратная поясницы (наружная часть), выпрямляющая позвоночник, подвздошно-поясничная": "прямая, косые, выпрямляющая",
+  "шея\nгрудино-ключично-сосцевидная, лестничные, поднимающая лопатку, верхняя трапециевидная, выпрямляющая позвоночник": "лестничные, трапециевидная",
+  "ответ зависит от направления\nвнешние нагрузки, которые смещают центр масс": "внешние нагрузки, которые смещают центр масс",
+  "нестабильный сегмент\nпрямых прикреплений к позвонкам почти нет — стабилизируют только сжатием; сжатие толкает сегмент к концу объёма — боль": "только сжатием → боль",
+  "свойства\nглубоко, ближе к оси; крепятся к каждому позвонку; управляют движением сегмента — короткие растяжки; больше волокон I типа — выносливость": "ближе к оси, волокна I типа",
+  "поясница\nпоперечная живота, многораздельная, квадратная поясницы (глубокая часть), глубокие вращатели": "поперечная, многораздельная",
+  "шея\nпередняя и латеральная прямые мышцы головы, длинная мышца шеи": "длинная мышца шеи",
+  "зачем\nдержат каждый сегмент устойчиво, чтобы пассивные ткани не нагружались на пределе движения": "сегмент устойчив, ткани без нагрузки",
+  "прямая, наружная и внутренняя косые\nбольшие глобальные сгибатели туловища, растяжки против толчков": "глобальные сгибатели туловища",
+  "поперечная — самая глубокая\nчерез задний и средний листки фасции к поясничным позвонкам; натягивает пояс вокруг живота и поясницы": "натягивает пояс вокруг живота",
+  "активна и при сгибании, и при разгибании\nвключается заранее при быстрых движениях рук и ног; связана с дыханием, тазовым дном и глубокой многораздельной": "включается заранее; дыхание, тазовое дно",
+  "выпрямляющая позвоночник\nдлинные многосегментные разгибатели от крестца — глобальные растяжки": "длинные разгибатели — глобальные",
+  "многораздельная\nмного пучков, волокон I типа и капилляров — тонический стабилизатор; управляет сегментами, повышает жёсткость": "тонический стабилизатор",
+  "при боли в пояснице\nбыстрая атрофия на уровне сегмента, «изъеденный молью» вид, больше жира; качество мышцы — возможный предвестник повторной боли": "атрофия, «изъеденный молью» вид",
+  "упражнения улучшают работу обеих мышц\nвращатели, межпоперечные, глубокая квадратная — трудно изучить": "вращатели, межпоперечные — трудно изучить",
+  "окружает и поддерживает\nвыпрямляющую, многораздельную, квадратную поясницы; объём мышц натягивает фасцию": "объём мышц натягивает фасцию",
+  "боковой шов\nширочайшая, нижняя задняя зубчатая, внутренняя косая и поперечная тянут наклонные волокна фасции": "мышцы тянут волокна фасции",
+  "перекрёст X\nширочайшая спины + большая ягодичная другой стороны — пояснично-крестцовый переход": "широчайшая + большая ягодичная",
+  "точка опоры — атланто-затылочные суставы\nцентр тяжести головы впереди": "центр тяжести впереди",
+  "голова вперёд\nгорло и длинная шея растянуты и слабы; голову поднимает грудино-ключично-сосцевидная; челюсть тянет вниз": "горло и шея слабы",
+  "длинная мышца шеи\nосевое вытяжение; без неё грудино-ключично-сосцевидная при сгибании усиливала бы лордоз": "осевое вытяжение",
+  "сила — для больших и неожиданных нагрузок\nтяжёлая работа, спорт, падения": "тяжёлая работа, спорт, падения",
+  "600 человек, 20–65 лет\n17 механических факторов и боль в пояснице: сильнее всего связана плохая выносливость разгибателей спины": "выносливость разгибателей",
+  "постуральная роль\nвыносливость важнее максимальной силы": "выносливость важнее максимальной силы",
+};
+// cards-short end
+
+const SP = '#8fd6b0', GLOB = '#f0a04b', DEEP = '#86c9e8', MU = ANAT.muscle, ACTC = '#ff5a3c', FAS = '#e9dcc0', FAT = '#f3e3a0';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const swing = (q, n) => Math.sin(2 * Math.PI * n * q);
+const f1 = v => v.toFixed(1);
+const BN = ANAT.bone, BL = mix(ANAT.bone, '#000000', .45);
+let CLIP = 0;
+// The guy-wire scheme of Fig. 14.8, front view: a column of six segments between the pelvis and the chest, long
+// global wires on both sides and short deep wires across each segment. set({ lean, wob, glob, deep, stress }):
+// lean — the column bends; wob — segment 3 slips sideways; glob / deep — how hard the wires pull (0..1);
+// stress — the slipped segment's end-range turns red.
+function guyColumn(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), N = 6, H = 58;
+  const pelv = path(g, 'M-170 28H170', { stroke: BN, 'stroke-width': 16 }), chest = path(g, '', { stroke: BN, 'stroke-width': 16 });
+  const blocks = [], discs = [];
+  for (let i = 0; i < N; i++) {
+    if (i) discs.push(mk('rect', { x: -46, y: -5, width: 92, height: 10, rx: 4, fill: DISC_C }, g));
+    blocks.push(G(g, {}));
+    mk('rect', { x: -50, y: -21, width: 100, height: 42, rx: 9, fill: BN, stroke: BL, 'stroke-width': 2 }, blocks[i]);
+  }
+  const globW = [-1, 1].map(() => path(g, '', { stroke: GLOB, 'stroke-width': 5 }));
+  const deepW = [];
+  for (let i = 0; i < N - 1; i++) deepW.push([-1, 1].map(() => path(g, '', { stroke: DEEP, 'stroke-width': 4 })));
+  const hot = mk('circle', { r: 30, fill: COL.bad, 'fill-opacity': .35, stroke: COL.bad, 'stroke-width': 3, opacity: 0 }, g);
+  const S = { lean: 0, wob: 0, glob: .3, deep: 0, stress: 0 }, e = { g };
+  e.set = o => {
+    Object.assign(S, o);
+    const C = [];
+    let P = [0, -10], a = 0;
+    for (let i = 0; i < N; i++) {
+      a += S.lean / N;
+      const off = i === 3 ? S.wob * 26 : i > 3 ? S.wob * 26 : 0, rr = i === 3 ? S.wob * 14 : 0;
+      P = i ? [P[0] + H * Math.sin(rad(a)), P[1] - H * Math.cos(rad(a))] : [0, -10];
+      C.push([P[0] + off, P[1], a + rr]);
+    }
+    C.forEach(([cx, cy, r], i) => put(blocks[i], { x: cx, y: cy, r }));
+    discs.forEach((d, i) => { const A = C[i], B = C[i + 1]; d.setAttribute('transform', `translate(${f1((A[0] + B[0]) / 2)} ${f1((A[1] + B[1]) / 2)}) rotate(${f1((A[2] + B[2]) / 2)})`); });
+    const top = C[N - 1];
+    chest.setAttribute('d', `M${f1(top[0] - 170)} ${f1(top[1] - 30)}H${f1(top[0] + 170)}`);
+    [-1, 1].forEach((k, j) => {
+      globW[j].setAttribute('d', `M${k * 160} 22L${f1(top[0] + k * 160)} ${f1(top[1] - 24)}`);
+      globW[j].setAttribute('stroke', mix(GLOB, ACTC, S.glob * .7)); globW[j].setAttribute('stroke-width', f1(3 + 5 * S.glob));
+    });
+    deepW.forEach((pair, i) => pair.forEach((w, j) => {
+      const k = j ? 1 : -1, A = C[i], B = C[i + 1];
+      w.setAttribute('d', `M${f1(A[0] + k * 54)} ${f1(A[1])}L${f1(B[0] + k * 54)} ${f1(B[1])}`);
+      w.setAttribute('opacity', f1(S.deep)); w.setAttribute('stroke-width', f1(3 + 3 * S.deep));
+    }));
+    hot.setAttribute('cx', f1(C[3][0] + 52)); hot.setAttribute('cy', f1(C[3][1] + 22)); hot.setAttribute('opacity', f1(S.stress));
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// The abdominal wall from the front (by Fig. 14.10): rectus abdominis in the middle, external oblique on the viewer's
+// left, internal oblique on the right with a window onto the transversus. set({ tra }) — the transversus draws in:
+// the waist narrows and the belt glows.
+function absWall(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g);
+  const skin = mk('path', { fill: mix('#d8d1c1', COL.board, .55), stroke: mix('#d8d1c1', COL.board, .3), 'stroke-width': 2 }, g);
+  path(g, 'M-150 -200Q0 -250 150 -200M-140 -170Q0 -215 140 -170', { stroke: BN, 'stroke-width': 5, 'stroke-opacity': .7 });
+  path(g, 'M-160 120Q-150 80 -120 70M160 120Q150 80 120 70M-128 128L-20 196M128 128L20 196', { stroke: BN, 'stroke-width': 6, 'stroke-opacity': .7 });
+  const clip = (id, d) => { const c = mk('clipPath', { id }, defs); mk('path', { d }, c); return `url(#${id})`; };
+  const L = 'M-150 -190L-62 -200L-62 170L-125 128Q-160 -30 -150 -190Z', R = 'M150 -190L62 -200L62 170L125 128Q160 -30 150 -190Z';
+  const cl = clip('ab' + (++CLIP), L), cr = clip('ab' + (++CLIP), R), cw = clip('ab' + (++CLIP), 'M76 -60H140V70H76Z');
+  mk('path', { d: L, fill: mix(MU, COL.board, .25), stroke: mix(MU, '#000000', .35), 'stroke-width': 2 }, g);
+  let d = ''; for (let i = -10; i < 14; i++) d += `M-170 ${-240 + i * 30}L-50 ${-160 + i * 30}`;
+  const eo = path(g, d, { stroke: mix(MU, '#ffffff', .4), 'stroke-width': 2.5, 'clip-path': cl });
+  mk('path', { d: R, fill: mix(MU, COL.board, .32), stroke: mix(MU, '#000000', .35), 'stroke-width': 2 }, g);
+  d = ''; for (let i = -10; i < 14; i++) d += `M170 ${-140 + i * 30}L50 ${-240 + i * 30}`;
+  const io2 = path(g, d, { stroke: mix(MU, '#ffffff', .4), 'stroke-width': 2.5, 'clip-path': cr });
+  const win = mk('path', { d: 'M76 -60H140V70H76Z', fill: mix(MU, COL.board, .1), stroke: COL.board, 'stroke-width': 3 }, g);
+  d = ''; for (let i = 0; i < 14; i++) d += `M60 ${-56 + i * 10}H150`;
+  const tra = path(g, d, { stroke: mix(MU, '#ffffff', .5), 'stroke-width': 3, 'clip-path': cw });
+  const ra = [-1, 1].map(k => mk('path', { d: `M${k * 8} -205H${k * 60}V172Q${k * 34} 180 ${k * 8} 172Z`, fill: MU, stroke: mix(MU, '#000000', .35), 'stroke-width': 2 }, g));
+  path(g, 'M-60 -120H60M-60 -40H60M-60 40H60', { stroke: ANAT.tendon, 'stroke-width': 4 });
+  path(g, 'M0 -205V178', { stroke: ANAT.tendon, 'stroke-width': 5 });
+  const belt = mk('ellipse', { cx: 0, cy: 10, rx: 170, ry: 36, fill: 'none', stroke: ANAT.taut, 'stroke-width': 8, opacity: 0 }, g);
+  const S = { tra: 0 }, e = { g, eo, io: io2, tra, ra, win };
+  e.set = o => {
+    Object.assign(S, o);
+    const w = 10 * S.tra;
+    skin.setAttribute('d', `M-160 -210Q${f1(-182 + w)} -20 -168 150L168 150Q${f1(182 - w)} -20 160 -210Z`);
+    tra.setAttribute('stroke', mix(mix(MU, '#ffffff', .5), ACTC, S.tra));
+    belt.setAttribute('opacity', f1(.7 * S.tra)); belt.setAttribute('rx', f1(170 - w));
+    return e;
+  };
+  e.at = (px, py) => { const s0 = st(g); return [s0.x + px * s0.s, s0.y + py * s0.s]; };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// The back from behind (by Fig. 14.13): the erector spinae in three columns on the viewer's left, the multifidus as
+// short fascicles on the right. set({ atro }) — one level of the multifidus wastes and fills with fat.
+function backMuscles(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 });
+  mk('path', { d: 'M-190 -300Q-215 0 -170 260L170 260Q215 0 190 -300Z', fill: mix('#d8d1c1', COL.board, .6), stroke: mix('#d8d1c1', COL.board, .3), 'stroke-width': 2 }, g);
+  path(g, 'M-160 250Q-90 170 0 190Q90 170 160 250', { stroke: BN, 'stroke-width': 8, 'stroke-opacity': .7 });
+  mk('path', { d: 'M-46 190L46 190L22 290L-22 290Z', fill: BN, 'fill-opacity': .6, stroke: BL, 'stroke-width': 2 }, g);
+  for (let i = 0; i < 11; i++) mk('rect', { x: -9, y: -290 + i * 44, width: 18, height: 26, rx: 6, fill: BN, stroke: BL, 'stroke-width': 1.5 }, g);
+  const es = [[-30, 'spinalis'], [-62, 'longissimus'], [-100, 'iliocostalis']].map(([dx], i) => mk('path', { d: `M${dx + 6} 200Q${dx - 14 - i * 10} -40 ${dx - 6 - i * 16} -290L${dx - 30 - i * 16} -290Q${dx - 34 - i * 10} -40 ${dx - 18} 200Z`, fill: mix(MU, '#000000', i * .08), stroke: mix(MU, '#000000', .35), 'stroke-width': 1.5 }, g));
+  const mf = [];
+  for (let i = 0; i < 10; i++) {
+    const y0 = 196 - i * 44, e2 = mk('path', { d: `M14 ${y0 - 8}L60 ${y0 + 34}L68 ${y0 + 22}L24 ${y0 - 18}Z`, fill: MU, stroke: mix(MU, '#000000', .35), 'stroke-width': 1.5 }, g);
+    mf.push(e2);
+  }
+  const fat = [];
+  for (let i = 0; i < 6; i++) fat.push(mk('circle', { cx: 30 + (i % 3) * 12, cy: 196 - 44 * 2 + 2 + Math.floor(i / 3) * 12, r: 4.5, fill: FAT, opacity: 0 }, g));
+  const S = { atro: 0 }, e = { g, es, mf };
+  e.set = o => {
+    Object.assign(S, o);
+    const y0 = 196 - 44 * 2;
+    mf[2].setAttribute('d', `M14 ${y0 - 8}L${f1(60 - 20 * S.atro)} ${f1(y0 + 34 - 14 * S.atro)}L${f1(68 - 22 * S.atro)} ${f1(y0 + 22 - 12 * S.atro)}L24 ${y0 - 18}Z`);
+    mf[2].setAttribute('fill', mix(MU, '#8a7a6a', S.atro));
+    fat.forEach(c => c.setAttribute('opacity', f1(S.atro)));
+    return e;
+  };
+  e.at = (px, py) => { const s0 = st(g); return [s0.x + px * s0.s, s0.y + py * s0.s]; };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// A transverse section at the lumbar spine (by Fig. 14.11; anterior up): body, psoas, quadratus lumborum, erector
+// spinae and multifidus inside the posterior and middle layers of the thoracolumbar fascia, which meet at the lateral
+// raphe; the transversus, internal and external obliques run forward from it. set({ pull, bulk }).
+function tlfSection(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), a = { fill: BN, stroke: BL, 'stroke-width': 2, 'stroke-linejoin': 'round' };
+  mk('path', { d: 'M-24 0L-30 30L-110 6L-112 22L-34 44L-14 66L-8 130L8 130L14 66L34 44L112 22L110 6L30 30L24 0Z', ...a }, g);
+  mk('ellipse', { cx: 0, cy: -40, rx: 64, ry: 46, ...a }, g);
+  mk('circle', { cx: 0, cy: 34, r: 16, fill: COL.board, stroke: BL, 'stroke-width': 2 }, g);
+  const M = (cx, cy, rx, ry, col = MU) => mk('ellipse', { cx, cy, rx, ry, fill: col, stroke: mix(col, '#000000', .35), 'stroke-width': 2 }, g);
+  [-1, 1].forEach(k => { M(k * 96, -64, 36, 30); M(k * 168, 2, 42, 22, mix(MU, '#000000', .1)); });
+  const es = [-1, 1].map(k => M(k * 70, 82, 50, 40)), mf = [-1, 1].map(k => M(k * 26, 82, 18, 36, mix(MU, '#000000', .15)));
+  const post = path(g, '', { stroke: FAS, 'stroke-width': 4 }), mid = path(g, 'M-112 14L-196 48M112 14L196 48', { stroke: FAS, 'stroke-width': 3.5 });
+  const antL = path(g, 'M-62 -40Q-140 -40 -200 30M62 -40Q140 -40 200 30', { stroke: FAS, 'stroke-width': 3, 'stroke-opacity': .8 });
+  const abd = [0, 1, 2].map(i => [-1, 1].map(k => path(g, `M${k * (198 + i * 8)} ${48 - i * 4}Q${k * (300 + i * 14)} ${20 - i * 10} ${k * (300 + i * 18)} ${-150 - i * 20}`, { stroke: mix(MU, '#000000', i * .1), 'stroke-width': 12 - i * 2 })));
+  const rap = [-1, 1].map(k => mk('circle', { cx: k * 198, cy: 48, r: 7, fill: FAS }, g));
+  const arr = G(g, { o: 0 });
+  [-1, 1].forEach(k => { path(arr, `M${k * 180} 120L${k * 40} 150`, { stroke: ANAT.taut, 'stroke-width': 4 }); path(arr, `M${k * 54} 140L${k * 38} 151L${k * 54} 162`, { stroke: ANAT.taut, 'stroke-width': 4 }); });
+  const S = { pull: 0, bulk: 0 }, e = { g, abd, es, mf, arr };
+  e.set = o => {
+    Object.assign(S, o);
+    const b = 6 * S.bulk;
+    es.forEach((el, i) => { el.setAttribute('rx', f1(50 + b)); el.setAttribute('ry', f1(40 + b)); });
+    const yb = 128 + b * 1.4;
+    post.setAttribute('d', `M0 136Q${f1(-110)} ${f1(yb + 8)} -198 48M0 136Q110 ${f1(yb + 8)} 198 48`);
+    const t = clamp(S.pull + S.bulk * .6, 0, 1);
+    [post, mid].forEach(el => { el.setAttribute('stroke', mix(FAS, ANAT.taut, t)); el.setAttribute('stroke-width', f1(3.5 + 3 * t)); });
+    abd.forEach((pair, i) => pair.forEach(el => el.setAttribute('stroke', mix(mix(MU, '#000000', i * .1), ACTC, S.pull * (i < 2 ? .8 : .2)))));
+    put(arr, { o: S.pull });
+    return e;
+  };
+  e.at = (px, py) => { const s0 = st(g); return [s0.x + px * s0.s, s0.y + py * s0.s]; };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// A muscle on a postureFig between two points given as functions of its geometry (rest = length at creation).
+function cMus(f, fa, fb, w = 10) {
+  const a0 = fa(f.geo), b0 = fb(f.geo), mu = muscleEl(f.mid, { rest: Math.hypot(b0[0] - a0[0], b0[1] - a0[1]), w });
+  const upd = () => mu.set(fa(f.geo), fb(f.geo));
+  f.onSet.push(upd); upd();
+  return mu;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Мышцы-стабилизаторы', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 14 · Урок 129', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Мышцы-стабилизаторы', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'позвоночника', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'большие растяжки и короткие сегментарные мышцы', 800, 360, m('sub'), { size: 30, fill: SP, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const gc = guyColumn(art, 800, 820, .85, null); put(gc.g, { o: 1 });
+    prog(q => gc.set({ lean: 8 * swing(q, 1.5), glob: .3 + .5 * cyc(q, 1.5), deep: clamp(q * 2 - .6, 0, 1) }), .6, Math.max(2, D - 1.6), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['role', 'Роль мышц туловища', (m, D) => {
+    const p = panel(0);
+    txt(p, 'мышцы туловища — стабилизаторы', 800, 56, m('rl'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const gc = guyColumn(p, 480, 700, 1, m('rl'));
+    prog(q => gc.set({ lean: 24 * q, glob: 0 }), m('rl', 1.5), 1.5);
+    hide(txt(p, 'без мышц позвоночник сложился бы', 480, 160, m('rl', 2), { size: 23, fill: COL.bad, anchor: 'middle', weight: 700 }), m('two'));
+    prog(q => gc.set({ lean: 24 * (1 - q), glob: .5 * q, deep: q }), m('two'), 1.5);
+    infoCard(p, 880, 200, 680, 180, 'глобальные (поверхностные)', 'большие растяжки: длинные, через много сегментов', GLOB, m('two', .5), { size: 21 });
+    infoCard(p, 880, 410, 680, 180, 'глубокие (сегментарные)', 'короткие растяжки: от позвонка к позвонку', DEEP, m('two', 1.5), { size: 21 });
+  }],
+
+  ['global', 'Глобальные мышцы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'глобальные мышцы (табл. 14.1)', 800, 56, m('gl'), { size: 28, weight: 700, anchor: 'middle', fill: GLOB });
+    const gc = guyColumn(p, 300, 720, .9, m('gl'));
+    prog(q => gc.set({ glob: .3, deep: 0, lean: 10 * swing(q, 1.25) }), m('glr'), Math.max(1.5, m('gli') - m('glr')), lin);
+    prog(q => gc.set({ lean: 10 * (1 - q) }), m('gli'), .6);
+    prog(q => gc.set({ wob: q, glob: .3 + .7 * q }), m('gli', 1.5), 1.2);
+    prog(q => gc.set({ stress: q }), m('gli', 3.5), .6);
+    txt(p, 'сжатие → нагрузка на пассивные ткани', 300, 140, m('gli', 3.5), { size: 20, fill: COL.bad, anchor: 'middle', weight: 700 });
+    pill(p, 'рис. 14.8: схема', 300, 790, m('gl'), { col: COL.dim, size: 16 });
+    infoCard(p, 620, 90, 940, 170, 'свойства', 'поверхностно, дальше от оси; через много сегментов; дают движение — большие растяжки; при сильном сокращении сжимают позвоночник', GLOB, m('gl'), { size: 20 });
+    infoCard(p, 620, 280, 460, 230, 'поясница', 'прямая живота, наружная и внутренняя косые, квадратная поясницы (наружная часть), выпрямляющая позвоночник, подвздошно-поясничная', GLOB, m('gll'), { size: 19 });
+    infoCard(p, 1100, 280, 460, 230, 'шея', 'грудино-ключично-сосцевидная, лестничные, поднимающая лопатку, верхняя трапециевидная, выпрямляющая позвоночник', GLOB, m('glc'), { size: 19 });
+    infoCard(p, 620, 530, 940, 140, 'ответ зависит от направления', 'внешние нагрузки, которые смещают центр масс', COL.chalk, m('glr'), { size: 20 });
+    infoCard(p, 620, 690, 940, 180, 'нестабильный сегмент', 'прямых прикреплений к позвонкам почти нет — стабилизируют только сжатием; сжатие толкает сегмент к концу объёма — боль', COL.bad, m('gli'), { size: 20 });
+  }],
+
+  ['deep', 'Глубокие мышцы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'глубокие сегментарные мышцы (рис. 14.9)', 800, 56, m('dp'), { size: 28, weight: 700, anchor: 'middle', fill: DEEP });
+    const gc = guyColumn(p, 300, 720, .9, m('dp'));
+    gc.set({ wob: 1, glob: .6, stress: 1 });
+    prog(q => gc.set({ deep: q, wob: 1 - q, stress: 1 - q, glob: .6 - .3 * q }), m('dp', 1), 1.6);
+    txt(p, 'каждый сегмент удержан', 300, 140, m('dpf'), { size: 21, fill: DEEP, anchor: 'middle', weight: 700 });
+    infoCard(p, 620, 90, 940, 200, 'свойства', 'глубоко, ближе к оси; крепятся к каждому позвонку; управляют движением сегмента — короткие растяжки; больше волокон I типа — выносливость', DEEP, m('dp'), { size: 20 });
+    infoCard(p, 620, 310, 460, 220, 'поясница', 'поперечная живота, многораздельная, квадратная поясницы (глубокая часть), глубокие вращатели', DEEP, m('dpl'), { size: 20 });
+    infoCard(p, 1100, 310, 460, 220, 'шея', 'передняя и латеральная прямые мышцы головы, длинная мышца шеи', DEEP, m('dpc'), { size: 20 });
+    infoCard(p, 620, 560, 940, 160, 'зачем', 'держат каждый сегмент устойчиво, чтобы пассивные ткани не нагружались на пределе движения', SP, m('dpf'), { size: 20 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-gd', prompt: ['Глобальная или глубокая мышца?'],
+    build: grid([
+      { parts: ['Прямая мышца живота'], ans: ['g'], why: 'Глобальная.' },
+      { parts: ['Поперечная мышца живота'], ans: ['d'], why: 'Глубокая.' },
+      { parts: ['Многораздельная мышца'], ans: ['d'], why: 'Глубокая.' },
+      { parts: ['Мышца, выпрямляющая позвоночник'], ans: ['g'], why: 'Глобальная.' },
+      { parts: ['Длинная мышца шеи'], ans: ['d'], why: 'Глубокая.' },
+    ], [['g', 'Глобальная', GLOB], ['d', 'Глубокая', DEEP]], { multi: false, text: true }),
+  }], done) }],
+
+  ['abs', 'Мышцы живота', (m, D) => {
+    const p = panel(0);
+    txt(p, 'мышцы живота (по мотивам рис. 14.10)', 800, 56, m('ab'), { size: 28, weight: 700, anchor: 'middle', fill: MU });
+    const aw = absWall(p, 280, 460, 1.15, m('ab'));
+    lab(p, 'прямая', 420, 150, ...aw.at(-34, -150), MU, m('ab', .5));
+    lab(p, 'наружная косая', 180, 120, ...aw.at(-110, -60), MU, m('ab', 1));
+    lab(p, 'внутренняя косая', 500, 300, ...aw.at(110, -120), MU, m('ab', 1.5));
+    lab(p, 'поперечная', 500, 520, ...aw.at(108, 20), ANAT.taut, m('tra'));
+    tw(aw.win, { c_stroke: ANAT.taut, 'a_stroke-width': 4 }, m('tra'), .4);
+    prog(q => aw.set({ tra: cyc(q, 1.25) }), m('dr'), 3);
+    txt(p, '«втягивание»', 280, 790, m('dr', .5), { size: 22, fill: ANAT.taut, anchor: 'middle', weight: 700 });
+    infoCard(p, 700, 90, 860, 150, 'прямая, наружная и внутренняя косые', 'большие глобальные сгибатели туловища, растяжки против толчков', MU, m('ab'), { size: 20 });
+    infoCard(p, 700, 255, 860, 160, 'поперечная — самая глубокая', 'через задний и средний листки фасции к поясничным позвонкам; натягивает пояс вокруг живота и поясницы', ANAT.taut, m('tra'), { size: 20 });
+    infoCard(p, 700, 430, 860, 170, 'активна и при сгибании, и при разгибании', 'включается заранее при быстрых движениях рук и ног; связана с дыханием, тазовым дном и глубокой многораздельной', COL.whole, m('only'), { size: 20 });
+    // the evidence: thickening during a stabilizing contraction
+    const ev = G(p, { o: 0 }); show(ev, m('ev'));
+    roundBox(ev, 700, 615, 860, 255, COL.chalk, PANEL, 2.5);
+    T(ev, 'утолщение при сокращении (ультразвук)', { x: 722, y: 652, size: 22, weight: 700, fill: COL.chalk });
+    T(ev, '42 здоровых · 56 с болью в спине', { x: 1540, y: 652, size: 18, fill: COL.dim, weight: 600, anchor: 'end' });
+    const bar = (x, v, col, lbl, t) => { const b = G(p, { o: 0 }); mk('rect', { x, y: 840 - v * 2.2, width: 70, height: v * 2.2, rx: 6, fill: col }, b); T(b, v + ' %', { x: x + 35, y: 832 - v * 2.2, size: 20, fill: col, weight: 700, anchor: 'middle' }); show(b, t); };
+    bar(760, 60, ANAT.taut, 'поперечная', m('ev', 1)); bar(850, 30, MU, 'многоразд.', m('ev', 1.2));
+    bar(1000, 40, ANAT.taut, 'поперечная', m('ev', 2)); bar(1090, 20, MU, 'многоразд.', m('ev', 2.2));
+    T(ev, 'здоровые', { x: 845, y: 864, size: 18, fill: COL.good, weight: 700, anchor: 'middle' }); T(ev, 'боль в пояснице', { x: 1085, y: 864, size: 18, fill: COL.bad, weight: 700, anchor: 'middle' });
+    mk('rect', { x: 1220, y: 676, width: 18, height: 18, rx: 4, fill: ANAT.taut }, ev); T(ev, 'поперечная', { x: 1246, y: 692, size: 17, fill: COL.chalk, weight: 600 });
+    mk('rect', { x: 1380, y: 676, width: 18, height: 18, rx: 4, fill: MU }, ev); T(ev, 'многораздельная', { x: 1406, y: 692, size: 17, fill: COL.chalk, weight: 600 });
+    put(para(ev, 'обзор: связь утолщения многораздельной с результатами лечения противоречива', 1220, 740, null, { size: 18, fill: COL.dim, maxW: 320 }), { o: 1 });
+  }],
+
+  ['back', 'Мышцы спины', (m, D) => {
+    const p = panel(0);
+    txt(p, 'мышцы спины (по мотивам рис. 14.13)', 800, 56, m('es'), { size: 28, weight: 700, anchor: 'middle', fill: MU });
+    const bm = backMuscles(p, 330, 470, 1.15, m('es'));
+    bm.es.forEach((e, i) => pulse(e, m('es', .5 + i * .3), 1.04));
+    lab(p, 'выпрямляющая позвоночник', 300, 108, ...bm.at(-60, -200), MU, m('es', .5));
+    lab(p, 'многораздельная', 590, 160, ...bm.at(46, -150), MU, m('mf'));
+    prog(q => bm.set({ atro: q }), m('atr', .5), 1.5);
+    lab(p, 'атрофия и жир', 590, 470, ...bm.at(44, 110), FAT, m('atr', 1));
+    infoCard(p, 760, 90, 800, 150, 'выпрямляющая позвоночник', 'длинные многосегментные разгибатели от крестца — глобальные растяжки', MU, m('es'), { size: 20 });
+    infoCard(p, 760, 255, 800, 170, 'многораздельная', 'много пучков, волокон I типа и капилляров — тонический стабилизатор; управляет сегментами, повышает жёсткость', DEEP, m('mf'), { size: 20 });
+    infoCard(p, 760, 440, 800, 190, 'при боли в пояснице', 'быстрая атрофия на уровне сегмента, «изъеденный молью» вид, больше жира; качество мышцы — возможный предвестник повторной боли', COL.bad, m('atr'), { size: 20 });
+    infoCard(p, 760, 645, 800, 120, 'упражнения улучшают работу обеих мышц', 'вращатели, межпоперечные, глубокая квадратная — трудно изучить', SP, m('tr'), { size: 18 });
+    infoCard(p, 760, 780, 800, 90, 'данные неоднозначны', null, COL.dim, m('ev2'), { size: 18 });
+  }],
+
+  ['fascia', 'Пояснично-грудная фасция', (m, D) => {
+    const p = panel(0);
+    txt(p, 'пояснично-грудная фасция (по мотивам рис. 14.11–14.12)', 800, 56, m('tlf'), { size: 28, weight: 700, anchor: 'middle', fill: FAS });
+    const ts = tlfSection(p, 520, 430, 1.3, m('tlf'));
+    txt(p, 'разрез на уровне поясницы, вперёд ↑', 520, 120, m('tlf'), { size: 18, fill: COL.dim, anchor: 'middle', weight: 600 });
+    prog(q => ts.set({ bulk: cyc(q, 1.25) }), m('tlf', 2), 2.5);
+    lab(p, 'выпрямляющая', 140, 640, ...ts.at(-80, 100), MU, m('tlf', .5), { size: 18 });
+    lab(p, 'многораздельная', 520, 680, ...ts.at(-24, 110), MU, m('tlf', .8), { size: 18 });
+    lab(p, 'квадратная поясницы', 200, 700, ...ts.at(-180, 4), MU, m('tlf', 1.1), { size: 18 });
+    lab(p, 'подвздошно-поясничная', 300, 168, ...ts.at(-100, -70), MU, m('tlf', 1.4), { size: 18 });
+    lab(p, 'боковой шов', 820, 700, ...ts.at(198, 48), FAS, m('raph'), { size: 18 });
+    lab(p, 'поперечная и внутренняя косая', 700, 160, ...ts.at(300, -100), MU, m('raph', .8), { size: 18 });
+    prog(q => ts.set({ pull: q }), m('raph', 2.5), 1.2);
+    txt(p, 'натяжение держит остистые отростки вместе', 520, 790, m('raph', 3.5), { size: 20, fill: ANAT.taut, anchor: 'middle', weight: 700 });
+    infoCard(p, 1060, 250, 500, 210, 'окружает и поддерживает', 'выпрямляющую, многораздельную, квадратную поясницы; объём мышц натягивает фасцию', FAS, m('tlf'), { size: 19 });
+    infoCard(p, 1060, 480, 500, 200, 'боковой шов', 'широчайшая, нижняя задняя зубчатая, внутренняя косая и поперечная тянут наклонные волокна фасции', ANAT.taut, m('raph'), { size: 19 });
+    infoCard(p, 1060, 700, 500, 170, 'перекрёст X', 'широчайшая спины + большая ягодичная другой стороны — пояснично-крестцовый переход', COL.whole, m('x'), { size: 19 });
+  }],
+
+  ['neck', 'Мышцы шеи', (m, D) => {
+    const p = panel(0);
+    txt(p, 'равновесие головы (по мотивам рис. 14.14)', 1080, 56, m('ful'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const f = postureFig(p, 470, 2200, 2.2, m('ful'));
+    f.ghost(.5, m('ful', .3));
+    const ext = f.mus('trapU', { w: 13 }), so = f.mus('subocc', { w: 9 }), scm = f.mus('scm', { w: 11 }), dnf = f.mus('dnf', { w: 8 });
+    const mas = cMus(f, Q => Q.hd([20, -52]), Q => Q.hd([10, -8]), 10);
+    const sup = cMus(f, Q => Q.hd([38, -2]), Q => pAnt(Q, 21.5, 30), 6), inf = cMus(f, Q => pAnt(Q, 21.5, 30), Q => pAnt(Q, 16.2, P_FRONT[16] - 10), 6);
+    [ext, so, scm, dnf, mas, sup, inf].forEach(mu => put(mu.g, { o: 0 }));
+    const hy = G(p, { o: 0 }), hyE = mk('ellipse', { rx: 13, ry: 6, fill: BN, stroke: BL, 'stroke-width': 1.5 }, hy);
+    f.onSet.push(() => { const P = f.stage(pAnt(f.geo, 21.5, 30)); put(hy, { x: P[0], y: P[1] }); }); f.set({});
+    // the lever: fulcrum at the atlanto-occipital joints, the head's centre of gravity in front
+    const lev = G(p, { o: 0 });
+    const tri = mk('path', { d: 'M-14 12L14 12L0 -10Z', fill: COL.task }, lev), cs = comSym(lev, 0, 0, 14);
+    const gArr = path(lev, '', { stroke: COL.whole, 'stroke-width': 4 });
+    f.onSet.push(() => { const O = f.at('OA'), H = f.at('head'); put(tri, { x: O[0], y: O[1] + 8 }); put(cs, { x: H[0] + 24, y: H[1] + 30 }); gArr.setAttribute('d', `M${f1(H[0] + 24)} ${f1(H[1] + 48)}V${f1(H[1] + 120)}M${f1(H[0] + 14)} ${f1(H[1] + 106)}L${f1(H[0] + 24)} ${f1(H[1] + 122)}L${f1(H[0] + 34)} ${f1(H[1] + 106)}`); });
+    f.set({});
+    show(lev, m('ful', .5));
+    show(ext.g, m('ful', 2)); show(so.g, m('ful', 2.3));
+    prog(q => { ext.act(.7 * q); so.act(.5 * q); }, m('ful', 3), .8);
+    show(mas.g, m('jaw', 1)); prog(q => mas.act(.5 * q), m('jaw', 2), .6);
+    show(sup.g, m('hy')); show(inf.g, m('hy', .3)); show(hy, m('hy'));
+    // forward head: throat muscles and longus colli stretched, the sternocleidomastoid lifts the head
+    show(dnf.g, m('hy', 2));
+    f.to({ fh: 1, kyph: 52, scap: .8 }, m('hy', 3), 1.6);
+    show(scm.g, m('hy', 5)); prog(q => { scm.act(.7 * q); mas.act(.5 + .4 * q); }, m('hy', 6), .8);
+    f.to({ fh: 0, kyph: 42, scap: 0 }, m('lc', .2), 1.4);
+    prog(q => { scm.act(.7 * (1 - q)); dnf.act(.6 * q); }, m('lc', 1.6), .8);
+    lab(p, 'разгибатели шеи', 880, 360, ...f.unit(19, -26), MU, m('ful', 2), { size: 18 });
+    lab(p, 'жевательные', 880, 200, ...f.stage(f.geo.hd([18, -36])), MU, m('jaw', 1), { size: 18 });
+    lab(p, 'над- и подподъязычные', 880, 480, ...f.stage(pAnt(f.geo, 21.5, 30)), MU, m('hy', .3), { size: 18 });
+    lab(p, 'длинная мышца шеи', 880, 640, ...f.unit(19.5, 8), DEEP, m('hy', 2), { size: 18 });
+    lab(p, 'грудино-ключично-сосцевидная', 880, 560, ...f.unit(18.5, 40), GLOB, m('hy', 5), { size: 18 });
+    infoCard(p, 1200, 100, 360, 200, 'точка опоры — атланто-затылочные суставы', 'центр тяжести головы впереди', COL.task, m('ful'), { size: 18 });
+    infoCard(p, 1200, 320, 360, 280, 'голова вперёд', 'горло и длинная шея растянуты и слабы; голову поднимает грудино-ключично-сосцевидная; челюсть тянет вниз', COL.bad, m('hy', 3), { size: 17 });
+    infoCard(p, 1200, 620, 360, 250, 'длинная мышца шеи', 'осевое вытяжение; без неё грудино-ключично-сосцевидная при сгибании усиливала бы лордоз', DEEP, m('lc'), { size: 18 });
+  }],
+
+  ['endur', 'Выносливость', (m, D) => {
+    const p = panel(0);
+    txt(p, 'сила и выносливость', 800, 56, m('st'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    infoCard(p, 60, 100, 700, 150, 'сила — для больших и неожиданных нагрузок', 'тяжёлая работа, спорт, падения', COL.chalk, m('st'), { size: 20 });
+    const gx = 100, gw = 620, gy = 330;
+    const ga = G(p, { o: 0 }); show(ga, m('ten'));
+    mk('rect', { x: gx, y: gy, width: gw, height: 46, rx: 12, fill: PANEL, stroke: COL.dim, 'stroke-width': 2 }, ga);
+    T(ga, '0', { x: gx, y: gy + 76, size: 18, fill: COL.dim, anchor: 'middle' }); T(ga, '100 % максимума', { x: gx + gw, y: gy + 76, size: 18, fill: COL.dim, anchor: 'end' });
+    const fill = mk('rect', { x: gx, y: gy, width: 0, height: 46, rx: 12, fill: SP }, ga);
+    prog(q => fill.setAttribute('width', f1(gw * .1 * q)), m('ten', .5), 1);
+    txt(p, '≈ 10 % — для обычной стабильности', gx, gy - 20, m('ten', .8), { size: 22, fill: SP, weight: 700 });
+    const ext2 = mk('rect', { x: gx + gw * .1, y: gy, width: gw * .06, height: 46, fill: SP, 'fill-opacity': .35, stroke: SP, 'stroke-dasharray': '6 5', opacity: 0 }, p);
+    show(ext2, m('ten', 3));
+    txt(p, 'чуть больше: болезнь диска, разболтанные связки', gx + 40, gy + 120, m('ten', 3), { size: 19, fill: COL.dim, weight: 600 });
+    infoCard(p, 60, 520, 700, 240, '600 человек, 20–65 лет', '17 механических факторов и боль в пояснице: сильнее всего связана плохая выносливость разгибателей спины', COL.bad, m('n600'), { size: 21 });
+    const fb = G(p, { o: 0 }); show(fb, m('t1'));
+    roundBox(fb, 860, 100, 700, 420, DEEP, PANEL, 2.5);
+    T(fb, 'волокна в мышцах спины', { x: 1210, y: 150, size: 24, weight: 700, fill: DEEP, anchor: 'middle' });
+    mk('rect', { x: 980, y: 210, width: 150, height: 230, rx: 10, fill: DEEP }, fb); mk('rect', { x: 1290, y: 320, width: 150, height: 120, rx: 10, fill: COL.task }, fb);
+    T(fb, 'I тип — больше', { x: 1055, y: 480, size: 21, fill: DEEP, weight: 700, anchor: 'middle' }); T(fb, 'II тип', { x: 1365, y: 480, size: 21, fill: COL.task, weight: 700, anchor: 'middle' });
+    pill(p, 'схема: соотношение без чисел', 1210, 560, m('t1', .5), { col: COL.dim, size: 16 });
+    infoCard(p, 860, 600, 700, 170, 'постуральная роль', 'выносливость важнее максимальной силы', SP, m('t1', 1), { size: 21 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-mus', prompt: ['Какая это мышца?'],
+    build: grid([
+      { parts: ['Натягивает пояс поддержки вокруг живота и поясницы'], ans: ['t'], why: 'Поперечная мышца живота.' },
+      { parts: ['Быстро атрофируется на уровне поражённого сегмента'], ans: ['m'], why: 'Многораздельная.' },
+      { parts: ['Поднимает голову, когда глубокие сгибатели шеи слабы'], ans: ['s'], why: 'Грудино-ключично-сосцевидная.' },
+      { parts: ['Отвечает за осевое вытяжение — втягивание подбородка'], ans: ['l'], why: 'Длинная мышца шеи.' },
+      { parts: ['Активна и при сгибании, и при разгибании против сопротивления'], ans: ['t'], why: 'Поперечная мышца живота.' },
+    ], [['t', 'Поперечная', ANAT.taut], ['m', 'Многораздельная', DEEP], ['s', 'Грудино-ключ.-сосц.', GLOB], ['l', 'Длинная шеи', SP]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Глобальные мышцы — большие растяжки: двигают туловище и отвечают на толчки, но сегмент стабилизируют лишь сжатием.', 'w1'],
+     ['Глубокие — поперечная живота, многораздельная, длинная мышца шеи — держат каждый сегмент и выносливы.', 'w2'],
+     ['Пояснично-грудная фасция передаёт натяжение мышц на позвонки и помогает стабильности.', 'w3'],
+     ['Для обычной стабильности хватает ≈ 10 % силы; с болью в пояснице сильнее всего связана слабая выносливость разгибателей.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SP }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-nums', prompt: ['Числа из урока:'],
+    build: blanks([
+      { parts: ['Для стабильности хватает ≈ ', { box: '10' }, ' % от максимума'], why: 'Около десяти процентов максимального сокращения.' },
+      { parts: ['Здоровые: поперечная ', { box: '60' }, ' %, многоразд. ', { box: '30' }, ' %'], why: 'Утолщение при стабилизирующем сокращении.' },
+      { parts: ['Боль в пояснице: ', { box: '40' }, ' % и ', { box: '20' }, ' %'], why: 'Поперечная — 40 %, многораздельная — 20 %.' },
+    ]),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-glob', prompt: ['У пациента с нестабильным поясничным сегментом боль усиливается, когда он изо всех сил напрягает прямую мышцу живота и разгибатели спины. Почему так бывает и что нужно тренировать?'],
+    build: choice([
+      ['Глобальные мышцы лишь сжимают позвоночник и толкают нестабильный сегмент к концу объёма; нужно учить контроль глубоких сегментарных мышц'],
+      ['Мышцы слишком слабые: нужно ещё сильнее напрягать прямую мышцу живота'],
+      ['Боль от глубоких мышц: их надо расслабить'],
+      ['Мышцы туловища на стабильность не влияют'],
+    ], 0, 'Глобальные мышцы почти не крепятся к позвонкам: сегмент они стабилизируют только сжатием, а при нестабильности сжатие нагружает пассивные ткани.',
+    [null, 'Ещё больше сжатия усилит нагрузку на пассивные ткани.', 'Глубокие мышцы как раз удерживают сегмент.', 'Без мышц позвоночник стоя сложился бы.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

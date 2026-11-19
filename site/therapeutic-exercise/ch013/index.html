@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Приверженность к упражнениям — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 13, title: 'Приверженность к упражнениям', minutes: 7, language: 'ru', next: '../ch014/' };
+
+// One colour per group of factors.
+const GRP = { pat: COL.whole, cond: COL.nat, prog: COL.task };
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+function holdIn(p, f, draw0) {
+  const c = G(p);
+  draw0(c);
+  const upd = () => { const [x, y] = onStage(f, 'WN'); put(c, { x, y }); };
+  f.onSet.push(upd); upd();
+  return c;
+}
+const bottle = c => {
+  mk('rect', { x: -9, y: -34, width: 18, height: 46, rx: 6, fill: COL.whole, 'fill-opacity': .45, stroke: COL.whole, 'stroke-width': 2.5 }, c);
+  mk('rect', { x: -5, y: -42, width: 10, height: 9, rx: 2, fill: COL.whole }, c);
+};
+// Three chips on top: which group of factors is on screen.
+function groupChips(p, cur) {
+  [['pat', 'пациент'], ['cond', 'состояние здоровья'], ['prog', 'программа']].forEach(([k, s], i) => {
+    pill(p, `${i + 1} · ${s}`, 400 + i * 400, 70, .15, { col: k === cur ? GRP[k] : COL.faint, size: 25 });
+  });
+}
+// A week of exercise days with check marks.
+function week(p, x, y, t0, done = [1, 1, 0, 1, 1, 1, 0]) {
+  const g = G(p, { o: 0 });
+  ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].forEach((d, i) => {
+    mk('rect', { x: x + i * 56, y, width: 48, height: 52, rx: 8, fill: PANEL, stroke: EDGE, 'stroke-width': 2 }, g);
+    T(g, d, { x: x + i * 56 + 24, y: y + 74, size: 18, fill: COL.dim, anchor: 'middle' });
+  });
+  show(g, t0);
+  done.forEach((v, i) => { if (v) checkMark(p, x + i * 56 + 24, y + 28, t0 + .3 + i * .2, COL.good, 1); });
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Приверженность к упражнениям', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 1 · Урок 13', { x: 800, y: 250, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Приверженность к упражнениям', { x: 800, y: 345, size: 64, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'лучшая программа — та, которую пациент действительно выполняет', 800, 440, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 800;
+    path(art, `M560 ${GY}H760`, { stroke: COL.faint, 'stroke-width': 3 });
+    const f = fig(art, { x: 640, y: GY - 182 * .5, s: .5 });
+    week(art, 790, GY - 120, 0);
+    show(art, m('sub', .2));
+    repeatPose(f, { ...SQUAT, aN: 80, aF: 80 }, m('sub', .5), 3, 2, ['AN', onStage(f, 'AN')[0], GY]);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['why', 'Зачем', (m) => {
+    const p = panel(0);
+    // the ideal programme that is not done vs the one that is
+    const a = G(p, { o: 0 });
+    roundBox(a, 120, 110, 560, 420, COL.faint, PANEL, 2);
+    T(a, 'идеальная программа', { x: 150, y: 160, size: 28, weight: 700, fill: COL.dim });
+    for (let i = 0; i < 11; i++) mk('rect', { x: 150, y: 190 + i * 28, width: 300 + (i * 53) % 180, height: 12, rx: 6, fill: COL.faint }, a);
+    show(a, m('key'));
+    cross(p, 400, 340, 90, m('key', 2.4), 7);
+    txt(p, 'не выполняется', 400, 580, m('key', 2.6), { size: 26, weight: 700, fill: COL.bad, anchor: 'middle' });
+    const b = G(p, { o: 0 });
+    roundBox(b, 920, 110, 560, 420, COL.good, PANEL, 3);
+    T(b, 'реальная программа', { x: 950, y: 160, size: 28, weight: 700, fill: COL.good });
+    for (let i = 0; i < 4; i++) mk('rect', { x: 1000, y: 200 + i * 60, width: 260 + (i * 41) % 120, height: 14, rx: 7, fill: COL.good, 'fill-opacity': .5 }, b);
+    show(b, m('key', 1.2));
+    [0, 1, 2, 3].forEach(i => checkMark(p, 970, 207 + i * 60, m('key', 1.6 + i * .2), COL.good, 1));
+    txt(p, 'выполняется → результат', 1200, 580, m('key', 2.6), { size: 26, weight: 700, fill: COL.good, anchor: 'middle' });
+    pill(p, 'нет привычки к регулярным занятиям', 520, 660, m('hard', .2), { col: COL.int, size: 24 });
+    pill(p, 'программа надолго', 1080, 660, m('hard', 1.4), { col: COL.int, size: 24 });
+    const t = G(p, { o: 0 });
+    T(t, 'послушание', { x: 560, y: 770, size: 30, weight: 700, fill: COL.dim, anchor: 'middle' });
+    path(t, 'M470 760H650', { stroke: COL.bad, 'stroke-width': 4 });
+    T(t, '→  приверженность: участие и сотрудничество', { x: 700, y: 770, size: 30, weight: 700, fill: COL.good });
+    show(t, m('term'));
+  }],
+
+  ['pat', 'Факторы: пациент', (m) => {
+    const p = panel(0), c = GRP.pat;
+    groupChips(p, 'pat');
+    const rows = [['p', ['понимание состояния и программы', 'мотивация', 'самодисциплина', 'внимание и память', 'готовность меняться']], ['p2', ['усталость и стресс', 'время', 'совместимость с терапевтом', 'контроль над программой']], ['p3', ['окружение: социальное и культурное', 'убеждения о пользе', 'доступ к ресурсам']]];
+    const X = { p: [330, 800, 1220, 470, 1040], p2: [270, 600, 940, 1330], p3: [380, 840, 1240] }, Y = { p: [190, 190, 190, 270, 270], p2: [380, 380, 380, 380], p3: [490, 490, 490] };
+    rows.forEach(([k, items]) => items.forEach((s, i) => pill(p, s, X[k][i], Y[k][i], m(k, .2 + i * .45), { col: c, size: 25 })));
+    const sx = G(p, { o: 0 });
+    roundBox(sx, 260, 590, 1080, 150, COL.int, PANEL, 2.5);
+    T(sx, 'мужчины в среднем привержены больше, чем женщины', { x: 800, y: 650, size: 27, weight: 700, fill: COL.int, anchor: 'middle' });
+    T(sx, 'связь с возрастом неясна', { x: 800, y: 700, size: 24, fill: COL.dim, anchor: 'middle' });
+    show(sx, m('sex'));
+  }],
+
+  ['cond', 'Факторы: состояние', (m) => {
+    const p = panel(0), c = GRP.cond, GY = 640;
+    groupChips(p, 'cond');
+    ['острота', 'длительность', 'тяжесть', 'стабильность', 'сопутствующие болезни'].forEach((s, i) => pill(p, s, 200 + i * 285, 180, m('c', .3 + i * .45), { col: c, size: 25 }));
+    ground(p, 160, 560, GY, m('pain', -.2));
+    const f = fig(p, { x: 360, y: GY - 182 * .65, s: .65, o: 0 }); show(f.g, m('pain', -.2));
+    const [ax] = onStage(f, 'AN');
+    repeatPose(f, { ...SQUAT, aN: 80, aF: 80, hN: 60, kN: 60, hF: 60, kF: 60, fN: 18, fF: 18, t: 22 }, m('pain', .2), 2, 1, ['AN', ax, GY]);
+    painAt(f, m('pain', 2.3));
+    para(p, 'боль отбивает желание → в программе её сводят к минимуму', 360, 720, m('pain', 1.2), { size: 24, maxW: 460, fill: COL.bad, anchor: 'middle' });
+    // short-term goals as small steps
+    const sx = 860, sy = 640;
+    stairs(p, sx, sy, 5, 110, 62, m('short'), COL.good);
+    for (let i = 0; i < 5; i++) {
+      const fl = G(p, { o: 0 }), x = sx + 110 * (i + 1) - 30, y = sy - 62 * (i + 1);
+      path(fl, `M${x} ${y}V${y - 56}`, { stroke: COL.good, 'stroke-width': 3 });
+      mk('path', { d: `M${x} ${y - 56}L${x + 30} ${y - 46}L${x} ${y - 36}Z`, fill: COL.good }, fl);
+      show(fl, m('short', .6 + i * .35));
+    }
+    txt(p, 'краткосрочные цели, которых можно достигать', 1140, 700, m('short', .4), { size: 25, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'при тяжёлых и давних нарушениях', 1140, 740, m('short', .8), { size: 23, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['prog', 'Факторы: программа', (m) => {
+    const p = panel(0), c = GRP.prog;
+    groupChips(p, 'prog');
+    const items = [['сложность и длительность', 'pr', 0], ['обучение, контроль, обратная связь', 'pr', 1], ['участие пациента в плане', 'input', 0], ['преемственность: стационар → дом', 'input', 1], ['интересы и мотивация пациента', 'int', 0], ['удобство места и расписания', 'log', 0], ['атмосфера', 'log', 1], ['социальная поддержка', 'log', 2], ['индивидуальное внимание', 'log', 3]];
+    items.forEach(([s, k, j], i) => {
+      const col = i % 3, row = Math.floor(i / 3), x = 120 + col * 470, y = 170 + row * 170;
+      const g = G(p, { o: 0 });
+      roundBox(g, x, y, 430, 130, k === 'int' ? COL.good : c, PANEL, k === 'int' ? 3 : 2);
+      put(para(g, s, x + 215, y + 58, null, { size: 25, weight: 600, maxW: 380, anchor: 'middle', fill: k === 'int' ? COL.good : COL.chalk }), { o: 1 });
+      show(g, m(k, .2 + j * .7));
+    });
+    txt(p, 'такие программы выполняют лучше', 800, 720, m('int', 1.2), { size: 26, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-group', prompt: ['К какой группе относится фактор?'],
+    build: grid([
+      { parts: ['Пациент не верит, что упражнения помогут'], ans: ['p'], why: 'Убеждения — фактор пациента.' },
+      { parts: ['Сильная боль при упражнениях'], ans: ['c'], why: 'Боль — фактор состояния здоровья.' },
+      { parts: ['Программа из 15 упражнений по 40 минут'], ans: ['g'], why: 'Сложность и длительность — фактор программы.' },
+      { parts: ['Сопутствующие болезни'], ans: ['c'], why: 'Фактор состояния здоровья.' },
+      { parts: ['Неудобное место и расписание занятий'], ans: ['g'], why: 'Логистика — фактор программы.' },
+    ], [['p', 'Пациент', GRP.pat], ['c', 'Состояние', GRP.cond], ['g', 'Программа', GRP.prog]], { multi: false, text: true }),
+  }], done) }],
+
+  ['strat', 'Стратегии', (m) => {
+    const p = panel(0);
+    head(p, 'Как поддержать приверженность', .2, 70, COL.chalk);
+    const S8 = ['Выяснить отношение пациента к упражнениям', 'Помочь увидеть личную пользу', 'Объяснить смысл каждого упражнения', 'Связать упражнения с целями пациента', 'Дать влиять на программу и её усложнение', 'Сделать программу как можно короче', 'Встроить упражнения в повседневные дела', 'Дневник, контрольные визиты, видимый прогресс'];
+    S8.forEach((s, i) => {
+      const col = i < 4 ? 0 : 1, row = i % 4, x = 100 + col * 720, y = 130 + row * 150;
+      const g = G(p, { o: 0 });
+      roundBox(g, x, y, 680, 120, EDGE, PANEL, 2);
+      mk('circle', { cx: x + 46, cy: y + 60, r: 22, fill: COL.good }, g);
+      T(g, String(i + 1), { x: x + 46, y: y + 70, size: 26, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, s, x + 88, y + 52, null, { size: 26, maxW: 560 }), { o: 1 });
+      show(g, m('s' + (i + 1)));
+    });
+    week(p, 1100, 722, m('s8', 1.2));
+  }],
+
+  ['barr', 'Барьеры', (m) => {
+    const p = panel(0), GY = 600;
+    labelBox(p, 800, 90, 520, ['найти барьеры'], COL.int, m('b'), { size: 32 });
+    const R = [['нет времени', 'в распорядок дня, программа короче', 'b1'], ['неприятно или больно', 'изменить упражнения', 'b2'], ['нет снаряда', 'замена из обычных вещей', 'b3']];
+    R.forEach(([a, b, k], i) => {
+      const y = 210 + i * 130;
+      labelBox(p, 330, y, 380, [a], COL.bad, m(k), { size: 26 });
+      arrowTo(p, [530, y], [610, y], m(k, .5), { col: COL.dim, w: 4 });
+      labelBox(p, 862, y, 490, [b], COL.good, m(k, .8), { size: 24 });
+    });
+    // a bottle of water instead of a dumbbell
+    ground(p, 1130, 1450, GY, m('b3'));
+    const f = fig(p, { x: 1290, y: GY - 182 * .65, s: .65, o: 0, pose: { aN: 8, eN: 10 } });
+    const bt = holdIn(p, f, bottle); put(bt, { o: 0 });
+    show(f.g, m('b3')); show(bt, m('b3'));
+    repeatPose(f, { ...STAND, aN: 8, eN: 125 }, m('b3', .6), 4, 3);
+    pill(p, 'пояснение: пример, не из книги', 1290, 220, m('b3'), { col: COL.dim, size: 20 });
+    txt(p, 'бутылка воды вместо гантели', 1290, 650, m('b3', .4), { size: 23, fill: COL.whole, anchor: 'middle' });
+    labelBox(p, 800, 740, 1080, ['барьер — повод изменить программу, а не упрекнуть пациента'], COL.good, m('sol'), { size: 27 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => {
+    const p = panel(0), GY = 640;
+    ground(p, 120, 520, GY, .1);
+    fig(p, { x: 320, y: GY - 182 * .6, s: .6 });
+    pill(p, '«Нет времени на 30 минут упражнений»', 320, 300, .3, { col: COL.bad, size: 22 });
+    pill(p, 'пояснение: пример, не из книги', 320, 230, .3, { col: COL.dim, size: 20 });
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-barrier', prompt: ['Пациент говорит, что у него нет времени на 30 минут упражнений. Что предложить?'],
+    build: choice([['Сократить программу и встроить упражнения в повседневные дела'], ['Объяснить, что меньше 30 минут бесполезно'], ['Отменить программу']], 0,
+      'Барьер — повод изменить программу: короче и в распорядке дня.',
+      [null, 'Упрёк не помогает; программа должна быть как можно короче.', 'Программу меняют, а не отменяют.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 100, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Лучшая программа — та, которую пациент будет выполнять.', 'w1'],
+     ['На приверженность влияют пациент, состояние здоровья и сама программа.', 'w2'],
+     ['Помогают смысл, связь с целями, участие пациента, краткость, дневник и прогресс.', 'w3'],
+     ['Барьеры ищут вместе и меняют программу.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 200 + i * 130, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+    labelBox(p, 800, 750, 620, ['Глава 1 пройдена'], COL.good, m('ch'), { size: 32 });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-strat', prompt: ['Подберите стратегию к ситуации'],
+    build: grid([
+      { parts: ['Пациент не понимает, зачем ему это упражнение'], ans: ['g'], why: 'Объяснить смысл и связать с его целями.' },
+      { parts: ['Пациенту некогда заниматься'], ans: ['s'], why: 'Сократить программу и встроить в распорядок дня.' },
+      { parts: ['Пациент не замечает, что ему становится лучше'], ans: ['d'], why: 'Дневник и контрольные визиты делают прогресс видимым.' },
+      { parts: ['Упражнение вызывает дискомфорт'], ans: ['m'], why: 'Изменить упражнение.' },
+      { parts: ['Пациент хочет снова гулять с внуками, но не видит связи с упражнениями'], ans: ['g'], why: 'Связать упражнения с его целью.' },
+    ], [['g', 'Связать с целью', COL.good], ['s', 'Сократить', COL.task], ['d', 'Дневник', COL.whole], ['m', 'Изменить', COL.rat]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Лучшая программа — самая полная, даже если пациент её не выполняет.'], ans: ['f'], why: 'Неверно: лучшая — та, которую выполняют.' },
+      { parts: ['Слово «приверженность» подчёркивает участие пациента.'], ans: ['t'], why: 'Верно: участие и сотрудничество с терапевтом.' },
+      { parts: ['Боль может снижать приверженность.'], ans: ['t'], why: 'Верно: поэтому её в программе сводят к минимуму.' },
+      { parts: ['Чем длиннее программа, тем лучше её выполняют.'], ans: ['f'], why: 'Неверно: программу делают как можно короче.' },
+      { parts: ['В среднем женщины привержены упражнениям больше, чем мужчины.'], ans: ['f'], why: 'Неверно: в среднем наоборот.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

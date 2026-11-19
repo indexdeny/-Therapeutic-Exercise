@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Положение и направление силы — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 47, title: 'Положение, стабилизация, направление силы, прогрессия', minutes: 8, language: 'ru', next: '../ch048/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch047/cards.ru.json
+const CARDS_SHORT = {
+  "широкий контакт\nплоская поверхность кисти, а не большой палец": "плоская кисть, не палец",
+  "направление скольжения\nпо правилу «выпуклое — вогнутое» или в сторону ощутимого ограничения": "«выпуклое — вогнутое»",
+  "кость — целиком\nбез углового движения: рычаг дал бы качение и сжатие": "без углового движения",
+  "согреть ткани\nфизические факторы, массаж, лёгкие сокращения": "физические факторы, массаж, лёгкие сокращения",
+  "расслабить\nколебания I–II и расслабление — чередовать с растяжкой": "колебания I–II чередовать с растяжкой",
+  "скольжение III + тракция I\nтракция II или III вместе со скольжением III травмирует сустав": "II–III со скольжением III травмирует",
+  "больно в сторону ограничения?\nначать в безболезненную сторону, потом — в ограниченную": "безболезненная сторона → потом ограниченная",
+  "боль дольше 24 ч\nдоза или длительность были велики → уменьшить": "доза или длительность были велики → уменьшить",
+  "оценить сустав и объём\nпосле процедуры и перед следующей": "после процедуры и перед следующей",
+};
+// cards-short end
+
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A strap across the fixed bone of a jointGlide (in its frame), at `at` units from the joint centre.
+const beltOn = (j, at) => mk('rect', { x: -62, y: -(j.Rc + at), width: 124, height: 26, rx: 8, fill: COL.real, 'fill-opacity': .85, stroke: COL.board, 'stroke-width': 2 }, j.g);
+let LINES = [];
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Положение и направление силы', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 5 · Урок 47', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Положение, стабилизация,', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'направление силы, прогрессия', { x: 800, y: 380, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как выполнить приём точно', 800, 460, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), j = jointGlide(art, { x: 800, y: 690, s: .62, r: -90, t0: 0, shaft: 260 });
+    put(j.tp, { o: 1 });
+    show(art, m('sub', .2));
+    prog(q => j.set({ d: 12 * Math.sin(2 * Math.PI * 2 * q) }), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['pos', 'Положение и стабилизация', (m) => {
+    const p = panel(0);
+    // the patient relaxed on the table
+    bench(p, 110, 700, 270, m('relax'), COL.dim, 90);
+    supine(p, 420, 270, .62, m('relax'));
+    txt(p, 'пациент расслаблен', 405, 120, m('relax'), { size: 24, weight: 700, fill: COL.whole, anchor: 'middle' });
+    pill(p, 'до и между приёмами — торможение (гл. 4)', 405, 170, m('relax', 3), { col: COL.dim, size: 20 });
+    // resting position first, then the end of the range
+    const j = jointGlide(p, { x: 400, y: 640, s: .62, shaft: 120, t0: m('rest') });
+    const lab = txt(p, 'положение покоя', 620, 560, m('rest'), { size: 23, weight: 700, fill: COL.whole });
+    const sub = txt(p, 'проверка игры · первая процедура', 620, 595, m('rest', 1), { size: 21, fill: COL.dim });
+    prog(q => { j.set({ a: 28 * io(q) }); if (q > .5) { lab.textContent = 'у конца объёма'; lab.setAttribute('fill', ANAT.taut); sub.textContent = 'по мере лечения'; } }, m('end', .5), 1.6, lin);
+    txt(p, 'ткань уже удлинена → растяжение точнее', 620, 690, m('end', 2), { size: 21, fill: ANAT.taut });
+    // stabilise one partner, usually the proximal one
+    const k = jointGlide(p, { x: 1180, y: 470, s: .9, shaft: 160, t0: m('stab') });
+    beltOn(k, 70);
+    const S = k.stage([0, -(k.Rc + 120)]);
+    const gS = put(mk('ellipse', { rx: 24, ry: 16, fill: '#b9cfe0', 'fill-opacity': .9, stroke: '#7d93a3', 'stroke-width': 2 }, p), { x: S[0], y: S[1], r: 90, o: 0 });
+    show(gS, m('stab', 1));
+    prog(q => k.set({ d: 11 * io(q) }), m('stab', 2), 1.4, lin);
+    txt(p, 'проксимальную кость стабилизируют', 1180, 110, m('stab'), { size: 24, weight: 700, fill: COL.real, anchor: 'middle' });
+    pill(p, 'ремень · рука · помощник', 1180, 160, m('stab', .8), { col: COL.real, size: 21 });
+    pill(p, 'сила не уходит в соседние суставы', 1180, 820, m('stab', 3), { col: COL.good, size: 21 });
+  }],
+
+  ['force', 'Направление силы', (m) => {
+    const p = panel(0);
+    const A = jointGlide(p, { x: 330, y: 470, s: .95, shaft: 150, t0: .2 });
+    txt(p, 'движется выпуклая', 330, 100, .2, { size: 23, weight: 700, fill: COL.dim, anchor: 'middle' });
+    const gC = gripOn(A, p, [0, 110]);
+    show(gC, m('close'));
+    txt(p, 'сила — у сустава', 450, 590, m('close'), { size: 21, weight: 700, fill: COL.good });
+    show(A.axis, m('tp', 1)); show(A.tp, m('tp', 3));
+    txt(p, 'ось → середина вогнутой', 250, 445, m('tp', 1), { size: 20, fill: COL.whole, anchor: 'end' });
+    txt(p, 'плоскость лечения', 490, 392, m('tp', 3), { size: 22, weight: 700, fill: COL.task });
+    const CA = A.stage([0, 0]);
+    prog(q => A.set({ d: 12 * Math.sin(2 * Math.PI * q) }), m('glide', .5), 3, lin);
+    arrowTo(p, [CA[0] - 60, CA[1] + 125], [CA[0] + 60, CA[1] + 125], m('glide', .5), { col: COL.whole, w: 5 });
+    txt(p, 'скольжение ∥', CA[0], CA[1] + 175, m('glide', .5), { size: 22, weight: 700, fill: COL.whole, anchor: 'middle' });
+    prog(q => A.set({ d: 0, n: 10 * io(q) }), m('dist', .5), 1.2, lin);
+    arrowTo(p, [CA[0] + 150, CA[1] - 20], [CA[0] + 150, CA[1] + 70], m('dist', .5), { col: COL.good, w: 5 });
+    txt(p, 'тракция ⊥', CA[0] + 170, CA[1] + 30, m('dist', .5), { size: 22, weight: 700, fill: COL.good });
+    // the concave partner carries the plane: it turns with the bone
+    const B = jointGlide(p, { x: 880, y: 470, s: .95, shaft: 150, convexMoves: false, t0: m('tp', 5) });
+    show(B.tp, m('tp', 5)); show(B.axis, m('tp', 5));
+    txt(p, 'движется вогнутая', 880, 100, m('tp', 5), { size: 23, weight: 700, fill: COL.dim, anchor: 'middle' });
+    prog(q => B.set({ a: 30 * Math.sin(Math.PI * q) }), m('tp', 6), 3, lin);
+    txt(p, 'плоскость поворачивается с ней', 880, 830, m('tp', 6), { size: 21, weight: 700, fill: COL.task, anchor: 'middle' });
+    infoCard(p, 1150, 110, 390, 200, 'широкий контакт', 'плоская поверхность кисти, а не большой палец', COL.good, m('wide'), { size: 21 });
+    infoCard(p, 1150, 340, 390, 230, 'направление скольжения', 'по правилу «выпуклое — вогнутое» или в сторону ощутимого ограничения', COL.whole, m('glide'), { size: 21 });
+    infoCard(p, 1150, 600, 390, 230, 'кость — целиком', 'без углового движения: рычаг дал бы качение и сжатие', COL.bad, m('whole'), { size: 21 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => {
+    const p = panel(0), j = jointGlide(p, { x: 700, y: 560, s: 1.05, shaft: 140, t0: .2 }), C = j.stage([0, 0]), y1 = C[1] - j.Rc * 1.05;
+    const line = (d, box, label) => { const g = G(p, {}); path(g, d, { stroke: COL.task, 'stroke-width': 5, 'stroke-dasharray': '14 9' }); return { g, box, label }; };
+    LINES = [
+      line(`M${C[0] - 230} ${C[1]}H${C[0] + 230}`, [C[0] - 240, C[1] - 20, 480, 40], 'линия через центр головки'),
+      line(`M${C[0] - 230} ${y1}H${C[0] + 230}`, [C[0] - 240, y1 - 20, 480, 40], 'линия в вогнутой поверхности'),
+      line(`M${C[0] + 300} ${C[1] - 180}V${C[1] + 200}`, [C[0] + 280, C[1] - 190, 40, 400], 'линия вдоль кости'),
+    ];
+    txt(p, 'A', C[0] - 260, C[1] + 9, .2, { size: 26, weight: 700, fill: COL.task, anchor: 'end' });
+    txt(p, 'B', C[0] - 260, y1 + 9, .2, { size: 26, weight: 700, fill: COL.task, anchor: 'end' });
+    txt(p, 'C', C[0] + 300, C[1] - 205, .2, { size: 26, weight: 700, fill: COL.task, anchor: 'middle' });
+  }, { ask: done => quiz({ x: 200, y: 40, w: 1200, cls: 'side' }, [{
+    id: 'c-tp', prompt: ['Нажмите на плоскость лечения.'],
+    build: pickEls(LINES.map(b => ({ el: b.g, box: b.box, label: b.label })), 1,
+      'Плоскость лечения лежит в вогнутой поверхности, перпендикулярно линии от оси к её середине.',
+      i => ['Эта линия проходит через ось, а не по вогнутой поверхности.', '', 'Вдоль кости идёт тракция, а не плоскость.'][i]),
+  }], done) }],
+
+  ['prog', 'Начало и прогрессия', (m) => {
+    const p = panel(0), f = v => v.toFixed(1);
+    const node = (x, y, w, lines, col, t0) => labelBox(p, x, y, w, lines, col, t0, { size: 23 });
+    node(800, 130, 760, ['первая процедура: устойчивая тракция II', 'в положении покоя · сразу отметить реакцию'], COL.whole, m('init'));
+    arrowTo(p, [800, 175], [800, 225], m('next'), { col: COL.dim });
+    node(800, 260, 520, ['на следующий день: реакция?'], COL.chalk, m('next'));
+    arrowTo(p, [620, 290], [330, 350], m('worse'), { col: COL.bad });
+    node(330, 400, 520, ['боль и чувствительность ↑', '→ колебания I в положении покоя'], COL.bad, m('worse'));
+    arrowTo(p, [980, 290], [1250, 350], m('same'), { col: COL.good });
+    node(1250, 400, 520, ['так же или лучше'], COL.good, m('same'));
+    arrowTo(p, [1150, 430], [990, 512], m('same', 2), { col: COL.good });
+    arrowTo(p, [1330, 430], [1350, 512], m('same', 3.5), { col: COL.good });
+    node(930, 560, 420, ['сохранить игру:', 'повторить приём'], COL.whole, m('same', 2));
+    node(1350, 560, 380, ['увеличить игру:', 'растяжка'], ANAT.taut, m('same', 3.5));
+    node(380, 600, 560, ['движения запрещены →', 'устойчивые или колебания II'], COL.whole, m('keep'));
+    arrowTo(p, [1350, 604], [1350, 664], m('str'), { col: ANAT.taut });
+    node(1150, 710, 760, ['у конца объёма: устойчивая III', 'тракция или скольжение'], ANAT.taut, m('str'));
+    arrowTo(p, [1150, 755], [1150, 790], m('rot'), { col: COL.task });
+    node(1150, 840, 760, ['+ ротация перед этим: плечо — наружная при отведении,', 'колено — внутренняя ротация голени при сгибании'], COL.task, m('rot'));
+  }],
+
+  ['tips', 'Советы', (m) => {
+    const p = panel(0);
+    const cards = [['согреть ткани', 'физические факторы, массаж, лёгкие сокращения', COL.nat, 'warm'], ['расслабить', 'колебания I–II и расслабление — чередовать с растяжкой', COL.whole, 'relax'],
+      ['скольжение III + тракция I', 'тракция II или III вместе со скольжением III травмирует сустав', COL.bad, 'g1'], ['больно в сторону ограничения?', 'начать в безболезненную сторону, потом — в ограниченную', COL.good, 'pain'],
+      ['выбрать слабину', 'провести кость через игру; почувствовав сопротивление — растягивать', ANAT.taut, 'slack'], ['мобилизация с движением', 'включить в общий подход', COL.real, 'mwm']];
+    cards.forEach(([t, b, col, mk0], i) => infoCard(p, 70 + (i % 2) * 740, 100 + Math.floor(i / 2) * 260, 710, 230, t, b, col, m(mk0), { size: 22 }));
+    // a slack scale in the «выбрать слабину» card: the dot moves through the slack and then into the stretch
+    const g = G(p, { o: 0 }), x0 = 100, x1 = 740, y = 812;
+    mk('rect', { x: x0, y: y - 10, width: (x1 - x0) * .65, height: 20, rx: 10, fill: COL.whole, 'fill-opacity': .25 }, g);
+    mk('rect', { x: x0 + (x1 - x0) * .65, y: y - 10, width: (x1 - x0) * .35, height: 20, rx: 10, fill: ANAT.taut, 'fill-opacity': .4 }, g);
+    const dot = mk('circle', { cx: x0, cy: y, r: 12, fill: COL.chalk }, g);
+    show(g, m('slack', 1));
+    prog(q => dot.setAttribute('cx', (x0 + (x1 - x0) * .65 * io(q)).toFixed(1)), m('slack', 1.5), 1.6, lin);
+    prog(q => dot.setAttribute('cx', (x0 + (x1 - x0) * lerp(.65, .92, io(q))).toFixed(1)), m('slack', 4), 1.2, lin);
+  }],
+
+  ['resp', 'Реакция и программа', (m) => {
+    const p = panel(0);
+    txt(p, 'реакция пациента', 400, 100, m('sore'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].forEach((d, i) => {
+      const g = G(p, { o: 0 }), x = 90 + i * 90, on = i % 2 === 0;
+      roundBox(g, x, 150, 76, 90, on ? ANAT.taut : COL.faint, PANEL, 2.5);
+      T(g, d, { x: x + 38, y: 182, size: 21, fill: COL.dim, anchor: 'middle' });
+      T(g, on ? 'М' : 'А', { x: x + 38, y: 222, size: 24, weight: 700, fill: on ? ANAT.taut : COL.good, anchor: 'middle' });
+      show(g, m('sore', .3 + i * .2));
+    });
+    txt(p, 'М — мобилизация · А — сам двигается в новом объёме', 405, 280, m('sore', 2), { size: 20, fill: COL.dim, anchor: 'middle' });
+    infoCard(p, 70, 320, 670, 170, 'боль дольше 24 ч', 'доза или длительность были велики → уменьшить', COL.bad, m('d24'), { size: 22 });
+    infoCard(p, 70, 520, 670, 140, 'оценить сустав и объём', 'после процедуры и перед следующей', COL.whole, m('re'), { size: 22 });
+    txt(p, 'вся программа', 1160, 100, m('box'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    [['согреть ткани', 'box', COL.nat], ['расслабить мышцы', 'box', COL.whole], ['мобилизация — растяжка', 'b2', ANAT.taut], ['растяжка околосуставных тканей', 'b2', ANAT.taut],
+     ['активно использовать новый объём', 'b3', COL.good], ['сохранить объём сам', 'b4', COL.real]].forEach(([str, mk0, col], i) => {
+      const g = G(p, { o: 0 }), y = 150 + i * 118;
+      roundBox(g, 800, y, 730, 96, col, PANEL, 2.5);
+      mk('circle', { cx: 846, cy: y + 48, r: 24, fill: col }, g);
+      T(g, String(i + 1), { x: 846, y: y + 58, size: 26, weight: 700, fill: COL.board, anchor: 'middle' });
+      T(g, str, { x: 890, y: y + 57, size: 25, weight: 600, fill: COL.chalk });
+      show(g, m(mk0, [0, 4, 0, 2, 0, 0][i]));
+    });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-order', prompt: ['Расставьте по порядку.'],
+    build: grid([
+      { parts: ['Мобилизация — растяжка'], ans: ['3'], why: 'Третий шаг.' },
+      { parts: ['Согреть ткани'], ans: ['1'], why: 'Первый шаг.' },
+      { parts: ['Активно использовать новый объём'], ans: ['4'], why: 'После растяжек.' },
+      { parts: ['Расслабить мышцы'], ans: ['2'], why: 'Второй шаг.' },
+    ], [['1', '1', COL.nat], ['2', '2', COL.whole], ['3', '3', ANAT.taut], ['4', '4', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Начинают в положении покоя, затем — у конца объёма; проксимальную кость стабилизируют.', 'w1'],
+     ['Сила у сустава, широкой ладонью; скольжение ∥ плоскости лечения, тракция ⊥; плоскость лежит в вогнутой кости.', 'w2'],
+     ['Первая процедура — устойчивая тракция II; дальше — по реакции на следующий день.', 'w3'],
+     ['Растяжка через день; боль дольше суток — снизить дозу.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-next', prompt: ['После первой процедуры — устойчивой тракции II в положении покоя — на следующий день боль и чувствительность сустава усилились. Что дальше?'],
+    build: choice([
+      ['Колебания I степени в положении покоя'],
+      ['Устойчивая III степень в конце объёма'],
+      ['Повторить ту же процедуру'],
+      ['Толчок, чтобы быстрее вернуть объём'],
+    ], 0, 'При усилении боли амплитуду снижают до колебаний I степени.',
+    [null, 'Растяжка — только если так же или лучше.', 'Повторяют, если реакция такая же или лучше.', 'Толчок здесь не показан.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Скольжения выполняют перпендикулярно плоскости лечения.'], ans: ['f'], why: 'Неверно: параллельно; перпендикулярно — тракцию.' },
+      { parts: ['Плоскость лечения лежит в вогнутой кости.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['К скольжению III степени добавляют тракцию III степени.'], ans: ['f'], why: 'Неверно: только I степени.' },
+      { parts: ['Растягивающие процедуры обычно проводят через день.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Если боль держится дольше суток, дозу увеличивают.'], ans: ['f'], why: 'Неверно: уменьшают.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

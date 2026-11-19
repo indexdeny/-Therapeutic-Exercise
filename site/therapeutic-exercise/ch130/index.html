@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Нервный контроль, дыхание, внутрибрюшное давление — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 130, title: 'Нервный контроль, дыхание, внутрибрюшное давление', minutes: 8, language: 'ru', next: '../ch131/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch130/cards.ru.json
+const CARDS_SHORT = {
+  "в нужный момент и в нужном объёме\nрегулирует жёсткость и движение под действующую нагрузку": "регулирует жёсткость и движение",
+  "7 человек, мышцы с двух сторон\nпоперечная, внутренняя косая, выпрямляющая позвоночник, многораздельная": "поперечная, косая, многораздельная",
+  "включение несимметрично\nзависит от стороны и направления движения руки — противоречит работам о независимости от направления": "зависит от стороны и направления руки",
+  "вывод авторов\nупреждающая стратегия подтверждается, симметричная опора — под вопросом; тренировка поперечной полезна, механизм требует изучения": "упреждающая стратегия подтверждается",
+  "данные не всегда согласны\nодин и тот же механизм описывают по-разному": "описывают по-разному",
+  "сгибание бедра\nмышцы живота против тяги подвздошно-поясничной": "мышцы живота против тяги подвздошно-поясничной",
+  "толкание\nмежрёберные и мышцы живота держат рёбра для грудных и передней зубчатой": "держат рёбра",
+  "подъём и тяга\nдлинная мышца шеи против лордоза от верхней трапециевидной": "против лордоза",
+  "местное утомление\nповторяющаяся работа, тяжёлое усилие или плохая работа мышц из-за позы; утомлённые стабилизаторы — выше риск травмы": "утомлённые стабилизаторы → травма",
+  "Маррас и Граната\nдолгий повторный подъём меняет распределение движения между позвоночником и ногами и порядок включения мышц; сдвиг в пояснице растёт": "сдвиг в пояснице растёт",
+  "дисбаланс мышц\nразная гибкость и сила мышц бедра, плеча и шеи — несимметричные силы на позвоночник и изменения осанки": "несимметричные силы на позвоночник",
+  "межрёберные мышцы — постуральные\nстабилизируют и двигают рёбра; динамическая перепонка: ткани не втягиваются и не выпячиваются при перепадах давления": "стабилизируют и двигают рёбра",
+  "перед быстрым движением руки\nдиафрагма сокращается, давление растёт — на любой фазе дыхания и при любом направлении": "давление растёт",
+  "тонус подстраивается\nи на вдохе, и на выдохе; стабильность при повторных движениях": "и на вдохе, и на выдохе",
+  "камера должна быть замкнутой\nпоперечная + диафрагма + тазовое дно сокращаются синхронно": "поперечная + диафрагма + тазовое дно",
+  "как давление помогает\nразгружает от сжатия; давит на мышцы живота и натягивает фасцию; не даёт позвоночнику прогнуться": "разгружает от сжатия",
+  "натуживание — риск для сердца и сосудов\nучат выдыхать, сохраняя напряжение мышц живота": "учат выдыхать, сохраняя напряжение мышц живота",
+  "Ходжес и соавторы\nпри удержании натуживания поперечная включается позже → выдох во время усилия поддерживает стабилизацию": "выдох во время усилия",
+};
+// cards-short end
+
+const SP = '#8fd6b0', DEEPC = '#86c9e8', MU = ANAT.muscle, ACTC = '#ff5a3c', TRA = ANAT.taut, NEU = '#bba8ee', LIMB = '#86c9e8', SUP = '#f0a04b', IAPC = '#7fd0f0';
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const swing = (q, n) => Math.sin(2 * Math.PI * n * q);
+const f1 = v => v.toFixed(1);
+const BN = ANAT.bone, BL = mix(ANAT.bone, '#000000', .45);
+// One schematic EMG trace: flat until the onset (0..1 along w), then a burst. set(onset) moves the onset.
+function trace(p, x, y, w, col, t0, { amp = 26, seed = 1 } = {}) {
+  const g = G(p, { o: 0 }), e = path(g, '', { stroke: col, 'stroke-width': 2.5 });
+  const R = i => { const v = Math.sin(i * 12.9898 + seed * 78.233) * 43758.5453; return v - Math.floor(v); };
+  const t = { g, e };
+  t.set = on => {
+    let d = `M${x} ${y}`;
+    for (let i = 1; i <= 120; i++) { const u = i / 120, X = x + u * w, a = u < on ? 1.5 : amp * Math.min(1, (u - on) * 14); d += `L${f1(X)} ${f1(y + (R(i) - .5) * 2 * a)}`; }
+    e.setAttribute('d', d);
+    return t;
+  };
+  t.set(.9);
+  if (t0 !== null) show(g, t0);
+  return t;
+}
+// Lying on the back, side view (head to the left): pelvis, lumbar spine, thigh and the iliopsoas; the abdominals on top.
+// set({ lift, abs }): the leg rises; without the abdominals the iliopsoas pulls the lumbar spine into lordosis (the low
+// back lifts off the table) and the vertebrae shear forward (toward the ceiling).
+function slrScene(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), col = '#d8d1c1', line = mix(col, COL.board, .62);
+  path(g, 'M-430 6H420', { stroke: COL.dim, 'stroke-width': 5 });
+  const body = mk('path', { fill: mix(col, COL.board, .45), stroke: line, 'stroke-width': 2 }, g);
+  const head = mk('circle', { cx: -400, cy: -52, r: 46, fill: mix(col, COL.board, .3), stroke: line, 'stroke-width': 2 }, g);
+  const leg = G(g, { x: 0, y: -44 }), legB = mk('path', { d: 'M0 -26L400 -16L400 16L0 26Z', fill: mix(col, COL.board, .3), stroke: line, 'stroke-width': 2 }, leg);
+  path(leg, 'M0 0H380', { stroke: BN, 'stroke-width': 9, 'stroke-opacity': .7 });
+  const pel = G(g, { x: 0, y: -44 });
+  mk('path', { d: 'M-20 -30L-70 -36L-96 -6L-80 26L-30 32L24 18L30 -10Z', fill: BN, 'fill-opacity': .5, stroke: BL, 'stroke-width': 2 }, pel);
+  mk('circle', { cx: 0, cy: 0, r: 13, fill: BN, stroke: BL, 'stroke-width': 2 }, pel);
+  const verts = [0, 1, 2, 3, 4].map(() => mk('rect', { x: -14, y: -10, width: 28, height: 20, rx: 5, fill: BN, stroke: BL, 'stroke-width': 1.5 }, g));
+  const ips = muscleEl(g, { rest: 150, w: 12 });
+  const abs = path(g, '', { stroke: MU, 'stroke-width': 12, 'stroke-opacity': .9 });
+  const gap = path(g, '', { stroke: COL.bad, 'stroke-width': 3, 'stroke-dasharray': '6 6' });
+  const shear = G(g, { o: 0 }); path(shear, 'M0 0V-34M-9 -22L0 -36L9 -22', { stroke: COL.bad, 'stroke-width': 4 });
+  const S = { lift: 0, abs: 0 }, e = { g, ips };
+  e.set = o => {
+    Object.assign(S, o);
+    const arch = (S.lift / 60) * (1 - S.abs), tilt = 14 * arch;
+    put(leg, { r: -S.lift }); put(pel, { r: tilt });
+    const L = i => { const u = (i + 1) / 6; return [-60 - i * 40, -30 - 32 * arch * Math.sin(Math.PI * u)]; };
+    verts.forEach((v, i) => { const [vx, vy] = L(i); v.setAttribute('transform', `translate(${f1(vx)} ${f1(vy)})`); });
+    body.setAttribute('d', `M-360 -96Q-200 -104 -60 ${f1(-100 - 10 * arch)}L60 -84L60 0L-60 ${f1(-6 - 30 * arch)}Q-200 0 -360 0Z`);
+    const [lx, ly] = L(2), Fm = rotPt(60, -14, -S.lift);
+    ips.set([lx + 8, ly - 12], [Fm[0], Fm[1] - 44]);
+    ips.act(.6 * S.lift / 60);
+    const pubis = rotPt(26, -24, tilt);
+    abs.setAttribute('d', `M${f1(pubis[0])} ${f1(pubis[1] - 44)}Q-110 ${f1(-112 - 10 * arch)} -250 -104`);
+    abs.setAttribute('stroke', mix(MU, ACTC, S.abs));
+    gap.setAttribute('d', `M-200 2Q-120 ${f1(2 - 50 * arch)} -40 2`); gap.setAttribute('opacity', f1(clamp(arch * 2, 0, 1)));
+    const [sx, sy] = L(0); put(shear, { x: sx + 20, y: sy - 14, o: clamp(arch * 2, 0, 1) });
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// The abdominal canister from the side (anterior right): diaphragm on top, pelvic floor below, transversus in front,
+// the lumbar spine and the thoracolumbar fascia behind. set({ dia, pf, tra, iap }) 0..1.
+function canister(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 });
+  mk('path', { d: 'M-130 -230Q20 -260 150 -220L170 0L150 230Q20 260 -130 230Z', fill: mix(IAPC, COL.board, .82), stroke: 'none' }, g);
+  for (let i = 0; i < 9; i++) mk('rect', { x: -150, y: -220 + i * 50, width: 40, height: 40, rx: 8, fill: BN, stroke: BL, 'stroke-width': 1.5 }, g);
+  const tlf = path(g, 'M-176 -230V230', { stroke: ANAT.tendon, 'stroke-width': 4 });
+  const dia = path(g, '', { stroke: MU, 'stroke-width': 12 }), pf = path(g, '', { stroke: MU, 'stroke-width': 12 }), tra = path(g, '', { stroke: MU, 'stroke-width': 14 });
+  const dots = [];
+  for (let i = 0; i < 26; i++) dots.push(mk('circle', { cx: -80 + (i % 6) * 40 + (Math.floor(i / 6) % 2) * 18, cy: -150 + Math.floor(i / 6) * 70, r: 5, fill: IAPC, opacity: .3 }, g));
+  const arr = G(g, { o: 0 });
+  [[150, 0, 1, 0], [20, -190, 0, -1], [20, 200, 0, 1], [70, -110, .7, -.7], [70, 110, .7, .7]].forEach(([ax, ay, ux, uy]) => path(arr, `M${ax} ${ay}L${ax + ux * 40} ${ay + uy * 40}M${ax + ux * 40 - uy * 9 - ux * 12} ${ay + uy * 40 + ux * 9 - uy * 12}L${ax + ux * 40} ${ay + uy * 40}L${ax + ux * 40 + uy * 9 - ux * 12} ${ay + uy * 40 - ux * 9 - uy * 12}`, { stroke: IAPC, 'stroke-width': 4 }));
+  const up = G(g, { o: 0 }); path(up, 'M-130 60V-60M-142 -44L-130 -62L-118 -44', { stroke: COL.good, 'stroke-width': 5 });
+  const S = { dia: 0, pf: 0, tra: 0, iap: 0 }, e = { g, tlf, up, arr };
+  e.set = o => {
+    Object.assign(S, o);
+    dia.setAttribute('d', `M-110 -210Q20 ${f1(-330 + 70 * S.dia)} 150 -215`); dia.setAttribute('stroke', mix(MU, ACTC, S.dia));
+    pf.setAttribute('d', `M-110 215Q20 ${f1(290 - 50 * S.pf)} 150 220`); pf.setAttribute('stroke', mix(MU, ACTC, S.pf));
+    tra.setAttribute('d', `M150 -215Q${f1(200 - 34 * S.tra)} 0 150 220`); tra.setAttribute('stroke', mix(MU, ACTC, S.tra));
+    dots.forEach(d => d.setAttribute('opacity', f1(.25 + .7 * S.iap)));
+    put(arr, { o: S.iap });
+    tlf.setAttribute('stroke', mix(ANAT.tendon, ANAT.taut, S.iap)); tlf.setAttribute('stroke-width', f1(4 + 4 * S.iap));
+    return e;
+  };
+  e.at = (px, py) => { const s0 = st(g); return [s0.x + px * s0.s, s0.y + py * s0.s]; };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Нервный контроль и давление', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 14 · Урок 130', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Нервный контроль, дыхание', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и внутрибрюшное давление', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'стабилизаторы включаются заранее', 800, 360, m('sub'), { size: 30, fill: SP, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const cn = canister(art, 800, 650, .9, null); put(cn.g, { o: 1 });
+    prog(q => { const c = cyc(q, 2); cn.set({ dia: c, pf: c, tra: c, iap: c }); }, .6, Math.max(2, D - 1.6), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['ns', 'Нервная система', (m, D) => {
+    const p = panel(0);
+    txt(p, 'нервная система управляет стабильностью', 800, 56, m('nc'), { size: 28, weight: 700, anchor: 'middle', fill: NEU });
+    const f = postureFig(p, 380, 880, .8, m('nc'));
+    const er = f.mus('erector', { w: 13 }), ra = f.mus('rectus', { w: 11 });
+    const box = (x, y, w, str, col, t) => { const b = G(p, { o: 0 }); roundBox(b, x, y, w, 90, col, PANEL, 2.5); T(b, str, { x: x + w / 2, y: y + 56, size: 23, weight: 700, fill: col, anchor: 'middle' }); show(b, t); };
+    box(820, 140, 360, 'нервная система', NEU, m('nc'));
+    box(700, 420, 300, 'мышцы', MU, m('nc', 1));
+    box(1140, 420, 420, 'силы: ожидаемые и неожиданные', COL.whole, m('tm'));
+    arrowTo(p, [960, 232], [870, 418], m('nc', 1.5), { col: NEU });
+    arrowTo(p, [1320, 418], [1080, 232], m('tm', .5), { col: COL.whole });
+    infoCard(p, 700, 600, 860, 180, 'в нужный момент и в нужном объёме', 'регулирует жёсткость и движение под действующую нагрузку', SP, m('tm', 1), { size: 21 });
+    // a push: the trunk answers
+    const push = G(p, { o: 0 }); path(push, 'M150 380H230M216 368L232 380L216 392', { stroke: COL.whole, 'stroke-width': 5 }); show(push, m('tm', 2));
+    prog(q => { const k = swing(q, 1.25); f.set({ lord: 46 - 14 * k, kyph: 42 + 6 * k }); er.act(.8 * Math.max(0, k)); ra.act(.6 * Math.max(0, -k)); }, m('tm', 2.2), Math.max(2, D - m('tm', 2.2) - .3), lin);
+  }],
+
+  ['ff', 'Упреждающее включение', (m, D) => {
+    const p = panel(0);
+    txt(p, 'упреждающее управление', 800, 56, m('ffw'), { size: 28, weight: 700, anchor: 'middle', fill: NEU });
+    const f = postureFig(p, 250, 880, .72, m('ffw'));
+    const tr = f.mus('rectus', { w: 10 }); put(tr.g, { o: 0 });
+    f.to({ arm: 160 }, m('pre', .5), .7, out);
+    f.to({ arm: 0 }, m('dir', .2), .6);
+    f.to({ arm: -40 }, m('dir', 1.5), .7, out);
+    pill(p, 'быстрое движение руки', 250, 120, m('ffw', 1), { col: LIMB, size: 19 });
+    // schematic EMG traces: the trunk muscles start before the arm muscle
+    const X0 = 560, W = 700, rows = [['поперечная', TRA, .22], ['глубокая многораздельная', TRA, .24], ['поверхностные туловища', SUP, .3], ['мышца руки (дельтовидная)', LIMB, .42]];
+    const T0 = rows.map(([n, c, on], i) => { txt(p, n, X0 - 12, 210 + i * 110, m('pre'), { size: 19, fill: c, anchor: 'end', weight: 700 }); return trace(p, X0, 200 + i * 110, W, c, m('pre'), { seed: i + 1 }).set(on); });
+    const cur = path(p, `M${X0 + W * .42} 150V600`, { stroke: LIMB, 'stroke-width': 2, 'stroke-dasharray': '6 6' }, { o: 0 }); show(cur, m('pre', 1));
+    txt(p, 'начало движения руки', X0 + W * .42 + 8, 640, m('pre', 1), { size: 17, fill: LIMB, weight: 600 });
+    pill(p, 'схема', X0 + W - 40, 150, m('pre'), { col: COL.dim, size: 16 });
+    // direction: the deep muscles keep their onset, the superficial ones change
+    prog(q => T0[2].set(lerp(.3, .36, q)), m('dir', 1.5), .8);
+    txt(p, 'другое направление: глубокие — так же, поверхностные — иначе', X0 + W / 2, 690, m('dir', 2), { size: 19, fill: COL.chalk, anchor: 'middle', weight: 700 });
+    // low back pain: the transversus is late
+    prog(q => { T0[0].set(lerp(.22, .5, q)); }, m('lbp', .5), 1);
+    const late = txt(p, 'боль в пояснице: поперечная запаздывает', X0 + W / 2, 740, m('lbp', 1), { size: 20, fill: COL.bad, anchor: 'middle', weight: 700 });
+    infoCard(p, 560, 780, 1000, 100, 'туловище включается раньше конечности, чтобы сохранить стабильность', null, NEU, m('ffw'), { size: 19 });
+  }],
+
+  ['allison', 'Противоречивые данные', (m, D) => {
+    const p = panel(0);
+    txt(p, 'исследование Эллисон и соавторов', 800, 56, m('al'), { size: 28, weight: 700, anchor: 'middle', fill: COL.dim });
+    infoCard(p, 60, 100, 700, 200, '7 человек, мышцы с двух сторон', 'поперечная, внутренняя косая, выпрямляющая позвоночник, многораздельная', COL.chalk, m('al'), { size: 21 });
+    const X0 = 1000, W = 520;
+    const tl = trace(p, X0, 200, W, TRA, m('asym'), { seed: 3 }).set(.25), trr = trace(p, X0, 300, W, TRA, m('asym'), { seed: 5 }).set(.25);
+    txt(p, 'поперечная слева', X0 - 12, 210, m('asym'), { size: 18, fill: TRA, anchor: 'end', weight: 700 });
+    txt(p, 'поперечная справа', X0 - 12, 310, m('asym'), { size: 18, fill: TRA, anchor: 'end', weight: 700 });
+    prog(q => trr.set(lerp(.25, .4, q)), m('asym', 1), 1);
+    pill(p, 'схема', X0 + W - 30, 140, m('asym'), { col: COL.dim, size: 16 });
+    infoCard(p, 60, 330, 700, 220, 'включение несимметрично', 'зависит от стороны и направления движения руки — противоречит работам о независимости от направления', COL.bad, m('asym'), { size: 21 });
+    infoCard(p, 60, 580, 700, 230, 'вывод авторов', 'упреждающая стратегия подтверждается, симметричная опора — под вопросом; тренировка поперечной полезна, механизм требует изучения', SP, m('keep'), { size: 21 });
+    infoCard(p, 820, 420, 720, 160, 'данные не всегда согласны', 'один и тот же механизм описывают по-разному', COL.dim, m('keep', 2), { size: 20 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-ff', prompt: ['Глубокие или поверхностные мышцы туловища?'],
+    build: grid([
+      { parts: ['Включаются раньше руки при любом направлении движения'], ans: ['d'], why: 'Поперечная и глубокие волокна многораздельной.' },
+      { parts: ['Ответ зависит от направления движения руки'], ans: ['s'], why: 'Поверхностные мышцы — растяжки.' },
+      { parts: ['При боли в пояснице запаздывают при любом направлении'], ans: ['d'], why: 'Поперечная мышца.' },
+      { parts: ['Управляют смещением центра масс, как растяжки'], ans: ['s'], why: 'Поверхностные.' },
+      { parts: ['При боли в пояснице запаздывают в зависимости от направления'], ans: ['s'], why: 'Прямая, косые, выпрямляющая позвоночник.' },
+    ], [['d', 'Глубокие', TRA], ['s', 'Поверхностные', SUP]], { multi: false, text: true }),
+  }], done) }],
+
+  ['limbs', 'Конечности и позвоночник', (m, D) => {
+    const p = panel(0);
+    txt(p, 'конечности нагружают позвоночник', 800, 56, m('lm'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    infoCard(p, 60, 90, 1480, 90, 'без стабилизации мышцы пояса конечности двигают позвоночник и перегружают его', null, COL.chalk, m('lm'), { size: 20 });
+    const sl = slrScene(p, 500, 500, .95, m('hip'));
+    prog(q => sl.set({ lift: 45 * q, abs: 0 }), m('hip', 1), 1.6);
+    lab(p, 'подвздошно-поясничная', 700, 300, 380, 440, MU, m('hip', 1.5), { size: 19 });
+    txt(p, 'лордоз и передний сдвиг', 380, 552, m('hip', 2.5), { size: 20, fill: COL.bad, anchor: 'middle', weight: 700 });
+    prog(q => sl.set({ abs: q }), m('hip', 5), 1.2);
+    txt(p, 'мышцы живота держат таз и поясницу', 380, 592, m('hip', 5.5), { size: 20, fill: COL.good, anchor: 'middle', weight: 700 });
+    // pushing and lifting: small figures
+    const f2 = postureFig(p, 1150, 850, .36, m('push'), { arm: true });
+    f2.set({ arm: 80 }); const pc = f2.mus('pec', { w: 7 }), ra2 = f2.mus('rectus', { w: 7 }); prog(q => { pc.act(q); ra2.act(.6 * q); }, m('push', .8), .6);
+    show(mk('rect', { x: 1290, y: 560, width: 22, height: 290, rx: 6, fill: PANEL, stroke: COL.dim, 'stroke-width': 3, opacity: 0 }, p), m('push'));
+    txt(p, 'толкать', 1150, 495, m('push'), { size: 19, fill: COL.chalk, anchor: 'middle', weight: 700 });
+    const f3 = postureFig(p, 1420, 850, .36, m('lift'));
+    f3.set({ arm: 150 }); const tz = f3.mus('trapU', { w: 7 }), dn = f3.mus('dnf', { w: 5 }); prog(q => { tz.act(q); dn.act(.8 * q); }, m('lift', .8), .6);
+    txt(p, 'поднимать', 1420, 495, m('lift'), { size: 19, fill: COL.chalk, anchor: 'middle', weight: 700 });
+    infoCard(p, 60, 625, 900, 110, 'сгибание бедра', 'мышцы живота против тяги подвздошно-поясничной', MU, m('hip'), { size: 19 });
+    infoCard(p, 60, 750, 440, 130, 'толкание', 'межрёберные и мышцы живота держат рёбра для грудных и передней зубчатой', MU, m('push'), { size: 16 });
+    infoCard(p, 520, 750, 440, 130, 'подъём и тяга', 'длинная мышца шеи против лордоза от верхней трапециевидной', DEEPC, m('lift'), { size: 16 });
+  }],
+
+  ['fatigue', 'Утомление и дисбаланс', (m, D) => {
+    const p = panel(0);
+    txt(p, 'утомление стабилизаторов', 800, 56, m('ft'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    infoCard(p, 60, 100, 700, 210, 'местное утомление', 'повторяющаяся работа, тяжёлое усилие или плохая работа мышц из-за позы; утомлённые стабилизаторы — выше риск травмы', COL.bad, m('ft'), { size: 21 });
+    // a schematic chart: long repetitive lifting
+    const X0 = 880, Y0 = 520, W = 640, H = 300, ax = G(p, { o: 0 }); show(ax, m('mg'));
+    path(ax, `M${X0} ${Y0 - H}V${Y0}H${X0 + W}`, { stroke: COL.dim, 'stroke-width': 2 });
+    T(ax, 'время повторного подъёма →', { x: X0 + W, y: Y0 + 34, size: 18, fill: COL.dim, anchor: 'end', weight: 600 });
+    const cv = (k, col) => path(p, '', { stroke: col, 'stroke-width': 4 });
+    const fat = cv(0, COL.task), sh = cv(1, COL.bad);
+    prog(q => {
+      let d1 = '', d2 = '';
+      for (let i = 0; i <= 60 * q; i++) { const u = i / 60, X = X0 + u * W; d1 += (i ? 'L' : 'M') + f1(X) + ' ' + f1(Y0 - 30 - 220 * u ** 1.3); d2 += (i ? 'L' : 'M') + f1(X) + ' ' + f1(Y0 - 40 - 170 * Math.max(0, u - .35) ** 1.2 * 1.6); }
+      fat.setAttribute('d', d1); sh.setAttribute('d', d2);
+    }, m('mg', .5), 3, lin);
+    txt(p, 'утомление', X0 + W - 10, Y0 - 270, m('mg', 2), { size: 19, fill: COL.task, anchor: 'end', weight: 700 });
+    txt(p, 'передне-задний сдвиг', X0 + W - 10, Y0 - 150, m('mg', 3), { size: 19, fill: COL.bad, anchor: 'end', weight: 700 });
+    pill(p, 'схема', X0 + 60, Y0 - H + 10, m('mg'), { col: COL.dim, size: 16 });
+    infoCard(p, 60, 340, 700, 220, 'Маррас и Граната', 'долгий повторный подъём меняет распределение движения между позвоночником и ногами и порядок включения мышц; сдвиг в пояснице растёт', COL.task, m('mg'), { size: 20 });
+    infoCard(p, 60, 600, 1480, 160, 'дисбаланс мышц', 'разная гибкость и сила мышц бедра, плеча и шеи — несимметричные силы на позвоночник и изменения осанки', SP, m('imb'), { size: 21 });
+  }],
+
+  ['breath', 'Дыхание', (m, D) => {
+    const p = panel(0);
+    txt(p, 'дыхание, осанка и стабильность', 800, 56, m('insp'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const f = postureFig(p, 300, 880, .8, m('insp'));
+    tw(f.ribsP, { 'a_stroke-opacity': .9, c_stroke: ANAT.tendon }, m('insp'), .5);
+    prog(q => f.set({ kyph: 42 - 8 * cyc(q, 2.5) }), m('insp', .5), Math.max(2, m('dia') - m('insp', .5)), lin);
+    txt(p, 'вдох: грудь поднимается, грудной отдел разгибается', 300, 120, m('insp', .5), { size: 19, fill: COL.chalk, anchor: 'middle', weight: 700 });
+    infoCard(p, 640, 100, 900, 190, 'межрёберные мышцы — постуральные', 'стабилизируют и двигают рёбра; динамическая перепонка: ткани не втягиваются и не выпячиваются при перепадах давления', MU, m('ic'), { size: 20 });
+    const cn = canister(p, 1000, 610, .7, m('dia'));
+    prog(q => { const c = cyc(q, 1.5); cn.set({ dia: c, tra: c, iap: c * .8 }); }, m('dia', .8), Math.max(2, D - m('dia', .8) - .3), lin);
+    infoCard(p, 1230, 330, 330, 290, 'перед быстрым движением руки', 'диафрагма сокращается, давление растёт — на любой фазе дыхания и при любом направлении', IAPC, m('dia'), { size: 18 });
+    infoCard(p, 1230, 640, 330, 230, 'тонус подстраивается', 'и на вдохе, и на выдохе; стабильность при повторных движениях', SP, m('ton'), { size: 18 });
+  }],
+
+  ['iap', 'Внутрибрюшное давление', (m, D) => {
+    const p = panel(0);
+    txt(p, 'внутрибрюшное давление (по мотивам рис. 14.16–14.17)', 800, 56, m('val'), { size: 28, weight: 700, anchor: 'middle', fill: IAPC });
+    const cn = canister(p, 420, 500, 1.15, m('val'));
+    prog(q => cn.set({ tra: q }), m('val', 1), .8);
+    lab(p, 'диафрагма', 700, 140, ...cn.at(20, -250), MU, m('ch', .5));
+    lab(p, 'тазовое дно', 700, 860, ...cn.at(20, 260), MU, m('ch', .9));
+    lab(p, 'поперечная', 720, 470, ...cn.at(186, -40), MU, m('val', 1));
+    lab(p, 'пояснично-грудная фасция', 230, 100, ...cn.at(-176, -200), ANAT.tendon, m('out'));
+    prog(q => cn.set({ dia: q, pf: q }), m('ch', .5), 1);
+    prog(q => cn.set({ iap: q }), m('how'), 1);
+    show(cn.up, m('how', 1));
+    txt(p, 'разгрузка', 140, 540, m('how', 1), { size: 18, fill: COL.good, anchor: 'middle', weight: 700 });
+    infoCard(p, 860, 100, 700, 160, 'камера должна быть замкнутой', 'поперечная + диафрагма + тазовое дно сокращаются синхронно', MU, m('ch'), { size: 20 });
+    infoCard(p, 860, 280, 700, 180, 'как давление помогает', 'разгружает от сжатия; давит на мышцы живота и натягивает фасцию; не даёт позвоночнику прогнуться', IAPC, m('how'), { size: 20 });
+    infoCard(p, 860, 480, 700, 170, 'натуживание — риск для сердца и сосудов', 'учат выдыхать, сохраняя напряжение мышц живота', COL.bad, m('risk'), { size: 20 });
+    infoCard(p, 860, 670, 700, 200, 'Ходжес и соавторы', 'при удержании натуживания поперечная включается позже → выдох во время усилия поддерживает стабилизацию', SP, m('hod'), { size: 20 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['При подъёме тяжести выдыхать, сохраняя напряжение мышц живота'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Задержка дыхания с натуживанием ускоряет включение поперечной'], ans: ['f'], why: 'Неверно: она включается позже.' },
+      { parts: ['Диафрагма и тазовое дно сокращаются вместе с поперечной'], ans: ['t'], why: 'Верно: камера замкнута.' },
+      { parts: ['Перед быстрым движением руки давление растёт только на вдохе'], ans: ['f'], why: 'Неверно: на любой фазе дыхания.' },
+      { parts: ['Межрёберные мышцы работают как постуральные'], ans: ['t'], why: 'Верно.' },
+    ], [['t', 'Верно', COL.good], ['f', 'Неверно', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Нервная система включает мышцы туловища заранее; поперечную и глубокие волокна многораздельной — независимо от направления, хотя есть и противоречащие данные.', 'w1'],
+     ['При боли в пояснице поперечная мышца запаздывает.', 'w2'],
+     ['Без стабилизации туловища мышцы конечностей двигают позвоночник; утомление стабилизаторов повышает риск травмы.', 'w3'],
+     ['Диафрагма, поперечная и тазовое дно создают внутрибрюшное давление; при усилии выдыхаем, а не задерживаем дыхание.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SP }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-slr', prompt: ['Пациент лёжа на спине поднимает прямую ногу, и поясница отрывается от кушетки. Что подсказать?'],
+    build: choice([
+      ['Сначала напрячь мышцы живота и удерживать таз и поясницу, затем поднимать ногу'],
+      ['Поднимать ногу быстрее, чтобы не успеть прогнуться'],
+      ['Задержать дыхание и натужиться'],
+      ['Это нормально, продолжать'],
+    ], 0, 'Мышцы живота должны стабилизировать таз и поясницу против тяги подвздошно-поясничной мышцы, иначе растут лордоз и передний сдвиг.',
+    [null, 'Скорость не заменит стабилизацию.', 'Натуживание опасно для сердца и сосудов и задерживает включение поперечной.', 'Прогиб — признак недостаточной стабилизации.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-lift', prompt: ['Грузчик весь день поднимает коробки; к концу смены появляется боль в пояснице. Что, по данным урока, происходит?'],
+    build: choice([
+      ['Стабилизаторы утомляются: меняется работа позвоночника и ног и порядок включения мышц, сдвиг в пояснице растёт'],
+      ['Мышцы становятся сильнее к концу дня'],
+      ['Внутрибрюшное давление не влияет на позвоночник'],
+      ['Боль связана только с весом коробок, а не с повторами'],
+    ], 0, 'При долгом повторном подъёме меняются картина движения и включение мышц, растёт передне-задний сдвиг (Маррас и Граната).',
+    [null, 'К концу работы мышцы утомляются.', 'Давление помогает стабильности — но вопрос о повторах.', 'Важна и длительность повторной работы.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

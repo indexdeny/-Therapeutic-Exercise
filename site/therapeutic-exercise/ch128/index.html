@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Изгибы, гравитация и стабильность — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 128, title: 'Изгибы, гравитация и стабильность', minutes: 9, language: 'ru', next: '../ch129/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch128/cards.ru.json
+const CARDS_SHORT = {
+  "первичные (задние): грудной и крестцовый\nесть уже у младенца, выпуклость назад — кифоз; кифотическая осанка — чрезмерный грудной изгиб": "выпуклость назад — кифоз",
+  "компенсаторные (передние): шейный и поясничный\nпоявляются, когда младенец держит голову и встаёт; выпуклость вперёд — лордоз (иногда так называют только патологию, например провисшую спину)": "выпуклость вперёд — лордоз",
+  "изгибы и гибкость\nпомогают выдерживать силу тяжести и внешние силы": "выдерживать силу тяжести",
+  "ноги — опора\nкости, суставы, мышцы ног поддерживают и уравновешивают туловище": "поддерживают туловище",
+  "устойчивость опорного сустава\nлиния тяжести точно через ось — или противодействующая сила: мышцы либо пассивные структуры": "линия через ось или противодействие",
+  "покачивание\nвперёд и назад ≈ 4 см — им управляют мышцы": "≈ 4 см",
+  "голеностоп\nлиния впереди: голень тянет вперёд → подошвенные сгибатели, прежде всего камбаловидная": "подошвенные сгибатели, камбаловидная",
+  "колено\nлиния впереди держит разгибание: передняя крестообразная связка, задняя капсула, икроножная и задняя группа бедра; камбаловидная тянет голень назад": "связки, капсула, икроножная",
+  "колено согнуто\nлиния уходит назад → работает четырёхглавая": "линия уходит назад → работает четырёхглавая",
+  "тазобедренный\nлиния через сустав — равновесие; позади — сгибатели (подвздошно-поясничная) и подвздошно-бедренная связка; впереди — разгибатели бедра": "подвздошно-поясничная и связка",
+  "туловище\nлиния через тела поясничных и шейных позвонков, изгибы уравновешены; немного работают мышцы туловища и таза": "немного работают мышцы туловища",
+  "растяжки\nтуловище смещается — сокращаются мышцы противоположной стороны": "сокращаются мышцы противоположной стороны",
+  "крайние и длительные отклонения\nдержат пассивные структуры": "держат пассивные структуры",
+  "голова\nцентр тяжести впереди атланто-затылочных суставов → работают задние мышцы шеи": "работают задние мышцы шеи",
+  "линия внутри опоры — устойчиво\nустойчивее, если опустить центр тяжести или расширить опору": "опустить центр, расширить опору",
+  "человек стоя\nвысокий, опора маленькая — относительно неустойчив": "высокий, опора маленькая",
+  "пассивные ткани\nкости и связки натягиваются в конце объёма": "натягиваются в конце объёма",
+  "мышцы — динамические растяжки\nотвечают на толчки, противодействуют силе тяжести, держат внутри объёма": "отвечают на толчки",
+  "подсистемы связаны\nесли одна не обеспечивает опору, страдает устойчивость всей конструкции": "страдает вся конструкция",
+  "нестабильность сегмента — обычно сочетание\nповреждение пассивных тканей; мало силы или выносливости мышц; плохой нервно-мышечный контроль": "ткани + мышцы + контроль",
+  "нейтральная зона\nсередина объёма: капсулы и связки почти не сопротивляются": "капсулы и связки почти не сопротивляются",
+  "эластическая зона\nпассивные ткани сдерживают движение; ограничивают направление — дают в нём устойчивость": "ткани сдерживают движение",
+};
+// cards-short end
+
+const SP = '#8fd6b0', KYP = '#f4a48c', LOR = '#86c9e8', PAS = ANAT.tendon, ACT = ANAT.muscle, NEU = '#bba8ee', GRAV = COL.whole;
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const swing = (q, n) => Math.sin(2 * Math.PI * n * q);
+const f1 = v => v.toFixed(1);
+const BN = ANAT.bone, BL = mix(ANAT.bone, '#000000', .45);
+// The column alone, from the sacrum up (anterior to the right), coloured by region; set({ phi0, lord, kyph, cerv })
+// bends it the way postureFig does (an infant's single C curve: a negative lordosis). at(u, k) — a stage point.
+function spineLine(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 });
+  const sac = mk('path', { fill: REG_C.S, stroke: BL, 'stroke-width': 1.5 }, g);
+  const vs = SEG_L.map((_, i) => mk('path', { fill: i < 5 ? REG_C.L : i < 17 ? REG_C.T : REG_C.C, stroke: BL, 'stroke-width': 1.2 }, g));
+  const S = { phi0: 30, lord: 46, kyph: 42, cerv: 34 }, e = { g, pts: [], phis: [] };
+  e.set = o => {
+    Object.assign(S, o);
+    let phi = S.phi0, P = [0, 0];
+    const pts = [P], phis = [];
+    for (let i = 0; i < 24; i++) {
+      phi += i < 5 ? -S.lord * WL[i] : i < 17 ? S.kyph * WK[i - 5] : -S.cerv * WC[i - 17];
+      phis.push(phi);
+      P = [P[0] + SEG_L[i] * Math.sin(rad(phi)), P[1] - SEG_L[i] * Math.cos(rad(phi))];
+      pts.push(P);
+    }
+    vs.forEach((v, i) => {
+      const a = rad(phis[i]), d = [Math.sin(a), -Math.cos(a)], n = [Math.cos(a), Math.sin(a)], w = SEG_W[i] / 2, Lu = SEG_L[i];
+      const P0 = [pts[i][0] + d[0] * Lu * .12, pts[i][1] + d[1] * Lu * .12], P1 = [pts[i][0] + d[0] * Lu * .88, pts[i][1] + d[1] * Lu * .88];
+      v.setAttribute('d', `M${f1(P0[0] + n[0] * w)} ${f1(P0[1] + n[1] * w)}L${f1(P1[0] + n[0] * w)} ${f1(P1[1] + n[1] * w)}L${f1(P1[0] - n[0] * w)} ${f1(P1[1] - n[1] * w)}L${f1(P0[0] - n[0] * w)} ${f1(P0[1] - n[1] * w)}Z`);
+    });
+    // the sacrum: a curved wedge below S1, tilted with the start angle
+    const R = v => rotPt(v[0], v[1], S.phi0 - 30);
+    sac.setAttribute('d', 'M' + [[17, 10], [-17, -10], [-26, 16], [-28, 46], [-20, 74], [-8, 88], [-2, 76], [-6, 46], [4, 18]].map(v => { const [a, b] = R(v); return f1(a) + ' ' + f1(b); }).join('L') + 'Z');
+    e.pts = pts; e.phis = phis;
+    return e;
+  };
+  e.at = (u, k = 0) => {
+    const i = Math.min(23, Math.floor(u)), f = u - i, A = e.pts[i], B = e.pts[i + 1], a = rad(e.phis[i]);
+    const P = [lerp(A[0], B[0], f) + k * Math.cos(a), lerp(A[1], B[1], f) + k * Math.sin(a)], s0 = st(g);
+    return [s0.x + P[0] * s0.s, s0.y + P[1] * s0.s];
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// A weight-bearing joint as a pole on a pivot with a mass on top; set({ off }) tilts it: the gravity line moves off the
+// axis. mus(t, k) — a muscle on the other side contracts; lig(t) — a ligament on the far side goes taut.
+function jointBal(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 });
+  mk('rect', { x: -16, y: 0, width: 32, height: 180, rx: 14, fill: BN, stroke: BL, 'stroke-width': 2 }, g);
+  const top = G(g, {}), pole = mk('rect', { x: -14, y: -230, width: 28, height: 220, rx: 12, fill: BN, stroke: BL, 'stroke-width': 2 }, top);
+  mk('circle', { cx: 0, cy: -262, r: 40, fill: mix(BN, '#000000', .1), stroke: BL, 'stroke-width': 2 }, top);
+  mk('circle', { cx: 0, cy: 0, r: 16, fill: COL.board, stroke: COL.task, 'stroke-width': 4 }, g);
+  const gl = path(g, '', { stroke: GRAV, 'stroke-width': 3, 'stroke-dasharray': '10 7' }), ga = path(g, '', { stroke: GRAV, 'stroke-width': 4 });
+  const musE = path(g, '', { stroke: ACT, 'stroke-width': 12 }), ligE = path(g, '', { stroke: PAS, 'stroke-width': 5 });
+  put(musE, { o: 0 }); put(ligE, { o: 0 });
+  const S = { off: 0, act: 0, taut: 0 }, e = { g };
+  e.set = o => {
+    Object.assign(S, o);
+    put(top, { r: S.off });
+    const [mx, my] = rotPt(0, -262, S.off);
+    gl.setAttribute('d', `M${f1(mx)} ${f1(my)}V200`); ga.setAttribute('d', `M${f1(mx - 12)} ${f1(my + 70)}L${f1(mx)} ${f1(my + 92)}L${f1(mx + 12)} ${f1(my + 70)}`);
+    const [ax, ay] = rotPt(-14, -150, S.off), [bx, by] = rotPt(14, -150, S.off);
+    musE.setAttribute('d', `M${f1(ax)} ${f1(ay)}Q-60 -40 -16 90`); musE.setAttribute('stroke', mix(ACT, '#ff5a3c', S.act));
+    ligE.setAttribute('d', `M${f1(bx)} ${f1(by)}Q40 -40 16 90`); ligE.setAttribute('stroke', mix(PAS, ANAT.taut, S.taut)); ligE.setAttribute('stroke-width', f1(4 + 4 * S.taut));
+    return e;
+  };
+  e.mus = t => show(musE, t); e.lig = t => show(ligE, t);
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// A three-legged stool: passive, active and neural subsystems; set({ weak }) shortens the middle (active) leg.
+function stool(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), W = '#b48a5a', WL2 = mix(W, '#000000', .35);
+  const seat = G(g, {});
+  mk('ellipse', { cx: 0, cy: 0, rx: 190, ry: 46, fill: W, stroke: WL2, 'stroke-width': 3 }, seat);
+  mk('ellipse', { cx: 0, cy: 0, rx: 150, ry: 32, fill: mix(W, '#ffffff', .15) }, seat);
+  const legs = [[-150, 10, PAS, 'пассивная'], [0, 36, ACT, 'активная'], [150, 10, NEU, 'нервная']].map(([lx, ly, c, n]) => {
+    const e2 = path(g, '', { stroke: c, 'stroke-width': 22 });
+    const tx = T(g, n, { x: lx * 1.25, y: 330, size: 24, fill: c, weight: 700, anchor: 'middle' });
+    return { lx, ly, e: e2 };
+  });
+  const S = { weak: 0 }, e = { g };
+  e.set = o => {
+    Object.assign(S, o);
+    const tilt = 7 * S.weak;
+    put(seat, { r: 0, y: 26 * S.weak * .5 });
+    legs.forEach(({ lx, ly, e: le }, i) => {
+      const [sx, sy] = rotPt(lx, ly, tilt), len = i === 1 ? 240 * (1 - .28 * S.weak) : 240;
+      le.setAttribute('d', `M${f1(sx)} ${f1(sy + 13 * S.weak)}L${f1(lx * 1.25)} ${f1(sy + len)}`);
+    });
+    put(seat, { r: tilt });
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Изгибы, гравитация, стабильность', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 14 · Урок 128', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Изгибы позвоночника,', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'гравитация и стабильность', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'линия тяжести и то, что держит тело прямо', 800, 360, m('sub'), { size: 30, fill: SP, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    plumb(art, 1180, 890, 420, null); [...art.children].forEach(c => put(c, { o: 1 }));
+    const f = postureFig(art, 1180, 890, .5, null, { arm: false }); put(f.g, { o: 1 });
+    const sl = spineLine(art, 560, 840, 1.25, null); put(sl.g, { o: 1 });
+    prog(q => { const k = clamp(q * 1.6, 0, 1); sl.set({ phi0: lerp(-40, 30, k), lord: lerp(-20, 46, k), kyph: lerp(30, 42, k), cerv: lerp(-20, 34, k) }); }, .6, Math.max(2, D - 1.6), io);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['curves', 'Четыре изгиба', (m, D) => {
+    const p = panel(0);
+    txt(p, 'изгибы позвоночника', 800, 56, m('cv'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const sl = spineLine(p, 300, 700, 1.55, m('cv'));
+    sl.set({ phi0: -40, lord: -20, kyph: 30, cerv: -20 });
+    const st0 = txt(p, 'младенец: одна дуга, выпуклость назад', 330, 880, m('cv'), { size: 20, fill: COL.dim, anchor: 'middle', weight: 600 });
+    prog(q => sl.set({ phi0: lerp(-40, 30, q), lord: lerp(-20, 46, q), kyph: lerp(30, 42, q), cerv: lerp(-20, 34, q) }), m('sec'), 2.2);
+    hide(st0, m('sec'));
+    txt(p, 'взрослый: четыре изгиба', 330, 880, m('sec', 2.2), { size: 20, fill: COL.chalk, anchor: 'middle', weight: 700 });
+    // labels on the adult curve appear after the morph
+    const L = (u, str, col, t, dy = 0) => { const P = sl.at(u, 0); lab(p, str, P[0] + 190, P[1] + dy, P[0] + 12, P[1], col, t, { size: 21 }); };
+    const tq = m('sec', 2.4);
+    L(11, 'грудной — кифоз', KYP, tq); L(20, 'шейный — лордоз', LOR, tq + .4, -10); L(2.5, 'поясничный — лордоз', LOR, tq + .8);
+    const sp = sl.at(0, 0); lab(p, 'крестцовый — кифоз', sp[0] + 190, sp[1] + 50, sp[0], sp[1] + 30, KYP, tq + 1.2, { size: 21 });
+    infoCard(p, 760, 100, 800, 190, 'первичные (задние): грудной и крестцовый', 'есть уже у младенца, выпуклость назад — кифоз; кифотическая осанка — чрезмерный грудной изгиб', KYP, m('pri'), { size: 20 });
+    infoCard(p, 760, 310, 800, 200, 'компенсаторные (передние): шейный и поясничный', 'появляются, когда младенец держит голову и встаёт; выпуклость вперёд — лордоз (иногда так называют только патологию, например провисшую спину)', LOR, m('sec'), { size: 20 });
+    infoCard(p, 760, 540, 500, 150, 'изгибы и гибкость', 'помогают выдерживать силу тяжести и внешние силы', SP, m('why'), { size: 20 });
+    infoCard(p, 760, 710, 500, 150, 'ноги — опора', 'кости, суставы, мышцы ног поддерживают и уравновешивают туловище', COL.chalk, m('legs'), { size: 20 });
+    const f = postureFig(p, 1420, 880, .38, m('legs'), { arm: false }); f.ghost(.3, m('legs'));
+  }],
+
+  ['gravity', 'Сила тяжести', (m, D) => {
+    const p = panel(0);
+    txt(p, 'сила тяжести и равновесие сустава', 800, 56, m('gr'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const jb = jointBal(p, 330, 560, 1, m('gr'));
+    txt(p, 'ось сустава', 420, 570, m('eq'), { size: 19, fill: COL.task, weight: 700 });
+    const eq = txt(p, 'линия через ось — равновесие', 330, 200, m('eq'), { size: 21, fill: GRAV, anchor: 'middle', weight: 700 });
+    hide(eq, m('cf'));
+    prog(q => jb.set({ off: 9 * q }), m('cf'), 1.2);
+    txt(p, 'линия мимо оси → момент силы', 330, 200, m('cf', 1.2), { size: 21, fill: COL.bad, anchor: 'middle', weight: 700 });
+    jb.mus(m('cf', 2)); prog(q => jb.set({ act: q }), m('cf', 2), .8);
+    jb.lig(m('cf', 3)); prog(q => jb.set({ taut: q }), m('cf', 3), .8);
+    txt(p, 'мышца', 200, 520, m('cf', 2), { size: 20, fill: ACT, weight: 700, anchor: 'middle' });
+    txt(p, 'связка', 470, 470, m('cf', 3), { size: 20, fill: PAS, weight: 700, anchor: 'middle' });
+    infoCard(p, 620, 120, 940, 150, 'устойчивость опорного сустава', 'линия тяжести точно через ось — или противодействующая сила: мышцы либо пассивные структуры', SP, m('eq'), { size: 20 });
+    plumb(p, 1100, 880, 330, m('sway'));
+    const f = postureFig(p, 1100, 880, .6, m('sway'), { arm: false });
+    prog(q => put(f.g, { r: 1.1 * swing(q, 2.25) }), m('sway', .5), Math.max(2, D - m('sway', .5) - .3), lin);
+    const C = f.at('com'), cs = comSym(p, C[0], C[1], 12); put(cs, { o: 0 }); show(cs, m('sway', .3));
+    prog(() => { const c = f.at('com'); put(cs, { x: c[0], y: c[1] }); }, m('sway', .5), Math.max(2, D - m('sway', .5) - .3), lin);
+    const br = G(p, { o: 0 }); path(br, `M${C[0] + 50} ${C[1]}H${C[0] + 90}M${C[0] + 58} ${C[1] - 7}L${C[0] + 50} ${C[1]}L${C[0] + 58} ${C[1] + 7}M${C[0] + 82} ${C[1] - 7}L${C[0] + 90} ${C[1]}L${C[0] + 82} ${C[1] + 7}`, { stroke: COL.task, 'stroke-width': 3 }); T(br, '≈ 4 см', { x: C[0] + 100, y: C[1] + 8, size: 22, fill: COL.task, weight: 700 }); show(br, m('sway', 1));
+    infoCard(p, 1300, 400, 260, 250, 'покачивание', 'вперёд и назад ≈ 4 см — им управляют мышцы', COL.task, m('sway'), { size: 20 });
+  }],
+
+  ['line', 'Линия тяжести', (m, D) => {
+    const p = panel(0);
+    txt(p, 'эталон осанки сбоку (по мотивам рис. 14.7)', 1080, 56, m('pl'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    plumb(p, 420, 885, 50, m('pl'));
+    const f = postureFig(p, 420, 885, .88, m('pl'));
+    f.ghost(.55, m('pl', .5));
+    const dot = (k, col, t) => { const P = f.at(k), d = G(p, { x: P[0], y: P[1], s: 0, o: 0 }); mk('circle', { r: 9, fill: col, stroke: COL.board, 'stroke-width': 2 }, d); pop(d, t); return P; };
+    const R = [['mall', 'чуть впереди наружной лодыжки', 'ank'], ['knee', 'чуть впереди оси колена', 'kn'], ['troch', 'через большой вертел (чуть позади оси бедра)', 'tr'],
+      ['L3', 'через тела поясничных позвонков', 'sp'], ['C4', 'через тела шейных позвонков', 'sp', 1], ['sh', 'через плечевой сустав', 'sh'], ['ear', 'через мочку уха', 'ear']];
+    R.forEach(([k, str, mark, d = 0], i) => { const P = dot(k, COL.task, m(mark, d)); lab(p, str, 700, 820 - i * 110, P[0] + 6, P[1], COL.chalk, m(mark, d), { size: 22 }); });
+  }],
+
+  ['lower', 'Голеностоп, колено, бедро', (m, D) => {
+    const p = panel(0);
+    txt(p, 'что держит суставы ног', 1080, 56, m('an'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    plumb(p, 380, 885, 60, m('an'));
+    const f = postureFig(p, 380, 885, .88, m('an'));
+    f.ghost(.6, m('an', .3));
+    const sol = f.mus('soleus', { w: 13 }), gas = f.mus('gastroc', { w: 11 }), ham = f.mus('hams', { w: 12 }), rf = f.mus('rectFem', { w: 11 }), ips = f.mus('iliopsoas', { w: 13 }), gl = f.mus('glut', { w: 15 });
+    const ligG = G(f.mid, { o: 0 }), ilf = f.lig('iliofem', { w: 6, layer: ligG });
+    [sol, gas, ham, rf, ips, gl].forEach(mu => put(mu.g, { o: 0 }));
+    show(ligG, m('hb', 1.4));
+    show(sol.g, m('an', .5)); prog(q => sol.act(.8 * q), m('an', 1.5), .8);
+    show(gas.g, m('kn', 2)); show(ham.g, m('kn', 2.4));
+    prog(q => { sol.act(.8 * (1 - q)); }, m('kn'), .5);
+    // knees slightly bent: the line passes behind the knee and the quadriceps works
+    show(rf.g, m('kx', 1.5));
+    f.to({ shank: 9, thigh: -8 }, m('kx', 2.5), 1.2);
+    prog(q => rf.act(q), m('kx', 3.5), .8);
+    f.to({ shank: 1.5, thigh: 3.5 }, m('hp'), 1);
+    prog(q => rf.act(1 - q), m('hp'), .6);
+    // the line behind the hip: the iliopsoas and the iliofemoral ligament; in front of it: the hip extensors
+    show(ips.g, m('hb')); f.to({ thigh: 9, shank: 0 }, m('hb', .3), 1.2); prog(q => ips.act(.6 * q), m('hb', 1.4), .6);
+    show(gl.g, m('hf')); f.to({ thigh: -2, shank: 3, lord: 40, kyph: 46 }, m('hf', .2), 1.2); prog(q => { ips.act(.6 * (1 - q)); gl.act(.8 * q); }, m('hf', 1.2), .7);
+    const C = [['голеностоп', 'линия впереди: голень тянет вперёд → подошвенные сгибатели, прежде всего камбаловидная', 'an', 90],
+      ['колено', 'линия впереди держит разгибание: передняя крестообразная связка, задняя капсула, икроножная и задняя группа бедра; камбаловидная тянет голень назад', 'kn', 270],
+      ['колено согнуто', 'линия уходит назад → работает четырёхглавая', 'kx', 520],
+      ['тазобедренный', 'линия через сустав — равновесие; позади — сгибатели (подвздошно-поясничная) и подвздошно-бедренная связка; впереди — разгибатели бедра', 'hp', 660]];
+    C.forEach(([h, s, k, y]) => infoCard(p, 820, y, 740, k === 'kx' ? 120 : k === 'an' ? 160 : 230, h, s, k === 'kx' ? ACT : SP, m(k), { size: 19 }));
+    lab(p, 'камбаловидная', 140, 700, ...f.at('knee').map((v, i) => i ? v + 110 : v - 14), ACT, m('an', .8), { size: 18 });
+    lab(p, 'подвздошно-бедренная связка', 450, 380, ...f.at('hip').map((v, i) => i ? v + 20 : v + 22), PAS, m('hb', 1.6), { size: 18 });
+  }],
+
+  ['upper', 'Туловище и голова', (m, D) => {
+    const p = panel(0);
+    txt(p, 'туловище и голова', 1080, 56, m('tr'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    plumb(p, 380, 885, 60, m('tr'));
+    const f = postureFig(p, 380, 885, .88, m('tr'));
+    f.ghost(.6, m('tr', .3));
+    const er = f.mus('erector', { w: 14 }), ra = f.mus('rectus', { w: 12 }), tz = f.mus('trapU', { w: 11 }), so = f.mus('subocc', { w: 9 });
+    [er, ra, tz, so].forEach(mu => put(mu.g, { o: 0 }));
+    show(er.g, m('tr', 1)); show(ra.g, m('tr', 1.4));
+    prog(q => { er.act(.25); ra.act(.25); }, m('tr', 2), .3);
+    // the trunk sways: the opposite muscles work as guy wires
+    f.to({ lord: 28, kyph: 50 }, m('gw', .3), 1);
+    prog(q => { er.act(lerp(.25, .9, q)); ra.act(.25 * (1 - q)); }, m('gw', .8), .6);
+    f.to({ lord: 64, kyph: 40 }, m('gw', 2.6), 1.2);
+    prog(q => { er.act(lerp(.9, 0, q)); ra.act(lerp(0, .9, q)); }, m('gw', 3.2), .6);
+    // extreme: the ligaments take it
+    const all = f.band('ALL_L', { w: 5 });
+    put(all.e, { o: 0 }); put(all.glow, { o: 0 }); show(all.e, m('ex')); show(all.glow, m('ex'));
+    f.to({ lord: 80, kyph: 36 }, m('ex', .2), 1.2);
+    prog(q => { ra.act(lerp(.9, .1, q)); }, m('ex', .2), .8);
+    f.to({ lord: 46, kyph: 42 }, m('hd', .1), 1);
+    prog(q => ra.act(.1 * (1 - q)), m('hd', .1), .5);
+    // the head: its centre of gravity in front of the atlanto-occipital joints
+    const hg = G(p, { o: 0 }), hc = comSym(hg, 0, 0, 10);
+    const ax = mk('path', { d: 'M-8 0L8 0L0 -12Z', fill: COL.task }, hg);
+    prog(() => { const H = f.at('head'), O = f.at('OA'); put(hc, { x: H[0] + 14, y: H[1] + 10 }); ax.setAttribute('transform', `translate(${f1(O[0])} ${f1(O[1])})`); }, m('hd', 1.2), Math.max(.5, D - m('hd', 1.2)), lin);
+    show(hg, m('hd', 1.2));
+    show(tz.g, m('hd', 1)); show(so.g, m('hd', 1));
+    prog(q => { tz.act(.7 * q); so.act(.7 * q); }, m('hd', 1.5), .7);
+    const C = [['туловище', 'линия через тела поясничных и шейных позвонков, изгибы уравновешены; немного работают мышцы туловища и таза', SP, 'tr', 100],
+      ['растяжки', 'туловище смещается — сокращаются мышцы противоположной стороны', ACT, 'gw', 330],
+      ['крайние и длительные отклонения', 'держат пассивные структуры', PAS, 'ex', 530],
+      ['голова', 'центр тяжести впереди атланто-затылочных суставов → работают задние мышцы шеи', COL.task, 'hd', 690]];
+    C.forEach(([h, s, c, k, y]) => infoCard(p, 820, y, 740, k === 'ex' ? 140 : 200, h, s, c, m(k), { size: 20 }));
+    lab(p, 'передняя продольная связка', 440, 300, ...f.unit(2.5, 16), PAS, m('ex', .6), { size: 18 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-hold', prompt: ['Что удерживает сустав стоя?'],
+    build: grid([
+      { parts: ['Колени полностью разогнуты, линия впереди колена'], ans: ['p'], why: 'Пассивные структуры: связка и задняя капсула; мышцы не нужны.' },
+      { parts: ['Колени слегка согнуты, линия позади колена'], ans: ['m'], why: 'Мышца: четырёхглавая.' },
+      { parts: ['Линия впереди голеностопа'], ans: ['m'], why: 'Мышца: камбаловидная.' },
+      { parts: ['Расслабленная стойка, тазобедренный сустав'], ans: ['p'], why: 'Подвздошно-бедренная связка.' },
+      { parts: ['Центр тяжести головы впереди атланто-затылочных суставов'], ans: ['m'], why: 'Задние мышцы шеи.' },
+    ], [['m', 'Мышцы', ACT], ['p', 'Пассивные структуры', PAS]], { multi: false, text: true }),
+  }], done) }],
+
+  ['stab', 'Устойчивость', (m, D) => {
+    const p = panel(0);
+    txt(p, 'устойчивость: центр масс и площадь опоры', 800, 56, m('cg'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const f = postureFig(p, 260, 870, .78, m('cg'), { arm: false }); f.ghost(.5, m('cg', .3));
+    const C = f.at('com'), cs = comSym(p, C[0], C[1], 13); put(cs, { o: 0 }); show(cs, m('cg', .5));
+    lab(p, 'чуть впереди S2', 470, C[1] - 40, C[0] + 12, C[1], COM_C, m('cg', .8), { size: 20 });
+    const gl = path(p, `M${C[0]} ${C[1]}V862`, { stroke: GRAV, 'stroke-width': 3, 'stroke-dasharray': '10 7' }, { o: 0 }); show(gl, m('bos'));
+    const bos = path(p, `M${260 - 34} 878H${260 + 76}`, { stroke: BOS_C, 'stroke-width': 8 }, { o: 0 }); show(bos, m('bos'));
+    txt(p, 'площадь опоры', 280, 912, m('bos'), { size: 18, fill: BOS_C, weight: 700, anchor: 'middle' });
+    // two blocks: tall and narrow tips over, low and wide stays
+    const blk = (x, w, h, t, tip) => {
+      const g = G(p, { x, y: 820, o: 0 }), b = G(g, {}), inner = G(b, {});
+      mk('rect', { x: -w / 2, y: -h, width: w, height: h, rx: 8, fill: mix(BN, COL.board, .3), stroke: BN, 'stroke-width': 2.5 }, inner);
+      comSym(inner, 0, -h / 2, 11);
+      path(g, `M${-w / 2 - 10} 4H${w / 2 + 10}`, { stroke: BOS_C, 'stroke-width': 6 });
+      show(g, t);
+      if (tip) prog(q => { put(b, { x: -w / 2, r: -24 * q }); put(inner, { x: w / 2 }); }, m('tall', 1.5), 1.2, io);
+      return g;
+    };
+    blk(620, 70, 300, m('tall'), true); blk(870, 200, 110, m('bos', 1.5), false);
+    txt(p, 'высокий, опора узкая', 600, 870, m('tall'), { size: 18, fill: COL.bad, anchor: 'middle', weight: 700 });
+    txt(p, 'низкий, опора широкая', 880, 870, m('bos', 1.5), { size: 18, fill: COL.good, anchor: 'middle', weight: 700 });
+    infoCard(p, 1020, 100, 540, 190, 'линия внутри опоры — устойчиво', 'устойчивее, если опустить центр тяжести или расширить опору', BOS_C, m('bos'), { size: 20 });
+    infoCard(p, 1020, 310, 540, 170, 'человек стоя', 'высокий, опора маленькая — относительно неустойчив', COL.bad, m('tall'), { size: 20 });
+    infoCard(p, 1020, 500, 540, 160, 'пассивные ткани', 'кости и связки натягиваются в конце объёма', PAS, m('inert'), { size: 20 });
+    infoCard(p, 1020, 680, 540, 190, 'мышцы — динамические растяжки', 'отвечают на толчки, противодействуют силе тяжести, держат внутри объёма', ACT, m('guy'), { size: 20 });
+  }],
+
+  ['three', 'Три подсистемы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'стабильность позвоночника: три подсистемы', 800, 56, m('ss'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const sto = stool(p, 460, 360, 1.2, m('ss'));
+    const lb = (str, col, x, y, t) => { const g = G(p, { o: 0 }); T(g, str, { x, y, size: 22, fill: col, weight: 600, anchor: 'middle' }); show(g, t); };
+    lb('кости, связки', PAS, 235, 800, m('pas')); lb('мышцы', ACT, 460, 800, m('act')); lb('управление', NEU, 685, 800, m('neu'));
+    prog(q => sto.set({ weak: q }), m('stool', 1.5), 1.2);
+    txt(p, 'одна ножка не держит — шатается всё', 460, 200, m('stool', 2), { size: 22, fill: COL.bad, anchor: 'middle', weight: 700 });
+    infoCard(p, 940, 120, 620, 190, 'подсистемы связаны', 'если одна не обеспечивает опору, страдает устойчивость всей конструкции', SP, m('stool'), { size: 21 });
+    infoCard(p, 940, 340, 620, 290, 'нестабильность сегмента — обычно сочетание', 'повреждение пассивных тканей; мало силы или выносливости мышц; плохой нервно-мышечный контроль', COL.bad, m('inst'), { size: 21 });
+  }],
+
+  ['zones', 'Нейтральная и эластическая зоны', (m, D) => {
+    const p = panel(0);
+    txt(p, 'нейтральная и эластическая зоны (Панджаби)', 800, 56, m('nz'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const X0 = 90, Y0 = 520, W = 680, H = 360;
+    const ch = G(p, { o: 0 }); show(ch, m('nz'));
+    path(ch, `M${X0} ${Y0}H${X0 + W}M${X0 + W / 2} ${Y0 - H / 2 - 10}V${Y0 + H / 2 + 10}`, { stroke: COL.dim, 'stroke-width': 2 });
+    T(ch, 'движение →', { x: X0 + W, y: Y0 + 34, size: 18, fill: COL.dim, anchor: 'end', weight: 600 });
+    T(ch, 'сопротивление тканей', { x: X0 + W / 2 + 12, y: Y0 - H / 2, size: 18, fill: COL.dim, weight: 600 });
+    const curveY = u => Y0 - Math.sign(u) * (Math.abs(u) < .3 ? Math.abs(u) * 40 : 12 + (Math.abs(u) - .3) ** 2 * 520);   // u in −1..1
+    let d = ''; for (let i = 0; i <= 80; i++) { const u = -1 + i / 40; d += (i ? 'L' : 'M') + f1(X0 + W / 2 + u * W / 2) + ' ' + f1(clamp(curveY(u), Y0 - H / 2, Y0 + H / 2)); }
+    const nzR = mk('rect', { x: X0 + W / 2 - .3 * W / 2, y: Y0 - H / 2, width: .3 * W, height: H, fill: COL.good, 'fill-opacity': .12 }, ch); put(nzR, { o: 0 }); show(nzR, m('mid'));
+    const ezR = [-1, 1].map(k => { const r = mk('rect', { x: k < 0 ? X0 : X0 + W / 2 + .15 * W, y: Y0 - H / 2, width: .35 * W, height: H, fill: PAS, 'fill-opacity': .1 }, ch); put(r, { o: 0 }); show(r, m('el')); return r; });
+    path(ch, d, { stroke: COL.chalk, 'stroke-width': 4 });
+    txt(p, 'нейтральная зона', X0 + W / 2, Y0 + H / 2 + 40, m('mid'), { size: 21, fill: COL.good, anchor: 'middle', weight: 700 });
+    txt(p, 'эластическая', X0 + 120, Y0 + H / 2 + 40, m('el'), { size: 21, fill: PAS, anchor: 'middle', weight: 700 });
+    txt(p, 'эластическая', X0 + W - 120, Y0 + H / 2 + 40, m('el'), { size: 21, fill: PAS, anchor: 'middle', weight: 700 });
+    pill(p, 'схема', X0 + 60, Y0 - H / 2 + 10, m('nz'), { col: COL.dim, size: 17 });
+    const dot = G(p, { o: 0 }); mk('circle', { r: 11, fill: COL.task, stroke: COL.board, 'stroke-width': 2 }, dot); show(dot, m('mid'));
+    const sg = spineSeg(p, 1250, 330, 1, m('nz'));
+    const run = (q, a0, a1) => { const u = lerp(a0, a1, q); put(dot, { x: X0 + W / 2 + u * W / 2, y: clamp(curveY(u), Y0 - H / 2, Y0 + H / 2) }); sg.set({ flex: 13 * u }); };
+    prog(q => run(q, 0, .25), m('mid', .3), 1.2);
+    prog(q => run(q, .25, -.25), m('mid', 2), 1.6);
+    prog(q => run(q, -.25, .95), m('el', .3), 2.2);
+    infoCard(p, 900, 520, 660, 150, 'нейтральная зона', 'середина объёма: капсулы и связки почти не сопротивляются', COL.good, m('mid'), { size: 20 });
+    infoCard(p, 900, 690, 660, 170, 'эластическая зона', 'пассивные ткани сдерживают движение; ограничивают направление — дают в нём устойчивость', PAS, m('el'), { size: 20 });
+    const sig = G(p, { o: 0 });
+    const I = sg.at('isl'), ns = [1480, 120];
+    path(sig, `M${f1(I[0])} ${f1(I[1])}Q${f1(I[0] + 60)} 120 ${ns[0] - 30} ${ns[1]}`, { stroke: NEU, 'stroke-width': 3, 'stroke-dasharray': '6 6' });
+    pill(sig, 'ЦНС', ns[0], ns[1] + 8, null, { col: NEU, size: 20 });
+    [...sig.children].forEach(c => put(c, { o: 1 }));
+    show(sig, m('rec'));
+    txt(p, 'рецепторы капсул и связок → положение', 1250, 490, m('rec', .5), { size: 18, fill: NEU, anchor: 'middle', weight: 700 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-zone', prompt: ['Нейтральная или эластическая зона?'],
+    build: grid([
+      { parts: ['Середина объёма, связки почти не сопротивляются'], ans: ['n'], why: 'Нейтральная зона.' },
+      { parts: ['Ближе к концу объёма, капсула натягивается'], ans: ['e'], why: 'Эластическая зона.' },
+      { parts: ['Пассивная стабильность минимальна'], ans: ['n'], why: 'Нейтральная зона.' },
+      { parts: ['Ткань ограничивает движение и даёт устойчивость в этом направлении'], ans: ['e'], why: 'Эластическая зона.' },
+      { parts: ['Сегмент в среднем положении'], ans: ['n'], why: 'Нейтральная зона.' },
+    ], [['n', 'Нейтральная', COL.good], ['e', 'Эластическая', PAS]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Грудной и крестцовый изгибы — первичные, кифозы; шейный и поясничный — компенсаторные, лордозы.', 'w1'],
+     ['Линия тяжести: чуть впереди лодыжки и оси колена, через большой вертел, тела поясничных и шейных позвонков, плечевой сустав и мочку уха.', 'w2'],
+     ['Где линия не проходит через ось, сустав держат мышцы или пассивные структуры.', 'w3'],
+     ['Стабильность — пассивная, активная и нервная подсистемы; в нейтральной зоне связки почти не помогают.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SP }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-knee', prompt: ['Пациентка из-за контрактуры стоит со слегка согнутыми коленями. Что меняется в работе колена?'],
+    build: choice([
+      ['Линия тяжести проходит позади коленного сустава, и четырёхглавая мышца должна постоянно сокращаться'],
+      ['Ничего: колено держит задняя капсула'],
+      ['Колено держит передняя крестообразная связка, мышцы отдыхают'],
+      ['Работает только камбаловидная мышца'],
+    ], 0, 'При слегка согнутых коленях линия уходит за сустав, и без четырёхглавой мышцы колено подогнётся.',
+    [null, 'Замыкающий механизм работает только при полном разгибании.', 'Связка держит при полностью разогнутом колене.', 'Камбаловидная держит голеностоп и помогает колену, но не предотвращает подгибание.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-stool', prompt: ['У пациента повреждены связки поясничного сегмента. Что следует из модели трёх подсистем?'],
+    build: choice([
+      ['Устойчивость сегмента должны поддержать мышцы и нервный контроль; нестабильность обычно складывается из нескольких причин'],
+      ['Если связки повреждены, остальные подсистемы уже не помогут'],
+      ['Достаточно укрепить глобальные мышцы — нервный контроль не важен'],
+      ['Подсистемы независимы: проблема только в связках'],
+    ], 0, 'Подсистемы связаны, как ножки табурета: пассивную опору компенсируют мышцы и нервный контроль.',
+    [null, 'Мышцы и нервное управление как раз и компенсируют недостаток пассивной опоры.', 'Плохой нервно-мышечный контроль — одна из частых составляющих нестабильности.', 'Подсистемы связаны: одна влияет на устойчивость всей конструкции.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

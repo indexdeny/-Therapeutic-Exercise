@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ползучесть и релаксация — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 31, title: 'Время и скорость: ползучесть, релаксация, коллаген', minutes: 8, language: 'ru', next: '../ch032/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch031/cards.ru.json
+const CARDS_SHORT = {
+  "защита\nпри быстрой нагрузке деформация не доходит до пластической зоны — тело выдерживает прыжок": "тело выдерживает прыжок",
+  "малая сила надолго\nв упругой зоне: перестройка связей коллагена и перераспределение воды": "перестройка связей + перераспределение воды",
+  "восстановление медленнее\nна этом основаны длительные растяжения хронических контрактур": "основа длительных растяжений",
+  "долговременные растяжения\nположение сохраняют часами или днями: ортез, гипс": "часами или днями: ортез, гипс",
+  "останется ли новая длина\nзависит от величины деформации и от того, как долго её держат": "зависит от величины и как долго держат",
+  "разорвать часть связей\nи перестроить волокна — ползучестью, релаксацией или контролируемыми циклами": "ползучесть, релаксация, циклы",
+  "время между сеансами\nна заживление; интенсивную растяжку — не каждый день; сильное воспаление → больше рубца": "не каждый день",
+  "использовать объём\nиначе ткань постепенно вернётся к прежней длине": "иначе ткань вернётся",
+  "иммобилизация\nновые волокна слабо связаны, больше беспорядочных сшивок, хуже смазка → спайки": "беспорядочные сшивки → спайки",
+};
+// cards-short end
+
+const BONE = ANAT.bone;
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A plotted function on a chart: f(q) for q 0..1 gives 0..1 up; drawn in as time passes (put(e, { d })).
+function plot(p, x0, y0, w, h, f, col, { width = 6, n = 80 } = {}) {
+  let d = '';
+  for (let i = 0; i <= n; i++) { const q = i / n; d += `${i ? 'L' : 'M'}${(x0 + q * w).toFixed(1)} ${(y0 - f(q) * h).toFixed(1)}`; }
+  return path(p, d, { stroke: col, 'stroke-width': width }, { d: 0 });
+}
+// A strip of tissue from a fixed clamp at x to x + L, at height y.
+function strip(p, defs, x, y) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x: x - 24, y: y - 40, width: 24, height: 80, rx: 4, fill: COL.dim }, g);
+  const s = limbEl(g, defs, ANAT.tendon, 16, 16, mix(ANAT.tendon, '#000000', .35));
+  return { g, set: L => s.set([x, y], [x + L, y]) };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Время и скорость', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 4 · Урок 31', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Время и скорость: ползучесть,', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'релаксация и коллаген', { x: 800, y: 380, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'почему растягивают медленно и долго', 800, 460, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    chartAxes(art, 620, 820, 380, 260, 'длина', 'время', 0);
+    const cv = plot(art, 620, 820, 360, 220, q => .25 + .65 * (1 - Math.exp(-q * 4)), COL.task);
+    show(art, m('sub', .2)); draw(cv, m('sub', .4), Math.max(1, D - m('sub', .4) - 1.2));
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['rate', 'Скорость нагрузки', (m) => {
+    const p = panel(0), X0 = 160, Y0 = 760, W = 820, H = 540;
+    chartAxes(p, X0, Y0, W + 20, H + 20, 'напряжение', 'деформация', m('rate'));
+    const slow = stressCurve(X0, Y0, W, H), fast = stressCurve(X0, Y0, W, H, { k: 1.8 });
+    const cs = path(p, slow.path(0, .5), { stroke: COL.good, 'stroke-width': 6 }, { d: 0 });
+    const cf = path(p, fast.path(0, fast.e(.5)), { stroke: COL.bad, 'stroke-width': 6 }, { d: 0 });
+    draw(cs, m('rate', .5), 1.4); draw(cf, m('rate', 1.6), 1.4);
+    txt(p, 'быстро — круче: ткань жёстче', fast.pt(fast.e(.5))[0] + 40, fast.pt(fast.e(.5))[1] - 30, m('rate', 2.6), { size: 23, weight: 700, fill: COL.bad, anchor: 'end' });
+    txt(p, 'медленно — податливее', slow.pt(.5)[0] + 20, slow.pt(.5)[1] + 10, m('rate', 2), { size: 23, weight: 700, fill: COL.good });
+    infoCard(p, 1060, 160, 460, 220, 'защита', 'при быстрой нагрузке деформация не доходит до пластической зоны — тело выдерживает прыжок', COL.whole, m('prot'), { size: 22 });
+    // a jumper: a big load for a short time
+    const s = .9, GY = 640, f = fig(p, { x: 1290, y: GY - 182 * s, s, o: 0, pose: SQUAT });
+    ground(p, 1160, 1420, GY, m('prot'));
+    const ax = 1290;
+    plant(f, 'AN', ax, GY);
+    show(f.g, m('prot'));
+    // squat, jump, land: the feet leave the floor at the top of the jump
+    prog(q => { const v = Math.sin(Math.PI * q); f.set({ ...STAND, aN: lerp(122, 170, v), aF: lerp(122, 170, v) }); plant(f, 'AN', ax, GY - 60 * v); }, m('prot', 1), 1, lin);
+    prog(() => { f.set(SQUAT); plant(f, 'AN', ax, GY); }, m('prot', 2), .3, lin);
+    labelBox(p, 800, 840, 900, ['растягивают медленно — чтобы ткань не «твердела»'], COL.good, m('slow'), { size: 25 });
+  }],
+
+  ['creep', 'Ползучесть', (m) => {
+    const p = panel(0), defs = mk('defs', {}, p);
+    // a constant weight hangs on a strip of tissue: the strip keeps lengthening
+    const st = strip(p, defs, 160, 260);
+    const wt = G(p, { o: 0 });
+    path(wt, 'M0 0V60', { stroke: COL.dim, 'stroke-width': 3 });
+    mk('rect', { x: -30, y: 60, width: 60, height: 50, rx: 8, fill: COL.dim }, wt);
+    T(wt, 'груз', { x: 0, y: 92, size: 18, fill: COL.board, anchor: 'middle', weight: 700 });
+    show(st.g, m('creep')); show(wt, m('creep', .5));
+    const L = q => 200 + 160 * (1 - Math.exp(-q * 4));
+    const go = q => { st.set(L(q)); put(wt, { x: 160 + L(q), y: 260 }); };
+    go(0);
+    prog(q => go(q), m('creep', .6), 6, lin);
+    const X0 = 160, Y0 = 760, W = 600, H = 280;
+    chartAxes(p, X0, Y0, W + 20, H + 20, 'длина ткани', 'время', m('creep', .6));
+    const cv = plot(p, X0, Y0, W, H, q => .25 + .65 * (1 - Math.exp(-q * 4)), COL.task);
+    draw(cv, m('creep', .6), 6);
+    pill(p, 'сила постоянна — ткань удлиняется', 470, 400, m('creep', 2), { col: COL.task, size: 22 });
+    // a warm tissue creeps more
+    const cw = plot(p, X0, Y0, W, H, q => .25 + .9 * (1 - Math.exp(-q * 5)), COL.bad);
+    draw(cw, m('heat', .3), 2);
+    txt(p, 'тёплая ткань', X0 + W - 10, Y0 - H - 20, m('heat', 1), { size: 22, weight: 700, fill: COL.bad, anchor: 'end' });
+    infoCard(p, 880, 160, 640, 200, 'малая сила надолго', 'в упругой зоне: перестройка связей коллагена и перераспределение воды', COL.task, m('low'), { size: 22 });
+    infoCard(p, 880, 390, 640, 130, 'нагрев усиливает ползучесть', null, COL.bad, m('heat'), { size: 22 });
+    infoCard(p, 880, 550, 640, 200, 'восстановление медленнее', 'на этом основаны длительные растяжения хронических контрактур', COL.whole, m('rec'), { size: 22 });
+  }],
+
+  ['relax', 'Релаксация напряжения', (m) => {
+    const p = panel(0), defs = mk('defs', {}, p);
+    // the strip is held at one length; the force needed to hold it falls
+    const st = strip(p, defs, 160, 260);
+    st.set(360);
+    const cl = G(p, { o: 0 });
+    mk('rect', { x: 520, y: 220, width: 24, height: 80, rx: 4, fill: COL.dim }, cl);
+    show(st.g, m('sr')); show(cl, m('sr'));
+    const dial = G(p, { x: 660, y: 260, o: 0 });
+    mk('circle', { r: 50, fill: PANEL, stroke: COL.chalk, 'stroke-width': 4 }, dial);
+    T(dial, 'сила', { x: 0, y: 80, size: 20, fill: COL.dim, anchor: 'middle' });
+    const needle = path(dial, 'M0 0L0 -40', { stroke: COL.task, 'stroke-width': 5 });
+    show(dial, m('sr', .3));
+    const F = q => .3 + .6 * Math.exp(-q * 3.5);
+    prog(q => put(needle, { r: lerp(-110, 110, F(q)) }), m('sr', .6), 6, lin);
+    const X0 = 160, Y0 = 760, W = 600, H = 280;
+    chartAxes(p, X0, Y0, W + 20, H + 20, 'напряжение в ткани', 'время', m('sr', .6));
+    const cv = plot(p, X0, Y0, W, H, F, COL.task);
+    draw(cv, m('sr', .6), 6);
+    pill(p, 'длина постоянна — сила падает', 470, 400, m('sr', 2), { col: COL.task, size: 22 });
+    infoCard(p, 880, 160, 640, 220, 'долговременные растяжения', 'положение сохраняют часами или днями: ортез, гипс', COL.whole, m('use'), { size: 22 });
+    infoCard(p, 880, 410, 640, 200, 'останется ли новая длина', 'зависит от величины деформации и от того, как долго её держат', COL.good, m('perm'), { size: 22 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-creep', prompt: ['Ползучесть или релаксация напряжения?'],
+    build: grid([
+      { parts: ['Ортез держит локоть под одним углом; сила, нужная для этого, со временем падает'], ans: ['r'], why: 'Длина постоянна, сила падает — релаксация.' },
+      { parts: ['Груз висит на манжете, и локоть постепенно разгибается дальше'], ans: ['c'], why: 'Сила постоянна, длина растёт — ползучесть.' },
+      { parts: ['Гипс держит колено в новом положении несколько дней'], ans: ['r'], why: 'Постоянная длина — релаксация.' },
+      { parts: ['Постоянная сила — длина растёт'], ans: ['c'], why: 'Ползучесть.' },
+    ], [['c', 'Ползучесть', COL.task], ['r', 'Релаксация', COL.whole]], { multi: false, text: true }),
+  }], done) }],
+
+  ['cyc', 'Циклическая нагрузка', (m) => {
+    const p = panel(0), X0 = 160, Y0 = 700, W = 1000, H = 420;
+    chartAxes(p, X0, Y0, W + 20, H + 20, 'нагрузка', 'повторы', m('cyc'));
+    // high repeated loads: damage builds up; below the endurance limit, cycles never break the tissue
+    const lim = Y0 - .35 * H;
+    const ll = path(p, `M${X0} ${lim}H${X0 + W}`, { stroke: COL.good, 'stroke-width': 3, 'stroke-dasharray': '10 8' }, { o: 0 });
+    show(ll, m('lim'));
+    txt(p, 'предел выносливости', X0 + W + 10, lim + 8, m('lim'), { size: 22, weight: 700, fill: COL.good });
+    const saw = (amp, n, col, t0, dur) => { let d = ''; for (let i = 0; i <= n * 8; i++) { const q = i / (n * 8), v = Math.abs(Math.sin(Math.PI * n * q)); d += `${i ? 'L' : 'M'}${(X0 + q * W).toFixed(1)} ${(Y0 - v * amp * H).toFixed(1)}`; } const e = path(p, d, { stroke: col, 'stroke-width': 4 }, { d: 0 }); draw(e, t0, dur); return e; };
+    saw(.8, 7, COL.bad, m('cyc', .5), 4);
+    const br = G(p, { o: 0 });
+    path(br, `M${X0 + W - 30} ${Y0 - .8 * H - 30}l20 20l-14 6l22 22`, { stroke: COL.bad, 'stroke-width': 6 });
+    T(br, 'разрыв при меньшей деформации', { x: X0 + W - 40, y: Y0 - .8 * H - 44, size: 22, weight: 700, fill: COL.bad, anchor: 'end' });
+    show(br, m('cyc', 4.5));
+    saw(.25, 12, COL.good, m('lim', .6), 3);
+    txt(p, 'лёгкие циклы — без разрушения', X0 + W / 2, Y0 + 50, m('lim', 2), { size: 22, weight: 700, fill: COL.good, anchor: 'middle' });
+    pill(p, 'усталость ткани: стрессовые переломы, перегрузка', 800, 150, m('fat'), { col: COL.bad, size: 23 });
+  }],
+
+  ['sum', 'Что это значит', (m) => {
+    const p = panel(0);
+    infoCard(p, 80, 120, 450, 330, 'разорвать часть связей', 'и перестроить волокна — ползучестью, релаксацией или контролируемыми циклами', COL.task, m('s1'), { size: 23 });
+    infoCard(p, 575, 120, 450, 330, 'время между сеансами', 'на заживление; интенсивную растяжку — не каждый день; сильное воспаление → больше рубца', COL.whole, m('s2'), { size: 23 });
+    infoCard(p, 1070, 120, 450, 330, 'использовать объём', 'иначе ткань постепенно вернётся к прежней длине', COL.good, m('s3'), { size: 23 });
+    // a week: stretch days and rest days
+    const days = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'], on = [1, 0, 1, 0, 1, 0, 0];
+    days.forEach((d, i) => {
+      const g = G(p, { o: 0 }), x = 600 + i * 58;
+      mk('rect', { x, y: 500, width: 48, height: 48, rx: 8, fill: on[i] ? COL.whole : 'none', 'fill-opacity': .5, stroke: COL.whole, 'stroke-width': 2 }, g);
+      T(g, d, { x: x + 24, y: 531, size: 18, fill: COL.chalk, anchor: 'middle' });
+      show(g, m('s2', 1 + i * .15));
+    });
+    const s = 1, GY = 820, f = fig(p, { x: 1300, y: GY - 182 * s, s, o: 0, pose: { aN: 20, eN: 20 } });
+    ground(p, 1180, 1440, GY, m('s3'));
+    show(f.g, m('s3'));
+    prog(q => f.set({ aN: lerp(20, 165, wave(q, 1)) }), m('s3', .5), 3, lin);
+  }],
+
+  ['imm', 'Иммобилизация', (m) => {
+    const p = panel(0), X0 = 220, Y0 = 760, H = 380;
+    txt(p, 'передняя крестообразная связка у обезьян: нагрузка при разрыве, % от нормы', 800, 110, m('acl'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    path(p, `M${X0 - 40} ${Y0}H${X0 + 1100}`, { stroke: COL.dim, 'stroke-width': 3 });
+    const bar = (i, v, col, label, t0) => {
+      const x = X0 + i * 380, r = mk('rect', { x, width: 220, rx: 10, fill: col, 'fill-opacity': .85 }, p);
+      put(r, { o: 0 }); show(r, t0);
+      prog(q => { const h = H * v / 100 * io(q); r.setAttribute('y', (Y0 - h).toFixed(1)); r.setAttribute('height', h.toFixed(1)); }, t0, 1, lin);
+      txt(p, v + '%', x + 110, Y0 - H * v / 100 - 18, t0 + .8, { size: 32, weight: 700, fill: col, anchor: 'middle' });
+      put(para(p, label, x + 110, Y0 + 40, null, { size: 21, maxW: 300, anchor: 'middle', fill: COL.chalk }), { o: 0 });
+      show(p.lastChild, t0);
+    };
+    bar(0, 61, COL.bad, 'после 8 недель иммобилизации', m('acl', 1));
+    bar(1, 79, COL.int, 'через 5 месяцев тренировки', m('acl', 3));
+    bar(2, 91, COL.good, 'через 12 месяцев', m('acl', 5));
+    infoCard(p, 840, 150, 680, 170, 'иммобилизация', 'новые волокна слабо связаны, больше беспорядочных сшивок, хуже смазка → спайки', COL.bad, m('imm'), { size: 22 });
+  }],
+
+  ['other', 'Что ещё ослабляет коллаген', (m) => {
+    const p = panel(0);
+    [['бездействие', 'меньше коллагеновых волокон, ткань слабее; восстановление — около 5 месяцев регулярной нагрузки', COL.int, 'inact'],
+     ['возраст', 'ниже прочность и жёсткость, медленнее адаптация — выше риск перегрузки и разрывов', COL.real, 'age'],
+     ['кортикостероиды', 'надолго снижают прочность; у места инъекции клетки не появляются до 15 недель', COL.bad, 'ster'],
+     ['травма', 'слабый коллаген III типа → с ~3-й недели перестройка в I тип, от месяцев до года', COL.nat, 'inj'],
+     ['и ещё', 'дефицит питания, гормональные нарушения, диализ', COL.dim, 'misc']].forEach(([t1, t2, col, mark], i) => {
+      const g = G(p, { o: 0, x: -16 }), y = 140 + i * 140;
+      mk('rect', { x: 120, y: y - 34, width: 14, height: 96, rx: 7, fill: col }, g);
+      T(g, t1, { x: 160, y, size: 28, weight: 700, fill: col });
+      put(para(g, t2, 160, y + 40, null, { size: 23, fill: COL.chalk, maxW: 1300 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-coll', prompt: ['Ослабляет или укрепляет соединительную ткань?'],
+    build: grid([
+      { parts: ['Иммобилизация'], ans: ['w'], why: 'Слабые связи, спайки.' },
+      { parts: ['Регулярная циклическая нагрузка'], ans: ['s'], why: 'Физическая активность укрепляет соединительную ткань.' },
+      { parts: ['Кортикостероиды'], ans: ['w'], why: 'Надолго снижают прочность коллагена.' },
+      { parts: ['Старение'], ans: ['w'], why: 'Ниже прочность и жёсткость.' },
+      { parts: ['Бездействие'], ans: ['w'], why: 'Меньше коллагена; восстановление — около 5 месяцев.' },
+    ], [['w', 'Ослабляет', COL.bad], ['s', 'Укрепляет', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['При быстрой нагрузке ткань жёстче, поэтому растягивают медленно.', 'w1'],
+     ['Ползучесть — удлинение при постоянной силе; релаксация — падение силы при постоянной длине.', 'w2'],
+     ['Повторные нагрузки без отдыха ведут к усталости ткани; между сеансами нужно время.', 'w3'],
+     ['Иммобилизация, бездействие, возраст, стероиды и травма ослабляют коллаген.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-case', prompt: ['Пациентке 70 лет, она много лет принимает кортикостероиды; после иммобилизации колена нужна растяжка. Что выбрать?'],
+    build: choice([
+      ['Медленную растяжку с малой силой, постепенно увеличивая дозу и оставляя время на восстановление'],
+      ['Быструю интенсивную растяжку каждый день'],
+      ['Резкие повторные рывки в конце объёма'],
+      ['Растягивать до сильной боли, чтобы ускорить результат'],
+    ], 0, 'Возраст, стероиды и иммобилизация ослабили ткань: малая сила, медленно, с отдыхом между сеансами.',
+    [null, 'Быстрая нагрузка делает ткань жёстче, а ослабленная ткань рвётся легче; нужны перерывы.', 'Повторные сильные нагрузки ведут к усталости и разрыву ткани.', 'Сильная боль — признак повреждения и будущего рубца.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['При быстрой нагрузке ткань становится жёстче.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Ползучесть — уменьшение силы при постоянной длине.'], ans: ['f'], why: 'Неверно: это релаксация напряжения.' },
+      { parts: ['Нагрев ткани усиливает ползучесть.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['После иммобилизации прочность связки возвращается за пару недель.'], ans: ['f'], why: 'Неверно: через год — около 91%.' },
+      { parts: ['Без использования нового объёма ткань может вернуться к прежней длине.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

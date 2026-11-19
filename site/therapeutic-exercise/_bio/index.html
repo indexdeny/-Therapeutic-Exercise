@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>bio sandbox</title><link rel="stylesheet" href="../lib/engine.css"></head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script>
+const CHAPTER = { number: 996, title: 'bio sandbox', minutes: 1, language: 'ru' };
+var BIO = [];
+</script>
+<script>
+// Sandbox tests for the biomechanics layer: each test returns true/false or { ok, detail }.
+const near = (a, b, e = .5) => Math.abs(a - b) <= e;
+const angD = (u, v) => { let d = Math.abs(bioAng(u) - bioAng(v)) % 360; return d > 180 ? 360 - d : d; };
+const dirOf = (A, B) => bioUnit([B[0] - A[0], B[1] - A[1]]);
+function fresh() { scene.replaceChildren(); TW = []; BIO_REG.clear(); BIO = []; BIO_MODE = 'lesson'; BIO_BEAT = 'b'; BIO_FIGN = 0; }
+const mkFig = (pose, o = {}) => fig(scene, { x: 600, y: 400, s: 1, pose, ...o });
+const SITK = k => ({ ...SIT, t: 0, hN: 90, kN: k });
+const W8 = { type: 'weight', at: 'AN', w: 1 }, DOWN = [0, 1], ID = P => P;
+window.TESTS = {
+  kneeZero: () => { fresh(); const f = mkFig(SITK(45)), G0 = bioGeoFig(f, 'kN'), P = k => figPt(f, f.pts[k]);
+    const z = angD(G0.zero, dirOf(P('H'), P('KN'))), pr = angD(G0.prox, dirOf(P('KN'), P('H')));
+    return { ok: near(G0.th, 45, .01) && z < 1 && pr < 1, detail: [G0.th, z, pr].join() }; },
+  kneeZeroFacingLeft: () => { fresh(); const f = mkFig(SITK(45), { dir: -1 }), G0 = bioGeoFig(f, 'kN'), P = k => figPt(f, f.pts[k]);
+    const z = angD(G0.zero, dirOf(P('H'), P('KN'))); return { ok: z < 1, detail: z }; },
+  zeros: () => { fresh(); const f = mkFig({ ...STAND, t: 0, aN: 60, eN: 30, hN: 40, kN: 50, fN: 10 }), P = k => figPt(f, f.pts[k]), d = {};
+    d.a = angD(bioGeoFig(f, 'aN').zero, dirOf(P('Sh'), P('H')));          // arm along the trunk
+    d.e = angD(bioGeoFig(f, 'eN').zero, dirOf(P('Sh'), P('EN')));         // forearm continues the humerus
+    d.h = angD(bioGeoFig(f, 'hN').zero, dirOf(P('Sh'), P('H')));          // thigh continues the trunk
+    d.k = angD(bioGeoFig(f, 'kN').zero, dirOf(P('H'), P('KN')));          // shank continues the thigh
+    d.f = Math.abs(90 - angD(bioGeoFig(f, 'fN').zero, dirOf(P('KN'), P('AN'))));   // foot square to the shank
+    const th = ['aN', 'eN', 'hN', 'kN', 'fN'].map(k => bioGeoFig(f, k).th).join();
+    return { ok: Object.values(d).every(v => v < 1) && th === '60,30,40,50,10', detail: JSON.stringify(d) + ' ' + th }; },
+  handEnd: () => { fresh(); const f = mkFig({ ...STAND, aN: 90, eN: 0 }), W = f.pts.WN, X = f.pts.XN;
+    return { ok: !!X && near(Math.hypot(X[0] - W[0], X[1] - W[1]), RIG.hand, .01), detail: String(X) }; },
+  leverHorizontal: () => { fresh(); const f = mkFig(SITK(0)), G0 = bioGeoFig(f, 'kN'), F = bioForces(G0, { load: W8 }, DOWN, ID);
+    const A = figPt(f, f.pts.AN), M = bioM(G0.C, G0.k, [F.seg, F.load]);
+    const want = F.W * Math.abs(F.seg.P[0] - G0.C[0]) + F.W * Math.abs(A[0] - G0.C[0]);
+    return { ok: near(Math.abs(M), want, want * .01) && near(F.load.P[0], A[0], .01), detail: M + ' vs ' + want }; },
+  leverVertical: () => { fresh(); const f = mkFig(SITK(90)), G0 = bioGeoFig(f, 'kN'), q = { load: W8, range: [0, 90] };
+    const F = bioForces(G0, q, DOWN, ID), M = bioM(G0.C, G0.k, [F.seg, F.load]), cv = bioCurve(G0, q, DOWN, ID);
+    return { ok: Math.abs(M) < cv.max * .05, detail: M + ' / ' + cv.max }; },
+  curveMax: () => { fresh(); const q = { load: W8, range: [0, 90] }, G0 = bioGeoFig(mkFig(SITK(45)), 'kN'), cv = bioCurve(G0, q, DOWN, ID);
+    const G1 = bioGeoFig(mkFig(SITK(0)), 'kN'), F1 = bioForces(G1, q, DOWN, ID), M0 = Math.abs(bioM(G1.C, G1.k, [F1.seg, F1.load]));
+    return { ok: cv.max >= M0 * .999 && cv.max <= M0 * 1.03 && near(cv.pts[0][0], 0) && near(cv.pts[60][0], 90) && !cv.signed, detail: cv.max + ' vs ' + M0 }; },
+  signedCurve: () => { fresh(); const pt = supine(scene, 800, 500, 1, null, { aN: 0 }), G0 = bioGeoFig(pt, 'aN');
+    const cv = bioCurve(G0, { load: { type: 'weight', at: 'WN', w: 1 }, range: [0, 180] }, DOWN, ID), v = cv.pts.map(p => p[1]);
+    return { ok: cv.signed && v[0] > 0 && v[60] < 0 && Math.abs(v[30]) < cv.max * .1, detail: [v[0], v[30], v[60]].map(x => x.toFixed(2)).join() }; },
+  handForce: () => { fresh(); const f = mkFig(SITK(45)), G0 = bioGeoFig(f, 'kN'), F = bioForces(G0, { load: { type: 'hand', at: .5, w: 1 } }, DOWN, ID);
+    const t = rotPt(G0.u[0], G0.u[1], G0.k), tan = [t[0] - G0.u[0], t[1] - G0.u[1]];
+    return { ok: F.load.F[0] * tan[0] + F.load.F[1] * tan[1] > 0 && near(F.load.P[0], G0.C[0] + G0.u[0] * G0.len * .5, .01) && F.load.kind === 'res', detail: F.load.F.join() }; },
+  pulley: () => { fresh(); const f = mkFig(SITK(45)), G0 = bioGeoFig(f, 'kN'), A = figPt(f, f.pts.AN), an = [A[0] + 300, A[1]];
+    const F = bioForces(G0, { load: { type: 'pulley', at: 'AN', w: 2, anchor: an } }, DOWN, ID);
+    return { ok: near(F.load.F[0], 2 * F.W, 1e-6) && near(F.load.F[1], 0, 1e-6), detail: F.load.F.join() }; },
+  customAngle: () => { fresh(); const C = [800, 400], R = 100, a = rad(-60);
+    const L = bioJoint('rot', scene, () => ({ C, end: [C[0] + R * Math.sin(a), C[1] - R * Math.cos(a)], zero: [0, -1], k: -1, seg: 'fa' }));
+    const G0 = bioGeoCustom(L); return { ok: near(G0.th, 60, .01) && near(G0.len, 100, .01), detail: G0.th }; },
+  customAbs: () => { fresh(); const C = [800, 400], R = 100, a = rad(-60);
+    BIO = [{ beat: 'b', fig: null, joint: 'rot', level: 'angle' }];
+    const L = bioJoint('rot', scene, () => ({ C, end: [C[0] + R * Math.sin(a), C[1] - R * Math.cos(a)], zero: [0, -1], k: 1, range: [-90, 90], abs: true }));
+    bioDraw(L, 0); const pills = [...L.g.querySelectorAll('text')].map(t => t.textContent).filter(s => s.endsWith('°') && s !== '0°');
+    return { ok: near(bioGeoCustom(L).th, -60, .01) && pills.includes('60°') && !pills.some(s => s.startsWith('−6')), detail: pills.join() }; },
+  muscleAuto: () => { fresh(); const f = mkFig(SITK(45)), mu = muscleOn(f, ...MUSCLE.rectus); mu.act(.9);
+    const a = !!bioMuscle(f, 'kN', null), b = !bioMuscle(f, 'eN', null), c = !bioMuscle(f, 'kN', { muscle: null });
+    mu.act(.1); const d = !bioMuscle(f, 'kN', null), e = !!bioMuscle(f, 'kN', { muscle: 'rectus' });
+    return { ok: a && b && c && d && e, detail: [a, b, c, d, e].join() }; },
+  figNumbers: () => { fresh(); const a = mkFig(STAND), b = mkFig(STAND); return { ok: a.bio.n === 0 && b.bio.n === 1 && a.bio.beat === 'b', detail: [a.bio.n, b.bio.n, a.bio.beat].join() }; },
+  levels: () => { fresh(); const f = mkFig(SITK(45)), L = f.bio, n = b => L.g ? L.g.querySelectorAll(`[data-b="${b}"]`).length : 0, out = [];
+    for (const level of ['angle', 'forces', 'full']) { BIO = [{ beat: 'b', fig: 0, joint: 'kN', level, load: W8 }]; bioDraw(L, 0); out.push([n('gon'), n('forces'), n('bars')].join('')); }
+    return { ok: out.join() === '100,110,111', detail: out.join() }; },
+  fromTo: () => { fresh(); const f = mkFig(SITK(45)), L = f.bio, sh = () => !!L.g && L.g.getAttribute('display') !== 'none';
+    BIO = [{ beat: 'b', fig: 0, joint: 'kN', from: 1, to: 2 }]; bioDraw(L, .5); const a = sh(); bioDraw(L, 1.5); const b = sh(); bioDraw(L, 2.5); const c = sh();
+    BIO = [{ beat: 'b', fig: 0, joint: 'kN', enabled: false }]; bioDraw(L, 1); const d = sh();
+    return { ok: !a && b && !c && !d, detail: [a, b, c, d].join() }; },
+  otherFigure: () => { fresh(); mkFig(STAND); const g = mkFig(SITK(45)); BIO = [{ beat: 'b', fig: 0, joint: 'kN' }]; bioDraw(g.bio, 0);
+    return { ok: !g.bio.g || g.bio.g.getAttribute('display') === 'none', detail: String(g.bio.g && g.bio.g.getAttribute('display')) }; },
+  labelFirst: () => { fresh(); const fs = [0, 1, 2].map(() => mkFig(SITK(45)));
+    BIO = [{ beat: 'b', fig: 0, joint: 'kN', level: 'angle' }, { beat: 'b', fig: 1, joint: 'kN', load: W8 }, { beat: 'b', fig: 2, joint: 'kN', load: W8 }];
+    fs.forEach(f => bioDraw(f.bio, 0)); const has = f => [...f.bio.g.querySelectorAll('text')].some(t => t.textContent === 'плечо силы');
+    return { ok: bioLabelPlace() === 1 && has(fs[1]) && !has(fs[2]), detail: [bioLabelPlace(), has(fs[1]), has(fs[2])].join() }; },
+  musNotLonger: () => { fresh(); const f = mkFig(SITK(45)), mu = muscleOn(f, ...MUSCLE.rectus); mu.act(.9);
+    BIO = [{ beat: 'b', fig: 0, joint: 'kN', load: W8 }]; bioDraw(f.bio, 0);
+    const len = k => +f.bio.g.querySelector(`[data-b="arrow-${k}"]`).getAttribute('data-len');
+    const bars = f.bio.g.querySelector('[data-b="bars"]').textContent;
+    return { ok: len('mus') <= len('load') && bars.includes('момент мышцы') && bars.includes('≈'), detail: [len('mus'), len('load'), bars].join(' ') }; },
+  pillDegrees: () => { fresh(); const f = mkFig(SITK(45)); BIO = [{ beat: 'b', fig: 0, joint: 'kN', level: 'angle' }]; bioDraw(f.bio, 0);
+    const a = [...f.bio.g.querySelectorAll('text')].some(t => t.textContent === '45°');
+    BIO = [{ beat: 'b', fig: 0, joint: 'kN', level: 'angle', gon: 'compact' }]; bioDraw(f.bio, 0);
+    const b = f.bio.g.querySelectorAll('[data-b="gon"] text').length === 1;
+    return { ok: a && b, detail: [a, b].join() }; },
+  barsAuto: () => { fresh(); T(scene, 'занято', { x: 1300, y: 160, size: 30 }); const f = mkFig(SITK(45));
+    BIO = [{ beat: 'b', fig: 0, joint: 'kN', load: W8 }]; bioDraw(f.bio, 0);
+    return { ok: !!f.bio.spot && f.bio.spot[1] > 400, detail: String(f.bio.spot) }; },
+  barsNamed: () => { fresh(); const f = mkFig(SITK(45)); BIO = [{ beat: 'b', fig: 0, joint: 'kN', load: W8, bars: [100, 120] }]; bioDraw(f.bio, 0);
+    const r = f.bio.g.querySelector('[data-b="bars"] rect'); return { ok: +r.getAttribute('x') === 100 && +r.getAttribute('y') === 120, detail: r.getAttribute('x') + ',' + r.getAttribute('y') }; },
+  curveDrawn: () => { fresh(); const f = mkFig(SITK(45)); BIO = [{ beat: 'b', fig: 0, joint: 'kN', load: W8, curve: true, range: [0, 90] }]; bioDraw(f.bio, 0);
+    const t = f.bio.g.querySelector('[data-b="bars"]').textContent; return { ok: t.includes('угол сустава') && t.includes('90°'), detail: t }; },
+  hiddenFigure: () => { fresh(); const f = mkFig(SITK(45)); put(f.g, { o: 0 }); BIO = [{ beat: 'b', fig: 0, joint: 'kN' }]; bioDraw(f.bio, 0);
+    return !f.bio.g || f.bio.g.getAttribute('display') === 'none'; },
+  noPlacesNoDom: () => { fresh(); const f = mkFig(SITK(45)); bioTick(0); return !f.bio.g; },
+  defaultMode: () => { BIO_MODE = null; return bioMode() === 'lesson'; },
+  keyCycle: () => { fresh(); bioInit(); bioSet('lesson'); const seen = [];
+    for (let i = 0; i < 5; i++) { document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB', key: 'b', bubbles: true })); seen.push(bioMode()); }
+    let s = null; try { s = localStorage.getItem('animebook:bio'); } catch {}
+    return { ok: seen.join() === 'angle,forces,full,off,lesson' && s === 'lesson' && !!document.getElementById('bioToast'), detail: seen.join() + ' ' + s }; },
+  keyInInput: () => { fresh(); bioInit(); bioSet('lesson'); const inp = document.createElement('input'); document.body.appendChild(inp); inp.focus();
+    inp.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB', key: 'b', bubbles: true })); inp.remove(); return bioMode() === 'lesson'; },
+  keyWithHelp: () => { fresh(); bioInit(); bioSet('lesson'); const help = document.getElementById('help'); help.hidden = false;
+    document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB', key: 'b', bubbles: true })); help.hidden = true; return bioMode() === 'lesson'; },
+  keyModeAnyFigure: () => { fresh(); const f = mkFig(SITK(45)); bioSet('angle'); bioTick(0); const a = !!f.bio.g && f.bio.g.getAttribute('display') !== 'none';
+    bioSet('off'); const b = f.bio.g.getAttribute('display') === 'none'; bioSet('lesson'); return { ok: a && b, detail: [a, b].join() }; },
+  autoJoint: () => { fresh(); const f = mkFig(STAND), L = f.bio; let k1 = null, k3 = null;
+    for (let i = 0; i <= 10; i++) { f.set({ kN: 6 * i }); k1 = bioAutoJoint(L, i * .05); }
+    f.set({ eN: 120 }); const k2 = bioAutoJoint(L, .6);                       // the elbow moved more, but the knee was chosen .6 s ago
+    for (let i = 13; i <= 24; i++) k3 = bioAutoJoint(L, i * .05);              // a second later the elbow takes over
+    const g = mkFig({ ...STAND, eN: 95 }), k4 = bioAutoJoint(g.bio, 0);       // a still figure: the joint farthest from standing
+    return { ok: k1 === 'kN' && k2 === 'kN' && k3 === 'eN' && k4 === 'eN', detail: [k1, k2, k3, k4].join() }; },
+  autoJointFirstGuess: () => { fresh(); const f = mkFig({ ...SIT, kN: 90 }), L = f.bio; let k = null;   // the hip is farthest from standing,
+    for (let i = 0; i <= 5; i++) { f.set({ kN: 90 - 8 * i }); k = bioAutoJoint(L, i * .05); }        // but the knee is what moves
+    return { ok: k === 'kN', detail: k }; },
+  helperSkipped: () => { fresh(); const th = mkFig(SITK(45), { col: '#b9cfe0' }); bioSet('full'); bioDraw(th.bio, 0);
+    const a = !th.bio.g || th.bio.g.getAttribute('display') === 'none';
+    bioSet('lesson'); BIO = [{ beat: 'b', fig: 0, joint: 'kN', level: 'angle' }]; bioDraw(th.bio, 0); const b = !!th.bio.g && th.bio.g.getAttribute('display') !== 'none';
+    return { ok: th.bio.helper && a && b, detail: [th.bio.helper, a, b].join() }; },
+  hiddenLimbSkipped: () => { fresh(); const f = mkFig({ ...STAND, eN: 120, kN: 30 }); f.parts.faN.e.setAttribute('opacity', 0);
+    const k = bioAutoJoint(f.bio, 0); return { ok: k === 'kN', detail: k }; },
+  helpBio: () => { bioInit(); const h = document.getElementById('helpBio'); return !!h && !h.hidden && h.textContent.includes('Биомеханика'); },
+};
+window.TESTS_Q = {
+  queryWins: () => { BIO_MODE = null; return { ok: bioMode() === 'full', detail: bioMode() }; },
+};
+</script>
+</body></html>

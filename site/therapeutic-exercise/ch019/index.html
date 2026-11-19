@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Программа оздоровления за пять шагов — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 19, title: 'Программа оздоровления за пять шагов', minutes: 8, language: 'ru', next: '../ch020/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch019/cards.ru.json
+const CARDS_SHORT = {
+  "скрининг\nвалидные и надёжные инструменты": "надёжные инструменты",
+  "обучение\nпрограмма и раздаточные материалы": "раздаточные материалы",
+  "упражнения\nплан каждого занятия": "план каждого занятия",
+  "потребность\nнаучить женщин с остеопорозом безопасно выполнять силовые упражнения": "остеопороз → безопасные силовые упражнения",
+  "цель\nдва уровня занятий: профилактика переломов и правильная техника": "профилактика переломов + техника",
+  "мотивация\nспросить участников, что их мотивирует": "спросить, что мотивирует",
+  "дети\nвесело и не слишком строго": "весело и не слишком строго",
+  "пожилые\nначинать медленно, чтобы был успех; встроить в распорядок; светлый и доступный зал": "медленно → успех; доступный зал",
+  "после скрининга\nрезультаты и рекомендации — домой": "результаты и рекомендации — домой",
+};
+// cards-short end
+
+// The five steps — one colour each.
+const STEP5 = [['потребность', COL.whole], ['цели и задачи', COL.good], ['разработка', COL.task], ['проведение', COL.real], ['оценка', COL.rat]];
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+// The step number badge in the corner of a beat.
+function stepTag(p, i, t0) {
+  const [s, c] = STEP5[i];
+  return pill(p, `шаг ${i + 1} · ${s}`, 1380, 60, t0, { col: c, size: 24 });
+}
+// A row of small person icons; on[i] colours the i-th one.
+function people(p, x0, y, n, t0, col = COL.chalk, gap = 52) {
+  return Array.from({ length: n }, (_, i) => {
+    const g = G(p, { x: x0 + i * gap, y, o: 0 });
+    mk('circle', { cy: -34, r: 11, fill: col }, g);
+    mk('path', { d: 'M-15 12V-8Q-15 -20 0 -20Q15 -20 15 -8V12Z', fill: col }, g);
+    show(g, t0 + i * .08, .25);
+    return g;
+  });
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Пять шагов', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 2 · Урок 19', { x: 800, y: 250, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Программа оздоровления за пять шагов', { x: 800, y: 345, size: 58, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как превратить идею в работающую программу', 800, 440, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    mk('ellipse', { cx: 800, cy: 680, rx: 110, ry: 90, fill: 'none', stroke: COL.faint, 'stroke-width': 3, 'stroke-dasharray': '6 8' }, art);
+    STEP5.forEach(([, c], i) => { const a = rad(-90 + i * 72); mk('circle', { cx: 800 + 110 * Math.cos(a), cy: 680 + 90 * Math.sin(a), r: 18, fill: c }, art); });
+    show(art, m('sub', .2));
+    const d = mk('circle', { r: 10, fill: COL.chalk }, art);
+    prog(q => { const a = rad(-90) + q * 2 * Math.PI; put(d, { x: 800 + 110 * Math.cos(a), y: 680 + 90 * Math.sin(a) }); }, m('sub', .3), Math.max(1.5, D - m('sub', .3) - 1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['steps', 'Пять шагов', (m) => {
+    const p = panel(0);
+    head(p, 'Пять шагов (бокс 2.8)', m('five'), 70, COL.chalk);
+    const ring = cycleRing(p, { cx: 800, cy: 450, r: 420, ry: 280, items: STEP5.map(([s]) => s), col: COL.chalk, w: 300, size: 28 });
+    ring.nodes.forEach((nd, i) => {
+      nd.box.querySelector('rect').setAttribute('stroke', STEP5[i][1]);
+      nd.box.querySelectorAll('text').forEach(t => t.setAttribute('fill', STEP5[i][1]));
+      T(nd.box, String(i + 1), { x: nd.x - 128, y: nd.y + 10, size: 28, weight: 700, fill: STEP5[i][1] });
+      ring.reveal(i, m('s' + (i + 1)));
+      ring.arc(i, m(i < 4 ? 's' + (i + 2) : 'loop', -.5));
+    });
+    ring.runner(m('loop', .4), 3, 1, COL.chalk);
+    txt(p, 'оценка → что улучшить', 800, 460, m('loop', .2), { size: 27, weight: 700, fill: STEP5[4][1], anchor: 'middle' });
+  }],
+
+  ['need', 'Потребность, цели и задачи', (m) => {
+    const p = panel(0);
+    hide(stepTag(p, 0, m('aud')), m('goal'), .3);
+    txt(p, 'для кого программа?', 450, 120, m('aud'), { size: 30, weight: 700, fill: STEP5[0][1], anchor: 'middle' });
+    ['дети', 'взрослые', 'пожилые', 'предприятия', 'школы', 'сообщество', 'особая группа: например, болезнь Паркинсона'].forEach((s, i) => pill(p, s, i < 6 ? 170 + (i % 3) * 280 : 450, 190 + Math.floor(i / 3) * 70, m('aud', .4 + i * .45), { col: STEP5[0][1], size: 25 }));
+    stepTag(p, 1, m('goal'));
+    const g2 = G(p, { o: 0 });
+    roundBox(g2, 860, 140, 650, 470, STEP5[1][1], PANEL, 3);
+    T(g2, 'назначение программы', { x: 890, y: 196, size: 27, weight: 700, fill: STEP5[1][1] });
+    T(g2, 'цели:', { x: 890, y: 266, size: 27, weight: 700, fill: STEP5[1][1] });
+    ['скрининг', 'обучение', 'упражнения'].forEach((s, i) => T(g2, '• ' + s, { x: 920, y: 312 + i * 42, size: 25 }));
+    T(g2, 'конкретные задачи', { x: 890, y: 480, size: 27, weight: 700, fill: STEP5[1][1] });
+    T(g2, 'что именно участники узнают и сделают', { x: 890, y: 524, size: 23, fill: COL.dim });
+    show(g2, m('goal', .3));
+  }],
+
+  ['dev', 'Разработка', (m) => {
+    const p = panel(0);
+    stepTag(p, 2, m('dev'));
+    head(p, 'Разработать вмешательство', m('dev'), 70, COL.chalk);
+    infoCard(p, 90, 130, 450, 200, 'скрининг', 'валидные и надёжные инструменты', STEP5[2][1], m('scr'), { size: 24 });
+    infoCard(p, 575, 130, 450, 200, 'обучение', 'программа и раздаточные материалы', STEP5[2][1], m('scr', 2), { size: 24 });
+    infoCard(p, 1060, 130, 450, 200, 'упражнения', 'план каждого занятия', STEP5[2][1], m('scr', 4), { size: 24 });
+    txt(p, 'логистика', 800, 400, m('log'), { size: 28, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const L6 = ['помещение', 'парковка и доступ', 'время и длительность', 'сколько людей вместит', 'кто проводит', 'бюджет и плата'];
+    L6.forEach((s, i) => {
+      const x = 170 + (i % 3) * 460, y = 470 + Math.floor(i / 3) * 90, g = G(p, { o: 0 });
+      mk('rect', { x, y: y - 24, width: 32, height: 32, rx: 6, fill: 'none', stroke: COL.dim, 'stroke-width': 2.5 }, g);
+      T(g, s, { x: x + 48, y: y + 2, size: 26 });
+      show(g, m('log', .4 + i * .6));
+      checkMark(p, x + 16, y - 8, m('log', .8 + i * .6), COL.good, 1);
+    });
+  }],
+
+  ['impl', 'Проведение и оценка', (m) => {
+    const p = panel(0);
+    hide(stepTag(p, 3, m('impl')), m('eval'), .3);
+    txt(p, 'план', 200, 168, m('impl', .3), { size: 24, fill: COL.dim });
+    draw(path(p, 'M280 160H700', { stroke: COL.dim, 'stroke-width': 4, 'stroke-dasharray': '10 8' }, { d: 0 }), m('impl', .3), .8);
+    txt(p, 'жизнь', 200, 248, m('impl', 1), { size: 24, fill: STEP5[3][1] });
+    draw(path(p, 'M280 240C360 200 400 290 470 240S600 200 700 250', { stroke: STEP5[3][1], 'stroke-width': 4 }, { d: 0 }), m('impl', 1), 1);
+    labelBox(p, 490, 340, 520, ['быть гибким и готовым к неожиданностям'], STEP5[3][1], m('impl', 2), { size: 24 });
+    stepTag(p, 4, m('eval'));
+    const sv = G(p, { o: 0 });
+    roundBox(sv, 900, 130, 600, 220, STEP5[4][1], PANEL, 2.5);
+    T(sv, 'анкета участников', { x: 930, y: 180, size: 26, weight: 700, fill: STEP5[4][1] });
+    ['место', 'время', 'содержание', 'удовлетворённость'].forEach((s, i) => { T(sv, s, { x: 930, y: 222 + i * 30, size: 21, fill: COL.dim }); for (let j = 0; j < 5; j++) mk('path', { d: `M${1170 + j * 30} ${210 + i * 30}l4 9h9l-7 6l3 9l-9 -6l-9 6l3 -9l-7 -6h9z`, fill: j < 4 ? COL.int : 'none', stroke: COL.int, 'stroke-width': 1 }, sv); });
+    show(sv, m('eval', .3));
+    // baseline and progress
+    const bars = [[.35, 'исходно'], [.55, 'по ходу'], [.75, 'в конце']];
+    bars.forEach(([v, s], i) => {
+      const x = 180 + i * 160, r = mk('rect', { x, y: 720, width: 110, height: 0, rx: 8, fill: COL.good, 'fill-opacity': .7 }, p);
+      prog(q => { r.setAttribute('y', (720 - 240 * v * q).toFixed(1)); r.setAttribute('height', (240 * v * q).toFixed(1)); }, m('base', .3 + i * .5), .7, out);
+      txt(p, s, x + 55, 756, m('base', .3 + i * .5), { size: 22, fill: COL.dim, anchor: 'middle' });
+    });
+    txt(p, 'упражнения: исходные данные и прогресс', 420, 470, m('base'), { size: 24, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'что улучшить?', 1200, 450, m('fb'), { size: 26, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ['другое время', 'меньшая группа', 'более длинные занятия'].forEach((s, i) => pill(p, s, 1200, 520 + i * 70, m('fb', .4 + i * .5), { col: STEP5[4][1], size: 25 }));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-step', prompt: ['Какой это шаг?'],
+    build: grid([
+      { parts: ['Решить, для кого программа: пожилые люди с риском падений'], ans: ['1'], why: 'Аудитория — шаг 1, потребность.' },
+      { parts: ['Забронировать зал и рассчитать бюджет'], ans: ['3'], why: 'Логистика — шаг 3, разработка.' },
+      { parts: ['Попросить участников заполнить анкету оценки'], ans: ['5'], why: 'Шаг 5, оценка.' },
+      { parts: ['Сформулировать: научить безопасной технике упражнений'], ans: ['2'], why: 'Цели и задачи — шаг 2.' },
+      { parts: ['Провести занятия, подстраиваясь под неожиданности'], ans: ['4'], why: 'Шаг 4, проведение.' },
+    ], STEP5.map(([s, c], i) => [String(i + 1), `${i + 1}. ${s[0].toUpperCase() + s.slice(1)}`, c]), { multi: false, text: true }),
+  }], done) }],
+
+  ['case1', 'Пример: остеопороз', (m) => {
+    const p = panel(0), GY = 380;
+    head(p, 'Пример из книги: занятия для женщин с остеопорозом', .2, 70, COL.chalk);
+    ground(p, 100, 720, GY, m('talk'));
+    const t = fig(p, { x: 170, y: GY - 182 * .5, s: .5, o: 0, col: '#b9cfe0', pose: { aN: 70, eN: 20 } }); show(t.g, m('talk'));
+    [330, 440, 550, 660].forEach((x, i) => { const f = fig(p, { x, y: GY - 182 * .45, s: .45, o: 0, dir: -1, col: '#d8c7b8' }); show(f.g, m('talk', .3 + i * .15)); });
+    txt(p, 'лекция для группы поддержки', 410, 440, m('talk', .4), { size: 24, fill: COL.dim, anchor: 'middle' });
+    pill(p, '«Сделайте нам занятия с отягощениями!»', 440, 510, m('ask'), { col: COL.int, size: 23 });
+    infoCard(p, 800, 120, 710, 150, 'потребность', 'научить женщин с остеопорозом безопасно выполнять силовые упражнения', STEP5[0][1], m('need'), { size: 23 });
+    infoCard(p, 800, 290, 710, 150, 'цель', 'два уровня занятий: профилактика переломов и правильная техника', STEP5[1][1], m('goal'), { size: 23 });
+    const O5 = ['влияние упражнений на кость', 'показания и противопоказания', 'техника: веса, ленты, тренажёры', 'участницы показывают технику', 'осанка и механика тела в быту'];
+    txt(p, 'задачи:', 820, 500, m('obj'), { size: 26, weight: 700, fill: STEP5[1][1] });
+    O5.forEach((s, i) => txt(p, `${i + 1}. ${s}`, 820, 545 + i * 42, m('obj', .4 + i * .8), { size: 23 }));
+  }],
+
+  ['case2', 'Первый уровень', (m) => {
+    const p = panel(0);
+    stepTag(p, 2, m('lv'));
+    txt(p, 'уровень 1 — четыре занятия', 520, 70, m('lv'), { size: 28, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const S4 = [['1', 'оценка равновесия, гибкости голеностопов, риска падений; осанка; сведение лопаток, втягивание подбородка, вставание со стула, наклон таза, носки–пятки', 'w1'], ['2', 'профилактика падений; упражнения с лентой', 'w2'], ['3', 'чего избегать, чтобы не перегружать тела позвонков; как поднимать вес и увеличивать его', 'w3'], ['4', 'с эрготерапевтами: осанка и механика тела — зубы, кровать, пылесос', 'w4']];
+    S4.forEach(([n, s, k], i) => {
+      const x = 90 + (i % 2) * 720, y = 120 + Math.floor(i / 2) * 250, g = G(p, { o: 0 });
+      roundBox(g, x, y, 690, 220, i === 3 ? COL.whole : STEP5[2][1], PANEL, 2.5);
+      T(g, 'занятие ' + n, { x: x + 24, y: y + 44, size: 27, weight: 700, fill: i === 3 ? COL.whole : STEP5[2][1] });
+      put(para(g, s, x + 24, y + 90, null, { size: 23, maxW: 640 }), { o: 1 });
+      show(g, m(k));
+    });
+    ['вторники 18:00–20:30', '4 недели', 'до 20 человек', 'папка материалов', 'буклет', '$25'].forEach((s, i) => pill(p, s, 200 + i * 240, 680, m('logi', .3 + i * .4), { col: COL.chalk, size: 23 }));
+  }],
+
+  ['case3', 'Итог примера', (m) => {
+    const p = panel(0);
+    hide(stepTag(p, 3, m('imp')), m('ev'), .3);
+    txt(p, 'пришли 10 участниц', 800, 160, m('imp'), { size: 30, weight: 700, fill: STEP5[3][1], anchor: 'middle' });
+    const P10 = people(p, 566, 300, 10, m('imp', .3));
+    stepTag(p, 4, m('ev'));
+    labelBox(p, 800, 430, 760, ['оценка в целом положительная', 'некоторым — другой день или время'], STEP5[4][1], m('ev', .3), { size: 26 });
+    P10.forEach((g, i) => { if (i < 8) tw(g, { s: 1.15 }, m('next', .3 + i * .1), .3); });
+    const hl = G(p, { o: 0 });
+    path(hl, 'M540 340H948', { stroke: COL.good, 'stroke-width': 6, 'stroke-linecap': 'round' });
+    show(hl, m('next', .2));
+    txt(p, '8 из 10 хотят уровень 2', 800, 600, m('next', 1), { size: 34, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['extra', 'Советы', (m) => {
+    const p = panel(0), GY = 300;
+    head(p, 'Дополнительные советы', .2, 70, COL.chalk);
+    ground(p, 90, 520, GY, m('spec'));
+    const r = fig(p, { x: 140, y: GY - 182 * .45, s: .45, o: 0 }); show(r.g, m('spec'));
+    walk(r, m('spec', .2), 3, { cycles: 5, dx: 200, running: true });
+    const bike = G(p, { o: 0 });
+    mk('circle', { cx: 440, cy: GY - 24, r: 22, fill: 'none', stroke: COL.dim, 'stroke-width': 3 }, bike);
+    mk('circle', { cx: 510, cy: GY - 24, r: 22, fill: 'none', stroke: COL.dim, 'stroke-width': 3 }, bike);
+    path(bike, `M440 ${GY - 24}L470 ${GY - 60}L510 ${GY - 24}M470 ${GY - 60}H500`, { stroke: COL.dim, 'stroke-width': 3 });
+    show(bike, m('spec', 1));
+    cross(p, 475, GY - 40, 40, m('spec', 1.6), 6);
+    txt(p, 'марафонцу — бегать, не велосипед', 300, 350, m('spec', .6), { size: 23, weight: 700, fill: COL.good, anchor: 'middle' });
+    infoCard(p, 600, 120, 430, 150, 'мотивация', 'спросить участников, что их мотивирует', COL.int, m('mot'), { size: 23 });
+    infoCard(p, 1070, 120, 440, 150, 'дети', 'весело и не слишком строго', COL.task, m('kids'), { size: 23 });
+    infoCard(p, 600, 300, 910, 150, 'пожилые', 'начинать медленно, чтобы был успех; встроить в распорядок; светлый и доступный зал', COL.whole, m('old'), { size: 23 });
+    // handouts: big print for older adults
+    const hd = G(p, { o: 0 });
+    roundBox(hd, 90, 480, 520, 260, COL.chalk, PANEL, 2);
+    T(hd, 'Аа', { x: 160, y: 600, size: 90, weight: 700, fill: COL.chalk });
+    T(hd, 'крупный шрифт', { x: 320, y: 560, size: 26, weight: 700 });
+    T(hd, 'простой язык', { x: 320, y: 600, size: 24, fill: COL.dim });
+    T(hd, 'мало терминов', { x: 320, y: 636, size: 24, fill: COL.dim });
+    T(hd, 'картинки упражнений', { x: 320, y: 672, size: 24, fill: COL.dim });
+    show(hd, m('hand'));
+    infoCard(p, 680, 520, 830, 150, 'после скрининга', 'результаты и рекомендации — домой', COL.good, m('scrh'), { size: 24 });
+  }],
+
+  ['adh', 'Приверженность в группе', (m) => {
+    const p = panel(0);
+    head(p, 'Что влияет на приверженность (табл. 2.5)', m('adh'), 70, COL.chalk);
+    txt(p, 'мешает', 420, 140, m('a1'), { size: 30, weight: 700, fill: COL.bad, anchor: 'middle' });
+    txt(p, 'помогает', 1180, 140, m('a2'), { size: 30, weight: 700, fill: COL.good, anchor: 'middle' });
+    const R7 = [['слабое руководство', 'сильный руководитель'], ['неудобное время и место', 'часть распорядка'], ['травма', 'без травм'], ['скука', 'удовольствие и разнообразие'], ['слабая личная вовлечённость', 'поддержка группы'], ['не видно прогресса', 'регулярно о прогрессе'], ['семья против', 'одобрение семьи']];
+    R7.forEach(([a, b], i) => {
+      const y = 200 + i * 80, late = i >= 4;
+      pill(p, a, 420, y, m(late ? 'a3' : 'a1', .3 + (late ? i - 4 : i) * .5), { col: COL.bad, size: 24 });
+      arrowTo(p, [640, y - 8], [960, y - 8], m(late ? 'a3' : 'a2', .3 + (late ? i - 4 : i) * .5), { col: COL.faint, w: 3 });
+      pill(p, b, 1180, y, m(late ? 'a3' : 'a2', .5 + (late ? i - 4 : i) * .5), { col: COL.good, size: 24 });
+    });
+  }],
+
+  ['q2', 'Быстрая проверка', () => {
+    const p = panel(0);
+    const a = G(p, { o: 0 });
+    roundBox(a, 120, 250, 420, 360, COL.chalk, PANEL, 2);
+    T(a, 'Аа', { x: 170, y: 380, size: 90, weight: 700, fill: COL.chalk });
+    [0, 1, 2].forEach(i => mk('rect', { x: 170, y: 420 + i * 40, width: 300 - i * 40, height: 14, rx: 7, fill: COL.faint }, a));
+    show(a, .2);
+  }, { ask: done => quiz({ x: 640, y: 170, w: 880, cls: 'side' }, [{
+    id: 'c-hand', prompt: ['Программа для пожилых людей. Какой раздаточный материал лучше?'],
+    build: choice([['Крупный шрифт, простой язык, картинки упражнений'], ['Мелкий шрифт, чтобы уместить больше терминов'], ['Только текст без картинок']], 0,
+      'Для пожилых — крупный шрифт, простой язык, мало терминов и картинки.',
+      [null, 'Пожилым нужен крупный шрифт, а медицинских терминов — как можно меньше.', 'Картинки упражнений нужны везде, где возможно.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 100, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Пять шагов: потребность, цели и задачи, разработка, проведение, оценка.', 'w1'],
+     ['Разработка: инструменты, материалы, план занятий, логистика и бюджет.', 'w2'],
+     ['Оценивают и удовлетворённость участников, и прогресс по исходным данным.', 'w3'],
+     ['Учитывайте аудиторию, специфичность упражнений и факторы приверженности.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 200 + i * 130, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+    labelBox(p, 800, 750, 620, ['Глава 2 пройдена'], COL.good, m('ch'), { size: 32 });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-adh', prompt: ['Помогает или мешает приверженности к групповым занятиям?'],
+    build: grid([
+      { parts: ['Занятия в удобное время, как часть распорядка'], ans: ['h'], why: 'Помогает.' },
+      { parts: ['Одни и те же упражнения каждый раз'], ans: ['b'], why: 'Скука мешает; помогает разнообразие.' },
+      { parts: ['Поддержка группы'], ans: ['h'], why: 'Помогает.' },
+      { parts: ['Участники не знают о своём прогрессе'], ans: ['b'], why: 'Мешает; помогают регулярные сообщения о прогрессе.' },
+      { parts: ['Семья одобряет занятия'], ans: ['h'], why: 'Помогает.' },
+    ], [['h', 'Помогает', COL.good], ['b', 'Мешает', COL.bad]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Первый шаг — определить потребность и аудиторию.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Марафонцу для подготовки достаточно велосипеда.'], ans: ['f'], why: 'Неверно: упражнения должны соответствовать цели — бегать.' },
+      { parts: ['В примере с остеопорозом четвёртое занятие провели вместе с эрготерапевтами.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Для пожилых программу лучше начинать с высокой нагрузки.'], ans: ['f'], why: 'Неверно: начинать медленно, чтобы был успех.' },
+      { parts: ['Программу оценивают только по мнению терапевта.'], ans: ['f'], why: 'Неверно: участники оценивают программу, а прогресс измеряют по данным.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

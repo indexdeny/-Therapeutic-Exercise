@@ -1,0 +1,20 @@
+[
+ {
+  "beat": "rec",
+  "fig": 4,
+  "target": "hamstrings",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает hamstrings, фигура ×0.55",
+  "off": "много фигур: две лупы с длинными линиями через подписи"
+ },
+ {
+  "beat": "rec",
+  "fig": 5,
+  "target": "biceps",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает biceps, фигура ×0.55",
+  "off": "много фигур: две лупы с длинными линиями через подписи"
+ }
+]

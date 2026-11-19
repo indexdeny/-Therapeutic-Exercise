@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Профилактика, хронические болезни и благополучие — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 14, title: 'Профилактика, хронические болезни и благополучие', minutes: 8, language: 'ru', next: '../ch015/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch014/cards.ru.json
+const CARDS_SHORT = {
+  "Укрепление здоровья\nусилия, которые помогают человеку, группе или сообществу осознать возможности профилактики и стремиться к ним": "осознать возможности профилактики",
+  "Общественное здравоохранение\nпредупреждать болезни, создавая ресурсы и среду, которые помогают людям оставаться здоровыми": "предупреждать болезни: ресурсы + среда",
+  "долгая жизнь\nбез предотвратимых болезней, инвалидности, травм и ранней смерти": "без ранней смерти",
+  "равенство\nв здоровье для всех групп": "для всех групп",
+  "среда\nсоциальная и физическая, которая способствует здоровью": "способствует здоровью",
+  "всю жизнь\nкачество жизни и здоровое поведение на всех этапах": "на всех этапах",
+};
+// cards-short end
+
+// Wellness dimensions (Six Dimensions of Health) — one colour each, kept through chapter 2.
+const DIM = [['социальное', COL.whole], ['профессиональное', COL.task], ['духовное', COL.real], ['физическое', COL.good], ['интеллектуальное', COL.int], ['эмоциональное', COL.rat]];
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+// A wellness wheel: six sectors whose filled radius shows a self-rating 0..1.
+function wheel(p, cx, cy, R, t0) {
+  const g = G(p, { o: 0 }), fills = [];
+  DIM.forEach(([name, c], i) => {
+    const a0 = rad(-90 + i * 60), a1 = rad(-90 + (i + 1) * 60), f = v => v.toFixed(1);
+    const sec = r => `M${cx} ${cy}L${f(cx + r * Math.cos(a0))} ${f(cy + r * Math.sin(a0))}A${r} ${r} 0 0 1 ${f(cx + r * Math.cos(a1))} ${f(cy + r * Math.sin(a1))}Z`;
+    mk('path', { d: sec(R), fill: 'none', stroke: c, 'stroke-width': 2.5 }, g);
+    const fl = mk('path', { d: sec(R * .02), fill: c, 'fill-opacity': .45 }, g);
+    fills.push(v => fl.setAttribute('d', sec(Math.max(1, R * v))));
+    const am = (a0 + a1) / 2, lx = cx + (R + 26) * Math.cos(am), ly = cy + (R + 26) * Math.sin(am);
+    T(g, name, { x: lx, y: ly + 8, size: 22, weight: 700, fill: c, anchor: Math.cos(am) > .3 ? 'start' : Math.cos(am) < -.3 ? 'end' : 'middle' });
+  });
+  show(g, t0);
+  // rate(values, t0): sectors grow to the given levels
+  g.rate = (vals, t1, from = null) => { const v0 = from || vals.map(() => 0); prog(q => vals.forEach((v, i) => fills[i](lerp(v0[i], v, q))), t1, 1.2, out); };
+  return g;
+}
+const heartD = 'M0 12C-8 -2 -30 -6 -30 12C-30 28 -10 38 0 48C10 38 30 28 30 12C30 -6 8 -2 0 12Z';
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Профилактика и благополучие', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 2 · Урок 14', { x: 800, y: 250, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Профилактика, хронические болезни', { x: 800, y: 335, size: 58, weight: 600, anchor: 'middle' });
+    T(g, 'и благополучие', { x: 800, y: 405, size: 50, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'от лечения болезней — к здоровью', 800, 490, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 800;
+    path(art, `M560 ${GY}H860`, { stroke: COL.faint, 'stroke-width': 3 });
+    const f = fig(art, { x: 600, y: GY - 182 * .5, s: .5 });
+    const w = wheel(art, 1010, 690, 70, 0);
+    w.querySelectorAll('text').forEach(t => t.remove());
+    show(art, m('sub', .2));
+    walk(f, m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), { cycles: 3, dx: 180 });
+    w.rate([.7, .8, .6, .85, .7, .75], m('sub', .6));
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['roles', 'Роль терапевта', (m) => {
+    const p = panel(0), GY = 520;
+    // from illness to wellness: a figure that starts with a limp and ends walking well
+    ground(p, 120, 1480, GY, m('adv'));
+    txt(p, 'болезнь', 200, GY + 50, m('adv'), { size: 28, weight: 700, fill: COL.bad, anchor: 'middle' });
+    txt(p, 'благополучие', 1400, GY + 50, m('adv'), { size: 28, weight: 700, fill: COL.good, anchor: 'middle' });
+    const f = fig(p, { x: 200, y: GY - 182 * .55, s: .55, o: 0, pose: { t: 20, hd: 16, hN: 24, hF: 20, kN: 12, kF: 12, fN: 8, fF: 8 } }); show(f.g, m('adv'));
+    const R6 = ['обучение', 'вмешательство', 'исследования', 'защита интересов', 'консультирование', 'выявление рисков'];
+    R6.forEach((s, i) => pill(p, s, 300 + i * 200, 180 + (i % 2) * 64, m('list', .2 + i * .5), { col: COL.task, size: 24 }));
+    const gap = G(p, { o: 0 });
+    for (let i = 0; i < 10; i++) mk('rect', { x: 330 + i * 94, y: GY - 6, width: 86, height: 16, rx: 5, fill: COL.good, 'fill-opacity': .25 + i * .05, stroke: COL.good, 'stroke-width': 1.5 }, gap);
+    show(gap, m('gap'));
+    poseTo(f, { t: 0, hd: 0, hN: STAND.hN, hF: STAND.hF, kN: STAND.kN, kF: STAND.kF, fN: 0, fF: 0 }, m('gap', .2), 1, io, ['AN', 200, GY]);
+    walk(f, m('gap', 1.2), 5, { cycles: 5, dx: 1000 });
+    // community: houses and a park
+    const com = G(p, { o: 0 });
+    [[560, 700], [680, 700], [800, 700]].forEach(([x, y]) => path(com, `M${x - 40} ${y}V${y - 50}L${x} ${y - 84}L${x + 40} ${y - 50}V${y}Z`, { stroke: COL.whole, 'stroke-width': 3 }));
+    mk('circle', { cx: 930, cy: 640, r: 34, fill: COL.good, 'fill-opacity': .3, stroke: COL.good, 'stroke-width': 3 }, com);
+    path(com, 'M930 674V700', { stroke: COL.good, 'stroke-width': 4 });
+    path(com, 'M500 702H990', { stroke: COL.faint, 'stroke-width': 3 });
+    show(com, m('comm'));
+    txt(p, 'среда для здорового образа жизни', 745, 750, m('comm', .4), { size: 24, fill: COL.whole, anchor: 'middle' });
+    labelBox(p, 1260, 680, 520, ['видение профессии:', 'преобразовать общество через движение'], COL.chalk, m('vis'), { size: 26 });
+  }],
+
+  ['terms', 'Ключевые понятия', (m) => {
+    const p = panel(0);
+    head(p, 'Ключевые понятия', .2, 70, COL.chalk);
+    // health: physical + mental + social, not just the absence of disease
+    const hg = G(p, { o: 0 });
+    roundBox(hg, 90, 110, 690, 320, COL.good, PANEL, 2.5);
+    T(hg, 'Здоровье (ВОЗ)', { x: 114, y: 154, size: 28, weight: 700, fill: COL.good });
+    [['физическое', 260, 260, COL.good], ['психическое', 400, 260, COL.whole], ['социальное', 330, 350, COL.task]].forEach(([s, x, y, c]) => {
+      mk('circle', { cx: x, cy: y, r: 74, fill: c, 'fill-opacity': .14, stroke: c, 'stroke-width': 2.5 }, hg);
+      T(hg, s, { x, y: y + 8, size: 20, weight: 700, fill: c, anchor: 'middle' });
+    });
+    put(para(hg, 'полное благополучие, а не только отсутствие болезней', 520, 250, null, { size: 23, maxW: 240 }), { o: 1 });
+    show(hg, m('health'));
+    const wg = G(p, { o: 0 });
+    roundBox(wg, 820, 110, 690, 320, COL.task, PANEL, 2.5);
+    T(wg, 'Благополучие (веллнес)', { x: 844, y: 154, size: 28, weight: 700, fill: COL.task });
+    ['физическое и эмоциональное здоровье', 'духовность', 'социальные связи'].forEach((s, i) => T(wg, '• ' + s, { x: 850, y: 210 + i * 40, size: 24 }));
+    show(wg, m('well'));
+    const pr = G(p, { o: 0 });
+    path(pr, 'M860 360H1300', { stroke: COL.task, 'stroke-width': 3, 'stroke-dasharray': '8 6' });
+    path(pr, 'M1290 350L1306 360L1290 370', { stroke: COL.task, 'stroke-width': 3 });
+    T(pr, 'активный процесс: осознать → выбрать', { x: 860, y: 404, size: 24, weight: 700, fill: COL.task });
+    show(pr, m('proc'));
+    infoCard(p, 90, 470, 690, 230, 'Укрепление здоровья', 'усилия, которые помогают человеку, группе или сообществу осознать возможности профилактики и стремиться к ним', COL.whole, m('promo'), { size: 23 });
+    infoCard(p, 820, 470, 690, 230, 'Общественное здравоохранение', 'предупреждать болезни, создавая ресурсы и среду, которые помогают людям оставаться здоровыми', COL.real, m('pub'), { size: 23 });
+  }],
+
+  ['chronic', 'Хронические болезни', (m) => {
+    const p = panel(0);
+    txt(p, '10 главных причин смерти (США)', 330, 90, m('top'), { size: 26, weight: 700, fill: COL.dim, anchor: 'middle' });
+    for (let i = 0; i < 10; i++) {
+      const c = mk('rect', { x: 90 + (i % 5) * 96, y: 120 + Math.floor(i / 5) * 96, width: 80, height: 80, rx: 12, fill: i < 7 ? COL.bad : COL.faint, 'fill-opacity': i < 7 ? .55 : .35 }, p);
+      put(c, { o: 0 }); show(c, m('top', .3 + i * .12));
+    }
+    txt(p, '7 из 10 — хронические', 330, 350, m('top', 1.6), { size: 26, weight: 700, fill: COL.bad, anchor: 'middle' });
+    // the top four
+    const I4 = [['сердце и сосуды', g => mk('path', { d: heartD, fill: COL.bad, 'fill-opacity': .5, stroke: COL.bad, 'stroke-width': 3 }, g)],
+      ['онкология', g => { mk('circle', { r: 26, fill: COL.rat, 'fill-opacity': .4, stroke: COL.rat, 'stroke-width': 3 }, g); mk('circle', { r: 9, fill: COL.rat }, g); }],
+      ['лёгкие', g => { path(g, 'M0 -30V0M0 0L-12 8M0 0L12 8', { stroke: COL.whole, 'stroke-width': 4 }); [-1, 1].forEach(s => mk('ellipse', { cx: s * 22, cy: 14, rx: 16, ry: 26, fill: COL.whole, 'fill-opacity': .35, stroke: COL.whole, 'stroke-width': 3 }, g)); }],
+      ['диабет', g => mk('path', { d: 'M0 -28C16 -6 20 6 0 20C-20 6 -16 -6 0 -28Z', fill: COL.int, 'fill-opacity': .5, stroke: COL.int, 'stroke-width': 3 }, g)]];
+    I4.forEach(([s, draw0], i) => {
+      const g = G(p, { x: 110 + i * 165, y: 470, o: 0 });
+      draw0(g);
+      T(g, s, { x: 0, y: 76, size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      pop(g, m('four', .2 + i * .5));
+    });
+    txt(p, 'в мире — около 2/3 смертей', 330, 640, m('world'), { size: 26, weight: 700, fill: COL.dim, anchor: 'middle' });
+    // behaviours → cascade
+    ['курение', 'малоподвижность', 'плохое питание', 'избыток алкоголя'].forEach((s, i) => pill(p, s, 860, 140 + i * 70, m('beh', .3 + i * .5), { col: COL.task, size: 25 }));
+    ['давление и инсульт', 'ожирение', 'диабет'].forEach((s, i) => {
+      pill(p, s, 1340, 175 + i * 70, m('casc', .4 + i * .5), { col: COL.bad, size: 25 });
+    });
+    arrowTo(p, [1010, 245], [1180, 245], m('casc'), { col: COL.dim, w: 5 });
+    const big = G(p, { o: 0 });
+    T(big, '> 76%', { x: 1100, y: 520, size: 96, weight: 700, fill: COL.bad, anchor: 'middle' });
+    T(big, 'взрослых — хотя бы одна хроническая болезнь (2013)', { x: 1100, y: 570, size: 23, fill: COL.dim, anchor: 'middle' });
+    show(big, m('pct'));
+    labelBox(p, 1100, 690, 720, ['оценка факторов риска — часть практики терапевта'], COL.good, m('pt'), { size: 25 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-risk', prompt: ['Повышает ли это поведение риск хронических болезней?'],
+    build: grid([
+      { parts: ['Курение'], ans: ['r'], why: 'Курение — рискованное поведение.' },
+      { parts: ['Ежедневная прогулка быстрым шагом'], ans: ['n'], why: 'Регулярная активность защищает.' },
+      { parts: ['Избыток алкоголя'], ans: ['r'], why: 'Рискованное поведение.' },
+      { parts: ['Сидячий образ жизни без упражнений'], ans: ['r'], why: 'Малоподвижность — рискованное поведение.' },
+      { parts: ['Овощи и фрукты каждый день'], ans: ['n'], why: 'Хорошее питание защищает.' },
+    ], [['r', 'Повышает риск', COL.bad], ['n', 'Защищает', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['costs', 'Цена болезней и профилактики', (m) => {
+    const p = panel(0);
+    const sp = G(p, { o: 0 });
+    T(sp, '≈ $3 трлн', { x: 330, y: 170, size: 80, weight: 700, fill: COL.int, anchor: 'middle' });
+    T(sp, 'расходы США на здравоохранение, 2014', { x: 330, y: 215, size: 23, fill: COL.dim, anchor: 'middle' });
+    T(sp, '≈ $9,5 тыс. на человека · 17,5% ВВП', { x: 330, y: 255, size: 23, fill: COL.dim, anchor: 'middle' });
+    show(sp, m('spend'));
+    // share of costs: chronic disease 86%
+    const bar = (y, v, c, lab, k, off = 0) => {
+      txt(p, lab, 90, y - 14, m(k, off), { size: 23, fill: c, weight: 700 });
+      const bg = mk('rect', { x: 90, y, width: 500, height: 30, rx: 8, fill: COL.faint, 'fill-opacity': .35 }, p);
+      put(bg, { o: 0 }); show(bg, m(k, off));
+      const r = mk('rect', { x: 90, y, width: 0, height: 30, rx: 8, fill: c }, p);
+      prog(q => r.setAttribute('width', (500 * v * q).toFixed(1)), m(k, off + .2), 1, out);
+      txt(p, `${Math.round(v * 100)}%`, 610, y + 24, m(k, off + 1), { size: 26, weight: 700, fill: c });
+    };
+    bar(350, .86, COL.bad, 'лечение хронических болезней', 'chr');
+    txt(p, 'продолжительность жизни: 24-е место из 30 стран', 330, 450, m('rank'), { size: 24, weight: 700, fill: COL.dim, anchor: 'middle' });
+    bar(540, .03, COL.good, 'профилактика', 'prev');
+    bar(630, .75, COL.task, 'лечение во многом предотвратимых болезней', 'prev', 1.4);
+    // return on investment
+    const inv = G(p, { o: 0 });
+    T(inv, '$10', { x: 900, y: 190, size: 70, weight: 700, fill: COL.good, anchor: 'middle' });
+    T(inv, 'на человека в год', { x: 900, y: 230, size: 22, fill: COL.dim, anchor: 'middle' });
+    show(inv, m('inv'));
+    arrowTo(p, [990, 170], [1090, 170], m('inv', .6), { col: COL.good, w: 4 });
+    const bars = [[1, 2.8, '1–2 года', 'inv', 1], [2, 16, '5 лет', 'five', 0]];
+    bars.forEach(([i, v, lab, k, off]) => {
+      const x = 1110 + (i - 1) * 200, h = 30 + v * 24;
+      const r = mk('rect', { x, y: 600, width: 140, height: 0, rx: 10, fill: COL.good, 'fill-opacity': .7 }, p);
+      prog(q => { r.setAttribute('y', (600 - h * q).toFixed(1)); r.setAttribute('height', (h * q).toFixed(1)); }, m(k, off + .2), 1, out);
+      txt(p, `$${String(v).replace('.', ',')} млрд/год`, x + 70, 600 - h - 16, m(k, off + 1), { size: 24, weight: 700, fill: COL.good, anchor: 'middle' });
+      txt(p, `через ${lab}`, x + 70, 640, m(k, off), { size: 23, fill: COL.dim, anchor: 'middle' });
+    });
+    txt(p, 'экономия', 1280, 700, m('five', 1.2), { size: 26, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['wellness', 'Измерения благополучия', (m) => {
+    const p = panel(0);
+    head(p, 'Благополучие многомерно, стороны связаны', .2, 70, COL.chalk);
+    const w = wheel(p, 520, 450, 210, m('six'));
+    txt(p, 'модель шести измерений', 520, 780, m('six'), { size: 24, fill: COL.dim, anchor: 'middle' });
+    ['+ медицинская сторона', '+ питание'].forEach((s, i) => pill(p, s, 1140, 200 + i * 70, m('wheel', .3 + i * .5), { col: COL.chalk, size: 25 }));
+    txt(p, 'модель здоровой жизни', 1140, 140, m('wheel'), { size: 24, fill: COL.dim, anchor: 'middle' });
+    const unb = [.9, .3, .5, .85, .4, .25], bal = [.75, .7, .72, .78, .7, .74];
+    w.rate(unb, m('wheel', 1.4));
+    txt(p, 'самооценка каждой стороны', 1140, 380, m('wheel', 1.6), { size: 25, weight: 700, fill: COL.task, anchor: 'middle' });
+    w.rate(bal, m('bal'), unb);
+    labelBox(p, 1140, 500, 500, ['желателен баланс'], COL.good, m('bal', .4), { size: 28 });
+    labelBox(p, 1140, 660, 600, ['опросник воспринимаемого благополучия', 'легко провести и подсчитать'], COL.whole, m('pws'), { size: 25 });
+  }],
+
+  ['hp', '«Здоровые люди 2020»', (m) => {
+    const p = panel(0);
+    head(p, 'Национальная программа «Здоровые люди 2020»', m('hp'), 70, COL.chalk);
+    labelBox(p, 800, 150, 900, ['видение: все люди живут долгой и здоровой жизнью'], COL.good, m('vis'), { size: 27 });
+    const G4 = [['долгая жизнь', 'без предотвратимых болезней, инвалидности, травм и ранней смерти', 'g1'], ['равенство', 'в здоровье для всех групп', 'g2'], ['среда', 'социальная и физическая, которая способствует здоровью', 'g3'], ['всю жизнь', 'качество жизни и здоровое поведение на всех этапах', 'g4']];
+    G4.forEach(([h, s, k], i) => infoCard(p, 90 + i * 360, 230, 340, 260, h, s, COL.task, m(k), { size: 23 }));
+    txt(p, 'ведущие показатели, например:', 800, 560, m('lhi'), { size: 24, fill: COL.dim, anchor: 'middle' });
+    ['доступ к помощи', 'питание, активность и ожирение', 'психическое здоровье', 'табак'].forEach((s, i) => pill(p, s, [250, 650, 1060, 1360][i], 630, m('lhi', .4 + i * .4), { col: COL.whole, size: 24 }));
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Терапевт помогает пройти путь от болезни к благополучию: обучает, вмешивается, выявляет риски.', 'w1'],
+     ['Здоровье — не только отсутствие болезней; благополучие — активный процесс в нескольких измерениях.', 'w2'],
+     ['Главные причины смерти — хронические болезни, во многом связанные с поведением.', 'w3'],
+     ['Профилактика стоит мало, а экономит много.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-dim', prompt: ['Какое это измерение благополучия?'],
+    build: grid([
+      { parts: ['Работа приносит удовлетворение'], ans: ['o'], why: 'Профессиональное измерение.' },
+      { parts: ['Есть друзья, на которых можно опереться'], ans: ['s'], why: 'Социальное измерение: поддержка в отношениях.' },
+      { parts: ['Жизнь имеет смысл и цель'], ans: ['p'], why: 'Духовное измерение.' },
+      { parts: ['Регулярно двигаюсь и правильно питаюсь'], ans: ['f'], why: 'Физическое измерение.' },
+      { parts: ['Понимаю свои чувства и справляюсь со стрессом'], ans: ['e'], why: 'Эмоциональное измерение.' },
+    ], [['s', 'Социальное', DIM[0][1]], ['o', 'Профессиональное', DIM[1][1]], ['p', 'Духовное', DIM[2][1]], ['f', 'Физическое', DIM[3][1]], ['e', 'Эмоциональное', DIM[5][1]]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Здоровье — это просто отсутствие болезней.'], ans: ['f'], why: 'Неверно: это полное физическое, психическое и социальное благополучие.' },
+      { parts: ['Около трёх четвертей расходов уходят на лечение во многом предотвратимых болезней.'], ans: ['t'], why: 'Верно: около 75%.' },
+      { parts: ['На профилактику в США тратят около половины расходов на здравоохранение.'], ans: ['f'], why: 'Неверно: около 3%.' },
+      { parts: ['Благополучие — активный процесс выбора в пользу полноценной жизни.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Хронические болезни часто связаны с курением, малоподвижностью и питанием.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

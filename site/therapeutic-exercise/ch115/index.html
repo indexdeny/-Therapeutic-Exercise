@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Осложнения после операции — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 115, title: 'Осложнения: тромбоз глубоких вен и тромбоэмболия', minutes: 10, language: 'ru', next: '../ch116/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch115/cards.ru.json
+const CARDS_SHORT = {
+  "вывих\nкапсулу рассекали (эндопротез, открытый шов губы) → учить съёмной шине или косынке и опасным положениям": "капсулу рассекали → шина, опасные положения",
+  "спайки и контрактуры\nдвигаться как можно раньше: упражнения или непрерывное пассивное движение в безопасном объёме": "двигаться как можно раньше",
+  "фиксаторы и швы\nранняя или чрезмерная опора нарушает контакт отломков; тяжёлый подъём рвёт шов на руке → костыли, ходунки, правильная прогрессия": "ранняя опора, тяжёлый подъём → костыли",
+  "причина\nзастой крови": "застой крови",
+  "причина\nповреждение и воспаление стенки вены": "стенка вены",
+  "причина\nповышенная свёртываемость": "свёртываемость",
+  "а остальные — без внешних признаков\nпоэтому важны факторы риска, критерии Уэллса и профилактика": "факторы риска, Уэллс, профилактика",
+  "≥ 2 баллов\nтромбоз вероятен → обследование": "вероятен → обследование",
+  "< 2 баллов\nтромбоз маловероятен": "тромбоз маловероятен",
+  "подтверждает только визуализация\nультразвук или флебография": "ультразвук или флебография",
+  "при подозрении\nнемедленно направить к врачу": "немедленно к врачу",
+  "клинический совет\n1 минута насоса стопами через равные промежутки дня усиливает венозный кровоток до 30 минут после упражнения и уменьшает застой в голени после эндопротезирования тазобедренного сустава": "1 минута насоса стопами → кровоток до 30 минут",
+  "сразу — медицинская помощь\nантикоагулянты; постельный режим от 2 дней до недели и дольше; нога приподнята, колено слегка согнуто; компрессионные чулки": "антикоагулянты + постельный режим ≥ 2 дней",
+  "противопоказано\nпассивные и активные движения ноги, влажное тепло, пневмокомпрессия": "движения ноги, тепло, пневмокомпрессия",
+  "когда ходить\nкогда антикоагулянты достигли лечебного уровня — по согласованию с врачами. Ходьба в первые сутки не увеличивала эмболий (без эмболии, хороший резерв), боль и отёк проходили быстрее; все носили компрессионный трикотаж": "антикоагулянты на лечебном уровне",
+  "после выписки\nантикоагулянты обычно около полугода": "антикоагулянты около полугода",
+};
+// cards-short end
+
+const HEAD = COL.whole, PAIN = '#ff5a3c', SURG = '#7fc8c2', VEIN = '#4a6fb5', SVEIN = '#7f9fe0', CLOT = '#6b1a24', SKIN = '#e7c3ae';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function numLine(p, n, str, x, y, col, t0, { size = 22, maxW = 860 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 20, cy: y - 8, r: 19, fill: col }, g);
+  T(g, String(n), { x: x + 20, y: y, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 54, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A leg seen from the front (groin at 0, ankle at y 580) with its deep vein (femoral → popliteal → tibial) and the great
+// saphenous vein. set({ swell, red, clot, sclot, emb, stock }): swell 0..1 — the calf swells; red — warm red skin;
+// clot / sclot 0..1 — a clot in the deep / superficial vein of the calf; emb 0..1 — a piece of the deep clot travels up
+// (−1 hides it); stock 0..1 — a compression stocking. flow(t) moves the blood (call with a growing time × speed).
+function legVeins(p, x, y, s = 1, t0 = null) {
+  const g = G(p, { x, y, s, o: 0 }), f = v => v.toFixed(1);
+  const skin = mk('path', { fill: SKIN, stroke: '#b98c78', 'stroke-width': 3 }, g);
+  const redE = mk('ellipse', { cx: 0, cy: 420, rx: 70, ry: 120, fill: '#e2574c', opacity: 0 }, g);
+  const stock = mk('path', { fill: '#5a6f86', 'fill-opacity': .55, stroke: '#3d4a5a', 'stroke-width': 2, opacity: 0 }, g);
+  const deepD = 'M10 -30C12 60 4 200 4 300C4 360 -2 440 -6 560';
+  mk('path', { d: 'M10 -30C14 -70 22 -110 32 -150', stroke: VEIN, 'stroke-width': 16, fill: 'none', 'stroke-linecap': 'round' }, g);
+  const deep = mk('path', { d: deepD, stroke: VEIN, 'stroke-width': 14, fill: 'none', 'stroke-linecap': 'round' }, g);
+  mk('path', { d: deepD, stroke: mix(VEIN, '#ffffff', .3), 'stroke-width': 4, fill: 'none', 'stroke-linecap': 'round', 'stroke-opacity': .6 }, g);
+  const sap = mk('path', { d: 'M-30 590C-50 520 -58 420 -56 330C-56 220 -50 120 -20 20C-10 -6 0 -20 8 -28', stroke: SVEIN, 'stroke-width': 7, fill: 'none', 'stroke-linecap': 'round' }, g);
+  const flow = mk('path', { d: deepD, stroke: '#cfe0ff', 'stroke-width': 4, fill: 'none', 'stroke-dasharray': '3 22', 'stroke-linecap': 'round' }, g);
+  const clotE = mk('ellipse', { cx: 2, cy: 430, rx: 0, ry: 0, fill: CLOT, stroke: '#3a0c12', 'stroke-width': 1.5 }, g);
+  const sclotE = mk('ellipse', { cx: -56, cy: 400, rx: 0, ry: 0, fill: CLOT }, g);
+  const route = mk('path', { d: 'M1 420C3 360 4 330 4 300C4 200 12 60 10 -30C14 -70 22 -110 32 -150', fill: 'none', stroke: 'none' }, g);
+  const emb = mk('ellipse', { rx: 6, ry: 12, fill: CLOT, stroke: '#3a0c12', 'stroke-width': 1.5, opacity: 0 }, g);
+  const S = { swell: 0, red: 0, clot: 0, sclot: 0, emb: -1, stock: 0 }, e = { g, st: S };
+  const legD = w => `M-90 0C-92 120 -70 230 -62 300C-58 340 ${f(-66 - w)} 380 ${f(-62 - w * .8)} 440C-54 500 -40 540 -36 580L-40 620C-20 640 50 640 70 625L40 580C44 540 ${f(60 + w * .8)} 500 ${f(62 + w)} 440C66 380 58 340 62 300C70 230 92 120 90 0Z`;
+  e.set = o => {
+    Object.assign(S, o);
+    skin.setAttribute('d', legD(22 * S.swell));
+    stock.setAttribute('d', 'M-64 300C-60 340 -66 380 -62 440C-54 500 -40 540 -36 580L-40 620C-20 640 50 640 70 625L40 580C44 540 60 500 62 440C66 380 58 340 62 300Z');
+    stock.setAttribute('opacity', f(S.stock));
+    redE.setAttribute('opacity', f(.35 * S.red));
+    clotE.setAttribute('rx', f(8 * S.clot)); clotE.setAttribute('ry', f(34 * S.clot));
+    sclotE.setAttribute('rx', f(5 * S.sclot)); sclotE.setAttribute('ry', f(16 * S.sclot));
+    if (S.emb < 0) emb.setAttribute('opacity', 0);
+    else { const L = route.getTotalLength(), P = route.getPointAtLength(L * S.emb); emb.setAttribute('cx', f(P.x)); emb.setAttribute('cy', f(P.y)); emb.setAttribute('opacity', 1); }
+    return e;
+  };
+  e.flow = t => flow.setAttribute('stroke-dashoffset', f(t * 25));
+  e.at = P => { const s0 = st(g); return [s0.x + P[0] * s0.s, s0.y + P[1] * s0.s]; };
+  e.set({});
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+// A dot travelling along a stage path: returns { set(u) }.
+function traveller(p, d, col = CLOT, r = 8) {
+  const pth = mk('path', { d, fill: 'none', stroke: col, 'stroke-width': 2, 'stroke-dasharray': '4 8', opacity: 0 }, p);
+  const dot = mk('circle', { r, fill: col, stroke: '#3a0c12', 'stroke-width': 1.5, opacity: 0 }, p);
+  return { pth, set(u) { const L = pth.getTotalLength(), P = pth.getPointAtLength(L * clamp(u, 0, 1)); dot.setAttribute('cx', P.x.toFixed(1)); dot.setAttribute('cy', P.y.toFixed(1)); dot.setAttribute('opacity', u > 0 && u < 1.01 ? 1 : 0); } };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Осложнения после операции', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 12 · Урок 115', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Осложнения после операции', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'тромбоз глубоких вен и тромбоэмболия', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'распознать и предупредить', 800, 360, m('sub'), { size: 30, fill: VEIN, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const lv = legVeins(art, 620, 520, .58, null); put(lv.g, { o: 1 });
+    const lu = lungsEl(art, 1060, 640, .9, null);
+    const tr = traveller(art, `M${lv.at([32, -150]).join(' ')}C760 420 900 450 1040 560`);
+    prog(q => { lv.flow(q * 60 * (1 - .7 * clamp(q * 3, 0, 1))); lv.set({ clot: clamp(q * 3 - .3, 0, 1) }); lu.breathe(cyc(q, 4)); tr.set(clamp(q * 3 - 1.4, 0, 1.2)); }, .5, Math.max(2, D - 1.5), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['list', 'Осложнения (блок 12.5)', (m, D) => {
+    const p = panel(0);
+    txt(p, 'возможные осложнения после операции (блок 12.5)', 800, 56, m('list'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    txt(p, 'рано — в первые полгода — или поздно; часть обучения и упражнений — профилактика', 800, 100, m('list', .5), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const L = [['лёгкие', 'пневмония, ателектаз', COL.whole], ['инфекция', 'местная или общая', COL.bad], ['тромбоз и эмболия', 'глубоких вен, лёгочной артерии', VEIN],
+      ['рана', 'медленно заживает', COL.real], ['жгут', 'слабость мышц: ишемия, сдавление нерва', COL.task], ['фиксаторы', 'поломка, расшатывание, смещение', COL.dim],
+      ['сращение', 'замедленное после перелома, остеотомии, артродеза', COL.task], ['шов мягких тканей', 'разрыв до заживления', COL.bad], ['вывих', 'сустава или импланта', COL.bad],
+      ['нерв', 'защемление рубцом', COL.task], ['спайки', 'контрактуры, тугоподвижность', COL.real], ['эндопротез', 'расшатывание: остеолиз, инфекция', COL.dim]];
+    L.forEach(([h, s, c], i) => {
+      const r = Math.floor(i / 4), cI = i % 4, x = 60 + cI * 375, y = 140 + r * 245, g0 = G(p, { o: 0 });
+      roundBox(g0, x, y, 355, 225, c, PANEL, 2.2);
+      mk('circle', { cx: x + 34, cy: y + 36, r: 17, fill: c }, g0);
+      T(g0, String(i + 1), { x: x + 34, y: y + 43, size: 19, weight: 700, fill: COL.board, anchor: 'middle' });
+      T(g0, h, { x: x + 62, y: y + 44, size: 24, weight: 700, fill: c });
+      put(para(g0, s, x + 24, y + 100, null, { size: 21, maxW: 310 }), { o: 1 });
+      show(g0, m('b' + (i + 1)));
+    });
+  }],
+
+  ['risk', 'Лёгкие, вывих, спайки, фиксаторы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'как снижать риск осложнений', 800, 56, m('lung'), { size: 28, weight: 700, anchor: 'middle', fill: SURG });
+    const lu = lungsEl(p, 330, 330, 1, m('lung'));
+    const atl = mk('ellipse', { cx: 410, cy: 420, rx: 40, ry: 50, fill: '#5b2a35', opacity: 0 }, p);
+    show(atl, m('lung', 1));
+    prog(q => lu.breathe(cyc(q, 5) * (1 - .6 * clamp(q * 2, 0, 1))), m('lung'), Math.max(2, m('pre') - m('lung')), lin);
+    prog(q => { lu.breathe(cyc(q, 3)); atl.setAttribute('opacity', (1 - q).toFixed(2)); }, m('pre'), Math.max(2, m('disl') - m('pre')), lin);
+    lab(p, 'ателектаз', 600, 470, 420, 440, '#e88aa0', m('lung', 1));
+    pillRow(p, ['общий наркоз', 'обезболивающие', 'долгий постельный режим'], 400, 560, m('why'), { col: COL.bad, size: 19, gap: .5, space: 10 });
+    pillRow(p, ['дыхательные упражнения с дня операции', 'раннее вставание и ходьба'], 400, 620, m('pre'), { col: COL.good, size: 19, gap: .6, space: 10 });
+    infoCard(p, 820, 100, 720, 200, 'вывих', 'капсулу рассекали (эндопротез, открытый шов губы) → учить съёмной шине или косынке и опасным положениям', COL.bad, m('disl'), { size: 21 });
+    infoCard(p, 820, 320, 720, 170, 'спайки и контрактуры', 'двигаться как можно раньше: упражнения или непрерывное пассивное движение в безопасном объёме', COL.real, m('adh'), { size: 21 });
+    infoCard(p, 820, 510, 720, 200, 'фиксаторы и швы', 'ранняя или чрезмерная опора нарушает контакт отломков; тяжёлый подъём рвёт шов на руке → костыли, ходунки, правильная прогрессия', COL.task, m('fix'), { size: 21 });
+    const lb = longBone(p, 120, 790, 560, m('fix'), { r: 22 }); lb.set({ line: 'trans', plate: 1 });
+    const a1 = G(p, { o: 0 }); path(a1, 'M400 690V748m-12 -14l12 14l12 -14', { stroke: COL.bad, 'stroke-width': 5 }); show(a1, m('fix', 1));
+    prog(q => lb.set({ shift: 8 * q }), m('fix', 1.5), .6);
+    txt(p, 'слишком рано — слишком много', 400, 676, m('fix', 1), { size: 19, weight: 700, fill: COL.bad, anchor: 'middle' });
+  }],
+
+  ['dvt', 'Тромб и эмбол', (m, D) => {
+    const p = panel(0);
+    txt(p, 'тромбоз глубоких вен и тромбоэмболия', 800, 56, m('clot'), { size: 28, weight: 700, anchor: 'middle', fill: VEIN });
+    const lv = legVeins(p, 300, 230, .95, m('clot'));
+    pill(p, 'по мотивам рис. 12.1 — схема', 300, 880 - 4, m('clot'), { col: COL.dim, size: 17 });
+    lab(p, 'большая подкожная вена', 560, 520, ...lv.at([-56, 330]), SVEIN, m('sup'));
+    lab(p, 'глубокие вены', 560, 380, ...lv.at([8, 200]), VEIN, m('deep'));
+    prog(q => lv.flow(q * 120), m('clot'), Math.max(2, D - m('clot')), lin);
+    prog(q => lv.set({ sclot: q * (1 - clamp(q * 2 - 1, 0, 1)) }), m('sup'), Math.max(2, m('deep') - m('sup')), lin);
+    prog(q => lv.set({ clot: q }), m('deep'), 1.5);
+    lab(p, 'тромб', 560, 650, ...lv.at([4, 430]), CLOT === '#6b1a24' ? '#e86a7a' : CLOT, m('deep', 1));
+    prog(q => lv.set({ emb: q }), m('emb'), 2, lin);
+    const lu = lungsEl(p, 1150, 380, .9, m('emb'));
+    const tr = traveller(p, `M${lv.at([32, -150]).join(' ')}C540 60 900 120 1130 330`);
+    show(tr.pth, m('emb', 1.8), .3);
+    prog(q => tr.set(q), m('emb', 2), 1.6, lin);
+    const blk = mk('circle', { cx: 1160, cy: 360, r: 0, fill: CLOT, opacity: .85 }, p);
+    prog(q => blk.setAttribute('r', (18 * q).toFixed(1)), m('pe'), .6);
+    txt(p, 'эмбол', 860, 140, m('emb', 1), { size: 21, weight: 700, fill: '#e86a7a' });
+    txt(p, 'тромбоэмболия лёгочной артерии — угроза жизни', 1150, 590, m('pe'), { size: 21, weight: 700, fill: COL.bad, anchor: 'middle' });
+    pill(p, 'риск особенно высок после эндопротезирования тазобедренного и коленного', 1080, 650, m('hi'), { col: COL.task, size: 18 });
+    const C = [['застой крови', VEIN], ['повреждение и воспаление стенки вены', COL.bad], ['повышенная свёртываемость', CLOT === '#6b1a24' ? '#e86a7a' : CLOT]];
+    C.forEach(([s, c], i) => infoCard(p, 640 + i * 300, 700, 280, 150, ['причина', 'причина', 'причина'][i], s, c, m('cause', .4 + i * 1.2), { size: 20 }));
+  }],
+
+  ['rf', 'Факторы риска (блок 12.6)', (m, D) => {
+    const p = panel(0);
+    txt(p, 'факторы риска тромбоза (блок 12.6)', 800, 56, m('rf'), { size: 28, weight: 700, anchor: 'middle', fill: VEIN });
+    const R = ['иммобилизация после операции или перелома, долгий постельный режим', 'малоподвижность, долгое сидение, стояние больше 6 часов', 'травма вен, паралич конечности',
+      'активная опухоль в последние полгода; тромбоз или эмболия в прошлом', 'пожилой возраст, ожирение, сердечная недостаточность', 'оральные контрацептивы, беременность'];
+    R.forEach((s, i) => numLine(p, i + 1, s, 760, 140 + i * 110, VEIN, m('r' + (i + 1)), { size: 22, maxW: 720 }));
+    bench(p, 80, 620, 330, m('r1'), COL.dim, 100);
+    const f = supine(p, 330, 330, .75, m('r1'), { aN: 6, eN: 8 });
+    const cs = fig(p, { s: .75, o: 0, pose: { ...SIT, t: 4 } }); plant(cs, 'H', 330, 640);
+    chair(p, 330, 654, 820, m('r2')); show(cs.g, m('r2'));
+    const clk = G(p, { o: 0 }), cx = 560, cy = 640;
+    mk('circle', { cx, cy, r: 46, fill: PANEL, stroke: COL.task, 'stroke-width': 4 }, clk);
+    const hand = path(clk, `M${cx} ${cy}V${cy - 32}`, { stroke: COL.task, 'stroke-width': 4 });
+    show(clk, m('r2')); prog(q => hand.setAttribute('transform', `rotate(${(q * 1080).toFixed(1)} ${cx} ${cy})`), m('r2'), Math.max(2, D - m('r2')), lin);
+  }],
+
+  ['signs', 'Признаки и критерии Уэллса', (m, D) => {
+    const p = panel(0);
+    txt(p, 'как распознать тромбоз глубоких вен', 800, 56, m('signs'), { size: 28, weight: 700, anchor: 'middle', fill: VEIN });
+    const lv = legVeins(p, 300, 220, .95, m('signs'));
+    lv.set({ clot: 1 });
+    prog(q => lv.set({ swell: q, red: q }), m('signs', 1.5), 2);
+    prog(q => lv.flow(q * 30), m('signs'), Math.max(2, m('wells') - m('signs')), lin);
+    lab(p, 'боль, отёк, тепло, покраснение', 580, 660, ...lv.at([60, 430]), PAIN, m('signs', 2.5));
+    const mt = G(p, { o: 0 }); mk('rect', { x: 800, y: 300, width: 700, height: 40, rx: 12, fill: COL.board, stroke: COL.dim, 'stroke-width': 2 }, mt);
+    const fil = mk('rect', { x: 800, y: 300, width: 0, height: 40, rx: 12, fill: COL.task }, mt);
+    const lo = mk('rect', { x: 800 + 700 * .25, y: 296, width: 700 * .25, height: 48, rx: 6, fill: 'none', stroke: COL.chalk, 'stroke-width': 2, 'stroke-dasharray': '6 5' }, mt);
+    T(mt, 'распознают по признакам лишь 25–50 % случаев', { x: 1150, y: 270, size: 23, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    show(mt, m('signs', .5)); prog(q => fil.setAttribute('width', (700 * (.25 + .25 * q)).toFixed(1)), m('signs', 1), 1.5);
+    infoCard(p, 800, 400, 700, 200, 'а остальные — без внешних признаков', 'поэтому важны факторы риска, критерии Уэллса и профилактика', COL.dim, m('signs', 4), { size: 22 });
+    // Wells criteria on a fresh panel
+    const p2 = panel(m('wells'));
+    txt(p2, 'критерии Уэллса (блок 12.7)', 800, 56, m('wells'), { size: 28, weight: 700, anchor: 'middle', fill: VEIN });
+    const W = [['активная опухоль', 1, 'w1'], ['паралич, парез или недавний гипс на ноге', 1, 'w1'], ['постельный режим ≥ 3 дней или крупная операция за 12 недель', 1, 'w1'],
+      ['болезненность по ходу глубоких вен', 1, 'w2'], ['отёк всей ноги', 1, 'w2'], ['голень толще здоровой ≥ 3 см', 1, 'w2'], ['ямка от надавливания только на больной ноге', 1, 'w2'],
+      ['расширенные поверхностные вены', 1, 'w2'], ['тромбоз в прошлом', 1, 'w2'], ['другой диагноз не менее вероятен', -2, 'w3']];
+    W.forEach(([s, v, k], i) => {
+      const y = 110 + i * 60, g0 = G(p2, { o: 0 });
+      mk('rect', { x: 60, y, width: 980, height: 50, rx: 10, fill: i % 2 ? PANEL : mix(PANEL, COL.board, .4) }, g0);
+      T(g0, s, { x: 84, y: y + 33, size: 21, fill: COL.chalk });
+      T(g0, v > 0 ? '+1' : '−2', { x: 1000, y: y + 34, size: 24, weight: 700, fill: v > 0 ? COL.task : COL.good, anchor: 'end' });
+      show(g0, m(k, (W.filter(r => r[2] === k).indexOf(W[i])) * .9));
+    });
+    infoCard(p2, 1080, 110, 460, 250, '≥ 2 баллов', 'тромбоз вероятен → обследование', COL.bad, m('w4'), { size: 23 });
+    infoCard(p2, 1080, 380, 460, 160, '< 2 баллов', 'тромбоз маловероятен', COL.good, m('w4', 1), { size: 23 });
+    infoCard(p2, 1080, 560, 460, 250, 'подтверждает только визуализация', 'ультразвук или флебография', VEIN, m('img'), { size: 23 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-wells', prompt: ['Посчитайте баллы по критериям Уэллса.'],
+    build: blanks([
+      { parts: ['Операция неделю назад, голень +4 см, болезненность по ходу вен: ', { box: '3' }], why: 'Крупная операция за 12 недель +1, голень ≥ 3 см +1, болезненность +1 = 3: тромбоз вероятен.' },
+      { parts: ['Гипс на ноге, отёк всей ноги, другой диагноз вероятен: ', { box: '0' }], why: '+1 +1 −2 = 0: тромбоз маловероятен.' },
+    ]),
+  }], done) }],
+
+  ['pe', 'Признаки тромбоэмболии', (m, D) => {
+    const p = panel(0);
+    txt(p, 'признаки тромбоэмболии лёгочной артерии', 800, 56, m('pe'), { size: 28, weight: 700, anchor: 'middle', fill: COL.bad });
+    txt(p, 'зависят от размера эмбола, поражённой части лёгкого, болезней сердца и лёгких', 800, 100, m('pe', .5), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const f = frontStand(p, 330, 840, 1.25, m('h'), { muscles: false });
+    const q = f.pts, chest = f.at([q.Sc[0] + 34, q.Sc[1] + 40]);
+    const pain = G(p, { x: chest[0], y: chest[1], s: 0, o: 0 }); mk('circle', { r: 26, fill: PAIN, 'fill-opacity': .35, stroke: PAIN, 'stroke-width': 4 }, pain);
+    pop(pain, m('h', 2)); pulse(pain, m('h', 3), 1.4); pulse(pain, m('h', 4.5), 1.4);
+    lab(p, 'боль сбоку в груди — сильнее на вдохе и при кашле', 760, 330, ...chest, PAIN, m('h', 2));
+    const puffs = [0, 1, 2].map(i => mk('path', { d: '', stroke: COL.whole, 'stroke-width': 3, fill: 'none', opacity: 0 }, p));
+    const head = f.at(q.Hc);
+    prog(t => puffs.forEach((e, i) => { const u = (t * 14 + i / 3) % 1, x0 = head[0] + 40 + u * 90; e.setAttribute('d', `M${x0.toFixed(1)} ${head[1] + 10}q10 -10 20 0t20 0`); e.setAttribute('opacity', (Math.sin(u * Math.PI)).toFixed(2)); }), m('h'), Math.max(2, D - m('h')), lin);
+    txt(p, 'внезапная одышка, частое поверхностное дыхание', 760, 230, m('h'), { size: 23, weight: 700, fill: COL.whole });
+    pillRow(p, ['отёк ног', 'тревога', 'лихорадка', 'потливость', 'кашель', 'кровь в мокроте'], 1150, 470, m('o'), { col: COL.task, size: 20, gap: .5, space: 10 });
+    infoCard(p, 760, 560, 780, 200, 'при подозрении', 'немедленно направить к врачу', COL.bad, m('ref'), { size: 28 });
+  }],
+
+  ['prev', 'Профилактика тромбоза', (m, D) => {
+    const p = panel(0);
+    txt(p, 'профилактика тромбоза', 800, 56, m('prev'), { size: 28, weight: 700, anchor: 'middle', fill: COL.good });
+    const P = ['антикоагулянты — пациентам высокого риска', 'возвышенное положение ног лёжа и сидя', 'не сидеть подолгу, особенно в длинном гипсе', 'вставать и ходить через 1–2 дня после операции, не позже',
+      'насос стопами регулярно в течение дня', 'компрессионные чулки', 'перемежающаяся пневмокомпрессия при постельном режиме'];
+    P.forEach((s, i) => numLine(p, i + 1, s, 60, 120 + i * 70, COL.good, m('p' + (i + 1)), { size: 21, maxW: 620 }));
+    // ankle pumps drive the blood in the calf veins
+    bench(p, 820, 1340, 330, m('p2'), COL.dim, 90);
+    const f = supine(p, 1060, 330, .72, m('p2'), { aN: 6, eN: 8, hN: 14, hF: 14 });
+    prog(q => f.set({ fN: -30 + 55 * cyc(q, 8), fF: -30 + 55 * cyc(q, 8) }), m('p5'), Math.max(2, D - m('p5')), lin);
+    const lv = legVeins(p, 1420, 520, .55, m('p5'));
+    prog(q => lv.flow(q * 30), m('p5'), 1.5, lin);
+    prog(q => lv.flow(45 + q * 260), m('p5', 1.5), Math.max(2, D - m('p5', 1.5)), lin);
+    lab(p, 'насос стопами — кровь бежит быстрее', 1000, 200, ...onStage(f, 'toeN'), COL.good, m('p5', .5));
+    prog(q => lv.set({ stock: q }), m('p6'), .8);
+    infoCard(p, 60, 650, 1100, 210, 'клинический совет', '1 минута насоса стопами через равные промежутки дня усиливает венозный кровоток до 30 минут после упражнения и уменьшает застой в голени после эндопротезирования тазобедренного сустава', COL.good, m('tip'), { size: 21 });
+  }],
+
+  ['mgmt', 'Если тромбоз подтверждён', (m, D) => {
+    const p = panel(0);
+    txt(p, 'если тромбоз подтверждён (блок 12.8)', 800, 56, m('conf'), { size: 28, weight: 700, anchor: 'middle', fill: VEIN });
+    infoCard(p, 60, 100, 720, 250, 'сразу — медицинская помощь', 'антикоагулянты; постельный режим от 2 дней до недели и дольше; нога приподнята, колено слегка согнуто; компрессионные чулки', VEIN, m('conf'), { size: 21 });
+    bench(p, 100, 720, 520, m('conf', 1), COL.dim, 80);
+    const f = supine(p, 330, 520, .72, m('conf', 1), { hN: 22, kN: 22, aN: 6, eN: 8 });
+    const pil = G(p, { o: 0 }); mk('path', { d: 'M440 520Q470 470 560 470Q620 470 650 500L660 520Z', fill: '#5b6f8a', stroke: '#9fb3cf', 'stroke-width': 2 }, pil); show(pil, m('conf', 1));
+    p.insertBefore(pil, f.g);
+    infoCard(p, 820, 100, 720, 250, 'противопоказано', 'пассивные и активные движения ноги, влажное тепло, пневмокомпрессия', COL.bad, m('contra'), { size: 22 });
+    cross(p, 1480, 140, 18, m('contra', .5), 6);
+    infoCard(p, 820, 380, 720, 300, 'когда ходить', 'когда антикоагулянты достигли лечебного уровня — по согласованию с врачами. Ходьба в первые сутки не увеличивала эмболий (без эмболии, хороший резерв), боль и отёк проходили быстрее; все носили компрессионный трикотаж', COL.good, m('walk'), { size: 20 });
+    const w = fig(p, { x: 330, y: 820 - 182 * .6, s: .6, o: 0 }); show(w.g, m('walk', 1)); walk(w, m('walk', 1), Math.max(2, m('cpg') - m('walk', 1)), { cycles: 6, dx: 200 });
+    // guidelines and after discharge
+    const p2 = panel(m('cpg'));
+    txt(p2, 'роль терапевта и что можно после выписки', 800, 56, m('cpg'), { size: 28, weight: 700, anchor: 'middle', fill: VEIN });
+    ['выявляет пациентов из группы риска', 'отстаивает профилактику', 'использует критерии Уэллса', 'активизирует, когда антикоагулянты на лечебном уровне']
+      .forEach((s, i) => numLine(p2, i + 1, s, 60, 130 + i * 70, VEIN, m('cpg', .5 + i * 1.6), { size: 22, maxW: 640 }));
+    infoCard(p2, 820, 100, 720, 160, 'после выписки', 'антикоагулянты обычно около полугода', COL.whole, m('after'), { size: 22 });
+    pillRow(p2, ['контактные виды спорта', 'бег', 'лыжи'], 1180, 320, m('after', 1.5), { col: COL.bad, size: 21, gap: .5 });
+    pillRow(p2, ['ходьба или лёгкий бег на дорожке', 'эллиптический тренажёр'], 1180, 390, m('after', 3.5), { col: COL.good, size: 21, gap: .5 });
+    pill(p2, 'риск падения — шлем', 1180, 460, m('after', 6), { col: COL.task, size: 21 });
+    const tm = treadmill(p2, 1060, 820, .8, m('after', 3.5));
+    prog(q => tm.set({ ph: q * 10 }), m('after', 3.5), Math.max(2, D - m('after', 3.5)), lin);
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-dvt', prompt: ['Можно ли это?'],
+    build: grid([
+      { parts: ['Насос стопами в постели после эндопротезирования'], ans: ['y'], why: 'Да: профилактика тромбоза.' },
+      { parts: ['Массаж и пассивные движения ноги при свежем подтверждённом тромбозе'], ans: ['n'], why: 'Нет: противопоказано.' },
+      { parts: ['Ходьба в компрессионных чулках, когда антикоагулянты на лечебном уровне'], ans: ['y'], why: 'Да, по согласованию с врачами.' },
+      { parts: ['Горные лыжи в первые месяцы приёма антикоагулянтов'], ans: ['n'], why: 'Нет: лыжи, бег и контактный спорт исключают.' },
+      { parts: ['Эллиптический тренажёр на антикоагулянтах'], ans: ['y'], why: 'Да: разрешён.' },
+    ], [['y', 'Можно', COL.good], ['n', 'Нельзя', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['После операции следят за лёгкими, инфекцией, тромбозом, раной, фиксаторами, вывихом и контрактурами.', 'w1'],
+     ['Тромбоз глубоких вен часто незаметен; по Уэллсу 2 балла и больше — вероятен, подтверждает только визуализация.', 'w2'],
+     ['Внезапная одышка и боль в груди на вдохе — подозрение на эмболию: немедленно к врачу.', 'w3'],
+     ['Профилактика: насос стопами, ранняя ходьба, возвышенное положение, компрессия, лекарства.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: VEIN }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-pe', prompt: ['Второй день после эндопротезирования колена: внезапная одышка, частое поверхностное дыхание, боль сбоку в груди на вдохе. Что делать?'],
+    build: choice([
+      ['Немедленно направить к врачу: возможна тромбоэмболия'],
+      ['Дыхательные упражнения и продолжить занятие'],
+      ['Насос стопами и ходьба, чтобы разогнать кровь'],
+      ['Подождать до завтра'],
+    ], 0, 'Внезапная одышка, частое дыхание и боль в груди на вдохе — главные признаки тромбоэмболии: нужна немедленная медицинская помощь.',
+    [null, 'Это не просто нехватка дыхательных упражнений — нужна срочная помощь.', 'Нагрузка не лечит эмболию; нужен врач.', 'Тромбоэмболия угрожает жизни — ждать нельзя.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-prev', prompt: ['Пациентка лежит после операции на бедре. Как снизить риск тромбоза глубоких вен?'],
+    build: choice([
+      ['Насос стопами регулярно, возвышенное положение ног, вставать как можно раньше, компрессия и лекарства по назначению'],
+      ['Строгий покой до снятия швов'],
+      ['Подолгу сидеть, свесив ноги'],
+      ['Тепло на икры и массаж'],
+    ], 0, 'Это меры профилактики из книги: насос стопами, возвышение, ранняя ходьба, компрессия и антикоагулянты.',
+    [null, 'Неподвижность — фактор риска тромбоза.', 'Долгое сидение повышает риск.', 'Тепло и массаж не входят в профилактику, а при тромбозе противопоказаны.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

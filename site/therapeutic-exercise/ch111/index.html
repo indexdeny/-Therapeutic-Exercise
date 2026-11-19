@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Переломы и заживление кости — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 111, title: 'Переломы и заживление кости', minutes: 8, language: 'ru', next: '../ch112/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch111/cards.ru.json
+const CARDS_SHORT = {
+  "нарушение целости\nкости, ростковой пластинки или хрящевой суставной поверхности": "кость, ростковая пластинка, хрящ",
+  "осевой скелет\nмогут пострадать головной и спинной мозг или внутренние органы": "мозг или внутренние органы",
+  "диагноз и лечение — дело врача\nно терапевт может первым увидеть пациента после травмы или микротравм, а травма может случиться и на занятии": "терапевт может увидеть первым",
+  "есть подозрение\n→ направить на рентген и к врачу": "→ направить на рентген и к врачу",
+  "воспаление\nрвутся мелкие сосуды → гематома и сгусток; крови больше при смещении и повреждении мягких тканей": "гематома и сгусток",
+  "мозоль\nклетки надкостницы и эндоста → толстая мозоль; затем хрящ у перелома и первичная грубоволокнистая кость": "толстая мозоль",
+  "клиническое сращение\nперелом не двигается, линия на снимке видна; движения в суставах — без деформирующих сил": "не двигается",
+  "рентгенологическое\nмозоль заменена зрелой пластинчатой костью и рассасывается": "пластинчатая кость",
+  "стержень или пластина с винтами\nстабилизируют отломки": "стабилизируют отломки",
+  "нагрузка в обход кости\nидёт через фиксатор — кость под ним теряет плотность": "кость теряет плотность",
+  "после сращения\nфиксатор обычно удаляют; несколько месяцев — защита от больших нагрузок": "удаляют; защита несколько месяцев",
+};
+// cards-short end
+
+const HEAD = COL.whole, PAIN = '#ff5a3c', FR = '#e8b04a', SKIN = '#c99a86';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function numLine(p, n, str, x, y, col, t0, { size = 22, maxW = 860 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 20, cy: y - 8, r: 19, fill: col }, g);
+  T(g, String(n), { x: x + 20, y: y, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 54, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+let SEED = 7;
+const rnd = () => (SEED = SEED * 16807 % 2147483647) / 2147483647;
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A straight force arrow from (x1, y1) to its head at (x2, y2).
+function arw(p, x1, y1, x2, y2, col = FR, w = 5) {
+  const g = G(p, { o: 0 }), L = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / L, uy = (y2 - y1) / L, f = v => v.toFixed(1);
+  path(g, `M${f(x1)} ${f(y1)}L${f(x2)} ${f(y2)}M${f(x2 - ux * 14 - uy * 9)} ${f(y2 - uy * 14 + ux * 9)}L${f(x2)} ${f(y2)}L${f(x2 - ux * 14 + uy * 9)} ${f(y2 - uy * 14 - ux * 9)}`, { stroke: col, 'stroke-width': w });
+  return g;
+}
+// A twist arrow round a horizontal bone at x (radius r): dir 1 turns the near side down, −1 up.
+function twistArw(p, x, y, r, dir, col = FR) {
+  const g = G(p, { o: 0 }), a = y - dir * (r + 12), b = y + dir * (r + 12);
+  path(g, `M${x} ${a}A16 ${r + 12} 0 0 ${dir > 0 ? 1 : 0} ${x} ${b}`, { stroke: col, 'stroke-width': 4.5 });
+  path(g, `M${x - 12} ${b - dir * 8}L${x} ${b}L${x - 10} ${b + dir * 10}`, { stroke: col, 'stroke-width': 4.5 });
+  return g;
+}
+// A block of spongy bone (centre x, y; w × h); set({ sq }) squeezes it from above and below and bulges its sides.
+function spongy(p, x, y, w, h, t0 = null, { seed = 4 } = {}) {
+  const g = G(p, { o: 0 }), B = ANAT.bone, line = mix(B, '#000000', .45), f = v => v.toFixed(1);
+  const body = mk('path', { fill: '#6b4540', stroke: B, 'stroke-width': 6, 'stroke-linejoin': 'round' }, g);
+  const inner = G(g, {});
+  SEED = seed;
+  const n = 6, rows = 5;
+  for (let r = 0; r < rows; r++) for (let c = 0; c < n; c++) {
+    const x0 = -w / 2 + 14 + (w - 28) * (c + rnd() * .5) / n, y0 = -h / 2 + 14 + (h - 28) * (r + rnd() * .5) / rows;
+    const a = rnd() * Math.PI, L = 16 + rnd() * 12;
+    mk('path', { d: `M${f(x0)} ${f(y0)}l${f(Math.cos(a) * L)} ${f(Math.sin(a) * L)}`, stroke: B, 'stroke-width': 4.5, 'stroke-linecap': 'round' }, inner);
+  }
+  const crack = mk('path', { d: `M${f(-w * .35)} ${f(-h * .05)}l${f(w * .15)} ${f(h * .12)}l${f(w * .12)} ${f(-h * .1)}l${f(w * .14)} ${f(h * .12)}l${f(w * .12)} ${f(-h * .1)}`, stroke: '#2a1a18', 'stroke-width': 3, fill: 'none', opacity: 0 }, g);
+  const s = { g, set({ sq = 0 }) {
+    const hh = h / 2 * (1 - .28 * sq), b = 16 * sq;
+    body.setAttribute('d', `M${f(-w / 2)} ${f(-hh)}H${f(w / 2)}Q${f(w / 2 + 2 * b)} 0 ${f(w / 2)} ${f(hh)}H${f(-w / 2)}Q${f(-w / 2 - 2 * b)} 0 ${f(-w / 2)} ${f(-hh)}Z`);
+    inner.setAttribute('transform', `scale(${f(1 + .08 * sq)} ${f(1 - .28 * sq)})`);
+    crack.setAttribute('opacity', f(clamp(sq * 2 - 1, 0, 1)));
+    crack.setAttribute('transform', `scale(1 ${f(1 - .28 * sq)})`);
+    return s;
+  } };
+  put(g, { x, y });
+  s.set({});
+  if (t0 !== null) show(g, t0);
+  return s;
+}
+// Phase chips; chips.on(i, t) lights chip i from time t (and dims the one lit before).
+function chipRow(p, names, cols, cx, y, t0, { size = 21, gap = 40 } = {}) {
+  const ws = names.map(s => uiW(s, size) + 34), tot = ws.reduce((a, b) => a + b, 0) + gap * (names.length - 1);
+  let x = cx - tot / 2, last = null;
+  const C = names.map((s, i) => {
+    const mkc = on => { const g = G(p, { x: x + ws[i] / 2, y, o: 0 }); mk('rect', { x: -ws[i] / 2, y: -size * 1.05, width: ws[i], height: size * 1.55, rx: size * .78, fill: on ? mix(cols[i], COL.board, .75) : COL.board, stroke: on ? cols[i] : COL.faint, 'stroke-width': on ? 2.8 : 1.6 }, g); T(g, s, { x: 0, y: 0, size, fill: on ? cols[i] : COL.faint, weight: 600, anchor: 'middle' }); return g; };
+    const off = mkc(false), on = mkc(true);
+    if (i) { const a = G(p, { o: 0 }); path(a, `M${x - gap + 8} ${y - size * .3}h${gap - 16}m-8 -7l8 7l-8 7`, { stroke: COL.dim, 'stroke-width': 2.5 }); show(a, t0); }
+    show(off, t0);
+    x += ws[i] + gap;
+    return on;
+  });
+  return { on(i, t) { if (last !== null) hide(C[last], t, .4); show(C[i], t, .4); last = i; } };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Переломы и заживление кости', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 11 · Урок 111', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Переломы', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и заживление кости', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'виды переломов, признаки и фазы сращения', 800, 360, m('sub'), { size: 30, fill: FR, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const lb = longBone(art, 380, 620, 840, null, { r: 40 }); put(lb.g, { o: 1 });
+    lb.set({ line: 'obl' });
+    prog(q => lb.set({ shift: 8 * clamp(q * 4, 0, 1) * (1 - clamp(q * 4 - 2, 0, 1)), hema: clamp(q * 4 - .5, 0, 1) * (1 - clamp(q * 3 - 1.5, 0, 1)), soft: clamp(q * 3 - 1, 0, 1), hard: clamp(q * 3 - 1.8, 0, 1) }), .8, Math.max(2, D - 2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['def', 'Что такое перелом', (m, D) => {
+    const p = panel(0);
+    txt(p, 'перелом (fracture)', 800, 56, m('def'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    infoCard(p, 60, 92, 1480, 120, 'нарушение целости', 'кости, ростковой пластинки или хрящевой суставной поверхности', FR, m('def'), { size: 22 });
+    // the bone in its soft tissue: an artery and a nerve run beside it
+    const env = G(p, { o: 0 });
+    mk('rect', { x: 180, y: 300, width: 1240, height: 250, rx: 120, fill: SKIN, 'fill-opacity': .22, stroke: SKIN, 'stroke-width': 2 }, env);
+    const mus = mk('path', { d: 'M260 330C600 300 1000 300 1340 330L1340 372C1000 352 600 352 260 372Z', fill: ANAT.muscle, 'fill-opacity': .55 }, env);
+    show(env, m('def', .5));
+    const lb = longBone(p, 300, 440, 1000, m('def', .5), { r: 36 });
+    prog(q => lb.set({ line: 'obl', shift: 10 * q, angle: 5 * q }), m('def', 1.5), 1);
+    const art = path(p, 'M220 520C500 510 700 530 790 512C880 494 1100 520 1380 510', { stroke: '#e2574c', 'stroke-width': 7 }, { o: 0 });
+    const nv = path(p, 'M220 540C520 534 760 548 1380 532', { stroke: '#f1dfa0', 'stroke-width': 4, 'stroke-dasharray': '2 0' }, { o: 0 });
+    show(art, m('soft')); show(nv, m('soft'));
+    prog(q => { const k = .45 + .55 * cyc(q, 4); art.setAttribute('stroke-opacity', k.toFixed(2)); }, m('soft', 1), Math.max(2, m('cen') - m('soft', 1)), lin);
+    const hit = G(p, { x: 790, y: 512, o: 0 }); mk('circle', { r: 30, fill: PAIN, 'fill-opacity': .3, stroke: PAIN, 'stroke-width': 3 }, hit); show(hit, m('soft', 1.5));
+    lab(p, 'мягкие ткани страдают всегда', 560, 280, 520, 336, ANAT.muscle, m('soft', .3));
+    lab(p, 'крупная артерия', 1180, 610, 1000, 514, '#e2574c', m('soft', 1.5));
+    lab(p, 'периферический нерв', 1180, 642, 1250, 536, '#f1dfa0', m('soft', 1.5));
+    infoCard(p, 60, 660, 1480, 150, 'осевой скелет', 'могут пострадать головной и спинной мозг или внутренние органы', COL.bad, m('cen'), { size: 22 });
+  }],
+
+  ['types', 'Сила определяет тип', (m, D) => {
+    const p = panel(0);
+    txt(p, 'тип перелома зависит от силы (табл. 11.3)', 800, 56, m('types'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    const cell = (i, title, res, t0) => {
+      const c = i % 3, r = Math.floor(i / 3), x = 60 + c * 500, y = 96 + r * 392, g = G(p, { o: 0 });
+      roundBox(g, x, y, 480, 372, EDGE, PANEL, 2);
+      T(g, title, { x: x + 240, y: y + 40, size: 23, weight: 700, fill: FR, anchor: 'middle' });
+      show(g, t0);
+      const rg = G(p, { o: 0 });
+      put(para(rg, res, x + 240, y + 300, null, { size: 20, weight: 700, fill: COL.chalk, maxW: 440, anchor: 'middle' }), { o: 1 });
+      return { x, y, cx: x + 240, rg };
+    };
+    // 1 bending: three-point load, the convex side opens
+    const c1 = cell(0, 'сгибание', 'поперечный или косой; у детей — «зелёная ветка»', m('bend'));
+    const b1 = longBone(p, c1.x + 90, c1.y + 170, 300, m('bend'), { r: 22 });
+    b1.set({ line: 'trans' });
+    const a1 = [arw(p, c1.x + 100, c1.y + 80, c1.x + 100, c1.y + 128), arw(p, c1.x + 380, c1.y + 80, c1.x + 380, c1.y + 128), arw(p, c1.cx, c1.y + 270, c1.cx, c1.y + 218)];
+    a1.forEach(a => show(a, m('bend', .5)));
+    prog(q => b1.set({ angle: 9 * q }), m('bend', 1.5), 1.2);
+    show(c1.rg, m('bend', 2));
+    // 2 twisting
+    const c2 = cell(1, 'скручивание', 'спиральный', m('twist'));
+    const b2 = longBone(p, c2.x + 90, c2.y + 170, 300, m('twist'), { r: 22 });
+    const t1 = twistArw(p, c2.x + 120, c2.y + 170, 22, 1), t2 = twistArw(p, c2.x + 360, c2.y + 170, 22, -1);
+    show(t1, m('twist', .3)); show(t2, m('twist', .3));
+    prog(q => b2.set({ line: q > .3 ? 'spiral' : null, rot: q }), m('twist', .8), 1.2);
+    show(c2.rg, m('twist', 1.5));
+    // 3 pull of a tendon: avulsion
+    const c3 = cell(2, 'тяга связки или мышцы', 'отрывной', m('pull'));
+    const b3 = longBone(p, c3.x + 40, c3.y + 190, 220, m('pull'), { r: 22 });
+    const frag = G(p, { o: 0 }), fx0 = c3.x + 262, fy0 = c3.y + 152;
+    mk('ellipse', { cx: 0, cy: 0, rx: 14, ry: 10, fill: ANAT.bone, stroke: mix(ANAT.bone, '#000000', .5), 'stroke-width': 2 }, frag);
+    put(frag, { x: fx0, y: fy0 }); show(frag, m('pull'));
+    const mu = muscleEl(p, { rest: 120, w: 20 }); put(mu.g, { o: 0 }); show(mu.g, m('pull'));
+    const ten = path(p, '', { stroke: ANAT.tendon, 'stroke-width': 5 }, { o: 0 }); show(ten, m('pull'));
+    const upd3 = k => { const fx = fx0 + 26 * k, fy = fy0 - 14 * k; put(frag, { x: fx, y: fy }); ten.setAttribute('d', `M${fx + 8} ${fy - 4}L${c3.x + 330} ${c3.y + 110}`); mu.set([c3.x + 330, c3.y + 110], [c3.x + 450, c3.y + 90]); mu.act(k > 0 ? 1 : .2); };
+    upd3(0);
+    prog(q => upd3(q), m('pull', .8), .6, out);
+    show(c3.rg, m('pull', 1.2));
+    // 4 compression of spongy bone
+    const c4 = cell(3, 'сдавление (губчатая кость)', 'компрессионный; у детей — пряжкообразный', m('crush'));
+    const sp = spongy(p, c4.cx, c4.y + 175, 170, 130, m('crush'));
+    const a4 = [arw(p, c4.cx, c4.y + 66, c4.cx, c4.y + 100), arw(p, c4.cx, c4.y + 284, c4.cx, c4.y + 250)];
+    a4.forEach(a => show(a, m('crush', .4)));
+    prog(q => { sp.set({ sq: q }); put(a4[0], { y: 18 * q }); put(a4[1], { y: -18 * q }); }, m('crush', 1), 1.6);
+    show(c4.rg, m('crush', 2));
+    // 5 repeated small loads: a stress fracture
+    const c5 = cell(4, 'повторяющиеся микротравмы', 'усталостный (стрессовый)', m('rep'));
+    const b5 = longBone(p, c5.x + 90, c5.y + 180, 300, m('rep'), { r: 22 });
+    const a5 = arw(p, c5.cx, c5.y + 80, c5.cx, c5.y + 140, FR, 4);
+    show(a5, m('rep', .3));
+    prog(q => put(a5, { y: -14 * cyc(q, 7) }), m('rep', .3), 5, lin);
+    const crack = path(p, `M${c5.cx - 2} ${c5.y + 158}l5 8l-4 7l4 7`, { stroke: '#2a1a18', 'stroke-width': 2.5 }, { d: 0 });
+    draw(crack, m('rep', 3), 2.5);
+    show(c5.rg, m('rep', 4));
+    // 6 normal force on diseased bone
+    const c6 = cell(5, 'обычная сила, больная кость', 'патологический (остеопороз, опухоль)', m('path'));
+    const b6 = longBone(p, c6.x + 90, c6.y + 180, 300, m('path'), { r: 22 });
+    prog(q => b6.set({ lucent: q * 1.8 }), m('path', .3), 1);
+    const a6 = arw(p, c6.cx, c6.y + 100, c6.cx, c6.y + 146, FR, 3);
+    show(a6, m('path', 1.3));
+    prog(q => b6.set({ line: 'trans', shift: 7 * q }), m('path', 2.2), .5);
+    show(c6.rg, m('path', 2.6));
+  }],
+
+  ['desc', 'Как описывают перелом', (m, D) => {
+    const p = panel(0);
+    txt(p, 'как описывают перелом', 800, 56, m('desc'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    // site
+    txt(p, 'место', 60, 116, m('site'), { size: 23, weight: 700, fill: FR });
+    const lb = longBone(p, 110, 250, 680, m('site'), { r: 32 });
+    const reg = [[70, 140, 'эпифиз', 0], [140, 230, 'метафиз', 1], [230, 670, 'диафиз', 0], [670, 760, 'метафиз', 1], [760, 830, 'эпифиз', 0]];
+    reg.forEach(([a, b, s, up], i) => {
+      const g0 = G(p, { o: 0 }), y = up ? 178 : 196;
+      path(g0, `M${a + 3} ${y + 8}V${y}H${b - 3}V${y + 8}`, { stroke: COL.whole, 'stroke-width': 2 });
+      T(g0, s, { x: (a + b) / 2, y: y - 8, size: 17, weight: 600, fill: COL.whole, anchor: 'middle' });
+      show(g0, m('site', .4 + i * .4));
+    });
+    lab(p, 'внутрисуставной — через суставную поверхность', 740, 360, 828, 270, COL.real, m('site', 2.6), { size: 18 });
+    // extent
+    txt(p, 'полный или неполный', 900, 116, m('ext'), { size: 23, weight: 700, fill: FR });
+    const e1 = longBone(p, 920, 190, 300, m('ext'), { r: 20 }); e1.set({ line: 'obl' });
+    const e2 = longBone(p, 920, 300, 300, m('ext', .8), { r: 20 });
+    draw(path(p, 'M1072 280l6 9l-5 8', { stroke: COL.board, 'stroke-width': 4 }, { d: 0 }), m('ext', 1.2), .5);
+    txt(p, 'полный', 1300, 197, m('ext'), { size: 20, weight: 600, fill: COL.chalk });
+    txt(p, 'неполный', 1300, 307, m('ext', .8), { size: 20, weight: 600, fill: COL.chalk });
+    // configuration
+    txt(p, 'направление линии', 60, 440, m('conf'), { size: 23, weight: 700, fill: FR });
+    pill(p, 'по мотивам рис. 11.12–11.13 — схема', 1340, 432, m('conf'), { col: COL.dim, size: 17 });
+    [['trans', 'поперечный'], ['long', 'продольный'], ['obl', 'косой'], ['spiral', 'спиральный'], ['comm', 'оскольчатый: 2+ отломка']].forEach(([k, s], i) => {
+      const x = 90 + i * 300, b = longBone(p, x, 530, 220, m('conf', .5 + i * 1.1), { r: 17 });
+      b.set({ line: k });
+      txt(p, s, x + 110, 600, m('conf', .5 + i * 1.1), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    });
+    // displacement, skin, complications on a fresh panel
+    const p2 = panel(m('disp'));
+    txt(p2, 'отломки, кожа, осложнения', 800, 56, m('disp'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    txt(p2, 'отломки', 60, 116, m('disp'), { size: 23, weight: 700, fill: FR });
+    [['без смещения', { line: 'trans' }], ['в сторону', { line: 'trans', shift: 22 }], ['с растяжением', { line: 'trans', gap: 26 }], ['с захождением', { line: 'trans', gap: -46, shift: 36 }], ['с поворотом', { line: 'spiral', rot: 1 }]].forEach(([s, st0], i) => {
+      const x = 90 + i * 300, b = longBone(p2, x, 220, 220, m('disp', .3 + i * 1), { r: 17 });
+      prog(q => b.set({ ...st0, gap: (st0.gap || 0) * q, shift: (st0.shift || 0) * q, rot: (st0.rot || 0) * q }), m('disp', .6 + i * 1), .8);
+      txt(p2, s, x + 110, 310, m('disp', .3 + i * 1), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    });
+    // closed and open
+    txt(p2, 'кожа', 60, 400, m('open'), { size: 23, weight: 700, fill: FR });
+    const env = (x, t0) => { const g0 = G(p2, { o: 0 }); mk('rect', { x: x - 20, y: 470, width: 420, height: 120, rx: 60, fill: SKIN, 'fill-opacity': .25, stroke: SKIN, 'stroke-width': 3 }, g0); show(g0, t0); return g0; };
+    env(120, m('open')); env(820, m('open', .8));
+    const wound = G(p2, { o: 0 }); mk('ellipse', { cx: 1040, cy: 471, rx: 22, ry: 8, fill: '#b8433b' }, wound);
+    const cb = longBone(p2, 150, 530, 360, m('open'), { r: 20 }); cb.set({ line: 'obl', shift: 6 });
+    const ob = longBone(p2, 850, 530, 360, m('open', .8), { r: 20 });
+    show(wound, m('open', 1.6));
+    prog(q => ob.set({ line: 'obl', gap: -18 * q, shift: -44 * q, angle: 18 * q }), m('open', 1.2), 1);
+    txt(p2, 'закрытый — кожа цела', 310, 640, m('open'), { size: 20, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p2, 'открытый — кожа повреждена', 1010, 640, m('open', .8), { size: 20, weight: 700, fill: COL.bad, anchor: 'middle' });
+    txt(p2, 'осложнения:', 60, 760, m('comp'), { size: 23, weight: 700, fill: FR });
+    pillRow(p2, ['местные', 'общие'], 420, 752, m('comp', .4), { col: [COL.task, COL.bad], size: 22, gap: .6 });
+    txt(p2, 'от самой травмы или от лечения', 640, 760, m('comp', 1.2), { size: 21, fill: COL.chalk });
+  }],
+
+  ['signs', 'Признаки возможного перелома', (m, D) => {
+    const p = panel(0);
+    txt(p, 'признаки возможного перелома (блок 11.5)', 800, 56, m('signs'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    infoCard(p, 60, 92, 1480, 120, 'диагноз и лечение — дело врача', 'но терапевт может первым увидеть пациента после травмы или микротравм, а травма может случиться и на занятии', COL.whole, m('signs'), { size: 21 });
+    // a limb in close-up: guarding, swelling, deformity, point tenderness
+    const env = G(p, { o: 0 });
+    mk('rect', { x: 70, y: 300, width: 680, height: 220, rx: 110, fill: SKIN, 'fill-opacity': .22, stroke: SKIN, 'stroke-width': 2 }, env);
+    show(env, m('signs', 1));
+    const mu = muscleEl(p, { rest: 520, w: 22 }); put(mu.g, { o: 0 }); mu.set([150, 350], [670, 350]); show(mu.g, m('signs', 1));
+    const lb = longBone(p, 120, 430, 580, m('signs', 1), { r: 30 });
+    lb.set({ line: 'obl' });
+    const sw = mk('ellipse', { cx: 410, cy: 420, rx: 0, ry: 0, fill: SKIN, 'fill-opacity': .35, stroke: SKIN, 'stroke-width': 2 }, p);
+    prog(q => { sw.setAttribute('rx', (150 * q).toFixed(1)); sw.setAttribute('ry', (125 * q).toFixed(1)); lb.set({ angle: 6 * q, shift: 6 * q }); }, m('l5'), 1);
+    prog(q => mu.act(.9 * cyc(q, 2)), m('l3'), m('l4') - m('l3'), lin);
+    const fg = G(p, { o: 0 }); const fsh = shadeGrad(mk('defs', {}, fg), '#d8d1c1');
+    mk('path', { d: capsuleD([0, -110], [0, -12], 17, 13), fill: fsh.url, stroke: mix('#d8d1c1', COL.board, .62), 'stroke-width': 2 }, fg); fsh.aim([0, -110], [0, -12], 17);
+    put(fg, { x: 420, y: 272 }); show(fg, m('l6')); tw(fg, { y: 334 }, m('l6', .3), .5);
+    const ping = G(p, { x: 420, y: 342, s: 0, o: 0 }); mk('circle', { r: 26, fill: PAIN, 'fill-opacity': .35, stroke: PAIN, 'stroke-width': 4 }, ping);
+    pop(ping, m('l6', .8)); pulse(ping, m('l6', 1.4), 1.5);
+    lab(p, 'защитное напряжение', 250, 270, 260, 342, ANAT.muscle, m('l3'));
+    lab(p, 'отёк, деформация', 560, 622, 520, 500, SKIN, m('l5', .5));
+    const L = [['l1', 'падение, прямой удар, скручивание или авария'], ['l2', 'местная боль, сильнее от движения и опоры'], ['l3', 'защитное напряжение мышц при пассивном движении'], ['l4', 'меньше пользуется частью тела'], ['l5', 'отёк, деформация, ненормальная подвижность (не всегда заметны)'], ['l6', 'резкая точечная болезненность']];
+    L.forEach(([k, s], i) => numLine(p, i + 1, s, 800, 270 + i * 64, FR, m(k), { size: 21, maxW: 680 }));
+    infoCard(p, 60, 660, 700, 190, 'есть подозрение', '→ направить на рентген и к врачу', COL.bad, m('ref'), { size: 23 });
+    txt(p, 'факторы риска перелома:', 800, 690, m('risk'), { size: 21, weight: 700, fill: COL.chalk });
+    pillRow(p, ['внезапный удар', 'остеопороз', 'падения в анамнезе'], 1150, 740, m('risk', .5), { col: FR, size: 19, gap: .6, space: 12 });
+    pillRow(p, ['повторяющиеся нагрузки', 'болезни, делающие кость хрупкой'], 1150, 796, m('risk', 2.3), { col: FR, size: 19, gap: .6, space: 12 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-type', prompt: ['Какой это перелом?'],
+    build: grid([
+      { parts: ['Лыжник упал, нога скрутилась в ботинке'], ans: ['s'], why: 'Скручивание — спиральный перелом.' },
+      { parts: ['Удар сбоку по середине голени — излом на выпуклой стороне'], ans: ['t'], why: 'Сгибание — поперечный или косой.' },
+      { parts: ['Резкое сокращение мышцы оторвало кусочек кости у прикрепления'], ans: ['a'], why: 'Тяга мышцы — отрывной.' },
+      { parts: ['Новобранец после недель маршей: боль в стопе, маленькая трещина'], ans: ['f'], why: 'Повторяющиеся микротравмы — стрессовый.' },
+      { parts: ['Бегун резко увеличил пробег — трещина в большеберцовой'], ans: ['f'], why: 'Ритмичная нагрузка, к которой кость не привыкла, — стрессовый.' },
+    ], [['t', 'Поперечный / косой', FR], ['s', 'Спиральный', COL.whole], ['a', 'Отрывной', COL.real], ['f', 'Стрессовый', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['heal', 'Заживление кости', (m, D) => {
+    const p = panel(0);
+    txt(p, 'заживление кортикальной кости', 800, 52, m('heal'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    const ch = chipRow(p, ['воспалительная', 'репаративная', 'ремоделирование'], [COL.bad, COL.task, COL.good], 560, 112, m('heal'));
+    ch.on(0, m('infl')); ch.on(1, m('rep')); ch.on(2, m('rad'));
+    const lb = longBone(p, 140, 330, 820, m('heal'), { r: 40 }), FX = lb.fx;
+    // torn vessels of the periosteum
+    const ves = [-1, 1].map(k => path(p, `M${FX - 120} ${330 + k * 46}C${FX - 60} ${330 + k * 52} ${FX - 20} ${330 + k * 40} ${FX - 6} ${330 + k * 46}M${FX + 6} ${330 + k * 46}C${FX + 30} ${330 + k * 52} ${FX + 80} ${330 + k * 40} ${FX + 120} ${330 + k * 46}`, { stroke: '#e2574c', 'stroke-width': 3 }, { o: 0 }));
+    ves.forEach(v => { show(v, m('infl', .3)); hide(v, m('rep', 1)); });
+    prog(q => lb.set({ line: 'obl', shift: 6 * q }), m('infl', .2), .6);
+    prog(q => lb.set({ hema: q }), m('infl', 1.5), 2.5);
+    prog(q => lb.set({ hema: 1 - q, soft: q }), m('rep', .5), 3);
+    prog(q => lb.set({ hard: .45 * q }), m('cart', .5), 3);
+    prog(q => lb.set({ hard: .45 + .55 * q, shift: 6 * (1 - q) }), m('clin', .5), 3);
+    prog(q => lb.set({ remodel: q }), m('rad', .5), 4);
+    lab(p, 'гематома и сгусток', 300, 220, FX - 30, 300, '#e2574c', m('infl', 2));
+    lab(p, 'мозоль', 760, 230, FX + 70, 280, CALLUS_C, m('rep', 1.5));
+    lab(p, 'хрящ → грубоволокнистая кость', 700, 470, FX + 40, 372, COL.task, m('cart', 1));
+    // the X-ray: the soft callus is invisible, the line stays until the radiological union
+    const xr = G(p, { o: 0 });
+    mk('rect', { x: 1100, y: 170, width: 440, height: 300, rx: 16, fill: '#0d1315', stroke: COL.dim, 'stroke-width': 2 }, xr);
+    T(xr, 'на снимке', { x: 1320, y: 205, size: 20, weight: 700, fill: COL.dim, anchor: 'middle' });
+    show(xr, m('rep', 3));
+    const mb = longBone(p, 1150, 330, 340, m('rep', 3), { r: 18 }), FXm = mb.fx;
+    const xl = path(p, `M${FXm - 12} ${330 - 20}L${FXm + 12} ${330 + 20}`, { stroke: '#0d1315', 'stroke-width': 3.5 }, { o: 0 });
+    show(xl, m('rep', 3));
+    prog(q => mb.set({ hard: .45 * q }), m('cart', .5), 3);
+    prog(q => mb.set({ hard: .45 + .55 * q }), m('clin', .5), 3);
+    prog(q => { mb.set({ remodel: q }); xl.setAttribute('opacity', (1 - q).toFixed(2)); }, m('rad', .5), 4);
+    const nv = txt(p, 'мозоли не видно', 1320, 440, m('rep', 3.5), { size: 18, fill: COL.dim, anchor: 'middle' }); hide(nv, m('cart', .5));
+    txt(p, 'видна по мере окостенения', 1320, 440, m('cart', 1), { size: 18, fill: COL.dim, anchor: 'middle' });
+    // four cards
+    const C = [['воспаление', 'рвутся мелкие сосуды → гематома и сгусток; крови больше при смещении и повреждении мягких тканей', COL.bad, 'infl'],
+      ['мозоль', 'клетки надкостницы и эндоста → толстая мозоль; затем хрящ у перелома и первичная грубоволокнистая кость', COL.task, 'rep'],
+      ['клиническое сращение', 'перелом не двигается, линия на снимке видна; движения в суставах — без деформирующих сил', COL.whole, 'clin'],
+      ['рентгенологическое', 'мозоль заменена зрелой пластинчатой костью и рассасывается', COL.good, 'rad']];
+    C.forEach(([h, s, c, k], i) => infoCard(p, 60 + i * 375, 540, 355, 320, h, s, c, m(k), { size: 19 }));
+  }],
+
+  ['fix', 'Фиксатор и сроки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'внутренняя фиксация и сроки сращения', 800, 56, m('fix'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    const lb = longBone(p, 120, 270, 760, m('fix'), { r: 38 }), FX = lb.fx;
+    lb.set({ line: 'trans' });
+    prog(q => lb.set({ plate: q }), m('fix', 1), .8);
+    // the load bypasses the bone under the plate
+    const flow = path(p, `M60 270H${FX - 120}V${270 - 38 - 9}H${FX + 120}V270H940`, { stroke: COL.task, 'stroke-width': 5, 'stroke-dasharray': '1 1' }, { d: 0 });
+    draw(flow, m('shield', .3), 2);
+    const head = arw(p, 900, 270, 950, 270, COL.task, 5); show(head, m('shield', 2));
+    prog(q => lb.set({ lucent: q * 2 }), m('shield', 1.5), 2);
+    lab(p, 'кость под пластиной теряет плотность', 560, 410, FX - 40, 300, COL.chalk, m('shield', 2.5));
+    prog(q => lb.set({ plate: 1 - q }), m('rem', .3), 1);
+    hide(flow, m('rem', .3)); hide(head, m('rem', .3));
+    prog(q => lb.set({ lucent: 2 * (1 - q) }), m('rem', 3), Math.max(2, m('time') - m('rem', 3)), lin);
+    infoCard(p, 980, 92, 560, 150, 'стержень или пластина с винтами', 'стабилизируют отломки', COL.whole, m('fix'), { size: 21 });
+    infoCard(p, 980, 260, 560, 170, 'нагрузка в обход кости', 'идёт через фиксатор — кость под ним теряет плотность', COL.task, m('shield'), { size: 21 });
+    infoCard(p, 980, 448, 560, 170, 'после сращения', 'фиксатор обычно удаляют; несколько месяцев — защита от больших нагрузок', COL.good, m('rem'), { size: 21 });
+    txt(p, 'срок зависит от:', 60, 470, m('time'), { size: 22, weight: 700, fill: COL.chalk });
+    pillRow(p, ['возраст', 'место и тип', 'смещение', 'операция'], 470, 520, m('time', .4), { col: FR, size: 19, gap: .6, space: 12 });
+    pillRow(p, ['мягкие ткани', 'кровоснабжение отломков', 'здоровье', 'курение'], 470, 576, m('time', 3), { col: FR, size: 19, gap: .6, space: 12 });
+    // usual times, weeks
+    const AX = 300, AW = 1200, AY = 840, wk = v => AX + v / 20 * AW;
+    txt(p, 'обычные сроки сращения, недели', 800, 650, m('ages'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const ax = G(p, { o: 0 });
+    path(ax, `M${AX} ${AY}H${AX + AW}`, { stroke: COL.dim, 'stroke-width': 2.5 });
+    [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20].forEach(v => { path(ax, `M${wk(v)} ${AY - 6}V${AY + 6}`, { stroke: COL.dim, 'stroke-width': 2 }); T(ax, String(v), { x: wk(v), y: AY + 28, size: 17, fill: COL.dim, anchor: 'middle' }); });
+    show(ax, m('ages'));
+    [['дети', 4, 6, COL.good], ['подростки', 6, 8, COL.task], ['взрослые', 10, 18, FR]].forEach(([s, a, b, c], i) => {
+      const y = 680 + i * 48, g0 = G(p, { o: 0 });
+      T(g0, s, { x: AX - 16, y: y + 25, size: 20, fill: COL.chalk, anchor: 'end', weight: 600 });
+      mk('rect', { x: wk(a), y, width: wk(b) - wk(a), height: 34, rx: 9, fill: c, 'fill-opacity': .85 }, g0);
+      T(g0, `${a}–${b}`, { x: wk(b) + 12, y: y + 25, size: 20, weight: 700, fill: c });
+      show(g0, m('ages', .5 + i * 1.6));
+    });
+  }],
+
+  ['ab', 'Нарушения сращения', (m, D) => {
+    const p = panel(0);
+    txt(p, 'нарушения сращения (блок 11.6)', 800, 56, m('ab'), { size: 28, weight: 700, anchor: 'middle', fill: FR });
+    const cell = (i, title, s, t0) => {
+      const x = 60 + i * 500, g = G(p, { o: 0 });
+      roundBox(g, x, 92, 480, 320, EDGE, PANEL, 2);
+      T(g, title, { x: x + 240, y: 132, size: 23, weight: 700, fill: FR, anchor: 'middle' });
+      put(para(g, s, x + 240, 340, null, { size: 20, maxW: 440, anchor: 'middle' }), { o: 1 });
+      show(g, t0);
+      return x;
+    };
+    const x1 = cell(0, 'неправильное сращение', 'кость срослась с деформацией', m('mal'));
+    const b1 = longBone(p, x1 + 90, 230, 300, m('mal'), { r: 22 });
+    prog(q => b1.set({ line: 'obl', angle: 14 * q }), m('mal', .5), .8);
+    prog(q => b1.set({ hard: q, remodel: .5 * q }), m('mal', 1.4), 1.5);
+    const x2 = cell(1, 'замедленное сращение', 'заживает дольше обычного', m('del'));
+    const b2 = longBone(p, x2 + 90, 230, 300, m('del'), { r: 22 });
+    b2.set({ line: 'trans', gap: 6 });
+    prog(q => b2.set({ soft: .5 * q }), m('del', .5), Math.max(2, m('non') - m('del', .5)), lin);
+    const clk = G(p, { o: 0 }), ccx = x2 + 420, ccy = 290;
+    mk('circle', { cx: ccx, cy: ccy, r: 24, fill: PANEL, stroke: COL.task, 'stroke-width': 3.5 }, clk);
+    const hand = path(clk, `M${ccx} ${ccy}V${ccy - 17}`, { stroke: COL.task, 'stroke-width': 3.5 });
+    show(clk, m('del', .5));
+    prog(q => hand.setAttribute('transform', `rotate(${(q * 1080).toFixed(1)} ${ccx} ${ccy})`), m('del', .5), Math.max(2, D - m('del', .5)), lin);
+    const x3 = cell(2, 'несращение', 'кости нет: фиброзное соединение или ложный сустав', m('non'));
+    const b3 = longBone(p, x3 + 90, 230, 300, m('non'), { r: 22 });
+    prog(q => b3.set({ line: 'trans', gap: 18 * q }), m('non', .3), .6);
+    const fib = path(p, [-14, -6, 2, 10, 18].map(dy => `M${x3 + 240 - 2} ${230 + dy}c6 -5 12 5 18 0`).join(''), { stroke: '#d9cfb8', 'stroke-width': 2.5 }, { o: 0 });
+    show(fib, m('non', 1.2));
+    // cancellous bone
+    const cg = G(p, { o: 0 }); roundBox(cg, 60, 440, 920, 420, COL.whole, PANEL, 2.5); show(cg, m('canc'));
+    txt(p, 'губчатая кость', 90, 486, m('canc'), { size: 26, weight: 700, fill: COL.whole });
+    txt(p, 'метафизы длинных костей, тела коротких и плоских', 90, 520, m('canc'), { size: 20, fill: COL.dim });
+    const sp = spongy(p, 230, 680, 260, 200, m('canc'), { seed: 9 });
+    const pts = [['срастается быстрее: внутренняя мозоль, хорошее кровоснабжение, большая площадь контакта', COL.good, 1.5],
+      ['легче ломается от сдавления', COL.task, 9.5],
+      ['поверхности растянуты (например, при репозиции) → сращение замедляется', COL.bad, 12]];
+    pts.forEach(([s, c, t], i) => { const g0 = G(p, { o: 0 }); mk('circle', { cx: 410, cy: 582 + i * 92, r: 8, fill: c }, g0); put(para(g0, s, 430, 590 + i * 92, null, { size: 20, maxW: 520 }), { o: 1 }); show(g0, m('canc', t)); });
+    prog(q => sp.set({ sq: .6 * cyc(q, 1) }), m('canc', 9.5), 2);
+    // the growth plate
+    const eg = G(p, { o: 0 }); roundBox(eg, 1020, 440, 520, 420, COL.real, PANEL, 2.5); show(eg, m('epi'));
+    txt(p, 'перелом через ростковую пластинку', 1280, 486, m('epi'), { size: 22, weight: 700, fill: COL.real, anchor: 'middle' });
+    const vg = G(p, { x: 1240, y: 830, r: -90, o: 0 });
+    const vb = longBone(vg, 0, 0, 300, null, { r: 26, fx: .8 }); put(vb.g, { o: 1 });
+    const plate = path(vb.g, `M240 -40V40`, { stroke: '#8fc7e0', 'stroke-width': 7 });
+    show(vg, m('epi'));
+    const fl = path(p, '', { stroke: PAIN, 'stroke-width': 3.5 }, { o: 0 });
+    fl.setAttribute('d', 'M1212 600L1246 590L1268 556'); show(fl, m('epi', .8));
+    prog(q => vb.set({ angle: -12 * q }), m('epi', 1.6), 1.6);
+    txt(p, 'рост нарушен', 1410, 690, m('epi', 2), { size: 20, weight: 700, fill: COL.bad, anchor: 'middle' });
+    txt(p, '→ деформация', 1410, 718, m('epi', 2), { size: 20, weight: 700, fill: COL.bad, anchor: 'middle' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-weeks', prompt: ['Обычные сроки сращения перелома, недель:'],
+    build: blanks([
+      { parts: ['Дети: от ', { box: '4' }, ' до ', { box: '6' }], why: 'У детей — 4–6 недель.' },
+      { parts: ['Подростки: от ', { box: '6' }, ' до ', { box: '8' }], why: 'У подростков — 6–8 недель.' },
+      { parts: ['Взрослые: от ', { box: '10' }, ' до ', { box: '18' }], why: 'У взрослых — 10–18 недель.' },
+    ]),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Тип перелома зависит от силы: сгибание, скручивание, тяга, сдавление, повторяющаяся нагрузка, больная кость.', 'w1'],
+     ['Подозрение на перелом — к врачу: удар или падение, боль от движения и опоры, защитное напряжение, отёк, деформация, точечная болезненность.', 'w2'],
+     ['Фазы: гематома → мозоль → клиническое и рентгенологическое сращение.', 'w3'],
+     ['Сроки: дети — 4–6 недель, подростки — 6–8, взрослые — 10–18.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: FR }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-ankle', prompt: ['На занятии пациент оступился и подвернул голеностоп: резкая боль в одной точке на лодыжке, отёк, не может опереться на ногу. Что делать?'],
+    build: choice([
+      ['Прекратить занятие и направить на рентген и к врачу'],
+      ['Продолжить: это растяжение, его разрабатывают движением'],
+      ['Сразу мобилизовать сустав, чтобы не было скованности'],
+      ['Дать упражнения с опорой на ногу через боль'],
+    ], 0, 'Точечная болезненность, отёк и невозможность опереться — признаки возможного перелома: нужен рентген и врач.',
+    [null, 'Признаки возможного перелома нельзя списывать на растяжение.', 'Мобилизация до исключения перелома опасна.', 'Боль при опоре — тревожный признак, нагрузка через боль недопустима.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-union', prompt: ['Взрослый, перелом лучевой кости, 6 недель. Врач говорит о клиническом сращении; линия перелома на снимке ещё видна. Что можно?'],
+    build: choice([
+      ['Активные движения в соседних суставах без деформирующих сил в месте перелома'],
+      ['Сопротивление с полной силой на дистальный отломок'],
+      ['Ничего, пока линия на снимке не исчезнет'],
+      ['Сразу полная нагрузка с отягощением'],
+    ], 0, 'При клиническом сращении иммобилизация обычно уже не нужна: движения в суставах разрешены, но без деформирующих сил в месте перелома.',
+    [null, 'Это деформирующая сила в месте перелома — пока рано.', 'Ждать рентгенологического сращения для движений не нужно.', 'До рентгенологического сращения большие нагрузки рано.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

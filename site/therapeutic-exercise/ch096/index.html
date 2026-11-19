@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Свойства воды — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 96, title: 'Свойства воды', minutes: 10, language: 'ru', next: '../ch097/' };
+// bio begin: places of the biomechanics layer (B switches); made by tools/therapeutic-exercise/bio.py from content/therapeutic-exercise/ch096/bio.ru.json
+const BIO = [
+  {"beat": "assist", "fig": 0, "level": "angle", "joint": "aN", "load": {"type": "none"}},
+];
+// bio end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch096/cards.ru.json
+const CARDS_SHORT = {
+  "закон Архимеда\nвыталкивающая сила равна весу вытесненной жидкости": "сила = вес вытесненной жидкости",
+  "относительная невесомость\nсуставы разгружены, сила тяжести слабее → активные движения легче": "суставы разгружены → движения легче",
+  "после шва вращательной манжеты\nпо шею в воде: сгибание и отведение плеча — плавучесть помогает увеличить объём": "плавучесть помогает объёму",
+  "разгибание из 90° сгибания\nрука идёт вниз сквозь воду — плавучесть становится сопротивлением": "плавучесть → сопротивление",
+  "доступ к пациенту в трёх измерениях\nтерапевт подходит со всех сторон": "терапевт подходит со всех сторон",
+  "закон Паскаля\nдавление жидкости одинаково со всех сторон погружённого тела; растёт с плотностью и глубиной": "давление одинаково со всех сторон",
+  "совет: лимфедема\nгидростатическое давление и вязкость → лимфоток ↑, отёк ↓; но опущенное положение конечности может свести эффект на нет": "лимфоток ↑, отёк ↓",
+  "поверхность — как натянутая плёнка\nнатяжение измеряют как силу на единицу длины": "сила на единицу длины",
+  "свойство\nмолекулы на поверхности притягиваются параллельно ей; сопротивление растёт с размером предмета, пересекающего поверхность": "сопротивление растёт с размером предмета",
+  "конечность через поверхность\nработы больше, чем под водой": "работы больше, чем под водой",
+  "снаряд у поверхности\nсопротивление больше": "сопротивление больше",
+  "лобовое сопротивление (drag)\nтурбулентность + вязкость; быстрее движение → больше сопротивление": "быстрее движение → больше сопротивление",
+  "удельная теплоёмкость (specific heat)\nтепло (калории), чтобы нагреть 1 г вещества на 1 °C; скорость изменения температуры зависит от массы и удельной теплоёмкости": "нагреть 1 г на 1 °C",
+  "ампутация одной ноги\nвертикально: наклоняется в сторону культи": "наклоняется в сторону культи",
+  "опора на дно\nстоя, сидя, на коленях: действуют и центр плавучести, и центр тяжести": "плавучесть + тяжесть",
+};
+// cards-short end
+
+const AQ = COL.whole, WT = COL.task, ACT = '#ff5a3c', HEAT = '#ff8a5c';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A bathroom scale on the pool floor (top at y - 26): sc.set(v) shows v %.
+function scaleBox(p, x, y, t0) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x: x - 72, y: y - 26, width: 144, height: 26, rx: 6, fill: '#5d7068', stroke: COL.chalk, 'stroke-width': 2 }, g);
+  mk('rect', { x: x - 38, y: y - 22, width: 76, height: 19, rx: 3, fill: COL.board }, g);
+  const t = T(g, '100 %', { x, y: y - 7, size: 16, weight: 700, fill: COL.good, anchor: 'middle' });
+  g.set = v => { t.textContent = Math.round(v) + ' %'; return g; };
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// Vertical figure treading water in deep water: hip at (x, y).
+const TREAD = { ...STAND, hN: 10, kN: 22, hF: -4, kF: 14, aN: 34, eN: 34, aF: 26, eF: 28 };
+// A wavy heat arrow leaving the body (red-orange).
+function heatArrow(p, x, y, dx, dy) {
+  const L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, nx = -uy, ny = ux, f = v => v.toFixed(1);
+  let d = `M${f(x)} ${f(y)}`;
+  for (let i = 1; i <= 16; i++) { const q = i / 16, w = 5 * Math.sin(q * Math.PI * 3); d += `L${f(x + dx * q + nx * w)} ${f(y + dy * q + ny * w)}`; }
+  const X = x + dx, Y = y + dy;
+  d += `M${f(X - ux * 10 - nx * 7)} ${f(Y - uy * 10 - ny * 7)}L${f(X)} ${f(Y)}L${f(X - ux * 10 + nx * 7)} ${f(Y - uy * 10 + ny * 7)}`;
+  return path(p, d, { stroke: HEAT, 'stroke-width': 3.5 });
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Свойства воды', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 9 · Урок 96', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Свойства воды', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'плавучесть · давление · вязкость · поверхность · поток · тепло', 800, 300, m('sub'), { size: 28, fill: AQ, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const w = pool(art, 420, 1180, 590, 860, null, { rim: 60 });
+    const f = fig(w.mid, { s: .95 }); plant(f, 'AN', 800, 860);
+    const up = fArrow(art, ...figPt(f, [10, -80]), 0, -110, BUOY_C), dn = fArrow(art, ...figPt(f, [2, -4]), 0, 120, WT);
+    T(art, 'плавучесть', { x: 830, y: 470, size: 20, weight: 700, fill: BUOY_C });
+    T(art, 'вес', { x: 830, y: 820, size: 20, weight: 700, fill: WT });
+    w.wave(.3, D, 4);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['buoy', 'Плавучесть', (m, D) => {
+    const p = panel(0);
+    txt(p, 'плавучесть (buoyancy)', 800, 56, m('buoy'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const S = 1.15, X = 545, FL = 840, FEET = FL - 26, HIP = FEET - 182 * S;
+    const ASIS = HIP - IMM.asis * S, XIPH = HIP - IMM.xiph * S, C7 = HIP - IMM.c7 * S;
+    const w = pool(p, 330, 760, FL, FL, m('buoy'), { rim: FL - 390 });
+    const f = fig(w.mid, { s: S, o: 0 }); plant(f, 'AN', X, FEET); show(f.g, m('buoy'));
+    const sc = scaleBox(p, X, FL, m('buoy'));
+    const load = y => y >= FL ? 100 : y >= ASIS ? lerp(100, 50, (FL - y) / (FL - ASIS)) : y >= XIPH ? lerp(50, 33, (ASIS - y) / (ASIS - XIPH)) : y >= C7 ? lerp(33, 10, (XIPH - y) / (XIPH - C7)) : 10;
+    const B0 = figPt(f, [10, -84]), W0 = figPt(f, [2, -4]);
+    const up = fArrow(p, B0[0], B0[1], 0, 0, BUOY_C), dn = fArrow(p, W0[0], W0[1], 0, 150, WT);
+    put(up, { o: 0 }); put(dn, { o: 0 }); show(dn, m('def')); show(up, m('def'));
+    const upL = T(p, 'плавучесть', { x: X + 40, y: 360, size: 20, weight: 700, fill: BUOY_C, o: 0 }), dnL = T(p, 'вес', { x: X + 22, y: W0[1] + 140, size: 20, weight: 700, fill: WT, o: 0 });
+    show(upL, m('def')); show(dnL, m('def'));
+    let lvl = FL;
+    const setLvl = y => { lvl = y; w.set({ y }); const v = load(y); sc.set(v); up.set(B0[0], B0[1], 0, -(100 - v) * 1.5); put(upL, { y: B0[1] - (100 - v) * 1.5 - 14 }); };
+    setLvl(FL);
+    prog(q => setLvl(lerp(FL, ASIS, q)), m('levels'), 1.6);
+    prog(q => setLvl(lerp(ASIS, XIPH, q)), m('xiph'), 1.4);
+    prog(q => setLvl(lerp(XIPH, C7, q)), m('c7'), 1.4);
+    // level marks on the left of the pool
+    [[ASIS, 'ASIS · 50 %', 'asis'], [XIPH, 'мечевидный отросток · 33 %', 'xiph'], [C7, 'C7 · 10 %', 'c7']].forEach(([y, s, k]) => {
+      const g = G(p, { o: 0 });
+      path(g, `M250 ${y}H330`, { stroke: COL.chalk, 'stroke-width': 2.5, 'stroke-dasharray': '6 5' });
+      T(g, s, { x: 320, y: y - 10, size: 19, weight: 700, fill: COL.chalk, anchor: 'end' });
+      show(g, m(k));
+    });
+    infoCard(p, 840, 100, 700, 76, 'сила вверх, против силы тяжести', null, AQ, m('def'));
+    infoCard(p, 840, 196, 700, 118, 'закон Архимеда', 'выталкивающая сила равна весу вытесненной жидкости', AQ, m('arch'), { size: 22 });
+    // Fig. 9.1 as bars: the share of body weight on the legs
+    const ch = G(p, { o: 0 }), bx = 900, by = 820;
+    path(ch, `M${bx - 20} ${by}H${bx + 600}`, { stroke: COL.dim, 'stroke-width': 3 });
+    T(ch, '% веса тела на ногах (рис. 9.1)', { x: bx - 20, y: 420, size: 21, weight: 700, fill: COL.chalk });
+    show(ch, m('levels'));
+    [['ASIS', 50, 'asis'], ['мечевидный', 33, 'xiph'], ['C7', 10, 'c7']].forEach(([s, v, k], i) => {
+      const g = G(p, { o: 0 }), x = bx + 30 + i * 190, h = v * 6;
+      mk('rect', { x, y: by - h, width: 130, height: h, rx: 8, fill: mix(WT, COL.board, .35), stroke: WT, 'stroke-width': 2.5 }, g);
+      T(g, v + ' %', { x: x + 65, y: by - h - 14, size: 30, weight: 700, fill: WT, anchor: 'middle' });
+      T(g, s, { x: x + 65, y: by + 30, size: 20, fill: COL.chalk, anchor: 'middle' });
+      show(g, m(k));
+    });
+  }],
+
+  ['assist', 'Плавучесть помогает и сопротивляется', (m, D) => {
+    const p = panel(0);
+    txt(p, 'плавучесть: помощь и сопротивление', 800, 56, m('unload'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const S = 1.2, GY = 820, X = 330, C7 = GY - 182 * S - IMM.c7 * S;
+    const w = pool(p, 80, 720, C7, GY, m('unload'), { rim: 30 });
+    w.wave(m('unload'), Math.max(3, D - m('unload')), 3);
+    const f = fig(w.mid, { s: S, o: 0, pose: { ...STAND, aN: 6, eN: 4 } }); plant(f, 'AN', X, GY); show(f.g, m('unload'));
+    const ext = muscleOn(f, ['Sh', 'H', 44, 20], ['Sh', 'EN', 24, 4], { w: 12, after: 'torso' });
+    const hand = fArrow(p, 0, 0, 0, -60, BUOY_C); put(hand, { o: 0 });
+    const mv = fArrow(p, 0, 0, 0, 0, COL.chalk, { w: 4, head: 12 }); put(mv, { o: 0 });
+    const lA = txt(p, '↑ плавучесть помогает', 560, 290, null, { size: 22, weight: 700, fill: COL.good, anchor: 'middle' }); put(lA, { o: 0 });
+    const lR = txt(p, '↓ плавучесть сопротивляется', 560, 326, null, { size: 22, weight: 700, fill: COL.bad, anchor: 'middle' }); put(lR, { o: 0 });
+    const lM = txt(p, 'работают разгибатели плеча', 230, 300, null, { size: 20, weight: 700, fill: ACT, anchor: 'middle' }); put(lM, { o: 0 });
+    NOTE(p, 230, 262, m('resist', 1));
+    // assist: the arm floats up to the surface; resist: it is pulled down through the water, then floats up again
+    const T1 = m('assist', .6), T2 = m('resist', .3);
+    const angAt = T => {
+      if (T < T1) return 6;
+      if (T < T2) return lerp(6, 86, io(clamp((T - T1) / 3, 0, 1)));
+      const u = (T - T2) % 4.6;
+      return u < 1.6 ? lerp(86, 6, io(u / 1.6)) : lerp(6, 86, io(clamp((u - 1.6) / 2.6, 0, 1)));
+    };
+    prog(q => {
+      const T = q * D, a = angAt(T), da = angAt(T + .05) - angAt(T - .05);
+      f.set({ aN: a, eN: 4 });
+      const [hx, hy] = onStage(f, 'WN');
+      hand.set(hx, hy, 0, -64); put(hand, { o: T >= T1 ? 1 : 0 });
+      const down = T >= T2 && da < -.2, upw = da > .2;
+      ext.act(down ? .9 : 0);
+      const [sx, sy] = onStage(f, 'Sh'), ax = hx - sx, ay = hy - sy, L = Math.hypot(ax, ay) || 1, sg = da > 0 ? 1 : -1;
+      const tx = ay / L * sg, ty = -ax / L * sg;   // tangent of the hand's path, in the direction of motion
+      mv.set(hx - ax / L * 30, hy - ay / L * 30, tx * 70, ty * 70);
+      put(mv, { o: Math.abs(da) > .2 ? 1 : 0 });
+      put(lA, { o: T < T1 ? 0 : upw ? 1 : .3 }); put(lR, { o: T < T2 ? 0 : down ? 1 : .3 }); put(lM, { o: T < T2 ? 0 : down ? 1 : .3 });
+    }, 0, D, lin);
+    infoCard(p, 780, 110, 770, 130, 'относительная невесомость', 'суставы разгружены, сила тяжести слабее → активные движения легче', AQ, m('unload'), { size: 21 });
+    infoCard(p, 780, 260, 770, 160, 'после шва вращательной манжеты', 'по шею в воде: сгибание и отведение плеча — плавучесть помогает увеличить объём', COL.good, m('assist'), { size: 21 });
+    infoCard(p, 780, 440, 770, 130, 'разгибание из 90° сгибания', 'рука идёт вниз сквозь воду — плавучесть становится сопротивлением', COL.bad, m('resist'), { size: 21 });
+    infoCard(p, 780, 590, 770, 76, 'против плавучести → укрепление мышц', null, ACT, m('str'));
+  }],
+
+  ['float', 'Что меняет плавучесть', (m, D) => {
+    const p = panel(0);
+    txt(p, 'от чего зависит плавучесть', 800, 56, m('lungs'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const SY = 420, S = .8;
+    const w = pool(p, 60, 1540, SY, 830, m('lungs'), { rim: 40 });
+    w.wave(m('lungs'), Math.max(3, D - m('lungs')), 3);
+    const F = [[260, 126, 'lungs', 'полный вдох — выше'], [540, 150, 'lungs', 'выдох — ниже'], [1000, 120, 'comp', 'больше жира — выше'], [1290, 150, 'bone', 'плотные кости — ниже']];
+    const figs = F.map(([x, d, k, lab], i) => {
+      const f = fig(w.mid, { x, y: SY + d * S, s: S, o: 0, pose: TREAD });
+      if (i === 2) {   // more subcutaneous fat: a wider trunk and thighs
+        const defs = mk('defs', {}, f.g), C0 = '#d8d1c1', CF = mix(C0, COL.board, .42), ln = mix(C0, COL.board, .62);
+        const tr = limbEl(f.g, defs, C0, 33, 36, ln); f.g.insertBefore(tr.e, f.parts.torso.e); tr.set([0, 0], f.pts.Sh);
+        const tN = limbEl(f.g, defs, C0, 22, 15, ln); f.g.insertBefore(tN.e, f.parts.thN.e); tN.set(f.pts.H, f.pts.KN);
+        const tF = limbEl(f.g, defs, CF, 21, 14, mix(CF, COL.board, .5)); f.g.insertBefore(tF.e, f.parts.thF.e); tF.set(f.pts.H, f.pts.KF);
+      }
+      show(f.g, m(k, i % 2 ? 1 : 0));
+      txt(p, lab, x, 760, m(k, i % 2 ? 1 : 0), { size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      return f;
+    });
+    prog(q => figs.forEach((f, i) => put(f.g, { y: SY + F[i][1] * S + 2.5 * Math.sin(q * D * 1.4 + i) })), m('lungs'), Math.max(3, D - m('lungs')), lin);
+    [[0, 1], [2, 3]].forEach(([a, b]) => {
+      const ha = SY + F[a][1] * S - 180 * S, hb = SY + F[b][1] * S - 180 * S, g = G(p, { o: 0 });
+      path(g, `M${F[a][0] - 50} ${ha}H${F[b][0] + 50}`, { stroke: COL.chalk, 'stroke-width': 2, 'stroke-dasharray': '6 6' });
+      path(g, `M${F[b][0] + 40} ${ha + 4}V${hb - 4}`, { stroke: COL.task, 'stroke-width': 3 });
+      show(g, m(F[b][2], 1.5));
+    });
+    txt(p, 'воздух в лёгких', 400, 330, m('lungs'), { size: 24, weight: 700, fill: AQ, anchor: 'middle' });
+    txt(p, 'состав тела', 1145, 330, m('comp'), { size: 24, weight: 700, fill: AQ, anchor: 'middle' });
+    txt(p, 'жир легче воды по удельному весу', 1000, 700, m('comp', 1), { size: 17, fill: COL.dim, anchor: 'middle' });
+    const bone = G(p, { o: 0 });
+    path(bone, 'M1262 704H1318', { stroke: ANAT.bone, 'stroke-width': 8 }); [1262, 1318].forEach(x => [-6, 6].forEach(d => mk('circle', { cx: x, cy: 704 + d, r: 6, fill: ANAT.bone }, bone)));
+    show(bone, m('bone', .5));
+    infoCard(p, 520, 100, 700, 110, 'доступ к пациенту в трёх измерениях', 'терапевт подходит со всех сторон', COL.good, m('access'), { size: 21 });
+    const ac = G(p, { o: 0 });
+    mk('ellipse', { cx: 420, cy: 155, rx: 54, ry: 16, fill: '#d8d1c1', stroke: mix('#d8d1c1', COL.board, .6), 'stroke-width': 2 }, ac);
+    mk('circle', { cx: 360, cy: 155, r: 13, fill: '#d8d1c1', stroke: mix('#d8d1c1', COL.board, .6), 'stroke-width': 2 }, ac);
+    [[420, 100, 0, 30], [420, 210, 0, -30], [300, 155, 30, 0], [490, 120, 0, 0]].slice(0, 3).forEach(([x, y, dx, dy]) => fArrow(ac, x, y, dx, dy, COL.good, { w: 4, head: 11 }));
+    fArrow(ac, 510, 155, -26, 0, COL.good, { w: 4, head: 11 });
+    show(ac, m('access'));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-wb', prompt: ['Сколько веса приходится на ноги (рис. 9.1)?'],
+    build: blanks([
+      { parts: ['Вода до передней верхней ости (ASIS), %: ', { box: '50' }], why: 'ASIS — 50 %.' },
+      { parts: ['До мечевидного отростка, %: ', { box: '33' }], why: 'Мечевидный отросток — 33 %.' },
+      { parts: ['До седьмого шейного позвонка (C7), %: ', { box: '10' }], why: 'C7 — 10 %.' },
+      { parts: ['Пациент 70 кг стоит в воде до ASIS; на ноги, кг: ', { box: '35' }], why: '70 × 0,5 = 35 кг.' },
+    ]),
+  }], done) }],
+
+  ['press', 'Гидростатическое давление', (m, D) => {
+    const p = panel(0);
+    txt(p, 'гидростатическое давление (hydrostatic pressure)', 800, 56, m('press'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const S = 1.15, GY = 820, X = 300, HIP = GY - 182 * S, XIPH = HIP - IMM.xiph * S;
+    const w = pool(p, 60, 600, XIPH, GY, m('press'), { rim: 110 });
+    w.wave(m('press'), Math.max(3, D - m('press')), 3);
+    const f = fig(w.mid, { s: S, o: 0 }); plant(f, 'AN', X, GY); show(f.g, m('press'));
+    // pressure arrows: equal front and back at one depth (Pascal), longer deeper
+    const arr = G(p, { o: 0 });
+    [[566, 33], [636, 26], [704, 24], [776, 22]].forEach(([y, hw]) => {
+      const L = 14 + (y - XIPH) * .16;
+      [-1, 1].forEach(k => fArrow(arr, X + k * (hw + 6 + L), y, -k * L, 0, DRAG_C, { w: 5, head: 12 }));
+    });
+    show(arr, m('pascal'));
+    const dep = G(p, { o: 0 });
+    fArrow(dep, 560, XIPH + 16, 0, 266, COL.chalk, { w: 4, head: 14 });
+    T(dep, 'глубже —', { x: 545, y: XIPH + 220, size: 19, fill: COL.chalk, anchor: 'end' });
+    T(dep, 'давление больше', { x: 545, y: XIPH + 246, size: 19, weight: 700, fill: COL.chalk, anchor: 'end' });
+    show(dep, m('depth'));
+    // effusion at the knee shrinks; venous return; the heart slows
+    const [kx, ky] = onStage(f, 'KN'), eff = G(w.mid, { x: kx + 8, y: ky, o: 0 });
+    mk('ellipse', { rx: 26, ry: 20, fill: COL.nat, 'fill-opacity': .55, stroke: COL.nat, 'stroke-width': 2.5 }, eff);
+    show(eff, m('eff')); tw(eff, { s: .45 }, m('eff', .8), 2);
+    txt(p, 'выпот ↓', kx + 46, ky - 26, m('eff'), { size: 20, weight: 700, fill: COL.nat });
+    const [ax, ay] = onStage(f, 'AN'), vein = `M${ax - 12} ${ay - 30}C${ax - 22} ${ay - 90} ${kx - 26} ${ky + 30} ${kx - 22} ${ky}S${X - 26} ${HIP + 10} ${X - 18} ${HIP - 30}`;
+    const vg = G(p, { o: 0 }); path(vg, vein, { stroke: BLOOD_V, 'stroke-width': 6, 'stroke-opacity': .8 });
+    const vd = [0, 1, 2, 3, 4].map(() => mk('circle', { r: 5, fill: BLOOD_V, stroke: COL.board, 'stroke-width': 1.5 }, vg));
+    show(vg, m('ven'));
+    const vp = path(p, vein, { stroke: 'none' }), VL = vp.getTotalLength();
+    prog(q => vd.forEach((e, i) => { const P = vp.getPointAtLength(((q * 6 + i / 5) % 1) * VL); put(e, { x: P.x, y: P.y }); }), m('ven'), Math.max(3, D - m('ven')), lin);
+    txt(p, 'венозный', 74, 600, m('ven'), { size: 19, weight: 700, fill: BLOOD_V }); txt(p, 'возврат ↑', 74, 624, m('ven'), { size: 19, weight: 700, fill: BLOOD_V });
+    const ht = heartEl(p, ...figPt(f, [16, -96]), .14, m('brady'));
+    prog(q => { const T = q * D, per = T < m('brady') ? .8 : lerp(.8, 1.3, clamp((T - m('brady')) / 3, 0, 1)); ht.beat(cyc(T / per, 1)); }, 0, D, lin);
+    txt(p, 'ЧСС ↓ · кровь — к центру', 340, 360, m('brady'), { size: 20, weight: 700, fill: HEART_C, anchor: 'middle' });
+    // near the surface the exercise is easier
+    const ns = G(p, { o: 0 });
+    path(ns, `M${X + 130} ${XIPH + 70}V${XIPH + 12}M${X + 120} ${XIPH + 24}L${X + 130} ${XIPH + 10}L${X + 140} ${XIPH + 24}`, { stroke: COL.good, 'stroke-width': 4 });
+    T(ns, 'у поверхности', { x: X + 150, y: XIPH + 40, size: 19, weight: 700, fill: COL.good });
+    T(ns, '— легче', { x: X + 150, y: XIPH + 64, size: 19, weight: 700, fill: COL.good });
+    show(ns, m('surf'));
+    infoCard(p, 700, 100, 850, 140, 'закон Паскаля', 'давление жидкости одинаково со всех сторон погружённого тела; растёт с плотностью и глубиной', AQ, m('pascal'), { size: 21 });
+    // Barbosa: breast-deep → hip-deep → land
+    txt(p, 'Барбоза: одно упражнение, 6 минут', 1125, 300, m('barb'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const GY2 = 820, S2 = .5;
+    [[820, 'по грудь', IMM.xiph, 60], [1110, 'по бёдра', 0, 110], [1400, 'суша', null, 160]].forEach(([x, lab, lv, h], i) => {
+      const t0 = m('barb', .5 + i * .6), H2 = GY2 - 182 * S2;
+      let par = p;
+      if (lv !== null) { const w2 = pool(p, x - 80, x + 80, H2 - lv * S2, GY2, t0, { rim: 90 - lv * S2 * .5 }); par = w2.mid; } else ground(p, x - 80, x + 80, GY2, t0);
+      const g2 = fig(par, { s: S2, o: 0 }); plant(g2, 'AN', x, GY2); show(g2.g, t0);
+      txt(p, lab, x, GY2 + 34, t0, { size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      const bar = G(p, { o: 0 }); mk('rect', { x: x - 30, y: 540 - h, width: 60, height: h, rx: 6, fill: mix(COL.task, COL.board, .3), stroke: COL.task, 'stroke-width': 2 }, bar);
+      show(bar, m('barb', 3 + i * .4));
+    });
+    txt(p, 'ответ организма', 1550, 362, m('barb', 3), { size: 18, fill: COL.task, anchor: 'end' });
+    pill(p, 'схема', 1480, 325, m('barb', 3), { col: COL.dim, size: 17 });
+    const pr = G(p, { o: 0 }); fArrow(pr, 860, 595, 500, 0, COL.good, { w: 5, head: 16 }); T(pr, 'прогрессия нагрузки', { x: 1110, y: 576, size: 20, weight: 700, fill: COL.good, anchor: 'middle' }); show(pr, m('prog'));
+  }],
+
+  ['visc', 'Вязкость', (m, D) => {
+    const p = panel(0);
+    txt(p, 'вязкость (viscosity)', 800, 56, m('visc'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    txt(p, 'трение между молекулами жидкости → сопротивление течению', 420, 104, m('visc', .5), { size: 21, fill: COL.dim, anchor: 'middle' });
+    // lane 1: the same hand slow, then fast
+    const t1 = poolTop(p, 70, 140, 700, 300, m('visc'));
+    const hand = mk('rect', { x: -14, y: -34, width: 28, height: 68, rx: 12, fill: '#d8d1c1', stroke: mix('#d8d1c1', COL.board, .6), 'stroke-width': 2 }, p); put(hand, { o: 0 }); show(hand, m('speed'));
+    const dr = fArrow(p, 0, 0, 0, 0, DRAG_C); put(dr, { o: 0 }); show(dr, m('speed'));
+    const sl = txt(p, '', 420, 180, m('speed'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const T0 = m('speed');
+    const xAt = T => { const u = Math.max(0, T - T0) % 4.6; return u < 3 ? lerp(160, 680, u / 3) : u < 3.9 ? lerp(680, 160, (u - 3) / .9) : 160; };
+    prog(q => {
+      const T = T0 + q * (D - T0), x = xAt(T), v = (xAt(T + .03) - xAt(T - .03)) / .06;
+      put(hand, { x, y: 300 }); dr.set(x - Math.sign(v) * 22, 300, -v * .28, 0);
+      sl.textContent = Math.abs(v) > 400 ? 'быстро → сопротивление больше' : Math.abs(v) > 20 ? 'медленно → сопротивление меньше' : '';
+    }, T0, Math.max(3, D - T0), lin);
+    pill(p, 'схема', 700, 420, m('speed'), { col: COL.dim, size: 17 });
+    // lane 2: a hand and a paddle at the same speed
+    const t2 = poolTop(p, 70, 480, 700, 330, m('area'));
+    const hd = mk('rect', { x: -14, y: -34, width: 28, height: 68, rx: 12, fill: '#d8d1c1', stroke: mix('#d8d1c1', COL.board, .6), 'stroke-width': 2 }, p);
+    const pd = mk('rect', { x: -14, y: -62, width: 28, height: 124, rx: 10, fill: '#e07a5f', stroke: mix('#e07a5f', COL.board, .5), 'stroke-width': 2 }, p);
+    [hd, pd].forEach(e => put(e, { o: 0 })); show(hd, m('area')); show(pd, m('area'));
+    const d1 = fArrow(p, 0, 0, 0, 0, DRAG_C), d2 = fArrow(p, 0, 0, 0, 0, DRAG_C);
+    [d1, d2].forEach(e => put(e, { o: 0 })); show(d1, m('area')); show(d2, m('area'));
+    txt(p, 'ладонь', 110, 540, m('area'), { size: 19, weight: 700, fill: COL.chalk });
+    txt(p, 'лопатка: площадь больше', 110, 690, m('area'), { size: 19, weight: 700, fill: COL.chalk });
+    prog(q => { const u = (q * 2.5) % 1, x = lerp(200, 660, u); put(hd, { x, y: 590 }); put(pd, { x, y: 740 }); d1.set(x - 20, 590, -50, 0); d2.set(x - 20, 740, -95, 0); }, m('area'), Math.max(3, D - m('area')), lin);
+    infoCard(p, 820, 130, 730, 190, 'совет: лимфедема', 'гидростатическое давление и вязкость → лимфоток ↑, отёк ↓; но опущенное положение конечности может свести эффект на нет', COL.good, m('lymph'), { size: 22 });
+    txt(p, 'что рекомендуют:', 1185, 380, m('meth'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ['ватсу (Watsu)', 'джахара (Jahara)', 'ай-чи (Ai Chi) — водное тай-чи', 'аквааэробика', 'метод Халливик (Halliwick)', 'ПНФ в воде'].forEach((s, i) => pill(p, s, 1185, 430 + i * 52, m('meth', .3 + i * .45), { col: AQ, size: 20 }));
+  }],
+
+  ['surf', 'Поверхностное натяжение', (m, D) => {
+    const p = panel(0);
+    txt(p, 'поверхностное натяжение (surface tension)', 800, 56, m('surf'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const S = 1.15, GY = 820, X = 330, SY = 500;
+    const w = pool(p, 80, 760, SY, GY, m('surf'), { rim: 40 });
+    const f = fig(w.mid, { s: S, o: 0 }); plant(f, 'AN', X, GY); show(f.g, m('surf'));
+    // the arm rises through the surface; the surface bulges like a film before it lets the hand through
+    let bump = { x: 0, k: 0 };
+    w.surfAt = x => w.y + w.amp * Math.sin(x * .028 + w.t * 2.6) - bump.k * 26 * Math.exp(-(((x - bump.x) / 34) ** 2));
+    const T0 = m('work');
+    prog(q => {
+      const T = q * D, u = Math.max(0, T - T0) % 5, a = T < T0 ? 4 : u < 2.5 ? lerp(4, 150, io(u / 2.5)) : lerp(150, 4, io((u - 2.5) / 2.5));
+      f.set({ aN: a, eN: 4 });
+      const [hx, hy] = onStage(f, 'WN');
+      const dist = hy - SY;   // below the surface: positive
+      bump = { x: hx, k: a > 30 && a < 150 && Math.abs(dist) < 34 && T >= T0 ? clamp(1 - Math.abs(dist) / 34, 0, 1) : 0 };
+      w.set({ t: T, amp: 3 });
+    }, 0, D, lin);
+    txt(p, 'через поверхность —', 560, 300, m('work'), { size: 21, weight: 700, fill: COL.task, anchor: 'middle' });
+    txt(p, 'больше работы, чем под водой', 560, 330, m('work'), { size: 21, weight: 700, fill: COL.task, anchor: 'middle' });
+    // a kickboard at the surface
+    const kb = G(p, { o: 0 });
+    mk('rect', { x: 600, y: SY - 12, width: 120, height: 22, rx: 11, fill: FLOAT_C, stroke: mix(FLOAT_C, '#000000', .4), 'stroke-width': 2 }, kb);
+    fArrow(kb, 596, SY - 1, -70, 0, DRAG_C, { w: 5, head: 13 });
+    show(kb, m('equip'));
+    txt(p, 'снаряд у поверхности → сопротивление ↑', 560, 590, m('equip'), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 820, 110, 730, 150, 'поверхность — как натянутая плёнка', 'натяжение измеряют как силу на единицу длины', AQ, m('surf'), { size: 22 });
+    infoCard(p, 820, 280, 730, 170, 'свойство', 'молекулы на поверхности притягиваются параллельно ей; сопротивление растёт с размером предмета, пересекающего поверхность', AQ, m('prop'), { size: 21 });
+    infoCard(p, 820, 470, 730, 120, 'конечность через поверхность', 'работы больше, чем под водой', COL.task, m('work'), { size: 22 });
+    infoCard(p, 820, 610, 730, 120, 'снаряд у поверхности', 'сопротивление больше', COL.task, m('equip'), { size: 22 });
+  }],
+
+  ['flow', 'Поток и сопротивление', (m, D) => {
+    const p = panel(0);
+    txt(p, 'гидромеханика: жидкость в движении', 800, 56, m('flow'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    // two lanes of streamlines around a limb in cross-section
+    const lane = (y0, t0, turbulent) => {
+      const tk = poolTop(p, 70, y0, 720, 250, t0), cx = 360, cy = y0 + 125, g = G(p, { o: 0 });
+      const lines = [];
+      for (let i = 0; i < 7; i++) {
+        const yy = y0 + 30 + i * 32, side = yy < cy ? -1 : 1, near = Math.max(0, 1 - Math.abs(yy - cy) / 110);
+        let d = '';
+        for (let j = 0; j <= 60; j++) {
+          const x = 90 + j * 11.4, gss = Math.exp(-(((x - cx) / 80) ** 2)) * near * 36 * side;
+          const wake = turbulent && x > cx + 40 ? Math.sin((x - cx) * .09 + i) * 16 * near * Math.min(1, (x - cx - 40) / 60) : 0;
+          d += `${j ? 'L' : 'M'}${x.toFixed(1)} ${(yy + gss + wake).toFixed(1)}`;
+        }
+        lines.push(path(g, d, { stroke: SURF_C, 'stroke-width': 2.5, 'stroke-dasharray': '14 10', 'stroke-opacity': .85 }));
+      }
+      mk('ellipse', { cx, cy, rx: 44, ry: 58, fill: '#d8d1c1', stroke: mix('#d8d1c1', COL.board, .6), 'stroke-width': 2.5 }, g);
+      const sw = [];
+      if (turbulent) [[cx + 100, cy - 30, 18], [cx + 160, cy + 26, 22], [cx + 230, cy - 18, 16], [cx + 290, cy + 30, 20]].forEach(([x, y, r]) => sw.push(path(g, `M${x + r} ${y}A${r} ${r} 0 1 1 ${x} ${y - r}A${r * .6} ${r * .6} 0 1 1 ${x + r * .3} ${y}`, { stroke: SURF_C, 'stroke-width': 2.5 })));
+      show(g, t0);
+      prog(q => { lines.forEach(e => e.setAttribute('stroke-dashoffset', (-q * (turbulent ? 900 : 360)).toFixed(1))); sw.forEach((e, k) => { const [x, y] = [[cx + 100, cy - 30], [cx + 160, cy + 26], [cx + 230, cy - 18], [cx + 290, cy + 30]][k]; e.setAttribute('transform', `rotate(${(q * 1400 * (k % 2 ? -1 : 1)).toFixed(1)} ${x} ${y})`); }); }, t0, Math.max(3, D - t0), lin);
+      return { tk, g };
+    };
+    lane(110, m('lam'), false);
+    txt(p, 'ламинарный: молекулы параллельно — медленно', 430, 400, m('lam'), { size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    lane(450, m('turb'), true);
+    txt(p, 'турбулентный: не параллельно — быстрее', 430, 740, m('turb'), { size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pill(p, 'схема', 720, 780, m('lam'), { col: COL.dim, size: 17 });
+    infoCard(p, 840, 110, 710, 170, 'лобовое сопротивление (drag)', 'турбулентность + вязкость; быстрее движение → больше сопротивление', DRAG_C, m('drag'), { size: 22 });
+    // a current against a standing patient
+    const w = pool(p, 860, 1540, 470, 760, m('current'), { rim: 20 });
+    const f = fig(w.mid, { s: .62, o: 0, pose: { ...LEAN(-7), aN: 30, eN: 30, aF: 20, eF: 20 } }); plant(f, 'AN', 1300, 760); show(f.g, m('current'));
+    const cur = G(p, { o: 0 });
+    [520, 590, 660, 720].forEach((y, i) => fArrow(cur, 900 + (i % 2) * 30, y, 150, 0, DRAG_C, { w: 5, head: 14 }));
+    show(cur, m('current'));
+    prog(q => cur.setAttribute('transform', `translate(${(10 * Math.sin(q * 40)).toFixed(1)} 0)`), m('current'), Math.max(3, D - m('current')), lin);
+    txt(p, 'вода движется мимо пациента → труднее удержаться', 1200, 800, m('current'), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pillRow(p, ['перчатка', 'лопатка', 'ботинок'], 1120, 860, m('equip'), { col: COL.task, size: 20, gap: .4 });
+    txt(p, '→ сопротивление ↑', 1370, 867, m('equip', 1), { size: 21, weight: 700, fill: COL.task });
+  }],
+
+  ['boot', 'Гидроботинок', (m, D) => {
+    const p = panel(0);
+    txt(p, 'совет: начало разгибания колена', 800, 56, m('boot'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    const SY = 560, GY = 830, S = 1;
+    const w = pool(p, 60, 1000, SY, GY, m('boot'), { rim: 40 });
+    w.wave(m('boot'), Math.max(3, D - m('boot')), 3);
+    const T0 = m('boot', 1.2);
+    const kAt = T => { if (T < T0) return 92; const u = (T - T0) % 3.2; return u < 1.4 ? lerp(92, 4, out(u / 1.4)) : lerp(4, 92, io(clamp((u - 1.4) / 1.8, 0, 1))); };
+    const rigs = [[290, false, 'босиком'], [740, true, 'гидроботинок']].map(([x, bootOn, lab]) => {
+      const seat = 640;
+      mk('rect', { x: x - 150, y: seat, width: 140, height: GY - seat, rx: 8, fill: mix(COL.dim, COL.board, .55), stroke: COL.dim, 'stroke-width': 2 }, w.back);
+      const f = fig(w.mid, { x: x - 90, y: seat - 16, s: S, o: 0, pose: { ...SIT, t: 4, aN: 20, eN: 30, aF: 20, eF: 30, hN: 92, kN: 92, hF: 92, kF: 92, fN: 0 } });
+      show(f.g, m('boot'));
+      const q4 = muscleOn(f, ...MUSCLE.quads, { w: 14, after: 'thN' });
+      let bt = null;
+      if (bootOn) {
+        bt = mk('path', { fill: '#6d9cbf', stroke: mix('#6d9cbf', '#000000', .45), 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, f.g);
+        f.onSet.push(() => {
+          const P = f.pts, u = [P.toeN[0] - P.heelN[0], P.toeN[1] - P.heelN[1]], L = Math.hypot(...u), ux = u[0] / L, uy = u[1] / L;
+          const v = [P.KN[0] - P.AN[0], P.KN[1] - P.AN[1]], Lv = Math.hypot(...v), vx = v[0] / Lv, vy = v[1] / Lv;
+          const A = P.AN, pt = (a, b) => `${(A[0] + ux * a + vx * b).toFixed(1)} ${(A[1] + uy * a + vy * b).toFixed(1)}`;
+          bt.setAttribute('d', `M${pt(-22, -14)}L${pt(46, -14)}L${pt(56, 4)}L${pt(40, 30)}L${pt(18, 46)}L${pt(-14, 56)}L${pt(-26, 30)}Z`);
+        });
+        f.set({});
+      }
+      const dr = fArrow(p, 0, 0, 0, 0, DRAG_C); put(dr, { o: 0 });
+      txt(p, lab, x - 20, 870, m('boot'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      return { f, q4, dr, k: bootOn ? 2.3 : 1 };
+    });
+    prog(q => {
+      const T = q * D, k = kAt(T), dk = (kAt(T + .03) - kAt(T - .03)) / .06;
+      rigs.forEach(r => {
+        r.f.set({ kN: k });
+        r.q4.act(dk < -5 ? .9 : 0);
+        const P = r.f.pts, [ax, ay] = onStage(r.f, 'AN'), [kx, ky] = onStage(r.f, 'KN'), sx = ax - kx, sy = ay - ky, L = Math.hypot(sx, sy);
+        const nx = -sy / L, ny = sx / L, dir = dk < 0 ? 1 : -1, mag = Math.min(150, Math.abs(dk) * .55 * r.k);
+        r.dr.set(ax + nx * dir * 34, ay + ny * dir * 34, nx * dir * mag, ny * dir * mag);
+        put(r.dr, { o: T >= T0 && Math.abs(dk) > 5 ? 1 : 0 });
+      });
+    }, 0, D, lin);
+    txt(p, 'четырёхглавая разгибает колено', 520, 300, m('boot', 1.5), { size: 21, weight: 700, fill: ACT, anchor: 'middle' });
+    txt(p, 'стрелка — сопротивление воды', 520, 332, m('boot', 1.5), { size: 19, fill: DRAG_C, anchor: 'middle' });
+    // drag over the extension: the boot adds most at the start
+    const cx0 = 1080, cy0 = 640;
+    chartAxes(p, cx0, cy0, 450, 300, 'сопротивление', 'разгибание →', m('barb'));
+    txt(p, 'начало', cx0 + 6, cy0 + 36, m('barb'), { size: 18, fill: COL.dim });
+    const c1 = path(p, fnPath(cx0, cy0, 430, 260, x => .32 * Math.exp(-(((x - .2) / .3) ** 2)) + .05), { stroke: COL.chalk, 'stroke-width': 4 }, { d: 0 });
+    const c2 = path(p, fnPath(cx0, cy0, 430, 260, x => .92 * Math.exp(-(((x - .18) / .26) ** 2)) + .06), { stroke: '#6d9cbf', 'stroke-width': 5 }, { d: 0 });
+    draw(c1, m('barb', .5)); draw(c2, m('barb', 1.2));
+    txt(p, 'гидроботинок', 1300, 380, m('barb', 1.2), { size: 19, weight: 700, fill: '#6d9cbf' });
+    txt(p, 'босиком', 1300, 560, m('barb', .5), { size: 19, weight: 700, fill: COL.chalk });
+    pill(p, 'схема', 1470, 420, m('barb'), { col: COL.dim, size: 17 });
+  }],
+
+  ['thermo', 'Тепло', (m, D) => {
+    const p = panel(0);
+    txt(p, 'термодинамика: вода и тепло', 800, 56, m('thermo'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    infoCard(p, 60, 100, 700, 200, 'удельная теплоёмкость (specific heat)', 'тепло (калории), чтобы нагреть 1 г вещества на 1 °C; скорость изменения температуры зависит от массы и удельной теплоёмкости', AQ, m('cp'), { size: 20 });
+    const big = (x, y, num, s1, s2, t0) => { const g = G(p, { o: 0 }); roundBox(g, x, y, 340, 250, HEAT, PANEL, 2.5); T(g, num, { x: x + 170, y: y + 100, size: 70, weight: 700, fill: HEAT, anchor: 'middle' }); put(para(g, s1, x + 170, y + 150, null, { size: 21, weight: 700, maxW: 300, anchor: 'middle' }), { o: 1 }); T(g, s2, { x: x + 170, y: y + 226, size: 18, fill: COL.dim, anchor: 'middle' }); show(g, t0); return g; };
+    big(60, 330, '× 1000', 'вода удерживает тепло лучше воздуха', 'температура воды почти не меняется', m('keep'));
+    big(420, 330, '× 25', 'вода проводит тепло быстрее воздуха', '', m('cond'));
+    // heat leaves a resting and a moving patient
+    const w = pool(p, 820, 1540, 380, 760, m('keep'), { rim: 40 });
+    w.wave(m('keep'), Math.max(3, D - m('keep')), 3);
+    const a = fig(w.mid, { s: .7, o: 0 }); plant(a, 'AN', 1000, 760); show(a.g, m('move'));
+    const b = fig(w.mid, { s: .7, o: 0 }); plant(b, 'AN', 1360, 760); show(b.g, m('move'));
+    walk(b, m('move'), Math.max(2, D - m('move')), { cycles: Math.max(1, Math.round((D - m('move')) / 1.2)) });
+    const hA = G(p, { o: 0 }), hB = G(p, { o: 0 });
+    [[-1, -40], [1, 20]].forEach(([k, dy]) => heatArrow(hA, 1000 + k * 30, 560 + dy, k * 50, -10));
+    [[-1, -70], [1, -40], [-1, 0], [1, 30], [-1, 60], [1, 90], [-1, 120]].forEach(([k, dy]) => heatArrow(hB, 1360 + k * 34, 560 + dy, k * 90, -14));
+    show(hA, m('move')); show(hB, m('move', .4));
+    prog(q => { const o = 6 * Math.sin(q * 60); hA.setAttribute('transform', `translate(0 ${(o * .4).toFixed(1)})`); hB.setAttribute('transform', `translate(0 ${o.toFixed(1)})`); }, m('move'), Math.max(3, D - m('move')), lin);
+    txt(p, 'в покое', 1000, 810, m('move'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'в движении — теряет тепло быстрее', 1360, 810, m('move', .4), { size: 21, weight: 700, fill: HEAT, anchor: 'middle' });
+  }],
+
+  ['cob', 'Центр плавучести', (m, D) => {
+    const p = panel(0);
+    txt(p, 'центр плавучести (center of buoyancy)', 800, 56, m('cob'), { size: 28, weight: 700, anchor: 'middle', fill: AQ });
+    txt(p, 'точка, к которой приложены выталкивающие силы', 800, 96, m('cob', 1), { size: 20, fill: COL.dim, anchor: 'middle' });
+    const SY = 320, S = 1.05, X = 340;
+    const w = pool(p, 60, 640, SY, 830, m('cob'), { rim: 40 });
+    w.wave(m('cob'), Math.max(3, D - m('cob')), 3);
+    const f = fig(w.mid, { x: X, y: SY + 128 * S, s: S, o: 0, pose: TREAD }); show(f.g, m('cob'));
+    const back = floats(f, { belt: 'back' });
+    put(back.belt.e, { o: 0 }); put(back.strap0, { o: 0 });
+    // a float on the front of the trunk (mirror of the back one)
+    const defs = mk('defs', {}, f.g), ff = limbEl(f.g, defs, FLOAT_C, 15, 15, mix(FLOAT_C, '#000000', .42)); put(ff.e, { o: 0 });
+    const PB = [10, -84], PG = [4, -6];   // centre of buoyancy (sternum) and of gravity (≈ S2), figure units
+    const cob = cobSym(p, 0, 0, 14), cog = comSym(p, 0, 0, 13); put(cob, { o: 0 }); put(cog, { o: 0 });
+    const up = fArrow(p, 0, 0, 0, -1, BUOY_C), dn = fArrow(p, 0, 0, 0, 1, WT), ex = fArrow(p, 0, 0, 0, -1, BUOY_C, { w: 6 });
+    [up, dn, ex].forEach(e => put(e, { o: 0 }));
+    show(cob, m('stern')); show(cog, m('stern')); show(up, m('stern')); show(dn, m('stern'));
+    const lb = txt(p, 'грудина', X + 40, 0, m('stern'), { size: 19, weight: 700, fill: COB_C });
+    // state: r — lean (+ forward), dev — 0 none, 1 back float, −1 front float
+    const G0 = figPt(f, PG);
+    const place = (r, dev) => {
+      const [gx, gy] = rotPt(PG[0] * S, PG[1] * S, r);
+      put(f.g, { x: G0[0] - gx, y: G0[1] - gy, r });
+      const B = figPt(f, PB), Gp = figPt(f, PG);
+      put(cob, { x: B[0], y: B[1] }); put(cog, { x: Gp[0], y: Gp[1] }); put(lb, { y: B[1] + 34, x: B[0] + 26 });
+      up.set(B[0], B[1] - 18, 0, -110); dn.set(Gp[0], Gp[1] + 18, 0, 110);
+      const uT = [f.pts.Sh[0] - f.pts.H[0], f.pts.Sh[1] - f.pts.H[1]], L = Math.hypot(...uT), u = [uT[0] / L, uT[1] / L], n = [-u[1], u[0]];
+      const C = [f.pts.H[0] + u[0] * 32 + n[0] * 30, f.pts.H[1] + u[1] * 32 + n[1] * 30];
+      ff.set([C[0] - u[0] * 14, C[1] - u[1] * 14], [C[0] + u[0] * 14, C[1] + u[1] * 14]);
+      const D0 = dev > 0 ? back.belt : ff, pts = D0 === ff ? C : null;
+      const st0 = st(f.g), loc = dev > 0 ? [f.pts.H[0] + u[0] * 32 - n[0] * 30, f.pts.H[1] + u[1] * 32 - n[1] * 30] : C, [lx, ly] = rotPt(loc[0] * S, loc[1] * S, r);
+      ex.set(st0.x + lx, st0.y + ly - 18, 0, -90); put(ex, { o: dev ? 1 : 0 });
+    };
+    place(0, 0);
+    const T1 = m('back'), T2 = m('front');
+    prog(q => {
+      const T = q * D;
+      let r = 0, dev = 0;
+      if (T >= T1 && T < T2) { dev = 1; r = 16 * io(clamp((T - T1 - .5) / 1.6, 0, 1)); }
+      if (T >= T2) { dev = -1; r = lerp(16, -16, io(clamp((T - T2 - .3) / 2, 0, 1))); }
+      put(back.belt.e, { o: dev > 0 ? 1 : 0 }); put(back.strap0, { o: dev > 0 ? 1 : 0 }); put(ff.e, { o: dev < 0 ? 1 : 0 });
+      place(r, dev);
+    }, 0, D, lin);
+    txt(p, 'сила мимо центра плавучести → вращение', 340, 780, m('rot'), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const cB = txt(p, 'поплавок сзади → наклон вперёд', 340, 240, m('back'), { size: 21, weight: 700, fill: FLOAT_C, anchor: 'middle' }); hide(cB, m('front'), .3);
+    txt(p, 'поплавок спереди → наклон назад', 340, 240, m('front', .3), { size: 21, weight: 700, fill: FLOAT_C, anchor: 'middle' });
+    // unilateral manual resistance: the patient swings round the therapist (top view)
+    const tp = poolTop(p, 700, 130, 850, 400, m('circle'));
+    const ffg = flatFig(tp.mid, 0, 0, .34, null); floatsTop(ffg); ffg.face(true); ffg.arm(90); put(ffg.g, { o: 1 });
+    const thG = G(tp.top, { s: .42 }), th = therapistTop(thG, null); put(th, { o: 1 });
+    const C = [1300, 400], W = ffg.pts.W;
+    prog(q => {
+      const T = q * D, a = T < m('circle') ? 0 : 40 * Math.sin((T - m('circle')) * 1.1);
+      const [wx, wy] = rotPt(W[0] * .34, W[1] * .34, a + 90);
+      put(ffg.g, { x: C[0] - wx, y: C[1] - wy, r: a + 90 });
+      const [sx, sy] = rotPt(84 * .34, -168 * .34, a + 90), Sx = C[0] - wx + sx, Sy = C[1] - wy + sy, dx = C[0] - Sx, dy = C[1] - Sy, L = Math.hypot(dx, dy) || 1;
+      const k = 1 / .42; th.set([(C[0] + dx / L * 62) * k, (C[1] + dy / L * 62) * k], [(C[0] - dy / L * 6) * k, (C[1] + dx / L * 6) * k], [(C[0] + dy / L * 6) * k, (C[1] - dx / L * 6) * k]);
+    }, 0, D, lin);
+    const arcP = a => [C[0] + 250 * Math.cos(rad(a)), C[1] + 250 * Math.sin(rad(a))], [a1x, a1y] = arcP(-140), [a2x, a2y] = arcP(-40);
+    const arc0 = G(p, { o: 0 }); path(arc0, `M${a1x.toFixed(1)} ${a1y.toFixed(1)}A250 250 0 0 1 ${a2x.toFixed(1)} ${a2y.toFixed(1)}`, { stroke: COL.chalk, 'stroke-width': 3, 'stroke-dasharray': '8 7' });
+    fArrow(arc0, a2x - 14, a2y - 12, 14, 12, COL.chalk, { w: 3, head: 14 }); show(arc0, m('circle', 1));
+    txt(p, 'одностороннее ручное сопротивление → пациент вращается вокруг терапевта', 1125, 570, m('circle'), { size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 700, 610, 410, 200, 'ампутация одной ноги', 'вертикально: наклоняется в сторону культи', COL.task, m('amp'), { size: 21 });
+    infoCard(p, 1140, 610, 410, 200, 'опора на дно', 'стоя, сидя, на коленях: действуют и центр плавучести, и центр тяжести', COL.task, m('floor'), { size: 20 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-prop', prompt: ['Какое свойство воды здесь работает?'],
+    build: grid([
+      { parts: ['Отёк колена в воде уменьшается'], ans: ['p'], why: 'Гидростатическое давление уменьшает выпот.' },
+      { parts: ['Чем быстрее движение руки, тем тяжелее'], ans: ['v'], why: 'Сопротивление вязкости пропорционально скорости.' },
+      { parts: ['Рука сама поднимается в сгибание плеча'], ans: ['b'], why: 'Плавучесть помогает движению вверх.' },
+      { parts: ['Рука, проходящая через поверхность, работает больше'], ans: ['s'], why: 'Поверхностное натяжение.' },
+      { parts: ['Поплавок на спине наклоняет пациента вперёд'], ans: ['c'], why: 'Сила вне центра плавучести вращает тело.' },
+    ], [['b', 'Плавучесть', BUOY_C], ['p', 'Давление', DRAG_C], ['v', 'Вязкость', COL.irr], ['s', 'Поверхность', COL.task], ['c', 'Центр плавучести', COB_C]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 100, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Плавучесть: ASIS — 50 %, мечевидный отросток — 33 %, C7 — 10 % веса; помогает вверх, сопротивляется вниз.', 'w1'],
+     ['Гидростатическое давление растёт с глубиной: выпот ↓, венозный возврат ↑, кровь — к центру.', 'w2'],
+     ['Вязкость, поверхность, лобовое сопротивление: быстрее и шире — тяжелее.', 'w3'],
+     ['Вода держит тепло ×1000 и проводит его ×25 по сравнению с воздухом.', 'w4'],
+     ['Центр плавучести — на уровне грудины; силы мимо него вращают тело.', 'w5']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 190 + i * 135, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: AQ }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 28, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-depth', prompt: ['Бегунье с надрывом икроножной мышцы разрешено нагружать ногу на 25 % веса. На какой глубине тренировать ходьбу в воде (по рис. 9.1)?'],
+    build: choice([
+      ['Чуть глубже мечевидного отростка: между ним (33 %) и C7 (10 %)'],
+      ['До передней верхней ости (50 %)'],
+      ['До мечевидного отростка (33 %)'],
+      ['На суше с костылями — вода тут не поможет'],
+    ], 0, '25 % — меньше 33 % и больше 10 %, значит, вода должна быть выше мечевидного отростка, но ниже C7.',
+    [null, 'Это половина веса — вдвое больше разрешённого.', '33 % — всё ещё больше 25 %.', 'Глубина воды как раз и позволяет дозировать нагрузку весом.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-cuff', prompt: ['Пациент после шва вращательной манжеты. Как использовать плавучесть, чтобы увеличить объём движений плеча?'],
+    build: choice([
+      ['Стоя по шею в воде, поднимать руку в сгибание и отведение — плавучесть помогает'],
+      ['Тянуть руку вниз из сгибания 90° — это облегчённое движение'],
+      ['Стоять по пояс: плечо над водой, плавучесть всё равно поможет'],
+      ['Махать рукой как можно быстрее — так легче'],
+    ], 0, 'По шею в воде рука сама всплывает: плавучесть помогает сгибанию и отведению.',
+    [null, 'Наоборот: при движении вниз плавучесть сопротивляется.', 'Над водой плавучесть на руку не действует.', 'Чем быстрее движение, тем больше сопротивление воды.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

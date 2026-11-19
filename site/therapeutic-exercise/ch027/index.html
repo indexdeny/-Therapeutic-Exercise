@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CPM и функциональные паттерны — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 27, title: 'CPM и ROM в функциональных паттернах', minutes: 7, language: 'ru', next: '../ch028/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch027/cards.ru.json
+const CARDS_SHORT = {
+  "Роберт Солтер\nисследования: непрерывное движение помогает заживлению суставов и мягких тканей": "движение помогает заживлению",
+  "обзор 24 РКИ: эндопротез колена\nэффекта на сгибание, боль, функцию и качество жизни недостаточно для рутинного применения": "эффекта недостаточно для рутины",
+  "11 исследований, 808 пациентов\nнет доказательств, что аппарат уменьшает тромбоэмболию": "тромбоэмболию не уменьшает",
+  "определить паттерн\nкакое движение нужно в жизни": "какое движение нужно в жизни",
+  "провести через него\nруками, аппаратом или сам пациент": "руки, аппарат или сам",
+  "включить в жизнь\nкогда помощь больше не нужна": "когда помощь больше не нужна",
+};
+// cards-short end
+
+const SKIN = '#d8d1c1', METAL = '#8fa3ad';
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A knee CPM machine under a supine patient. set(k): knee flexion in degrees; the hip follows at k / 2, so the heel
+// stays at table height and the foot carriage slides along the rail toward the hip. The motor shows the angle.
+function cpmScene(p, hx, TOP, s, t0) {
+  const defs = mk('defs', {}, p), railY = TOP - 7 * s;
+  bench(p, hx - 330 * s, hx + 320 * s, TOP, t0, COL.dim, 155 * s);
+  const g = G(p, { o: 0 });
+  path(g, `M${hx + 20 * s} ${railY}H${hx + 262 * s}`, { stroke: '#7d8f97', 'stroke-width': 8 * s });
+  mk('rect', { x: hx + 236 * s, y: railY - 40 * s, width: 72 * s, height: 40 * s, rx: 6, fill: '#55666e', stroke: METAL, 'stroke-width': 2 }, g);
+  const read = T(g, '0°', { x: hx + 272 * s, y: railY - 13 * s, size: 22 * s, fill: '#d6f0ff', anchor: 'middle', weight: 700 });
+  const cr = [limbEl(g, defs, METAL, 8 * s, 8 * s, '#5d7078'), limbEl(g, defs, METAL, 8 * s, 8 * s, '#5d7078')];
+  const cart = mk('rect', { width: 36 * s, height: 22 * s, rx: 5, fill: '#55666e', stroke: METAL, 'stroke-width': 2 }, g);
+  const pt = supine(p, hx, TOP, s, null);
+  const off = (A, B, d) => { const dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy), n = [-dy / L * d, dx / L * d]; return [[A[0] + n[0], A[1] + n[1]], [B[0] + n[0], B[1] + n[1]]]; };
+  const sc = { pt, g };
+  sc.set = k => {
+    pt.set({ hN: k / 2, kN: k });
+    const H = onStage(pt, 'H'), K = onStage(pt, 'KN'), A = onStage(pt, 'AN');
+    cr[0].set(...off([H[0] + 30 * s, H[1]], K, 15 * s)); cr[1].set(...off(K, A, 13 * s));
+    put(cart, { x: A[0] - 18 * s, y: railY - 20 * s });
+    read.textContent = Math.round(k) + '°';
+    return sc;
+  };
+  sc.set(0);
+  if (t0 !== null) { show(g, t0); show(pt.g, t0); }
+  return sc;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'CPM и паттерны', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 3 · Урок 27', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Непрерывное пассивное движение', { x: 800, y: 315, size: 54, weight: 600, anchor: 'middle' });
+    T(g, 'и ROM в функциональных паттернах', { x: 800, y: 380, size: 44, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'когда движение даёт аппарат — и как вернуть движение в жизнь', 800, 460, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const sc = cpmScene(art, 820, 700, .55, 0);
+    show(art, m('sub', .2));
+    prog(q => sc.set(70 * wave(q, 1)), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['cpm', 'Что такое CPM', (m, D) => {
+    const p = panel(0);
+    const sc = cpmScene(p, 560, 560, 1.25, .2);
+    prog(q => sc.set(lerp(10, 75, wave(q, 2.5))), m('def', .8), D - m('def', .8) - .2, lin);
+    txt(p, 'аппарат двигает сустав медленно и непрерывно — в заданном объёме', 800, 100, m('def'), { size: 26, weight: 700, fill: COL.whole, anchor: 'middle' });
+    ['колено', 'плечо', 'и почти любой сустав'].forEach((str, i) => pill(p, str, [300, 520, 800][i], 170, m('dev', .3 + i * .7), { col: COL.dim, size: 22 }));
+    infoCard(p, 1060, 240, 460, 200, 'Роберт Солтер', 'исследования: непрерывное движение помогает заживлению суставов и мягких тканей', COL.good, m('salt'), { size: 22 });
+    labelBox(p, 1290, 520, 460, ['единых параметров', 'применения нет'], COL.int, m('par'), { size: 25 });
+  }],
+
+  ['ben', 'Польза', (m) => {
+    const p = panel(0);
+    txt(p, 'предполагаемая польза', 800, 100, .2, { size: 30, weight: 600, fill: COL.dim, anchor: 'middle' });
+    ['меньше спаек и контрактур — меньше тугоподвижности', 'заживление сухожилий и связок', 'заживление разрезов над движущимся суставом',
+     'смазка сустава синовиальной жидкостью, заживление хряща', 'меньше последствий иммобилизации, объём возвращается быстрее', 'меньше послеоперационной боли'].forEach((str, i) => {
+      const x = 100 + (i < 3 ? 0 : 720), y = 240 + (i % 3) * 190, g = G(p, { o: 0, y: 16 });
+      mk('circle', { cx: x + 30, cy: y, r: 30, fill: COL.good }, g);
+      path(g, `M${x + 17} ${y + 1}l9 10l17 -21`, { stroke: COL.board, 'stroke-width': 6 });
+      put(para(g, str, x + 82, y + 4, null, { size: 28, weight: 600, maxW: 570 }), { o: 1 });
+      tw(g, { o: 1, y: 0 }, m('b' + (i + 1)), .6);
+    });
+  }],
+
+  ['evid', 'Исследования', (m) => {
+    const p = panel(0), X0 = 130, Y0 = 500, XS = 330, X1 = 740;
+    // range of motion over time: the CPM curve rises faster at first, then both meet
+    const ax = G(p, { o: 0 });
+    path(ax, `M${X0} 170V${Y0}H${X1 + 10}`, { stroke: COL.dim, 'stroke-width': 3 });
+    T(ax, 'объём', { x: X0 - 12, y: 165, size: 21, fill: COL.dim, anchor: 'end' });
+    T(ax, 'первые дни', { x: (X0 + XS) / 2, y: Y0 + 34, size: 21, fill: COL.dim, anchor: 'middle' });
+    T(ax, 'месяцы', { x: (XS + X1) / 2, y: Y0 + 34, size: 21, fill: COL.dim, anchor: 'middle' });
+    show(ax, .2);
+    const c1 = path(p, `M${X0} 480C170 340 230 300 ${XS} 290`, { stroke: COL.whole, 'stroke-width': 6 }, { d: 0 });
+    const c2 = path(p, `M${X0} 480C200 420 260 370 ${XS} 360`, { stroke: COL.task, 'stroke-width': 6 }, { d: 0 });
+    draw(c1, m('short', .5), 1.4); draw(c2, m('short', 1), 1.4);
+    txt(p, 'с аппаратом', 200, 270, m('short', 1.5), { size: 22, weight: 700, fill: COL.whole });
+    txt(p, 'другое раннее движение', 250, 410, m('short', 2), { size: 22, weight: 700, fill: COL.task });
+    const dl = path(p, `M${XS} 200V${Y0}`, { stroke: COL.dim, 'stroke-width': 2, 'stroke-dasharray': '6 6' }, { o: 0 });
+    show(dl, m('short', 3));
+    pill(p, 'выписка раньше', XS, 200, m('short', 3.2), { col: COL.whole, size: 21 });
+    const c3 = path(p, `M${XS} 290C430 270 560 232 ${X1} 226`, { stroke: COL.whole, 'stroke-width': 6 }, { d: 0 });
+    const c4 = path(p, `M${XS} 360C430 300 560 244 ${X1} 230`, { stroke: COL.task, 'stroke-width': 6 }, { d: 0 });
+    draw(c3, m('long', .3), 1.6); draw(c4, m('long', .3), 1.6);
+    txt(p, 'в итоге — одинаково', 600, 190, m('long', 1.8), { size: 23, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 830, 110, 690, 175, 'обзор 24 РКИ: эндопротез колена', 'эффекта на сгибание, боль, функцию и качество жизни недостаточно для рутинного применения', COL.bad, m('coch'), { size: 22 });
+    infoCard(p, 830, 305, 690, 140, '11 исследований, 808 пациентов', 'нет доказательств, что аппарат уменьшает тромбоэмболию', COL.int, m('vte'), { size: 22 });
+    pill(p, 'больше обезболивающих', 990, 490, m('harm', .8), { col: COL.bad, size: 22 });
+    pill(p, 'больше кровопотери по дренажу', 1360, 490, m('harm', 2), { col: COL.bad, size: 22 });
+    txt(p, 'решая, использовать ли аппарат, учитывают:', 800, 640, m('cost'), { size: 25, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ['стоимость', 'приверженность пациента', 'контроль персонала', 'срок госпитализации', 'кому подходит'].forEach((str, i) => pill(p, str, [190, 470, 790, 1090, 1370][i], 712, m('cost', .8 + i * .6), { col: COL.whole, size: 22 }));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-evid', prompt: ['Что показали обзоры исследований?'],
+    build: choice([
+      ['После эндопротезирования колена эффекта мало для рутинного применения'],
+      ['Аппарат надёжно предотвращает тромбоэмболию'],
+      ['Через месяцы функция с аппаратом заметно лучше'],
+      ['С аппаратом нужно меньше обезболивающих'],
+    ], 0, 'Эффект на сгибание, боль, функцию и качество жизни недостаточен, чтобы применять аппарат рутинно.',
+    [null, 'Доказательств, что он уменьшает тромбоэмболию, недостаточно.', 'В долгосрочной перспективе функция не отличается.', 'Наоборот, в некоторых работах обезболивающих нужно больше.']),
+  }], done) }],
+
+  ['guide', 'Параметры', (m) => {
+    const p = panel(0);
+    const box = (i, title, col, t0) => {
+      const x = 60 + (i % 3) * 500, y = 110 + (i / 3 | 0) * 380, g = G(p, { x, y, o: 0 });
+      roundBox(g, 0, 0, 470, 350, col, PANEL, 2.5);
+      put(para(g, title, 22, 42, null, { size: 24, weight: 700, fill: col, maxW: 426 }), { o: 1 });
+      show(g, t0);
+      return g;
+    };
+    // 1 when
+    const b1 = box(0, 'когда надевать', COL.whole, m('g1'));
+    T(b1, 'день 0', { x: 235, y: 180, size: 64, weight: 700, fill: COL.whole, anchor: 'middle' });
+    put(para(b1, 'сразу после операции, ещё под наркозом, или как можно раньше', 235, 240, null, { size: 21, maxW: 410, anchor: 'middle', fill: COL.chalk }), { o: 1 });
+    // 2 the arc grows day by day
+    const b2 = box(1, 'дуга: старт 20–30°, +10–15° в день', COL.task, m('g2'));
+    [25, 37, 50, 62].forEach((v, i) => {
+      const y = 100 + i * 52, bar = mk('rect', { x: 90, y: y - 16, width: v * 4.4, height: 30, rx: 6, fill: COL.task, 'fill-opacity': .75 }, b2);
+      T(b2, `день ${i + 1}`, { x: 76, y: y + 7, size: 19, fill: COL.dim, anchor: 'end' });
+      const lab = T(b2, `${v}°`, { x: 100 + v * 4.4, y: y + 7, size: 19, fill: COL.task, weight: 700 });
+      put(bar, { o: 0 }); put(lab, { o: 0 }); show(bar, m('g2', .8 + i * .6)); show(lab, m('g2', .8 + i * .6));
+    });
+    // 3 one cycle every 45 s to 2 min
+    const b3 = box(2, 'скорость: цикл 45 с – 2 мин', COL.good, m('g3'));
+    mk('circle', { cx: 235, cy: 190, r: 80, fill: 'none', stroke: COL.faint, 'stroke-width': 10 }, b3);
+    const sweep = path(b3, 'M235 110A80 80 0 1 1 234.9 110', { stroke: COL.good, 'stroke-width': 10 }, { d: 0 });
+    prog(q => put(sweep, { d: (q * 3) % 1 }), m('g3', .4), 4, lin);
+    T(b3, '1 цикл', { x: 235, y: 200, size: 26, weight: 700, fill: COL.good, anchor: 'middle' });
+    // 4 hours a day
+    const b4 = box(3, 'время на аппарате', COL.real, m('g4'));
+    const HX = 30, HW = 410;
+    mk('rect', { x: HX, y: 120, width: HW, height: 34, rx: 8, fill: COL.faint }, b4);
+    const best = mk('rect', { x: HX + HW * 4 / 24, y: 120, width: HW * 4 / 24, height: 34, rx: 8, fill: COL.real }, b4);
+    put(best, { o: 0 }); show(best, m('g4', 4));
+    [0, 6, 12, 18, 24].forEach(h => T(b4, String(h), { x: HX + HW * h / 24, y: 182, size: 18, fill: COL.dim, anchor: 'middle' }));
+    T(b4, 'часов', { x: HX + HW, y: 108, size: 18, fill: COL.dim, anchor: 'end' });
+    put(para(b4, 'от круглосуточно до 1 ч × 3 в день; лучше всего — 4–8 ч в день', 235, 240, null, { size: 21, maxW: 410, anchor: 'middle', fill: COL.chalk }), { o: 1 });
+    // 5 between sessions
+    const b5 = box(4, 'в перерывах — физическая терапия', COL.whole, m('g5'));
+    put(para(b5, 'активно-вспомогательные упражнения и изометрия мышц: пациент учится управлять новым объёмом', 22, 130, null, { size: 22, maxW: 426, fill: COL.chalk }), { o: 1 });
+    // 6 how long
+    const b6 = box(5, 'сколько дней', COL.task, m('g6'));
+    put(para(b6, 'обычно меньше недели или до нужного объёма; можно дома, если обучить пациента или близких', 22, 130, null, { size: 22, maxW: 426, fill: COL.chalk }), { o: 1 });
+  }],
+
+  ['func', 'Функциональные паттерны', (m, D) => {
+    const p = panel(0), defs = mk('defs', {}, p);
+    const steps = [['определить паттерн', 'какое движение нужно в жизни', COL.task, 'pat', 0], ['провести через него', 'руками, аппаратом или сам пациент', COL.whole, 'pat', 3], ['включить в жизнь', 'когда помощь больше не нужна', COL.good, 'own', 0]];
+    steps.forEach(([t1, t2, col, mk2, off], i) => {
+      infoCard(p, 80 + i * 500, 100, 440, 150, t1, t2, col, m(mk2, off), { size: 22 });
+      if (i < 2) arrowTo(p, [530 + i * 500, 175], [574 + i * 500, 175], m(steps[i + 1][3], steps[i + 1][4]), { col: COL.dim, w: 4 });
+    });
+    // a patient brings a spoon to the mouth: range of motion inside a real task
+    const s = 1.2, GY = 800, f = fig(p, { x: 330, y: GY - 182 * s, s, o: 0, pose: { aN: 20, eN: 30 } });
+    ground(p, 180, 520, GY, m('pat', 1));
+    const spoon = limbEl(p, defs, '#c9c9c9', 3, 3, '#8d8d8d');
+    f.onSet.push(() => { const [x, y] = onStage(f, 'WN'); spoon.set([x + 2, y], [x + 26, y - 18]); });
+    f.set({});
+    show(f.g, m('pat', 1)); put(spoon.e, { o: 0 }); show(spoon.e, m('pat', 1));
+    prog(q => { const v = wave(q, 3); f.set({ aN: lerp(20, 30, v), eN: lerp(30, 145, v), hd: 6 * v }); }, m('pat', 4), D - m('pat', 4) - .3, lin);
+    ['начать обучение повседневным делам', 'обучать людей с нарушением зрения', 'пациент видит смысл упражнений', 'двигательные паттерны для жизни'].forEach((str, i) =>
+      pill(p, str, 1000, 380 + i * 70, m('why', .3 + i * 1.6), { col: COL.whole, size: 23 }));
+    labelBox(p, 1000, 700, 640, ['закрепить двигательное обучение'], COL.good, m('own', 1.5), { size: 25 });
+  }],
+
+  ['ul', 'Руки и шея', (m) => {
+    const p = panel(0), defs = mk('defs', {}, p), s = 1.25, GY = 820, fx = 300;
+    ground(p, 120, 620, GY, .2);
+    const f = fig(p, { x: fx, y: GY - 182 * s, s, o: 0, pose: { aN: 10, eN: 15 } });
+    show(f.g, .2);
+    // shelves at three heights for the reaching example
+    const sh = G(p, { o: 0 });
+    [300, 420, 540].forEach(y => mk('rect', { x: fx + 150, y, width: 150, height: 12, rx: 4, fill: COL.dim }, sh));
+    show(sh, m('u3')); hide(sh, m('u4'));
+    const prop = limbEl(p, defs, '#9fb4c0', 6, 6, '#6d7f88');
+    f.onSet.push(() => { const [x, y] = onStage(f, 'WN'); prop.set([x - 6, y - 4], [x + 14, y - 22]); });
+    f.set({});
+    put(prop.e, { o: 0 }); show(prop.e, m('u1'));
+    poseTo(f, { aN: 35, eN: 55 }, m('u1', .3), .9);
+    poseTo(f, { aN: 25, eN: 140, hd: 6 }, m('u2', .3), 1.1);
+    poseTo(f, { aN: 160, eN: 8, hd: -8 }, m('u3', .3), 1.3);
+    poseTo(f, { aN: 165, eN: 125, hd: 10 }, m('u4', .3), 1.2);
+    poseTo(f, { aN: 70, eN: 150, hd: 0 }, m('u5', .3), 1.1);
+    [['взять столовый прибор', 'разгибание и сгибание пальцев', 'u1'],
+     ['поднести руку ко рту', 'сгибание локтя, супинация; немного сгибания, отведения и наружной ротации плеча', 'u2'],
+     ['достать до полок разной высоты', 'сгибание плеча, разгибание локтя', 'u3'],
+     ['расчесать волосы на затылке', 'отведение и наружная ротация плеча, сгибание локтя, поворот шеи', 'u4'],
+     ['держать телефон у уха', 'наружная ротация плеча, супинация, наклон шеи вбок', 'u5']].forEach(([a, b, mark], i) => {
+      const g = G(p, { o: 0, x: 20 }), y = 120 + i * 145;
+      T(g, a, { x: 720, y, size: 27, weight: 700, fill: COL.task });
+      put(para(g, b, 720, y + 38, null, { size: 22, maxW: 780, fill: COL.chalk }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['ll', 'Ноги и туловище', (m, D) => {
+    const p = panel(0), s = .95, GY = 560;
+    // 1 from lying to sitting at the edge of the bed
+    const f1 = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...SIT, aN: 10, eN: 20, aF: 10, eF: 20 } });
+    plant(f1, 'AN', 450, GY);
+    const [h1x, h1y] = onStage(f1, 'H'), TB = h1y + 24 * s;
+    bench(p, 60, h1x + 40, TB, m('l1'), COL.dim, GY - TB);
+    const ghost = supine(p, 250, TB, s, null);   // where the patient lay a moment ago
+    tw(ghost.g, { o: .3 }, m('l1'), .5);
+    p.appendChild(f1.g);
+    show(f1.g, m('l1', 1));
+    path(p, `M${90} ${GY}H${560}`, { stroke: COL.faint, 'stroke-width': 3 });
+    // 2 sit to stand, again and again
+    const ax = 840, f2 = fig(p, { x: 0, y: 0, s, o: 0, pose: SIT });
+    plant(f2, 'AN', ax, GY);
+    const [h2x, h2y] = onStage(f2, 'H');
+    const ch = path(p, `M${h2x - 50} ${h2y + 26}H${h2x + 30}M${h2x - 44} ${h2y + 26}V${GY}M${h2x + 24} ${h2y + 26}V${GY}M${h2x - 50} ${h2y + 26}V${h2y - 70}`, { stroke: COL.dim, 'stroke-width': 5 }, { o: 0 });
+    path(p, `M${ax - 160} ${GY}H${ax + 160}`, { stroke: COL.faint, 'stroke-width': 3 });
+    show(ch, m('l2')); show(f2.g, m('l2'));
+    const keys = Object.keys(SIT);
+    prog(q => { const v = wave(q, 2); const pose = {}; keys.forEach(k => { pose[k] = lerp(SIT[k], STAND[k], v); }); f2.set(pose); plant(f2, 'AN', ax, GY); }, m('l2', .6), m('l3') - m('l2', .6), lin);
+    // 3 putting on socks: the hip bends and turns out, the trunk leans, the hands reach the foot
+    const f3 = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...SIT, t: 32, hN: 112, kN: 118, fN: 0 } });
+    plant(f3, 'AF', 1300, GY);
+    const [h3x, h3y] = onStage(f3, 'H');
+    path(p, `M${h3x - 50} ${h3y + 26}H${h3x + 30}M${h3x - 44} ${h3y + 26}V${GY}M${h3x + 24} ${h3y + 26}V${GY}`, { stroke: COL.dim, 'stroke-width': 5 });
+    path(p, `M${1150} ${GY}H${1460}`, { stroke: COL.faint, 'stroke-width': 3 });
+    const sock = mk('ellipse', { rx: 22, ry: 12, fill: COL.whole, 'fill-opacity': .85 }, p);
+    reach(f3, 'N', ...onStage(f3, 'toeN')); reach(f3, 'F', ...onStage(f3, 'toeN'));
+    const [tx, ty] = onStage(f3, 'toeN');
+    put(sock, { x: tx - 6, y: ty - 4, o: 0 });
+    show(f3.g, m('l3')); show(sock, m('l3', .6));
+    [['лёжа → сидя у края кровати', 'отведение и приведение бедра, затем сгибание бедра и колена', 'l1', 270],
+     ['встать, сесть, ходить', 'сгибание и разгибание бедра и колена, движения стопы, немного ротации бедра', 'l2', 800],
+     ['надеть носки и обувь', 'наружная ротация и отведение бедра, сгибание колена, стопа, наклон туловища', 'l3', 1310]].forEach(([a, b, mark, x]) => {
+      const g = G(p, { o: 0 });
+      T(g, a, { x, y: 640, size: 25, weight: 700, fill: COL.task, anchor: 'middle' });
+      put(para(g, b, x, 680, null, { size: 21, maxW: 440, fill: COL.chalk, anchor: 'middle' }), { o: 1 });
+      show(g, m(mark));
+    });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-func', prompt: ['Какие суставы работают? Отметьте все.'],
+    build: grid([
+      { parts: ['Поднести ложку ко рту'], ans: ['sh', 'el'], why: 'Сгибание локтя и супинация, немного движений плеча.' },
+      { parts: ['Достать с верхней полки'], ans: ['sh', 'el'], why: 'Сгибание плеча и разгибание локтя.' },
+      { parts: ['Держать телефон у уха'], ans: ['sh', 'nk'], why: 'Наружная ротация плеча, супинация, наклон шеи вбок.' },
+      { parts: ['Надеть носки'], ans: ['hp', 'kn'], why: 'Наружная ротация и отведение бедра, сгибание колена.' },
+      { parts: ['Встать со стула'], ans: ['hp', 'kn'], why: 'Разгибание бедра и колена.' },
+    ], [['sh', 'Плечо', COL.whole], ['el', 'Локоть', COL.task], ['nk', 'Шея', COL.real], ['hp', 'Бедро', COL.good], ['kn', 'Колено', COL.int]], { multi: true, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 100, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Аппарат медленно и непрерывно двигает сустав; польза — меньше спаек и боли, быстрее объём.', 'w1'],
+     ['В долгосрочной перспективе — не лучше другого раннего движения; после эндопротезирования колена рутинно не рекомендуют.', 'w2'],
+     ['Дуга 20–30°, +10–15° в день; цикл от 45 с до 2 мин.', 'w3'],
+     ['Функциональные паттерны связывают объём движений с повседневными делами.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 200 + i * 130, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+    labelBox(p, 800, 780, 520, ['Глава 3 пройдена'], COL.good, m('ch'), { size: 30 });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-calc', prompt: ['Посчитайте.'],
+    build: blanks([
+      { parts: ['Старт 20°, +15° в день: через 4 дня дуга — ', { box: '80' }, '°'], why: '20 + 4 × 15 = 80.' },
+      { parts: ['Цикл 45 с: за час — ', { box: '80' }, ' циклов'], why: '3600 / 45 = 80.' },
+      { parts: ['От 30° до 90° по +10° в день — ', { box: '6' }, ' дней'], why: '(90 − 30) / 10 = 6.' },
+    ]),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['В первые дни после операции объём с аппаратом растёт быстрее.'], ans: ['t'], why: 'Верно — и пациентов раньше выписывают.' },
+      { parts: ['Через месяцы функция с аппаратом заметно лучше, чем без него.'], ans: ['f'], why: 'Неверно: в долгосрочной перспективе не отличается.' },
+      { parts: ['Начальная дуга — 20–30°.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Обзоры доказали, что аппарат предотвращает тромбоэмболию.'], ans: ['f'], why: 'Неверно: доказательств недостаточно.' },
+      { parts: ['Функциональный паттерн сначала определяют, потом проводят через него конечность.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

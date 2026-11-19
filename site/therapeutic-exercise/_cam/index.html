@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>cam sandbox</title><link rel="stylesheet" href="../lib/engine.css"></head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script>
+const CHAPTER = { number: 995, title: 'cam sandbox', minutes: 1, language: 'ru' };
+var BEATS = [{ id: 'b', ask: false }], LUPA = [];
+</script>
+<script>
+// Sandbox tests for the free zoom and the magnifiers: each test returns true/false or { ok, detail } (async allowed).
+const near = (a, b, e = .5) => Math.abs(a - b) <= e;
+const stg = () => document.getElementById('stage');
+const scr = (x, y) => { const p = new DOMPoint(x, y).matrixTransform(stg().getScreenCTM()); return [p.x, p.y]; };   // stage point -> client
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function fresh() {
+  camInit(); camReset(false); scene.replaceChildren(); TW = []; BIO_REG.clear(); BIO_BEAT = 'b'; BIO_FIGN = 0;
+  LUPA = []; LUPA_ON = null; for (const k in LUPA_SPOT) delete LUPA_SPOT[k]; BEATS[0].ask = false; if (LUPA_G) LUPA_G.replaceChildren();
+}
+const small = (o = {}) => fig(scene, { x: 400, y: 500, s: .6, pose: STAND, ...o });
+const wheelAt = (x, y, dy) => { const [cx, cy] = scr(x, y); stg().dispatchEvent(new WheelEvent('wheel', { deltaY: dy, clientX: cx, clientY: cy, bubbles: true, cancelable: true })); };
+window.TESTS = {
+  wrap: () => { fresh(); const sc = document.getElementById('scene'); return { ok: sc.parentNode.id === 'cam' && sc.parentNode.parentNode.id === 'stage', detail: sc.parentNode.id }; },
+  zoomAtPoint: () => { fresh(); camZoomAt(2, 400, 300); const ok = near(CAM.x, -400) && near(CAM.y, -300) && /scale\(2/.test(camEl().getAttribute('transform'));
+    camReset(false); return { ok: ok && !camEl().hasAttribute('transform'), detail: [CAM.x, CAM.y].join() }; },
+  clampEdges: () => { fresh(); camZoomAt(2, 0, 0); CAM.x = 100; CAM.y = -5000; camClamp(); return { ok: CAM.x === 0 && CAM.y === -900, detail: [CAM.x, CAM.y].join() }; },
+  maxZoom: () => { fresh(); camZoomAt(10, 800, 450); return { ok: CAM.z === CAM3.max, detail: CAM.z }; },
+  wheel: () => { fresh(); wheelAt(800, 450, -300); const qx = (800 - CAM.x) / CAM.z, qy = (450 - CAM.y) / CAM.z;
+    return { ok: CAM.z > 1.4 && near(qx, 800, 1) && near(qy, 450, 1), detail: [CAM.z, qx, qy].join() }; },
+  dragNoClick: () => { fresh(); camZoomAt(2, 800, 450); const x0 = CAM.x, hit = mk('rect', { x: 0, y: 0, width: 1600, height: 900, fill: 'transparent' }, scene); let n = 0;
+    hit.addEventListener('click', e => { n++; e.stopPropagation(); });
+    const [cx, cy] = scr(800, 450), ev = (t, x, y) => new PointerEvent(t, { clientX: x, clientY: y, button: 0, bubbles: true });
+    hit.dispatchEvent(ev('pointerdown', cx, cy)); dispatchEvent(ev('pointermove', cx + 60, cy)); dispatchEvent(ev('pointerup', cx + 60, cy));
+    hit.dispatchEvent(new MouseEvent('click', { clientX: cx + 60, clientY: cy, bubbles: true })); const a = n;
+    hit.dispatchEvent(ev('pointerdown', cx, cy)); dispatchEvent(ev('pointerup', cx, cy)); hit.dispatchEvent(new MouseEvent('click', { clientX: cx, clientY: cy, bubbles: true }));
+    return { ok: a === 0 && n === 1 && CAM.x > x0, detail: [a, n, x0, CAM.x].join() }; },
+  keys: async () => { fresh(); const k = key => document.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+    k('='); const a = CAM.z; k('-'); const b = CAM.z; camZoomAt(2, 800, 450); k('0'); await sleep(450);
+    return { ok: near(a, 1.25, .001) && near(b, 1, .001) && CAM.z === 1 && !camEl().hasAttribute('transform'), detail: [a, b, CAM.z].join() }; },
+  askNoZoom: () => { fresh(); BEATS[0].ask = true; wheelAt(800, 450, -300); const z = CAM.z; BEATS[0].ask = false; return { ok: z === 1, detail: z }; },
+  helpCam: () => { camInit(); const h = document.getElementById('helpCam'); return !!h && !h.hidden && h.textContent.includes('колесо'); },
+  lupaDraw: () => { fresh(); const f = small({ pose: { ...SIT, t: 0, hN: 90, kN: 45 } }); LUPA = [{ beat: 'b', fig: 0, target: 'KN', zoom: 3 }]; lupaTick(0);
+    const g = document.getElementById('lupas'), u = g && g.querySelector('use'), clip = g && g.querySelector('clipPath circle'), mark = g && g.querySelector('.lupa-mark');
+    const K = lupaTarget(f, 'KN'), C = [+clip.getAttribute('cx'), +clip.getAttribute('cy')];
+    return { ok: !!u && u.getAttribute('href') === '#scene' && +clip.getAttribute('r') === 170 && near(+mark.getAttribute('cx'), K[0], .1) && near(+mark.getAttribute('r'), 170 / 3, .1)
+      && Math.hypot(C[0] - K[0], C[1] - K[1]) >= 170 + 170 / 3, detail: [K, C].join(' ') }; },
+  lupaFollows: () => { fresh(); const f = small(); LUPA = [{ beat: 'b', fig: 0, target: 'KN' }]; lupaTick(0);
+    const m1 = +document.querySelector('#lupas .lupa-mark').getAttribute('cx'); put(f.g, { x: 500 }); lupaTick(.1);
+    const m2 = +document.querySelector('#lupas .lupa-mark').getAttribute('cx'); return { ok: near(m2 - m1, 100, .5), detail: [m1, m2].join() }; },
+  lupaMuscle: () => { fresh(); const f = small(); muscleOn(f, ...MUSCLE.rectus);
+    const a = lupaTarget(f, 'rectus'), b = lupaTarget(f, 'm0'); return { ok: !!a && !!b && near(a[0], b[0], .01) && near(a[1], b[1], .01), detail: [a, b].join(' ') }; },
+  lupaAvoidsText: () => { fresh(); small(); LUPA = [{ beat: 'b', fig: 0, target: 'KN' }]; lupaTick(0);
+    const c1 = document.querySelector('#lupas clipPath circle'), x1 = +c1.getAttribute('cx'), y1 = +c1.getAttribute('cy');
+    T(scene, 'ЗАНЯТО ЗАНЯТО', { x: x1, y: y1, size: 60, anchor: 'middle' }); lupaTick(1); lupaTick(1.5);
+    const c2 = document.querySelector('#lupas clipPath circle'), x2 = +c2.getAttribute('cx'), y2 = +c2.getAttribute('cy');
+    return { ok: Math.hypot(x2 - x1, y2 - y1) > 100, detail: [x1, y1, x2, y2].join() }; },
+  lupaHiddenWhenZoomed: () => { fresh(); small(); LUPA = [{ beat: 'b', fig: 0, target: 'KN' }]; lupaTick(0);
+    camZoomAt(2, 800, 450); const a = document.getElementById('lupas').getAttribute('display'); camReset(false); lupaTick(.1);
+    const b = document.getElementById('lupas').getAttribute('display'), n = document.querySelectorAll('#lupas .lupa').length;
+    return { ok: a === 'none' && b === 'inline' && n === 1, detail: [a, b, n].join() }; },
+  lupaFromTo: () => { fresh(); small(); LUPA = [{ beat: 'b', fig: 0, target: 'KN', from: 1, to: 2 }];
+    const n = t => { lupaTick(t); return document.querySelectorAll('#lupas .lupa').length; }, r = [n(.5), n(1.5), n(2.5)];
+    return { ok: r.join() === '0,1,0', detail: r.join() }; },
+  lupaKey: () => { fresh(); small(); LUPA = [{ beat: 'b', fig: 0, target: 'KN' }]; BIO_T = 0; lupaTick(0);
+    document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyL', key: 'l', bubbles: true }));
+    const a = lupaOn(), n = document.querySelectorAll('#lupas .lupa').length; let s = null; try { s = localStorage.getItem('animebook:lupa'); } catch {}
+    lupaSet(true); return { ok: a === false && n === 0 && s === '0', detail: [a, n, s].join() }; },
+  lupaHidesWhenNoRoom: () => { fresh(); small(); mk('rect', { x: 0, y: 0, width: 1600, height: 900, rx: 22, fill: 'none', stroke: '#fff' }, scene);
+    LUPA = [{ beat: 'b', fig: 0, target: 'KN' }]; lupaTick(0); return { ok: document.querySelectorAll('#lupas .lupa').length === 0, detail: document.querySelectorAll('#lupas .lupa').length }; },
+  lupaNear: () => { fresh(); small(); LUPA = [{ beat: 'b', fig: 0, target: 'KN' }]; lupaTick(0); const K = lupaTarget(BIO_REG.values().next().value.f, 'KN');
+    const c = document.querySelector('#lupas clipPath circle'), d = Math.hypot(+c.getAttribute('cx') - K[0], +c.getAttribute('cy') - K[1]);
+    return { ok: d <= LUPA3.far * LUPA3.R, detail: d }; },
+  lupaAvoidsFrames: () => { fresh(); small(); LUPA = [{ beat: 'b', fig: 0, target: 'KN' }]; lupaTick(0);
+    const c1 = document.querySelector('#lupas clipPath circle'), x1 = +c1.getAttribute('cx'), y1 = +c1.getAttribute('cy');
+    mk('rect', { x: x1 - 60, y: y1 - 30, width: 120, height: 60, rx: 12, fill: 'none', stroke: '#fff' }, scene); lupaTick(1); lupaTick(1.5);
+    const c2 = document.querySelector('#lupas clipPath circle'), d = c2 ? Math.hypot(+c2.getAttribute('cx') - x1, +c2.getAttribute('cy') - y1) : Infinity;
+    return { ok: d > 100, detail: [x1, y1, d].join() }; },
+  lupaLinesAvoidText: () => { fresh(); small(); LUPA = [{ beat: 'b', fig: 0, target: 'KN' }]; lupaTick(0);
+    const K = lupaTarget(BIO_REG.values().next().value.f, 'KN'), c1 = document.querySelector('#lupas clipPath circle'), C = [+c1.getAttribute('cx'), +c1.getAttribute('cy')];
+    const [a] = lupaTangents(K, C, LUPA3.R / 3);
+    fresh(); small(); LUPA = [{ beat: 'b', fig: 0, target: 'KN' }];
+    const tx = T(scene, 'ЗАНЯТО', { x: (a[0][0] + a[1][0]) / 2, y: (a[0][1] + a[1][1]) / 2 + 8, size: 22, anchor: 'middle' }); lupaTick(0);
+    const c2 = document.querySelector('#lupas clipPath circle'); if (!c2) return { ok: false, detail: 'hidden' };
+    const C2 = [+c2.getAttribute('cx'), +c2.getAttribute('cy')], box = tx.getBBox();
+    const hit = lupaTangents(K, C2, LUPA3.R / 3).some(([p, q]) => lupaSegHit(p, q, [box.x, box.y, box.x + box.width, box.y + box.height]));
+    return { ok: !hit && Math.hypot(C2[0] - C[0], C2[1] - C[1]) > 1, detail: [C, C2].join(' ') }; },
+  lupaLinesFallback: () => { fresh(); small(); LUPA = [{ beat: 'b', fig: 0, target: 'KN' }];
+    const K = lupaTarget(BIO_REG.values().next().value.f, 'KN');
+    for (let k = 0; k < 24; k++) { const an = k / 24 * 2 * Math.PI; T(scene, '·', { x: K[0] + 120 * Math.cos(an), y: K[1] + 120 * Math.sin(an), size: 30 }); }
+    lupaTick(0); return { ok: document.querySelectorAll('#lupas .lupa').length === 1, detail: document.querySelectorAll('#lupas .lupa').length }; },
+  lupaLinesOverOwnFigure: () => { fresh(); const f = small({ x: 800 }); LUPA = [{ beat: 'b', fig: 0, target: 'Sh' }]; lupaTick(0);
+    return { ok: document.querySelectorAll('#lupas .lupa').length === 1, detail: document.querySelectorAll('#lupas .lupa').length }; },
+  lupaSlides: () => { fresh(); small(); LUPA = [{ beat: 'b', fig: 0, target: 'KN' }]; lupaTick(0);
+    const at = () => { const c = document.querySelector('#lupas clipPath circle'); return [+c.getAttribute('cx'), +c.getAttribute('cy')]; }, A = at();
+    T(scene, 'ЗАНЯТО ЗАНЯТО', { x: A[0], y: A[1], size: 60, anchor: 'middle' }); lupaTick(1); const B0 = at();
+    lupaTick(1.2); const M = at(); lupaTick(1.5); const B = at();
+    const on = (p, a, b) => Math.abs(Math.hypot(p[0] - a[0], p[1] - a[1]) + Math.hypot(p[0] - b[0], p[1] - b[1]) - Math.hypot(a[0] - b[0], a[1] - b[1])) < 1;
+    return { ok: B0.join() === A.join() && on(M, A, B) && M.join() !== A.join() && M.join() !== B.join() && Math.hypot(B[0] - A[0], B[1] - A[1]) > 100, detail: [A, B0, M, B].join(' ') }; },
+  noPlacesNoLayer: () => { fresh(); if (LUPA_G) { LUPA_G.remove(); LUPA_G = null; } lupaTick(0); return !document.getElementById('lupas'); },
+};
+window.TESTS_Q = {
+  queryWins: () => { LUPA_ON = null; return { ok: lupaOn() === false, detail: lupaOn() }; },
+};
+</script>
+</body></html>

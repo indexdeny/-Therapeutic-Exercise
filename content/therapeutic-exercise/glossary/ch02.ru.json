@@ -1,0 +1,469 @@
+{
+  "chapter": 2,
+  "terms": [
+    {
+      "id": "health",
+      "ru": "Здоровье",
+      "en": "health",
+      "def": "По определению ВОЗ — состояние полного физического, душевного и социального благополучия, а не только отсутствие болезней.",
+      "page": 43,
+      "moments": [
+        {
+          "n": 14,
+          "beat": "terms",
+          "mark": "health"
+        }
+      ],
+      "see": [
+        "wellness"
+      ]
+    },
+    {
+      "id": "wellness",
+      "ru": "Благополучие",
+      "en": "wellness",
+      "alt": [
+        "веллнес"
+      ],
+      "def": "Активный процесс, в котором человек осознаёт, что влияет на его жизнь, и выбирает более полноценную жизнь; охватывает тело, эмоции, социальные связи, духовность.",
+      "page": 43,
+      "moments": [
+        {
+          "n": 14,
+          "beat": "terms",
+          "mark": "well",
+          "to": "proc"
+        },
+        {
+          "n": 14,
+          "beat": "wellness",
+          "mark": "multi",
+          "to": "six"
+        }
+      ],
+      "see": [
+        "health",
+        "health-promotion"
+      ]
+    },
+    {
+      "id": "health-promotion",
+      "ru": "Укрепление здоровья",
+      "en": "health promotion",
+      "def": "Усилия, которые помогают человеку, группе или сообществу осознать свои возможности для здоровья и действовать ради него.",
+      "page": 43,
+      "moments": [
+        {
+          "n": 14,
+          "beat": "terms",
+          "mark": "promo"
+        }
+      ],
+      "see": [
+        "public-health"
+      ]
+    },
+    {
+      "id": "public-health",
+      "ru": "Общественное здравоохранение",
+      "en": "public health",
+      "def": "Предупреждение болезней через ресурсы и среду, которые помогают людям вести здоровый образ жизни.",
+      "page": 43,
+      "moments": [
+        {
+          "n": 14,
+          "beat": "terms",
+          "mark": "pub"
+        }
+      ],
+      "see": [
+        "health-promotion"
+      ]
+    },
+    {
+      "id": "preparticipation-screening",
+      "ru": "Скрининг перед занятиями",
+      "en": "preparticipation screening",
+      "def": "Несколько вопросов о сердце, симптомах, суставах и лекарствах перед программой с умеренной нагрузкой; хотя бы одно «да» требует дополнительной оценки.",
+      "page": 48,
+      "moments": [
+        {
+          "n": 15,
+          "beat": "screen",
+          "mark": "pre",
+          "to": "yes"
+        }
+      ],
+      "see": [
+        "functional-movement-screen"
+      ]
+    },
+    {
+      "id": "functional-movement-screen",
+      "ru": "Скрининг функциональных движений",
+      "en": "Functional Movement Screen (FMS)",
+      "def": "Проверка из семи заданий для хорошо подготовленных людей; её вариант применяют при известной боли в опорно-двигательном аппарате.",
+      "page": 49,
+      "moments": [
+        {
+          "n": 15,
+          "beat": "screen",
+          "mark": "fms"
+        }
+      ],
+      "see": [
+        "preparticipation-screening"
+      ]
+    },
+    {
+      "id": "social-cognitive-theory",
+      "ru": "Социально-когнитивная теория",
+      "en": "social cognitive theory",
+      "def": "Теория изменения поведения: обучение идёт в социальном контексте, а мышление, среда и поведение влияют друг на друга.",
+      "page": 50,
+      "moments": [
+        {
+          "n": 16,
+          "beat": "sct",
+          "mark": "sct",
+          "to": "bel"
+        }
+      ],
+      "see": [
+        "self-efficacy"
+      ]
+    },
+    {
+      "id": "self-efficacy",
+      "ru": "Самоэффективность",
+      "en": "self-efficacy",
+      "def": "Вера человека в то, что у него получится выполнить нужное действие и изменить поведение; многие считают её ключом к регулярной активности.",
+      "page": 50,
+      "moments": [
+        {
+          "n": 16,
+          "beat": "sct",
+          "mark": "ex",
+          "to": "key"
+        },
+        {
+          "n": 16,
+          "beat": "hbm",
+          "mark": "se"
+        }
+      ],
+      "see": [
+        "social-cognitive-theory",
+        "health-belief-model"
+      ]
+    },
+    {
+      "id": "health-belief-model",
+      "ru": "Модель убеждений о здоровье",
+      "en": "health belief model",
+      "def": "Модель: человек действует ради здоровья, если ощущает угрозу болезни, верит в свой успех и видит, что польза перевешивает барьеры.",
+      "page": 50,
+      "moments": [
+        {
+          "n": 16,
+          "beat": "hbm",
+          "mark": "hbm",
+          "to": "cue"
+        },
+        {
+          "n": 16,
+          "beat": "hbmex",
+          "mark": "t",
+          "to": "act"
+        }
+      ],
+      "see": [
+        "cues-to-action",
+        "self-efficacy"
+      ]
+    },
+    {
+      "id": "cues-to-action",
+      "ru": "Сигналы к действию",
+      "en": "cues to action",
+      "def": "В модели убеждений о здоровье — то, что подталкивает начать: напоминание врача, кампания в СМИ, болезнь знакомого.",
+      "page": 50,
+      "moments": [
+        {
+          "n": 16,
+          "beat": "hbm",
+          "mark": "cue"
+        }
+      ],
+      "see": [
+        "health-belief-model"
+      ]
+    },
+    {
+      "id": "transtheoretical-model",
+      "ru": "Транстеоретическая модель",
+      "en": "transtheoretical model",
+      "alt": [
+        "модель стадий изменения"
+      ],
+      "def": "Модель Прохаски: изменение поведения проходит пять стадий — преднамерение, намерение, подготовку, действие и поддержание.",
+      "page": 50,
+      "moments": [
+        {
+          "n": 16,
+          "beat": "ttm",
+          "mark": "ttm"
+        },
+        {
+          "n": 16,
+          "beat": "algo",
+          "mark": "q1",
+          "to": "d30"
+        }
+      ],
+      "see": [
+        "precontemplation",
+        "maintenance"
+      ]
+    },
+    {
+      "id": "precontemplation",
+      "ru": "Стадия преднамерения",
+      "en": "precontemplation",
+      "alt": [
+        "преднамерение"
+      ],
+      "def": "Человек не собирается ничего менять в ближайшие шесть месяцев.",
+      "page": 50,
+      "moments": [
+        {
+          "n": 16,
+          "beat": "ttm",
+          "mark": "s1"
+        }
+      ],
+      "see": [
+        "contemplation"
+      ]
+    },
+    {
+      "id": "contemplation",
+      "ru": "Стадия намерения",
+      "en": "contemplation",
+      "alt": [
+        "намерение"
+      ],
+      "def": "Человек собирается измениться в ближайшие шесть месяцев.",
+      "page": 50,
+      "moments": [
+        {
+          "n": 16,
+          "beat": "ttm",
+          "mark": "s2"
+        }
+      ],
+      "see": [
+        "precontemplation",
+        "preparation"
+      ]
+    },
+    {
+      "id": "preparation",
+      "ru": "Стадия подготовки",
+      "en": "preparation",
+      "alt": [
+        "подготовка"
+      ],
+      "def": "Человек уже делает первые шаги и планирует изменения в ближайшие 30 дней.",
+      "page": 50,
+      "moments": [
+        {
+          "n": 16,
+          "beat": "ttm",
+          "mark": "s3"
+        }
+      ],
+      "see": [
+        "contemplation",
+        "action-stage"
+      ]
+    },
+    {
+      "id": "action-stage",
+      "ru": "Стадия действия",
+      "en": "action",
+      "alt": [
+        "действие"
+      ],
+      "def": "Поведение уже изменено, но меньше шести месяцев назад.",
+      "page": 50,
+      "moments": [
+        {
+          "n": 16,
+          "beat": "ttm",
+          "mark": "s4"
+        }
+      ],
+      "see": [
+        "preparation",
+        "maintenance"
+      ]
+    },
+    {
+      "id": "maintenance",
+      "ru": "Стадия поддержания",
+      "en": "maintenance",
+      "alt": [
+        "поддержание"
+      ],
+      "def": "Новое поведение держится больше шести месяцев.",
+      "page": 50,
+      "moments": [
+        {
+          "n": 16,
+          "beat": "ttm",
+          "mark": "s5"
+        }
+      ],
+      "see": [
+        "action-stage"
+      ]
+    },
+    {
+      "id": "motivation",
+      "ru": "Мотивация",
+      "en": "motivation",
+      "def": "То, как человек побуждает к действию себя или других. Её три стороны — внутренняя, мотивация выполнения и мотивация задачи.",
+      "page": 51,
+      "moments": [
+        {
+          "n": 16,
+          "beat": "motiv",
+          "mark": "def",
+          "to": "task"
+        }
+      ]
+    },
+    {
+      "id": "learned-helplessness",
+      "ru": "Выученная беспомощность",
+      "en": "learned helplessness",
+      "def": "Привычка не пытаться действовать самому, которая складывается, когда окружающие не верят в возможности человека.",
+      "page": 52,
+      "moments": [
+        {
+          "n": 17,
+          "beat": "margin",
+          "mark": "lh"
+        }
+      ],
+      "see": [
+        "thinner-margin-of-health"
+      ]
+    },
+    {
+      "id": "thinner-margin-of-health",
+      "ru": "Тонкий запас здоровья",
+      "en": "thinner margin of health",
+      "def": "Образ, которым описывают людей с инвалидностью: резерв здоровья у них меньше, поэтому физическая активность для них особенно важна.",
+      "page": 52,
+      "moments": [
+        {
+          "n": 17,
+          "beat": "margin",
+          "mark": "thin"
+        }
+      ],
+      "see": [
+        "learned-helplessness"
+      ]
+    },
+    {
+      "id": "mindfulness",
+      "ru": "Осознанность",
+      "en": "mindfulness",
+      "def": "Особое внимание: намеренное, в настоящем моменте и без оценки; мысли, ощущения и эмоции замечают, но не судят.",
+      "page": 53,
+      "moments": [
+        {
+          "n": 18,
+          "beat": "def",
+          "mark": "d1",
+          "to": "d2"
+        },
+        {
+          "n": 18,
+          "beat": "qual",
+          "mark": "q1",
+          "to": "q7"
+        }
+      ],
+      "see": [
+        "mbsr"
+      ]
+    },
+    {
+      "id": "mbsr",
+      "ru": "Снижение стресса на основе осознанности",
+      "en": "mindfulness-based stress reduction (MBSR)",
+      "def": "Программа медитации осознанности, которую создал Джон Кабат-Зинн в 1979 году; снижает стресс и помогает при стойкой боли.",
+      "page": 54,
+      "moments": [
+        {
+          "n": 18,
+          "beat": "med",
+          "mark": "mbsr",
+          "to": "pt"
+        },
+        {
+          "n": 18,
+          "beat": "eff",
+          "mark": "chr"
+        }
+      ],
+      "see": [
+        "mindfulness"
+      ]
+    },
+    {
+      "id": "diaphragmatic-breathing",
+      "ru": "Диафрагмальное дыхание",
+      "en": "diaphragmatic (abdominal) breathing",
+      "alt": [
+        "брюшное дыхание"
+      ],
+      "def": "Дыхание, при котором на вдохе живот выдвигается вперёд, а нижние рёбра расходятся; его чувствуют рукой на животе у пупка.",
+      "page": 55,
+      "moments": [
+        {
+          "n": 18,
+          "beat": "belly",
+          "mark": "abd"
+        }
+      ],
+      "see": [
+        "upper-chest-breathing"
+      ]
+    },
+    {
+      "id": "upper-chest-breathing",
+      "ru": "Верхнегрудное дыхание",
+      "en": "upper chest (shallow) breathing",
+      "alt": [
+        "поверхностное дыхание"
+      ],
+      "def": "Поверхностное дыхание, при котором на вдохе поднимаются верх груди и рёбра.",
+      "page": 55,
+      "moments": [
+        {
+          "n": 18,
+          "beat": "belly",
+          "mark": "chest"
+        }
+      ],
+      "see": [
+        "diaphragmatic-breathing"
+      ]
+    }
+  ]
+}

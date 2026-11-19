@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Методы и показания — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 29, title: 'Методы увеличения мобильности; показания и польза растяжки', minutes: 8, language: 'ru', next: '../ch030/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch029/cards.ru.json
+const CARDS_SHORT = {
+  "самостоятельная\nпациент выполняет сам после обучения; «упражнения на гибкость» — в общей подготовке людей без нарушений": "пациент сам после обучения",
+  "переносимость растяжения\n6 недель статической растяжки увеличили тыльное сгибание стопы без изменения строения мышцы": "6 недель → без изменения мышцы",
+  "общая подготовка\nразминка и заминка; программы общей и спортивной подготовки": "разминка и заминка",
+  "профилактика травм?\nдоказательства неубедительны — так же и для отсроченной боли в мышцах": "доказательства неубедительны",
+};
+// cards-short end
+
+const SKIN = '#d8d1c1', HAND = '#b9cfe0';
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// A list row: a round mark (check, cross or number), then the text; slides in at t0.
+function listRow(p, x, y, str, kind, col, t0, { size = 26, maxW = 600 } = {}) {
+  const g = G(p, { o: 0, x: -16 });
+  mk('circle', { cx: x + 24, cy: y - 8, r: 22, fill: col }, g);
+  if (kind === 'ok') path(g, `M${x + 13} ${y - 8}l8 9l15 -18`, { stroke: COL.board, 'stroke-width': 5 });
+  else if (kind === 'no') path(g, `M${x + 15} ${y - 17}l18 18M${x + 33} ${y - 17}l-18 18`, { stroke: COL.board, 'stroke-width': 5 });
+  else T(g, kind, { x: x + 24, y: y + 1, size: 24, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 62, y, null, { size, weight: 600, maxW }), { o: 1 });
+  tw(g, { o: 1, x: 0 }, t0, .5);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Методы и показания', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 4 · Урок 29', { x: 800, y: 240, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Как увеличивают подвижность', { x: 800, y: 335, size: 58, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'методы, показания, противопоказания и результаты', 800, 430, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const sc = tableScene(art, { hx: 820, top: 680, s: .55, t0: 0 });
+    muscleOn(sc.pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 13 });
+    show(art, m('sub', .2));
+    prog(q => sc.pt.set({ hN: 80 * wave(q, 1) }), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['stretch', 'Растяжка', (m) => {
+    const p = panel(0);
+    const sc = tableScene(p, { hx: 600, top: 560, s: 1.15, t0: .2 });
+    const pt = sc.pt, ham = muscleOn(pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 13, slack: 1.04 }), rf = muscleOn(pt, ...MUSCLE.rectus, { after: 'ftN', w: 13 });
+    // the leg goes to the end of the available range, then just beyond it
+    const H = onStage(pt, 'H'), R = 290;
+    const avail = path(p, romArc(H, R, 0, 70), { stroke: COL.dim, 'stroke-width': 5, 'stroke-dasharray': '6 8' }, { o: 0 });
+    const extra = path(p, romArc(H, R, 70, 82), { stroke: COL.task, 'stroke-width': 9 }, { o: 0 });
+    prog(q => pt.set({ hN: 70 * io(q) }), m('end', .4), 1.8, lin);
+    show(avail, m('end', .6));
+    prog(q => pt.set({ hN: lerp(70, 82, io(q)) }), m('end', 2.6), 1.4, lin);
+    show(extra, m('end', 2.6));
+    txt(p, 'чуть дальше доступного объёма', H[0] + 70, H[1] - R - 30, m('end', 3), { size: 23, weight: 700, fill: COL.task });
+    // assisted: the patient's own hip flexors help
+    prog(q => rf.act(.8 * Math.sin(Math.PI * q)), m('ass'), 2.4, lin);
+    ['руками или прибором', 'постоянно или с перерывами'].forEach((str, i) => pill(p, str, 1240, 190 + i * 60, m('src', i * .8), { col: COL.dim, size: 22 }));
+    pill(p, 'пассивная — пациент расслаблен', 1240, 330, m('pas'), { col: COL.whole, size: 22 });
+    pill(p, 'ассистированная — пациент помогает', 1240, 390, m('ass'), { col: COL.nat, size: 22 });
+    infoCard(p, 1010, 470, 510, 220, 'самостоятельная', 'пациент выполняет сам после обучения; «упражнения на гибкость» — в общей подготовке людей без нарушений', COL.good, m('self'), { size: 21 });
+  }],
+
+  ['other', 'Другие методы', (m) => {
+    const p = panel(0);
+    txt(p, 'другие способы увеличить подвижность', 800, 100, .2, { size: 30, weight: 600, fill: COL.dim, anchor: 'middle' });
+    [['растяжка по методу ПНФ', 'приёмы нервно-мышечного облегчения и торможения: рефлекторно снизить напряжение укороченной мышцы', COL.real, 'pnf'],
+     ['мышечно-энергетические техники', 'из остеопатии: дозированное напряжение против сопротивления специалиста (постизометрическая релаксация)', COL.task, 'met'],
+     ['мобилизация и манипуляция суставов', 'приёмы на структурах сустава — глава 5', COL.whole, 'jm'],
+     ['мобилизация мягких тканей', 'фрикционный массаж, миофасциальный релиз, акупрессура, триггерные точки, инструменты', COL.nat, 'stm'],
+     ['мобилизация нервной ткани', 'спайки после травмы или операции натягивают нерв при движении — глава 13', COL.int, 'neur']].forEach(([t1, t2, col, mark], i) => {
+      const g = G(p, { o: 0, x: -16 }), y = 190 + i * 130;
+      mk('rect', { x: 120, y: y - 34, width: 14, height: 90, rx: 7, fill: col }, g);
+      T(g, t1, { x: 160, y, size: 27, weight: 700, fill: col });
+      put(para(g, t2, 160, y + 38, null, { size: 22, fill: COL.chalk, maxW: 1300 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['ind', 'Показания', (m) => {
+    const p = panel(0);
+    txt(p, 'показания к растяжке', 800, 100, .2, { size: 30, weight: 700, fill: COL.good, anchor: 'middle' });
+    ['объём ограничен потерей растяжимости — спайки, контрактуры, рубцы — и это мешает деятельности',
+     'ограничение может привести к деформации, которую можно предотвратить',
+     'слабость мышц и укорочение противоположных тканей',
+     'часть общей или спортивной подготовки',
+     'до и после интенсивной нагрузки'].forEach((str, i) => listRow(p, 170, 210 + i * 130, str, 'ok', COL.good, m('i' + (i + 1)), { size: 28, maxW: 1200 }));
+  }],
+
+  ['contra', 'Противопоказания', (m) => {
+    const p = panel(0);
+    txt(p, 'противопоказания', 800, 100, .2, { size: 30, weight: 700, fill: COL.bad, anchor: 'middle' });
+    ['костный блок', 'недавний перелом без сращения', 'острое воспаление или инфекция: жар, отёк; риск нарушить заживление', 'резкая острая боль при движении',
+     'гематома, признаки травмы тканей', 'сустав уже гипермобилен', 'укорочение даёт суставу стабильность', 'укорочение позволяет пациенту с параличом выполнять действие'].forEach((str, i) =>
+      listRow(p, i < 4 ? 80 : 830, 200 + (i % 4) * 160, str, 'no', COL.bad, m('c' + (i + 1)), { size: 25, maxW: 600 }));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-ind', prompt: ['Растягивать или нет?'],
+    build: grid([
+      { parts: ['Колено не сгибается из-за спаек после иммобилизации'], ans: ['y'], why: 'Показание: потеря растяжимости мешает деятельности.' },
+      { parts: ['Перелом две недели назад, сращения ещё нет'], ans: ['n'], why: 'Противопоказание: сращение не завершено.' },
+      { parts: ['Сустав горячий и отёчный'], ans: ['n'], why: 'Противопоказание: острое воспаление.' },
+      { parts: ['При тетраплегии слегка укороченные сгибатели пальцев дают тенодезный захват'], ans: ['n'], why: 'Нельзя: укорочение нужно для функции.' },
+      { parts: ['Укорочение может привести к деформации, которую можно предотвратить'], ans: ['y'], why: 'Показание.' },
+    ], [['y', 'Растягивать', COL.good], ['n', 'Нельзя', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['out', 'Результат', (m) => {
+    const p = panel(0);
+    // a schematic of range of motion growing over weeks of stretching
+    const X0 = 140, Y0 = 560, ax = G(p, { o: 0 });
+    path(ax, `M${X0} 200V${Y0}H${X0 + 620}`, { stroke: COL.dim, 'stroke-width': 3 });
+    T(ax, 'объём', { x: X0 - 12, y: 196, size: 21, fill: COL.dim, anchor: 'end' });
+    T(ax, 'недели растяжки', { x: X0 + 620, y: Y0 + 36, size: 21, fill: COL.dim, anchor: 'end' });
+    show(ax, m('rom'));
+    const c = path(p, `M${X0} 500C${X0 + 220} 470 ${X0 + 360} 330 ${X0 + 600} 290`, { stroke: COL.good, 'stroke-width': 7 }, { d: 0 });
+    draw(c, m('rom', .5), 2);
+    pill(p, 'схема', X0 + 560, 220, m('rom', .5), { col: COL.dim, size: 19 });
+    txt(p, 'статическая и ПНФ-растяжка увеличивают гибкость', X0 + 300, 150, m('rom', 1), { size: 24, weight: 700, fill: COL.good, anchor: 'middle' });
+    ['меньше жёсткость мышцы и сухожилия', 'биомеханические и нервные изменения', 'податливость фасции'].forEach((str, i) => pill(p, str, 1180, 200 + i * 64, m('mech', .5 + i * .9), { col: COL.whole, size: 22 }));
+    infoCard(p, 880, 420, 640, 240, 'переносимость растяжения', '6 недель статической растяжки увеличили тыльное сгибание стопы без изменения строения мышцы', COL.int, m('tol'), { size: 23 });
+  }],
+
+  ['fit', 'Подготовка и травмы', (m) => {
+    const p = panel(0);
+    infoCard(p, 140, 160, 600, 220, 'общая подготовка', 'разминка и заминка; программы общей и спортивной подготовки', COL.good, m('fit'), { size: 24 });
+    infoCard(p, 860, 160, 600, 220, 'профилактика травм?', 'доказательства неубедительны — так же и для отсроченной боли в мышцах', COL.int, m('inj'), { size: 24 });
+    const q = G(p, { o: 0 });
+    T(q, '?', { x: 1160, y: 560, size: 160, weight: 700, fill: COL.int, anchor: 'middle' });
+    show(q, m('inj', 1));
+    // a warm-up: a figure jogging on the spot
+    const s = 1, GY = 760, f = fig(p, { x: 440, y: GY - 182 * s, s, o: 0 });
+    ground(p, 300, 580, GY, m('fit'));
+    show(f.g, m('fit'));
+    walk(f, m('fit', .5), 5, { cycles: 4, running: true });
+  }],
+
+  ['perf', 'Растяжка и результат', (m) => {
+    const p = panel(0), Y0 = 470, defs = mk('defs', {}, p);
+    path(p, `M120 ${Y0}H1480`, { stroke: COL.dim, 'stroke-width': 3 });
+    T(p, 'лучше', { x: 108, y: Y0 - 120, size: 19, fill: COL.good, anchor: 'end' });
+    T(p, 'хуже', { x: 108, y: Y0 + 130, size: 19, fill: COL.bad, anchor: 'end' });
+    T(p, 'сила, мощность, спринт, прыжок', { x: 120, y: 120, size: 22, fill: COL.dim });
+    pill(p, 'схема', 1420, 120, .2, { col: COL.dim, size: 19 });
+    const bar = (x, h, col, label, t0) => {
+      const r = mk('rect', { x: x - 90, width: 180, rx: 10, fill: col, 'fill-opacity': .8 }, p);
+      put(r, { o: 0 });
+      prog(q => { const v = h * io(q); r.setAttribute('y', (v > 0 ? Y0 - v : Y0).toFixed(1)); r.setAttribute('height', Math.abs(v).toFixed(1)); }, t0, 1, lin);
+      show(r, t0);
+      put(para(p, label, x, h > 0 ? Y0 + 50 : Y0 - h + 40, null, { size: 21, maxW: 300, anchor: 'middle', fill: COL.chalk }), { o: 0 });
+      show(p.lastChild, t0 + .4);
+    };
+    bar(290, -70, COL.bad, 'статическая прямо перед нагрузкой', m('acute'));
+    bar(620, -160, COL.bad, 'держать дольше 90 секунд', m('ninety'));
+    bar(950, 90, COL.good, 'динамическая: движения через активный объём', m('dyn'));
+    bar(1280, 170, COL.good, 'регулярная растяжка неделями', m('chron'));
+    txt(p, '0', 108, Y0 + 7, .2, { size: 21, fill: COL.dim, anchor: 'end' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-perf', prompt: ['Спринтер прямо перед забегом держит статическое растяжение по 2 минуты на каждую мышцу. Что, скорее всего, будет?'],
+    build: choice([
+      ['Скорость и мощность не вырастут, а могут снизиться'],
+      ['Риск травмы надёжно снизится'],
+      ['Отсроченная боль в мышцах исчезнет'],
+      ['Мощность прыжка вырастет'],
+    ], 0, 'Острая статическая растяжка, особенно дольше 90 секунд, снижает или не меняет результат.',
+    [null, 'Защиту от травм растяжка не доказала.', 'Доказательства неубедительны.', 'Наоборот: мощность может снизиться.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Растяжка — сила в конце объёма: пассивная, ассистированная, самостоятельная, механическая.', 'w1'],
+     ['Нельзя: костный блок, свежий перелом, острое воспаление, резкая боль, гипермобильность, укорочение нужно для функции.', 'w2'],
+     ['Гибкость растёт, а защиту от травм растяжка не доказала.', 'w3'],
+     ['Перед силовой работой — динамическая растяжка, а не долгая статическая.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-warm', prompt: ['Футболист спрашивает, как размяться перед игрой. Что посоветовать?'],
+    build: choice([
+      ['Динамическую растяжку: контролируемые движения через активный объём'],
+      ['Статическую растяжку по 2 минуты на каждую мышцу'],
+      ['Быстрые махи на максимальной скорости до предела'],
+      ['Без разминки: растяжка всегда вредна'],
+    ], 0, 'Острая динамическая растяжка может улучшить результат, а долгая статическая — снизить.',
+    [null, 'Удержание дольше 90 секунд сильнее всего снижает мощность.', 'Быстрые махи до предела травмируют ткани — об этом в следующих уроках.', 'Разминка нужна; вредна долгая статическая растяжка прямо перед нагрузкой.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['При ассистированной растяжке пациент помогает движению.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Растяжка доказанно предотвращает травмы.'], ans: ['f'], why: 'Неверно: доказательства неубедительны.' },
+      { parts: ['Если сустав уже гипермобилен, его не растягивают.'], ans: ['t'], why: 'Верно: это противопоказание.' },
+      { parts: ['Регулярная растяжка в течение недель может улучшить спринт и прыжок.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Мышечно-энергетические техники пришли из метода ПНФ.'], ans: ['f'], why: 'Неверно: из остеопатии.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

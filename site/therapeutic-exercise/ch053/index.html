@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мобилизация голеностопа и стопы — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 53, title: 'Мобилизация: голень, голеностоп и стопа', minutes: 9, language: 'ru', next: '../ch054/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch053/cards.ru.json
+const CARDS_SHORT = {
+  "положение\nна боку, наполовину на животе; верхняя нога согнута вперёд; одна рука держит большеберцовую, основание другой — позади головки": "на боку, наполовину на животе",
+  "дистальный: вилка ограничивает тыльное сгибание\nоснование руки на латеральной лодыжке: на животе — вперёд, на спине — назад": "лодыжка: вперёд или назад",
+  "тракция\nна спине; пальцы обеих рук на тыле стопы ниже вилки, большие — на подошве; тянуть, отклоняясь назад": "руки на тыле стопы, тянуть назад",
+  "стабилизация\nбольшеберцовую — ремнём или к столу": "большеберцовую — ремнём или к столу",
+  "прогрессия\nу конца тыльного или подошвенного сгибания": "у конца тыльного или подошвенного сгибания",
+  "назад: на спине\nпятка за краем стола; голень — ремень или рука; межпальцевой промежуток на таранной ниже вилки; тракция I вниз": "промежуток на таранной, тракция I",
+  "вперёд: на животе\nстопа за краем; рука на тыле стопы — тракция I; промежуток другой — сзади на таранной и пяточной; давить на пяточную вперёд": "тракция I, давить на пяточную вперёд",
+  "вариант на спине\nголень держат спереди от вилки, пяточную подхватывают и тянут вперёд": "пяточную тянут вперёд",
+  "покой\nсередина между инверсией и эверсией; таранную держит тыльное сгибание или рука": "между инверсией и эверсией",
+  "тракция\nпятка за краем, бедро ротировано наружу; бедро терапевта держит тыльное сгибание; пяточную тянут дистально": "пяточную тянут дистально",
+  "скольжения\nна боку или на животе; основание кисти сбоку на пяточной: медиально — для латерального, латерально — для медиального; сначала тракция I": "кисть сбоку на пяточной, сначала тракция",
+  "подошвенное скольжение\nуказательный под стабилизируемой костью, возвышение на тыле той, что двигают; давить к подошве": "давить к подошве",
+  "тыльное скольжение\nуказательный фиксирует проксимальную с подошвы; II пястно-фаланговый сустав терапевта давит на подошвенную сторону": "сустав терапевта давит с подошвы",
+  "пальцы стопы — как пальцы кисти\nк подошве — сгибание, к тылу — разгибание, медиально и латерально — приведение и отведение": "к подошве — сгибание, к тылу — разгибание",
+};
+// cards-short end
+
+const HAND = '#b9cfe0', LINE = mix(ANAT.bone, '#000000', .5);
+const gripOval = (p, k = 1) => { const e = mk('ellipse', { rx: 24 * k, ry: 16 * k, fill: HAND, 'fill-opacity': .9, stroke: '#7d93a3', 'stroke-width': 2 }, p); put(e, { o: 0 }); return e; };
+// The ankle from the side (front to the right): the tibia's mortise (concave) above, the talus (convex) with the foot
+// below. a > 0 dorsiflexes the foot, a < 0 plantarflexes it; d glides the talus forward (+) or back (−).
+function ankleSide(p, x, y, s, t0) {
+  const j = jointGlide(p, { x, y, s, shaft: 30, fixShaft: 200, w: 80, t0 });
+  const foot = mk('path', { d: 'M-120 40Q-150 95 -95 110L210 118Q240 112 236 92L120 40Q40 20 -40 30Z', fill: mix(ANAT.bone, COL.board, .25), stroke: LINE, 'stroke-width': 2 }, j.mov);
+  j.mov.insertBefore(foot, j.mov.firstChild);
+  const g = G(p, { o: 0 });
+  T(g, 'вперёд →', { x: x + 260 * s, y: y - 200 * s, size: 20, fill: COL.dim, anchor: 'middle' });
+  T(g, '← назад', { x: x - 200 * s, y: y - 160 * s, size: 20, fill: COL.dim, anchor: 'middle' });
+  show(g, t0);
+  return j;
+}
+// A cross-section of the leg: the tibia (large) and the fibula (small). set(dx, dy) shifts the fibula.
+function legSection(p, x, y, s, t0, { head = false } = {}) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), id = 'ls' + (++SHADE_ID), gr = mk('radialGradient', { id, cx: .38, cy: .34, r: .75 }, defs);
+  [[0, mix(ANAT.bone, '#ffffff', .55)], [.55, ANAT.bone], [1, mix(ANAT.bone, '#000000', .4)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, gr));
+  mk('path', { d: 'M-110 -60Q-20 -120 60 -70Q120 -10 60 70Q-30 120 -100 60Q-150 0 -110 -60Z', fill: `url(#${id})`, stroke: LINE, 'stroke-width': 2 }, g);
+  T(g, 'большеберцовая', { x: -25, y: 8, size: 20, fill: COL.board, weight: 700, anchor: 'middle' });
+  const fib = G(g, { x: 115, y: head ? 60 : 30 });
+  mk('circle', { r: head ? 38 : 30, fill: `url(#${id})`, stroke: LINE, 'stroke-width': 2 }, fib);
+  T(fib, 'м/б', { x: 0, y: 7, size: 18, fill: COL.board, weight: 700, anchor: 'middle' });
+  T(g, '↑ вперёд', { x: 170, y: -90, size: 19, fill: COL.dim, anchor: 'middle' });
+  T(g, '↓ назад', { x: 170, y: 140, size: 19, fill: COL.dim, anchor: 'middle' });
+  const out = { g, fib, x0: 115, y0: head ? 60 : 30 };
+  out.set = (dx, dy) => put(fib, { x: out.x0 + dx, y: out.y0 + dy });
+  if (t0 !== null) show(g, t0);
+  return out;
+}
+// The bones of the foot from the medial side (a scheme): name → [x, y, w, h, angle]; light(name, col) tints one.
+const FOOT = { calc: [-210, 70, 150, 80, 8], tal: [-140, -10, 110, 70, 0], nav: [-40, 10, 60, 64, -10], cun: [30, 30, 70, 60, -14], m1: [170, 70, 220, 42, -12], ph: [320, 100, 90, 32, -6] };
+const FOOT_NAMES = { calc: 'пяточная', tal: 'таранная', nav: 'ладьевидная', cun: 'клиновидная', m1: 'I плюсневая', ph: 'фаланга' };
+function footMedial(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), out = { g, bones: {} };
+  path(g, 'M-300 40Q-310 130 -230 125L120 108Q300 120 390 122Q400 90 360 80L120 40Q-20 -30 -110 -60Q-200 -60 -240 -20Z', { stroke: COL.faint, 'stroke-width': 3, fill: 'none' });
+  for (const n in FOOT) {
+    const [bx, by, w, h, a] = FOOT[n], b = G(g, { x: bx, y: by, r: a });
+    const r = mk('rect', { x: -w / 2, y: -h / 2, width: w, height: h, rx: Math.min(w, h) * .45, fill: ANAT.bone, stroke: LINE, 'stroke-width': 2 }, b);
+    out.bones[n] = { g: b, rect: r, c: [x + bx * s, y + by * s] };
+  }
+  const nameAt = { calc: [-210, 150], tal: [-140, -60], nav: [-40, 82], cun: [110, -2], m1: [190, 128], ph: [320, 150] };
+  for (const n in FOOT) T(g, FOOT_NAMES[n], { x: nameAt[n][0], y: nameAt[n][1], size: 18, fill: COL.dim, anchor: 'middle' });
+  out.light = (n, col) => { const r = out.bones[n].rect; r.setAttribute('fill', col ? mix(ANAT.bone, col, .55) : ANAT.bone); r.setAttribute('stroke', col || LINE); r.setAttribute('stroke-width', col ? 4 : 2); };
+  if (t0 !== null) show(g, t0);
+  return out;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Голень, голеностоп, стопа', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 5 · Урок 53', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Мобилизация:', { x: 800, y: 315, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'голень, голеностоп и стопа', { x: 800, y: 380, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'малоберцовая, таранная, пяточная кости и предплюсна', 800, 460, m('sub'), { size: 28, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), j = ankleSide(art, 760, 610, .7, 0);
+    show(art, m('sub', .2));
+    prog(q => j.set({ a: 20 * Math.sin(2 * Math.PI * q) }), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['tf', 'Межберцовые суставы', (m) => {
+    const p = panel(0), defs = mk('defs', {}, p);
+    // the leg from the front: the tibia and the fibula with their two joints
+    txt(p, 'голень спереди', 230, 95, .2, { size: 20, fill: COL.dim, anchor: 'middle' });
+    limbEl(p, defs, ANAT.bone, 36, 26, LINE).set([200, 160], [215, 760]);
+    limbEl(p, defs, ANAT.bone, 15, 13, LINE).set([300, 190], [295, 770]);
+    mk('ellipse', { cx: 300, cy: 185, rx: 26, ry: 22, fill: ANAT.bone, stroke: LINE, 'stroke-width': 2 }, p);
+    mk('ellipse', { cx: 296, cy: 778, rx: 20, ry: 30, fill: ANAT.bone, stroke: LINE, 'stroke-width': 2 }, p);
+    const lab = (P, str, t0) => { mk('circle', { cx: P[0], cy: P[1], r: 9, fill: COL.task, opacity: 0 }, p); show(p.lastChild, t0); txt(p, str, P[0] + 40, P[1] + 8, t0, { size: 22, weight: 700, fill: COL.task }); };
+    lab([268, 188], 'проксимальный', m('legs', .5));
+    lab([268, 770], 'дистальный', m('legs', 1.5));
+    // proximal: the head of the fibula slides forward and out
+    const A = legSection(p, 760, 330, 1, m('prox'), { head: true });
+    txt(p, 'срез у головки малоберцовой', 760, 160, m('prox'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    prog(q => A.set(10 * io(q), -18 * io(q)), m('prox', 9), 1.4, lin);
+    pill(p, 'вперёд и наружу → подвижность головки', 760, 500, m('prox', 9), { col: COL.whole, size: 20 });
+    infoCard(p, 1060, 140, 480, 290, 'положение', 'на боку, наполовину на животе; верхняя нога согнута вперёд; одна рука держит большеберцовую, основание другой — позади головки', COL.dim, m('prox', 3), { size: 20 });
+    // distal: the fibula glides forward or back when the mortise limits dorsiflexion
+    const B = legSection(p, 760, 690, .8, m('dist'));
+    prog(q => B.set(0, -16 * Math.sin(Math.PI * q)), m('dist', 5), 1.6, lin);
+    prog(q => B.set(0, 16 * Math.sin(Math.PI * q)), m('dist', 7), 1.6, lin);
+    infoCard(p, 1060, 560, 480, 290, 'дистальный: вилка ограничивает тыльное сгибание', 'основание руки на латеральной лодыжке: на животе — вперёд, на спине — назад', COL.whole, m('dist'), { size: 20 });
+  }],
+
+  ['tc', 'Голеностопный сустав', (m) => {
+    const p = panel(0), j = ankleSide(p, 420, 380, 1.1, .2);
+    txt(p, 'вогнутая вилка', 520, 262, m('tc', .5), { size: 21, fill: COL.whole });
+    txt(p, 'выпуклый блок таранной', 520, 345, m('tc', 1.5), { size: 21, fill: COL.task });
+    prog(q => j.set({ a: -10 * io(q) }), m('rest', .5), 1, lin);
+    pill(p, 'покой: подошвенное сгибание 10°', 420, 760, m('rest'), { col: COL.whole, size: 22 });
+    show(j.tp, m('rest', 2));
+    pill(p, 'плоскость — в вилке, спереди назад', 420, 815, m('rest', 2), { col: COL.task, size: 21 });
+    // traction along the leg
+    prog(q => j.set({ a: -10, n: 11 * io(q) }), m('dist', 4), 1.2, lin);
+    const C = j.stage([0, 0]);
+    arrowTo(p, [C[0] - 170, C[1] + 40], [C[0] - 170, C[1] + 130], m('dist', 4), { col: COL.good, w: 6 });
+    txt(p, 'по длинной оси', C[0] - 185, C[1] + 165, m('dist', 4), { size: 21, weight: 700, fill: COL.good, anchor: 'end' });
+    infoCard(p, 880, 120, 650, 210, 'тракция', 'на спине; пальцы обеих рук на тыле стопы ниже вилки, большие — на подошве; тянуть, отклоняясь назад', COL.good, m('dist'), { size: 21 });
+    infoCard(p, 880, 360, 650, 140, 'стабилизация', 'большеберцовую — ремнём или к столу', COL.real, m('rest', 4), { size: 21 });
+    infoCard(p, 880, 530, 650, 140, 'прогрессия', 'у конца тыльного или подошвенного сгибания', COL.task, m('dist', 9), { size: 21 });
+  }],
+
+  ['tcg', 'Скольжения таранной', (m) => {
+    const p = panel(0), j = ankleSide(p, 400, 360, 1.05, .2);
+    j.set({ a: -10 });
+    // posterior glide: dorsiflexion; anterior glide: plantarflexion
+    prog(q => j.set({ a: lerp(-10, 12, io(q)), d: -12 * io(q) }), m('post', 4), 1.8, lin);
+    pill(p, 'назад → тыльное сгибание', 400, 700, m('post', 1), { col: COL.whole, size: 22 });
+    const tb = txt(p, 'задняя часть капсулы', 200, 640, m('post', 6), { size: 21, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    hide(tb, m('ant'), .3);
+    prog(q => j.set({ a: lerp(12, -25, io(q)), d: lerp(-12, 12, io(q)) }), m('ant', 4), 2, lin);
+    pill(p, 'вперёд → подошвенное сгибание', 400, 760, m('ant', 1), { col: COL.task, size: 22 });
+    txt(p, 'передняя часть капсулы', 640, 640, m('ant', 6), { size: 21, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    NOTE(p, 400, 830, m('post', 6));
+    infoCard(p, 880, 110, 650, 250, 'назад: на спине', 'пятка за краем стола; голень — ремень или рука; межпальцевой промежуток на таранной ниже вилки; тракция I вниз', COL.whole, m('post'), { size: 21 });
+    infoCard(p, 880, 390, 650, 250, 'вперёд: на животе', 'стопа за краем; рука на тыле стопы — тракция I; промежуток другой — сзади на таранной и пяточной; давить на пяточную вперёд', COL.task, m('ant'), { size: 21 });
+    infoCard(p, 880, 670, 650, 180, 'вариант на спине', 'голень держат спереди от вилки, пяточную подхватывают и тянут вперёд', COL.dim, m('alt'), { size: 21 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-ankle', prompt: ['Какое скольжение?'],
+    build: grid([
+      { parts: ['Увеличить тыльное сгибание (таранная)'], ans: ['b'], why: 'Таранную — назад.' },
+      { parts: ['Увеличить подошвенное сгибание (таранная)'], ans: ['f'], why: 'Таранную — вперёд.' },
+      { parts: ['Увеличить эверсию (пяточная)'], ans: ['m'], why: 'Пяточную — медиально.' },
+      { parts: ['Увеличить инверсию (пяточная)'], ans: ['l'], why: 'Пяточную — латерально.' },
+    ], [['b', 'Назад', COL.whole], ['f', 'Вперёд', COL.task], ['m', 'Медиально', COL.good], ['l', 'Латерально', COL.real]], { multi: false, text: true }),
+  }], done) }],
+
+  ['st', 'Подтаранный сустав', (m) => {
+    const p = panel(0), j = jointGlide(p, { x: 400, y: 380, s: 1.05, shaft: 110, w: 90, t0: .2 });
+    txt(p, 'пятка сзади, правая стопа', 400, 95, .2, { size: 20, fill: COL.dim, anchor: 'middle' });
+    T(p, '← медиально', { x: 200, y: 640, size: 20, fill: COL.dim, anchor: 'middle', o: 0 }); show(p.lastChild, .2);
+    T(p, 'латерально →', { x: 600, y: 640, size: 20, fill: COL.dim, anchor: 'middle', o: 0 }); show(p.lastChild, .2);
+    txt(p, 'вогнутая таранная', 530, 250, m('st', .5), { size: 21, fill: COL.whole });
+    txt(p, 'выпуклая пяточная', 530, 450, m('st', 1.5), { size: 21, fill: COL.task });
+    show(j.tp, m('st', 4));
+    pill(p, 'плоскость — в таранной, параллельно подошве', 400, 700, m('st', 4), { col: COL.task, size: 21 });
+    prog(q => j.set({ n: 10 * io(q) }), m('dist', 5), 1.2, lin);
+    // medial glide with eversion, lateral glide with inversion
+    prog(q => j.set({ n: 0, d: -12 * io(q), a: 18 * io(q) }), m('ml', .5), 1.6, lin);
+    prog(q => j.set({ d: lerp(-12, 12, io(q)), a: lerp(18, -18, io(q)) }), m('ml', 3), 2, lin);
+    pill(p, 'медиально → эверсия', 300, 770, m('ml', .5), { col: COL.good, size: 22 });
+    pill(p, 'латерально → инверсия', 520, 830, m('ml', 3), { col: COL.real, size: 22 });
+    infoCard(p, 880, 110, 650, 160, 'покой', 'середина между инверсией и эверсией; таранную держит тыльное сгибание или рука', COL.whole, m('st', 6), { size: 21 });
+    infoCard(p, 880, 300, 650, 250, 'тракция', 'пятка за краем, бедро ротировано наружу; бедро терапевта держит тыльное сгибание; пяточную тянут дистально', COL.good, m('dist'), { size: 21 });
+    infoCard(p, 880, 580, 650, 270, 'скольжения', 'на боку или на животе; основание кисти сбоку на пяточной: медиально — для латерального, латерально — для медиального; сначала тракция I', COL.task, m('ml'), { size: 21 });
+  }],
+
+  ['tars', 'Предплюсна и пальцы', (m) => {
+    const p = panel(0), ft = footMedial(p, 450, 380, 1.15, .2);
+    txt(p, 'стопа с медиальной стороны (схема)', 450, 95, .2, { size: 20, fill: COL.dim, anchor: 'middle' });
+    pill(p, 'проксимальная — выпуклая, дистальная — вогнутая', 450, 160, m('rule'), { col: COL.whole, size: 21 });
+    // plantar glide: hold the navicular, push the cuneiform toward the sole
+    whenAt(m('plant', 4), () => { ft.light('nav', COL.real); ft.light('cun', COL.task); });
+    const cun = ft.bones.cun;
+    prog(q => put(cun.g, { x: FOOT.cun[0], y: FOOT.cun[1] + 10 * Math.sin(Math.PI * q), r: FOOT.cun[4] }), m('plant', 6), 1.6, lin);
+    const aP = arrowTo(p, [cun.c[0], cun.c[1] - 110], [cun.c[0], cun.c[1] - 45], m('plant', 6), { col: COL.task, w: 5 });
+    const xP = cross(p, ft.bones.nav.c[0], ft.bones.nav.c[1] + 60, 12, m('plant', 5));
+    hide(aP, m('dors'), .3); hide(xP, m('dors'), .3);
+    cross(p, ft.bones.tal.c[0] + 10, ft.bones.tal.c[1] + 55, 12, m('dors', 1));
+    pill(p, 'к подошве → супинация, свод выше', 450, 700, m('plant', 6), { col: COL.task, size: 21 });
+    // dorsal glide (lateral side: the cuboid on the calcaneus) — shown on the same scheme with the calcaneus held
+    whenAt(m('dors'), () => { ft.light('cun', null); ft.light('tal', COL.real); ft.light('nav', COL.task); });
+    pill(p, 'к тылу → пронация (например, ладьевидная на таранной)', 450, 760, m('dors'), { col: COL.whole, size: 21 });
+    const nav = ft.bones.nav;
+    arrowTo(p, [nav.c[0], nav.c[1] + 110], [nav.c[0], nav.c[1] + 45], m('dors', 3), { col: COL.whole, w: 5 });
+    infoCard(p, 900, 110, 640, 250, 'подошвенное скольжение', 'указательный под стабилизируемой костью, возвышение на тыле той, что двигают; давить к подошве', COL.task, m('plant'), { size: 21 });
+    infoCard(p, 900, 390, 640, 230, 'тыльное скольжение', 'указательный фиксирует проксимальную с подошвы; II пястно-фаланговый сустав терапевта давит на подошвенную сторону', COL.whole, m('dors'), { size: 21 });
+    infoCard(p, 900, 650, 640, 200, 'пальцы стопы — как пальцы кисти', 'к подошве — сгибание, к тылу — разгибание, медиально и латерально — приведение и отведение', COL.good, m('toes'), { size: 21 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-arch', prompt: ['Нужно поднять свод стопы. Ладьевидная стабилизирована. Как двигать клиновидную?'],
+    build: choice([
+      ['К подошве — подошвенное скольжение'],
+      ['К тылу — тыльное скольжение'],
+      ['Тянуть по длинной оси стопы'],
+      ['Давить на ладьевидную'],
+    ], 0, 'Подошвенное скольжение дистальной кости — для супинации и подъёма свода.',
+    [null, 'Тыльное — для пронации.', 'Это тракция, а не скольжение.', 'Ладьевидную держат.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Межберцовые: головку малоберцовой — вперёд; дистальный сустав — когда вилка ограничивает тыльное сгибание.', 'w1'],
+     ['Голеностоп: выпуклая таранная в вогнутой вилке — назад для тыльного сгибания, вперёд для подошвенного.', 'w2'],
+     ['Подтаранный: выпуклая пяточная — медиально для эверсии, латерально для инверсии.', 'w3'],
+     ['Предплюсна и пальцы: дистальную вогнутую кость — к подошве для супинации и сгибания, к тылу для пронации и разгибания.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-cast', prompt: ['После шести недель в гипсе ограничено тыльное сгибание голеностопа. С чего начать мобилизацию?'],
+    build: choice([
+      ['Устойчивая тракция II степени в положении покоя — проверить реакцию'],
+      ['Сразу скольжение таранной назад III степени у конца объёма'],
+      ['Скольжение таранной вперёд'],
+      ['Толчок, чтобы быстрее вернуть объём'],
+    ], 0, 'Первая процедура — устойчивая тракция II в положении покоя (10° подошвенного сгибания); дальше — по реакции.',
+    [null, 'Это прогрессия — после того, как известна реакция сустава.', 'Вперёд — для подошвенного сгибания.', 'Толчок здесь не показан.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Покой голеностопа — 10° подошвенного сгибания.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Блок таранной кости вогнутый.'], ans: ['f'], why: 'Неверно: выпуклый; вогнута вилка.' },
+      { parts: ['Скольжение пяточной латерально увеличивает инверсию.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Подошвенное скольжение предплюсны нужно для пронации.'], ans: ['f'], why: 'Неверно: для супинации.' },
+      { parts: ['Пальцы стопы мобилизуют как пальцы кисти.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

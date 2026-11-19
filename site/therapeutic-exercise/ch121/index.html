@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Нарушения подвижности нервов — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 121, title: 'Нарушения подвижности нервов', minutes: 8, language: 'ru', next: '../ch122/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch121/cards.ru.json
+const CARDS_SHORT = {
+  "обычно\nнервная система легко приспосабливается к движениям в быту": "легко приспосабливается",
+  "хуже — с рубцом или отёком\nспайки и отёк мешают нерву удлиняться — симптомы при движении": "спайки и отёк мешают нерву",
+  "сосудистые и механические факторы\nпоражают нерв; самая частая жалоба — боль": "поражают нерв; самая частая жалоба — боль",
+  "в положении растяжения нерва\nтянущая боль или покалывание": "тянущая боль или покалывание",
+  "клиническое рассуждение\nповреждена сама нервная ткань или ткани вокруг — или движения сдавливают и натягивают нерв и воспроизводят симптомы?": "нервная ткань или вокруг?",
+  "данные\nнадёжность тестов верхней конечности многообещающа; обзор 10 рандомизированных исследований мобилизации — в основном польза, но качество работ под вопросом": "в основном польза, качество — вопрос",
+};
+// cards-short end
+
+const HEAD = COL.whole, NV = NERVE_C, PAIN = '#ff5a3c';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function numLine(p, n, str, x, y, col, t0, { size = 22, maxW = 860 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 20, cy: y - 8, r: 19, fill: col }, g);
+  T(g, String(n), { x: x + 20, y: y, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 54, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+// A chain of joints (names) with a nerve running through them — a scheme. set(el): el[i] 0..1 — how far joint i
+// elongates the nerve bed (1 = the joint opened straight). The nerve tension is the mean of el; the beads slide toward
+// the joints that elongate (proximal joints pull them up the chain, distal ones down). Gauges show both.
+function chainDiag(p, x, y, names, t0, { seg = 200, gauges = true } = {}) {
+  const g = G(p, { o: 0 }), defs = mk('defs', {}, g), col = '#d8d1c1', line = mix(col, COL.board, .62);
+  const segs = names.slice(1).map(() => limbEl(g, defs, col, 22, 18, line));
+  const nodes = names.map(n => { const gg = G(g, {}); mk('circle', { r: 20, fill: PANEL, stroke: COL.chalk, 'stroke-width': 3 }, gg); T(gg, n, { x: 0, y: 52, size: 19, weight: 700, fill: COL.chalk, anchor: 'middle' }); return gg; });
+  const nv = nerveLine(g, [[0, 0], [1, 0]], null, { w: 9, n: 18 }); put(nv.g, { o: 1 });
+  const gG = G(g, { o: gauges ? 1 : 0 }), gx = x + seg * (names.length - 1) + 80;
+  const bar = (yy, label, c) => { T(gG, label, { x: gx, y: yy - 12, size: 18, fill: COL.dim }); mk('rect', { x: gx, y: yy, width: 180, height: 20, rx: 8, fill: COL.board, stroke: COL.dim, 'stroke-width': 1.5 }, gG); return mk('rect', { x: gx, y: yy, width: 0, height: 20, rx: 8, fill: c }, gG); };
+  const bT = bar(y - 50, 'натяжение', ANAT.taut), bS = bar(y + 20, 'скольжение', NV);
+  const e = { g, el: names.map(() => 0), tension: 0 };
+  e.set = (el, { sym = 0 } = {}) => {
+    e.el = el;
+    let P = [x, y], ang = 0;
+    const pts = [P];
+    el.forEach((k, i) => { if (i === 0) return; ang = (i % 2 ? -1 : 1) * 32 * (1 - el[i - 1]); P = [P[0] + seg * Math.cos(rad(ang)), P[1] + seg * Math.sin(rad(ang))]; pts.push(P); });
+    segs.forEach((s, i) => s.set(pts[i], pts[i + 1]));
+    nodes.forEach((n, i) => { put(n, { x: pts[i][0], y: pts[i][1] }); n.firstChild.setAttribute('stroke', el[i] > .5 ? ANAT.taut : COL.chalk); });
+    const t = el.reduce((a, b) => a + b, 0) / el.length, mid = (el.length - 1) / 2;
+    const sl = el.reduce((a, k, i) => a + k * (i - mid), 0) / el.length;
+    e.tension = t;
+    nv.pts = pts.map(q => [q[0], q[1] - 30]);
+    nv.set({ wave: 1 - t, taut: t, slide: 120 * sl, hot: sym });
+    bT.setAttribute('width', f1(180 * t)); bS.setAttribute('width', f1(180 * clamp(Math.abs(sl) * 2.2, 0, 1)));
+    return e;
+  };
+  e.set(e.el);
+  if (t0 !== null) show(g, t0);
+  return e;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Нарушения подвижности нервов', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 13 · Урок 121', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Нарушения подвижности нервов', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'как распознать и мобилизовать', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'нерв, который плохо скользит, — и мягкие приёмы мобилизации', 800, 360, m('sub'), { size: 30, fill: NV, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const cd = chainDiag(art, 360, 640, ['шея', 'плечо', 'локоть', 'кисть'], null, { seg: 230 }); put(cd.g, { o: 1 });
+    prog(q => { const c = cyc(q, 2); cd.set([c, .5, 1 - c, .5]); }, .6, Math.max(2, D - 1.6), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['why', 'Почему нерв перестаёт скользить', (m, D) => {
+    const p = panel(0);
+    txt(p, 'нерв сдавлен — движения выше и ниже его деформируют', 800, 56, m('why'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const cd = chainDiag(p, 220, 440, ['выше', 'место сдавления', 'ниже'], m('why'), { seg: 340 });
+    cd.set([.2, .2, .2]);
+    const band = G(p, { o: 0 }); mk('rect', { x: 540, y: 360, width: 80, height: 100, rx: 10, fill: ANAT.bone, 'fill-opacity': .85 }, band); show(band, m('site'));
+    prog(q => { const c = cyc(q, 2); cd.set([.2 + .8 * c, .2, .2], { sym: c * .8 }); }, m('site', .5), Math.max(1.5, m('scar') - m('site', .5)), lin);
+    prog(q => { const c = cyc(q, 2); cd.set([.2, .2, .2 + .8 * c], { sym: c }); }, m('scar', .3), Math.max(1.5, D - m('scar', .3)), lin);
+    const adh = G(p, { o: 0 }); [-24, -8, 8, 24].forEach(dx => path(adh, `M${580 + dx} 470l6 22`, { stroke: '#d9cfb8', 'stroke-width': 4 })); show(adh, m('scar'));
+    infoCard(p, 60, 600, 720, 200, 'обычно', 'нервная система легко приспосабливается к движениям в быту', COL.good, m('why'), { size: 22 });
+    infoCard(p, 820, 600, 720, 200, 'хуже — с рубцом или отёком', 'спайки и отёк мешают нерву удлиняться — симптомы при движении', COL.bad, m('scar'), { size: 22 });
+  }],
+
+  ['hist', 'Жалобы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'что рассказывает пациент', 800, 56, m('hist'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const f = frontStand(p, 360, 860, 1.5, m('hist'), { muscles: false, pose: { aR: 8, eR: 4 } }), Q = f.pts;
+    prog(q => f.set({ aR: 8 + 100 * q, eR: 4 }), m('sens'), 1.2);
+    const zig = G(p, { o: 0 }); show(zig, m('sens', 1.2));
+    prog(q => {
+      zig.replaceChildren();
+      const [E, W] = [f.at(Q.arms[1][0]), f.at(Q.arms[1][1])];
+      [0, 1, 2].forEach(i => { const k = (q * 3 + i / 3) % 1, x = E[0] + (W[0] - E[0]) * k, y = E[1] + (W[1] - E[1]) * k; path(zig, `M${f1(x - 10)} ${f1(y - 18)}l8 8l-6 6l10 12`, { stroke: ANAT.taut, 'stroke-width': 3.5, fill: 'none' }); });
+    }, m('sens', 1.2), Math.max(1.5, D - m('sens', 1.2)), lin);
+    infoCard(p, 760, 110, 780, 160, 'сосудистые и механические факторы', 'поражают нерв; самая частая жалоба — боль', COL.bad, m('hist'), { size: 22 });
+    infoCard(p, 760, 290, 780, 160, 'в положении растяжения нерва', 'тянущая боль или покалывание', ANAT.taut, m('sens'), { size: 22 });
+    infoCard(p, 760, 470, 780, 260, 'клиническое рассуждение', 'повреждена сама нервная ткань или ткани вокруг — или движения сдавливают и натягивают нерв и воспроизводят симптомы?', COL.whole, m('reason'), { size: 22 });
+  }],
+
+  ['tests', 'Нейродинамические тесты', (m, D) => {
+    const p = panel(0);
+    txt(p, 'нейродинамические тесты: правила', 800, 56, m('tests'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    pillRow(p, ['тесты верхней конечности', 'подъём прямой ноги', 'тест сгорбленного сидения'], 800, 112, m('tests', .5), { col: NV, size: 20, gap: 1, space: 14 });
+    const cd = chainDiag(p, 120, 300, ['шея', 'плечо', 'локоть', 'кисть'], m('joints'), { seg: 170, gauges: false });
+    cd.set([0, 0, 0, 0]);
+    prog(q => { const i = Math.min(3, Math.floor(q * 4)), k = cyc(q * 4 % 1, 1), el = [0, 0, 0, 0]; el[i] = k; cd.set(el); }, m('joints', .5), Math.max(2, m('other') - m('joints', .5)), lin);
+    txt(p, 'сначала — каждый сустав отдельно', 380, 420, m('joints'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const R = [['other', 'ещё: пальпация нерва, чувствительность, рефлексы, ловкость, сила'], ['same', 'положения теста = положения лечения'], ['side', 'сначала здоровая сторона; симптомы и там — чувствительность корешков или центральная сенситизация'], ['act', 'сначала активно, потом пассивно; положительный активный тест — пригодится скольжение нерва']];
+    R.forEach(([k, s], i) => numLine(p, i + 1, s, 760, 200 + i * 120, NV, m(k), { size: 22, maxW: 720 }));
+    const L = frontStand(p, 220, 870, .7, m('side'), { muscles: false, col: '#b9cfe0' });
+    const Rr = frontStand(p, 460, 870, .7, m('side', 1), { muscles: false });
+    txt(p, 'здоровая', 220, 600, m('side'), { size: 19, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'больная', 460, 600, m('side', 1), { size: 19, weight: 700, fill: PAIN, anchor: 'middle' });
+    prog(q => L.set({ aR: 8 + 90 * cyc(q, 1) }), m('side', .3), 1.5); prog(q => Rr.set({ aR: 8 + 90 * cyc(q, 1) }), m('side', 1.5), 1.5);
+  }],
+
+  ['pos', 'Когда тест положительный', (m, D) => {
+    const p = panel(0);
+    txt(p, 'тест положительный, если выполнены четыре условия', 800, 56, m('pos'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const C = ['воспроизводит симптомы пациента в зоне проверяемого нерва', 'отличается от другой стороны и от нормальных ответов', 'согласуется со всем обследованием', 'симптомы меняются при сенсибилизирующих движениях'];
+    C.forEach((s, i) => { numLine(p, i + 1, s, 60, 140 + i * 66, COL.good, m('p' + (i + 1)), { size: 22, maxW: 700 }); checkMark(p, 820, 132 + i * 66, m('p' + (i + 1), .4)); });
+    // the procedure: elongate joint after joint until symptoms; then sensitise
+    const cd = chainDiag(p, 140, 620, ['шея', 'плечо', 'локоть', 'кисть'], m('proc'), { seg: 210 });
+    const t0 = m('proc', .5), span = Math.max(4, D - t0);
+    prog(q => {
+      const k = q * 5, el = [0, clamp(k, 0, 1), clamp(k - 1, 0, 1), clamp(k - 2, 0, 1)];
+      const s = k > 3 ? cyc((k - 3) / 2, 1) : 0;   // then the neck goes in and out of elongation
+      el[0] = s;
+      cd.set(el, { sym: clamp(cd.tension * 1.6 - .6, 0, 1) });
+    }, t0, span, lin);
+    txt(p, 'медленно — сустав за суставом до симптомов, затем один сустав туда и обратно', 800, 870, m('proc', 1), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pill(p, 'схема', 140, 520, m('proc'), { col: COL.dim, size: 17 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-pos', prompt: ['Положительный ли тест натяжения срединного нерва?'],
+    build: grid([
+      { parts: ['Покалывание в первых пальцах, сильнее при наклоне шеи в другую сторону, слабее — в свою; справа — не так'], ans: ['y'], why: 'Да: зона нерва, отличие сторон, сенсибилизация меняет симптомы.' },
+      { parts: ['Тянет в двуглавой мышце, наклон шеи ничего не меняет'], ans: ['n'], why: 'Нет: симптомы не в зоне нерва и не меняются при сенсибилизации.' },
+      { parts: ['Такие же ощущения с обеих сторон, как у здоровых людей'], ans: ['n'], why: 'Нет: нет отличия от другой стороны и от нормы.' },
+      { parts: ['Ограничение из-за тугоподвижного плечевого сустава'], ans: ['n'], why: 'Нет: суставы цепи проверяют заранее, чтобы исключить это.' },
+      { parts: ['Знакомая пациенту боль по ходу нерва, совпадает с жалобами и находками'], ans: ['y'], why: 'Да, если меняется при сенсибилизации.' },
+    ], [['y', 'Положительный', COL.good], ['n', 'Нет', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['cause', 'От натяжения к нейродинамике', (m, D) => {
+    const p = panel(0);
+    txt(p, 'откуда симптомы', 800, 56, m('cause'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const a = G(p, { o: 0 }); roundBox(a, 60, 100, 700, 200, COL.task, PANEL, 2.5); T(a, 'тесты натяжения', { x: 90, y: 150, size: 26, weight: 700, fill: COL.task }); put(para(a, 'натяжение выше или ниже места, где нерв сдавлен или спаян', 90, 200, null, { size: 22, maxW: 640 }), { o: 1 }); show(a, m('cause'));
+    const ar = G(p, { o: 0 }); path(ar, 'M780 200h40m-14 -10l14 10l-14 10', { stroke: COL.dim, 'stroke-width': 4 }); show(ar, m('dyn'));
+    const b = G(p, { o: 0 }); roundBox(b, 840, 100, 700, 200, COL.good, PANEL, 2.5); T(b, 'нейродинамика', { x: 870, y: 150, size: 26, weight: 700, fill: COL.good }); put(para(b, 'механика + физиология + пластичность нервной системы', 870, 200, null, { size: 22, maxW: 640 }), { o: 1 }); show(b, m('dyn'));
+    txt(p, 'смещение нерва зависит от:', 60, 360, m('ev'), { size: 22, weight: 700, fill: COL.chalk });
+    pillRow(p, ['объёма движения', 'расстояния до поражения', 'положения соседних суставов', 'числа суставов', 'удлиняет или укорачивает ложе'], 800, 410, m('ev', .5), { col: NV, size: 19, gap: .8, space: 10 });
+    // simultaneous hip + knee: the sciatic nerve slides most
+    const cd = chainDiag(p, 120, 620, ['таз', 'колено', 'стопа'], m('ev', 6), { seg: 250 });
+    prog(q => { const c = cyc(q, 2); cd.set([c, 1 - c, .3]); }, m('ev', 6.5), Math.max(2, D - m('ev', 6.5)), lin);
+    txt(p, 'седалищный нерв — больше всего при движении бедра и колена вместе', 420, 840, m('ev', 6), { size: 20, weight: 700, fill: NV, anchor: 'middle' });
+    infoCard(p, 960, 480, 580, 330, 'данные', 'надёжность тестов верхней конечности многообещающа; обзор 10 рандомизированных исследований мобилизации — в основном польза, но качество работ под вопросом', COL.whole, m('ev', 9), { size: 21 });
+  }],
+
+  ['princ', 'Принципы мобилизации', (m, D) => {
+    const p = panel(0);
+    txt(p, 'мобилизация нерва: принципы', 800, 56, m('goal'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    infoCard(p, 60, 96, 720, 180, 'цель', 'максимально сместить нерв при минимальном растяжении; нерв должен выдерживать натяжение, скользить и сжиматься', COL.good, m('goal'), { size: 21 });
+    infoCard(p, 820, 96, 720, 180, 'главная ошибка', 'слишком агрессивно, слишком много, слишком быстро', COL.bad, m('err'), { size: 22 });
+    cross(p, 1500, 140, 16, m('err', .5), 6);
+    pillRow(p, ['без симптомов', 'медленно', 'ритмично', 'колебания'], 800, 320, m('int', 2), { col: COL.good, size: 21, gap: .5 });
+    txt(p, 'чем выше раздражимость — тем мягче', 800, 370, m('int'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // slider: one joint unloads while another loads — the nerve slides, tension stays low
+    const s1 = chainDiag(p, 90, 620, ['шея', 'локоть', 'кисть'], m('slide'), { seg: 170 });
+    prog(q => { const c = cyc(q, 3); s1.set([c, .3, 1 - c]); }, m('slide', .5), Math.max(2, m('glide') - m('slide', .5)), lin);
+    txt(p, 'скольжение', 280, 430, m('slide'), { size: 24, weight: 700, fill: NV, anchor: 'middle' });
+    txt(p, 'один сустав нагружает, другой разгружает', 280, 780, m('slide', 1), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    // the second technique: offload, then move one segment in and out of resistance
+    const s2 = chainDiag(p, 860, 620, ['шея', 'локоть', 'кисть'], m('glide'), { seg: 170 });
+    prog(q => { const k = clamp(q * 4, 0, 1); s2.set([.6 - .5 * k, .3, k < 1 ? .3 : .3 + .5 * cyc((q - .25) / .75, 3)]); }, m('glide', .5), Math.max(2, m('self') - m('glide', .5)), lin);
+    txt(p, 'разгрузить — и вводить один сегмент в сопротивление', 1050, 430, m('glide'), { size: 22, weight: 700, fill: ANAT.taut, anchor: 'middle' });
+    txt(p, 'крупно, медленно, колебаниями', 1050, 780, m('glide', 1), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    pill(p, 'схема', 800, 820, m('slide'), { col: COL.dim, size: 17 });
+    pill(p, 'затем — самомобилизация дома', 800, 870, m('self'), { col: COL.good, size: 20 });
+  }],
+
+  ['prec', 'Предосторожности', (m, D) => {
+    const p = panel(0);
+    txt(p, 'предосторожности и противопоказания', 800, 56, m('prec'), { size: 28, weight: 700, anchor: 'middle', fill: COL.bad });
+    txt(p, 'полное обследование до теста; покалывание и онемение не должны сохраняться, когда положение отпущено', 800, 100, m('prec', .5), { size: 20, fill: COL.dim, anchor: 'middle' });
+    const P = ['какие ещё ткани нагружает положение', 'не обострять — без чрезмерной нагрузки и повторов', 'насколько быстро ухудшается состояние', 'активная болезнь нервной системы — осторожно', 'признаки нарушения кровообращения'];
+    txt(p, 'предосторожности', 60, 160, m('p1'), { size: 24, weight: 700, fill: COL.task });
+    P.forEach((s, i) => numLine(p, i + 1, s, 60, 220 + i * 70, COL.task, m('p' + (i + 1)), { size: 21, maxW: 640 }));
+    txt(p, 'противопоказания', 820, 160, m('contra'), { size: 24, weight: 700, fill: COL.bad });
+    const C = ['острые или нестабильные неврологические признаки', 'конский хвост: мочеиспускание, дефекация, чувствительность в промежности', 'травма или поражение спинного мозга', 'опухоль и инфекция'];
+    C.forEach((s, i) => { const g0 = G(p, { o: 0 }); roundBox(g0, 820, 190 + i * 140, 720, 120, COL.bad, PANEL, 2); put(para(g0, s, 900, 240 + i * 140, null, { size: 22, maxW: 600 }), { o: 1 }); show(g0, m('c' + (i + 1))); cross(p, 860, 248 + i * 140, 14, m('c' + (i + 1), .3), 5); });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-ok', prompt: ['Можно ли мобилизовать нерв?'],
+    build: grid([
+      { parts: ['Нарушилось мочеиспускание, онемела промежность'], ans: ['n'], why: 'Нет: признаки поражения конского хвоста — срочно к врачу.' },
+      { parts: ['Хроническое покалывание в пальцах, тест положительный, состояние стабильно'], ans: ['y'], why: 'Да, мягко и без симптомов.' },
+      { parts: ['Слабость в ноге быстро нарастает последние дни'], ans: ['n'], why: 'Нет: острые нестабильные неврологические признаки.' },
+      { parts: ['После мобилизации покалывание держится часами'], ans: ['n'], why: 'Нет: так быть не должно — снизить нагрузку и пересмотреть.' },
+      { parts: ['Опухоль по ходу нерва'], ans: ['n'], why: 'Нет: противопоказание.' },
+    ], [['y', 'Можно', COL.good], ['n', 'Нельзя', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Нерв, сдавленный у кости или в тесном пространстве, деформируется при движениях выше и ниже; хуже — с рубцом или отёком.', 'w1'],
+     ['Перед тестом проверяют каждый сустав; начинают со здоровой стороны и с активного теста.', 'w2'],
+     ['Положительный тест: симптомы в зоне нерва, отличие сторон, согласие с обследованием, изменение при сенсибилизации.', 'w3'],
+     ['Мобилизация — без симптомов, медленно и ритмично; главная ошибка — слишком много и слишком быстро.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: NV }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-irrit', prompt: ['У пациента сильно раздражённый нерв: покалывание появляется уже в начале теста и долго не проходит. Как мобилизовать?'],
+    build: choice([
+      ['Очень мягко: скольжение без симптомов, медленно и ритмично, малой амплитудой'],
+      ['Удерживать максимальное натяжение, пока не пройдёт'],
+      ['Много повторений до появления покалывания'],
+      ['Мобилизация не нужна — только покой'],
+    ], 0, 'Чем выше раздражимость, тем мягче приём; правильная техника не вызывает симптомов.',
+    [null, 'Это перегрузит раздражённый нерв.', 'Главная ошибка — слишком много и слишком быстро.', 'Мягкая мобилизация помогает, если нет противопоказаний.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-both', prompt: ['При тесте на здоровой стороне у пациента тоже появляются сильные симптомы. О чём подумать?'],
+    build: choice([
+      ['О повышенной чувствительности корешков или центральной сенситизации'],
+      ['Что тест на больной стороне можно не делать'],
+      ['Что у пациента всё в порядке'],
+      ['Что нужно усилить натяжение'],
+    ], 0, 'Начинают со здоровой стороны; симптомы и там говорят о чувствительности корешков или центральной сенситизации.',
+    [null, 'Сравнение сторон остаётся частью оценки.', 'Сильные симптомы с обеих сторон — повод задуматься.', 'Усиливать натяжение при таком ответе неразумно.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

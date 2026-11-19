@@ -1,0 +1,374 @@
+{
+  "region": "women",
+  "exercises": [
+    {
+      "id": "pf-ex",
+      "ru": "Упражнения для тазового дна",
+      "en": "pelvic floor muscle exercises",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "sit",
+        "supine",
+        "stand"
+      ],
+      "gear": [
+        "none",
+        "band",
+        "ball"
+      ],
+      "key": [
+        "сжать, как будто сдерживаете мочу",
+        "быстрые — 15–20 в подходе",
+        "«лифт» и полное расслабление"
+      ],
+      "warn": "не задерживать дыхание; замечать, когда работу подменяют ягодичные, живот, приводящие",
+      "page": 998,
+      "moments": [
+        {
+          "n": 246,
+          "beat": "pfex",
+          "mark": "cr",
+          "to": "relax"
+        },
+        {
+          "n": 246,
+          "beat": "pfex",
+          "mark": "start"
+        },
+        {
+          "n": 246,
+          "beat": "pfmore",
+          "mark": "tip",
+          "to": "stab"
+        },
+        {
+          "n": 248,
+          "beat": "post",
+          "mark": "pf"
+        },
+        {
+          "n": 248,
+          "beat": "cs",
+          "mark": "pf"
+        },
+        {
+          "n": 240,
+          "beat": "ui",
+          "mark": "pf"
+        }
+      ]
+    },
+    {
+      "id": "dra-corr",
+      "ru": "Корригирующее упражнение при диастазе",
+      "en": "corrective exercise for diastasis recti",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "strength",
+        "control"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "руки скрестно на животе сводят мышцы",
+        "на выдохе поднять только голову",
+        "пока расхождение больше 2 см"
+      ],
+      "warn": "пока расхождение больше двух пальцев — без напряжённых упражнений с ростом давления в животе",
+      "page": 1005,
+      "moments": [
+        {
+          "n": 247,
+          "beat": "dra",
+          "mark": "lift",
+          "to": "stab"
+        },
+        {
+          "n": 247,
+          "beat": "dra",
+          "mark": "check"
+        },
+        {
+          "n": 245,
+          "beat": "test",
+          "mark": "how",
+          "to": "tx"
+        },
+        {
+          "n": 248,
+          "beat": "post",
+          "mark": "dra"
+        }
+      ]
+    },
+    {
+      "id": "preg-session",
+      "ru": "Занятие при беременности",
+      "en": "exercise session for the uncomplicated pregnancy",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "function",
+        "endurance",
+        "strength"
+      ],
+      "pos": [
+        "stand",
+        "side",
+        "quad"
+      ],
+      "gear": [
+        "none",
+        "wedge"
+      ],
+      "key": [
+        "разминка, растяжка, нагрузка, заминка",
+        "после 1-го триместра на спине ≤5 минут",
+        "не задерживать дыхание"
+      ],
+      "warn": "кровотечение, боль, подтекание вод, головокружение — прекратить и связаться с врачом",
+      "page": 1002,
+      "moments": [
+        {
+          "n": 247,
+          "beat": "class",
+          "mark": "box",
+          "to": "doc"
+        },
+        {
+          "n": 247,
+          "beat": "rules",
+          "mark": "edu",
+          "to": "str"
+        },
+        {
+          "n": 247,
+          "beat": "stop",
+          "mark": "sig"
+        },
+        {
+          "n": 247,
+          "beat": "posture",
+          "mark": "why",
+          "to": "str"
+        },
+        {
+          "n": 247,
+          "beat": "limbs",
+          "mark": "prone",
+          "to": "flex",
+          "shot": 8.6
+        },
+        {
+          "n": 248,
+          "beat": "unsafe",
+          "mark": "u"
+        }
+      ],
+      "thumb": 4
+    },
+    {
+      "id": "preg-aerobic",
+      "ru": "Аэробика при беременности",
+      "en": "aerobic exercise during pregnancy",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "endurance"
+      ],
+      "pos": [
+        "stand",
+        "sit"
+      ],
+      "gear": [
+        "none",
+        "water",
+        "machine"
+      ],
+      "key": [
+        "15–30 минут в большинство дней",
+        "Борг 12–14, устала — остановиться",
+        "велотренажёр, плавание, аквааэробика"
+      ],
+      "warn": "без контактных видов спорта, риска удара в живот и падений; есть абсолютные противопоказания",
+      "page": 1001,
+      "moments": [
+        {
+          "n": 246,
+          "beat": "rec",
+          "mark": "base",
+          "to": "post"
+        },
+        {
+          "n": 246,
+          "beat": "mat",
+          "mark": "flow",
+          "to": "ben",
+          "shot": 39.5,
+          "crop": [
+            80,
+            300,
+            480,
+            600
+          ]
+        },
+        {
+          "n": 246,
+          "beat": "fetal",
+          "mark": "f",
+          "to": "nb"
+        },
+        {
+          "n": 246,
+          "beat": "contra",
+          "mark": "abs"
+        }
+      ],
+      "thumb": 1
+    },
+    {
+      "id": "relax-breath",
+      "ru": "Расслабление и дыхание для родов",
+      "en": "relaxation and breathing for labor",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "control"
+      ],
+      "pos": [
+        "supine",
+        "side",
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "замечать и снимать напряжение",
+        "напрячь — расслабить по очереди",
+        "вдох животом, верх груди расслаблен"
+      ],
+      "warn": "закружилась голова или покалывает губы и пальцы — дышать мягче",
+      "page": 1008,
+      "moments": [
+        {
+          "n": 248,
+          "beat": "relax",
+          "mark": "why",
+          "to": "br",
+          "shot": 50.7,
+          "crop": [
+            0,
+            120,
+            760,
+            600
+          ]
+        },
+        {
+          "n": 248,
+          "beat": "labor",
+          "mark": "s1",
+          "to": "s2"
+        }
+      ]
+    },
+    {
+      "id": "huffing",
+      "ru": "Хаффинг после кесарева сечения",
+      "en": "huffing after cesarean section",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "function"
+      ],
+      "pos": [
+        "sit",
+        "supine"
+      ],
+      "gear": [
+        "roll"
+      ],
+      "key": [
+        "прижать шов подушкой или руками",
+        "быстро с силой выдохнуть «ха»",
+        "живот вверх и внутрь"
+      ],
+      "warn": "к интенсивным нагрузкам — не раньше чем через 6–8 недель",
+      "page": 1012,
+      "moments": [
+        {
+          "n": 248,
+          "beat": "cs",
+          "mark": "huff"
+        },
+        {
+          "n": 248,
+          "beat": "cs",
+          "mark": "box"
+        }
+      ]
+    },
+    {
+      "id": "bedrest-ex",
+      "ru": "Упражнения в постели при беременности высокого риска",
+      "en": "bed exercises for the high-risk pregnancy",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "mobility",
+        "strength"
+      ],
+      "pos": [
+        "side",
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "none",
+        "wedge"
+      ],
+      "key": [
+        "лучше всего — на левом боку",
+        "на спине — клин под правое бедро",
+        "медленно, с минимальным усилием"
+      ],
+      "warn": "упражнения для живота могут вызвать схватки; без натуживания",
+      "page": 1014,
+      "moments": [
+        {
+          "n": 248,
+          "beat": "hrex",
+          "mark": "ex"
+        },
+        {
+          "n": 248,
+          "beat": "hrex",
+          "mark": "box",
+          "to": "rules"
+        },
+        {
+          "n": 248,
+          "beat": "hrex",
+          "mark": "up"
+        }
+      ]
+    }
+  ]
+}

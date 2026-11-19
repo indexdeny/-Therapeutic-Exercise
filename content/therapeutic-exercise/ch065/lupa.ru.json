@@ -1,0 +1,20 @@
+[
+ {
+  "beat": "intro",
+  "fig": 0,
+  "target": "rectus",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает rectus, фигура ×0.8"
+ },
+ {
+  "beat": "var",
+  "fig": 0,
+  "target": "biceps",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает biceps, фигура ×0.8",
+  "from": "el",
+  "to": "man"
+ }
+]

@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Открытая и закрытая цепь — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 66, title: 'Открытая и закрытая кинетическая цепь', minutes: 10, language: 'ru', next: '../ch067/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch066/lupa.ru.json
+const LUPA = [
+  {"beat": "intro", "fig": 0, "target": "rectus", "zoom": 3},
+  {"beat": "intro", "fig": 1, "target": "rectus", "zoom": 3},
+  {"beat": "contro", "fig": 1, "target": "rectus", "to": "fix", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch066/cards.ru.json
+const CARDS_SHORT = {
+  "открытая\nмашем рукой, качаем ногой; обычно один сустав": "обычно один сустав",
+  "закрытая\nсопротивление не даёт сегменту двигаться; сжатие суставов; «функциональнее»?": "сжатие суставов",
+  "действие мышцы меняется: задняя большеберцовая\nоткрытая цепь — инверсия и подошвенное сгибание стопы · при ходьбе в опоре — тормозит пронацию подтаранного сустава, затем супинирует его для жёсткого отталкивания": "открыто — инверсия, в опоре — тормозит пронацию",
+  "неподвижен ли сегмент?\nгантель, рычаг динамометра — обычно открытая цепь; при большом сопротивлении — спорно": "гантель — обычно открытая цепь",
+  "в книге\nпривычные термины: открытая и закрытая цепь": "открытая и закрытая цепь",
+  "оба вида нужны; «закрытая функциональнее» — не доказано\nоба уменьшают дефицит силы; связь с функцией в рандомизированных работах показана редко": "оба уменьшают дефицит силы",
+  "изоляция — открытая\nтолько закрытая цепь после ПКС → остаточная слабость четырёхглавой": "слабость четырёхглавой после ПКС",
+  "контроль — открытая\nодин сустав, внешняя стабилизация; ценно в начале": "один сустав, ценно в начале",
+  "сближение суставов — закрытая\nопора добавляет сжатие → меньше сдвиг (например, большеберцовой кости), выше конгруэнтность и устойчивость": "опора → меньше сдвиг, выше устойчивость",
+  "закрытая цепь (предполагают)\nмеханорецепторы → совместное сокращение → динамическая устойчивость; данные и за, и против": "механорецепторы → динамическая устойчивость",
+  "открытая цепь тоже может\nчередующаяся изометрия, плиометрика без опоры, вибрирующий снаряд, быстрая изокинетика (в конце разгибания; на 60°/с — нет)": "изометрия, плиометрика, быстрая изокинетика",
+  "внимание\nбольшая нагрузка в открытой цепи — риск для нестабильного, травмированного, недавно восстановленного сустава (колено без ПКС)": "большая нагрузка — риск для нестабильного сустава",
+  "закрытая цепь — больше обратной связи?\nбольше мышц и суставов; опора сжимает суставы и раздражает механорецепторы": "больше мышц, опора раздражает механорецепторы",
+  "данные противоречивы\nплечо: закрытая + открытая лучше; чувство положения колена — без разницы": "плечо: закрытая + открытая лучше",
+  "перенос\nоба вида растят силу, мощность, выносливость; при той же нагрузке ЭМГ сходна → выбирать по функции": "выбирать по функции",
+  "открытая цепь — когда опора запрещена\nили при боли, отёке, ограничении в одном звене — для соседних суставов": "или боль, отёк — для соседних суставов",
+};
+// cards-short end
+
+const OKC = COL.whole, CKC = COL.good, CAST = '#8f9aa3';
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// Open chain: sitting knee extension with the quadriceps. Returns { f, q }.
+function openKnee(p, hx, hy, s, t0) {
+  const f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...SIT, t: 4, kN: 90, aN: 20, eN: 30, aF: 20, eF: 30 } });
+  plant(f, 'H', hx, hy);
+  bench(p, hx - 110 * s, hx + 60 * s, hy + 8 * s, t0, COL.dim, 182 * s * .95);
+  p.appendChild(f.g);
+  const q = muscleOn(f, ...MUSCLE.rectus, { after: 'ftN', w: 13 });
+  show(f.g, t0);
+  return { f, q };
+}
+// Closed chain: a squat over the planted feet with the quadriceps, the hamstrings and the gluteus maximus.
+function squatFig(p, x, gy, s, t0) {
+  const f = fig(p, { x, y: gy - 182 * s, s, o: 0 });
+  const q = muscleOn(f, ...MUSCLE.rectus, { after: 'ftN', w: 13 }), h = muscleOn(f, ...MUSCLE.hamstrings, { after: 'ftN', w: 12 });
+  const gm = muscleOn(f, ['H', 'Sh', 10, -18], ['KN', 'H', 40, -12], { after: 'thN', w: 14 });
+  show(f.g, t0);
+  const [ax] = onStage(f, 'AN');
+  f.sq = e => { f.set(blendPose(STAND, { ...SQUAT, aN: 90, aF: 90 }, e)); plant(f, 'AN', ax, gy); };
+  return { f, q, h, gm };
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Открытая и закрытая цепь', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 66', { x: 800, y: 180, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Открытая и закрытая', { x: 800, y: 265, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'кинетическая цепь', { x: 800, y: 330, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'свободна ли кисть или стопа — и что это меняет', 800, 410, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 820;
+    const ok = openKnee(art, 560, 660, .8, 0);
+    path(art, `M800 ${GY}H1100`, { stroke: COL.faint, 'stroke-width': 3 });
+    const sq = squatFig(art, 950, GY, .7, 0);
+    prog(q => { ok.f.set({ kN: lerp(90, 10, cyc(q, 2.5)) }); ok.q.act(.9); sq.f.sq(.7 * cyc(q, 2.5)); sq.q.act(.9); }, .5, Math.max(4, D - 1.2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['term', 'Понятия', (m) => {
+    const p = panel(0), GY = 560;
+    txt(p, 'открытая и закрытая кинетическая цепь (Штейндлер)', 800, 76, m('term'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ground(p, 120, 480, GY, m('open'));
+    const sw = fig(p, { x: 300, y: GY - 182 * .9, s: .9, o: 0 });
+    show(sw.g, m('open'));
+    prog(q => sw.set({ hN: 35 * Math.sin(2 * Math.PI * 2 * q), kN: 10, aN: 10 + 140 * cyc(q, 2), eN: 10 }), m('open', .4), 5, lin);
+    txt(p, 'открытая: конечный сегмент свободен', 300, 620, m('open'), { size: 24, weight: 700, fill: OKC, anchor: 'middle' });
+    ground(p, 640, 1000, GY, m('closed'));
+    const sq = squatFig(p, 820, GY, .9, m('closed'));
+    prog(q => { sq.f.sq(.75 * cyc(q, 2)); sq.q.act(.9); sq.gm.act(.8); }, m('closed', .4), 5, lin);
+    txt(p, 'закрытая: тело движется над опорой', 820, 620, m('closed'), { size: 24, weight: 700, fill: CKC, anchor: 'middle' });
+    infoCard(p, 1080, 130, 460, 200, 'открытая', 'машем рукой, качаем ногой; обычно один сустав', OKC, m('open', .5), { size: 22 });
+    infoCard(p, 1080, 345, 460, 230, 'закрытая', 'сопротивление не даёт сегменту двигаться; сжатие суставов; «функциональнее»?', CKC, m('closed', .5), { size: 22 });
+    infoCard(p, 120, 680, 1420, 170, 'действие мышцы меняется: задняя большеберцовая', 'открытая цепь — инверсия и подошвенное сгибание стопы · при ходьбе в опоре — тормозит пронацию подтаранного сустава, затем супинирует его для жёсткого отталкивания', COL.task, m('act'), { size: 22 });
+  }],
+
+  ['contro', 'Спорные вопросы', (m) => {
+    const p = panel(0), GY = 470;
+    txt(p, 'термины спорны', 800, 76, m('contro'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // a squat (weight bearing) and a leg press (not weight bearing, the foot pushes a plate)
+    ground(p, 90, 430, GY, m('wb'));
+    const sq = squatFig(p, 260, GY, .75, m('wb'));
+    prog(q => { sq.f.sq(.7 * cyc(q, 2)); sq.q.act(.9); }, m('wb', .3), 4, lin);
+    txt(p, 'приседание: опора + закрытая', 260, 520, m('wb'), { size: 21, fill: CKC, anchor: 'middle', weight: 600 });
+    const lp = fig(p, { x: 0, y: 0, s: .75, o: 0, pose: { ...STAND, t: -50, hN: 115, kN: 95, hF: 115, kF: 95, fN: 10, fF: 10, aN: 20, eN: 20 } });
+    plant(lp, 'H', 600, 400);
+    const seat = G(p, { o: 0 });
+    path(seat, 'M540 410H640M540 410L470 300', { stroke: COL.dim, 'stroke-width': 8 });
+    show(seat, m('wb', 1.5));
+    p.appendChild(lp.g);
+    const plate = mk('rect', { width: 16, height: 90, rx: 4, fill: '#5b6f86' }, p);
+    const lq = muscleOn(lp, ...MUSCLE.rectus, { after: 'ftN', w: 11 });
+    lp.onSet.push(() => { const T0 = onStage(lp, 'toeN'), Hh = onStage(lp, 'heelN'); put(plate, { x: Math.max(T0[0], Hh[0]) + 4, y: (T0[1] + Hh[1]) / 2 - 45 }); });
+    lp.set({});
+    put(plate, { o: 0 }); show(lp.g, m('wb', 1.5)); show(plate, m('wb', 1.5));
+    prog(q => { const e = cyc(q, 2); lp.set({ hN: lerp(115, 70, e), kN: lerp(95, 15, e), hF: lerp(115, 70, e), kF: lerp(95, 15, e) }); plant(lp, 'H', 600, 400); lq.act(.9); }, m('wb', 2), 4, lin);
+    txt(p, 'жим ногами: без опоры, но цепь закрыта?', 660, 520, m('wb', 1.5), { size: 21, fill: COL.task, anchor: 'middle', weight: 600 });
+    infoCard(p, 960, 120, 580, 200, 'неподвижен ли сегмент?', 'гантель, рычаг динамометра — обычно открытая цепь; при большом сопротивлении — спорно', COL.int, m('fix'), { size: 22 });
+    ['дистальный сегмент фиксирован / свободен', 'частичная цепь: жим ногами, степпер, скользящая доска', 'изолированное движение / движение цепи', 'односуставное без опоры / многосуставное с опорой'].forEach((s, i) => pill(p, s, 800, 590 + i * 58, m('alt', .5 + i * 1.2), { col: COL.whole, size: 23 }));
+    infoCard(p, 960, 340, 580, 150, 'в книге', 'привычные термины: открытая и закрытая цепь', COL.good, m('keep'), { size: 22 });
+  }],
+
+  ['char', 'Признаки', (m) => {
+    const p = panel(0);
+    txt(p, 'открытая и закрытая цепь: признаки', 800, 70, m('char'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const tbl = G(p, {});
+    // small figures above the two columns
+    const GY = 270;
+    const ok = openKnee(tbl, 470, 190, .45, m('o'));
+    prog(q => { ok.f.set({ kN: lerp(90, 10, cyc(q, 2)) }); ok.q.act(.9); }, m('o', .3), 5, lin);
+    ground(tbl, 1060, 1260, GY, m('c'));
+    const sq = squatFig(tbl, 1160, GY, .42, m('c'));
+    prog(q => { sq.f.sq(.7 * cyc(q, 2)); sq.q.act(.9); sq.h.act(.6); }, m('c', .3), 5, lin);
+    const rows = [['кисть или стопа движется в пространстве', 'кисть или стопа на опоре'], ['суставы движутся независимо', 'движения соседних суставов предсказуемы'], ['движение — дистальнее сустава', 'дистальнее и/или проксимальнее'], ['главный двигатель через этот сустав', 'много групп выше и ниже'], ['обычно без опоры', 'обычно с опорой'], ['груз — на дистальном сегменте', 'нагрузка — на нескольких сегментах'], ['вращательная нагрузка на сустав', 'осевая нагрузка весом тела'], ['стабилизация внешняя', 'внутренняя: мышцы, сжатие, поза']];
+    rows.forEach(([a, b], i) => {
+      const y = 300 + i * 68;
+      const ga = G(tbl, { o: 0 }), gb = G(tbl, { o: 0 });
+      mk('rect', { x: 80, y, width: 700, height: 58, rx: 12, fill: PANEL, stroke: OKC, 'stroke-width': 2 }, ga); T(ga, a, { x: 100, y: y + 37, size: 22, fill: COL.chalk });
+      mk('rect', { x: 820, y, width: 700, height: 58, rx: 12, fill: PANEL, stroke: CKC, 'stroke-width': 2 }, gb); T(gb, b, { x: 840, y: y + 37, size: 22, fill: COL.chalk });
+      show(ga, m('o', 1 + i * 1.2)); show(gb, m('c', 1 + i * 1.3));
+    });
+    hide(tbl, m('ex', -.2), .4);
+    // examples
+    const ex = G(p, { o: 0 });
+    T(ex, 'руки', { x: 120, y: 200, size: 26, weight: 700, fill: CKC });
+    T(ex, 'ноги', { x: 120, y: 360, size: 26, weight: 700, fill: CKC });
+    show(ex, m('ex'));
+    ['упор на четвереньках', 'отжимания от стула', 'от стены', 'лёжа'].forEach((s, i) => pill(p, s, 360 + i * 300, 260, m('ex', .5 + i * .5), { col: CKC, size: 24 }));
+    ['выпады', 'приседания', 'шаг на ступеньку и вниз', 'подъём на носки'].forEach((s, i) => pill(p, s, 330 + i * 300, 420, m('ex', 3 + i * .5), { col: CKC, size: 24 }));
+    T(ex, 'в книге — тоже закрытая цепь', { x: 120, y: 540, size: 26, weight: 700, fill: COL.task });
+    ['велотренажёр', 'лыжный тренажёр', 'степпер', 'подтягивание — без опоры'].forEach((s, i) => pill(p, s, 300 + i * 320, 600, m('scope', .5 + i * .6), { col: COL.task, size: 24 }));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-chain', prompt: ['Открытая или закрытая цепь (по определениям книги)?'],
+    build: grid([
+      { parts: ['Разгибание колена сидя с манжетой'], ans: ['o'], why: 'Стопа свободна, один сустав, без опоры.' },
+      { parts: ['Полуприсед'], ans: ['c'], why: 'Тело движется над стопами на опоре.' },
+      { parts: ['Подъём на носки стоя'], ans: ['c'], why: 'Стопа на опоре.' },
+      { parts: ['Подтягивание на перекладине'], ans: ['c'], why: 'Закрытая цепь без опоры — кисти на перекладине.' },
+      { parts: ['Сгибание колена лёжа на животе с манжетой'], ans: ['o'], why: 'Стопа движется свободно.' },
+    ], [['o', 'Открытая', OKC], ['c', 'Закрытая', CKC]], { multi: false, text: true }),
+  }], done) }],
+
+  ['ben', 'Изоляция и контроль', (m) => {
+    const p = panel(0);
+    txt(p, 'что даёт каждая', 800, 76, m('ben'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 80, 120, 1440, 120, 'оба вида нужны; «закрытая функциональнее» — не доказано', 'оба уменьшают дефицит силы; связь с функцией в рандомизированных работах показана редко', COL.int, m('ev'), { size: 22 });
+    const ok = openKnee(p, 320, 470, .9, m('iso'));
+    prog(q => { ok.f.set({ kN: lerp(90, 10, cyc(q, 2)) }); ok.q.act(.95); }, m('iso', .3), 5, lin);
+    txt(p, 'изолированно: четырёхглавая', 320, 700, m('iso'), { size: 22, fill: '#ff7a5c', anchor: 'middle', weight: 600 });
+    ground(p, 620, 960, 640, m('iso', 2));
+    const sq = squatFig(p, 790, 640, .85, m('iso', 2));
+    prog(q => { sq.f.sq(.75 * cyc(q, 2)); sq.q.act(.35); sq.gm.act(.95); }, m('iso', 2.3), 5, lin);
+    txt(p, 'слабую мышцу могут подменить', 790, 700, m('iso', 2.3), { size: 22, fill: COL.bad, anchor: 'middle', weight: 600 });
+    infoCard(p, 1020, 270, 520, 200, 'изоляция — открытая', 'только закрытая цепь после ПКС → остаточная слабость четырёхглавой', OKC, m('iso'), { size: 22 });
+    infoCard(p, 1020, 485, 520, 170, 'контроль — открытая', 'один сустав, внешняя стабилизация; ценно в начале', OKC, m('ctrl'), { size: 22 });
+    infoCard(p, 80, 730, 1440, 130, 'сближение суставов — закрытая', 'опора добавляет сжатие → меньше сдвиг (например, большеберцовой кости), выше конгруэнтность и устойчивость', CKC, m('app'), { size: 22 });
+  }],
+
+  ['coact', 'Совместное сокращение', (m) => {
+    const p = panel(0), GY = 640;
+    txt(p, 'совместное сокращение и динамическая устойчивость', 800, 76, m('coact'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ground(p, 120, 520, GY, m('sq'));
+    const sq = squatFig(p, 320, GY, 1.05, m('coact', .5));
+    prog(q => { sq.f.sq(.75 * cyc(q, 2)); sq.q.act(.9); sq.h.act(.9); }, m('sq', .3), 6, lin);
+    txt(p, 'четырёхглавая + задняя группа бедра', 320, 700, m('sq', .5), { size: 22, fill: '#ff7a5c', anchor: 'middle', weight: 600 });
+    infoCard(p, 620, 130, 920, 150, 'закрытая цепь (предполагают)', 'механорецепторы → совместное сокращение → динамическая устойчивость; данные и за, и против', CKC, m('coact'), { size: 22 });
+    infoCard(p, 620, 295, 920, 110, 'плечевой пояс — правдоподобно, данных мало', null, COL.dim, m('ue'), { size: 22 });
+    infoCard(p, 620, 420, 920, 200, 'открытая цепь тоже может', 'чередующаяся изометрия, плиометрика без опоры, вибрирующий снаряд, быстрая изокинетика (в конце разгибания; на 60°/с — нет)', OKC, m('okc'), { size: 22 });
+    infoCard(p, 620, 635, 920, 170, 'внимание', 'большая нагрузка в открытой цепи — риск для нестабильного, травмированного, недавно восстановленного сустава (колено без ПКС)', COL.bad, m('prec'), { size: 22 });
+  }],
+
+  ['prop', 'Проприоцепция и перенос', (m) => {
+    const p = panel(0), GY = 560;
+    txt(p, 'проприоцепция, равновесие, перенос в функцию', 800, 76, m('prop'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // single-leg balance on a rocker board
+    const rb = G(p, { x: 300, y: GY, o: 0 });
+    mk('rect', { x: -110, y: -14, width: 220, height: 14, rx: 4, fill: '#7a6a52' }, rb);
+    mk('path', { d: 'M-40 0A40 40 0 0 0 40 0Z', fill: '#5b4a36' }, rb);
+    show(rb, m('bal'));
+    const f = fig(p, { x: 300, y: GY - 14 - 182 * .9, s: .9, o: 0, pose: { ...SINGLE, aN: 70, aF: 70, eN: 10, eF: 10 } });
+    show(f.g, m('bal'));
+    prog(q => { const a = 6 * Math.sin(2 * Math.PI * 3 * q); put(rb, { r: a }); put(f.g, { r: a * .6 }); }, m('bal', .3), 5, lin);
+    txt(p, 'равновесие — закрытая цепь', 300, 620, m('bal'), { size: 22, fill: CKC, anchor: 'middle', weight: 600 });
+    infoCard(p, 620, 120, 920, 150, 'закрытая цепь — больше обратной связи?', 'больше мышц и суставов; опора сжимает суставы и раздражает механорецепторы', CKC, m('why'), { size: 22 });
+    infoCard(p, 620, 285, 920, 150, 'данные противоречивы', 'плечо: закрытая + открытая лучше; чувство положения колена — без разницы', COL.int, m('mix'), { size: 22 });
+    infoCard(p, 620, 450, 920, 150, 'перенос', 'оба вида растят силу, мощность, выносливость; при той же нагрузке ЭМГ сходна → выбирать по функции', COL.whole, m('carry'), { size: 22 });
+    // the jump study (24 healthy people, 6 weeks)
+    const g = G(p, { o: 0 });
+    T(g, '24 здоровых, 6 недель: вертикальный прыжок', { x: 620, y: 650, size: 22, fill: COL.chalk, weight: 600 });
+    mk('rect', { x: 620, y: 680, width: 400, height: 34, rx: 9, fill: CKC }, g); T(g, 'приседания со штангой: +10%', { x: 1035, y: 705, size: 22, fill: CKC, weight: 700 });
+    mk('rect', { x: 620, y: 730, width: 8, height: 34, rx: 4, fill: OKC }, g); T(g, 'изокинетическое разгибание колена: без прироста', { x: 640, y: 755, size: 22, fill: OKC, weight: 700 });
+    T(g, 'прыжковая программа: меньше нагрузка при приземлении и риск травм колена у спортсменок', { x: 620, y: 810, size: 21, fill: COL.dim });
+    show(g, m('jump'));
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-okcckc', prompt: ['Верно или нет?'],
+    build: grid([
+      { parts: ['Доказано, что закрытая цепь функциональнее открытой'], ans: ['f'], why: 'Таких доказательств нет.' },
+      { parts: ['Открытая цепь лучше изолирует отдельную мышцу'], ans: ['t'], why: 'Да.' },
+      { parts: ['Большая нагрузка в открытой цепи может навредить недавно восстановленному суставу'], ans: ['t'], why: 'Показано для колена без ПКС.' },
+      { parts: ['Для тренировки равновесия лучше открытая цепь'], ans: ['f'], why: 'Очевидный выбор — закрытая цепь.' },
+      { parts: ['При одинаковой нагрузке активность мышц в обоих видах сходна'], ans: ['t'], why: 'Да.' },
+    ], TF, { multi: false, text: true }),
+  }], done) }],
+
+  ['impl', 'Когда что', (m) => {
+    const p = panel(0);
+    txt(p, 'начало: открытая цепь и разгрузка', 800, 76, m('impl'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // a long leg cast: open-chain hip exercise in supine
+    const sp = supine(p, 330, 330, .75, m('frac'));
+    bench(p, 90, 560, 330, m('frac'), COL.dim, 60);
+    p.appendChild(sp.g);
+    const cast = path(p, '', { stroke: CAST, 'stroke-width': 30, 'stroke-linecap': 'round', opacity: .85 });
+    sp.onSet.push(() => { const a = onStage(sp, 'KN'), H = onStage(sp, 'H'), A = onStage(sp, 'AN'), t = [lerp(H[0], a[0], .25), lerp(H[1], a[1], .25)]; cast.setAttribute('d', `M${t[0].toFixed(1)} ${t[1].toFixed(1)}L${a[0].toFixed(1)} ${a[1].toFixed(1)}L${A[0].toFixed(1)} ${A[1].toFixed(1)}`); });
+    sp.set({}); put(cast, { o: 0 }); show(cast, m('frac'));
+    const hf = muscleOn(sp, ['H', 'Sh', 8, 16], ['H', 'KN', 40, -16], { after: 'torso', w: 11 });
+    prog(q => { sp.set({ hN: 35 * cyc(q, 2) }); hf.act(.9); }, m('frac', .8), 5, lin);
+    txt(p, 'нога в гипсе: бедро — в открытой цепи', 330, 420, m('frac'), { size: 22, fill: OKC, anchor: 'middle', weight: 600 });
+    infoCard(p, 640, 120, 900, 170, 'открытая цепь — когда опора запрещена', 'или при боли, отёке, ограничении в одном звене — для соседних суставов', OKC, m('impl'), { size: 22 });
+    infoCard(p, 640, 305, 900, 120, 'сначала изолированно, потом сочетания', null, OKC, m('pat'), { size: 22 });
+    // unloading: a pool, parallel bars, body-weight support
+    const GY = 790;
+    const pool = G(p, { o: 0 });
+    mk('rect', { x: 90, y: 560, width: 380, height: 260, fill: COL.whole, 'fill-opacity': .18, stroke: COL.whole, 'stroke-width': 3 }, pool);
+    T(pool, 'бассейн', { x: 280, y: 548, size: 22, fill: COL.whole, anchor: 'middle', weight: 700 });
+    show(pool, m('unl'));
+    const fp = fig(p, { x: 280, y: GY - 182 * .65, s: .65, o: 0 });
+    show(fp.g, m('unl'));
+    prog(q => fp.set(blendPose(STAND, { ...SQUAT, aN: 60, aF: 60 }, .6 * cyc(q, 2))), m('unl', .5), 4, lin);
+    const bars = G(p, { o: 0 });
+    path(bars, `M560 640H860M580 640V${GY}M840 640V${GY}`, { stroke: COL.dim, 'stroke-width': 6 });
+    T(bars, 'брусья', { x: 710, y: 548, size: 22, fill: COL.dim, anchor: 'middle', weight: 700 });
+    show(bars, m('bars'));
+    const fb = fig(p, { x: 710, y: GY - 182 * .65, s: .65, o: 0, pose: { aN: 30, eN: 60, aF: 30, eF: 60 } });
+    show(fb.g, m('bars'));
+    const bw = G(p, { o: 0 });
+    path(bw, `M1000 520H1300M1150 520V600`, { stroke: COL.task, 'stroke-width': 6 });
+    mk('rect', { x: 990, y: GY, width: 330, height: 22, rx: 8, fill: PANEL, stroke: COL.dim, 'stroke-width': 3 }, bw);
+    T(bw, 'дорожка с поддержкой веса', { x: 1150, y: 508, size: 22, fill: COL.task, anchor: 'middle', weight: 700 });
+    show(bw, m('bwst'));
+    const fw = fig(p, { x: 1100, y: GY - 182 * .65, s: .65, o: 0 });
+    show(fw.g, m('bwst'));
+    walk(fw, m('bwst', .5), 5, { cycles: 4, dx: 0 });
+    path(p, `M1150 600L${1100 + 5} ${GY - 182 * .65 - 70}`, { stroke: COL.task, 'stroke-width': 3 }, { o: 0 }); show(p.lastChild, m('bwst'));
+    txt(p, 'вода тормозит, не всегда доступна', 280, 860, m('unl', 1), { size: 19, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'нагрузку трудно дозировать', 710, 860, m('bars', 1), { size: 19, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'рано: закрытая цепь и ходьба', 1150, 860, m('bwst', 1), { size: 19, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['prog', 'Прогрессия закрытой цепи', (m) => {
+    const p = panel(0);
+    txt(p, 'как усложнять упражнения закрытой цепи', 800, 76, m('prog'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const R = [['вес', 'частичный → полный → + груз; руки: стена → облегчённые → обычные отжимания'], ['площадь опоры', 'широкая → узкая; две ноги → одна'], ['опора', 'неподвижная → скользящая; устойчивая → качающаяся, мяч; твёрдая → мягкая; ниже → выше'], ['равновесие', 'с поддержкой → без; глаза открыты → закрыты'], ['размах и плоскость', 'малый → большой; короткая дуга → полная; одна плоскость → несколько: вперёд, назад, диагональ, вбок'], ['скорость', 'медленно → быстро; потом плиометрика и ловкость (глава 23)']];
+    R.forEach(([a, b], i) => {
+      const y = 130 + i * 122, g = G(p, { o: 0 });
+      mk('rect', { x: 80, y, width: 1440, height: 106, rx: 16, fill: PANEL, stroke: CKC, 'stroke-width': 2 }, g);
+      mk('circle', { cx: 130, cy: y + 53, r: 26, fill: CKC }, g);
+      T(g, String(i + 1), { x: 130, y: y + 63, size: 28, weight: 700, fill: COL.board, anchor: 'middle' });
+      T(g, a, { x: 180, y: y + 62, size: 26, weight: 700, fill: CKC });
+      put(para(g, b, 460, y + 46, null, { size: 23, maxW: 1030 }), { o: 1 });
+      show(g, m('p' + (i + 1)));
+    });
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Открытая цепь — кисть или стопа свободны, обычно один сустав; закрытая — тело движется над опорой.', 'w1'],
+     ['Термины спорные, но в книге их используют.', 'w2'],
+     ['Открытая — изоляция и контроль; закрытая — сжатие суставов, равновесие; выбирают по задаче.', 'w3'],
+     ['Закрытую цепь усложняют: вес, опора, неустойчивость, равновесие, размах, плоскости, скорость.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-ckcprog', prompt: ['Это усложнение или упрощение упражнения закрытой цепи?'],
+    build: grid([
+      { parts: ['С двух ног — на одну'], ans: ['up'], why: 'Меньше площадь опоры — сложнее.' },
+      { parts: ['С пола — на качающуюся доску'], ans: ['up'], why: 'Неустойчивая опора — сложнее.' },
+      { parts: ['С закрытыми глазами — на открытые'], ans: ['down'], why: 'Это упрощение.' },
+      { parts: ['От полной опоры — к опоре на брусья'], ans: ['down'], why: 'Меньше вес на ноге — проще.' },
+      { parts: ['Шаг на ступеньку вперёд — затем вбок'], ans: ['up'], why: 'Из сагиттальной плоскости во фронтальную — сложнее.' },
+    ], [['up', 'Усложнение', CKC], ['down', 'Упрощение', COL.whole]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-cast', prompt: ['Перелом большеберцовой кости, нога в длинной гипсовой повязке, нагрузка на ногу ограничена несколько недель. Что можно начать?'],
+    build: choice([
+      ['Упражнения для бедра в открытой цепи с постепенным усложнением'],
+      ['Приседания с полной нагрузкой на ногу'],
+      ['Ничего, пока не снимут гипс'],
+      ['Прыжки на одной ноге'],
+    ], 0, 'Когда опора запрещена, открытая цепь для соседних суставов — до разрешения частичной нагрузки.',
+    [null, 'Опора на ногу ограничена.', 'Бедро можно тренировать уже сейчас.', 'Это высокая ударная нагрузка, она запрещена.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

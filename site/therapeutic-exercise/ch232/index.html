@@ -1,0 +1,1281 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Плиометрические упражнения — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 232, title: 'Плиометрические упражнения', minutes: 12, language: 'ru', next: '../ch233/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch232/cards.ru.json
+const CARDS_SHORT = {
+  "диагонали\nстоя, утяжелённый мяч двумя руками: D1 или D2 с быстрой сменой и поворотом туловища": "D1 или D2, поворот туловища",
+  "от груди и из-за головы\nлёжа и стоя: поймать, затормозить, сразу бросить; сгибатели плеча и разгибатели локтя, разгибатели плеча и локтя": "поймать, затормозить, бросить",
+  "сбоку и над головой\nбоковой бросок в сетку — горизонтальные мышцы плеча и ротаторы туловища; из руки в руку — отводящие": "боковой бросок, из руки в руку",
+  "лента в 90/90\nдля наружных — лицом к стене: отпустить во внутреннюю под контролем и быстро вернуть; для внутренних — спиной к стене; лента натянута": "отпустить и быстро вернуть",
+  "лёжа на животе\nплечо 90°, локоть согнут: удары мячом об пол — внутренние ротаторы": "удары мячом об пол",
+  "ловля сбоку и бросок\nплечо чуть отведено: ловить сбоку и возвращать; затем бейсбольный бросок с поворотом": "плечо чуть отведено; затем бейсбольный бросок",
+  "обратная ловля\nна колене спиной к терапевту, 90/90: поймать лёгкий мяч — бросить наружной ротацией": "поймать — бросить наружной ротацией",
+  "локоть\nподбросить сгибанием, поймать с разгибанием под контролем и сразу снова; над головой — разгибатели": "подбросить и поймать",
+  "запястье\nсидя, локоть на бедре, ладонь вверх: подбрасывать сгибанием запястья": "подбрасывать сгибанием запястья",
+  "имитация спорта\nведение мяча; ракетка: ладонью вверх и об пол — сгибатели, ладонью вниз вверх — разгибатели; махи клюшкой и битой": "ведение, ракетка, махи",
+  "скользящая платформа\nна коленях: руки в стороны, вперёд-назад, затем на одной руке — всё быстрее": "всё быстрее",
+  "отталкивания\nот стены — с помощью терапевта, затем сам и одной рукой; от столешницы в стороны — вес то на одну, то на другую руку": "от стены, от столешницы",
+  "отжимания\nс хлопком; с платформ: опустить руки и грудь на пол — отжаться — вернуться": "с хлопком, с платформ",
+  "приземление\nобувь; колени сгибаются, голень вертикальна — без вальгусного провала": "голень вертикальна, без вальгуса",
+  "удар по мячу\nмах назад и вперёд — сгибатели бедра и разгибатели колена; боком — приводящие": "мах назад и вперёд",
+  "мяч, батут, шаги\nс мяча до полустойки; пружинить на батуте; приставные шаги и скользящая платформа": "пружинить на батуте; скользящая платформа",
+  "из приседа\nбыстро присесть (уступающая фаза) — сразу выпрыгнуть; голени вертикально, без вальгуса": "присесть — сразу выпрыгнуть",
+  "серии и квадраты\nпрыжки вперёд по прямой, затем скачки; по квадратам — вперёд, назад, в стороны, по диагонали": "по прямой, по квадратам",
+  "подтягивание и выпад\nкак можно выше с коленями к груди; приземление в выпад той же ногой или «ножницами»; труднее — с грузом": "колени к груди, выпад",
+  "зигзаг\nпо зигзагу на полу — прыжки или скачки, всё быстрее и дальше": "всё быстрее и дальше",
+  "платформы\nна одну и с неё — во все стороны, сначала скорость и повторения, потом высота; с платформы на пол и на следующую": "сначала скорость, потом высота",
+  "волейболистка — по материалу главы\nсначала приземление без вальгуса и устойчивость бедра на одной ноге; затем прыжки на двух → скачки на одной, платформы и смены направления 2 раза в неделю; равновесие с толчками; плиометрика для рук — броски мяча": "приземление → прыжки → платформы",
+  "теннисист — по материалу главы\nзапястье и локоть — подбрасывания, ракетка с короткой, потом длинной ручкой; ротаторы — лента 90/90; ноги — приставные шаги и прыжки; повторения, потом нагрузка": "подбрасывания, лента 90/90",
+};
+// cards-short end
+
+const SH = '#86c9e8', MU = '#f4a48c', LG = '#f1dfa0', FUN = '#f0c060', SP = '#8fd6b0', ENV = '#c9b8e8', BAD = COL.bad;
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, t = Array.isArray(t0) ? t0[i] : t0 === null ? null : t0 + i * gap, g = pill(p, s, x + ws[i] / 2, y, t, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19, anchor = null } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x, an = anchor || (right ? 'end' : 'start');
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: an });
+  const lx = an === 'start' && right ? x + uiW(str, size) + 8 : an === 'middle' ? x : x + (right ? 8 : -8), ly = an === 'middle' ? y + (ty > y ? 8 : -size) : y - size * .35;
+  path(g, `M${lx} ${ly}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+const arw = (p, x1, y1, x2, y2, col, t0, w = 6) => { const a = Math.atan2(y2 - y1, x2 - x1), h = 14, g = G(p, { o: 0 }); path(g, `M${f1(x1)} ${f1(y1)}L${f1(x2)} ${f1(y2)}M${f1(x2 - h * Math.cos(a - .5))} ${f1(y2 - h * Math.sin(a - .5))}L${f1(x2)} ${f1(y2)}L${f1(x2 - h * Math.cos(a + .5))} ${f1(y2 - h * Math.sin(a + .5))}`, { stroke: col, 'stroke-width': w }); if (t0 !== null) show(g, t0); else put(g, { o: 1 }); return g; };
+const floorLn = (p, x1, x2, y, t0) => show(path(p, `M${x1} ${y}H${x2}`, { stroke: COL.dim, 'stroke-width': 4 }, { o: 0 }), t0);
+const ring = (p, P, r, col, t0) => { const c = mk('circle', { cx: f1(P[0]), cy: f1(P[1]), r, fill: 'none', stroke: col, 'stroke-width': 4, opacity: 0 }, p); show(c, t0); return c; };
+// an arc of the glenoid or the head (radius rr about the centre C of the joint, angles a0..a1) in stage coordinates
+const arcOn = (j, conv, rr, a0, a1) => { const P = []; for (let a = a0; a <= a1; a += 4) P.push(j.at(conv(polar([0, 0], rr, a)))); return P; };
+
+/* ---------- exercise helpers (chapters 17–18) ---------- */
+// Put a hand of the front-view figure on a stage point (two-link arm 72 + 66); flip bends the elbow the other way.
+function fsReach(f, side, X, Y, flip = false) {
+  const S = st(f.g), i = side === 'L' ? 0 : 1, k = i ? 1 : -1, Sh = f.pts.Sh[i];
+  const tx = (X - S.x) / S.s - Sh[0], ty = (Y - S.y) / S.s - Sh[1], D = clamp(Math.hypot(tx, ty), 8, 137.5), dg = 180 / Math.PI;
+  const phi = Math.atan2(k * tx, ty) * dg, be = Math.acos(clamp((72 * 72 + D * D - 66 * 66) / (2 * 72 * D), -1, 1)) * dg, ga = Math.acos(clamp((72 * 72 + 66 * 66 - D * D) / (2 * 72 * 66), -1, 1)) * dg;
+  const sg = flip ? -1 : 1;
+  f.set({ ['a' + side]: phi + sg * be, ['e' + side]: -sg * (180 - ga) });
+}
+// an elastic band between two stage points; set(A, B, rest) — brighter and thinner as it stretches
+function bandLine(p, col = '#e86a8a') {
+  const e = path(p, '', { stroke: col, 'stroke-width': 6, 'stroke-linecap': 'round' }, { o: 0 });
+  return { e, set(A, B, rest = 100) { const L = Math.hypot(B[0] - A[0], B[1] - A[1]), k = clamp(L / rest - 1, 0, 1); e.setAttribute('d', `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`); e.setAttribute('stroke-width', f1(6 - 2.5 * k)); e.setAttribute('stroke', mix(col, '#ffd75e', k * .6)); } };
+}
+const propLine = (p, d, t0, col = COL.dim, w = 5) => { const e = path(p, d, { stroke: col, 'stroke-width': w, 'stroke-linecap': 'round' }, { o: 0 }); if (t0 !== null) show(e, t0); return e; };
+// a ball (side view): set(x, y) moves it
+function ballEl(p, r, col = '#86c9e8') {
+  const defs = mk('defs', {}, p), g = G(p, { o: 0 });
+  mk('circle', { r, fill: ballGrad(defs, col), stroke: mix(col, '#000000', .45), 'stroke-width': 2 }, g);
+  return { g, set(x, y) { put(g, { x, y }); } };
+}
+// a seated rig figure on a chair, ankle at (ax, GY)
+function seatFig(p, ax, GY, s, t0, pose = {}) {
+  const f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...SIT, ...pose } });
+  plant(f, 'AN', ax, GY);
+  const [hx, hy] = onStage(f, 'H');
+  chair(p, hx, hy + 22 * s / .5 * .32, GY, t0);
+  p.appendChild(f.g); show(f.g, t0);
+  return f;
+}
+const QUAD = { ...STAND, t: 66, hN: 66, kN: 90, hF: 66, kF: 90, aN: 66, aF: 66, eN: 0, eF: 0, fN: -90, fF: -90 };
+// a rig figure on all fours: knee at (kx, FY); hands under the shoulders
+function quadFig(p, kx, FY, s, t0, pose = {}) {
+  const f = fig(p, { x: 0, y: 0, s, o: 0, pose: { ...QUAD, ...pose } });
+  plant(f, 'KN', kx, FY - 12 * s);
+  const Sh = onStage(f, 'Sh'); f.hand = [Sh[0] + 4, FY - 28 * s];
+  reach(f, 'N', ...f.hand); reach(f, 'F', f.hand[0] - 4, f.hand[1]);
+  show(f.g, t0); return f;
+}
+// a checklist of criteria that tick one by one
+function checklist(p, x, y, items, t0, gap, col = SP, { size = 18, dy = 40 } = {}) {
+  return items.map((s, i) => { const t = t0 + i * gap, g = G(p, {}); checkMark(g, x + 12, y + i * dy - 6, t, col, .9); txt(g, s, x + 34, y + i * dy, t, { size, fill: COL.chalk, weight: 600 }); return g; });
+}
+// horizontal bars with values: rows [label, value, colour]; k — px per unit
+function bars(p, x, y, rows, t0, { k = 5, dy = 46, unit = '%', w0 = 210, size = 17 } = {}) {
+  return rows.map(([s, v, c], i) => {
+    const yy = y + i * dy, g = G(p, { o: 0 }); show(g, t0 + i * .5);
+    T(g, s, { x: x + w0 - 12, y: yy + 6, size, fill: c, weight: 700, anchor: 'end' });
+    const b = mk('rect', { x: x + w0, y: yy - 13, width: 0, height: 24, rx: 7, fill: c }, g);
+    const tv = T(g, '', { x: x + w0 + 8, y: yy + 6, size, fill: COL.chalk, weight: 700 });
+    prog(q => { b.setAttribute('width', f1(k * v * q)); put(tv, { x: x + w0 + 8 + k * v * q }); tv.textContent = (unit === '' ? '' : (v * q).toFixed(v % 1 ? 1 : 0).replace('.', ',')) + unit; }, t0 + i * .5, 1);
+    return g;
+  });
+}
+// a resistance arrow (the hand or a band pushes the other way): a short thick arrow onto point P from direction ang
+function pushArr(p, P, ang, col, t0, L = 70) { const A = polar(P, L + 14, ang), B = polar(P, 14, ang); return arw(p, A[0], A[1], B[0], B[1], col, t0, 7); }
+
+
+/* ---------- chapter 18 helpers (lesson 172) ---------- */
+// a range dial round a stage point: the arc a0..a1 (degrees of flexion, 0 hanging down, turning forward = to the right)
+function flexArc(p, C, r, a0, a1, col, t0, w = 10) { const e = path(p, romArc(C, r, a0, a1, 90, -1), { stroke: col, 'stroke-width': w, 'stroke-linecap': 'round' }, { o: 0 }); if (t0 !== null) show(e, t0); return e; }
+// a forearm-rotation dial for foreEnd: the sector ±a about thumb-up, and a pointer along the thumb
+function rotDial(p, e, r, a, col, t0) {
+  const C = e.at('C'), g = G(p, { o: 0 });
+  path(g, romArc(C, r, -a, a, -90, 1), { stroke: col, 'stroke-width': 10, 'stroke-linecap': 'round' });
+  T(g, 'супинация', { x: C[0] - r - 12, y: C[1] - r * .55, size: 16, fill: col, weight: 700, anchor: 'end' });
+  T(g, 'пронация', { x: C[0] + r + 12, y: C[1] - r * .55, size: 16, fill: col, weight: 700 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a small axial inset of a radioulnar joint (volar side up). kind 'prox': the radial head in the annular ring against
+// the radial notch of the ulna; 'dist': the ulnar notch of the radius going round the head of the ulna. set(pro 0..1)
+function ruInset(p, x, y, kind, t0) {
+  const g = G(p, { x, y, o: 0 }), defs = mk('defs', {}, g), RC = mix(ANAT.bone, '#f6d9a8', .25), line = mix(ANAT.bone, '#000000', .5);
+  roundBox(g, -150, -120, 300, 240, EDGE, PANEL, 2);
+  T(g, 'ладонная сторона', { x: 0, y: -92, size: 15, fill: COL.dim, anchor: 'middle' });
+  T(g, 'тыльная сторона', { x: 0, y: 108, size: 15, fill: COL.dim, anchor: 'middle' });
+  const o = { g };
+  if (kind === 'prox') {
+    mk('path', { d: 'M48 -62Q8 0 48 62L110 62L110 -62Z', fill: boneGrad(defs, 0, 0, 1, 0), stroke: line, 'stroke-width': 2 }, g);   // ulna, radial notch
+    path(g, 'M44 -56Q6 0 44 56', { stroke: CART_C, 'stroke-width': 4 });
+    path(g, 'M44 -56A58 58 0 1 0 44 56', { stroke: ANAT.tendon, 'stroke-width': 9, 'stroke-opacity': .85 });   // annular ligament
+    const head = G(g, { x: -16, y: 0 });
+    mk('circle', { r: 46, fill: ballGrad(defs, RC), stroke: line, 'stroke-width': 2 }, head);
+    const stripe = path(head, 'M0 -44L0 -26', { stroke: line, 'stroke-width': 4 });
+    o.set = pro => { put(head, { x: -16, y: 0, r: -170 * pro }); };
+    o.head = head; o.stripe = stripe;
+  } else {
+    mk('circle', { cx: 30, cy: 6, r: 34, fill: ballGrad(defs), stroke: line, 'stroke-width': 2 }, g);   // head of the ulna
+    const rad = G(g, { x: 30, y: 6 });
+    mk('path', { d: 'M-40 -24A38 38 0 0 1 -40 24L-112 34Q-128 0 -112 -34Z', fill: boneGrad(defs, 0, 0, 1, 0, RC), stroke: line, 'stroke-width': 2 }, rad);
+    path(rad, 'M-40 -24A38 38 0 0 1 -40 24', { stroke: CART_C, 'stroke-width': 4 });
+    o.set = pro => { put(rad, { x: 30, y: 6, r: 55 * pro }); };
+  }
+  o.set(0);
+  if (t0 !== null) show(g, t0);
+  return o;
+}
+
+/* ---------- chapter 18 helpers (lesson 173) ---------- */
+// the flexion range a contracted capsule allows: [extension limit, flexion limit], scanned on the model
+function capRange(j) {
+  let lo = 0, hi = 145;
+  for (let a = 0; a <= 145; a++) { j.set({ flex: a }); if (j.capA.tension < .97) { lo = a; break; } }
+  for (let a = 145; a >= 0; a--) { j.set({ flex: a }); if (j.capP.tension < .97) { hi = a; break; } }
+  return [lo, hi];
+}
+// a hinged elbow brace on an elbowSag model (bars, straps, the hinge); block — the extension stop in degrees
+function hingeBrace(p, j, t0, block = null) {
+  const g = G(p, { o: 0 }), col = '#9fb0bf', sw = 11 * st(j.g).s / .7;
+  const bar1 = path(g, '', { stroke: col, 'stroke-width': sw, 'stroke-linecap': 'round', 'stroke-opacity': .9 });
+  const bar2 = path(g, '', { stroke: col, 'stroke-width': sw, 'stroke-linecap': 'round', 'stroke-opacity': .9 });
+  const straps = [0, 1, 2, 3].map(() => path(g, '', { stroke: '#6fa8c8', 'stroke-width': sw * 1.1, 'stroke-linecap': 'round', 'stroke-opacity': .75 }));
+  const hinge = mk('circle', { r: sw * 1.3, fill: '#6f7f8c', stroke: '#2b343a', 'stroke-width': 2 }, g);
+  const stop = block !== null ? path(g, '', { stroke: COL.bad, 'stroke-width': sw * .9, 'stroke-linecap': 'round' }) : null;
+  const seg = (A, B) => `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`;
+  const across = (P, Q, k) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], L = Math.hypot(dx, dy) || 1, n = [-dy / L * 34 * st(j.g).s / .7, dx / L * 34 * st(j.g).s / .7]; return seg([P[0] + n[0], P[1] + n[1]], [P[0] - n[0], P[1] - n[1]]); };
+  const upd = () => {
+    const C = j.at('C'), A = j.at(j.hum([-.15, -5.6])), B = j.at(j.fore([.1, 6.3]));
+    bar1.setAttribute('d', seg(A, C)); bar2.setAttribute('d', seg(C, B));
+    const a1 = j.at(j.hum([-.18, -4.6])), a2 = j.at(j.hum([-.22, -2.4])), b1 = j.at(j.fore([0, 2.6])), b2 = j.at(j.fore([.1, 5.2]));
+    straps[0].setAttribute('d', across(a1, C, 1)); straps[1].setAttribute('d', across(a2, C, 1)); straps[2].setAttribute('d', across(b1, C, 1)); straps[3].setAttribute('d', across(b2, C, 1));
+    hinge.setAttribute('cx', f1(C[0])); hinge.setAttribute('cy', f1(C[1]));
+    if (stop) { const r = rad(st(j.g).r || 0), P = polar(C, 60 * st(j.g).s / .7, 90 - block + (st(j.g).r || 0)), Q = polar(C, 90 * st(j.g).s / .7, 90 - block + (st(j.g).r || 0)); stop.setAttribute('d', seg(P, Q)); }
+  };
+  j.onSet.push(upd); upd();
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a small scene card: a framed box with a caption
+function sceneBox(p, x, y, w, h, title, col, t0) { const g = G(p, { o: 0 }); roundBox(g, x, y, w, h, EDGE, PANEL, 2); T(g, title, { x: x + w / 2, y: y + h - 16, size: 16, fill: col, weight: 700, anchor: 'middle' }); if (t0 !== null) show(g, t0); return g; }
+
+/* ---------- chapter 18 helpers: a phase strip ---------- */
+// Rehabilitation phases on a time axis: rows [label, from, to, colour] in weeks; ticks [[value, label]].
+// Each phase gets its own row; they appear one by one (t0 + i * gap, or t0[i] if an array).
+function phaseBar(p, x, y, w, max, rows, ticks, t0, { gap = .6, dy = 34, size = 15 } = {}) {
+  const g = G(p, { o: 0 }), X = v => x + w * v / max;
+  path(g, `M${x} ${y}H${x + w}`, { stroke: COL.dim, 'stroke-width': 3 });
+  ticks.forEach(([v, s0]) => { path(g, `M${f1(X(v))} ${y - 6}V${y + 6}`, { stroke: COL.dim, 'stroke-width': 2 }); T(g, s0, { x: X(v), y: y + 26, size: 14, fill: COL.dim, anchor: 'middle' }); });
+  if (t0 !== null) show(g, Array.isArray(t0) ? t0[0] : t0);
+  const els = rows.map(([s0, a, b, c], i) => {
+    const r = G(p, { o: 0 }), yy = y - 26 - (rows.length - 1 - i) * dy;
+    mk('rect', { x: X(a), y: yy - 12, width: Math.max(4, X(b) - X(a)), height: 22, rx: 8, fill: c, 'fill-opacity': .85 }, r);
+    const fits = uiW(s0, size) + 16 <= X(b) - X(a);
+    T(r, s0, { x: fits ? X(a) + 8 : X(b) + 8, y: yy + 5, size, fill: fits ? COL.board : c, weight: 700 });
+    if (t0 !== null) show(r, Array.isArray(t0) ? t0[i] : t0 + i * gap);
+    return r;
+  });
+  return { g, rows: els, X };
+}
+
+/* ---------- chapter 18 helpers (lesson 175) ---------- */
+// a two-column list with marks: items [text, colour], cross (✕) or tick
+function markList(p, x, y, items, t0, gap, { cross: isX = true, size = 16, dy = 36, maxW = 300 } = {}) {
+  return items.map(([s0, c], i) => { const g = G(p, { o: 0 }), yy = y + i * dy; if (isX) cross(g, x + 10, yy - 6, 9, 0, 4); else checkMark(g, x + 10, yy - 6, 0, c, .8); put(para(g, s0, x + 30, yy, null, { size, fill: c, weight: 600, maxW }), { o: 1 }); show(g, t0 + i * gap); return g; });
+}
+// a range bar: [label, lo, hi, mean, colour] on a % scale (k px per %)
+function rangeBars(p, x, y, rows, t0, { k = 6, dy = 48, w0 = 220, size = 15, track = false, unit = ' %', showMean = true } = {}) {
+  return rows.map(([s0, lo, hi, mean, c], i) => {
+    const g = G(p, { o: 0 }), yy = y + i * dy;
+    T(g, s0, { x: x + w0 - 10, y: yy + 5, size, fill: c, weight: 700, anchor: 'end' });
+    if (track) mk('rect', { x: x + w0, y: yy - 9, width: 100 * k, height: 18, rx: 6, fill: COL.faint, 'fill-opacity': .5 }, g);
+    const a0 = track && lo === hi ? 0 : lo;
+    mk('rect', { x: x + w0 + a0 * k, y: yy - 9, width: Math.max(4, (hi - a0) * k), height: 18, rx: 6, fill: c, 'fill-opacity': track ? .9 : .35 }, g);
+    if (mean !== null) mk('rect', { x: x + w0 + mean * k - 3, y: yy - 14, width: 6, height: 28, rx: 2, fill: c }, g);
+    T(g, (mean !== null && showMean ? String(mean).replace('.', ',') + unit : lo === hi ? `${lo}${unit}` : `${lo}–${hi}${unit}`), { x: x + w0 + Math.max(hi, mean ?? 0) * k + 12, y: yy + 5, size, fill: COL.chalk, weight: 700 });
+    show(g, t0 + i * .6);
+    return g;
+  });
+}
+
+/* ---------- chapter 18 helpers (lesson 176) ---------- */
+// a tendon close-up: healthy (parallel collagen) or tendinosis (disorganised fibres, new vessels)
+function tendonPatch(p, x, y, w, h, sick, t0) {
+  const g = G(p, { o: 0 }); roundBox(g, x, y, w, h, EDGE, PANEL, 2);
+  for (let i = 0; i < 9; i++) {
+    const yy = y + 22 + i * (h - 44) / 8;
+    if (!sick) path(g, `M${x + 16} ${yy}H${x + w - 16}`, { stroke: ANAT.tendon, 'stroke-width': 3 });
+    else { let d = `M${x + 16} ${yy}`; for (let k = 1; k <= 6; k++) d += `L${f1(x + 16 + (w - 32) * k / 6)} ${f1(yy + ((i * 7 + k * 5) % 9 - 4) * 2.4)}`; path(g, d, { stroke: ANAT.tendon, 'stroke-width': 2.5, 'stroke-opacity': .8 }); }
+  }
+  if (sick) for (let k = 0; k < 3; k++) path(g, `M${x + 30 + k * 50} ${y + 20}q12 20 -4 40t4 40`, { stroke: COL.bad, 'stroke-width': 3, 'stroke-opacity': .85 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a fingertip that rubs across a point (cross-friction): returns the group; it oscillates along direction ang
+function rubTip(p, P, ang, t0, dur, amp = 16) {
+  const g = G(p, { o: 0 }); mk('ellipse', { rx: 15, ry: 20, fill: '#b9cfe0', 'fill-opacity': .9, stroke: '#4d6b80', 'stroke-width': 2 }, g);
+  const u = polar([0, 0], 1, ang);
+  prog(q => { const s0 = amp * Math.sin(2 * Math.PI * 4 * q); put(g, { x: P[0] + u[0] * s0, y: P[1] + u[1] * s0, r: ang + 90 }); }, t0, dur, lin);
+  show(g, t0);
+  return g;
+}
+
+/* ---------- chapter 18 helpers (lesson 177) ---------- */
+// keep an armSide's wrist on a fixed stage point while it re-poses (forearm on a mat or a table)
+function armHold(a, o, W0) { a.set(o); const W = a.at('W'), S0 = st(a.g); put(a.g, { x: S0.x + W0[0] - W[0], y: S0.y + W0[1] - W[1] }); a.set({}); }
+// a helper hand (pale ellipse) with a push arrow onto stage point P from direction ang
+function helpHand(p, P, ang, t0, col = COL.good) { const g = G(p, { o: 0 }), A = polar(P, 46, ang); mk('ellipse', { cx: A[0], cy: A[1], rx: 24, ry: 16, fill: '#b9cfe0', 'fill-opacity': .9, stroke: '#4d6b80', 'stroke-width': 2, transform: `rotate(${f1(ang)} ${f1(A[0])} ${f1(A[1])})` }, g); const B = polar(P, 28, ang), C2 = polar(P, 8, ang); arw(g, B[0], B[1], C2[0], C2[1], col, null, 5); if (t0 !== null) show(g, t0); return g; }
+
+/* ---------- chapter 18 helpers (lesson 178) ---------- */
+// a dumbbell held by an armSide: it follows the fist
+function armDb(p, a, k = .6, t0 = null) { const g = G(p, { o: 0 }); dumbbell(g, k); a.onSet.push(() => { const P = a.at('grip'); put(g, { x: P[0], y: P[1], r: (a.dir || 0) + 90 }); }); a.set({}); if (t0 !== null) show(g, t0); return g; }
+// resistance torque of gravity over the elbow angle (a scheme): two curves on a small chart
+function torqueChart(p, x, y, w, h, curves, t0) {
+  const g = G(p, { o: 0 });
+  path(g, `M${x} ${y}H${x + w}M${x} ${y}V${y - h}`, { stroke: COL.dim, 'stroke-width': 2.5 });
+  T(g, 'сопротивление', { x: x - 4, y: y - h - 10, size: 14, fill: COL.dim });
+  [[0, '0°'], [90, '90°'], [140, '140°']].forEach(([v, s0]) => T(g, s0, { x: x + w * v / 140, y: y + 22, size: 13, fill: COL.dim, anchor: 'middle' }));
+  T(g, 'сгибание локтя', { x: x + w, y: y + 44, size: 13, fill: COL.dim, anchor: 'end' });
+  curves.forEach(([fn, col, s0, lx, ly]) => { path(g, fnPath(x, y, w, h, v => fn(v * 140)), { stroke: col, 'stroke-width': 4 }); T(g, s0, { x: lx, y: ly, size: 14, fill: col, weight: 700 }); });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+/* ---------- chapter 19 lesson helpers ---------- */
+// sample points of a handSag model at a temporary pose (the model is restored)
+function hPose(h, pose, pts) { const save = { ...h.q }; h.set(pose); const out = pts.map(([k, x, y]) => h.fr(k, [x, y])); h.set(save); return out; }
+// a band polygon along a polyline: from the line (offset d0) outward to d1 on the side sg (+1 / −1 of the normal)
+function hShellD(P, d0, d1, sg = 1) {
+  const off = d => P.map((q, i) => { const a = P[Math.max(0, i - 1)], b = P[Math.min(P.length - 1, i + 1)], L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, nx = -(b[1] - a[1]) / L, ny = (b[0] - a[0]) / L; return [q[0] + sg * nx * d, q[1] + sg * ny * d]; });
+  const A = off(d0), B = off(d1).reverse();
+  return smoothD(A, false).replace(/^M/, 'M') + 'L' + smoothD(B, false).slice(1) + 'Z';
+}
+const ORTH = c => ({ fill: c, 'fill-opacity': .42, stroke: mix(c, '#000000', .35), 'stroke-width': 2, 'stroke-linejoin': 'round' });
+// Orthoses on a handSag model. kind:
+//  'dbo' — static dorsal blocking orthosis (forearm 2/3, hand, fingers) shaped at { wr, mp } flexion with IP straight;
+//  'kl' — the same plus Kleinert traction: an elastic from the nail under a palmar bar to the wrist (follows the finger);
+//  'volar' — a short volar wrist orthosis at wr (default −12, i.e. extension), to the distal palmar crease;
+//  'rest' — a volar resting orthosis to the fingertips at the given pose;
+//  'ten' — a tenodesis orthosis: forearm cuff, a hinge at the wrist, hand piece holding MP at 60° and the IP straight;
+//  'dyn' — a dynamic MP extension orthosis: dorsal base, an outrigger over the finger and an elastic to a sling under P1;
+//  'pip' / 'dip' — finger splints holding the PIP (or DIP, slight hyperextension) straight; 'tpl' — a volar template
+//  that limits PIP flexion to o.pip and DIP flexion to o.dip.
+function hOrth(h, kind, t0, o = {}) {
+  const g = G(h.ovG, { o: 0 }), col = o.col || ORTH_C;
+  const strap = (A, B) => path(g, `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`, { stroke: '#6b7f8c', 'stroke-width': 9, 'stroke-opacity': .85, 'stroke-linecap': 'butt' });
+  if (kind === 'dbo' || kind === 'kl') {
+    const pose = { wr: o.wr ?? 20, mp: o.mp ?? 50, pip: 0, dip: 0 };
+    const D = hPose(h, pose, [['r', -330, -58], ['r', -150, -56], ['r', -40, -52], ['l', 0, -40], ['h', 60, -33], ['h', 150, -28], ['h', 214, -27], ['1', 30, -20], ['1', 70, -18], ['2', 20, -16], ['2', 45, -15], ['3', 20, -14], ['3', 44, -10]]);
+    mk('path', { d: hShellD(D, 1, 12, -1), ...ORTH(col) }, g);
+    const V = hPose(h, pose, [['r', -200, 62], ['h', 120, 50], ['1', 40, 22]]);
+    const Dd = hPose(h, pose, [['r', -200, -60], ['h', 120, -32], ['1', 40, -22]]);
+    [0, 1, 2].forEach(i => strap(Dd[i], V[i]));
+    if (kind === 'kl') {
+      const bar = hPose(h, pose, [['h', 168, 52]])[0];
+      mk('circle', { cx: bar[0], cy: bar[1], r: 7, fill: '#8a9aa6', stroke: '#4d5a63', 'stroke-width': 2 }, g);
+      const band = path(g, '', { stroke: '#e86a8a', 'stroke-width': 4 });
+      const anchor = [-120, 64];
+      const upd = () => { const N = h.fr('3', [40, -6]); band.setAttribute('d', `M${f1(N[0])} ${f1(N[1])}L${f1(bar[0])} ${f1(bar[1] + 7)}L${f1(anchor[0])} ${f1(anchor[1])}`); };
+      h.onSet.push(upd); upd();
+    }
+  }
+  if (kind === 'volar' || kind === 'rest') {
+    const pose = kind === 'volar' ? { wr: o.wr ?? -12 } : { wr: o.wr ?? -10, mp: o.mp ?? 0, pip: o.pip ?? 0, dip: o.dip ?? 0 };
+    const pts = [['r', -300, 62], ['r', -120, 60], ['l', 0, 58], ['h', 60, 56], ['h', 150, 48], ['h', 206, 44]];
+    if (kind === 'rest') pts.push(['1', 30, 22], ['1', 70, 20], ['2', 30, 18], ['3', 30, 16]);
+    const V = hPose(h, { ...h.q, ...pose }, pts);
+    mk('path', { d: hShellD(V, 1, 12, 1), ...ORTH(col) }, g);
+    const Dd = hPose(h, { ...h.q, ...pose }, [['r', -220, -58], ['h', 100, -32]]), Vv = hPose(h, { ...h.q, ...pose }, [['r', -220, 64], ['h', 100, 54]]);
+    [0, 1].forEach(i => strap(Dd[i], Vv[i]));
+  }
+  if (kind === 'ten') {
+    const cuff = hPose(h, h.q, [['r', -300, -60], ['r', -160, -58], ['r', -30, -54]]);
+    mk('path', { d: hShellD(cuff, 1, 12, -1), ...ORTH(col) }, g);
+    const hg = G(h.G.h, { o: 1 }), hand = [[40, -34], [120, -29], [200, -27]].concat([[30, -20], [70, -18], [L1H + 30, -16]].map(([a, b]) => { const v = rotPt(a, b, 60); return [212 + v[0], v[1]]; }));
+    mk('path', { d: hShellD(hand, 1, 11, -1), ...ORTH(col) }, hg);
+    mk('circle', { cx: 0, cy: -48, r: 9, fill: '#8a9aa6', stroke: '#4d5a63', 'stroke-width': 2.5 }, hg);
+    g.hand = hg;
+  }
+  if (kind === 'dyn') {
+    const base = hPose(h, { ...h.q, wr: o.wr ?? -12 }, [['r', -300, -58], ['r', -120, -56], ['l', 0, -40], ['h', 80, -32], ['h', 170, -28]]);
+    mk('path', { d: hShellD(base, 1, 12, -1), ...ORTH(col) }, g);
+    const hg = G(h.G.h, {});
+    path(hg, 'M140 -40L150 -105L268 -105', { stroke: '#8a9aa6', 'stroke-width': 6 });
+    const band = path(g, '', { stroke: '#e86a8a', 'stroke-width': 3.5 }), sling = path(g, '', { stroke: '#6b7f8c', 'stroke-width': 5 });
+    const upd = () => { const T = h.fr('h', [262, -105]), S = h.fr('1', [44, 20]), S0 = h.fr('1', [34, 18]), S1 = h.fr('1', [54, 18]); band.setAttribute('d', `M${f1(T[0])} ${f1(T[1])}L${f1(S[0])} ${f1(S[1])}`); sling.setAttribute('d', `M${f1(S0[0])} ${f1(S0[1])}Q${f1(S[0])} ${f1(S[1] + 8)} ${f1(S1[0])} ${f1(S1[1])}`); };
+    h.onSet.push(upd); upd();
+    g.hand = hg;
+  }
+  if (kind === 'pip' || kind === 'dip' || kind === 'tpl') {
+    const fr = kind === 'dip' ? '2' : '1', fg = G(h.G[fr], {});
+    let P;
+    if (kind === 'pip') P = [[10, 22], [50, 22], [L1H, 21], [L1H + 30, 19], [L1H + 50, 18]];
+    else if (kind === 'dip') P = [[14, 19], [40, 18], [52 + 6, 17], ...[[12, 16], [34, 14]].map(([a, b]) => { const v = rotPt(a, b, -5); return [52 + v[0], v[1]]; })];
+    else { const a = o.pip ?? 30, b = o.dip ?? 22; P = [[10, 23], [50, 22], [L1H - 2, 21]]; [[16, 18], [40, 17]].forEach(([u, w]) => { const v = rotPt(u, w, a); P.push([L1H + v[0], v[1]]); }); const D = rotPt(52, 0, a); [[10, 15], [30, 14]].forEach(([u, w]) => { const v = rotPt(u, w, a + b); P.push([L1H + D[0] + v[0], D[1] + v[1]]); }); }
+    mk('path', { d: hShellD(P, 0, 9, 1), ...ORTH(col) }, fg);
+    g.hand = fg;
+  }
+  if (t0 !== null) { show(g, t0); if (g.hand) { put(g.hand, { o: 0 }); show(g.hand, t0); } }
+  else if (g.hand) put(g.hand, { o: 1 });
+  return g;
+}
+const L1H = 88, MPX19 = 212, L3H = 36;
+// The carpal tunnel in cross-section (palm side up): the carpal arch, the transverse carpal ligament, nine flexor
+// tendons and the median nerve inside; the canal of Guyon (ulnar nerve and artery) on the ulnar side. Radial to the left.
+function tunnelX(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), t = { g };
+  [[[-150, 30], [-120, -10], [-80, 10], [-90, 50], [-140, 60]], [[-80, 20], [-40, 30], [-30, 70], [-70, 80], [-95, 55]], [[-30, 40], [30, 40], [40, 85], [-25, 90]], [[38, 30], [90, 10], [120, -20], [135, -10], [110, 40], [100, 70], [48, 80]], [[130, 50], [160, 30], [175, 60], [150, 80]]]
+    .forEach(P => boneSh(g, defs, P, { ax: [0, 0, 0, 1] }));
+  t.tcl = path(g, 'M-140 -14C-90 -60 60 -62 128 -26', { stroke: CAPS_C, 'stroke-width': 16, 'stroke-opacity': .85 });
+  const tend = (cx, cy, r, col) => mk('circle', { cx, cy, r, fill: col, stroke: mix(col, '#000000', .35), 'stroke-width': 1.5 }, g);
+  t.syn = mk('ellipse', { cx: -2, cy: 6, rx: 112, ry: 34, fill: '#f4a48c', 'fill-opacity': 0, stroke: 'none' }, g);
+  t.fds = [[-46, -14], [-16, -22], [16, -22], [46, -14]].map(([a, b]) => tend(a, b, 11, ANAT.tendon));
+  t.fdp = [[-42, 14], [-14, 18], [14, 18], [42, 14]].map(([a, b]) => tend(a, b, 11, mix(ANAT.tendon, '#d9b860', .3)));
+  t.fpl = tend(-84, 12, 11, mix(ANAT.tendon, '#d9b860', .15));
+  t.med = mk('ellipse', { cx: -70, cy: -24, rx: 15, ry: 10, fill: NERVE_C, stroke: mix(NERVE_C, '#000000', .4), 'stroke-width': 1.5 }, g);
+  mk('path', { d: 'M100 -40C112 -60 150 -62 162 -40', fill: 'none', stroke: CAPS_C, 'stroke-width': 7, 'stroke-opacity': .7 }, g);
+  t.uln = mk('circle', { cx: 120, cy: -46, r: 9, fill: NERVE_C, stroke: mix(NERVE_C, '#000000', .4), 'stroke-width': 1.5 }, g);
+  t.art = mk('circle', { cx: 142, cy: -48, r: 7, fill: VESS_C, stroke: mix(VESS_C, '#000000', .4), 'stroke-width': 1.5 }, g);
+  if (t0 !== null) show(g, t0);
+  return t;
+}
+// a shaded cylinder seen end-on (a handle, a bar) or a ball
+function cylEl(p, r, col = '#9fb0bf') { const g = G(p, {}), defs = mk('defs', {}, g); mk('circle', { r, fill: ballGrad(defs, col), stroke: mix(col, '#000000', .45), 'stroke-width': 2 }, g); return g; }
+// a group clipped to a rounded rectangle (for a close-up of a big model)
+function clipG(p, x, y, w, h) { const id = 'cl' + (++SHADE_ID), d = mk('defs', {}, p), cp = mk('clipPath', { id }, d); mk('rect', { x, y, width: w, height: h, rx: 18 }, cp); return mk('g', { 'clip-path': `url(#${id})` }, p); }
+// A table: cols — column widths; head — header strings; rows — arrays of cell strings. Rows appear at t0s[i]
+// (or t0 + i * gap). Returns the group; g.rows — the row groups.
+function tbl(p, x, y, cols, head, rows, t0s, { size = 15, gap = .5, col = SH, pad = 10, minH = 36 } = {}) {
+  const g = G(p, { o: 0 }), rg = [];
+  let yy = y;
+  const row = (cells, isHead) => {
+    const r = G(g, { o: isHead ? 1 : 0 }), hs = [];
+    let xx = x;
+    cells.forEach((c, i) => { const t = put(para(r, c || '—', xx + pad, yy + size + pad - 2, null, { size: isHead ? size - 1 : size, weight: isHead || i === 0 ? 700 : 500, fill: isHead ? col : i === 0 ? COL.chalk : i === 1 ? COL.chalk : COL.dim, maxW: cols[i] - pad * 2 }), { o: 1 }); hs.push(t._h || size * 1.3); xx += cols[i]; });
+    const hgt = Math.max(minH, Math.max(...hs) + pad * 1.4);
+    const bg = mk('rect', { x, y: yy, width: cols.reduce((a, b) => a + b, 0), height: hgt, fill: isHead ? mix(col, COL.board, .82) : (rg.length % 2 ? PANEL : mix(PANEL, '#ffffff', .03)), stroke: EDGE, 'stroke-width': 1 }, r);
+    r.insertBefore(bg, r.firstChild);
+    yy += hgt;
+    return r;
+  };
+  row(head, true);
+  rows.forEach((c, i) => { const r = row(c, false); rg.push(r); show(r, Array.isArray(t0s) ? t0s[i] : t0s + i * gap, .4); });
+  g.rows = rg; g.h = yy - y;
+  show(g, Array.isArray(t0s) ? t0s[0] - .3 : t0s - .3);
+  return g;
+}
+// horizontal bars with the label above each bar: rows [label, value, colour]; t0s — a time or one per row
+function hbars(p, x, y, rows, t0s, { k = 3, dy = 50, unit = '', size = 15, h = 18 } = {}) {
+  return rows.map(([s, v, c], i) => {
+    const yy = y + i * dy, g = G(p, { o: 0 }), t = Array.isArray(t0s) ? t0s[i] : t0s + i * .5; show(g, t);
+    T(g, s, { x, y: yy - 6, size, fill: c, weight: 700 });
+    const b = mk('rect', { x, y: yy, width: 0, height: h, rx: 6, fill: c }, g);
+    const tv = T(g, '', { x: x + 8, y: yy + h - 3, size, fill: COL.chalk, weight: 700 });
+    prog(q => { b.setAttribute('width', f1(k * v * q)); put(tv, { x: x + 8 + k * v * q }); tv.textContent = (v * q).toFixed(v % 1 ? 1 : 0).replace('.', ',') + unit; }, t, 1);
+    return g;
+  });
+}
+/* ---------- chapter 20 lesson helpers ---------- */
+// a model point (model frame of hipFront / hipSag) on the stage
+const stg = (j, P) => { const S0 = st(j.g), v = rotPt(P[0] * S0.s, P[1] * S0.s, S0.r || 0); return [S0.x + v[0], S0.y + v[1]]; };
+// the angle between two stage directions from C, drawn as an arc with a label
+function angArc(p, C, A, B, r, str, col, t0, { size = 20, off = 26 } = {}) {
+  const g = G(p, { o: 0 }), a0 = Math.atan2(A[1] - C[1], A[0] - C[0]) / rad(1), a1 = Math.atan2(B[1] - C[1], B[0] - C[0]) / rad(1);
+  let d = a1 - a0; while (d > 180) d -= 360; while (d < -180) d += 360;
+  path(g, smoothD(arcPts(C, r, a0, a0 + d, 6), false), { stroke: col, 'stroke-width': 3.5 });
+  [A, B].forEach(P => path(g, `M${f1(C[0])} ${f1(C[1])}L${f1(P[0])} ${f1(P[1])}`, { stroke: col, 'stroke-width': 2.5, 'stroke-dasharray': '8 6' }));
+  const M = polar(C, r + off, a0 + d / 2);
+  T(g, str, { x: M[0], y: M[1] + size * .35, size, fill: col, weight: 700, anchor: 'middle' });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// the femur from above: the condylar axis and the neck turned forward by the torsion angle
+function torsInset(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g);
+  roundBox(g, -150, -150, 300, 300, EDGE, PANEL, 2);
+  T(g, 'вид сверху', { x: 0, y: -122, size: 17, fill: COL.dim, anchor: 'middle', weight: 600 });
+  mk('ellipse', { cx: 0, cy: 50, rx: 112, ry: 42, fill: boneGrad(defs, 0, 0, 0, 1), stroke: mix(ANAT.bone, '#000000', .5), 'stroke-width': 2 }, g);
+  path(g, 'M-128 50H128', { stroke: SH, 'stroke-width': 3, 'stroke-dasharray': '8 6' });
+  const neck = G(g, {}), head = mk('circle', { r: 30, fill: ballGrad(defs), stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 1.5 }, neck);
+  const nk = mk('path', { fill: boneGrad(defs, 0, 0, 1, 0), stroke: mix(ANAT.bone, '#000000', .5), 'stroke-width': 2 }, neck);
+  neck.insertBefore(nk, head);
+  mk('circle', { cx: 0, cy: 0, r: 26, fill: ballGrad(defs), stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 1.5 }, g);
+  const axis = path(g, '', { stroke: FUN, 'stroke-width': 3, 'stroke-dasharray': '8 6' }), arc = path(g, '', { stroke: FUN, 'stroke-width': 3.5 });
+  const lbl = T(g, '', { x: -60, y: 92, size: 22, fill: FUN, weight: 700, anchor: 'middle' });
+  T(g, 'вперёд ↓', { x: 108, y: 128, size: 15, fill: COL.dim, anchor: 'end' });
+  g.set = a => {
+    const H = [-105 * Math.cos(rad(a)), 105 * Math.sin(rad(a))];
+    head.setAttribute('cx', f1(H[0])); head.setAttribute('cy', f1(H[1]));
+    const n = [-H[1] / 105, H[0] / 105];
+    nk.setAttribute('d', ptsD([[n[0] * 18, n[1] * 18], [H[0] + n[0] * 14, H[1] + n[1] * 14], [H[0] - n[0] * 14, H[1] - n[1] * 14], [-n[0] * 18, -n[1] * 18]], true));
+    axis.setAttribute('d', `M${f1(-H[0] * .3)} ${f1(-H[1] * .3)}L${f1(H[0] * 1.25)} ${f1(H[1] * 1.25)}`);
+    arc.setAttribute('d', smoothD(arcPts([0, 0], 70, 180 - a, 180, 4), false));
+    lbl.textContent = Math.round(a) + '°';
+  };
+  g.set(12);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// the pelvis from above, turning about the stance hip
+function pelvTop(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g);
+  roundBox(g, -170, -150, 340, 300, EDGE, PANEL, 2);
+  T(g, 'вид сверху', { x: 0, y: -122, size: 17, fill: COL.dim, anchor: 'middle', weight: 600 });
+  T(g, 'вперёд ↓', { x: 150, y: 132, size: 15, fill: COL.dim, anchor: 'end' });
+  const pg = G(g, {});
+  mk('path', { d: 'M-118 -40C-130 10 -90 52 -40 58C-15 62 15 62 40 58C90 52 130 10 118 -40C80 -78 -80 -78 -118 -40Z', fill: boneGrad(defs, 0, 0, 0, 1), stroke: mix(ANAT.bone, '#000000', .5), 'stroke-width': 2, opacity: .9 }, pg);
+  mk('circle', { cx: -60, cy: 12, r: 20, fill: ballGrad(defs), stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 1.5 }, g);
+  const free = mk('circle', { cx: 60, cy: 12, r: 20, fill: ballGrad(defs), stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 1.5, opacity: .55 }, pg);
+  T(g, 'опорная', { x: -60, y: 62, size: 15, fill: SH, anchor: 'middle', weight: 700 });
+  void free;
+  // rotation about the stance hip at (-60, 12)
+  g.set = a => pg.setAttribute('transform', `rotate(${f1(a)} -60 12)`);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a translucent zone on the front of the leg (dermatome) between stage points
+function zoneBand(p, P, col, t0) { const e = mk('path', { d: smoothD(P), fill: col, 'fill-opacity': .35, stroke: col, 'stroke-width': 2, opacity: 0 }, p); if (t0 !== null) show(e, t0); return e; }
+// the piriformis and the sciatic nerve from behind (a small inset)
+function piriInset(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g);
+  roundBox(g, -160, -130, 320, 260, EDGE, PANEL, 2);
+  T(g, 'сзади', { x: 0, y: -104, size: 16, fill: COL.dim, anchor: 'middle', weight: 600 });
+  boneSh(g, defs, [[-150, -70], [-95, -82], [-70, -20], [-88, 40], [-140, 60]], { col: mix(ANAT.bone, '#c9d6e0', .2) });
+  boneSh(g, defs, [[75, -40], [118, -52], [140, -20], [130, 110], [92, 110], [86, 10]]);
+  const pm = bellyEl(g, { w: 34, ta: .05, tb: .12 }); pm.set([[-80, -20], [10, -22], [100, -30]]);
+  path(g, smoothD([[-60, -110], [-30, -40], [-10, 20], [10, 110]], false), { stroke: NERVE_C, 'stroke-width': 9, 'stroke-linecap': 'round' });
+  T(g, 'грушевидная', { x: 10, y: -52, size: 15, fill: ANAT.muscle, anchor: 'middle', weight: 700 });
+  T(g, 'седалищный нерв', { x: 40, y: 72, size: 15, fill: NERVE_C, anchor: 'start', weight: 700 });
+  g.pm = pm;
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a cane in hand i (0 — screen left, 1 — screen right) of a frontStand figure, down to the floor beside the foot
+function frontCane(p, f, i, t0, col = '#b9c4c9') {
+  const g = G(p, { o: 0 }), e = path(g, '', { stroke: col, 'stroke-width': 7, 'stroke-linecap': 'round' }), tip = mk('circle', { r: 6, fill: '#55605f' }, g);
+  const upd = () => { const W = f.pts.arms[i][1], A = f.at(W), B = f.at([W[0] + (i ? 14 : -14), -4]); e.setAttribute('d', `M${f1(A[0])} ${f1(A[1] - 8)}L${f1(B[0])} ${f1(B[1])}`); tip.setAttribute('cx', f1(B[0])); tip.setAttribute('cy', f1(B[1])); };
+  f.onSet.push(upd); upd();
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a belt loop round a stage point P with a pull arrow at angle ang (the mobilization belt of MWM)
+function beltEl(p, P, ang, t0, { L = 150, col = '#9fd0e8', r = 26 } = {}) {
+  const g = G(p, { o: 0 }), B = polar(P, L, ang);
+  mk('ellipse', { cx: f1(P[0]), cy: f1(P[1]), rx: r, ry: r * .55, transform: `rotate(${f1(ang + 90)} ${f1(P[0])} ${f1(P[1])})`, fill: 'none', stroke: col, 'stroke-width': 7 }, g);
+  path(g, `M${f1(P[0])} ${f1(P[1])}L${f1(B[0])} ${f1(B[1])}`, { stroke: col, 'stroke-width': 7, 'stroke-linecap': 'round' });
+  const A1 = polar(P, L * .45, ang), A2 = polar(P, L * .8, ang);
+  g.appendChild(arw(p, A1[0], A1[1], A2[0], A2[1], COL.good, null, 5));
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// tint a bellyEl muscle with the alarm colour (cut or detached in surgery) from t0
+const hurtAt = (b, t0, v = 1) => prog(q => { b.hurt = v * q; if (b.last) b.set(...b.last); }, t0, .6);
+/* ---------- chapter 21 lesson helpers ---------- */
+// A schematic chart: axes from (x, y) w × h, x in axis units 0..xmax, y as 0..1 of the height. o: { xmax, ticks:
+// [[v, label]], xlab, ylab, scheme (default true — the «схема» pill) }. g.curve(fn, col, label, lx, ly, t0) draws
+// fn(v) → 0..1; g.band(a, b, col, label, t0) shades an x range; g.dot(col) — a marker moved by g.at(v, fn).
+function kChart(p, x, y, w, h, o, t0) {
+  const g = G(p, { o: 0 }), X = v => x + w * v / o.xmax, Y = v => y - h * v;
+  path(g, `M${x} ${y}H${x + w}M${x} ${y}V${y - h}`, { stroke: COL.dim, 'stroke-width': 2.5 });
+  if (o.ylab) T(g, o.ylab, { x: x - 4, y: y - h - 14, size: 14, fill: COL.dim });
+  (o.ticks || []).forEach(([v, s0]) => { path(g, `M${f1(X(v))} ${y - 5}V${y + 5}`, { stroke: COL.dim, 'stroke-width': 2 }); T(g, s0, { x: X(v), y: y + 22, size: 13, fill: COL.dim, anchor: 'middle' }); });
+  if (o.xlab) T(g, o.xlab, { x: x + w, y: y + 44, size: 13, fill: COL.dim, anchor: 'end' });
+  if (o.scheme !== false) put(pill(g, 'схема', x + w - 32, y - h - 12, null, { col: COL.dim, size: 13 }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  g.curve = (fn, col, label, lx, ly, t1, wd = 4) => {
+    const c = G(g, { o: 0 }), P = [];
+    for (let i = 0; i <= 80; i++) { const v = o.xmax * i / 80; P.push([X(v), Y(clamp(fn(v), 0, 1.05))]); }
+    path(c, smoothD(P, false), { stroke: col, 'stroke-width': wd, fill: 'none', 'stroke-linecap': 'round' });
+    if (label) T(c, label, { x: lx, y: ly, size: 14, fill: col, weight: 700 });
+    if (t1 !== null) show(c, t1);
+    return c;
+  };
+  g.band = (a, b, col, label, t1, ly = y - h + 16) => {
+    const c = G(g, { o: 0 });
+    mk('rect', { x: X(a), y: y - h, width: X(b) - X(a), height: h, fill: col, 'fill-opacity': .16 }, c);
+    if (label) T(c, label, { x: (X(a) + X(b)) / 2, y: ly, size: 13, fill: col, weight: 700, anchor: 'middle' });
+    if (t1 !== null) show(c, t1);
+    return c;
+  };
+  g.dot = (col, t1) => { const d = mk('circle', { r: 8, fill: col, stroke: COL.board, 'stroke-width': 2, opacity: 0 }, g); if (t1 !== null) show(d, t1); return d; };
+  g.at = (d, v, fn) => put(d, { x: X(v), y: Y(fn(v)) });
+  Object.assign(g, { X, Y });
+  return g;
+}
+// piecewise-linear then smoothed function through [x, y] points
+const kInterp = P => v => { if (v <= P[0][0]) return P[0][1]; for (let i = 1; i < P.length; i++) if (v <= P[i][0]) { const q = (v - P[i - 1][0]) / (P[i][0] - P[i - 1][0]), s0 = q * q * (3 - 2 * q); return lerp(P[i - 1][1], P[i][1], s0); } return P[P.length - 1][1]; };
+// a referred-pain or symptom zone: a soft ellipse with a label
+function kZone(p, P, rx, ry, col, label, t0, { lx = 0, ly = 0, anchor = 'middle', size = 16 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('ellipse', { cx: f1(P[0]), cy: f1(P[1]), rx, ry, fill: col, 'fill-opacity': .32, stroke: col, 'stroke-width': 2.5 }, g);
+  if (label) T(g, label, { x: P[0] + lx, y: P[1] + ly, size, fill: col, weight: 700, anchor });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a nerve as a dotted yellow line through stage points
+function kNerve(p, P, t0, col = '#d9e05a') { const e = path(p, smoothD(P, false), { stroke: col, 'stroke-width': 4.5, 'stroke-dasharray': '2 0', 'stroke-linecap': 'round', fill: 'none' }, { o: 0 }); if (t0 !== null) show(e, t0); return e; }
+// a short arrow along a direction at a point (stage coordinates), returned as a group
+function kArrow(p, P, ang, L, col, t0, w = 5) { const A = polar(P, -L / 2, ang), B = polar(P, L / 2, ang); return arw(p, A[0], A[1], B[0], B[1], col, t0, w); }
+// a lying hipSag (supine r −90, head to the left; prone r 90) with its hip at (x, y)
+function kLie(p, x, y, s, t0, r, opts, pose) { const j = hipSag(p, x, y, s, t0, { fade: 6, ...opts }); put(j.g, { r }); j.set(pose || {}); return j; }
+// effusion: a soft blue swelling over the suprapatellar pouch and round the joint of a kneeSag
+function kEffusion(k, p, t0) {
+  const g = G(p, { o: 0 }), e = mk('path', { fill: '#7fd0e0', 'fill-opacity': .35, stroke: '#7fd0e0', 'stroke-width': 2.5 }, g);
+  const upd = () => { const P = [k.fm([1.0, -2.6]), k.fm([1.55, -1.9]), k.fm([1.62, -.9]), k.fm([1.4, .1]), k.fm([1.1, -.6]), k.fm([1.12, -1.7])].map(k.stage);
+    const Q = [k.fm([-1.15, -.6]), k.fm([-1.5, .2]), k.fm([-1.3, .9]), k.fm([-1.0, .3])].map(k.stage);
+    e.setAttribute('d', smoothD(P) + smoothD(Q)); };
+  k.onSet.push(upd); upd();
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a hinged knee brace on a kneeSag or a hipSag (uprights along the thigh and the shank, straps, a hinge dial);
+// lock — draw a lock on the hinge (locked in extension). g.lockEl can be hidden to show it unlocked.
+function kBrace(k, p, t0, { lock = true, col = '#9fb0bf' } = {}) {
+  const g = G(p, { o: 0 }), up = path(g, '', { stroke: col, 'stroke-width': 9, 'stroke-linecap': 'round' }), lo = path(g, '', { stroke: col, 'stroke-width': 9, 'stroke-linecap': 'round' });
+  const st = [0, 1, 2, 3].map(() => path(g, '', { stroke: '#5d7a8a', 'stroke-width': 16, 'stroke-linecap': 'round', 'stroke-opacity': .85 }));
+  const hinge = mk('circle', { r: 13, fill: '#55605f', stroke: col, 'stroke-width': 3 }, g), lockEl = mk('rect', { width: 12, height: 10, rx: 2, fill: '#ffd75e', opacity: lock ? 1 : 0 }, g);
+  const isKnee = !!k.geo && k.tb && !k.pv;
+  const P = (fr, u, v) => isKnee ? k.stage(fr === 'f' ? k.fm([u, v]) : k.tb([u, v])) : k.stage(fr === 'f' ? k.fm([u, v + (v < 0 ? 10 : 0)]) : k.tb([u, v - 0]));
+  const upd = () => {
+    const A = isKnee ? P('f', 0, -4.2) : P('f', 0, -4.0), K = isKnee ? k.stage([0, 0]) : k.at('knee'), B = isKnee ? P('t', 0, 5.0) : P('t', 0, 5.0);
+    up.setAttribute('d', `M${f1(A[0])} ${f1(A[1])}L${f1(K[0])} ${f1(K[1])}`); lo.setAttribute('d', `M${f1(K[0])} ${f1(K[1])}L${f1(B[0])} ${f1(B[1])}`);
+    const S = [isKnee ? P('f', -1.3, -3.3) : P('f', -1.2, -3.0), isKnee ? P('f', 1.3, -3.3) : P('f', 1.0, -3.0), isKnee ? P('t', -1.1, 4.2) : P('t', -.9, 4.0), isKnee ? P('t', 1.2, 4.2) : P('t', .8, 4.0)];
+    st[0].setAttribute('d', `M${f1(S[0][0])} ${f1(S[0][1])}L${f1(S[1][0])} ${f1(S[1][1])}`); st[1].setAttribute('d', `M${f1(S[2][0])} ${f1(S[2][1])}L${f1(S[3][0])} ${f1(S[3][1])}`);
+    st[2].setAttribute('d', ''); st[3].setAttribute('d', '');
+    put(hinge, { x: K[0], y: K[1] }); put(lockEl, { x: K[0] - 6, y: K[1] - 5 });
+  };
+  k.onSet.push(upd); upd();
+  g.lockEl = lockEl;
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+
+/* ---------- chapter 22 lesson helpers ---------- */
+// A lesser toe from the side (toes to the right): the metatarsal head at (x, y), three phalanges, the plantar fat
+// pad under the head and a soft skin. set({ mtp, pip, dip, sub }): mtp — extension (+) at the MTP joint; pip / dip —
+// flexion (+) at the IP joints; sub 0..1 — dorsal subluxation of the phalanx with the fat pad. at(name): 'mtp',
+// 'pip', 'dip', 'tip', 'pad', 'pipTop' (stage points).
+function toeChain(p, x, y, s, t0, { callus = false } = {}) {
+  const R = 40, g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), q = { mtp: 0, pip: 0, dip: 0, sub: 0 }, j = { g, q, onSet: [] };
+  const skin = mk('path', { fill: shadeGrad(defs, HIPSK_C).url, stroke: HIPSL_C, 'stroke-width': 2, opacity: .55 }, g);
+  const pad = mk('ellipse', { rx: .55 * R, ry: .26 * R, fill: '#e8c27a', 'fill-opacity': .75, stroke: mix('#e8c27a', '#000000', .35), 'stroke-width': 1.5 }, g);
+  const mt = boneSh(g, defs, [[-3.2, -.35], [-1.0, -.3], [-.2, -.42], [.38, -.1], [.36, .3], [-.2, .42], [-1.0, .32], [-3.2, .3]].map(([a, b]) => [a * R, b * R]));
+  const PH = [[0, 1.55, .3], [1.55, .85, .27], [.85, .7, .25]], ph = PH.map(() => mk('path', {}, g)), cal = [mk('ellipse', { rx: 9, ry: 5, fill: COL.bad, 'fill-opacity': 0 }, g), mk('ellipse', { rx: 9, ry: 5, fill: COL.bad, 'fill-opacity': 0 }, g)];
+  void mt;
+  g.appendChild(pad); pad.setAttribute('fill-opacity', '.62');
+  const draw = () => {
+    const base = [.38 + .0 * q.sub, -.32 * q.sub];
+    let A = base, ang = -q.mtp; const J = [A], angs = [];
+    [0, q.pip, q.dip].forEach((fl, i) => { ang += fl; angs.push(ang); const L = PH[i][1], B = [A[0] + L * Math.cos(rad(ang)), A[1] + L * Math.sin(rad(ang))]; J.push(B); A = B; });
+    PH.forEach(([, L, w], i) => {
+      const A0 = J[i], B0 = J[i + 1], a0 = angs[i], n = [-Math.sin(rad(a0)), Math.cos(rad(a0))], t = [Math.cos(rad(a0)), Math.sin(rad(a0))];
+      const P = [[0, w], [.15, w * .7], [.5, w * .62], [.85, w * .7], [1, w * .9], [1.04, 0], [1, -w * .9], [.85, -w * .7], [.5, -w * .62], [.15, -w * .7], [0, -w], [-.04, 0]].map(([u, v]) => [(A0[0] + t[0] * u * L + n[0] * v) * R, (A0[1] + t[1] * u * L + n[1] * v) * R]);
+      ph[i].setAttribute('d', smoothD(P)); ph[i].setAttribute('fill', boneGrad(defs, 0, 0, 1, 0)); ph[i].setAttribute('stroke', mix(ANAT.bone, '#000000', .5)); ph[i].setAttribute('stroke-width', 1.8);
+    });
+    put(pad, { x: 0, y: lerp(.62, -.1, q.sub) * R });
+    const top = J.map((P, i) => { const a0 = angs[Math.min(i, 2)]; return [(P[0] - Math.sin(rad(a0)) * -.42) * R, (P[1] + Math.cos(rad(a0)) * -.42) * R]; });
+    const bot = J.map((P, i) => { const a0 = angs[Math.min(i, 2)]; return [(P[0] - Math.sin(rad(a0)) * .45) * R, (P[1] + Math.cos(rad(a0)) * .45) * R]; });
+    skin.setAttribute('d', smoothD([[-3.2 * R, -.6 * R], ...top, [(J[3][0] + .25 * Math.cos(rad(angs[2]))) * R, (J[3][1] + .25 * Math.sin(rad(angs[2]))) * R], ...bot.reverse(), [-.2 * R, (.9 - .5 * q.sub) * R], [-3.2 * R, .62 * R]]));
+    j.J = J; j.top = top;
+    if (callus) { [1, 2].forEach((k, i) => { put(cal[i], { x: top[k][0], y: top[k][1] }); cal[i].setAttribute('fill-opacity', String(clamp((q.pip - 20) / 40, 0, .8))); }); }
+    j.onSet.forEach(fn => fn(j));
+  };
+  j.set = o => { Object.assign(q, o); draw(); return j; };
+  j.at = k => { const S0 = st(g), P = { mtp: [0, 0], pip: j.J[1], dip: j.J[2], tip: j.J[3], pad: [0, lerp(.62, -.1, q.sub)], pipTop: [j.top[1][0] / R, j.top[1][1] / R] }[k]; return [S0.x + P[0] * R * S0.s, S0.y + P[1] * R * S0.s]; };
+  draw();
+  if (t0 !== null) show(g, t0);
+  return j;
+}
+// A CAM walker boot on an ankleSag: shells along the shank and the foot, a sole, heel wedges (n) and a hinge dial
+// at the ankle showing the dorsiflexion stop (deg, − is plantarflexion). g.wedges(n), g.stop(deg).
+function bootEl(a, p, t0, { wedges = 0, stop = null, col = '#7f93a6' } = {}) {
+  const g = G(p, { o: 0 }), sh = mk('path', { fill: col, 'fill-opacity': .28, stroke: col, 'stroke-width': 3, 'stroke-linejoin': 'round' }, g);
+  const sole = mk('path', { fill: mix(col, '#000000', .35), stroke: col, 'stroke-width': 2 }, g), wg = G(g, {}), dial = G(g, {}), strap = path(g, '', { stroke: mix(col, '#ffffff', .25), 'stroke-width': 7, 'stroke-linecap': 'round' });
+  const ring = mk('circle', { r: 17, fill: COL.board, stroke: col, 'stroke-width': 3 }, dial), ptr = path(dial, '', { stroke: COL.task, 'stroke-width': 3 }), lbl = T(dial, '', { x: 24, y: 5, size: 14, fill: COL.task, weight: 700 });
+  void ring;
+  let nW = wedges, stp = stop;
+  const upd = () => {
+    const S = P => a.stage(a.S(P)), C = P => a.stage(a.Cf(P)), M = P => a.stage(a.Mc(P));
+    sh.setAttribute('d', smoothD([S([1.45, -7.5]), S([1.4, -3.0]), S([1.25, -1.1]), M([3.4, -.25]), M([5.6, .75]), M([6.4, 1.6]), M([6.3, 2.75]), C([-1.5, 2.85]), C([-2.45, 1.7]), S([-2.0, -1.4]), S([-2.55, -4.5]), S([-2.6, -7.5])]));
+    const H = C([-2.1, 2.85]), Tt = M([6.5, 2.85]), H2 = C([-2.1, 3.3]), T2 = M([6.5, 3.3]);
+    sole.setAttribute('d', ptsD([H, Tt, T2, H2], true));
+    wg.innerHTML = '';
+    for (let i = 0; i < nW; i++) { const A = C([-1.9, 2.62 - .16 * i]), B = C([1.2 - .25 * i, 2.62 - .16 * i]), B2 = C([-1.9, 2.5 - .16 * i]); mk('path', { d: ptsD([A, B, B2], true), fill: '#e6c88a', stroke: '#b89a5a', 'stroke-width': 1.5 }, wg); }
+    const K = S([0, 0]); put(dial, { x: K[0], y: K[1] });
+    if (stp === null) { put(dial, { o: 0 }); } else { put(dial, { o: 1 }); const an = rad(90 + stp); ptr.setAttribute('d', `M0 0L${f1(14 * Math.cos(an - Math.PI / 2))} ${f1(-14 * Math.sin(an - Math.PI / 2))}`); lbl.textContent = (stp > 0 ? '+' : '') + stp + '°'; }
+    const s1 = S([-2.4, -5.5]), s2 = S([1.4, -5.5]); strap.setAttribute('d', `M${f1(s1[0])} ${f1(s1[1])}L${f1(s2[0])} ${f1(s2[1])}`);
+  };
+  a.onSet.push(upd); upd();
+  g.wedges = n => { nW = n; upd(); }; g.stop = v => { stp = v; upd(); };
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// an orthotic insert under the medial arch of an ankleSag (med view): a firm pad lifting the arch
+function insoleEl(a, p, t0, col = '#8fd6b0') {
+  const g = G(p, { o: 0 }), e = mk('path', { fill: col, 'fill-opacity': .55, stroke: col, 'stroke-width': 2.5 }, g);
+  const upd = () => { const C = P => a.stage(a.Cf(P)), M = P => a.stage(a.Mc(P)); e.setAttribute('d', smoothD([C([-2.0, 2.66]), C([-.4, 2.66]), M([2.8, 2.6]), M([5.0, 2.66]), M([5.0, 2.8]), C([-2.0, 2.82])]) + smoothD([C([-.6, 2.62]), M([1.6, 2.3]), M([3.6, 2.4]), M([4.4, 2.62])])); };
+  a.onSet.push(upd); upd();
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a heel lift under the heel of an ankleSag (in the shoe): a wedge h R units high under the heel
+function heelLiftEl(a, p, t0, h = .35, col = '#e6c88a') {
+  const g = G(p, { o: 0 }), e = mk('path', { fill: col, stroke: '#b89a5a', 'stroke-width': 2 }, g);
+  const upd = () => { const C = P => a.stage(a.Cf(P)); e.setAttribute('d', ptsD([C([-2.1, 2.64]), C([1.3, 2.64]), C([-2.1, 2.64 + h])], true)); };
+  a.onSet.push(upd); upd();
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// ice and a compression wrap on an ankleSag
+function iceWrapEl(a, p, t0, { ice = true, wrap = true } = {}) {
+  const g = G(p, { o: 0 }), wg = G(g, {}), ig = G(g, {});
+  const upd = () => {
+    wg.innerHTML = ''; ig.innerHTML = '';
+    if (wrap) for (let i = 0; i < 6; i++) { const A = a.stage(a.S([-2.0, -3.4 + i * .55])), B = a.stage(i < 3 ? a.S([1.3, -3.0 + i * .55]) : a.Mc([2.2 + (i - 3) * .9, -.2 + (i - 3) * .45])); path(wg, `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`, { stroke: '#c9b8e8', 'stroke-width': 12, 'stroke-opacity': .55, 'stroke-linecap': 'round' }); }
+    if (ice) { const P = a.stage(a.S([.0, .2])); mk('rect', { x: f1(P[0] - 36), y: f1(P[1] - 26), width: 72, height: 52, rx: 14, fill: '#9fd6ec', 'fill-opacity': .75, stroke: '#d8f1fb', 'stroke-width': 2 }, ig); T(ig, '❄', { x: P[0], y: P[1] + 9, size: 26, fill: '#ffffff', anchor: 'middle' }); }
+  };
+  a.onSet.push(upd); upd();
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// an air-stirrup splint on an ankleRear: two shells on the sides of the leg and the heel
+function stirrupEl(r, p, t0, col = '#86c9e8') {
+  const g = G(p, { o: 0 }), L = mk('path', { fill: col, 'fill-opacity': .35, stroke: col, 'stroke-width': 3 }, g), Rr = mk('path', { fill: col, 'fill-opacity': .35, stroke: col, 'stroke-width': 3 }, g), st0 = path(g, '', { stroke: col, 'stroke-width': 8, 'stroke-linecap': 'round' });
+  const upd = () => { const S = P => r.stage(r.S(P)), C = P => r.stage(r.Cf(P));
+    L.setAttribute('d', smoothD([S([-2.3, -7.5]), S([-1.85, -7.5]), S([-1.75, -1.0]), C([-1.45, 2.2]), C([-1.75, 2.4]), S([-2.2, -1.0])]));
+    Rr.setAttribute('d', smoothD([S([2.3, -7.5]), S([1.85, -7.5]), S([1.8, -1.0]), C([1.55, 2.2]), C([1.85, 2.4]), S([2.25, -1.0])]));
+    const A = C([-1.75, 2.9]), B = C([1.85, 2.9]); st0.setAttribute('d', `M${f1(A[0])} ${f1(A[1])}L${f1(B[0])} ${f1(B[1])}`); };
+  r.onSet.push(upd); upd();
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// calcaneal taping on an ankleSag (med or lat view): strips round the heel and under the sole
+function heelTapeEl(a, p, t0, col = '#f3c95c') {
+  const g = G(p, { o: 0 });
+  const upd = () => { g.innerHTML = ''; const C = P => a.stage(a.Cf(P)), M = P => a.stage(a.Mc(P));
+    [[-1.0, 0], [-.7, .25], [-.4, .5]].forEach(([u, k]) => path(g, smoothD([C([u - .6, .5 + k]), C([-2.3, 1.3 + k * .4]), C([-1.6, 2.7]), C([.6, 2.7]), M([3.2, 2.6])], false), { stroke: col, 'stroke-width': 7, 'stroke-opacity': .7, 'stroke-linecap': 'round', fill: 'none' }));
+    path(g, smoothD([C([-2.2, 1.9]), C([-.6, 1.6]), M([2.6, 1.3])], false), { stroke: col, 'stroke-width': 7, 'stroke-opacity': .7, 'stroke-linecap': 'round', fill: 'none' }); };
+  a.onSet.push(upd); upd();
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// footprints of walking from left to right: steps [[length, side]], side 0 — left foot (upper row), 1 — right
+function footprints(p, x, y, steps, t0, { col = COL.chalk, gap = .35, bad = null } = {}) {
+  const g = G(p, { o: 0 }); let xx = x;
+  steps.forEach(([L, sd], i) => { xx += L; const e = G(g, { o: 0 }), yy = y + (sd ? 26 : -26), c = bad === sd ? COL.bad : col;
+    mk('ellipse', { cx: xx, cy: yy, rx: 22, ry: 9, fill: c, 'fill-opacity': .55 }, e); mk('ellipse', { cx: xx - 26, cy: yy, rx: 9, ry: 8, fill: c, 'fill-opacity': .55 }, e);
+    if (t0 !== null) show(e, t0 + i * gap); else put(e, { o: 1 }); });
+  if (t0 !== null) show(g, t0); else put(g, { o: 1 });
+  return g;
+}
+// a balance trace (centre of pressure) in a small box; k 0..1 — the sway amount (redrawn by g.set(k))
+function copTrace(p, x, y, w, h, t0, k = 1, col = '#ff9a5a') {
+  const g = G(p, { o: 0 }); roundBox(g, x, y, w, h, EDGE, PANEL, 2);
+  const e = path(g, '', { stroke: col, 'stroke-width': 2.5, fill: 'none' });
+  g.set = kk => { const P = []; let px = 0, py = 0; for (let i = 0; i < 160; i++) { px = px * .92 + (Math.sin(i * 1.7) + Math.sin(i * .37) * .6) * kk * 9; py = py * .92 + (Math.cos(i * 1.3) + Math.sin(i * .53) * .7) * kk * 9; P.push([x + w / 2 + px, y + h / 2 + py]); } e.setAttribute('d', smoothD(P, false)); };
+  g.set(k);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// a strap or towel from a stage point on the foot to the hands (a curved band)
+function strapEl(p, A, B, t0, col = '#c9b8e8', w = 9) { const e = path(p, `M${f1(A[0])} ${f1(A[1])}Q${f1((A[0] + B[0]) / 2)} ${f1(Math.max(A[1], B[1]) + 20)} ${f1(B[0])} ${f1(B[1])}`, { stroke: col, 'stroke-width': w, 'stroke-linecap': 'round', fill: 'none', 'stroke-opacity': .85 }, { o: 0 }); if (t0 !== null) show(e, t0); return e; }
+
+/* ---------- chapter 23 lesson helpers ---------- */
+// More muscles on the side-view mannequin (near side): gluteus maximus, soleus, anterior and posterior deltoid,
+// pectoralis major, latissimus dorsi, forearm flexors and extensors.
+Object.assign(MUSCLE, {
+  glutMax: [['H', 'Sh', 14, -24], ['H', 'KN', 34, 12]],
+  soleus: [['KN', 'AN', 20, 8], ['AN', 'heelN', 10, 0]],
+  deltA: [['Sh', 'H', -7, -9], ['Sh', 'EN', 34, -7]],
+  deltP: [['Sh', 'H', -7, 9], ['Sh', 'EN', 34, 7]],
+  pecMaj: [['Sh', 'H', 26, -17], ['Sh', 'EN', 20, -6]],
+  lat: [['H', 'Sh', 40, -21], ['Sh', 'EN', 16, 6]],
+  foreFlex: [['EN', 'WN', 4, -7], ['WN', 'EN', -12, -3]],
+  foreExt: [['EN', 'WN', 4, 7], ['WN', 'EN', -12, 3]],
+});
+const MUS23_AFTER = { gastroc: 'shN', soleus: 'shN', tibAnt: 'shN', hamstrings: 'thN', quads: 'thN', rectus: 'thN', glutMax: 'thN', iliopsoas: 'thN',
+  parasp: 'torso', abdom: 'torso', lat: 'torso', pecMaj: 'torso', deltA: 'uaN', deltP: 'uaN', biceps: 'uaN', triceps: 'uaN', foreFlex: 'faN', foreExt: 'faN' };
+const MUS23_W = { parasp: 11, abdom: 11, iliopsoas: 10, soleus: 11, deltA: 11, deltP: 11, pecMaj: 12, lat: 12, foreFlex: 8, foreExt: 8, biceps: 10, triceps: 10, tibAnt: 9 };
+// Muscles on a figure by name; returns { name: muscle } (each has act(0..1) and glows yellow when stretched).
+function figMus(f, keys) {
+  const out = {};
+  keys.forEach(k => { out[k] = muscleOn(f, ...MUSCLE[k], { w: MUS23_W[k] || 13, after: MUS23_AFTER[k] }); });
+  return out;
+}
+// set activation of several muscles at once
+function musAct(M, keys, v) { keys.forEach(k => M[k] && M[k].act(v)); }
+
+// ---- inverse kinematics on the mannequin (all targets are stage points; the group transform stays as it is) ----
+function figLocal(f, P) { const s = st(f.g), v = rotPt(P[0] - s.x, P[1] - s.y, -(s.r || 0)); return [v[0] / f.s, v[1] / f.s]; }
+const rigAngOf = (f, dx, dy) => Math.atan2(dx * f.dir, dy) * 180 / Math.PI;      // 0 = down, + toward the facing side
+// rig angle (in the figure's own frame) of a stage direction
+function rigAngStage(f, vx, vy) { const v = rotPt(vx, vy, -(st(f.g).r || 0)); return rigAngOf(f, v[0], v[1]); }
+function ik2(a, b, d) { d = clamp(d, Math.abs(a - b) + .5, a + b - .01); return Math.acos(clamp((a * a + d * d - b * b) / (2 * a * d), -1, 1)) * 180 / Math.PI; }
+// Put the hip at stage point H and aim the trunk at stage point T (pose.t is kept at 0).
+function figTrunk(f, H, T) { const dx = T[0] - H[0], dy = T[1] - H[1]; put(f.g, { x: H[0], y: H[1], r: Math.atan2(dx, -dy) * 180 / Math.PI }); f.set({ t: 0 }); }
+// Reach a wrist to stage point W; bend 1 bends the elbow one way, −1 the other.
+function figArmIK(f, side, W, bend = 1) {
+  const S = f.pts.Sh, T = figLocal(f, W), d = Math.hypot(T[0] - S[0], T[1] - S[1]);
+  const phi = rigAngOf(f, T[0] - S[0], T[1] - S[1]), th1 = phi - bend * ik2(RIG.ua, RIG.fa, d);
+  const E = [S[0] + f.dir * RIG.ua * Math.sin(rad(th1)), S[1] + RIG.ua * Math.cos(rad(th1))], th2 = rigAngOf(f, T[0] - E[0], T[1] - E[1]);
+  f.set({ ['a' + side]: th1 + f.pose.t, ['e' + side]: th2 - th1 });
+}
+// Reach an ankle to stage point A; footDir — the stage direction of the sole [vx, vy] (default flat, toes forward).
+function figLegIK(f, side, A, footDir = null, bend = 1) {
+  const T = figLocal(f, A), d = Math.hypot(T[0], T[1]);
+  const phi = rigAngOf(f, T[0], T[1]), th1 = phi + bend * ik2(RIG.th, RIG.sh, d);
+  const K = [f.dir * RIG.th * Math.sin(rad(th1)), RIG.th * Math.cos(rad(th1))], th2 = rigAngOf(f, T[0] - K[0], T[1] - K[1]);
+  const fd = footDir || [f.dir, 0], fa = rigAngStage(f, fd[0], fd[1]);
+  f.set({ ['h' + side]: th1 + f.pose.t, ['k' + side]: th1 - th2, ['f' + side]: ((fa - th2 - 90) % 360 + 540) % 360 - 180 });
+}
+
+// ---- props ----
+const PROP_C = '#8a9aa8', BALL_W = '#c97a52', BALL_B = '#86c9e8';
+// a box or platform standing on the floor at gy (height h); returns its top y
+function platBox(p, x0, x1, h, gy, t0, col = PROP_C) { const g = G(p, { o: t0 === null ? 1 : 0 }); mk('rect', { x: x0, y: gy - h, width: x1 - x0, height: h, rx: 6, fill: mix(col, COL.board, .45), stroke: col, 'stroke-width': 3 }, g); if (t0 !== null) show(g, t0); return { g, top: gy - h }; }
+// a balance dome (BOSU) on the floor; flat: upside down (platform up); returns { g, top }
+function bosuEl(p, x, gy, w, t0, { flat = false } = {}) {
+  const g = G(p, { o: 0 }), h = w * .3;
+  if (!flat) { mk('path', { d: `M${x - w / 2} ${gy}A${w / 2} ${h} 0 0 1 ${x + w / 2} ${gy}Z`, fill: '#5d7f9a', stroke: '#9fc3dc', 'stroke-width': 3 }, g); mk('rect', { x: x - w / 2 - 4, y: gy - 6, width: w + 8, height: 8, rx: 4, fill: '#2d3a44' }, g); }
+  else { mk('path', { d: `M${x - w / 2 + 10} ${gy - h}A${w / 2 - 10} ${h} 0 0 0 ${x + w / 2 - 10} ${gy - h}Z`, fill: '#5d7f9a', stroke: '#9fc3dc', 'stroke-width': 3 }, g); mk('rect', { x: x - w / 2, y: gy - h - 8, width: w, height: 9, rx: 4, fill: '#2d3a44' }, g); }
+  if (t0 !== null) show(g, t0); else put(g, { o: 1 });
+  return { g, top: flat ? gy - h - 8 : gy - h };
+}
+// a foam roller lying on the floor (end view): full circle or a half roll (curved side down)
+function rollEl(p, x, gy, r, t0, { half = false } = {}) {
+  const g = G(p, { o: 0 });
+  if (half) mk('path', { d: `M${x - r} ${gy - r}A${r} ${r} 0 0 0 ${x + r} ${gy - r}Z`, fill: mix(FOAM, COL.board, .4), stroke: FOAM, 'stroke-width': 3 }, g);
+  else { mk('circle', { cx: x, cy: gy - r, r, fill: mix(FOAM, COL.board, .4), stroke: FOAM, 'stroke-width': 3 }, g); mk('circle', { cx: x, cy: gy - r, r: r * .35, fill: 'none', stroke: FOAM, 'stroke-width': 2 }, g); }
+  if (t0 !== null) show(g, t0); else put(g, { o: 1 });
+  return { g, top: half ? gy - r : gy - 2 * r };
+}
+// a large therapy ball resting on the floor; returns { g, top, c }
+function gymBall(p, x, gy, r, t0, col = '#7fb3d5') {
+  const g = G(p, { o: 0 }), defs = mk('defs', {}, g), c = [x, gy - r];
+  mk('circle', { cx: c[0], cy: c[1], r, fill: ballGrad(defs, col), stroke: mix(col, '#000000', .45), 'stroke-width': 2 }, g);
+  path(g, `M${f1(c[0] - r * .7)} ${f1(c[1] - r * .1)}Q${c[0]} ${f1(c[1] + r * .35)} ${f1(c[0] + r * .7)} ${f1(c[1] - r * .1)}`, { stroke: mix(col, '#000000', .3), 'stroke-width': 2, fill: 'none' });
+  if (t0 !== null) show(g, t0); else put(g, { o: 1 });
+  return { g, top: gy - 2 * r, c, r };
+}
+// a ball that sits in the near hand (or between both hands) of a figure and follows it
+function ballInHand(f, p, r, col, t0, both = false) {
+  const b = ballEl(p, r, col);
+  const upd = () => { const A = onStage(f, 'WN'), B = both ? onStage(f, 'WF') : A; b.set((A[0] + B[0]) / 2, (A[1] + B[1]) / 2 - (both ? 0 : r * .6)); };
+  f.onSet.push(upd); upd(); if (t0 !== null) show(b.g, t0); return b;
+}
+// a stick, club, bat or racquet held in the near hand: length L, angle offset a0 from the forearm; racquet adds a head
+function heldStick(f, p, L, a0, t0, { col = '#c8b48a', w = 6, racquet = false, blade = false } = {}) {
+  const g = G(p, { o: 0 }), e = path(g, '', { stroke: col, 'stroke-width': w, 'stroke-linecap': 'round', fill: 'none' });
+  const head = racquet ? mk('ellipse', { rx: 20, ry: 26, fill: 'none', stroke: col, 'stroke-width': 4 }, g) : null;
+  let wob = 0; g.wob = v => { wob = v; upd(); };
+  const upd = () => {
+    const E = onStage(f, 'EN'), W = onStage(f, 'WN'), a = Math.atan2(W[1] - E[1], W[0] - E[0]) + rad(a0), B = [W[0] + L * Math.cos(a), W[1] + L * Math.sin(a)];
+    if (blade) { const Mx = (W[0] + B[0]) / 2 - Math.sin(a) * wob, My = (W[1] + B[1]) / 2 + Math.cos(a) * wob, A2 = [2 * W[0] - B[0], 2 * W[1] - B[1]], M2 = [(W[0] + A2[0]) / 2 + Math.sin(a) * wob, (W[1] + A2[1]) / 2 - Math.cos(a) * wob];
+      e.setAttribute('d', `M${f1(A2[0])} ${f1(A2[1])}Q${f1(M2[0])} ${f1(M2[1])} ${f1(W[0])} ${f1(W[1])}Q${f1(Mx)} ${f1(My)} ${f1(B[0])} ${f1(B[1])}`); }
+    else e.setAttribute('d', `M${f1(W[0])} ${f1(W[1])}L${f1(B[0])} ${f1(B[1])}`);
+    if (head) { const C = [W[0] + (L + 20) * Math.cos(a), W[1] + (L + 20) * Math.sin(a)]; put(head, { x: C[0], y: C[1], r: a * 180 / Math.PI + 90 }); }
+  };
+  f.onSet.push(upd); upd(); if (t0 !== null) show(g, t0); return g;
+}
+// floor patterns in perspective (flattened ellipse): a star of n spokes, two crossing lines (four quadrants), a zigzag
+function starFloor(p, x, gy, r, t0, n = 8, col = SH) {
+  const g = G(p, { o: 0 });
+  for (let i = 0; i < n; i++) { const a = Math.PI * 2 * i / n; path(g, `M${x} ${gy}L${f1(x + r * Math.cos(a))} ${f1(gy + r * .32 * Math.sin(a))}`, { stroke: col, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-opacity': .8 }); }
+  if (t0 !== null) show(g, t0); else put(g, { o: 1 });
+  return g;
+}
+function quadFloor(p, x, gy, r, t0, col = SH) {
+  const g = G(p, { o: 0 });
+  path(g, `M${x - r} ${gy}L${x + r} ${gy}M${x - r * .35} ${gy + r * .3}L${x + r * .35} ${gy - r * .3}`, { stroke: col, 'stroke-width': 4, 'stroke-linecap': 'round' });
+  [['1', -.5, -.12], ['2', .45, -.12], ['3', -.45, .2], ['4', .5, .2]].forEach(([s0, a, b]) => T(g, s0, { x: x + r * a, y: gy + r * b + 5, size: 16, fill: COL.dim, weight: 700, anchor: 'middle' }));
+  if (t0 !== null) show(g, t0); else put(g, { o: 1 });
+  return g;
+}
+// a balance beam on the floor
+function beamEl(p, x0, x1, gy, t0) { const g = G(p, { o: 0 }); mk('rect', { x: x0, y: gy - 16, width: x1 - x0, height: 16, rx: 4, fill: '#b98a5a', stroke: mix('#b98a5a', '#000000', .35), 'stroke-width': 2 }, g); [x0 + 20, x1 - 30].forEach(xx => mk('rect', { x: xx, y: gy - 4, width: 10, height: 6, fill: '#6d5236' }, g)); if (t0 !== null) show(g, t0); else put(g, { o: 1 }); return { g, top: gy - 16 }; }
+// a mini-trampoline (side view); set(sag) dips the mat
+function trampEl(p, x, gy, w, t0) {
+  const g = G(p, { o: 0 }), top = gy - 34;
+  [x - w / 2 + 8, x + w / 2 - 8].forEach(xx => path(g, `M${xx} ${top}L${xx - 6} ${gy}`, { stroke: PROP_C, 'stroke-width': 5 }));
+  const mat = path(g, '', { stroke: '#4d6b80', 'stroke-width': 6, fill: 'none', 'stroke-linecap': 'round' });
+  path(g, `M${x - w / 2} ${top}L${x + w / 2} ${top}`, { stroke: PROP_C, 'stroke-width': 4, 'stroke-opacity': .7 });
+  const j = { g, top, set(sag) { mat.setAttribute('d', `M${x - w / 2 + 6} ${top}Q${x} ${top + 2 * sag} ${x + w / 2 - 6} ${top}`); } };
+  j.set(0); if (t0 !== null) show(g, t0); return j;
+}
+// a rebounder net (side view) standing on the floor, leaning back
+function reboundEl(p, x, gy, t0) { const g = G(p, { o: 0 }); path(g, `M${x} ${gy}L${x + 40} ${gy - 170}M${x + 60} ${gy}L${x + 40} ${gy - 170}`, { stroke: PROP_C, 'stroke-width': 5 }); for (let i = 0; i < 6; i++) path(g, `M${x + 4 + i * 6} ${gy - 18 - i * 28}L${x + 38} ${gy - 30 - i * 26}`, { stroke: '#9fb3c8', 'stroke-width': 2, 'stroke-opacity': .7 }); if (t0 !== null) show(g, t0); else put(g, { o: 1 }); return g; }
+// a slide board (ProFitter) seen from the side: rails and a carriage; set(dx) moves the carriage
+function slideBoard(p, x, gy, w, t0) {
+  const g = G(p, { o: 0 }); mk('rect', { x: x - w / 2, y: gy - 14, width: w, height: 14, rx: 6, fill: mix(PROP_C, COL.board, .45), stroke: PROP_C, 'stroke-width': 3 }, g);
+  const car = mk('rect', { y: gy - 30, width: 90, height: 16, rx: 6, fill: '#5d7f9a', stroke: '#9fc3dc', 'stroke-width': 2 }, g);
+  const j = { g, top: gy - 30, set(dx) { car.setAttribute('x', f1(x - 45 + dx)); } }; j.set(0); if (t0 !== null) show(g, t0); return j;
+}
+// a heavy sled with a rope to the hands of a figure
+function sledEl(p, x, gy, t0) { const g = G(p, { o: 0 }); mk('path', { d: `M${x - 60} ${gy - 8}L${x + 60} ${gy - 8}L${x + 70} ${gy}L${x - 66} ${gy}Z`, fill: '#5d6b74' }, g); mk('rect', { x: x - 50, y: gy - 62, width: 100, height: 54, rx: 6, fill: mix(PROP_C, COL.board, .3), stroke: PROP_C, 'stroke-width': 3 }, g); T(g, 'груз', { x, y: gy - 30, size: 15, fill: COL.chalk, weight: 700, anchor: 'middle' }); if (t0 !== null) show(g, t0); else put(g, { o: 1 }); return g; }
+// a treadmill (side view)
+function treadEl(p, x0, x1, gy, t0) { const g = G(p, { o: 0 }); mk('rect', { x: x0, y: gy - 22, width: x1 - x0, height: 22, rx: 11, fill: '#3b4a54', stroke: PROP_C, 'stroke-width': 3 }, g); path(g, `M${x1 - 10} ${gy - 22}L${x1 + 20} ${gy - 160}L${x1 + 44} ${gy - 160}`, { stroke: PROP_C, 'stroke-width': 6, fill: 'none' }); if (t0 !== null) show(g, t0); else put(g, { o: 1 }); return { g, top: gy - 22 }; }
+// elastic band from a figure point (key) to a fixed stage point; returns the bandLine
+function figBand(f, p, key, B, t0, rest = 160, col = '#e86a8a') { const b = bandLine(p, col); const upd = () => b.set(onStage(f, key), B, rest); f.onSet.push(upd); upd(); if (t0 !== null) show(b.e, t0); return b; }
+// a floor line
+function floorAt(p, x0, x1, gy, t0) { const e = path(p, `M${x0} ${gy}L${x1} ${gy}`, { stroke: COL.dim, 'stroke-width': 3, 'stroke-opacity': .7 }, { o: 0 }); if (t0 !== null) show(e, t0); else put(e, { o: 1 }); return e; }
+
+// ---- whole-body set-ups built on the IK ----
+// A prone plank/push-up: toes (or knees) on the floor at P0, hands at stage point Hd. k 0..1 lowers the chest.
+// knees: the support is at the knees (shins on the floor). Returns a setter.
+function pushUp(f, P0, Hd, { knees = false } = {}) {
+  return k => {
+    const s = f.s, Sh = [Hd[0] - 8 * s * f.dir, Hd[1] - lerp(knees ? 120 : 132, 46, k) * s];
+    const A = knees ? [P0[0], P0[1] - 9 * s] : [P0[0], P0[1] - 30 * s], d = [Sh[0] - A[0], Sh[1] - A[1]], L = Math.hypot(d[0], d[1]);
+    const legL = (knees ? RIG.th : RIG.th + RIG.sh) * s * .995, H = [A[0] + d[0] / L * legL, A[1] + d[1] / L * legL];
+    figTrunk(f, H, Sh);
+    if (knees) { const Ak = [P0[0] - RIG.sh * s * f.dir, P0[1] - 7 * s]; figLegIK(f, 'N', Ak, [-f.dir, .05]); figLegIK(f, 'F', Ak, [-f.dir, .05]); }
+    else { figLegIK(f, 'N', A, [f.dir * .3, 1]); figLegIK(f, 'F', [A[0] - 4 * f.dir, A[1]], [f.dir * .3, 1]); }
+    figArmIK(f, 'N', Hd, -1); figArmIK(f, 'F', [Hd[0] - 6 * f.dir * s, Hd[1]], -1);
+    f.set({ hd: -20 });
+  };
+}
+// A supine bridge: shoulders on the floor at Sh0, feet at A0 (stage); lift 0..1 raises the pelvis by up to rise px.
+function bridgeSet(f, Sh0, A0, rise, { oneLeg = false, footDir = null } = {}) {
+  return (lift, liftLeg = 0) => {
+    const H0 = [lerp(Sh0[0], A0[0], .52), Sh0[1] - 6 * f.s], H = [H0[0], H0[1] - rise * lift];
+    figTrunk(f, H, Sh0);
+    figLegIK(f, 'N', A0, footDir);
+    if (oneLeg) { const s0 = st(f.g), K = onStage(f, 'KN'); figLegIK(f, 'F', [lerp(A0[0], K[0], .2) + 30 * f.dir * liftLeg, A0[1] - 120 * liftLeg * f.s], [f.dir, -.3]); void s0; }
+    else figLegIK(f, 'F', [A0[0] - 6 * f.dir, A0[1]], footDir);
+    f.set({ aN: 4, eN: 0, aF: 2, eF: 0, hd: 0 });
+  };
+}
+// High kneeling (both knees on the floor at Kx, gy) with a forward/backward lean (deg, + forward) about the knees.
+function kneelSet(f, Kx, gy, { half = false } = {}) {
+  return (lean = 0, sink = 0) => {
+    const K = [Kx, gy - 10 * f.s], u = rad(lean), H = [K[0] + Math.sin(u) * RIG.th * f.s * f.dir * (1 - sink * .3), K[1] - Math.cos(u) * RIG.th * f.s * (1 - sink * .3)];
+    figTrunk(f, H, [H[0] + Math.sin(u) * 100 * f.dir, H[1] - Math.cos(u) * 100]);
+    const back = [K[0] - RIG.sh * f.s * f.dir, gy - 7 * f.s];
+    figLegIK(f, 'F', back, [-f.dir, .05]);
+    if (half) figLegIK(f, 'N', [K[0] + 96 * f.s * f.dir, gy - 8 * f.s]);
+    else figLegIK(f, 'N', back, [-f.dir, .05]);
+  };
+}
+// Standing with the ankles at the given stage points (near, far) and the hip at H; feet flat.
+function standSet(f, AN, AF) {
+  return (H, trunkTo = null) => {
+    figTrunk(f, H, trunkTo || [H[0], H[1] - 100]);
+    figLegIK(f, 'N', AN); figLegIK(f, 'F', AF);
+  };
+}
+/* ---------- beats ---------- */
+const scn = (p, t0) => { const g = G(p, { o: 0 }); show(g, t0, .3); return g; };
+const ECC_C = '#f3c95c', CON_C = '#ff7a5c';
+// The right shoulder in 90/90 seen from the side (the person faces right, the upper arm points at the viewer).
+// set(a) turns the forearm about the humerus: 0 — up (full external rotation), 90 — forward (internal), 150 — down.
+// mus: er (posterior cuff) and ir (anterior: subscapularis and pectoralis) act(0..1). at('W') — the wrist.
+function rot9090(p, x, y, s, t0) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), col = '#d8d1c1', ln = mix(col, COL.board, .62);
+  const tr = limbEl(g, defs, col, 40, 34, ln); tr.set([-6, 190], [-6, -6]);
+  const hc = mk('circle', { cx: 6, cy: -76, r: 34, fill: shadeGrad(defs, col).url, stroke: ln, 'stroke-width': 2 }, g); void hc;
+  const er = muscleEl(g, { rest: 74, w: 18 }); er.set([-52, 46], [-14, -4]);
+  const ir = muscleEl(g, { rest: 74, w: 18 }); ir.set([40, 60], [14, 2]);
+  mk('ellipse', { cx: 0, cy: 0, rx: 27, ry: 25, fill: mix(col, '#ffffff', .15), stroke: ln, 'stroke-width': 2 }, g);
+  const fa = limbEl(g, defs, col, 13, 10, ln), hd = limbEl(g, defs, col, 10, 8, ln);
+  const j = { g, a: 0, mus: { er, ir }, pts: {} };
+  j.set = a => { j.a = a; const u = rad(a), W = [Math.sin(u) * 104, -Math.cos(u) * 104], X = [Math.sin(u) * 132, -Math.cos(u) * 132]; fa.set([0, 0], W); hd.set(W, X); j.pts.W = W; j.pts.X = X; return j; };
+  j.at = k => { const P = j.pts[k]; return [x + P[0] * s, y + P[1] * s]; };
+  j.set(0); show(g, t0); return j;
+}
+// a cone (obstacle)
+function cone(p, x, gy, h, t0) { const g = G(p, { o: 0 }); mk('path', { d: `M${x - h * .45} ${gy}L${x} ${gy - h}L${x + h * .45} ${gy}Z`, fill: '#f3a35c', stroke: '#c97a32', 'stroke-width': 2 }, g); show(g, t0); return g; }
+// a jump in place or forward: u 0..1 (squat — air — land), pose in the air
+function jumpPose(f, M, x0, x1, gy, s, u, air = 'stand', h = 120) {
+  if (u < .25) { const a = u / .25; f.set({ ...STAND, t: 28 * a, aN: -20 * a, aF: -20 * a, hN: 70 * a, kN: 85 * a, fN: 25 * a, hF: 70 * a, kF: 85 * a, fF: 25 * a }); put(f.g, { x: x0, y: gy - lerp(182, 140, a) * s }); musAct(M, ['glutMax', 'quads', 'gastroc'], .9); }
+  else if (u < .8) { const a = (u - .25) / .55, e = Math.sin(a * Math.PI); const P = air === 'tuck' ? { ...STAND, aN: 60, aF: 60, hN: 110 * e, kN: 120 * e, hF: 110 * e, kF: 120 * e } : air === 'lunge' ? { ...STAND, aN: 40, aF: -30, hN: 40 * e, kN: 40 * e, hF: -25 * e, kF: 40 * e } : { ...STAND, aN: 160, aF: 160, fN: -30 * e, fF: -30 * e }; f.set(P); put(f.g, { x: lerp(x0, x1, a), y: gy - 182 * s - h * e }); musAct(M, ['glutMax', 'quads', 'gastroc'], .3); }
+  else { const a = (u - .8) / .2; f.set({ ...STAND, t: 28 * (1 - a), aN: 30, aF: 30, hN: 70 * (1 - a), kN: 85 * (1 - a), fN: 25 * (1 - a), hF: 70 * (1 - a), kF: 85 * (1 - a), fF: 25 * (1 - a) }); put(f.g, { x: x1, y: gy - lerp(140, 182, a) * s }); musAct(M, ['glutMax', 'quads', 'gastroc'], 1 - a * .6); }
+}
+// a figure lying supine with the arms up (head to the left); k 0..1 bends the elbows bringing the hands to the chest
+function supPress(f, H, gy) {
+  return k => {
+    figTrunk(f, H, [H[0] - 120, H[1]]);
+    figLegIK(f, 'N', [H[0] + 175 * f.s, gy - 8 * f.s], [0, -1]); figLegIK(f, 'F', [H[0] + 172 * f.s, gy - 8 * f.s], [0, -1]);
+    const S = onStage(f, 'Sh'), L = lerp(130, 60, k) * f.s;
+    figArmIK(f, 'N', [S[0] + 10, S[1] - L], 1); figArmIK(f, 'F', [S[0] + 6, S[1] - L], 1);
+  };
+}
+const BEATS = [
+  ['intro', 'Плиометрические упражнения', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 23 · Урок 232', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Плиометрические упражнения', { x: 800, y: 215, size: 52, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'руки: броски, лента, отталкивания · ноги: прыжки, скачки, платформы · два случая', 800, 300, m('sub'), { size: 25, fill: SH, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    floorAt(art, 520, 1080, 860, null);
+    const f = fig(art, { s: 1.0 }); const M = figMus(f, ['glutMax', 'quads', 'gastroc']);
+    prog(q => jumpPose(f, M, 800, 800, 860, 1.0, (q * 2) % 1, 'tuck', 150), .5, Math.max(3, D - 1), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['ueb', 'Руки: двумя руками', (m, D) => {
+    const p = panel(0);
+    txt(p, 'руки: броски двумя руками', 400, 56, m('intro'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    pill(p, 'с опорой и без; часто — с туловищем и равновесием', 400, 120, m('intro', 1), { col: SH, size: 14 });
+    const s1 = scn(p, m('intro', 1));
+    floorAt(s1, 40, 760, 840, m('intro', 1));
+    const f = fig(s1, { s: 1.35 }); const M = figMus(f, ['deltA', 'lat', 'abdom', 'parasp', 'triceps']); const ss = standSet(f, [300, 834], [220, 834]); ss([260, 834 - 180 * 1.35]);
+    ballInHand(f, s1, 22, BALL_W, m('intro', 1), true);
+    prog(q => { const u = q * 2 % 1, up = u < .5 ? u / .5 : 1 - (u - .5) / .5; f.set({ aN: lerp(-30, 170, up), aF: lerp(-30, 170, up), eN: 10, eF: 10 }); musAct(M, ['deltA'], u < .5 ? 1 : .3); musAct(M, ['lat', 'triceps'], u < .5 ? .3 : 1); musAct(M, ['abdom', 'parasp'], .7); }, m('diag', 1), Math.max(3, m('chest') - m('diag') - 1), lin);
+    pill(s1, 'D1 / D2 с утяжелённым мячом, быстрая смена, поворот туловища', 400, 165, m('diag', 1), { col: COL.good, size: 13 });
+    hide(s1, m('chest'), .4);
+    const s2 = scn(p, m('chest'));
+    floorAt(s2, 40, 760, 840, m('chest'));
+    const g = fig(s2, { s: 1.2 }); const N = figMus(g, ['pecMaj', 'triceps', 'deltA']); const sp = supPress(g, [380, 820], 840); sp(0);
+    const bl = ballEl(s2, 22, BALL_W); show(bl.g, m('chest', 2));
+    prog(q => { const u = q * 2 % 1; let k = 0, by; if (u < .3) { k = 0; const W = onStage(g, 'WN'); by = lerp(330, W[1] - 22, u / .3); bl.set(W[0], by); } else if (u < .65) { k = (u - .3) / .35; sp(k); const W = onStage(g, 'WN'); bl.set(W[0], W[1] - 22); musAct(N, ['pecMaj', 'triceps', 'deltA'], .9); } else { const a = (u - .65) / .35; sp(1 - a); const W = onStage(g, 'WN'); bl.set(W[0], W[1] - 22 - 260 * Math.max(0, a - .5) * 2); musAct(N, ['pecMaj', 'triceps', 'deltA'], 1); } if (u < .3) sp(0); }, m('chest', 2), 8, lin);
+    lab(s2, 'опускание к груди — уступающая фаза', 470, 420, 300, 700, ECC_C, m('chest', 4), { size: 14 });
+    pill(s2, 'лёжа: поймать, опустить к груди, сразу бросить вверх', 400, 165, m('chest', 1), { col: COL.good, size: 13 });
+    pill(s2, 'стоя в шаге: от груди — терапевту или в сетку', 400, 210, m('chest', 14), { col: SH, size: 14 });
+    hide(s2, m('over'), .4);
+    const s3 = scn(p, m('over'));
+    floorAt(s3, 40, 760, 840, m('over'));
+    reboundEl(s3, 620, 840, m('over'));
+    const h = fig(s3, { s: 1.35 }); const K = figMus(h, ['triceps', 'lat', 'abdom', 'deltA']); const sh = standSet(h, [300, 834], [200, 834]); sh([250, 834 - 180 * 1.35]);
+    const ob = ballInHand(h, s3, 22, BALL_W, m('over'), true); void ob;
+    prog(q => { const u = q * 2 % 1, ph = u < .4 ? u / .4 : 1 - (u - .4) / .6; h.set({ aN: 170 - 10 * ph, aF: 170 - 10 * ph, eN: 100 * ph, eF: 100 * ph }); musAct(K, ['triceps', 'lat'], 1); musAct(K, ['abdom'], .7); }, m('over', 1), Math.max(3, m('side') - m('over') - 1), lin);
+    pill(s3, 'из-за головы: погасить плечами и локтями — бросить', 400, 165, m('over', 1), { col: COL.good, size: 14 });
+    hide(s3, m('side'), .4);
+    const s4 = scn(p, m('side'));
+    floorAt(s4, 40, 760, 840, m('side'));
+    const fs = frontStand(s4, 300, 840, 1.15, m('side'), { muscles: true });
+    const b4 = ballEl(s4, 20, BALL_W); show(b4.g, m('side', 1));
+    prog(q => { const u = Math.sin(q * Math.PI * 6); fs.set({ aL: 70 + 30 * u, eL: 60, aR: 70 - 30 * u, eR: 60, lean: 3 * u }); const A = fs.at(fs.pts.arms[0][1]), B = fs.at(fs.pts.arms[1][1]); b4.set((A[0] + B[0]) / 2 + 40 * u, (A[1] + B[1]) / 2); }, m('side', 1), Math.max(3, m('hand') - m('side') - 1), lin);
+    const sp1 = pill(s4, 'боковой бросок в сетку примерно в 3 м — поворотом туловища', 400, 165, m('side', 1), { col: COL.task, size: 13 });
+    const sx1 = txt(s4, 'в книге — 10 футов', 400, 200, m('side', 1), { size: 13, fill: COL.dim, weight: 600, anchor: 'middle' });
+    hide(sp1, m('hand', 1), .3); hide(sx1, m('hand', 1), .3);
+    prog(q => { const u = q * 2 % 1, side = Math.floor(q * 2) % 2 ? 1 : -1; fs.set({ aL: 150, aR: 150, eL: 0, eR: 0, lean: 0 }); const A = fs.at(fs.pts.arms[0][2] || fs.pts.arms[0][1]), B = fs.at(fs.pts.arms[1][2] || fs.pts.arms[1][1]); const P = side < 0 ? [A, B] : [B, A]; b4.set(lerp(P[0][0], P[1][0], u), lerp(P[0][1], P[1][1], u) - 60 * Math.sin(u * Math.PI)); }, m('hand', 1), Math.max(3, D - m('hand') - 2), lin);
+    pill(s4, 'из руки в руку над головой — отводящие мышцы плеча', 400, 165, m('hand', 1.3), { col: SH, size: 14 });
+    infoCard(p, 800, 90, 760, 120, 'диагонали', 'стоя, утяжелённый мяч двумя руками: D1 или D2 с быстрой сменой и поворотом туловища', COL.good, m('diag'), { size: 16 });
+    infoCard(p, 800, 225, 760, 150, 'от груди и из-за головы', 'лёжа и стоя: поймать, затормозить, сразу бросить; сгибатели плеча и разгибатели локтя, разгибатели плеча и локтя', SH, m('chest'), { size: 16 });
+    infoCard(p, 800, 390, 760, 150, 'сбоку и над головой', 'боковой бросок в сетку — горизонтальные мышцы плеча и ротаторы туловища; из руки в руку — отводящие', COL.task, m('side'), { size: 16 });
+  }],
+
+  ['ueu', 'Руки: ротаторы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ротаторы плеча', 400, 56, m('band'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const s1 = scn(p, m('band'));
+    const wl = path(s1, 'M700 220L700 840', { stroke: PROP_C, 'stroke-width': 10 }, { o: 0 }); show(wl, m('band'));
+    const r = rot9090(s1, 330, 420, 1.6, m('band'));
+    const bd = bandLine(s1, '#e86a8a'); show(bd.e, m('band', 2));
+    prog(q => { const u = q * 2 % 1, ext = Math.floor(q * 2) === 0; const a = ext ? (u < .6 ? 90 * u / .6 : 90 * (1 - (u - .6) / .4)) : (u < .6 ? 90 - 90 * u / .6 : 90 * (u - .6) / .4); r.set(a); bd.set(r.at('X'), [700, ext ? 300 : 560], 180); r.mus.er.act(ext ? .9 : .2); r.mus.ir.act(ext ? .2 : .9); }, m('band', 2), Math.max(3, m('prone') - m('band') - 2), lin);
+    lab(s1, 'наружные ротаторы', 120, 300, 330 - 52 * 1.6 * .6, 420 + 46 * 1.6 * .5, COL.bad, m('band', 3), { size: 15, anchor: 'start' });
+    txt(s1, 'положение 90/90: плечо отведено, локоть согнут', 400, 860, m('band', 1), { size: 15, fill: SH, weight: 700, anchor: 'middle' });
+    pill(s1, 'лицом к стене — для наружных; спиной — для внутренних', 400, 120, m('band', 1), { col: COL.task, size: 13 });
+    pill(s1, 'отпустить под контролем — сразу вернуть; лента натянута', 400, 165, m('band', 9), { col: COL.good, size: 13 });
+    hide(s1, m('prone'), .4);
+    const s2 = scn(p, m('prone'));
+    const tb = bench(s2, 60, 520, 560, m('prone'), COL.dim, 280);
+    floorAt(s2, 40, 760, 840, m('prone'));
+    const r2 = rot9090(s2, 470, 520, 1.2, m('prone')); put(r2.g, { x: 470, y: 520, s: 1.2, r: 90 });
+    const b2 = ballEl(s2, 18, BALL_W); show(b2.g, m('prone', 2));
+    prog(q => { const u = q * 2 % 1; const a = u < .4 ? lerp(90, 150, u / .4) : lerp(150, 90, (u - .4) / .6); r2.set(a); const ang = rad(a + 90), W = [470 + Math.sin(ang) * 132 * 1.2, 520 - Math.cos(ang) * 132 * 1.2]; const fall = u < .4 ? 0 : Math.sin((u - .4) / .6 * Math.PI); b2.set(W[0] + 10, W[1] + 20 + 240 * fall); r2.mus.ir.act(u < .4 ? 1 : .3); }, m('prone', 2), Math.max(3, m('sidec') - m('prone') - 2), lin);
+    pill(s2, 'лёжа на животе: ударить мячом об пол внутренней ротацией', 400, 120, m('prone', 1), { col: COL.good, size: 13 });
+    void tb;
+    hide(s2, m('sidec'), .4);
+    const s3 = scn(p, m('sidec'));
+    const tr = topRot(s3, 300, 580, 1.05, m('sidec'));
+    const b3 = ballEl(s3, 18, BALL_W); show(b3.g, m('sidec', 2));
+    prog(q => { const u = q * 2 % 1; tr.set(u < .5 ? 40 * u / .5 : 40 - 100 * (u - .5) / .5); const X = tr.at('W'); if (u < .4) { const a = u / .4; b3.set(lerp(720, X[0], a), lerp(300, X[1] - 20, a) - 60 * Math.sin(a * Math.PI)); } else if (u < .8) b3.set(X[0], X[1] - 20); else { const a = (u - .8) / .2; b3.set(lerp(X[0], 720, a), lerp(X[1] - 20, 300, a) - 60 * Math.sin(a * Math.PI)); } }, m('sidec', 2), 6, lin);
+    pill(s3, 'поймать сбоку — плечо уходит наружу — вернуть внутренней', 400, 120, m('sidec', 1), { col: COL.task, size: 13 });
+    pill(s3, 'бросок как в бейсболе — с поворотом туловища', 400, 165, m('sidec', 9), { col: SH, size: 14 });
+    hide(s3, m('rev'), .4);
+    const s4 = scn(p, m('rev'));
+    const r4 = rot9090(s4, 300, 420, 1.5, m('rev'));
+    const b5 = ballEl(s4, 16, '#f3c95c'); show(b5.g, m('rev', 2));
+    prog(q => { const u = q * 2 % 1; const a = u < .3 ? 0 : u < .6 ? 70 * (u - .3) / .3 : 70 * (1 - (u - .6) / .4); r4.set(a); const X = r4.at('X'); b5.set(u < .3 ? lerp(80, X[0], u / .3) : X[0], u < .3 ? lerp(200, X[1], u / .3) : X[1]); r4.mus.er.act(u > .6 ? 1 : .6); }, m('rev', 2), Math.max(3, D - m('rev') - 3), lin);
+    pill(s4, 'обратная ловля: спиной к терапевту, 90/90 — наружные ротаторы', 400, 120, m('rev', 1), { col: COL.bad, size: 13 });
+    infoCard(p, 800, 90, 760, 175, 'лента в 90/90', 'для наружных — лицом к стене: отпустить во внутреннюю под контролем и быстро вернуть; для внутренних — спиной к стене; лента натянута', COL.task, m('band'), { size: 16 });
+    infoCard(p, 800, 280, 760, 120, 'лёжа на животе', 'плечо 90°, локоть согнут: удары мячом об пол — внутренние ротаторы', COL.good, m('prone'), { size: 16 });
+    infoCard(p, 800, 415, 760, 120, 'ловля сбоку и бросок', 'плечо чуть отведено: ловить сбоку и возвращать; затем бейсбольный бросок с поворотом', SH, m('sidec'), { size: 16 });
+    infoCard(p, 800, 550, 760, 120, 'обратная ловля', 'на колене спиной к терапевту, 90/90: поймать лёгкий мяч — бросить наружной ротацией', COL.bad, m('rev'), { size: 16 });
+  }],
+
+  ['uee', 'Локоть и запястье', (m, D) => {
+    const p = panel(0);
+    txt(p, 'локоть и запястье', 400, 56, m('elb'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const s1 = scn(p, m('elb'));
+    floorAt(s1, 40, 760, 840, m('elb'));
+    const f = fig(s1, { s: 1.4 }); const M = figMus(f, ['biceps', 'triceps', 'deltA']); standSet(f, [262, 834], [244, 834])([250, 834 - 182 * 1.4 + 4]); f.set({ aN: 10, eN: 90 });
+    const b = ballEl(s1, 18, BALL_W); show(b.g, m('elb', 1));
+    prog(q => { const u = q * 2 % 1, e = u < .5 ? 90 + 40 * Math.sin(u / .5 * Math.PI) : 90 - 70 * Math.sin((u - .5) / .5 * Math.PI); f.set({ eN: e }); const W = onStage(f, 'WN'); const fly = u < .5 ? Math.sin(u / .5 * Math.PI) : 0; b.set(W[0] + 10, W[1] - 20 - 160 * fly); musAct(M, ['biceps'], u < .5 ? 1 : .6); }, m('elb', 1), Math.max(3, m('wr') - m('elb') - 1), lin);
+    lab(s1, 'сгибатели локтя: поймать — дать разогнуться — подбросить', 430, 330, ...onStage(f, 'EN'), COL.bad, m('elb', 3), { size: 14 });
+    pill(s1, 'руки над головой — разгибатели локтя', 400, 120, m('elb', 9), { col: SH, size: 14 });
+    hide(s1, m('wr'), .4);
+    const s2 = scn(p, m('wr'));
+    const as = armSide(s2, 210, 380, .85, m('wr'), { muscles: ['flx', 'ext'] }); as.set({ sh: 80, el: 90, wr: 0, pro: 0 });
+    const b2 = ballEl(s2, 16, '#f3c95c'); show(b2.g, m('wr', 1));
+    prog(q => { const u = q * 2 % 1, w = u < .5 ? 40 * Math.sin(u / .5 * Math.PI) : -30 * Math.sin((u - .5) / .5 * Math.PI); as.set({ wr: w }); const P = as.at('palm'); const fly = u < .5 ? Math.sin(u / .5 * Math.PI) : 0; b2.set(P[0], P[1] - 18 - 150 * fly); if (as.flx) as.flx.act(u < .5 ? 1 : .4); }, m('wr', 1), Math.max(3, m('sport') - m('wr') - 1), lin);
+    pill(s2, 'сидя, локоть на бедре: подбрасывать сгибанием запястья', 400, 120, m('wr', 1), { col: COL.good, size: 13 });
+    hide(s2, m('sport'), .4);
+    const s3 = scn(p, m('sport'));
+    floorAt(s3, 40, 760, 840, m('sport'));
+    const g = fig(s3, { s: 1.35 }); const N = figMus(g, ['deltA', 'pecMaj', 'abdom', 'parasp', 'foreFlex']); const sg = standSet(g, [300, 834], [200, 834]); sg([250, 834 - 176 * 1.35]);
+    const rq = heldStick(g, s3, 60, 0, m('sport', 1), { racquet: true });
+    prog(q => { const k = Math.sin(q * Math.PI * 8); g.set({ aN: 60 + 10 * k, eN: 40, aF: 20 }); musAct(N, ['foreFlex'], .5 + .5 * Math.abs(k)); }, m('sport', 4), 6, lin);
+    hide(rq, m('sport', 14), .3);
+    const cl = heldStick(g, s3, 160, 10, m('sport', 14), { col: '#c8c8c8', w: 5 });
+    prog(q => { const u = q * 2 % 1, a = u < .5 ? lerp(10, 150, u / .5) : lerp(150, -40, (u - .5) / .5); const H0 = [250, 834 - 176 * 1.35]; sg(H0, [H0[0] + (u < .5 ? -12 * u / .5 : lerp(-12, 24, (u - .5) / .5)), H0[1] - 100]); g.set({ aN: a, aF: a - 10, eN: 10, eF: 10 }); musAct(N, ['pecMaj', 'abdom', 'deltA'], u < .5 ? .3 : 1); }, m('sport', 15), Math.max(3, D - m('sport') - 16), lin);
+    void cl;
+    pill(s3, 'ведение мяча о стену или пол; набивать мяч ракеткой', 400, 120, m('sport', 1), { col: COL.task, size: 13 });
+    pill(s3, 'махи утяжелённой клюшкой или битой: назад — и резко вперёд', 400, 165, m('sport', 14), { col: CON_C, size: 13 });
+    infoCard(p, 800, 90, 760, 150, 'локоть', 'подбросить сгибанием, поймать с разгибанием под контролем и сразу снова; над головой — разгибатели', COL.bad, m('elb'), { size: 16 });
+    infoCard(p, 800, 255, 760, 120, 'запястье', 'сидя, локоть на бедре, ладонь вверх: подбрасывать сгибанием запястья', COL.good, m('wr'), { size: 16 });
+    infoCard(p, 800, 390, 760, 175, 'имитация спорта', 'ведение мяча; ракетка: ладонью вверх и об пол — сгибатели, ладонью вниз вверх — разгибатели; махи клюшкой и битой', COL.task, m('sport'), { size: 16 });
+  }],
+
+  ['uewb', 'С опорой на руки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'с опорой на руки', 400, 56, m('slide'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const s1 = scn(p, m('slide'));
+    floorAt(s1, 40, 760, 840, m('slide'));
+    const sb = slideBoard(s1, 520, 840, 300, m('slide'));
+    const f = fig(s1, { s: 1.25 }); const M = figMus(f, ['deltA', 'deltP', 'triceps', 'abdom']);
+    prog(q => { const k = Math.sin(q * Math.PI * 8); sb.set(90 * k); kneelSet(f, 230, 840)(35); figArmIK(f, 'N', [520 + 90 * k, sb.top], -1); figArmIK(f, 'F', [516 + 90 * k, sb.top], -1); f.set({ hd: -30 }); musAct(M, ['deltA'], Math.max(0, k)); musAct(M, ['deltP'], Math.max(0, -k)); musAct(M, ['triceps', 'abdom'], .7); }, m('slide', 1), Math.max(3, m('wall') - m('slide') - 1), lin);
+    pill(s1, 'скользящая платформа: в стороны, вперёд-назад, потом одной рукой', 400, 120, m('slide', 1), { col: COL.good, size: 13 });
+    hide(s1, m('wall'), .4);
+    const s2 = scn(p, m('wall'));
+    floorAt(s2, 40, 760, 840, m('wall'));
+    const wl = path(s2, 'M600 240L600 840', { stroke: PROP_C, 'stroke-width': 12 }, { o: 0 }); show(wl, m('wall'));
+    const g = fig(s2, { s: 1.35 }); const N = figMus(g, ['pecMaj', 'triceps', 'deltA', 'abdom']);
+    prog(q => { const u = q * 2 % 1, lean = u < .5 ? 40 * u / .5 : 40 * (1 - (u - .5) / .5), A = [300, 834]; const L = 182 * 1.35, H = [A[0] + Math.sin(rad(lean)) * L * .98, A[1] - Math.cos(rad(lean)) * L * .98]; figTrunk(g, H, [H[0] + Math.sin(rad(lean)) * 100, H[1] - Math.cos(rad(lean)) * 100]); figLegIK(g, 'N', A); figLegIK(g, 'F', [A[0] - 6, A[1]]); const S = onStage(g, 'Sh'), touch = lean > 22; if (touch) { figArmIK(g, 'N', [592, S[1] - 10], -1); figArmIK(g, 'F', [592, S[1] - 6], -1); } else g.set({ aN: 80, eN: 10, aF: 80, eF: 10 }); musAct(N, ['pecMaj', 'triceps', 'deltA'], touch ? 1 : .2); musAct(N, ['abdom'], .7); }, m('wall', 1), Math.max(3, m('side') - m('wall') - 1), lin);
+    pill(s2, 'упасть к стене, поймать себя руками — сразу оттолкнуться', 400, 120, m('wall', 1), { col: COL.task, size: 13 });
+    pill(s2, 'потом самостоятельно и одной рукой', 400, 165, m('wall', 12), { col: SH, size: 14 });
+    pill(s2, 'от столешницы в стороны: стопы примерно в 1 м', 400, 210, m('side', 1), { col: COL.good, size: 14 });
+    txt(s2, 'в книге — 3 фута', 400, 245, m('side', 1), { size: 13, fill: COL.dim, weight: 600, anchor: 'middle' });
+    hide(s2, m('pu'), .4);
+    const s3 = scn(p, m('pu'));
+    floorAt(s3, 40, 760, 840, m('pu'));
+    const h = fig(s3, { s: 1.2 }); const K = figMus(h, ['pecMaj', 'triceps', 'deltA', 'abdom']); const pk = pushUp(h, [130, 840], [470, 840]); pk(0);
+    const cl = G(s3, { o: 0 }); T(cl, 'хлопок!', { x: 470, y: 600, size: 22, fill: CON_C, weight: 700, anchor: 'middle' });
+    prog(q => { const u = q * 2 % 1; if (u < .4) { pk(u / .4); } else if (u < .7) { const a = (u - .4) / .3, e = Math.sin(a * Math.PI); pk(1 - a); figArmIK(h, 'N', [470, 840 - 60 * e], -1); figArmIK(h, 'F', [464, 840 - 60 * e], -1); put(cl, { o: e > .6 ? 1 : 0 }); } else { pk((u - .7) / .3); put(cl, { o: 0 }); } musAct(K, ['pecMaj', 'triceps', 'deltA'], 1); }, m('pu', 1), 8, lin);
+    const p1 = platBox(s3, 420, 540, 50, 840, m('pu', 12)); void p1;
+    prog(q => { const u = q * 2 % 1; const onP = u < .3 || u > .8; const pd = pushUp(h, [130, 840], [480, onP ? 790 : 840]); pd(onP ? 0 : Math.sin((u - .3) / .5 * Math.PI)); put(cl, { o: 0 }); musAct(K, ['pecMaj', 'triceps', 'deltA'], 1); }, m('pu', 12), Math.max(3, D - m('pu') - 13), lin);
+    pill(s3, 'с хлопком; с платформ на пол и обратно', 400, 120, m('pu', 1), { col: CON_C, size: 15 });
+    infoCard(p, 800, 90, 760, 120, 'скользящая платформа', 'на коленях: руки в стороны, вперёд-назад, затем на одной руке — всё быстрее', COL.good, m('slide'), { size: 16 });
+    infoCard(p, 800, 225, 760, 150, 'отталкивания', 'от стены — с помощью терапевта, затем сам и одной рукой; от столешницы в стороны — вес то на одну, то на другую руку', COL.task, m('wall'), { size: 16 });
+    infoCard(p, 800, 390, 760, 120, 'отжимания', 'с хлопком; с платформ: опустить руки и грудь на пол — отжаться — вернуться', CON_C, m('pu'), { size: 16 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-plyo-ue', prompt: ['Какие мышцы работают в основном?'],
+    build: grid([
+      { parts: ['Удары мячом об пол лёжа на животе'], ans: ['ir'], why: 'Внутренние ротаторы.' },
+      { parts: ['Обратная ловля в положении 90/90'], ans: ['er'], why: 'Наружные ротаторы.' },
+      { parts: ['Перебрасывание мяча из руки в руку над головой'], ans: ['ab'], why: 'Отводящие мышцы плеча.' },
+      { parts: ['Подбрасывание мяча сгибанием запястья'], ans: ['wf'], why: 'Сгибатели запястья.' },
+    ], [['ir', 'Внутренние ротаторы', COL.task], ['er', 'Наружные ротаторы', COL.bad], ['ab', 'Отводящие', SH], ['wf', 'Сгибатели запястья', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['le1', 'Ноги: начало', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ноги: приземление и первые упражнения', 400, 56, m('intro'), { size: 24, weight: 700, anchor: 'middle', fill: SH });
+    pill(p, 'разгибатели бедра и колена, подошвенные сгибатели; груз; две ноги → одна', 400, 120, m('intro', 1), { col: SH, size: 13 });
+    const s1 = scn(p, m('intro', 1));
+    floorAt(s1, 40, 760, 840, m('intro', 1));
+    const fs = frontStand(s1, 220, 840, 1.4, m('intro', 1), { muscles: true }); fs.set({ drop: 40, w: 26 });
+    const fb = frontStand(s1, 560, 840, 1.4, m('land', 3), { muscles: true }); fb.set({ drop: 40, w: 26 });
+    const kb = G(s1, { o: 0 }); { const KL = fb.at(fb.pts.legs[0][0]), KR = fb.at(fb.pts.legs[1][0]); [KL, KR].forEach((K, i) => path(kb, `M${f1(K[0] + (i ? -10 : 10))} ${f1(K[1] - 5)}l${i ? -18 : 18} 6`, { stroke: COL.bad, 'stroke-width': 5, 'stroke-linecap': 'round' })); } show(kb, m('land', 4));
+    txt(s1, 'голени вертикально', 220, 870, m('land', 2), { size: 15, fill: COL.good, weight: 700, anchor: 'middle' });
+    txt(s1, 'вальгусный провал — нет', 560, 870, m('land', 4), { size: 15, fill: COL.bad, weight: 700, anchor: 'middle' });
+    pill(s1, 'поддерживающая обувь; колени гасят удар', 400, 165, m('land', 1), { col: COL.good, size: 14 });
+    hide(s1, m('kick'), .4);
+    const s2 = scn(p, m('kick'));
+    floorAt(s2, 40, 760, 840, m('kick'));
+    const f = fig(s2, { s: 1.4 }); const M = figMus(f, ['iliopsoas', 'quads', 'glutMax', 'hamstrings']); const sf = standSet(f, [240, 834], [240, 834]); sf([240, 834 - 182 * 1.4 + 4]);
+    const kbl = ballEl(s2, 20, '#e8e8e8'); show(kbl.g, m('kick', 1));
+    prog(q => { const u = q * 2 % 1, a = u < .45 ? -40 * u / .45 : lerp(-40, 70, Math.min(1, (u - .45) / .25)); f.set({ hN: a, kN: u < .45 ? 60 * u / .45 : lerp(60, 0, Math.min(1, (u - .45) / .25)), fN: 0 }); figLegIK(f, 'F', [240, 834]); const T0 = onStage(f, 'toeN'); kbl.set(u < .65 ? 360 : lerp(360, 760, (u - .65) / .35), u < .65 ? 816 : 816 - 160 * Math.sin((u - .65) / .35 * Math.PI)); musAct(M, ['iliopsoas', 'quads'], u > .45 ? 1 : .2); musAct(M, ['glutMax', 'hamstrings'], u < .45 ? .4 : .1); void T0; }, m('kick', 1), Math.max(3, m('ball') - m('kick') - 1), lin);
+    pill(s2, 'удар по мячу: мах назад — и быстро вперёд', 400, 165, m('kick', 1), { col: COL.task, size: 14 });
+    pill(s2, 'боком: отвести — привести, внутренней стороной стопы', 400, 210, m('kick', 10), { col: SH, size: 14 });
+    hide(s2, m('ball'), .4);
+    const s3 = scn(p, m('ball'));
+    floorAt(s3, 40, 760, 840, m('ball'));
+    const gb = gymBall(s3, 200, 840, 62, m('ball'));
+    const g = fig(s3, { s: 1.3, o: 0 }); show(g.g, m('ball')); const N = figMus(g, ['glutMax', 'quads', 'hamstrings']);
+    prog(q => { const c = cyc(q, 4); const H = [lerp(200, 270, c), lerp(gb.top - 2, 834 - 150 * 1.3, c)]; figTrunk(g, H, [H[0] + lerp(30, 10, c), H[1] - 100]); figLegIK(g, 'N', [320, 834]); figLegIK(g, 'F', [312, 834]); g.set({ aN: 60, aF: 60, eN: 20, eF: 20 }); musAct(N, ['glutMax', 'quads'], 1); }, m('ball', 1), Math.max(3, m('tramp') - m('ball') - 1), lin);
+    pill(s3, 'с мяча до полустойки и обратно — быстрая смена', 400, 165, m('ball', 1), { col: COL.good, size: 14 });
+    hide(s3, m('tramp'), .4);
+    const s4 = scn(p, m('tramp'));
+    floorAt(s4, 40, 760, 840, m('tramp'));
+    const tp = trampEl(s4, 260, 840, 240, m('tramp'));
+    const h = fig(s4, { s: 1.25 }); const K = figMus(h, ['gastroc', 'soleus', 'tibAnt']);
+    prog(q => { const u = q * 4 % 1, e = Math.sin(u * Math.PI); tp.set(10 * (1 - e)); h.set({ ...STAND, fN: -30 * e, fF: -30 * e }); put(h.g, { x: 260, y: tp.top - 182 * 1.25 - 30 * e + 8 * (1 - e) }); musAct(K, ['gastroc', 'soleus'], 1 - e * .5); }, m('tramp', 1), 4, lin);
+    pill(s4, 'пружинить пятками на мини-батуте', 400, 165, m('tramp', 1), { col: COL.task, size: 14 });
+    const fs2 = frontStand(s4, 600, 840, 1.0, m('shuf'), { muscles: true });
+    prog(q => { const k = Math.sin(q * Math.PI * 6); put(fs2.g, { x: 600 + 60 * k }); fs2.set({ w: 20 + 14 * Math.abs(k), drop: 14 }); }, m('shuf', 1), Math.max(3, D - m('shuf') - 2), lin);
+    pill(s4, 'быстрые приставные шаги; скользящая платформа', 400, 210, m('shuf', 1), { col: SH, size: 14 });
+    infoCard(p, 800, 90, 760, 120, 'приземление', 'обувь; колени сгибаются, голень вертикальна — без вальгусного провала', COL.good, m('land'), { size: 16 });
+    infoCard(p, 800, 225, 760, 150, 'удар по мячу', 'мах назад и вперёд — сгибатели бедра и разгибатели колена; боком — приводящие', COL.task, m('kick'), { size: 16 });
+    infoCard(p, 800, 390, 760, 150, 'мяч, батут, шаги', 'с мяча до полустойки; пружинить на батуте; приставные шаги и скользящая платформа', SH, m('ball'), { size: 16 });
+  }],
+
+  ['le2', 'Ноги: прыжки', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ноги: прыжки', 400, 56, m('squat'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    floorAt(p, 40, 760, 840, m('squat'));
+    const f = fig(p, { s: 1.15 }); const M = figMus(f, ['glutMax', 'quads', 'gastroc', 'iliopsoas']);
+    prog(q => jumpPose(f, M, 300, 300, 840, 1.15, (q * 3) % 1, 'stand', 120), m('squat', 1), Math.max(3, m('bound') - m('squat') - 1), lin);
+    prog(q => { const k = Math.floor(q * 3), u = (q * 3) % 1; jumpPose(f, M, 120 + 180 * k, 120 + 180 * (k + 1), 840, 1.15, u, 'stand', 90); }, m('bound', 1), Math.max(3, m('quad') - m('bound') - 1), lin);
+    const qf = quadFloor(p, 400, 520, 200, m('quad'));
+    const dt = G(p, { o: 0 }); mk('ellipse', { rx: 22, ry: 10, fill: COL.task }, dt); show(dt, m('quad', 1)); hide(dt, m('tuck'), .3); hide(qf, m('tuck'), .3);
+    const QP = [[300, 495], [500, 495], [300, 560], [500, 560], [300, 495]];
+    prog(q => { const i = Math.min(3, Math.floor(q * 4)), u = (q * 4) % 1; put(dt, { x: lerp(QP[i][0], QP[i + 1][0], u), y: lerp(QP[i][1], QP[i + 1][1], u) - 40 * Math.sin(u * Math.PI) }); }, m('quad', 1), 5, lin);
+    prog(q => jumpPose(f, M, 300, 300, 840, 1.15, (q * 3) % 1, 'tuck', 150), m('tuck', 1), Math.max(3, m('lunge') - m('tuck') - 1), lin);
+    prog(q => jumpPose(f, M, 300, 300, 840, 1.15, (q * 3) % 1, 'lunge', 100), m('lunge', 1), Math.max(3, D - m('lunge') - 2), lin);
+    pill(p, 'из приседа — вверх — в присед; голени вертикально', 400, 120, m('squat', 1), { col: COL.good, size: 14 });
+    pill(p, 'серии прыжков вперёд; потом скачки на одной', 400, 165, m('bound', 1), { col: SH, size: 14 });
+    pill(p, 'по квадратам — смена направления', 400, 210, m('quad', 1), { col: COL.task, size: 14 });
+    pill(p, 'с подтягиванием коленей; через барьер', 400, 255, m('tuck', 1), { col: CON_C, size: 14 });
+    pill(p, 'в выпаде; «ножницы»; с жилетом', 400, 300, m('lunge', 1), { col: COL.bad, size: 14 });
+    infoCard(p, 800, 90, 760, 120, 'из приседа', 'быстро присесть (уступающая фаза) — сразу выпрыгнуть; голени вертикально, без вальгуса', COL.good, m('squat'), { size: 16 });
+    infoCard(p, 800, 225, 760, 120, 'серии и квадраты', 'прыжки вперёд по прямой, затем скачки; по квадратам — вперёд, назад, в стороны, по диагонали', SH, m('bound'), { size: 16 });
+    infoCard(p, 800, 360, 760, 150, 'подтягивание и выпад', 'как можно выше с коленями к груди; приземление в выпад той же ногой или «ножницами»; труднее — с грузом', CON_C, m('tuck'), { size: 16 });
+  }],
+
+  ['le3', 'Ноги: платформы и препятствия', (m, D) => {
+    const p = panel(0);
+    txt(p, 'зигзаг, платформы, препятствия', 400, 56, m('zig'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const zz = G(p, { o: 0 }); path(zz, 'M80 380L220 300L360 380L500 300L640 380', { stroke: SH, 'stroke-width': 4, fill: 'none', 'stroke-dasharray': '10 8' }); show(zz, m('zig'));
+    const dz = G(p, { o: 0 }); mk('ellipse', { rx: 20, ry: 9, fill: COL.task }, dz); show(dz, m('zig', 1)); hide(dz, m('plat'), .3); hide(zz, m('plat'), .3);
+    const ZP = [[80, 380], [220, 300], [360, 380], [500, 300], [640, 380]];
+    prog(q => { const i = Math.min(3, Math.floor(q * 4)), u = (q * 4) % 1; put(dz, { x: lerp(ZP[i][0], ZP[i + 1][0], u), y: lerp(ZP[i][1], ZP[i + 1][1], u) - 30 * Math.sin(u * Math.PI) }); }, m('zig', 1), 4, lin);
+    floorAt(p, 40, 760, 840, m('zig'));
+    const a = platBox(p, 70, 220, 80, 840, m('plat')), b = platBox(p, 560, 710, 80, 840, m('plat', 9));
+    const f = fig(p, { s: 1.0, o: 0 }); show(f.g, m('plat')); const M = figMus(f, ['glutMax', 'quads', 'gastroc']);
+    prog(q => { const u = q * 2 % 1; if (u < .5) jumpPose(f, M, 380, 145, 840, 1.0, u * 2, 'stand', 120); else { const v = (u - .5) * 2; f.set({ ...STAND }); put(f.g, { x: lerp(145, 380, v), y: lerp(a.top, 840, v * v) - 182 - 40 * Math.sin(v * Math.PI) }); } }, m('plat', 1), 6, lin);
+    prog(q => { const v = q * 2 % 1, A = [145, a.top], B = [635, b.top]; if (v < .3) { const s0 = v / .3; f.set({ ...STAND, aN: 30, aF: 30 }); put(f.g, { x: lerp(A[0], 390, s0), y: lerp(A[1], 840, s0 * s0) - 182 - 30 * Math.sin(s0 * Math.PI) }); } else if (v < .5) { f.set({ ...SQUAT, t: 28, aN: -20, aF: -20 }); put(f.g, { x: 390, y: 840 - 140 }); musAct(M, ['glutMax', 'quads', 'gastroc'], 1); } else { const s0 = (v - .5) / .5, e = Math.sin(s0 * Math.PI); f.set({ ...STAND, aN: 150 * (1 - s0), aF: 150 * (1 - s0), hN: 30 * e, kN: 50 * e, hF: 30 * e, kF: 50 * e }); put(f.g, { x: lerp(390, B[0], s0), y: lerp(840, B[1], s0) - 182 - 110 * e }); musAct(M, ['glutMax', 'quads', 'gastroc'], .3); } }, m('plat', 9), 6, lin);
+    pill(p, 'зигзаг: прыжки или скачки, быстрее и дальше', 400, 120, m('zig', 1), { col: SH, size: 14 });
+    pill(p, 'одна платформа: вперёд, назад, в стороны; потом выше', 400, 165, m('plat', 1), { col: COL.good, size: 14 });
+    pill(p, 'несколько платформ: с одной — на пол — на следующую', 400, 210, m('plat', 9), { col: CON_C, size: 14 });
+    const cs = G(p, { o: 0 }); [230, 360, 490].forEach((x, i) => cone(cs, x, 840, 40 + 14 * i, m('obst', .3 + i * .3))); show(cs, m('obst'));
+    pill(p, 'скачки через предметы разного размера', 400, 255, m('obst', 1), { col: COL.task, size: 14 });
+    hide(a.g, m('obst'), .3); hide(b.g, m('obst'), .3);
+    prog(q => { const k = Math.floor(q * 3), u = (q * 3) % 1, e = Math.sin(u * Math.PI); f.set({ ...STAND, hF: 50, kF: 90, fF: -10, hN: 20 * e, kN: 30 * e, aN: 40, aF: 40 }); put(f.g, { x: 160 + 130 * k + 130 * u, y: 840 - 182 - 120 * e }); musAct(M, ['glutMax', 'quads', 'gastroc'], u < .2 || u > .8 ? 1 : .3); }, m('obst', 1), Math.max(3, D - m('obst') - 2), lin);
+    infoCard(p, 800, 90, 760, 120, 'зигзаг', 'по зигзагу на полу — прыжки или скачки, всё быстрее и дальше', SH, m('zig'), { size: 16 });
+    infoCard(p, 800, 225, 760, 150, 'платформы', 'на одну и с неё — во все стороны, сначала скорость и повторения, потом высота; с платформы на пол и на следующую', COL.good, m('plat'), { size: 16 });
+    infoCard(p, 800, 390, 760, 100, 'препятствия', 'скачки через предметы разного размера', COL.task, m('obst'), { size: 16 });
+  }],
+
+  ['cases', 'Случаи главы', (m, D) => {
+    const p = panel(0);
+    txt(p, 'два случая главы', 400, 56, m('intro'), { size: 26, weight: 700, anchor: 'middle', fill: SH });
+    const s1 = scn(p, m('c1'));
+    txt(s1, 'волейболистка, 21 год: 4 мес. после пластики ПКС', 40, 120, m('c1', 1), { size: 18, fill: COL.task, weight: 700 });
+    markList(s1, 40, 165, [['объём полный, без боли', COL.good], ['сила 80–85 % от правой ноги', COL.good], ['стабильность как на здоровой', COL.good]], m('c1', 5), 3, { cross: false, size: 15, dy: 40, maxW: 360 });
+    markList(s1, 420, 165, [['приведение бедра', COL.bad], ['внутренняя ротация бедра', COL.bad], ['вальгус колена', COL.bad], ['пронация стопы', COL.bad]], m('c1', 16), 2, { size: 15, dy: 40, maxW: 350 });
+    txt(s1, 'при спуске со ступеньки:', 420, 145, m('c1', 15), { size: 15, fill: COL.bad, weight: 700 });
+    const stp = platBox(s1, 140, 340, 70, 840, m('c1', 15)); floorAt(s1, 40, 760, 840, m('c1', 15));
+    const f = fig(s1, { s: 1.15, o: 0 }); show(f.g, m('c1', 15)); const M = figMus(f, ['glutMax', 'quads', 'hamstrings']);
+    prog(q => { const c = cyc(q, 2); const H = [lerp(250, 290, c), stp.top - lerp(182, 135, c) * 1.15]; figTrunk(f, H, [H[0] + 30 * c, H[1] - 100]); figLegIK(f, 'N', [260, stp.top - 2]); figLegIK(f, 'F', [lerp(330, 380, c), lerp(stp.top - 2, 836, c)]); musAct(M, ['glutMax', 'quads'], c); }, m('c1', 16), 8, lin);
+    pill(s1, 'задание: 8 недель силы, равновесия и плиометрики; и руки', 400, 340, m('c1', 28), { col: SH, size: 13 });
+    hide(s1, m('c2'), .4);
+    const s2 = scn(p, m('c2'));
+    txt(s2, 'мужчина, 35 лет: хронический теннисный локоть', 40, 120, m('c2', 1), { size: 18, fill: COL.task, weight: 700 });
+    const as = armSide(s2, 130, 300, .85, m('c2', 2), { muscles: ['ext', 'flx'] }); as.set({ sh: 70, el: 60, wr: -10, pro: 1 });
+    if (as.ext) { as.ext.hurt = .8; as.ext.act(0); }
+    lab(s2, 'разгибатели запястья — от латерального надмыщелка', 330, 460, ...as.at('E'), COL.bad, m('c2', 3), { size: 14 });
+    pill(s2, 'симптомы под контролем; цель — турниры в клубе', 400, 680, m('c2', 6), { col: COL.good, size: 14 });
+    pill(s2, 'задание: сила и плиометрика для рук и ног, всё тело', 400, 725, m('c2', 10), { col: SH, size: 13 });
+    NOTE(p, 1180, 860, m('c1', 28));
+    infoCard(p, 800, 90, 760, 230, 'волейболистка — по материалу главы', 'сначала приземление без вальгуса и устойчивость бедра на одной ноге; затем прыжки на двух → скачки на одной, платформы и смены направления 2 раза в неделю; равновесие с толчками; плиометрика для рук — броски мяча', COL.task, m('c1', 28), { size: 16 });
+    infoCard(p, 800, 335, 760, 200, 'теннисист — по материалу главы', 'запястье и локоть — подбрасывания, ракетка с короткой, потом длинной ручкой; ротаторы — лента 90/90; ноги — приставные шаги и прыжки; повторения, потом нагрузка', SH, m('c2', 10), { size: 16 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-start', prompt: ['С чего начать плиометрику для ног у волейболистки из случая?'],
+    build: choice([
+      ['Научить приземляться без вальгуса колена, прыжки на двух ногах — потом на одной'],
+      ['Сразу прыжки в глубину с высокой платформы'],
+      ['Скачки на одной ноге через препятствия'],
+      ['Прыжки с жилетом с грузом'],
+    ], 0, 'У неё при спуске со ступеньки вальгус и приведение бедра: сначала техника приземления и прыжки на двух, затем одна нога и усложнение.',
+    [null, 'Это самый продвинутый уровень.', 'Одна нога — после двух и при хорошем приземлении.', 'Груз добавляют после техники и повторений.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Руки — броски и ловля утяжелённого мяча двумя, затем одной рукой, лента для ротаторов в 90/90, удары мячом лёжа, обратная ловля.', 'w1'],
+     ['Локоть и запястье — подбрасывания и ракетка; с опорой — скользящая платформа, отталкивания, отжимания с хлопком и с платформ.', 'w2'],
+     ['Ноги — удар по мячу, вставание с мяча, батут, шаги, прыжки из приседа, серии, квадраты, с подтягиванием коленей и в выпаде.', 'w3'],
+     ['Зигзаг, платформы и препятствия; всегда — опорная обувь и приземление без вальгуса колена.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SH }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-pe1', prompt: ['Подающему в бейсболе нужно ускорить замедление руки после броска. Какое упражнение особенно подходит?'],
+    build: choice([
+      ['Обратная ловля в положении 90/90 — наружные ротаторы'],
+      ['Подъёмы на носки на батуте'],
+      ['Удар по мячу ногой'],
+      ['Вставание с мяча'],
+    ], 0, 'Торможение руки после броска выполняют наружные ротаторы: обратная ловля тренирует их в конце объёма.',
+    [null, 'Это икроножная и камбаловидная.', 'Это мышцы бедра.', 'Это разгибатели бедра и колена.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-pe2', prompt: ['Во время прыжков из приседа колени пациента заваливаются внутрь. Что делать?'],
+    build: choice([
+      ['Остановиться и вернуться к технике приземления: голени вертикально'],
+      ['Прыгать выше'],
+      ['Добавить жилет с грузом'],
+      ['Перейти на одну ногу'],
+    ], 0, 'Вальгусный провал недопустим: техника приземления важнее высоты и груза.',
+    [null, 'Высота усилит нагрузку на колено.', 'Груз добавляют только при правильной технике.', 'На одной ноге контролировать ещё труднее.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

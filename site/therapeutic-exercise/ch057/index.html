@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Утомление и восстановление — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 57, title: 'Утомление и восстановление', minutes: 8, language: 'ru', next: '../ch058/' };
+// lupa begin: the magnifiers of the lesson (L switches); made by tools/therapeutic-exercise/lupa.py from content/therapeutic-exercise/ch057/lupa.ru.json
+const LUPA = [
+  {"beat": "intro", "fig": 0, "target": "biceps", "zoom": 3},
+];
+// lupa end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch057/cards.ru.json
+const CARDS_SHORT = {
+  "нормально и обратимо\nсила нервно-мышечной системы снижается постепенно и временно": "сила снижается постепенно и временно",
+  "в самой мышце\nнарушается сократительный механизм": "нарушается сократительный механизм",
+  "мышцы осанки — много типа I\nдолго держат небольшое напряжение: тело против силы тяжести, стабилизация при повторных нагрузках": "долго держат небольшое напряжение",
+  "много типа IIB\nбыстро наращивают большое напряжение, двигают тяжёлое — но легко утомляются": "большое напряжение, но легко утомляются",
+  "что делать\nуменьшить нагрузку — или прекратить и перейти к другой группе мышц, чтобы эта отдохнула": "уменьшить нагрузку или другая группа мышц",
+  "кислород\nнасколько эффективно тело его использует": "насколько эффективно используется",
+  "часто нерегулярно\nнервно-мышечные, сердечно-лёгочные, воспалительные, онкологические, психические болезни: внезапно, быстрее, через предсказуемые промежутки": "внезапно, быстрее, через промежутки",
+  "доставка кислорода нарушена\nболезни сердца, периферических сосудов, лёгких; химиотерапия, облучение → устают быстрее, восстанавливаются дольше": "устают быстрее, восстанавливаются дольше",
+  "в каждой программе\nмежду подходами и между занятиями": "между подходами и между занятиями",
+  "активное восстановление\nлёгкие упражнения в отдыхе — быстрее, чем покой": "лёгкие упражнения быстрее покоя",
+  "без восстановления нет роста\nотдых слишком короткий → плато или ухудшение, слабость от перетренированности": "короткий отдых → плато или ухудшение",
+  "утомлённая мышца\nлегче получает острое растяжение": "легче получает острое растяжение",
+};
+// cards-short end
+
+const T1 = '#c2564a', T2A = '#e8907c', T2B = '#f6d2c6';
+// A strip of motor unit potentials: n bursts from x0 to x0 + w around baseline y, amplitudes amp(i). Returns the path.
+function emgStrip(p, x0, y, w, n, amp, col = ANAT.taut) {
+  let d = `M${x0} ${y}`, seed = 7;
+  const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+  for (let i = 0; i < n; i++) {
+    const a = x0 + i * w / n, b = a + w / n * .6;
+    for (let x = a; x < b; x += 4) { const env = Math.sin(Math.PI * (x - a) / (b - a)); d += `L${x.toFixed(1)} ${(y + (rnd() * 2 - 1) * amp(i) * env).toFixed(1)}`; }
+    d += `L${(a + w / n).toFixed(1)} ${y}`;
+  }
+  return path(p, d, { stroke: col, 'stroke-width': 2 }, { d: 0 });
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Утомление и восстановление', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 6 · Урок 57', { x: 800, y: 200, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Утомление', { x: 800, y: 285, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и восстановление', { x: 800, y: 350, size: 46, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как мышца устаёт и сколько ей нужно на отдых', 800, 430, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 820;
+    path(art, `M620 ${GY}H900`, { stroke: COL.faint, 'stroke-width': 3 });
+    const c = curlFig(art, 760, GY, .7, 1.3, 0);
+    prog(q => { const e = (1 - Math.cos(2 * Math.PI * 3.5 * q)) / 2; c.f.set({ eN: lerp(10, lerp(125, 70, q), e) }); c.mu.act(1 - .5 * q); }, .4, Math.max(4, D - 1.2), lin);
+    mk('rect', { x: 960, y: 560, width: 30, height: 240, rx: 8, fill: 'none', stroke: COL.dim, 'stroke-width': 2 }, art);
+    const bar = mk('rect', { x: 964, y: 796, width: 22, height: 0, rx: 6, fill: COL.int }, art);
+    prog(q => { bar.setAttribute('y', (796 - 232 * q).toFixed(1)); bar.setAttribute('height', (232 * q).toFixed(1)); bar.setAttribute('fill', mix(COL.int, COL.bad, q)); }, .4, Math.max(4, D - 1.2), lin);
+    T(art, 'утомление', { x: 975, y: 545, size: 20, fill: COL.dim, anchor: 'middle' });
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['local', 'Мышечное утомление', (m) => {
+    const p = panel(0), GY = 780;
+    txt(p, 'мышечное (местное) утомление (muscle fatigue)', 800, 86, m('local'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'ответ мышцы на повторный стимул слабеет', 800, 130, m('local', 1.5), { size: 24, fill: COL.dim, anchor: 'middle' });
+    // potentials of the motor units fall with every repetition; the force falls too
+    const amp = i => 70 * (1 - i * .1), x0 = 100, W = 900;
+    path(p, `M${x0} 330H${x0 + W}`, { stroke: COL.faint, 'stroke-width': 1.5 }, { o: 0 });
+    show(p.lastChild, m('emg'));
+    const e = emgStrip(p, x0, 330, W, 7, amp);
+    txt(p, 'потенциалы двигательных единиц', x0, 220, m('emg'), { size: 23, fill: ANAT.taut, weight: 600 });
+    const env = path(p, `M${x0 + 30} ${330 - amp(0)}L${x0 + 6.5 * W / 7} ${330 - amp(6)}`, { stroke: COL.bad, 'stroke-width': 3, 'stroke-dasharray': '8 7' }, { d: 0 });
+    draw(e, m('rep'), 7, lin);
+    draw(env, m('norm', -.5), .8);
+    txt(p, 'амплитуда ↓', x0 + W - 10, 220, m('norm', -.2), { size: 23, fill: COL.bad, weight: 700, anchor: 'end' });
+    txt(p, 'сила за повторение', x0, 470, m('rep'), { size: 22, fill: COL.dim });
+    for (let i = 0; i < 7; i++) {
+      const h = 160 * (1 - i * .08), b = mk('rect', { x: x0 + i * W / 7 + 30, y: 660 - h, width: 60, height: h, rx: 6, fill: mix(ANAT.muscle, COL.int, i / 7) }, p);
+      put(b, { o: 0 }); show(b, m('rep', i));
+    }
+    ground(p, 1150, 1460, GY, .3);
+    const c = curlFig(p, 1300, GY, 1.05, 1.3, .3);
+    prog(q => { const e2 = (1 - Math.cos(2 * Math.PI * 7 * q)) / 2; c.f.set({ eN: lerp(10, 120, e2) }); c.mu.act(1 - .45 * q); }, m('rep'), 7, lin);
+    infoCard(p, 100, 720, 900, 140, 'нормально и обратимо', 'сила нервно-мышечной системы снижается постепенно и временно', COL.good, m('norm'), { size: 23 });
+  }],
+
+  ['cause', 'Причины', (m) => {
+    const p = panel(0);
+    txt(p, 'почему мышца устаёт', 800, 86, m('cause'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // the chain: CNS → nerve → synapse → muscle fibre
+    const g = G(p, { o: 0 });
+    roundBox(g, 80, 300, 220, 150, COL.whole, PANEL, 3);
+    T(g, 'ЦНС', { x: 190, y: 388, size: 34, weight: 700, fill: COL.whole, anchor: 'middle' });
+    path(g, 'M300 375C420 375 480 375 600 375', { stroke: ANAT.taut, 'stroke-width': 5 });
+    T(g, 'нерв', { x: 450, y: 355, size: 22, fill: ANAT.taut, anchor: 'middle' });
+    mk('ellipse', { cx: 625, cy: 375, rx: 26, ry: 18, fill: ANAT.taut }, g);
+    T(g, 'синапс', { x: 625, y: 430, size: 22, fill: ANAT.taut, anchor: 'middle' });
+    mk('rect', { x: 650, y: 330, width: 840, height: 90, rx: 45, fill: mix(ANAT.muscle, COL.board, .45), stroke: ANAT.muscle, 'stroke-width': 3 }, g);
+    for (let x = 690; x < 1470; x += 22) path(g, `M${x} 340V410`, { stroke: mix(ANAT.muscle, COL.board, .2), 'stroke-width': 3 });
+    T(g, 'мышечное волокно', { x: 1070, y: 310, size: 22, fill: ANAT.muscle, anchor: 'middle' });
+    show(g, m('cause', .3));
+    // inside the fibre
+    [['энергия', '↓'], ['кислород', '↓'], ['кальций', '↓'], ['H⁺', '↑']].forEach(([s, a], i) => {
+      const x = 800 + i * 200;
+      pill(p, `${s} ${a}`, x, 520, m('fib', .8 + i * 1.3), { col: a === '↑' ? COL.bad : COL.int, size: 26 });
+      arrowTo(p, [x, 495], [x, 430], m('fib', .8 + i * 1.3), { col: COL.dim, w: 3, dur: .3 });
+    });
+    infoCard(p, 700, 600, 840, 130, 'в самой мышце', 'нарушается сократительный механизм', ANAT.muscle, m('fib'), { size: 23 });
+    pill(p, 'возбудимость ↓ ?', 625, 245, m('nmj'), { col: ANAT.taut, size: 23 });
+    pill(p, 'защитное торможение ?', 190, 245, m('cns'), { col: COL.whole, size: 23 });
+    txt(p, '? — возможно', 190, 520, m('nmj'), { size: 21, fill: COL.dim, anchor: 'middle', italic: true });
+  }],
+
+  ['fiber', 'Типы волокон и утомление', (m) => {
+    const p = panel(0);
+    txt(p, 'типы волокон и устойчивость к утомлению', 800, 80, m('fiber'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const X = [700, 1000, 1300], cols = [['тип I', T1], ['тип IIA', T2A], ['тип IIB', T2B]];
+    cols.forEach(([s, c], i) => { const g = G(p, { o: 0 }); mk('rect', { x: X[i] - 130, y: 125, width: 260, height: 54, rx: 14, fill: c }, g); T(g, s, { x: X[i], y: 162, size: 27, weight: 700, fill: COL.board, anchor: 'middle' }); show(g, m('rows', i * .3)); });
+    const rows = [['устойчивость к утомлению', ['высокая', 'средняя', 'низкая'], [1, .55, .2]],
+      ['густота капилляров', ['высокая', 'высокая', 'низкая'], [1, 1, .25]],
+      ['энергия', ['аэробная', 'аэробная', 'анаэробная'], null],
+      ['диаметр', ['малый', 'средний', 'большой'], [.3, .6, 1]],
+      ['скорость сокращения и укорочения', ['медленная', 'быстрая', 'быстрая'], [.3, 1, 1]]];
+    rows.forEach(([lab, vals, lv], r) => {
+      const y = 240 + r * 82, g = G(p, { o: 0 });
+      mk('rect', { x: 70, y: y - 36, width: 1390, height: 72, rx: 12, fill: r % 2 ? 'none' : PANEL }, g);
+      put(para(g, lab, 90, y + 2, null, { size: 23, weight: 600, maxW: 440 }), { o: 1 });
+      vals.forEach((v, i) => {
+        T(g, v, { x: X[i], y: y + (lv ? -2 : 8), size: 23, fill: COL.chalk, anchor: 'middle' });
+        if (lv) mk('rect', { x: X[i] - 90, y: y + 10, width: 180 * lv[i], height: 10, rx: 5, fill: cols[i][1] }, g);
+      });
+      show(g, m('r' + (r + 1)));
+    });
+    infoCard(p, 70, 680, 680, 180, 'мышцы осанки — много типа I', 'долго держат небольшое напряжение: тело против силы тяжести, стабилизация при повторных нагрузках', T1, m('post'), { size: 22 });
+    infoCard(p, 780, 680, 680, 180, 'много типа IIB', 'быстро наращивают большое напряжение, двигают тяжёлое — но легко утомляются', T2B, m('heavy'), { size: 22 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-fibre', prompt: ['Какой тип волокон?'],
+    build: grid([
+      { parts: ['Наибольшая устойчивость к утомлению'], ans: ['1'], why: 'Тип I.' },
+      { parts: ['Анаэробная энергия, мало капилляров'], ans: ['b'], why: 'Тип IIB.' },
+      { parts: ['Быстрые, но аэробные, средняя устойчивость'], ans: ['a'], why: 'Тип IIA.' },
+      { parts: ['Наибольший диаметр'], ans: ['b'], why: 'Тип IIB.' },
+      { parts: ['Преобладают в мышцах осанки'], ans: ['1'], why: 'Тип I держит небольшое напряжение долго.' },
+    ], [['1', 'Тип I', T1], ['a', 'Тип IIA', T2A], ['b', 'Тип IIB', T2B]], { multi: false, text: true }),
+  }], done) }],
+
+  ['signs', 'Признаки утомления', (m, D) => {
+    const p = panel(0), GY = 760, s = 1.15;
+    txt(p, 'признаки мышечного утомления', 800, 76, m('signs'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ground(p, 90, 470, GY, .3);
+    const c = curlFig(p, 260, GY, s, 1.3, .3);
+    const spot = G(p, { o: 0 });
+    mk('circle', { r: 22, fill: COL.bad, 'fill-opacity': .35, stroke: COL.bad, 'stroke-width': 4 }, spot);
+    c.f.onSet.push(() => { const [A, B] = c.mu.ends(); const P = figPt(c.f, [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2]); put(spot, { x: P[0], y: P[1] }); });
+    c.f.set({});
+    // the rest of the beat shows the signs one after another on the same arm
+    const rep = (e, top) => lerp(10, top, e), cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+    const span = (a, b) => Math.max(1, m(b) - m(a) - .1);
+    prog(q => { c.f.set({ eN: rep(cyc(q, 2), 120) }); c.mu.act(.9); }, m('s1'), span('s1', 's2'), lin);
+    show(spot, m('s1', .3)); pulse(spot, m('s1', 1), 1.3);
+    prog(q => { c.f.set({ eN: 90 + 4 * Math.sin(q * 160) }); c.mu.act(.9); }, m('s2'), span('s2', 's3'), lin);
+    prog(q => { c.f.set({ eN: rep(cyc(q * q, 1.5), 120) }); }, m('s3'), span('s3', 's4'), lin);
+    prog(q => { const e = cyc(q, 1.5), st2 = Math.round(e * 5) / 5; c.f.set({ eN: rep(lerp(e, st2, .8), 115) }); }, m('s4'), span('s4', 's5'), lin);
+    const arc = G(p, { o: 0 });
+    show(arc, m('s5'));
+    prog(q => { c.f.set({ eN: rep(cyc(q, 1.5), 72) }); }, m('s5'), span('s5', 's6'), lin);
+    prog(q => { const e = cyc(q, 1.5); c.f.set({ eN: rep(e, 118), t: -14 * e, aN: 6 + 30 * e }); plant(c.f, 'AN', 260, GY); }, m('s6'), span('s6', 's7'), lin);
+    prog(q => c.f.set({ t: 0, aN: 6, eN: 10 }), m('s7'), .3, lin);
+    txt(p, 'не весь объём', 260, 830, m('s5', .5), { size: 22, fill: COL.bad, anchor: 'middle', weight: 600 });
+    hide(p.lastChild, m('s6'), .3);
+    txt(p, 'отклоняется назад', 260, 830, m('s6', .5), { size: 22, fill: COL.bad, anchor: 'middle', weight: 600 });
+    hide(p.lastChild, m('s7'), .3);
+    const L = ['неприятное ощущение, боль, судорога', 'дрожание работающей мышцы', 'невольное замедление движения', 'рывковые, неровные движения', 'не весь объём с тем же сопротивлением', 'обходные (неправильные) движения', 'не может продолжать даже лёгкую активность', 'падает пиковый момент на изокинетическом тесте'];
+    L.forEach((s2, i) => {
+      const y = 140 + i * 58, g = G(p, { o: 0 });
+      mk('circle', { cx: 570, cy: y, r: 19, fill: COL.int }, g);
+      T(g, String(i + 1), { x: 570, y: y + 8, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+      T(g, s2, { x: 605, y: y + 8, size: 24, fill: COL.chalk });
+      show(g, m('s' + (i + 1)));
+    });
+    infoCard(p, 540, 625, 1000, 140, 'что делать', 'уменьшить нагрузку — или прекратить и перейти к другой группе мышц, чтобы эта отдохнула', COL.good, m('act'), { size: 23 });
+    infoCard(p, 540, 780, 1000, 90, 'дома пациент сам узнаёт признаки', null, COL.whole, m('home'), { size: 23 });
+  }],
+
+  ['cardio', 'Общее утомление', (m, D) => {
+    const p = panel(0), GY = 470;
+    txt(p, 'кардиореспираторное (общее) утомление', 800, 86, m('cardio'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'ходьба, бег, велосипед, повторяющаяся работа — долго', 800, 130, m('cardio', 1.5), { size: 24, fill: COL.dim, anchor: 'middle' });
+    ground(p, 100, 1500, GY, .3);
+    const f = fig(p, { x: 140, y: GY - 182 * .75, s: .75, o: 0 });
+    show(f.g, .3);
+    walk(f, .4, Math.max(8, D - .8), { cycles: Math.max(8, D - .8) * .9, dx: 1200 });
+    infoCard(p, 100, 520, 560, 150, 'кислород', 'насколько эффективно тело его использует', COL.whole, m('ox'), { size: 23 });
+    [['сахар в крови', 'why'], ['гликоген в мышцах и печени', 'gly'], ['калий — особенно у пожилых', 'k']].forEach(([s, k], i) => {
+      const y = 560 + i * 100, g = G(p, { o: 0 });
+      T(g, s, { x: 720, y: y - 12, size: 24, fill: COL.chalk, weight: 600 });
+      mk('rect', { x: 720, y, width: 720, height: 26, rx: 9, fill: 'none', stroke: COL.dim, 'stroke-width': 2 }, g);
+      const b = mk('rect', { x: 723, y: y + 3, width: 714, height: 20, rx: 7, fill: COL.int }, g);
+      show(g, m(k));
+      prog(q => { b.setAttribute('width', (714 * (1 - .65 * io(q))).toFixed(1)); b.setAttribute('fill', mix(COL.int, COL.bad, q)); }, m(k, .5), 2, lin);
+    });
+  }],
+
+  ['thresh', 'Порог утомления', (m) => {
+    const p = panel(0);
+    txt(p, 'порог утомления (threshold for fatigue)', 800, 80, m('thresh'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'уровень нагрузки, который нельзя поддерживать бесконечно', 800, 122, m('thresh', 1.5), { size: 24, fill: COL.dim, anchor: 'middle' });
+    // baseline: hold time or repetitions at the start; later changes are measured from it
+    const g = G(p, { o: 0 });
+    roundBox(g, 80, 160, 700, 220, COL.task, PANEL, 2.5);
+    T(g, 'исходная точка', { x: 102, y: 202, size: 25, weight: 700, fill: COL.task });
+    T(g, 'удерживает 20 с', { x: 102, y: 250, size: 24, fill: COL.chalk });
+    T(g, 'или 12 повторений', { x: 102, y: 290, size: 24, fill: COL.chalk });
+    path(g, 'M440 340H750M440 340V200', { stroke: COL.dim, 'stroke-width': 2 });
+    [[470, 300], [560, 285], [650, 262], [730, 238]].forEach(([x, y], i) => mk('circle', { cx: x, cy: y, r: i ? 8 : 11, fill: i ? COL.good : COL.task }, g));
+    T(g, 'потом — изменения', { x: 600, y: 368, size: 20, fill: COL.good, anchor: 'middle' });
+    show(g, m('base'));
+    NOTE(p, 640, 202, m('base', .5));
+    ['здоровье', 'питание', 'образ жизни'].forEach((s, i) => pill(p, s, 940 + i * 200, 190, m('fac', .3 + i * .4), { col: COL.whole, size: 24 }));
+    infoCard(p, 840, 240, 700, 200, 'часто нерегулярно', 'нервно-мышечные, сердечно-лёгочные, воспалительные, онкологические, психические болезни: внезапно, быстрее, через предсказуемые промежутки', COL.int, m('irr'), { size: 22 });
+    // multiple sclerosis: strength over a day (scheme)
+    const x0 = 120, y0 = 800, W = 620, H = 300;
+    chartAxes(p, x0, y0, W, H, 'сила', '', m('ms'));
+    txt(p, 'день →', x0 + W, y0 + 62, m('ms'), { size: 20, fill: COL.dim, anchor: 'end' });
+    const day = t => .8 - .45 * Math.exp(-(((t - .55) / .17) ** 2));
+    draw(path(p, fnPath(x0, y0, W, H, day, .02, .3), { stroke: COL.good, 'stroke-width': 5 }, { d: 0 }), m('ms', .5), 1);
+    draw(path(p, fnPath(x0, y0, W, H, day, .3, .7), { stroke: COL.bad, 'stroke-width': 5 }, { d: 0 }), m('pm', .2), 1.2);
+    draw(path(p, fnPath(x0, y0, W, H, day, .7, .98), { stroke: COL.good, 'stroke-width': 5 }, { d: 0 }), m('eve', .2), 1);
+    txt(p, 'рассеянный склероз', x0 + 80, y0 - H - 8, m('ms'), { size: 23, weight: 700, fill: COL.chalk });
+    txt(p, 'утро', x0 + .1 * W, y0 + 30, m('ms', .5), { size: 20, fill: COL.good, anchor: 'middle' });
+    txt(p, 'середина дня', x0 + .55 * W, y0 + 30, m('pm'), { size: 20, fill: COL.bad, anchor: 'middle' });
+    txt(p, 'вечер', x0 + .9 * W, y0 + 30, m('eve'), { size: 20, fill: COL.good, anchor: 'middle' });
+    pill(p, 'схема', x0 + W - 50, y0 - H - 20, m('ms'), { col: COL.dim, size: 19 });
+    infoCard(p, 840, 480, 700, 200, 'доставка кислорода нарушена', 'болезни сердца, периферических сосудов, лёгких; химиотерапия, облучение → устают быстрее, восстанавливаются дольше', COL.bad, m('o2'), { size: 22 });
+    ['температура', 'качество воздуха', 'высота'].forEach((s, i) => pill(p, s, 960 + i * 220, 740, m('env', .3 + i * .4), { col: COL.dim, size: 24 }));
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-ms', prompt: ['У пациента рассеянный склероз. Когда лучше планировать упражнения с сопротивлением?'],
+    build: choice([['Утром'], ['В середине дня'], ['В любое время — разницы нет'], ['Сразу после долгой прогулки']], 0,
+      'Утром пациент обычно отдохнувший и действует лучше всего.',
+      [null, 'К середине дня он обычно достигает порога утомления и заметно слабеет.', 'Утомление при рассеянном склерозе меняется в течение дня.', 'Мышцы и организм уже утомлены.']),
+  }], done) }],
+
+  ['recov', 'Восстановление', (m) => {
+    const p = panel(0), x0 = 140, y0 = 560, W = 680, H = 380;
+    txt(p, 'восстановление после нагрузки', 800, 80, m('recov'), { size: 30, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    // force in % of the pre-exercise level over 5 minutes of rest
+    const pas = t => (95 - 35 * Math.exp(-t * 5)) / 100, act = t => (95 - 35 * Math.exp(-t * 7.2)) / 100;
+    const toY = v => (v - .5) / .5;
+    const g = G(p, { o: 0 });
+    path(g, `M${x0} ${y0 - H - 10}V${y0}H${x0 + W + 10}`, { stroke: COL.dim, 'stroke-width': 3 });
+    [50, 75, 100].forEach(v => T(g, v + '%', { x: x0 - 12, y: y0 - toY(v / 100) * H + 7, size: 19, fill: COL.dim, anchor: 'end' }));
+    [0, 1, 2, 3, 4, 5].forEach(v => T(g, String(v), { x: x0 + v / 5 * W, y: y0 + 30, size: 19, fill: COL.dim, anchor: 'middle' }));
+    T(g, 'мин отдыха', { x: x0 + W, y: y0 + 60, size: 20, fill: COL.dim, anchor: 'end' });
+    mk('rect', { x: x0, y: y0 - toY(.95) * H, width: W, height: (toY(.95) - toY(.9)) * H, fill: COL.good, 'fill-opacity': .18 }, g);
+    T(g, '90–95%', { x: x0 + W - 6, y: y0 - toY(.95) * H - 10, size: 20, fill: COL.good, anchor: 'end', weight: 700 });
+    show(g, m('min'));
+    draw(path(p, fnPath(x0, y0, W, H, t => toY(pas(t))), { stroke: COL.whole, 'stroke-width': 5 }, { d: 0 }), m('min', .5), 2);
+    const b = G(p, { o: 0 });
+    path(b, `M${x0 + .6 * W} ${y0 - H}V${y0}M${x0 + .8 * W} ${y0 - H}V${y0}`, { stroke: COL.task, 'stroke-width': 2, 'stroke-dasharray': '6 6' });
+    T(b, '3–4 мин', { x: x0 + .7 * W, y: y0 - H - 8, size: 21, fill: COL.task, anchor: 'middle', weight: 700 });
+    mk('rect', { x: x0, y: y0 - H, width: W * .2, height: H, fill: COL.whole, 'fill-opacity': .1 }, b);
+    T(b, '1-я минута', { x: x0 + .1 * W, y: y0 - 16, size: 19, fill: COL.whole, anchor: 'middle' });
+    show(b, m('min', 2.5));
+    draw(path(p, fnPath(x0, y0, W, H, t => toY(act(t))), { stroke: COL.good, 'stroke-width': 5, 'stroke-dasharray': '12 8' }, { d: 0 }), m('act', .5), 1.6);
+    txt(p, 'пассивный отдых', x0 + .3 * W, y0 - toY(.8) * H + 34, m('min', 1.5), { size: 21, fill: COL.whole, weight: 600 });
+    txt(p, 'активный — быстрее', x0 + .07 * W, y0 - toY(.93) * H - 8, m('act', 1.5), { size: 21, fill: COL.good, weight: 600 });
+    pill(p, 'схема', x0 + 70, y0 - H - 30, m('min'), { col: COL.dim, size: 19 });
+    // what restores how fast
+    const tl = G(p, { o: 0 });
+    path(tl, 'M140 720H820', { stroke: COL.dim, 'stroke-width': 3 });
+    show(tl, m('fast'));
+    [['кислород, энергия', 'минуты', 200, 'fast'], ['молочная кислота', '≈ 1 час', 470, 'lac'], ['гликоген', 'несколько дней', 740, 'gly']].forEach(([s, t, x, k]) => {
+      const g2 = G(p, { o: 0 });
+      mk('circle', { cx: x, cy: 720, r: 11, fill: COL.task }, g2);
+      T(g2, s, { x, y: 690, size: 21, fill: COL.chalk, anchor: 'middle', weight: 600 });
+      T(g2, t, { x, y: 762, size: 21, fill: COL.task, anchor: 'middle' });
+      show(g2, m(k));
+    });
+    infoCard(p, 900, 140, 640, 140, 'в каждой программе', 'между подходами и между занятиями', COL.whole, m('recov', 1), { size: 23 });
+    infoCard(p, 900, 300, 640, 160, 'активное восстановление', 'лёгкие упражнения в отдыхе — быстрее, чем покой', COL.good, m('act'), { size: 23 });
+    infoCard(p, 900, 480, 640, 200, 'без восстановления нет роста', 'отдых слишком короткий → плато или ухудшение, слабость от перетренированности', COL.int, m('tip'), { size: 23 });
+    infoCard(p, 900, 700, 640, 140, 'утомлённая мышца', 'легче получает острое растяжение', COL.bad, m('strain'), { size: 23 });
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Мышечное утомление — нормальное временное снижение силы; тип I устаёт меньше всего, IIB — больше всего.', 'w1'],
+     ['Дрожание, замедление, неполный объём, обходные движения → меньше нагрузка или другая группа мышц.', 'w2'],
+     ['Порог утомления — время удержания или число повторений; при многих болезнях он нерегулярен.', 'w3'],
+     ['До 90–95% — за 3–4 мин; активный отдых быстрее; без восстановления нет прогресса.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 31, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-signs', prompt: ['Признак утомления или нет?'],
+    build: grid([
+      { parts: ['Работающая мышца дрожит'], ans: ['y'], why: 'Дрожание — признак утомления.' },
+      { parts: ['Каждое следующее повторение медленнее, хотя пациент не хочет замедляться'], ans: ['y'], why: 'Невольное замедление — признак.' },
+      { parts: ['С тем же грузом движение уже не доходит до конца объёма'], ans: ['y'], why: 'Неполный объём — признак.' },
+      { parts: ['Пациент отклоняет корпус назад, чтобы поднять груз'], ans: ['y'], why: 'Обходное движение — признак.' },
+      { parts: ['Движение плавное, темп и объём прежние'], ans: ['n'], why: 'Признаков утомления нет.' },
+    ], [['y', 'Признак', COL.bad], ['n', 'Нет', COL.good]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tired', prompt: ['На восьмом повторении разгибания колена с манжетой четырёхглавая дрожит, а пациент отклоняется назад, чтобы закончить движение. Что делать?'],
+    build: choice([
+      ['Уменьшить груз или прекратить и перейти к другой группе мышц'],
+      ['Довести подход до конца любой ценой'],
+      ['Добавить груз, раз мышца так работает'],
+      ['Не обращать внимания, если нет боли'],
+    ], 0, 'Это признаки утомления: снизить нагрузку или дать мышце отдохнуть, работая другой группой.',
+    [null, 'Утомлённая мышца легче травмируется, а обходные движения закрепляют неправильный рисунок.', 'Признаки утомления — повод уменьшить нагрузку, а не увеличить.', 'Дрожание и обходные движения — признаки утомления и без боли.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

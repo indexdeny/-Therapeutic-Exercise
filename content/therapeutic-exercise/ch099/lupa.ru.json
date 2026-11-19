@@ -1,0 +1,38 @@
+[
+ {
+  "beat": "le",
+  "fig": 0,
+  "target": "iliopsoas",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает iliopsoas, фигура ×0.8",
+  "off": "линии лупы ложатся на подписи"
+ },
+ {
+  "beat": "indep",
+  "fig": 1,
+  "target": "m0",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает m0, фигура ×0.8",
+  "off": "мышца на фигуре в покое — увеличивать нечего"
+ },
+ {
+  "beat": "indep",
+  "fig": 2,
+  "target": "m0",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает m0, фигура ×0.8",
+  "off": "места для лупы нет"
+ },
+ {
+  "beat": "lumbar",
+  "fig": 4,
+  "target": "abdom",
+  "zoom": 3,
+  "enabled": false,
+  "why": "работает abdom, фигура ×0.5",
+  "off": "места для лупы нет"
+ }
+]

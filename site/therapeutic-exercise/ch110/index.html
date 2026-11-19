@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Остеопороз — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 110, title: 'Остеопороз', minutes: 8, language: 'ru', next: '../ch111/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch110/cards.ru.json
+const CARDS_SHORT = {
+  "болезнь кости\nминералов становится меньше — кость слабеет": "минералов становится меньше — кость слабеет",
+  "вторичный — из-за болезней и лекарств\nболезни ЖКТ, гипертиреоз, хроническая почечная недостаточность, злоупотребление алкоголем; глюкокортикоиды": "болезни ЖКТ, глюкокортикоиды",
+  "профилактика\nовощи и фрукты; достаточно кальция и витамина D; регулярные упражнения с нагрузкой весом; умеренный алкоголь и без курения": "кальций, витамин D, нагрузка весом",
+  "на снимке\nтонкий корковый слой, повышенная прозрачность, изменённые трабекулы, переломы": "тонкий корковый слой, переломы",
+  "менопауза\nэстрогенов меньше → рассасывание ускоряется": "эстрогенов меньше → рассасывание ускоряется",
+  "дети и подростки\nвыше пиковая костная масса": "выше пиковая костная масса",
+  "взрослые\nсохранить или повысить плотность": "сохранить или повысить плотность",
+  "пожилые\nменьше потеря кости от возраста и бездействия": "меньше потеря кости",
+  "ходьба после менопаузы\nплотность шейки бедра выше; позвоночника — нет": "шейка бедра ↑, позвонки — нет",
+  "многокомпонентная программа\nнагрузка весом + равновесие + укрепление → меньше падений и переломов бедра": "меньше падений и переломов",
+  "одна только ходьба\nполезна для сердца, но плотность при уже диагностированном остеопорозе заметно не повышает": "плотность заметно не повышает",
+  "аэробные: 5+ дней в неделю\n30 мин умеренной (быстрая ходьба) или 20 мин высокой (бег); можно 3 × 10 мин в день": "30 мин умеренной или 20 высокой",
+  "силовые: 2–3 дня в неделю\nдень отдыха между ними; 8–12 повторений до утомления мышц": "8–12 повторений до утомления",
+  "утяжелённый жилет или рюкзак\nповышает плотность кости; после перелома позвонка — не больше 1 кг сзади или 2 кг спереди; жилет 4–8 % массы тела улучшил и равновесие": "после перелома ≤ 1 кг сзади",
+  "почему\nсгибание повышает риск компрессионного перелома позвонка; без поворота меньше нагрузка на позвонки и диски": "сгибание → компрессионный перелом",
+  "сопротивление\nувеличивать постепенно, но в пределах прочности кости": "в пределах прочности кости",
+};
+// cards-short end
+
+const HEAD = COL.whole, PAIN = '#ff5a3c', OP = '#e8b04a', CLAST = '#9b6fd0', BLAST = '#5aa7d6';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+let SEED = 7;
+const rnd = () => (SEED = SEED * 16807 % 2147483647) / 2147483647;
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+function glowSpot(f, P, rx, ry, t0, col = PAIN) {
+  const e = mk('ellipse', { cx: P[0], cy: P[1], rx, ry, fill: col, 'fill-opacity': .45, opacity: 0 }, f.g);
+  if (t0 !== null) show(e, t0, .6);
+  return e;
+}
+
+// Spongy bone in section: a cortical shell round a lattice of trabeculae over dark marrow.
+// set({ loss }) 0..1: the trabeculae thin and some vanish, the cortex thins.
+function lattice(p, x, y, w, h, t0 = null, { seed = 3, n = 7 } = {}) {
+  const g = G(p, { o: 0 }), B = ANAT.bone, line = mix(B, '#000000', .45);
+  mk('rect', { x, y, width: w, height: h, rx: 18, fill: '#5b3833' }, g);
+  SEED = seed;
+  const rows = Math.max(2, Math.round(n * h / w)), dx = w / n, dy = h / rows, N = [];
+  for (let r = 0; r <= rows; r++) {
+    N.push([]);
+    for (let c = 0; c <= n; c++) {
+      const edge = r === 0 || c === 0 || r === rows || c === n;
+      N[r].push([x + c * dx + (edge ? 0 : (rnd() - .5) * dx * .55), y + r * dy + (edge ? 0 : (rnd() - .5) * dy * .55)]);
+    }
+  }
+  const S = [], f = v => v.toFixed(1), gO = mk('g', {}, g), gC = mk('g', {}, g);
+  const strut = (A, Bq) => {
+    const d = `M${f(A[0])} ${f(A[1])}L${f(Bq[0])} ${f(Bq[1])}`;
+    S.push({ o: mk('path', { d, stroke: line, 'stroke-linecap': 'round' }, gO), c: mk('path', { d, stroke: B, 'stroke-linecap': 'round' }, gC), r: rnd() });
+  };
+  for (let r = 0; r <= rows; r++) for (let c = 0; c <= n; c++) {
+    if (c < n && r > 0 && r < rows) strut(N[r][c], N[r][c + 1]);
+    if (r < rows && c > 0 && c < n) strut(N[r][c], N[r + 1][c]);
+    if (r < rows && c < n && rnd() < .35) strut(N[r][c], N[r + 1][c + 1]);
+  }
+  const cort = mk('rect', { x, y, width: w, height: h, rx: 18, fill: 'none', stroke: B }, g);
+  const cortL = mk('rect', { x, y, width: w, height: h, rx: 18, fill: 'none', stroke: line, 'stroke-width': 2 }, g);
+  const L = { g, set({ loss = 0 }) {
+    const wd = 8 * (1 - .62 * loss);
+    S.forEach(s => {
+      const o = clamp((s.r - .55 * loss) / .08, 0, 1);
+      s.o.setAttribute('stroke-width', f(wd + 3)); s.c.setAttribute('stroke-width', f(wd));
+      s.o.setAttribute('opacity', f(o)); s.c.setAttribute('opacity', f(o));
+    });
+    cort.setAttribute('stroke-width', f(22 * (1 - .6 * loss)));
+    return L;
+  } };
+  L.set({});
+  if (t0 !== null) show(g, t0);
+  return L;
+}
+// A column of vertebral bodies in side view (front to the right), built up from the lower back corner (x, y).
+// set({ wedge, load }): wedge 0..1 — the middle bodies lose front height and the column bends forward (kyphosis);
+// load 0..1 — the front of the middle body is squeezed (red).
+function vertStack(p, x, y, s = 1, t0 = null, { n = 5 } = {}) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), B = ANAT.bone, line = mix(B, '#000000', .5);
+  const D = 70, HP = 46, DISC = 13, discs = [], posts = [], bodies = [];
+  for (let i = 0; i < n; i++) {
+    if (i) discs.push(mk('path', { fill: '#8fb8c8', 'fill-opacity': .85, stroke: '#5d8797', 'stroke-width': 1.5 }, g));
+    posts.push(mk('path', { fill: 'none', stroke: mix(B, '#000000', .15), 'stroke-width': 11, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g));
+    const sh = shadeGrad(defs, B);
+    bodies.push({ e: mk('path', { fill: sh.url, stroke: line, 'stroke-width': 2, 'stroke-linejoin': 'round' }, g), sh });
+  }
+  const sq = mk('path', { fill: PAIN, opacity: 0 }, g);
+  const st0 = { wedge: 0, load: 0 }, v = { g, st: st0, mid: [0, 0] };
+  const f = q => q[0].toFixed(1) + ' ' + q[1].toFixed(1), add = (A, d, k) => [A[0] + d[0] * k, A[1] + d[1] * k];
+  v.set = o => {
+    Object.assign(st0, o);
+    let P = [0, 0], th = 0, prev = null;
+    for (let i = 0; i < n; i++) {
+      const a = [Math.cos(rad(th)), Math.sin(rad(th))], u = [Math.sin(rad(th)), -Math.cos(rad(th))];
+      const mid = i > 0 && i < n - 1, ha = HP * (1 - (mid ? .42 * st0.wedge : 0) - (i === 2 ? .1 * st0.load : 0));
+      const PB = P, AB = add(PB, a, D), AT = add(AB, u, ha), PT = add(PB, u, HP);
+      if (prev) discs[i - 1].setAttribute('d', `M${f(prev[0])}L${f(prev[1])}L${f(AB)}L${f(PB)}Z`);
+      bodies[i].e.setAttribute('d', `M${f(PB)}L${f(AB)}Q${f(add(add(AB, u, ha / 2), a, 6))} ${f(AT)}L${f(PT)}Q${f(add(add(PB, u, HP / 2), a, -4))} ${f(PB)}Z`);
+      bodies[i].sh.aim(add(PB, a, D / 2), add(PT, a, D / 2), D / 2);
+      const pm = add(PB, u, HP * .55);
+      posts[i].setAttribute('d', `M${f(pm)}L${f(add(pm, a, -26))}L${f(add(add(pm, a, -54), u, -20))}`);
+      if (i === 2) {
+        sq.setAttribute('d', `M${f(add(PB, a, D * .55))}L${f(AB)}L${f(AT)}L${f(add(add(PB, a, D * .55), u, (HP + ha) / 2))}Z`);
+        v.mid = add(add(PB, a, D), u, ha / 2);
+      }
+      prev = [PT, AT];
+      th += Math.atan2(HP - ha, D) * 180 / Math.PI;
+      P = add(PT, [Math.sin(rad(th)), -Math.cos(rad(th))], DISC);
+    }
+    sq.setAttribute('opacity', (.6 * st0.load).toFixed(2));
+    return v;
+  };
+  v.at = P => { const s0 = st(g); return [s0.x + P[0] * s0.s, s0.y + P[1] * s0.s]; };
+  v.set({});
+  if (t0 !== null) show(g, t0);
+  return v;
+}
+// The bone surface in close-up: an osteoclast digs a pit, osteoblasts fill it with new bone.
+// set({ dig, fill }) 0..1 each.
+function remodel(p, x, y, w, t0 = null, { h = 130 } = {}) {
+  const g = G(p, { o: 0 }), B = ANAT.bone, line = mix(B, '#000000', .45), cx = x + w / 2, pw = 130, f = v => v.toFixed(1);
+  const bone = mk('path', { fill: B, stroke: line, 'stroke-width': 2 }, g);
+  [[.16, .55], [.32, .78], [.72, .6], [.88, .74], [.5, .86]].forEach(([u, v]) => [16, 9, 3].forEach(r => mk('circle', { cx: x + w * u, cy: y + h * v, r, fill: 'none', stroke: line, 'stroke-width': 1.3, 'stroke-opacity': .6 }, g)));
+  const neo = mk('path', { fill: '#bfe0ec', stroke: '#7fb0c4', 'stroke-width': 1.5 }, g);
+  const oc = G(g, { o: 0 });
+  mk('path', { d: 'M-52 0C-52 -34 52 -34 52 0C40 8 30 2 20 8C10 2 0 8 -10 2C-20 8 -30 2 -40 8C-46 6 -52 4 -52 0Z', fill: CLAST, stroke: '#5b3b8a', 'stroke-width': 2 }, oc);
+  [-28, -10, 8, 26].forEach(dx => mk('circle', { cx: dx, cy: -12, r: 6, fill: '#4a2c74' }, oc));
+  const obs = [-2, -1, 0, 1, 2].map(i => { const e = G(g, { o: 0 }); mk('rect', { x: -11, y: -20, width: 22, height: 20, rx: 6, fill: BLAST, stroke: '#2f6f99', 'stroke-width': 1.5 }, e); mk('circle', { cx: 0, cy: -11, r: 4.5, fill: '#1f4d6b' }, e); return { e, i }; });
+  const s0 = { dig: 0, fill: 0 }, r = { g, st: s0 };
+  r.set = o => {
+    Object.assign(s0, o);
+    const d = 50 * s0.dig, top = d * (1 - s0.fill), x0 = cx - pw / 2;
+    bone.setAttribute('d', `M${x} ${y + h}V${y}H${f(x0)}Q${cx} ${f(y + 2 * d)} ${f(cx + pw / 2)} ${y}H${x + w}V${y + h}Z`);
+    neo.setAttribute('d', s0.fill > 0 && d > 0 ? `M${f(x0)} ${y}Q${cx} ${f(y + 2 * d)} ${f(cx + pw / 2)} ${y}Q${cx} ${f(y + 2 * top)} ${f(x0)} ${y}Z` : '');
+    put(oc, { x: cx, y: y + d * .8, o: s0.dig > 0 ? clamp(1 - s0.fill * 5, 0, 1) : 0 });
+    obs.forEach(({ e, i }) => { const t = .5 + i * .19; put(e, { x: x0 + pw * t, y: y + 4 * t * (1 - t) * top, o: s0.fill > 0 ? clamp(s0.fill * 5, 0, 1) * clamp((1 - s0.fill) * 12, 0, 1) : 0 }); });
+    return r;
+  };
+  r.set({});
+  if (t0 !== null) show(g, t0);
+  return r;
+}
+// A long bone standing upright (centre x, y; length L). set({ bend, build }): bend 0..1 — the shaft bows under load and
+// its surface glows (strain); build 0..1 — osteoblasts line the shaft and the cortex thickens.
+function bendBone(p, x, y, L, t0 = null, { r = 30 } = {}) {
+  const g = G(p, { o: 0 }), defs = mk('defs', {}, g), B = ANAT.bone, line = mix(B, '#000000', .5), f = v => v.toFixed(1), id = 'bb' + (++SHADE_ID);
+  const gr = mk('linearGradient', { id, x1: 0, y1: 0, x2: 1, y2: 0 }, defs);
+  [[0, mix(B, '#ffffff', .35)], [.45, B], [1, mix(B, '#000000', .42)]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, gr));
+  const glow = mk('path', { fill: 'none', stroke: ANAT.taut, 'stroke-opacity': .55, 'stroke-linecap': 'round' }, g);
+  const shaft = mk('path', { fill: `url(#${id})`, stroke: line, 'stroke-width': 2 }, g);
+  const ends = [-1, 1].map(k => mk('ellipse', { cx: x, cy: y + k * L / 2, rx: r * 1.5, ry: r * .85, fill: `url(#${id})`, stroke: line, 'stroke-width': 2 }, g));
+  const cells = [-3, -2, -1, 0, 1, 2, 3].map(i => mk('circle', { r: 5.5, fill: BLAST, stroke: '#1f4d6b', 'stroke-width': 1.5, opacity: 0 }, g));
+  const s0 = { bend: 0, build: 0 }, b = { g, st: s0 };
+  b.set = o => {
+    Object.assign(s0, o);
+    const bow = 22 * s0.bend, rr = r * (1 + .22 * s0.build), y0 = y - L / 2 + r * .5, y1 = y + L / 2 - r * .5;
+    shaft.setAttribute('d', `M${f(x - rr)} ${f(y0)}Q${f(x - rr + 2 * bow)} ${y} ${f(x - rr)} ${f(y1)}H${f(x + rr)}Q${f(x + rr + 2 * bow)} ${y} ${f(x + rr)} ${f(y0)}Z`);
+    glow.setAttribute('d', `M${f(x + rr)} ${f(y0 + 30)}Q${f(x + rr + 2 * bow)} ${y} ${f(x + rr)} ${f(y1 - 30)}`);
+    glow.setAttribute('stroke-width', f(14 * s0.bend));
+    cells.forEach((c, i) => { const t = (i + 3.5) / 7.5, yy = y0 + (y1 - y0) * t, xx = x + rr + 2 * bow * 2 * t * (1 - t) + 8; c.setAttribute('cx', f(xx)); c.setAttribute('cy', f(yy)); c.setAttribute('opacity', f(s0.build)); });
+    return b;
+  };
+  b.set({});
+  if (t0 !== null) show(g, t0);
+  return b;
+}
+// A weighted vest on a side-view figure (drawn under the near arm): w = [back, front] numbers of weight blocks.
+function vest(f, w = [1, 2]) {
+  const g = mk('g', {}, f.g), H = f.pts.H, S = f.pts.Sh;
+  f.g.insertBefore(g, f.parts.uaN.e);
+  const dx = S[0] - H[0], dy = S[1] - H[1], L = Math.hypot(dx, dy), u = [dx / L, dy / L], n = [-u[1] * f.dir, u[0] * f.dir];
+  const P = (al, of) => [H[0] + u[0] * al + n[0] * of, H[1] + u[1] * al + n[1] * of], fv = q => q[0].toFixed(1) + ' ' + q[1].toFixed(1);
+  // n points to the front of a figure facing right
+  mk('path', { d: `M${fv(P(30, -31))}L${fv(P(L - 6, -33))}L${fv(P(L - 6, 33))}L${fv(P(30, 30))}Z`, fill: '#3f5d7a', stroke: '#26394b', 'stroke-width': 2, 'stroke-linejoin': 'round' }, g);
+  const blk = (al, of, k) => mk('path', { d: `M${fv(P(al, of))}L${fv(P(al + 18, of))}L${fv(P(al + 18, of + k * 12))}L${fv(P(al, of + k * 12))}Z`, fill: '#a9b5bd', stroke: '#5f6b72', 'stroke-width': 1.5 }, g);
+  for (let i = 0; i < w[0]; i++) blk(70 + i * 22, -30, -1);
+  for (let i = 0; i < w[1]; i++) blk(56 + i * 22, 30, 1);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Остеопороз', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 11 · Урок 110', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Остеопороз', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'кость теряет минералы и слабеет', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'как её измеряют и какие упражнения укрепляют кость', 800, 360, m('sub'), { size: 30, fill: OP, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const a = lattice(art, 470, 450, 300, 300, null, { seed: 5 }); put(a.g, { o: 1 });
+    const b = lattice(art, 830, 450, 300, 300, null, { seed: 5 }); put(b.g, { o: 1 });
+    T(art, 'норма', { x: 620, y: 800, size: 24, weight: 700, fill: COL.good, anchor: 'middle' });
+    T(art, 'остеопороз', { x: 980, y: 800, size: 24, weight: 700, fill: COL.bad, anchor: 'middle' });
+    prog(q => b.set({ loss: q }), 1.2, Math.max(2, D - 3), io);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['def', 'Что такое остеопороз', (m, D) => {
+    const p = panel(0);
+    txt(p, 'остеопороз (osteoporosis)', 800, 56, m('def'), { size: 28, weight: 700, anchor: 'middle', fill: OP });
+    const lt = lattice(p, 90, 100, 360, 270, m('def'), { seed: 9 });
+    prog(q => lt.set({ loss: q * .8 }), m('def', 1.5), 2.5);
+    infoCard(p, 540, 92, 1000, 120, 'болезнь кости', 'минералов становится меньше — кость слабеет', OP, m('def'), { size: 22 });
+    // fracture sites
+    const f = frontStand(p, 270, 870, 1.08, m('frac'), { muscles: false }), q = f.pts, t1 = m('frac', .6);
+    const spine = [q.P[0], q.P[1] - 64], hip = [(q.P[0] + q.H[0][0]) / 2 - 8, q.P[1] + 14], wr = q.arms[1][1];
+    glowSpot(f, spine, 18, 30, t1); glowSpot(f, hip, 16, 14, t1 + .4); glowSpot(f, wr, 13, 13, t1 + .8);
+    lab(p, 'позвоночник', 470, 560, ...f.at(spine), PAIN, t1);
+    lab(p, 'бедро', 120, 660, ...f.at(hip), PAIN, t1 + .4);
+    lab(p, 'запястье', 470, 700, ...f.at(wr), PAIN, t1 + .8);
+    // how many (the USA)
+    [['≈ 10 млн', 'больных (США)'], ['80 %', 'из них — женщины'], ['+ 34 млн', 'с низкой костной массой']].forEach(([a, b], i) => {
+      const g0 = G(p, { o: 0 }), x = 540 + i * 340;
+      roundBox(g0, x, 236, 320, 110, COL.real, PANEL, 2);
+      T(g0, a, { x: x + 160, y: 284, size: 32, weight: 700, fill: COL.real, anchor: 'middle' });
+      T(g0, b, { x: x + 160, y: 322, size: 19, fill: COL.chalk, anchor: 'middle' });
+      show(g0, m('prev', .3 + i * 2.5));
+    });
+    // the T-score line, −4 … +1
+    const LX = 600, LW = 900, LY = 520, X = v => LX + (v + 4) / 5 * LW;
+    para(p, 'Т-критерий денситометрии — на сколько стандартных отклонений плотность выше или ниже нормы молодых здоровых женщин', LX, 392, m('t'), { size: 21, maxW: 940 });
+    const axis = G(p, { o: 0 });
+    path(axis, `M${LX} ${LY}H${LX + LW}`, { stroke: COL.dim, 'stroke-width': 3 });
+    [-4, -3, -2, -1, 0, 1].forEach(v => { path(axis, `M${X(v)} ${LY - 8}V${LY + 8}`, { stroke: COL.dim, 'stroke-width': 2.5 }); T(axis, v > 0 ? '+1' : v < 0 ? '−' + -v : '0', { x: X(v), y: LY + 38, size: 21, fill: COL.dim, anchor: 'middle' }); });
+    show(axis, m('t', .5));
+    const band = (a, b, col, name, t) => {
+      const g0 = G(p, { o: 0 });
+      mk('rect', { x: X(a) + 2, y: LY - 50, width: X(b) - X(a) - 4, height: 34, rx: 8, fill: col, 'fill-opacity': .75 }, g0);
+      T(g0, name, { x: (X(a) + X(b)) / 2, y: LY - 64, size: 21, weight: 700, fill: col, anchor: 'middle' });
+      show(g0, t);
+    };
+    band(-1, 1, COL.good, 'норма: −1 и выше', m('norm'));
+    band(-2.5, -1, COL.task, 'остеопения', m('pen'));
+    band(-4, -2.5, COL.bad, 'остеопороз: −2,5 и ниже', m('por'));
+    const k25 = G(p, { o: 0 }); path(k25, `M${X(-2.5)} ${LY - 8}V${LY + 8}`, { stroke: COL.bad, 'stroke-width': 3 }); T(k25, '−2,5', { x: X(-2.5), y: LY + 38, size: 21, fill: COL.bad, weight: 700, anchor: 'middle' }); show(k25, m('por'));
+    // one SD
+    const sd = G(p, { o: 0 });
+    path(sd, `M${X(-1)} ${LY + 58}V${LY + 70}H${X(0)}V${LY + 58}`, { stroke: COL.whole, 'stroke-width': 3 });
+    T(sd, '1 стандартное отклонение ≈ потеря 10–12 % минеральной плотности', { x: LX + LW / 2, y: LY + 106, size: 21, weight: 700, fill: COL.whole, anchor: 'middle' });
+    show(sd, m('sd'));
+  }],
+
+  ['risk', 'Факторы риска', (m, D) => {
+    const p = panel(0);
+    txt(p, 'первичный и вторичный остеопороз', 800, 56, m('prim'), { size: 28, weight: 700, anchor: 'middle', fill: OP });
+    txt(p, 'факторы риска первичного:', 60, 112, m('prim'), { size: 22, weight: 700, fill: COL.chalk });
+    const R = [['постменопауза', 'европеоидное или азиатское происхождение', 'семейный анамнез'], ['низкая масса тела', 'мало физической активности', 'мало кальция и витамина D'], ['курение', 'долгий постельный режим', 'пожилой возраст']];
+    R.forEach((r, i) => pillRow(p, r, 800, 160 + i * 54, m('prim', .6 + i * 3.5), { col: OP, size: 20, gap: 1.1, space: 14 }));
+    infoCard(p, 60, 330, 720, 200, 'вторичный — из-за болезней и лекарств', 'болезни ЖКТ, гипертиреоз, хроническая почечная недостаточность, злоупотребление алкоголем; глюкокортикоиды', COL.real, m('sec'), { size: 21 });
+    infoCard(p, 60, 560, 720, 230, 'профилактика', 'овощи и фрукты; достаточно кальция и витамина D; регулярные упражнения с нагрузкой весом; умеренный алкоголь и без курения', COL.good, m('nof'), { size: 21 });
+    infoCard(p, 820, 330, 720, 160, 'на снимке', 'тонкий корковый слой, повышенная прозрачность, изменённые трабекулы, переломы', COL.whole, m('xray'), { size: 21 });
+    const lt = lattice(p, 860, 540, 260, 240, m('xray', .5), { seed: 4 });
+    prog(q => lt.set({ loss: .75 * q }), m('xray', 1), 2);
+    txt(p, 'тонкая кора, редкие трабекулы', 990, 820, m('xray', 1.5), { size: 18, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    const vs = vertStack(p, 1270, 790, .95, m('xray', 3));
+    prog(q => vs.set({ wedge: q }), m('xray', 4), 2.5);
+    txt(p, 'компрессионные переломы позвонков → кифоз', 1340, 862, m('xray', 4.5), { size: 18, weight: 600, fill: COL.bad, anchor: 'middle' });
+  }],
+
+  ['bone', 'Кость перестраивается', (m, D) => {
+    const p = panel(0);
+    txt(p, 'кость — живая ткань', 800, 56, m('bone'), { size: 28, weight: 700, anchor: 'middle', fill: OP });
+    const rm = remodel(p, 60, 240, 700, m('bone'));
+    prog(q => rm.set({ dig: q, fill: 0 }), m('clast', .5), 2.2);
+    prog(q => rm.set({ fill: q }), m('blast', .3), 2.4);
+    lab(p, 'остеокласт — рассасывает кость', 400, 156, 412, 214, CLAST, m('clast'), { size: 20 });
+    pill(p, 'особенно при нехватке кальция в пище', 410, 110, m('clast', 1.5), { col: CLAST, size: 18 });
+    lab(p, 'остеобласты — строят', 640, 200, 470, 252, BLAST, m('blast'), { size: 20 });
+    // a balance: resorption vs formation
+    const bal = G(p, { x: 1180, y: 290, o: 0 });
+    path(bal, 'M0 0L-34 70H34Z', { fill: PANEL, stroke: COL.dim, 'stroke-width': 3 });
+    const beam = G(bal, {});
+    path(beam, 'M-230 0H230', { stroke: COL.chalk, 'stroke-width': 6 });
+    const pan = (k, col, str) => { const pg = G(beam, { x: k * 210 }); path(pg, 'M0 0V40', { stroke: COL.dim, 'stroke-width': 2 }); mk('rect', { x: -80, y: 40, width: 160, height: 40, rx: 10, fill: col, 'fill-opacity': .85 }, pg); T(pg, str, { x: 0, y: 67, size: 19, weight: 700, fill: COL.board, anchor: 'middle' }); return pg; };
+    const pL = pan(-1, CLAST, 'рассасывание'), pR = pan(1, BLAST, 'построение');
+    show(bal, m('bal'));
+    const tilt = a => { put(beam, { r: a }); put(pL, { r: -a }); put(pR, { r: -a }); };
+    prog(q => tilt(-8 * Math.sin(q * 12) * (1 - q)), m('bal'), 1.6, lin);
+    prog(q => tilt(-10 * q), m('age', .5), 1.2);
+    txt(p, 'до ≈ 30 лет — равновесие', 1180, 430, m('bal', 1), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'с возрастом рассасывание преобладает', 1180, 466, m('age', .5), { size: 21, weight: 700, fill: CLAST, anchor: 'middle' });
+    // bone mass over the years (schematic)
+    const X0 = 140, Y0 = 820, W = 620, H = 300;
+    chartAxes(p, X0, Y0, W, H, '', 'возраст →', m('bal', 1.5));
+    show(T(p, 'костная масса', { x: X0 - 20, y: Y0 - H - 16, size: 20, fill: COL.dim, o: 0 }), m('bal', 1.5));
+    const wom = u => u < .33 ? .85 * Math.sin(u / .33 * Math.PI / 2) : u < .5 ? .85 : u < .62 ? .85 - (u - .5) * 2.2 : .586 - (u - .62) * .55;
+    const men = u => u < .33 ? .92 * Math.sin(u / .33 * Math.PI / 2) : u < .5 ? .92 : .92 - (u - .5) * .6;
+    draw(path(p, fnPath(X0 + 4, Y0, W - 30, H, men, 0, 1, 120), { stroke: COL.whole, 'stroke-width': 3, 'stroke-dasharray': '8 7' }, { d: 0 }), m('bal', 2), 2);
+    draw(path(p, fnPath(X0 + 4, Y0, W - 30, H, wom, 0, 1, 120), { stroke: COL.real, 'stroke-width': 4.5 }, { d: 0 }), m('bal', 2), 2);
+    pill(p, 'пик ≈ 30 лет', X0 + 4 + (W - 30) * .33, Y0 - H * .92 - 26, m('bal', 3), { col: COL.good, size: 18 });
+    const mp = X0 + 4 + (W - 30) * .5;
+    show(path(p, `M${mp} ${Y0}V${Y0 - H * .85}`, { stroke: COL.real, 'stroke-width': 2, 'stroke-dasharray': '5 5' }, { o: 0 }), m('age', 1));
+    txt(p, 'менопауза', mp + 8, Y0 - 20, m('age', 1), { size: 18, weight: 700, fill: COL.real });
+    pillRow(p, ['женщины', 'мужчины'], X0 + W - 150, Y0 - H - 20, m('bal', 2), { col: [COL.real, COL.whole], size: 17, gap: .2, space: 10 });
+    pill(p, 'схема', X0 + W - 30, Y0 - H + 30, m('bal', 1.5), { col: COL.dim, size: 17 });
+    infoCard(p, 840, 520, 700, 200, 'менопауза', 'эстрогенов меньше → рассасывание ускоряется', COL.real, m('age', 2), { size: 22 });
+    // load builds bone: a fresh panel
+    const p2 = panel(m('ex'));
+    txt(p2, 'нагрузка строит кость', 800, 56, m('ex'), { size: 28, weight: 700, anchor: 'middle', fill: OP });
+    const bb = bendBone(p2, 400, 470, 520, m('ex'));
+    const mu = muscleEl(p2, { rest: 360, w: 18 }); put(mu.g, { o: 0 }); mu.set([330, 260], [330, 640]); show(mu.g, m('ex'));
+    const arT = G(p2, { o: 0 }), arB = G(p2, { o: 0 });
+    path(arT, 'M400 100V170m-14 -16l14 16l14 -16', { stroke: COL.task, 'stroke-width': 6 }); path(arB, 'M400 840V770m-14 16l14 -16l14 16', { stroke: COL.task, 'stroke-width': 6 });
+    show(arT, m('ex', .5)); show(arB, m('ex', .5));
+    txt(p2, 'вес тела', 430, 130, m('ex', .5), { size: 20, weight: 700, fill: COL.task });
+    txt(p2, 'опора', 430, 830, m('ex', .5), { size: 20, weight: 700, fill: COL.task });
+    txt(p2, 'мышца', 300, 450, m('ex', 1), { size: 20, weight: 700, fill: ANAT.muscle, anchor: 'end' });
+    prog(q => { const c = cyc(q, 3); bb.set({ bend: c }); mu.act(c * .9); }, m('ex', 1), Math.max(2.5, m('life') - m('ex', 1) - 1.6), lin);
+    prog(q => bb.set({ build: q }), m('life', -1.5), 1.4);
+    lab(p2, 'деформация', 610, 330, 452, 380, ANAT.taut, m('ex', 2));
+    lab(p2, 'остеобласты → плотнее', 610, 590, 448, 560, BLAST, m('life', -1.2));
+    [['дети и подростки', 'выше пиковая костная масса', COL.good], ['взрослые', 'сохранить или повысить плотность', COL.whole], ['пожилые', 'меньше потеря кости от возраста и бездействия', COL.real]]
+      .forEach(([h, s, c], i) => infoCard(p2, 840, 110 + i * 230, 700, 200, h, s, c, m('life', .5 + i * 2.2), { size: 22 }));
+  }],
+
+  ['ev', 'Что показывают исследования', (m, D) => {
+    const p = panel(0);
+    txt(p, 'что показывают исследования', 800, 56, m('walk'), { size: 28, weight: 700, anchor: 'middle', fill: OP });
+    // walking after menopause: femoral neck yes, spine no
+    const f = frontStand(p, 170, 470, .85, m('walk'), { muscles: false }), q = f.pts;
+    const hip = [(q.P[0] + q.H[0][0]) / 2 - 6, q.P[1] + 12], spine = [q.P[0], q.P[1] - 60];
+    glowSpot(f, hip, 14, 12, m('walk', 1), COL.good); glowSpot(f, spine, 14, 28, m('walk', 2), COL.dim);
+    infoCard(p, 300, 110, 460, 220, 'ходьба после менопаузы', 'плотность шейки бедра выше; позвоночника — нет', COL.good, m('walk'), { size: 21 });
+    // back extension after vertebroplasty: refracture later
+    txt(p, 'упражнения на разгибание спины после вертебропластики', 1180, 120, m('ext'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const ts = tableScene(p, { hx: 1180, top: 220, s: .58, t0: m('ext'), prone: true, hands: null });
+    prog(q => { const e = -20 * cyc(q, 3); ts.pt.set({ t: e, hN: e, hF: e }); }, m('ext', .8), 5, lin);
+    txt(p, 'повторный перелом позвонка — в среднем через:', 1180, 340, m('ext', 2), { size: 20, fill: COL.chalk, anchor: 'middle' });
+    [[20.4, 'с упражнениями', COL.good], [4.5, 'без упражнений', COL.bad]].forEach(([v, s, c], i) => {
+      const y = 362 + i * 54, g0 = G(p, { o: 0 });
+      T(g0, s, { x: 1000, y: y + 27, size: 20, fill: COL.chalk, anchor: 'end' });
+      const r = mk('rect', { x: 1014, y, width: 0, height: 36, rx: 8, fill: c }, g0);
+      const tv = T(g0, `${String(v).replace('.', ',')} мес.`, { x: 1024, y: y + 27, size: 21, weight: 700, fill: c });
+      show(g0, m('ext', 2.5 + i * 1.5));
+      prog(k => { r.setAttribute('width', (v * 21 * k).toFixed(1)); put(tv, { x: 1024 + v * 21 * k }); }, m('ext', 2.6 + i * 1.5), 1, out);
+    });
+    // what helps where
+    txt(p, 'что полезно и для чего:', 60, 560, m('fast'), { size: 22, weight: 700, fill: COL.chalk });
+    const row = (y, a, b, t) => { const g0 = G(p, { o: 0 }); put(pill(g0, a, 230, y, null, { col: COL.task, size: 20 }), { o: 1 }); T(g0, '→', { x: 440, y: y + 8, size: 28, weight: 700, fill: COL.dim, anchor: 'middle' }); put(pill(g0, b, 610, y, null, { col: COL.good, size: 20 }), { o: 1 }); show(g0, t); };
+    row(620, 'быстрая ходьба', 'позвоночник и бедро', m('fast', .5));
+    row(690, 'сопротивление, нагрузка весом', 'позвоночник', m('fast', 3));
+    infoCard(p, 820, 500, 720, 170, 'многокомпонентная программа', 'нагрузка весом + равновесие + укрепление → меньше падений и переломов бедра', COL.good, m('tip'), { size: 21 });
+    infoCard(p, 820, 690, 720, 170, 'одна только ходьба', 'полезна для сердца, но плотность при уже диагностированном остеопорозе заметно не повышает', COL.task, m('tip', 6), { size: 21 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-t', prompt: ['Что показывает Т-критерий?'],
+    build: grid([
+      { parts: ['Т = −0,8'], ans: ['n'], why: 'Норма: −1 и выше.' },
+      { parts: ['Т = −1,8'], ans: ['p'], why: 'Остеопения: от −1 до −2,4.' },
+      { parts: ['Т = −2,4'], ans: ['p'], why: 'Ещё остеопения.' },
+      { parts: ['Т = −2,5'], ans: ['o'], why: 'Остеопороз: −2,5 и ниже.' },
+      { parts: ['Т = −3,1'], ans: ['o'], why: 'Остеопороз.' },
+    ], [['n', 'Норма', COL.good], ['p', 'Остеопения', COL.task], ['o', 'Остеопороз', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['rec', 'Рекомендации', (m, D) => {
+    const p = panel(0);
+    txt(p, 'рекомендации по упражнениям', 800, 56, m('rec'), { size: 28, weight: 700, anchor: 'middle', fill: OP });
+    txt(p, 'с нагрузкой весом', 400, 112, m('wb'), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    const GY = 370, s = .55, row = G(p, { o: 0 });
+    const w1 = fig(row, { x: 130, y: GY - 182 * s, s }); walk(w1, m('wb', .5), Math.max(3, D - m('wb', .5)), { cycles: 14 });
+    const w2 = fig(row, { x: 290, y: GY - 182 * s, s }); walk(w2, m('wb', 1), Math.max(3, D - m('wb', 1)), { cycles: 20, running: true });
+    const su = G(row, {}), sf = stepUp(su, 440, GY, s, m('wb', 1.6), { dur: 1 });
+    const w4 = fig(row, { x: 650, y: GY - 182 * s, s });
+    prog(q => { const c = q * 8 % 1, air = Math.max(0, Math.sin(c * Math.PI * 2)), crouch = Math.max(0, -Math.sin(c * Math.PI * 2)); w4.set({ hN: 40 * crouch, hF: 40 * crouch, kN: 70 * crouch, kF: 70 * crouch, t: 20 * crouch, aN: 10 + 100 * air, aF: 10 + 100 * air }); put(w4.g, { y: GY - 182 * s + 30 * s * crouch - 50 * s * air }); }, m('wb', 2.2), Math.max(3, D - m('wb', 2.2)), lin);
+    show(row, m('wb'));
+    ['ходьба', 'бег трусцой', 'лестница', 'прыжки'].forEach((str, i) => txt(p, str, [140, 300, 470, 650][i], 405, m('wb', .5 + i * .6), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' }));
+    txt(p, 'без нагрузки весом', 930, 112, m('nwb'), { size: 21, weight: 700, fill: COL.whole, anchor: 'middle' });
+    const ce = cycleErgo(p, 870, GY, .55, m('nwb'));
+    prog(q => ce.crank(q * Math.PI * 2 * 12, .7), m('nwb'), Math.max(2, D - m('nwb')), lin);
+    txt(p, 'велоэргометр', 930, 405, m('nwb'), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'силовые', 1330, 112, m('res'), { size: 21, weight: 700, fill: COL.task, anchor: 'middle' });
+    const cf = curlFig(p, 1290, GY, s, 1, m('res'));
+    curls(cf, m('res', .5), Math.max(2, D - m('res', .5)), Math.round((D - m('res', .5)) / 1.6));
+    txt(p, '8–10 упражнений', 1330, 405, m('res'), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'на основные группы мышц', 1330, 432, m('res'), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 60, 470, 540, 200, 'аэробные: 5+ дней в неделю', '30 мин умеренной (быстрая ходьба) или 20 мин высокой (бег); можно 3 × 10 мин в день', COL.good, m('aer'), { size: 21 });
+    infoCard(p, 60, 690, 540, 170, 'силовые: 2–3 дня в неделю', 'день отдыха между ними; 8–12 повторений до утомления мышц', COL.task, m('rf'), { size: 21 });
+    // weighted vest
+    const fv = fig(p, { x: 780, y: 860 - 182, s: 1, o: 0 }); vest(fv, [1, 2]); show(fv.g, m('vest'));
+    lab(p, 'сзади ≤ 1 кг', 700, 452, 742, 598, COL.whole, m('vest', 3));
+    lab(p, 'спереди ≤ 2 кг', 862, 452, 816, 590, COL.whole, m('vest', 3));
+    infoCard(p, 1040, 470, 500, 300, 'утяжелённый жилет или рюкзак', 'повышает плотность кости; после перелома позвонка — не больше 1 кг сзади или 2 кг спереди; жилет 4–8 % массы тела улучшил и равновесие', COL.whole, m('vest'), { size: 21 });
+  }],
+
+  ['prec', 'Предосторожности', (m, D) => {
+    const p = panel(0);
+    txt(p, 'предосторожности', 800, 56, m('prec'), { size: 28, weight: 700, anchor: 'middle', fill: COL.bad });
+    // wedged vertebrae → kyphosis
+    const vs = vertStack(p, 150, 600, 1.05, m('wedge'));
+    prog(q => vs.set({ wedge: q }), m('wedge', 1), 2.5);
+    txt(p, 'клиновидные позвонки → кифоз', 250, 140, m('wedge', 1.5), { size: 21, weight: 700, fill: OP, anchor: 'middle' });
+    // flexion squeezes the front of the bodies
+    const ar = G(p, { o: 0 });
+    prog(q => vs.set({ load: cyc(q, 3) }), m('flex', .5), Math.max(2, m('rot') - m('flex', .5)), lin);
+    vs.set({ wedge: 1 }); const [mx, my] = vs.at(vs.mid); vs.set({ wedge: 0 });
+    path(ar, `M${mx + 60} ${my - 60}L${mx + 18} ${my - 14}m0 -18v18h18`, { stroke: PAIN, 'stroke-width': 5 });
+    path(ar, `M${mx + 60} ${my + 60}L${mx + 18} ${my + 14}m0 18v-18h18`, { stroke: PAIN, 'stroke-width': 5 });
+    show(ar, m('flex', .5));
+    txt(p, 'сгибание сжимает', mx + 80, my - 4, m('flex', .8), { size: 19, weight: 700, fill: PAIN });
+    txt(p, 'переднюю часть позвонка', mx + 80, my + 22, m('flex', .8), { size: 19, weight: 700, fill: PAIN });
+    // sit-ups: avoid
+    bench(p, 620, 1040, 330, m('flex'), COL.dim, 110);
+    const su = supine(p, 810, 330, .78, m('flex'), { hN: 50, hF: 50, kN: 100, kF: 100, aN: 30, aF: 30, eN: 20, eF: 20 });
+    prog(q => su.set({ t: 40 * cyc(q, 3) }), m('flex', .5), Math.max(2, m('rot') - m('flex', .5)), lin);
+    cross(p, 1080, 230, 26, m('flex', 1.5), 8);
+    txt(p, 'подъёмы туловища лёжа, скручивания,', 830, 490, m('flex', 1), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'тренажёр для пресса сидя', 830, 516, m('flex', 1), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    // flexion with rotation: avoid
+    const fr = fig(p, { s: .8, o: 0, pose: { t: 50, hd: -10, aN: 60, eN: 20, aF: 50, eF: 30, hN: 58, hF: 58, kN: 16, kF: 16 } });
+    plant(fr, 'AN', 1290, 500);
+    show(fr.g, m('rot'));
+    show(path(p, 'M1200 500H1460', { stroke: COL.dim, 'stroke-width': 3 }, { o: 0 }), m('rot'));
+    const rot = G(p, { o: 0 }), [sx, sy] = onStage(fr, 'Sh');
+    path(rot, `M${sx - 50} ${sy + 10}A60 22 0 1 0 ${sx + 50} ${sy + 4}`, { stroke: OP, 'stroke-width': 4, fill: 'none' });
+    path(rot, `M${sx + 50} ${sy + 4}l-4 -18M${sx + 50} ${sy + 4}l-18 4`, { stroke: OP, 'stroke-width': 4 });
+    show(rot, m('rot', .5));
+    prog(q => { const a = 6 * Math.sin(q * 20); fr.set({ t: 50 + a, hN: 58 + a, hF: 58 + a }); plant(fr, 'AN', 1290, 500); }, m('rot', .5), Math.max(2, m('prog') - m('rot', .5)), lin);
+    cross(p, 1460, 230, 26, m('rot', 1), 8);
+    txt(p, 'сгибание с поворотом туловища', 1330, 560, m('rot', .5), { size: 19, weight: 600, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 60, 640, 860, 220, 'почему', 'сгибание повышает риск компрессионного перелома позвонка; без поворота меньше нагрузка на позвонки и диски', COL.bad, m('flex', 3), { size: 21 });
+    infoCard(p, 960, 640, 580, 220, 'сопротивление', 'увеличивать постепенно, но в пределах прочности кости', COL.task, m('prog'), { size: 21 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-op', prompt: ['Подходит ли это при остеопорозе?'],
+    build: grid([
+      { parts: ['Скручивания лёжа на спине для пресса'], ans: ['n'], why: 'Нет: сгибание повышает риск компрессионного перелома позвонка.' },
+      { parts: ['Быстрая ходьба 30 минут 5 дней в неделю'], ans: ['y'], why: 'Да.' },
+      { parts: ['Наклон вперёд с поворотом, чтобы поднять груз'], ans: ['n'], why: 'Нет: сгибание с поворотом нагружает позвонки и диски.' },
+      { parts: ['Силовые 2–3 раза в неделю, 8–12 повторений'], ans: ['y'], why: 'Да.' },
+      { parts: ['Рюкзак 5 кг на спине после перелома позвонка'], ans: ['n'], why: 'Нет: на спине — не больше 1 кг.' },
+    ], [['y', 'Подходит', COL.good], ['n', 'Нет', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Остеопороз — потеря минералов и слабость кости: Т-критерий −2,5 и ниже.', 'w1'],
+     ['Остеокласты рассасывают, остеобласты строят; пик костной массы — к 30 годам, дальше рассасывание преобладает, особенно в менопаузе.', 'w2'],
+     ['Нагрузка весом и сила мышц деформируют кость и стимулируют её построение: упражнения с весом, силовые, аэробные, на равновесие.', 'w3'],
+     ['Избегать сгибания позвоночника и сгибания с поворотом.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: OP }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-op', prompt: ['Женщина 68 лет, остеопороз (Т = −2,8), год назад — компрессионный перелом позвонка. Какую программу выбрать?'],
+    build: choice([
+      ['Ходьба и лестница, силовые 2–3 раза в неделю, тренировка равновесия; без сгибания позвоночника'],
+      ['Скручивания и подъёмы туловища, чтобы укрепить пресс'],
+      ['Только велоэргометр, чтобы не нагружать кость'],
+      ['Покой, чтобы не было нового перелома'],
+    ], 0, 'Нагрузка весом, сопротивление и равновесие укрепляют кость и снижают риск падений; сгибания позвоночника избегают.',
+    [null, 'Сгибание повышает риск компрессионного перелома позвонка.', 'Кости нужна нагрузка весом и сопротивление; велоэргометр — без нагрузки весом.', 'Бездействие ускоряет потерю кости.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-vest', prompt: ['Пациентка с остеопорозом и переломом позвонка в анамнезе хочет ходить с утяжелённым жилетом. Что посоветовать?'],
+    build: choice([
+      ['Можно: не больше 1 кг сзади или 2 кг спереди'],
+      ['Чем тяжелее, тем лучше: 10 кг на спине'],
+      ['Жилеты при остеопорозе запрещены'],
+      ['Лучше носить груз в руках, наклоняясь вперёд'],
+    ], 0, 'Утяжелённый жилет повышает плотность кости; после перелома позвонка вес ограничивают: до 1 кг сзади или до 2 кг спереди.',
+    [null, 'После перелома позвонка на спине — не больше 1 кг.', 'Жилеты и рюкзаки повышают плотность кости — их рекомендуют с ограничением веса.', 'Наклон вперёд с грузом — сгибание позвоночника, его избегают.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

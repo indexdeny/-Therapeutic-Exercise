@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Обследование равновесия — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 91, title: 'Обследование равновесия', minutes: 9, language: 'ru', next: '../ch092/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch091/cards.ru.json
+const CARDS_SHORT = {
+  "1 · анамнез падений\nвнезапно или постепенно; как часто и в какую сторону; условия и занятие; головокружение, вращение, дурнота; лекарства сейчас и раньше; страх падения": "условия, головокружение, лекарства, страх",
+  "2 · нарушения\nвход: проприоцепция, зрение, вестибулярная система · обработка: интеграция, упреждающий и реактивный контроль · движение: осанка, сила и выносливость, объём движений и гибкость, координация, боль": "вход, обработка, движение",
+  "3 · функция\nкак дефициты отражаются на повседневных задачах": "как дефициты отражаются на повседневных задачах",
+  "4 · дом\nопасности, из-за которых можно упасть": "опасности, из-за которых можно упасть",
+  "объективнее и надёжнее\nтест тяги (Pull test) · тест «толчок и отпускание» · тест постурального стресса": "тест тяги, «толчок и отпускание»",
+  "высокий уровень функций\nшкала равновесия и подвижности в сообществе (CB&M) · HiMAT": "шкала CB&M, HiMAT",
+  "опросник DHI: 25 пунктов\nкак головокружение и неустойчивость мешают повседневным делам": "головокружение мешает делам",
+};
+// cards-short end
+
+const ST_C = COL.good, DY_C = COL.whole, AN_C = COL.task, RE_C = COL.rat, SO_C = COL.real, FU_C = '#9fe0f0', ACT = '#ff5a3c';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+const sway = (q, lo, hi, k = 1) => lo + (hi - lo) * (.5 + .32 * Math.sin(q * 6.1 * k) + .18 * Math.sin(q * 15.7 * k + 1));
+// An eye, open or closed.
+function eyeMark(p, x, y, open, s = 1, col = COL.whole) {
+  const g = G(p, { x, y, s });
+  if (open) { mk('path', { d: 'M-22 0Q0 -18 22 0Q0 18 -22 0Z', fill: '#f2efe6', stroke: col, 'stroke-width': 2.5 }, g); mk('circle', { r: 7, fill: col }, g); }
+  else { path(g, 'M-22 -2Q0 14 22 -2', { stroke: col, 'stroke-width': 3 }); path(g, 'M-14 6l-4 7M0 9v8M14 6l4 7', { stroke: col, 'stroke-width': 2 }); }
+  return g;
+}
+// A lantern dome over the head of a side-view figure.
+function domeOn(p, f) {
+  const g = G(p);
+  mk('path', { d: 'M-34 6A34 40 0 0 1 34 6Z', fill: mix('#e8c25a', COL.board, .35), stroke: '#e8c25a', 'stroke-width': 2 }, g);
+  path(g, 'M-26 -10H26M-30 -2H30M-18 -22H18', { stroke: '#e8c25a', 'stroke-width': 1.5 });
+  const upd = () => { const [x, y] = onStage(f, 'Hc'); put(g, { x, y: y + 6 * f.s, s: f.s * 1.25 }); };
+  f.onSet.push(upd); upd();
+  return g;
+}
+
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Обследование равновесия', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 8 · Урок 91', { x: 800, y: 150, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Обследование равновесия', { x: 800, y: 235, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'анамнез · тесты · пороги риска', { x: 800, y: 300, size: 42, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'тест для каждого типа контроля', 800, 385, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 830, S = .66;
+    path(art, `M420 ${GY}H1180`, { stroke: COL.faint, 'stroke-width': 3 });
+    const a = fig(art, { x: 560, y: GY - 182 * S, s: S, pose: { ...SINGLE, aN: 20, eN: 100, aF: 20, eF: 100 } });
+    const [aax] = onStage(a, 'AN');
+    prog(q => { a.set({ t: sway(q, -2, 2, 1.5) }); plant(a, 'AN', aax, GY); }, .4, Math.max(3, D - 1), lin);
+    const fp = foamPad(art, 860, GY, 200, 40);
+    const b = fig(art, { x: 860, y: fp.top - 182 * S, s: S });
+    const [bax] = onStage(b, 'AN');
+    prog(q => { b.set(LEAN(sway(q, -2, 4, 2))); plant(b, 'AN', bax, fp.top); }, .4, Math.max(3, D - 1), lin);
+    eyeMark(art, 905, 540, false, 1.2);
+    const c = fig(art, { x: 1080, y: GY - 182 * S, s: S, pose: { aN: 90, eN: 4 } });
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['eval', 'Что входит в обследование', (m, D) => {
+    const p = panel(0);
+    txt(p, 'полное обследование при нарушениях равновесия', 800, 56, m('ev'), { size: 28, weight: 700, anchor: 'middle' });
+    infoCard(p, 60, 100, 720, 330, '1 · анамнез падений', 'внезапно или постепенно; как часто и в какую сторону; условия и занятие; головокружение, вращение, дурнота; лекарства сейчас и раньше; страх падения', COL.task, m('hist'), { size: 21 });
+    infoCard(p, 820, 100, 720, 330, '2 · нарушения', 'вход: проприоцепция, зрение, вестибулярная система · обработка: интеграция, упреждающий и реактивный контроль · движение: осанка, сила и выносливость, объём движений и гибкость, координация, боль', COL.whole, m('imp'), { size: 21 });
+    infoCard(p, 60, 460, 720, 160, '3 · функция', 'как дефициты отражаются на повседневных задачах', COL.good, m('func'), { size: 21 });
+    infoCard(p, 820, 460, 720, 160, '4 · дом', 'опасности, из-за которых можно упасть', COL.rat, m('env'), { size: 21 });
+    txt(p, 'тесты — на все типы контроля равновесия:', 800, 680, m('mix'), { size: 23, weight: 700, anchor: 'middle' });
+    pillRow(p, ['статический', 'динамический', 'упреждающий', 'реактивный', 'сенсорная организация', 'функция', 'безопасность'], 800, 736, m('mix', .8), { col: [ST_C, DY_C, AN_C, RE_C, SO_C, FU_C, COL.bad], size: 20, gap: .3, space: 12 });
+  }],
+
+  ['static', 'Статическое равновесие', (m, D) => {
+    const p = panel(0), GY = 600;
+    txt(p, 'статическое равновесие: удержать позу', 800, 56, m('st'), { size: 28, weight: 700, anchor: 'middle', fill: ST_C });
+    const col = (x, title, mark) => { const g = G(p, { o: 0 }); roundBox(g, x - 175, 90, 350, 770, ST_C, PANEL, 2); T(g, title, { x, y: 132, size: 22, weight: 700, fill: ST_C, anchor: 'middle' }); show(g, m(mark)); };
+    col(220, 'проба Ромберга', 'rom'); col(600, 'тандемная проба Ромберга', 'sh'); col(980, 'стояние на одной ноге', 'slb'); col(1360, 'тест «аист»', 'stork');
+    // Romberg: feet together, eyes open then closed
+    const r = frontStand(p, 220, GY, .8, m('rom'), { pose: { w: 11, aL: 4, aR: 4 }, muscles: false });
+    const eo = eyeMark(p, 220, 190, true, 1); put(eo, { o: 0 }); show(eo, m('rom')); hide(eo, m('rom', 3));
+    const ec = eyeMark(p, 220, 190, false, 1); put(ec, { o: 0 }); show(ec, m('rom', 3));
+    prog(q => r.set({ shift: 6 * Math.sin(q * 11) }), m('rom'), Math.max(3, D - m('rom')), lin);
+    ['стопы вместе', 'глаза открыты → закрыты', '30 с'].forEach((s, i) => txt(p, s, 220, 650 + i * 32, m('rom', 1 + i), { size: 19, fill: COL.chalk, anchor: 'middle' }));
+    // tandem Romberg: heel to toe, arms crossed, eyes closed, 1 min
+    const tf = fig(p, { x: 600, y: GY - 182 * .8, s: .8, o: 0, pose: { ...STAND, hN: 10, hF: -10, aN: 22, eN: 112, aF: 22, eF: 112 } });
+    show(tf.g, m('sh'));
+    const st2 = stanceTop(p, 712, 300, .42, m('sh'), { stance: 'tandem', marks: false });
+    const e2 = eyeMark(p, 600, 190, false, 1); put(e2, { o: 0 }); show(e2, m('sh'));
+    ['пятка к носку', 'руки на груди', 'глаза закрыты · 1 мин'].forEach((s, i) => txt(p, s, 600, 650 + i * 32, m('sh', 1 + i * .8), { size: 19, fill: COL.chalk, anchor: 'middle' }));
+    ground(p, 450, 750, GY, m('sh'));
+    txt(p, 'скрининг: нужно ли искать причину подробнее', 410, 870, m('scr'), { size: 19, weight: 700, fill: ST_C, anchor: 'middle' });
+    // single-leg stance
+    const sl = fig(p, { x: 980, y: GY - 182 * .8, s: .8, o: 0, pose: { ...SINGLE, aN: 22, eN: 112, aF: 22, eF: 112 } });
+    show(sl.g, m('slb'));
+    const [slx] = onStage(sl, 'AN');
+    prog(q => { sl.set({ t: sway(q, -2, 2, 2) }); plant(sl, 'AN', slx, GY); }, m('slb'), Math.max(3, D - m('slb')), lin);
+    ground(p, 830, 1130, GY, m('slb'));
+    ['без обуви', '3 × 30 с на каждую ногу', 'лучшее или среднее время', 'предсказывает: падения с травмой', 'у пожилых, растяжения', 'голеностопа у спортсменов'].forEach((s, i) => txt(p, s, 980, 650 + i * 32, m('slb', 1 + i * .7), { size: 18, fill: i > 2 ? COL.task : COL.chalk, anchor: 'middle' }));
+    // stork: on the toes, the other foot at the knee
+    const sk = fig(p, { x: 1360, y: GY - 182 * .8, s: .8, o: 0, pose: { ...STAND, fN: -28, hF: 46, kF: 118, fF: -20, aN: -4, eN: 74, aF: -4, eF: 74 } });
+    show(sk.g, m('stork'));
+    const [skx] = onStage(sk, 'toeN');
+    prog(q => { sk.set({ t: sway(q, -2, 2, 2.4) }); plant(sk, 'toeN', skx, GY); }, m('stork'), Math.max(3, D - m('stork')), lin);
+    ground(p, 1210, 1510, GY, m('stork'));
+    ['руки на поясе', 'стопа у колена опорной', 'подняться на носок', 'норма: 20–30 с на ногу'].forEach((s, i) => txt(p, s, 1360, 650 + i * 32, m('stork', 1 + i * .8), { size: 19, fill: i === 3 ? COL.good : COL.chalk, anchor: 'middle', weight: i === 3 ? 700 : 500 }));
+  }],
+
+  ['dyn', 'Динамическое равновесие', (m, D) => {
+    const p = panel(0), GY = 520;
+    txt(p, 'динамическое равновесие', 800, 56, m('dy'), { size: 28, weight: 700, anchor: 'middle', fill: DY_C });
+    pillRow(p, ['поролон или мяч', 'лёжа → сидя', 'сидя → стоя', 'ходьба, прыжки, подскоки'], 800, 110, m('dy', 1), { col: DY_C, size: 20, gap: 1.2 });
+    // five times sit-to-stand with a timer
+    const box = G(p, { o: 0 }); roundBox(box, 60, 160, 1480, 700, DY_C, PANEL, 2.5);
+    T(box, 'пять вставаний со стула (5 × STS)', { x: 100, y: 205, size: 25, weight: 700, fill: DY_C });
+    T(box, 'руки скрещены на груди · как можно быстрее · время', { x: 100, y: 242, size: 20, fill: COL.chalk });
+    show(box, m('sts'));
+    const S = .95, f = fig(p, { x: 360, y: 0, s: S, o: 0, pose: { ...SIT, aN: 22, eN: 112, aF: 22, eF: 112 } });
+    plant(f, 'AN', 420, 760 + 0);
+    const [hx, hy] = onStage(f, 'H');
+    const ch = chair(p, hx, hy + 22 * S, 760, m('sts'));
+    ground(p, 150, 700, 760, m('sts'));
+    show(f.g, m('sts'));
+    const ARMS = { aN: 22, eN: 112, aF: 22, eF: 112 }, UP = { ...STAND, ...ARMS }, DN = { ...SIT, ...ARMS };
+    const clock = T(p, '0,0 с', { x: 1000, y: 520, size: 64, weight: 700, fill: COL.chalk, anchor: 'middle', o: 0 });
+    show(clock, m('sts', .5));
+    const cnt = T(p, '', { x: 1000, y: 580, size: 26, fill: DY_C, anchor: 'middle', o: 0 });
+    show(cnt, m('sts', .5));
+    const dur = Math.max(5, m('cut') - m('sts') + 3);
+    prog(q => {
+      const n = q * 5, u = n % 1, k = n >= 5 ? 0 : (1 - Math.cos(2 * Math.PI * u)) / 2;
+      f.set(blendPose(DN, UP, k)); plant(f, 'AN', 420, 760);
+      clock.textContent = (q * 16.4).toFixed(1).replace('.', ',') + ' с';
+      clock.setAttribute('fill', q * 16.4 > 15 ? COL.bad : COL.chalk);
+      cnt.textContent = 'вставаний: ' + Math.min(5, Math.floor(n + .5));
+    }, m('sts', .5), dur, lin);
+    const th = G(p, { o: 0 });
+    path(th, 'M820 640H1180', { stroke: COL.bad, 'stroke-width': 3, 'stroke-dasharray': '8 6' });
+    T(th, '> 15 с → повторные падения', { x: 1000, y: 680, size: 26, weight: 700, fill: COL.bad, anchor: 'middle' });
+    T(th, '2735 пожилых, живущих дома', { x: 1000, y: 724, size: 21, fill: COL.chalk, anchor: 'middle' });
+    T(th, 'чувствительность 55 % · специфичность 65 %', { x: 1000, y: 760, size: 21, fill: COL.dim, anchor: 'middle' });
+    show(th, m('cut'));
+  }],
+
+  ['ant', 'Упреждающий контроль', (m, D) => {
+    const p = panel(0), GY = 560;
+    txt(p, 'упреждающий контроль: поза настраивается заранее', 800, 56, m('ant'), { size: 28, weight: 700, anchor: 'middle', fill: AN_C });
+    pillRow(p, ['поймать мяч', 'открыть дверь', 'поднять разный вес', 'потянуться'], 800, 108, m('ant', 1), { col: AN_C, size: 20, gap: .8 });
+    // functional reach along a wall ruler
+    const fb = G(p, { o: 0 }); roundBox(fb, 60, 150, 560, 710, AN_C, PANEL, 2.5);
+    T(fb, 'тест функционального вытягивания', { x: 340, y: 192, size: 21, weight: 700, fill: AN_C, anchor: 'middle' });
+    show(fb, m('frt'));
+    const S = .9, f = fig(p, { x: 220, y: GY - 182 * S, s: S, o: 0, pose: { aN: 90, eN: 4, aF: 90, eF: 4 } });
+    show(f.g, m('frt'));
+    ground(p, 100, 600, GY, m('frt'));
+    const [ax] = onStage(f, 'AN'), [sx, sy] = onStage(f, 'Sh');
+    const rul = G(p, { o: 0 });
+    mk('rect', { x: 200, y: sy - 40, width: 380, height: 22, rx: 4, fill: mix('#e8c25a', COL.board, .55), stroke: '#e8c25a', 'stroke-width': 2 }, rul);
+    for (let i = 0; i <= 19; i++) path(rul, `M${210 + i * 19} ${sy - 40}v${i % 5 ? 8 : 14}`, { stroke: '#e8c25a', 'stroke-width': 1.5 });
+    show(rul, m('frt'));
+    const [w0] = onStage(f, 'WN'), reachA = G(p, { o: 0 });
+    prog(q => { const k = io(Math.min(1, q * 1.6)); f.set({ ...LEAN(12 * k), aN: 90 + 12 * k, eN: 4, aF: 90 + 12 * k, eF: 4 }); plant(f, 'AN', ax, GY); }, m('frt', .8), 2.5);
+    const dist = path(p, '', { stroke: AN_C, 'stroke-width': 4 });
+    put(dist, { o: 0 }); show(dist, m('frt', 3.3));
+    prog(() => { const [w1] = onStage(f, 'WN'); dist.setAttribute('d', `M${w0} ${sy - 56}H${w1}M${w0} ${sy - 66}v20M${w1} ${sy - 66}v20`); }, m('frt', .81), 2.5);
+    txt(p, 'насколько далеко — не меняя опоры', 340, 640, m('frt', 2), { size: 20, fill: COL.chalk, anchor: 'middle' });
+    txt(p, '+ многонаправленный тест вытягивания', 340, 690, m('frt', 4), { size: 19, fill: AN_C, anchor: 'middle' });
+    txt(p, 'нормы есть · надёжны · валидны', 340, 730, m('frt', 6), { size: 19, fill: COL.dim, anchor: 'middle' });
+    // the star and the Y from above
+    const sb = G(p, { o: 0 }); roundBox(sb, 660, 150, 880, 710, AN_C, PANEL, 2.5);
+    T(sb, 'звёздный тест (SEBT): 8 направлений', { x: 900, y: 192, size: 21, weight: 700, fill: AN_C, anchor: 'middle' });
+    show(sb, m('sebt'));
+    const star = G(p, { x: 900, y: 470, o: 0 });
+    for (let i = 0; i < 8; i++) { const a = rad(i * 45); path(star, `M0 0L${(200 * Math.sin(a)).toFixed(1)} ${(-200 * Math.cos(a)).toFixed(1)}`, { stroke: AN_C, 'stroke-width': 3 }); }
+    const sf = G(star, { x: 0, y: 40 }); mk('path', { d: footD(-1), fill: mix('#cfc8b8', COL.board, .4), stroke: '#cfc8b8', 'stroke-width': 2.5 }, sf);
+    const rf = G(star, { o: .9 }); mk('path', { d: footD(1), fill: 'none', stroke: AN_C, 'stroke-width': 3, 'stroke-dasharray': '6 5' }, rf);
+    show(star, m('sebt'));
+    prog(q => { const i = Math.min(7, Math.floor(q * 8)), u = (q * 8) % 1, a = rad(i * 45), r = 40 + 140 * Math.sin(Math.PI * u); put(rf, { x: r * Math.sin(a), y: -r * Math.cos(a) + 40, r: i * 45 }); }, m('sebt', .5), 8, lin);
+    txt(p, 'стоя на одной ноге, другой тянуться', 900, 720, m('sebt', 1), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'нестабильность голеностопа, ПКС, пателлофеморальная боль;', 900, 760, m('sebt', 4), { size: 17, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'прогноз травм у школьных спортсменов', 900, 786, m('sebt', 5), { size: 17, fill: COL.dim, anchor: 'middle' });
+    const yb = G(p, { x: 1330, y: 480, o: 0 });
+    [[0, 'вперёд'], [135, 'назад-наружу'], [225, 'назад-внутрь']].forEach(([deg, lab]) => { const a = rad(deg); path(yb, `M0 0L${(150 * Math.sin(a)).toFixed(1)} ${(-150 * Math.cos(a)).toFixed(1)}`, { stroke: COL.good, 'stroke-width': 4 }); T(yb, lab, { x: 175 * Math.sin(a), y: -175 * Math.cos(a) + (deg ? 20 : -6), size: 17, fill: COL.good, anchor: 'middle' }); });
+    const yf = G(yb, { y: 30 }); mk('path', { d: footD(-1), fill: mix('#cfc8b8', COL.board, .4), stroke: '#cfc8b8', 'stroke-width': 2.5 }, yf);
+    T(yb, 'Y-тест: 3 направления', { x: 0, y: -210, size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    T(yb, 'быстрее · прогноз травм ног', { x: 0, y: 300, size: 18, fill: COL.chalk, anchor: 'middle' });
+    show(yb, m('ybt'));
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-test', prompt: ['Какой тип контроля проверяет тест?'],
+    build: grid([
+      { parts: ['Проба Ромберга'], ans: ['st'], why: 'Удержание позы — статический контроль.' },
+      { parts: ['Тест функционального вытягивания'], ans: ['an'], why: 'Произвольное вытягивание — упреждающий контроль.' },
+      { parts: ['Пять вставаний со стула'], ans: ['dy'], why: 'Переход сидя → стоя — динамический.' },
+      { parts: ['Тест тяги (Pull test)'], ans: ['re'], why: 'Ответ на внешний толчок — реактивный.' },
+      { parts: ['Звёздный тест (SEBT)'], ans: ['an'], why: 'Вытягивание ногой у границ устойчивости — упреждающий.' },
+    ], [['st', 'Статический', ST_C], ['dy', 'Динамический', DY_C], ['an', 'Упреждающий', AN_C], ['re', 'Реактивный', RE_C]], { multi: false, text: true }),
+  }], done) }],
+
+  ['react', 'Реактивный контроль', (m, D) => {
+    const p = panel(0), GY = 720, S = 1, X0 = 420;
+    txt(p, 'реактивный контроль: ответ на внешний толчок', 800, 56, m('re'), { size: 28, weight: 700, anchor: 'middle', fill: RE_C });
+    ground(p, 160, 700, GY, m('re'));
+    const f = fig(p, { x: X0, y: GY - 182 * S, s: S, o: 0 });
+    show(f.g, m('re'));
+    const [ax] = onStage(f, 'AF');
+    const ov = balanceOverlay(p, f, GY, m('re', .5));
+    // pushes at the sternum, the back, the pelvis
+    const arr = (x1, y1, x2, y2, t0) => { const e = G(p, { o: 0 }); arrowTo(e, [x1, y1], [x2, y2], 0, { col: COL.bad, w: 6, dur: .01 }); show(e, t0); return e; };
+    const [shx, shy] = onStage(f, 'Sh'), [hx, hy] = onStage(f, 'H');
+    arr(shx + 140, shy + 40, shx + 36, shy + 40, m('push'));
+    T(p, 'грудина', { x: shx + 150, y: shy + 48, size: 19, fill: COL.bad, o: 0 }); show(p.lastChild, m('push'));
+    arr(shx - 150, shy + 10, shx - 36, shy + 10, m('push', .6));
+    T(p, 'спина', { x: shx - 160, y: shy + 18, size: 19, fill: COL.bad, anchor: 'end', o: 0 }); show(p.lastChild, m('push', .6));
+    arr(hx - 150, hy, hx - 36, hy, m('push', 1.2));
+    T(p, 'таз', { x: hx - 160, y: hy + 8, size: 19, fill: COL.bad, anchor: 'end', o: 0 }); show(p.lastChild, m('push', 1.2));
+    prog(q => { const u = (q * 2) % 1, k = Math.sin(Math.PI * Math.min(1, u / .6)) * (u < .6 ? 1 : 0); f.set(blendPose(STAND, q < .5 ? LEAN(9) : { ...STRIDE, t: 8 }, k)); plant(f, 'AF', ax, GY); }, m('push', 2), 5, lin);
+    pillRow(p, ['малые / большие', 'медленные / быстрые', 'ожидаемые / неожиданные'], 1160, 170, m('push', 2.5), { col: COL.bad, size: 19, gap: .6 });
+    const sc = G(p, { o: 0 }); roundBox(sc, 820, 230, 680, 330, COL.bad, PANEL, 2.5);
+    T(sc, 'субъективная оценка ответа:', { x: 850, y: 272, size: 21, weight: 700, fill: COL.bad });
+    ['нормальный', 'хороший', 'удовлетво-рительный', 'плохой', 'невозможный'].forEach((s, i) => { mk('rect', { x: 850 + i * 128, y: 300, width: 122, height: 120, rx: 10, fill: mix(COL.bad, COL.board, .85 - i * .1), stroke: COL.bad, 'stroke-width': 1.5 }, sc); put(para(sc, s.replace('-', '- '), 911 + i * 128, 350, null, { size: 15, anchor: 'middle', maxW: 112, fill: COL.chalk }), { o: 1 }); });
+    T(sc, 'не количественно · ненадёжно', { x: 1160, y: 490, size: 22, weight: 700, fill: COL.bad, anchor: 'middle' });
+    show(sc, m('push', 4));
+    infoCard(p, 820, 600, 680, 200, 'объективнее и надёжнее', 'тест тяги (Pull test) · тест «толчок и отпускание» · тест постурального стресса', COL.good, m('obj'), { size: 21 });
+    ov.g.parentNode.appendChild(ov.g);
+  }],
+
+  ['ctsib', 'Тест «поролон и купол»', (m, D) => {
+    const p = panel(0);
+    txt(p, 'тест сенсорной интеграции (CTSIB) — «поролон и купол»', 800, 50, m('ct'), { size: 26, weight: 700, anchor: 'middle', fill: SO_C });
+    // six conditions: firm / foam × eyes open / closed / dome
+    const CELLS = [], CW = 300, CH = 300, X0 = 60, Y0 = 80;
+    const ok = [[1, 1, 1], [0, 1, 1], [0, 1, 1], [1, 0, 1], [0, 0, 1], [0, 0, 1]];   // vision, surface, vestibular accurate
+    const bad = [[1, 1, 1], [1, 1, 1], [-1, 1, 1], [1, -1, 1], [1, -1, 1], [-1, -1, 1]];
+    for (let i = 0; i < 6; i++) {
+      const c = i % 3, r = Math.floor(i / 3), x = X0 + c * (CW + 20), y = Y0 + r * (CH + 20), cx = x + CW / 2, gy = y + CH - 50;
+      const g = G(p, { o: 0 });
+      const frame = mk('rect', { x, y, width: CW, height: CH, rx: 16, fill: PANEL, stroke: EDGE, 'stroke-width': 2.5 }, g);
+      T(g, String(i + 1), { x: x + 24, y: y + 38, size: 28, weight: 700, fill: SO_C });
+      let top = gy;
+      if (r === 1) { const fp = foamPad(g, cx - 30, gy, 150, 30); top = fp.top; } else path(g, `M${cx - 110} ${gy}H${cx + 50}`, { stroke: COL.dim, 'stroke-width': 4 });
+      const f = fig(g, { x: cx - 30, y: top - 182 * .52, s: .52 });
+      if (c === 2) domeOn(g, f);
+      eyeMark(g, x + CW - 60, y + 40, c !== 1, .9);
+      if (c === 2) T(g, 'купол', { x: x + CW - 60, y: y + 78, size: 16, fill: '#e8c25a', anchor: 'middle' });
+      const icons = [['зр', COL.whole], ['оп', COL.rat], ['вест', SO_C]];
+      icons.forEach(([s, colr], k) => {
+        const yy = y + 110 + k * 46, acc = ok[i][k] === 1;
+        mk('circle', { cx: x + CW - 52, cy: yy, r: 15, fill: acc ? mix(COL.good, COL.board, .5) : mix(COL.bad, COL.board, .5), stroke: acc ? COL.good : COL.bad, 'stroke-width': 2 }, g);
+        T(g, s, { x: x + CW - 52, y: yy + 5, size: 12, weight: 700, fill: COL.chalk, anchor: 'middle' });
+      });
+      show(g, m('c' + (i + 1)));
+      CELLS.push({ g, frame, x, y });
+    }
+    const lg = G(p, { o: 0 });
+    mk('circle', { cx: 1060, cy: 702, r: 10, fill: mix(COL.good, COL.board, .5), stroke: COL.good, 'stroke-width': 2 }, lg); T(lg, 'сигнал точен', { x: 1078, y: 708, size: 17, fill: COL.chalk });
+    mk('circle', { cx: 1240, cy: 702, r: 10, fill: mix(COL.bad, COL.board, .5), stroke: COL.bad, 'stroke-width': 2 }, lg); T(lg, 'неточен или нет', { x: 1258, y: 708, size: 17, fill: COL.chalk });
+    show(lg, m('c1', 1));
+    txt(p, 'стопы параллельно · ≥ 3 попытки по 30 с', 520, 735, m('c6', 3), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    // the patterns
+    const PAT = [['vd', 'зрительно зависимые', [2, 3, 5, 6], COL.whole], ['sd', 'зависимые от опоры', [4, 5, 6], COL.rat], ['gen', 'общее нарушение приспособления', [3, 4, 5, 6], COL.bad], ['vl', 'потеря вестибулярной функции', [5, 6], SO_C]];
+    const nextT = ['sd', 'gen', 'vl', 'mod'];
+    PAT.forEach(([k, lab, set, col], j) => {
+      const g = G(p, { o: 0 });
+      set.forEach(n => { const c = CELLS[n - 1]; mk('rect', { x: c.x - 4, y: c.y - 4, width: CW + 8, height: CH + 8, rx: 18, fill: 'none', stroke: col, 'stroke-width': 7 }, g); });
+      show(g, m(k)); hide(g, m(nextT[j]));
+      const t = G(p, { o: 0 });
+      roundBox(t, 1040, 90 + j * 120, 500, 104, col, PANEL, 2.5);
+      T(t, lab, { x: 1062, y: 130 + j * 120, size: 21, weight: 700, fill: col });
+      T(t, 'неустойчивы: ' + set.join(', '), { x: 1062, y: 168 + j * 120, size: 21, fill: COL.chalk });
+      show(t, m(k));
+    });
+    // the modified test: no dome
+    const md = G(p, { o: 0 });
+    [2, 5].forEach(n => { const c = CELLS[n]; mk('rect', { x: c.x, y: c.y, width: CW, height: CH, rx: 16, fill: COL.board, opacity: .7 }, md); path(md, `M${c.x + 30} ${c.y + 30}L${c.x + CW - 30} ${c.y + CH - 30}M${c.x + CW - 30} ${c.y + 30}L${c.x + 30} ${c.y + CH - 30}`, { stroke: COL.bad, 'stroke-width': 5 }); });
+    show(md, m('mod', 1));
+    infoCard(p, 60, 760, 1480, 100, 'модифицированный тест: 4 условия (без купола) · компьютерный вариант — тест сенсорной организации (SOT)', null, SO_C, m('mod', 2.5), { size: 20 });
+  }],
+
+  ['func', 'Ошибки и функция', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ошибки равновесия и функциональные тесты', 800, 50, m('bess'), { size: 27, weight: 700, anchor: 'middle' });
+    // BESS: three stances × two surfaces, eyes closed, 20 s
+    const bs = G(p, { o: 0 }); roundBox(bs, 60, 80, 720, 380, SO_C, PANEL, 2.5);
+    T(bs, 'система оценки ошибок (BESS)', { x: 90, y: 120, size: 22, weight: 700, fill: SO_C });
+    T(bs, '3 стойки × 2 опоры (пол, поролон) · глаза закрыты · 6 × 20 с', { x: 90, y: 154, size: 19, fill: COL.chalk });
+    show(bs, m('bess'));
+    [['двумя', 'together'], ['одна', 'single'], ['тандем', 'tandem']].forEach(([lab, stc], i) => {
+      [0, 1].forEach(j => {
+        const cx = 160 + i * 220, cy = 230 + j * 120, g = G(p, { o: 0 });
+        if (j) mk('rect', { x: cx - 70, y: cy - 50, width: 140, height: 100, rx: 14, fill: mix(FOAM, COL.board, .6), stroke: FOAM, 'stroke-width': 2 }, g);
+        put(stanceTop(g, cx, cy + 6, .42, null, { stance: stc, marks: false }).g, { o: 1 });
+        show(g, m('bess', .5 + i * .4 + j * .2));
+        if (!j) T(p, lab, { x: cx + 76, y: cy + 10, size: 17, fill: COL.dim, o: 0 }), show(p.lastChild, m('bess', .5 + i * .4));
+      });
+    });
+    pillRow(p, ['открыл глаза', 'шаг', 'оступился', 'упал'], 420, 432, m('bess', 3), { col: COL.bad, size: 18, gap: .3, space: 10 });
+    txt(p, '+1 за ошибку · сотрясение, нестабильность голеностопа, бандаж, утомление, возраст', 420, 478, m('bess', 5), { size: 16, fill: COL.dim, anchor: 'middle' });
+    // functional tests
+    const fn = G(p, { o: 0 }); roundBox(fn, 820, 80, 720, 380, FU_C, PANEL, 2.5);
+    T(fn, 'функциональные тесты', { x: 850, y: 120, size: 22, weight: 700, fill: FU_C });
+    T(fn, 'ограничения активности и участия → что тренировать', { x: 850, y: 154, size: 19, fill: COL.chalk });
+    T(fn, 'подвижность:', { x: 850, y: 204, size: 19, weight: 700, fill: FU_C });
+    T(fn, 'Тинетти (POMA) · «Встань и иди» (TUG) · Берг (BBS) · 4 квадрата (4SST)', { x: 850, y: 236, size: 18, fill: COL.chalk });
+    T(fn, 'ходьба:', { x: 850, y: 286, size: 19, weight: 700, fill: FU_C });
+    T(fn, 'динамический индекс ходьбы (DGI)', { x: 850, y: 318, size: 18, fill: COL.chalk });
+    T(fn, 'оценка функциональной ходьбы (FGA) — вестибулярные пациенты', { x: 850, y: 350, size: 18, fill: COL.chalk });
+    T(fn, 'большинство — для риска падений у пожилых', { x: 850, y: 420, size: 18, fill: COL.dim });
+    show(fn, m('fn'));
+    // BESTest and its short forms
+    const bt = G(p, { o: 0 }); roundBox(bt, 60, 490, 1480, 200, COL.task, PANEL, 2.5);
+    T(bt, 'тест систем равновесия (BESTest): 6 систем', { x: 90, y: 530, size: 22, weight: 700, fill: COL.task });
+    [[36, 'полный'], [14, 'мини'], [6, 'краткий']].forEach(([n, lab], i) => { const w = n * 14; mk('rect', { x: 90, y: 556 + i * 40, width: w, height: 30, rx: 8, fill: mix(COL.task, COL.board, .45), stroke: COL.task, 'stroke-width': 2 }, bt); T(bt, `${n} заданий — ${lab}`, { x: 104 + w, y: 578 + i * 40, size: 19, weight: 700, fill: COL.chalk }); });
+    T(bt, 'биомеханика · пределы устойчивости и вертикаль · упреждающие поправки', { x: 960, y: 572, size: 16, fill: COL.dim });
+    T(bt, 'постуральные ответы · сенсорная ориентация · устойчивость при ходьбе', { x: 960, y: 600, size: 16, fill: COL.dim });
+    show(bt, m('best'));
+    infoCard(p, 60, 720, 720, 140, 'высокий уровень функций', 'шкала равновесия и подвижности в сообществе (CB&M) · HiMAT', COL.good, m('high'), { size: 19 });
+    infoCard(p, 820, 720, 720, 140, 'опросник DHI: 25 пунктов', 'как головокружение и неустойчивость мешают повседневным делам', SO_C, m('dhi'), { size: 19 });
+  }],
+
+  ['cut', 'Пороги риска', (m, D) => {
+    const p = panel(0);
+    txt(p, 'пороги риска падений у пожилых', 800, 56, m('cut'), { size: 28, weight: 700, anchor: 'middle' });
+    const hdr = G(p, { o: 0 });
+    [['тест', 120], ['максимум', 820], ['риск, если', 1180]].forEach(([s, x]) => T(hdr, s, { x, y: 118, size: 21, weight: 700, fill: COL.dim }));
+    path(hdr, 'M100 134H1500', { stroke: EDGE, 'stroke-width': 2 });
+    show(hdr, m('cut'));
+    const ROWS = [['шкала Берг (BBS)', '56', '< 46', 'berg'], ['Тинетти (POMA)', '28 (16 + 12)', '< 20', 'tin'], ['«Встань и иди» (TUG)', 'время', '> 13,5 с', 'tug'], ['4 квадрата (4SST)', 'время', '> 15 с', 'fsst'],
+      ['динамический индекс ходьбы (DGI)', '24', '< 20', 'dgi'], ['функциональная ходьба (FGA)', '30', '< 23', 'fga'], ['5 вставаний со стула', 'время', '> 15 с', 'sts'], ['уверенность в равновесии (ABC)', '100 %', '< 67 %', 'abc']];
+    ROWS.forEach(([t, mx, rk, k], i) => {
+      const g = G(p, { o: 0 }), y = 180 + i * 82;
+      mk('rect', { x: 100, y: y - 40, width: 1400, height: 70, rx: 12, fill: i % 2 ? PANEL : 'none' }, g);
+      T(g, t, { x: 120, y, size: 24, weight: 700, fill: COL.chalk });
+      T(g, mx, { x: 820, y, size: 24, fill: COL.dim });
+      T(g, rk, { x: 1180, y, size: 28, weight: 700, fill: COL.bad });
+      show(g, m(k));
+    });
+    txt(p, 'чувствительность и специфичность — в книге; для пожилых, живущих дома', 800, 860, m('abc', 1.5), { size: 18, fill: COL.dim, anchor: 'middle' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-ctsib', prompt: ['В тесте «поролон и купол» пациент неустойчив в условиях 4, 5 и 6. Какой у него профиль?'],
+    build: choice([
+      ['Зависим от опоры (соматосенсорных сигналов)'],
+      ['Зрительно зависим'],
+      ['Потеря вестибулярной функции'],
+      ['Общее нарушение приспособления'],
+    ], 0, 'Условия 4–6 — на поролоне: неточны сигналы опоры. Неустойчивость именно там — зависимость от опоры.',
+    [null, 'Зрительно зависимые неустойчивы в 2, 3, 5, 6 — без зрения или с куполом.', 'При вестибулярной потере — очень неустойчивы в 5 и 6, где остаётся только вестибулярная информация.', 'Общее нарушение — неустойчивость в 3, 4, 5 и 6.']),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Анамнез падений, нарушения трёх этапов, функция, опасности дома; тесты — на все типы контроля.', 'w1'],
+     ['Ромберг, одна нога, «аист»; поролон, переходы, 5 вставаний; вытягивание, SEBT, Y-тест; толчки.', 'w2'],
+     ['«Поролон и купол» показывает, на какую систему человек опирается.', 'w3'],
+     ['Пороги: Берг < 46, TUG > 13,5 с, 5 вставаний > 15 с, ABC < 67 %.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-cut', prompt: ['Вспомните пороги риска падений у пожилых.'],
+    build: blanks([
+      { parts: ['Шкала Берг: максимум ', { box: '56' }, ' баллов'], why: 'Максимум — 56.' },
+      { parts: ['Шкала Берг: риск, если меньше ', { box: '46' }], why: 'Меньше 46 баллов.' },
+      { parts: ['Пять вставаний со стула: риск, если дольше ', { box: '15' }, ' с'], why: 'Больше 15 секунд.' },
+      { parts: ['Шкала уверенности ABC: риск, если меньше ', { box: '67' }, ' %'], why: 'Меньше 67 %.' },
+    ]),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-risk', prompt: ['Пациентка 78 лет: шкала Берг — 41 балл, «Встань и иди» — 16 секунд. Как это оценить?'],
+    build: choice([
+      ['Высокий риск падений: оба результата за порогом'],
+      ['Риск низкий: Берг выше 40'],
+      ['Риск только по Берг, «Встань и иди» в норме'],
+      ['Оценить нельзя без теста «поролон и купол»'],
+    ], 0, 'Берг 41 < 46, «Встань и иди» 16 с > 13,5 с — оба результата в зоне риска.',
+    [null, 'Порог шкалы Берг — 46, а не 40.', 'Порог «Встань и иди» — 13,5 с; 16 с выше него.', 'Пороги риска оценивают по этим тестам; «поролон и купол» показывает другое — опору на системы.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

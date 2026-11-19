@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кинестетическое обучение и контроль осанки — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 145, title: 'Кинестетическое обучение и контроль осанки', minutes: 7, language: 'ru', next: '../ch146/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch145/cards.ru.json
+const CARDS_SHORT = {
+  "цель\nчувство положения позвоночника, безопасного движения и контроля позы": "безопасное движение и контроль позы",
+  "положение облегчения\nобъём или положение, где симптомов меньше всего; его называют положением предпочтения или покоя": "где симптомов меньше всего",
+  "нейтраль\nсередина объёма; поначалу может быть не самой удобной": "середина объёма",
+  "начало\nлёжа на спине, затем сидя и в других привычных позах": "лёжа → сидя",
+  "боль сильная — пассивно\nтерапевт сам двигает голову и ищет самое удобное положение; при необходимости — подушки": "терапевт двигает голову",
+  "объяснить и потренировать\nпациент замечает, как меняются симптомы при входе в положение предпочтения и выходе, и сам двигается туда и обратно": "туда и обратно",
+  "воротник\nв острой стадии после травмы или операции, если сидя и стоя не удержать; осторожно — без зависимости": "осторожно — без зависимости",
+  "от туловища → разгибание\nсгибание и отведение плеча, разгибание и отведение бедра разгибают позвоночник": "разгибают позвоночник",
+  "к туловищу → сгибание\nразгибание и приведение плеча, сгибание и приведение бедра сгибают его": "сгибают позвоночник",
+  "почувствовать и удержать\nнайти нейтраль или положение предпочтения, двигать руками, потом ногами и держать позвоночник на месте — те же движения, что в базовой стабилизации": "руки, потом ноги — позвоночник на месте",
+  "соединить\nосознание + базовая стабилизация + механика переката, перехода в положение сидя, вставания и ходьбы": "+ перекат, вставание, ходьба",
+  "перед трудной задачей\nнапомнить найти нейтраль и заранее включить стабилизаторы — в упражнениях, аэробике и функциональной тренировке": "заранее включить стабилизаторы",
+  "пример\nруки над головой: напрячь живот, чтобы поясница не уходила в разгибание — с пола на полку, блок мяча": "напрячь живот — поясница не разгибается",
+  "поза и боль\nсвязать неправильную позу с болью; решить, нужна ли временная или постоянная опора": "нужна ли опора",
+  "застой жидкости\nповторные движения или удержание в ограниченном объёме; прогибы лёжа могут растянуть тугие ткани или сжать и «промассировать» отёчный диск": "прогибы лёжа: растянуть или сжать диск",
+  "острое раздражение корешка\nтракция или сгибание расширяют межпозвонковое отверстие": "тракция или сгибание",
+  "руки и ноги\nтугие ткани растягивают, если это не нагружает воспалённую область; сила и время — по близости к заживающей ткани": "сила и время — по заживающей ткани",
+};
+// cards-short end
+
+const SP = '#8fd6b0', KIN = '#86c9e8', FLX = '#f0a04b', EXT = '#86c9e8', TRA = '#e0a0c8', PIL = '#c8b8e8', PAIN = '#ff5a3c';
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19, anchor = null } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x, an = anchor || (right ? 'end' : 'start');
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: an });
+  const lx = an === 'start' && right ? x + uiW(str, size) + 8 : x + (right ? 8 : -8);
+  path(g, `M${lx} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const swing = (q, n) => Math.sin(2 * Math.PI * n * q);
+const f1 = v => v.toFixed(1);
+// A pillow or rolled towel: an ellipse at (x, y).
+function cushion(p, x, y, rx, ry, t0, under = null) {
+  const e = mk('ellipse', { cx: x, cy: y, rx, ry, fill: PIL, 'fill-opacity': .85, stroke: mix(PIL, '#000000', .35), 'stroke-width': 2, opacity: 0 }, p);
+  if (under) p.insertBefore(e, under.g);
+  return show(e, t0);
+}
+// A framed mini scene with a flexion/extension tag.
+function sceneBox(p, x, y, w, h, title, tag, col, t0) {
+  const g = G(p, { o: 0 });
+  roundBox(g, x, y, w, h, mix(col, COL.board, .3), PANEL, 2);
+  T(g, title, { x: x + 18, y: y + 34, size: 19, fill: COL.chalk, weight: 700 });
+  show(g, t0);
+  if (tag) pill(p, tag, x + w - 90, y + 30, t0 + .8, { col, size: 17 });
+  return g;
+}
+const sitPose = { shank: 0, thigh: -90, arm: 12, elb: 60 };
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Осознание позвоночника', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 16 · Урок 145', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Кинестетическое обучение', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и контроль осанки', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'положение облегчения, руки и ноги, привычный контроль', 800, 360, m('sub'), { size: 30, fill: SP, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const f = postureFig(art, 800, 860, .5, null); put(f.g, { o: 1 });
+    prog(q => { const k = cyc(q, 2); f.set({ arm: 170 * k, elb: 10, lord: 46 + 14 * k }); }, 1, Math.max(3, D - 2), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['bias', 'Положение облегчения', (m, D) => {
+    const p = panel(0);
+    txt(p, 'положение облегчения — положение предпочтения', 800, 56, m('goal'), { size: 28, weight: 700, anchor: 'middle', fill: KIN });
+    matLine(p, 80, 760, 420, m('goal'));
+    const f = lieFig(p, 730, 420, .62, m('goal'), 'supine'); f.hold(hookLegs(50));
+    // a range bar: flexion ← → extension, the neutral mark in the middle, the comfort zone off the middle
+    const X0 = 120, X1 = 720, Y = 600, gx = k => lerp(X0, X1, k), bar = G(p, { o: 0 });
+    path(bar, `M${X0} ${Y}H${X1}`, { stroke: COL.dim, 'stroke-width': 6, 'stroke-linecap': 'round' });
+    T(bar, 'сгибание', { x: X0, y: Y + 40, size: 18, fill: FLX, weight: 700, anchor: 'middle' });
+    T(bar, 'разгибание', { x: X1, y: Y + 40, size: 18, fill: EXT, weight: 700, anchor: 'middle' });
+    show(bar, m('goal', 1));
+    const zone = G(p, { o: 0 }); mk('rect', { x: gx(.18), y: Y - 16, width: gx(.42) - gx(.18), height: 32, rx: 16, fill: COL.good, 'fill-opacity': .35, stroke: COL.good, 'stroke-width': 2 }, zone);
+    T(zone, 'меньше всего симптомов', { x: gx(.3), y: Y - 30, size: 17, fill: COL.good, weight: 700, anchor: 'middle' });
+    show(zone, m('rel', 2));
+    const neu = G(p, { o: 0 }); path(neu, `M${gx(.5)} ${Y - 24}V${Y + 24}`, { stroke: COL.chalk, 'stroke-width': 3, 'stroke-dasharray': '5 4' }); T(neu, 'нейтраль — середина', { x: gx(.5), y: Y + 70, size: 17, fill: COL.chalk, weight: 600, anchor: 'middle' }); show(neu, m('neu'));
+    const dot = G(p, { x: gx(.5), y: Y, o: 0 }); mk('circle', { r: 13, fill: KIN, stroke: COL.board, 'stroke-width': 3 }, dot); show(dot, m('goal', 1));
+    prog(q => { const k = Math.sin(2 * Math.PI * 1.5 * q); f.hold({ tilt: -10 * k, lord: 46 - 18 * k }); put(dot, { x: gx(.5 - .32 * k) }); }, m('goal', 1.5), 8, lin);
+    prog(q => { f.hold({ tilt: 7 * q, lord: 46 - 13 * q }); put(dot, { x: gx(.5 - .2 * q) }); }, m('rel', 4), 2);
+    infoCard(p, 800, 90, 760, 170, 'цель', 'чувство положения позвоночника, безопасного движения и контроля позы', KIN, m('goal'), { size: 21 });
+    infoCard(p, 800, 280, 760, 220, 'положение облегчения', 'объём или положение, где симптомов меньше всего; его называют положением предпочтения или покоя', COL.good, m('rel'), { size: 21 });
+    infoCard(p, 800, 520, 760, 200, 'нейтраль', 'середина объёма; поначалу может быть не самой удобной', COL.chalk, m('neu'), { size: 21 });
+  }],
+
+  ['cerv', 'Шея', (m, D) => {
+    const p = panel(0);
+    txt(p, 'шея: найти удобное положение', 800, 56, m('sup'), { size: 28, weight: 700, anchor: 'middle', fill: KIN });
+    matLine(p, 80, 760, 420, m('sup'));
+    const f = lieFig(p, 740, 420, .64, m('sup'), 'supine');
+    const pil = f.at('occ'); cushion(p, pil[0] - 8, 404, 46, 14, m('pas', 8), f);
+    prog(q => f.set({ hd: 16 * swing(q, 2), fh: -.4 * cyc(q, 2) }), m('pas', 1), 6, lin);
+    const hand = G(p, { o: 0 }); mk('ellipse', { cx: 0, cy: 0, rx: 34, ry: 16, fill: mix(ANAT.skin, '#c08060', .3), stroke: mix(ANAT.bone, '#000000', .45), 'stroke-width': 2 }, hand); show(hand, m('pas'));
+    const H = f.at('head'); put(hand, { x: H[0] - 40, y: H[1] - 6, r: -70 });
+    txt(p, 'терапевт мягко кивает, наклоняет, поворачивает', 420, 500, m('pas'), { size: 19, fill: KIN, anchor: 'middle', weight: 700 });
+    // seated with a collar
+    const s = postureFig(p, 400, 860, .42, m('col'), { pose: sitPose });
+    const C = [19, 20, 21, 22].map(u => s.unit(u, 30)).concat([22, 21, 20, 19].map(u => s.unit(u, -24)));
+    const col = mk('path', { d: 'M' + C.map(P => f1(P[0]) + ' ' + f1(P[1])).join('L') + 'Z', fill: PIL, 'fill-opacity': .55, stroke: PIL, 'stroke-width': 3, opacity: 0 }, p);
+    show(col, m('col', .5));
+    lab(p, 'воротник — осторожно', 520, 640, s.unit(21, 30)[0], s.unit(21, 30)[1], PIL, m('col', 1), { anchor: 'start' });
+    infoCard(p, 800, 90, 760, 150, 'начало', 'лёжа на спине, затем сидя и в других привычных позах', KIN, m('sup'), { size: 20 });
+    infoCard(p, 800, 255, 760, 200, 'боль сильная — пассивно', 'терапевт сам двигает голову и ищет самое удобное положение; при необходимости — подушки', KIN, m('pas'), { size: 20 });
+    infoCard(p, 800, 470, 760, 200, 'объяснить и потренировать', 'пациент замечает, как меняются симптомы при входе в положение предпочтения и выходе, и сам двигается туда и обратно', SP, m('talk'), { size: 20 });
+    infoCard(p, 800, 685, 760, 185, 'воротник', 'в острой стадии после травмы или операции, если сидя и стоя не удержать; осторожно — без зависимости', PIL, m('col'), { size: 20 });
+  }],
+
+  ['lumb', 'Поясница', (m, D) => {
+    const p = panel(0);
+    txt(p, 'поясница: какое положение сгибает, какое разгибает', 800, 52, m('tilt'), { size: 28, weight: 700, anchor: 'middle', fill: KIN });
+    const W = 480, H = 360, X = [60, 560, 1060], Y = [90, 490];
+    // a: hook-lying, pelvic tilts first
+    sceneBox(p, X[0], Y[0], W, H, 'на спине, ноги согнуты', 'сгибание', FLX, m('tilt'));
+    matLine(p, X[0] + 20, X[0] + W - 20, Y[0] + 290, m('tilt'));
+    const a = lieFig(p, X[0] + W - 30, Y[0] + 290, .44, m('tilt'), 'supine'); a.hold(hookLegs(50));
+    prog(q => { const k = swing(q, 2); a.hold({ tilt: 9 * k, lord: 46 + 12 * k }); }, m('tilt', 2), 7, lin);
+    prog(q => a.hold({ tilt: -8 * q, lord: 46 - 22 * q }), m('sup'), 1.5);
+    txt(p, 'наклоны таза → найти облегчение', X[0] + W / 2, Y[0] + 340, m('tilt', 2), { size: 17, fill: KIN, anchor: 'middle', weight: 600 });
+    // b: towel under the low back
+    sceneBox(p, X[1], Y[0], W, H, 'полотенце под поясницей', 'разгибание', EXT, m('sup', 3));
+    matLine(p, X[1] + 20, X[1] + W - 20, Y[0] + 290, m('sup', 3));
+    const b = lieFig(p, X[1] + W - 30, Y[0] + 290, .44, m('sup', 3), 'supine', { lord: 64, tilt: 6 });
+    const L = b.unit(2, -40); cushion(p, L[0], Y[0] + 282, 30, 10, m('sup', 3.5), b);
+    // c: prone flat
+    sceneBox(p, X[2], Y[0], W, H, 'на животе ровно', 'разгибание', EXT, m('pr'));
+    matLine(p, X[2] + 20, X[2] + W - 20, Y[0] + 290, m('pr'));
+    lieFig(p, X[2] + 40, Y[0] + 290, .44, m('pr'), 'prone', { lord: 56 });
+    // d: prone over pillows
+    sceneBox(p, X[0], Y[1], W, H, 'на животе, подушки под животом', 'сгибание', FLX, m('pr', 2.5));
+    matLine(p, X[0] + 20, X[0] + W - 20, Y[1] + 290, m('pr', 2.5));
+    const d = lieFig(p, X[0] + 40, Y[1] + 290, .44, m('pr', 2.5), 'prone', { lord: 18, tilt: -10 });
+    const Pd = d.unit(2, 40); cushion(p, Pd[0], Y[1] + 272, 52, 18, m('pr', 3), d);
+    // e: sitting — slumped flexion, then a lumbar pillow
+    sceneBox(p, X[1], Y[1], W, H, 'сидя', 'сгибание', FLX, m('sit'));
+    const e = postureFig(p, X[1] + 300, Y[1] + 320, .4, m('sit'), { pose: { ...sitPose, lord: 12, tilt: -14, kyph: 52 } });
+    show(path(p, `M${X[1] + 150} ${Y[1] + 232}H${X[1] + 250}M${X[1] + 160} ${Y[1] + 232}V${Y[1] + 320}M${X[1] + 240} ${Y[1] + 232}V${Y[1] + 320}M${X[1] + 150} ${Y[1] + 232}V${Y[1] + 120}`, { stroke: COL.dim, 'stroke-width': 4 }, { o: 0 }), m('sit'));
+    const lp = G(p, { o: 0 }); mk('ellipse', { cx: X[1] + 166, cy: Y[1] + 180, rx: 14, ry: 26, fill: PIL, stroke: mix(PIL, '#000000', .35), 'stroke-width': 2 }, lp);
+    prog(q => e.set({ lord: lerp(12, 50, q), tilt: lerp(-14, 4, q), kyph: lerp(52, 42, q) }), m('sit', 2.5), 1.5);
+    show(lp, m('sit', 2.5));
+    pill(p, 'подушка за поясницу → разгибание', X[1] + W / 2, Y[1] + 340, m('sit', 2.5), { col: EXT, size: 16 });
+    // f: standing — extension; one foot on a stool — flexion
+    sceneBox(p, X[2], Y[1], W, H, 'стоя', 'разгибание', EXT, m('st'));
+    const GY = Y[1] + 330, sf = fig(p, { x: X[2] + 220, y: GY - 182 * .7, s: .7, o: 0, pose: { ...STAND } });
+    show(sf.g, m('st'));
+    const stool = G(p, { o: 0 }); mk('rect', { x: X[2] + 270, y: GY - 70, width: 90, height: 10, fill: '#8a7a64' }, stool); path(stool, `M${X[2] + 280} ${GY - 60}V${GY}M${X[2] + 350} ${GY - 60}V${GY}`, { stroke: '#8a7a64', 'stroke-width': 6 }); show(stool, m('st', 2));
+    show(path(p, `M${X[2] + 40} ${GY}H${X[2] + W - 40}`, { stroke: COL.dim, 'stroke-width': 4 }, { o: 0 }), m('st'));
+    prog(q => { legTo(sf, 'N', X[2] + 310 + 0 * q, lerp(GY, GY - 70, q)); }, m('st', 2.5), 1.4);
+    pill(p, 'нога на скамеечке → сгибание', X[2] + W / 2, Y[1] + 340, m('st', 2.5), { col: FLX, size: 16 });
+    pill(p, 'не получается активно — пассивное позиционирование', 800, 470, m('pp'), { col: COL.dim, size: 17 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-pos', prompt: ['Это положение сгибает или разгибает поясницу?'],
+    build: grid([
+      { parts: ['Лёжа на спине с согнутыми ногами'], ans: ['f'], why: 'Наклон таза назад — сгибание.' },
+      { parts: ['Свёрнутое полотенце под поясницей'], ans: ['e'], why: 'Наклон таза вперёд — разгибание.' },
+      { parts: ['Лёжа на животе с двумя подушками под животом'], ans: ['f'], why: 'Подушки сгибают поясницу.' },
+      { parts: ['Стоя, одна нога на скамеечке'], ans: ['f'], why: 'Нога на скамеечке даёт сгибание.' },
+      { parts: ['Лёжа на животе ровно'], ans: ['e'], why: 'Разгибание.' },
+    ], [['f', 'Сгибание', FLX], ['e', 'Разгибание', EXT]], { multi: false, text: true }),
+  }], done) }],
+
+  ['limbs', 'Руки и ноги', (m, D) => {
+    const p = panel(0);
+    txt(p, 'руки и ноги двигают позвоночник', 800, 56, m('rule'), { size: 28, weight: 700, anchor: 'middle', fill: KIN });
+    matLine(p, 80, 760, 440, m('rule'));
+    const f = lieFig(p, 730, 440, .62, m('rule'), 'supine'); f.hold(hookLegs(50));
+    const st = txt(p, '', 420, 520, m('rule'), { size: 22, fill: EXT, anchor: 'middle', weight: 700 });
+    // arms overhead → extension; knee to chest → flexion
+    prog(q => { f.hold({ arm: 170 * q, lord: 46 + 18 * q, tilt: 6 * q }); st.textContent = q > .3 ? 'руки от туловища → разгибание' : ''; st.setAttribute('fill', EXT); }, m('rule', 3), 2);
+    prog(q => { f.hold({ arm: 170 * (1 - q), lord: 64 - 18 * q, tilt: 6 * (1 - q) }); }, m('rule', 8), 1.5);
+    prog(q => { const o = hookLegs(50); f.hold({ thigh: lerp(o.thigh, -120, q), shank: lerp(o.shank, 20, q), ft: 90 - 90 * q, lord: 46 - 22 * q, tilt: -10 * q }); st.textContent = q > .3 ? 'колено к груди → сгибание' : st.textContent; if (q > .3) st.setAttribute('fill', FLX); }, m('rule', 10), 2);
+    prog(q => { const o = hookLegs(50); f.hold({ thigh: lerp(-120, o.thigh, q), shank: lerp(20, o.shank, q), ft: 90 * q, lord: 24 + 22 * q, tilt: -10 * (1 - q) }); if (q > .9) st.textContent = ''; }, m('try'), 1.4);
+    // try: the arm moves, the spine holds
+    const belt = mk('ellipse', { rx: 18, ry: 40, fill: 'none', stroke: TRA, 'stroke-width': 6, opacity: 0 }, p);
+    const B = f.unit(2.5, 22); belt.setAttribute('cx', f1(B[0])); belt.setAttribute('cy', f1(B[1]));
+    show(belt, m('try', 2));
+    prog(q => f.hold({ arm: 160 * cyc(q, 2) }), m('try', 3), 8, lin);
+    txt(p, 'руки двигаются — позвоночник держит нейтраль', 420, 570, m('try', 3), { size: 19, fill: SP, anchor: 'middle', weight: 700 });
+    pill(p, 'не удержать или хуже — пассивная опора', 420, 640, m('sup2'), { col: COL.bad, size: 17 });
+    infoCard(p, 800, 90, 760, 230, 'от туловища → разгибание', 'сгибание и отведение плеча, разгибание и отведение бедра разгибают позвоночник', EXT, m('rule', 2), { size: 20 });
+    infoCard(p, 800, 340, 760, 230, 'к туловищу → сгибание', 'разгибание и приведение плеча, сгибание и приведение бедра сгибают его', FLX, m('rule', 9), { size: 20 });
+    infoCard(p, 800, 590, 760, 280, 'почувствовать и удержать', 'найти нейтраль или положение предпочтения, двигать руками, потом ногами и держать позвоночник на месте — те же движения, что в базовой стабилизации', SP, m('try'), { size: 20 });
+  }],
+
+  ['habit', 'Привычка', (m, D) => {
+    const p = panel(0);
+    txt(p, 'контроль — в каждое движение, пока не станет привычкой', 800, 56, m('blend'), { size: 28, weight: 700, anchor: 'middle', fill: SP });
+    const shelf = G(p, { o: 0 }); path(shelf, 'M110 250H330M470 250H690', { stroke: '#8a7a64', 'stroke-width': 8 }); show(shelf, m('ov'));
+    const a = postureFig(p, 220, 860, .66, m('ov'));
+    const b = postureFig(p, 580, 860, .66, m('ov'));
+    const ra = a.mus('rectus', { w: 10 }), rb = b.mus('rectus', { w: 10 });
+    prog(q => a.set({ arm: 165 * q, elb: 10, lord: 46 + 26 * q, tilt: 8 * q }), m('ov', 1), 2);
+    prog(q => b.set({ arm: 165 * q, elb: 10 }), m('ov', 1), 2);
+    const zA = G(p, { o: 0 }), Lz = a.unit(2, -20); mk('circle', { cx: Lz[0], cy: Lz[1], r: 30, fill: PAIN, 'fill-opacity': .3, stroke: PAIN, 'stroke-width': 3 }, zA); show(zA, m('ov', 3));
+    txt(p, 'без контроля — прогиб', 220, 110, m('ov', 3), { size: 18, fill: COL.bad, anchor: 'middle', weight: 700 });
+    txt(p, 'живот напряжён — нейтраль', 580, 110, m('ov', 3), { size: 18, fill: COL.good, anchor: 'middle', weight: 700 });
+    infoCard(p, 800, 90, 760, 180, 'соединить', 'осознание + базовая стабилизация + механика переката, перехода в положение сидя, вставания и ходьбы', KIN, m('blend'), { size: 20 });
+    infoCard(p, 800, 290, 760, 200, 'перед трудной задачей', 'напомнить найти нейтраль и заранее включить стабилизаторы — в упражнениях, аэробике и функциональной тренировке', SP, m('hab'), { size: 20 });
+    infoCard(p, 800, 510, 760, 160, 'пример', 'руки над головой: напрячь живот, чтобы поясница не уходила в разгибание — с пола на полку, блок мяча', COL.good, m('ov'), { size: 20 });
+    infoCard(p, 800, 690, 760, 180, 'поза и боль', 'связать неправильную позу с болью; решить, нужна ли временная или постоянная опора', COL.task, m('post'), { size: 20 });
+  }],
+
+  ['infl', 'Когда растягивать', (m, D) => {
+    const p = panel(0);
+    txt(p, 'растяжка у воспалённых тканей и два исключения', 800, 56, m('ci'), { size: 28, weight: 700, anchor: 'middle', fill: PAIN });
+    pill(p, 'воспалённые ткани — растягивать нельзя', 400, 110, m('ci'), { col: COL.bad, size: 19 });
+    // 1: fluid stasis — prone press-ups and a disc that shrinks back
+    sceneBox(p, 60, 150, 680, 340, '1 · застой жидкости', null, KIN, m('fs'));
+    matLine(p, 80, 720, 440, m('fs'));
+    const f = lieFig(p, 100, 440, .5, m('fs'), 'prone');
+    const W = [72, -769];
+    prog(q => { const k = cyc(q, 2), lord = lerp(46, 96, k), kyph = lerp(42, 12, k), o = { ...f.q, lord, kyph }; f.set({ lord, kyph, ...armIK(o, W, 180) }); }, m('fs', 3), 6, lin);
+    const sg = spineSeg(p, 660, 228, .38, m('fs', 3), { ligs: false });
+    sg.set({ bulge: 1 });
+    prog(q => sg.set({ bulge: 1 - .8 * q }), m('fs', 4), 5);
+    // 2: nerve root — traction and flexion widen the foramen
+    sceneBox(p, 60, 510, 680, 360, '2 · раздражение корешка остеофитами', null, KIN, m('nr'));
+    const sg2 = spineSeg(p, 400, 690, .62, m('nr'), { ligs: false });
+    sg2.set({ osteo: .8, flex: -6 });
+    prog(q => sg2.set({ flex: lerp(-6, 8, q), comp: -7 * q }), m('nr', 3), 2.5);
+    txt(p, 'тракция и сгибание расширяют отверстие', 400, 850, m('nr', 3), { size: 18, fill: COL.good, anchor: 'middle', weight: 700 });
+    infoCard(p, 800, 150, 760, 330, 'застой жидкости', 'повторные движения или удержание в ограниченном объёме; прогибы лёжа могут растянуть тугие ткани или сжать и «промассировать» отёчный диск', KIN, m('fs'), { size: 20 });
+    infoCard(p, 800, 500, 760, 170, 'острое раздражение корешка', 'тракция или сгибание расширяют межпозвонковое отверстие', KIN, m('nr'), { size: 20 });
+    infoCard(p, 800, 690, 760, 180, 'руки и ноги', 'тугие ткани растягивают, если это не нагружает воспалённую область; сила и время — по близости к заживающей ткани', SP, m('lim'), { size: 20 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-str', prompt: ['Растягивать или нет?'],
+    build: grid([
+      { parts: ['Воспалённая ткань, нет застоя и сдавления корешка'], ans: ['n'], why: 'Растяжка в зоне воспаления противопоказана.' },
+      { parts: ['Застой жидкости ограничивает разгибание — повторные прогибы'], ans: ['y'], why: 'Исключение: застой жидкости.' },
+      { parts: ['Острое раздражение корешка остеофитами — тракция'], ans: ['y'], why: 'Исключение: расширить отверстие.' },
+      { parts: ['Тугая мышца бедра, растяжка не нагружает больную зону'], ans: ['y'], why: 'Можно, если не нагружает воспалённую область.' },
+      { parts: ['Растяжка, которая натягивает воспалённый сегмент'], ans: ['n'], why: 'Нагружает зону воспаления.' },
+    ], [['y', 'Можно', COL.good], ['n', 'Нельзя', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Пациент находит положение облегчения — положение предпочтения — и учится входить в него и выходить.', 'w1'],
+     ['Подушки, полотенце и скамеечка пассивно задают сгибание или разгибание.', 'w2'],
+     ['Руки и ноги от туловища разгибают позвоночник, к туловищу — сгибают.', 'w3'],
+     ['Растяжка в зоне воспаления противопоказана, кроме застоя жидкости и острого раздражения корешка.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: SP }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-bias', prompt: ['Пациенту с острой болью в пояснице легче всего лёжа на животе с подушкой под животом. Что делать?'],
+    build: choice([
+      ['Это сгибание: учить находить это положение и двигаться в него и из него, при нужде — пассивно'],
+      ['Это разгибание: сразу прогибы на руках'],
+      ['Нейтраль всегда лучше — подушку убрать'],
+      ['Ограничиться воротником'],
+    ], 0, 'Подушки под животом сгибают поясницу; положение облегчения учат находить и контролировать.',
+    [null, 'Подушки под животом дают сгибание, а не разгибание.', 'Поначалу нейтраль может быть не самой удобной.', 'Воротник — для шеи, и то осторожно.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-reach', prompt: ['Когда пациент поднимает руки над головой, поясница прогибается и появляется боль. Что тренировать?'],
+    build: choice([
+      ['Заранее напрягать мышцы живота и держать нейтраль при подъёме рук'],
+      ['Поднимать руки быстрее'],
+      ['Навсегда избегать движений руками'],
+      ['Прогибаться сильнее'],
+    ], 0, 'Руки от туловища разгибают позвоночник; мышцы живота удерживают нейтраль, пока это не станет привычкой.',
+    [null, 'Скорость не даёт контроля.', 'Цель — контроль, а не избегание.', 'Это усилит боль.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Остеоартрит — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 108, title: 'Остеоартрит', minutes: 10, language: 'ru', next: '../ch109/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch108/cards.ru.json
+const CARDS_SHORT = {
+  "хроническое дегенеративное нарушение\nпрежде всего страдает суставной хрящ синовиальных суставов": "суставной хрящ",
+  "кость\nперестраивается и разрастается по краям: шипы и «губы»": "шипы и «губы»",
+  "последствия\nограничения активности и участия у очень многих людей": "у очень многих людей",
+  "механическая травма\nсильная нагрузка или повторяющиеся мелкие нагрузки": "сильная нагрузка или повторяющиеся мелкие нагрузки",
+  "иммобилизация\nжидкость не движется → хрящ не омывается, лишён питания и быстро разрушается": "хрящ лишён питания",
+  "наследственность\nособенно кисти и тазобедренные суставы, отчасти колени": "кисти, тазобедренные суставы",
+  "боль устроена сложно\nместные факторы + центральные болевые пути + у части людей страх движения и его избегание": "местные + центральные + страх движения",
+  "нестабильность\nкапсула слабеет — гипермобильность в части объёма": "гипермобильность",
+  "контрактуры\nменьше двигается из-за боли → объём всё меньше": "объём всё меньше",
+  "хрящ\nрасщепляется, истончается; хруст, свободные тела": "хруст, свободные тела",
+  "кость под хрящом\nобнажается, уплотняется; рядом кисты и остеопороз": "кисты, остеопороз",
+  "обучение\nсуть болезни, защита суставов при активной жизни, симптомы; домашняя программа": "защита суставов + домашняя программа",
+  "ранние стадии\nболь от чрезмерной нагрузки, проходит в покое; баланс активности и отдыха, исправить биомеханику": "баланс активности и отдыха",
+  "поздние стадии\nболь и в покое; изменить активность, вспомогательные средства, ортезы; не помогают они и обезболивающие → вопрос об операции": "средства, ортезы → вопрос об операции",
+  "в пределах переносимости сустава\nбез деформирующих сил и весов, которые пациент не контролирует или которые болят": "без деформирующих сил и боли",
+  "варианты\nизометрия под разными углами в безболезненных положениях; сопротивление только в безболезненных дугах; бассейн": "изометрия, безболезненные дуги, бассейн",
+  "осторожно\nсустав болит во время или после → вес велик или нагрузка не в той части объёма; найти, где сжатие наибольшее, и не давать там максимального сопротивления": "болит → вес велик; не там максимум",
+  "растяжка и мобилизация\nплюс самостоятельная растяжка и движения во всём доступном объёме": "+ самостоятельная растяжка",
+  "равновесие\nчувство положения сустава нарушено → тренировка равновесия; тай-чи": "тренировка равновесия; тай-чи",
+  "избыточный вес\nдиета + упражнения лучше, чем что-то одно": "диета + упражнения лучше, чем что-то одно",
+  "падения\nсила, тай-чи, аэробика улучшают равновесие и снижают риск; упражнения в воде на равновесие заметно не влияют": "сила, тай-чи, аэробика → риск ↓",
+};
+// cards-short end
+
+const HEAD = COL.nat, PAIN = '#ff5a3c', OA = COL.task, RA = '#e6738c';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function numLine(p, n, str, x, y, col, t0, { size = 22, maxW = 860 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 20, cy: y - 8, r: 19, fill: col }, g);
+  T(g, String(n), { x: x + 20, y: y, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 54, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+function lab(p, str, x, y, tx, ty, col, t0, { size = 19 } = {}) {
+  const g = G(p, { o: 0 }), right = tx > x;
+  T(g, str, { x, y, size, fill: col, weight: 600, anchor: right ? 'end' : 'start' });
+  path(g, `M${x + (right ? 8 : -8)} ${y - size * .35}L${tx.toFixed(1)} ${ty.toFixed(1)}`, { stroke: col, 'stroke-width': 1.8, 'stroke-opacity': .8 });
+  mk('circle', { cx: tx, cy: ty, r: 3.5, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// Dots on the joints of a front-view figure: hip, knee, ankle, sh(oulder), elb(ow), wr(ist), hand + L/R, neck, lumbar.
+function bodyDots(p, f, keys, col, t0, { r = 11 } = {}) {
+  const q = f.pts, P = {
+    hipL: q.H[0], hipR: q.H[1], kneeL: q.legs[0][0], kneeR: q.legs[1][0], ankleL: q.legs[0][1], ankleR: q.legs[1][1],
+    shL: q.Sh[0], shR: q.Sh[1], elbL: q.arms[0][0], elbR: q.arms[1][0], wrL: q.arms[0][1], wrR: q.arms[1][1], handL: q.arms[0][2], handR: q.arms[1][2],
+    neck: q.Nk, lumbar: [q.P[0], q.P[1] - 26], footL: [q.legs[0][1][0] + 6, q.legs[0][1][1] + 6], footR: [q.legs[1][1][0] - 6, q.legs[1][1][1] + 6],
+  };
+  const g = G(p, { o: 0 });
+  keys.forEach(k => { const [x, y] = f.at(P[k]); mk('circle', { cx: x, cy: y, r, fill: col, 'fill-opacity': .85, stroke: COL.board, 'stroke-width': 2 }, g); });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Остеоартрит', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 11 · Урок 108', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Остеоартрит', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'дегенеративная болезнь суставов', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'хрящ изнашивается — кость перестраивается', 800, 360, m('sub'), { size: 30, fill: OA, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const aj = arthroJoint(art, 600, 610, .62, null); put(aj.g, { o: 1 });
+    const hm = handMap(art, 1040, 640, 1.05, null); put(hm.g, { o: 1 });
+    const nd = ['DIP2', 'DIP3', 'DIP4', 'PIP3'].map(n => hm.swell(n, OA, null, { rx: 13, ry: 10 }));
+    prog(q => { const k = io(clamp(q * 1.4, 0, 1)); aj.set({ cart: [1 - .2 * k, 1 - .9 * k], osteo: k, scler: k, cysts: clamp(k * 2 - 1, 0, 1), fiss: k }); nd.forEach(e => put(e, { o: k })); }, .5, D - 1.5, lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['def', 'Что такое остеоартрит', (m, D) => {
+    const p = panel(0);
+    txt(p, 'остеоартрит (osteoarthritis)', 800, 56, m('def'), { size: 28, weight: 700, anchor: 'middle', fill: OA });
+    const aj = arthroJoint(p, 400, 480, .95, m('def'));
+    pill(p, 'по мотивам рис. 11.4 — схема', 400, 860, m('def'), { col: COL.dim, size: 18 });
+    prog(q => aj.set({ cart: [1 - .2 * q, 1 - .85 * q], fiss: q }), m('def', 1), 2);
+    prog(q => aj.set({ osteo: q }), m('bone'), 1.5);
+    prog(q => aj.set({ syn: .4 * q, eff: .5 * q }), m('caps'), 1.2);
+    prog(q => aj.set({ scler: q, cysts: q }), m('xray', 1), 1.5);
+    lab(p, 'хрящ тоньше — щель уже', 760, 470, ...aj.stage([60, 0]), CART, m('xray'));
+    lab(p, 'остеофиты', 760, 400, ...aj.stage([128, -32]), OSTEO_C, m('bone', .3));
+    lab(p, 'уплотнённая кость под хрящом', 760, 560, ...aj.stage([60, 22]), COL.chalk, m('xray', 1));
+    lab(p, 'кисты', 250, 330, ...aj.stage([-62, -36]), COL.chalk, m('xray', 1.5));
+    lab(p, 'капсула толще, выпот', 250, 200, ...aj.stage([-150, -60]), SYNOV_C, m('caps'));
+    infoCard(p, 960, 110, 580, 220, 'хроническое дегенеративное нарушение', 'прежде всего страдает суставной хрящ синовиальных суставов', OA, m('def'), { size: 22 });
+    infoCard(p, 960, 350, 580, 160, 'кость', 'перестраивается и разрастается по краям: шипы и «губы»', OSTEO_C, m('bone'), { size: 22 });
+    infoCard(p, 960, 650, 580, 170, 'последствия', 'ограничения активности и участия у очень многих людей', COL.real, m('soc'), { size: 22 });
+  }],
+
+  ['cause', 'Причины и факторы риска', (m, D) => {
+    const p = panel(0);
+    txt(p, 'причина неизвестна — возможные причины и факторы риска', 800, 56, m('cause'), { size: 28, weight: 700, anchor: 'middle', fill: OA });
+    infoCard(p, 60, 100, 720, 170, 'механическая травма', 'сильная нагрузка или повторяющиеся мелкие нагрузки', OA, m('mech'), { size: 22 });
+    infoCard(p, 820, 100, 720, 170, 'иммобилизация', 'жидкость не движется → хрящ не омывается, лишён питания и быстро разрушается', COL.whole, m('imm'), { size: 22 });
+    // cartilage fed by moving fluid vs a still joint
+    const j1 = jointGlide(p, { x: 1180, y: 410, s: .5, shaft: 90, t0: m('imm', .5) }); fluidIn(j1, 10);
+    const j2 = jointGlide(p, { x: 1430, y: 410, s: .5, shaft: 90, t0: m('imm', .5) }); fluidIn(j2, 10);
+    prog(q => j1.set({ n: 4 * Math.sin(q * 60), d: 6 * Math.sin(q * 30) }), m('imm', .7), Math.max(2, D - m('imm', .7)), lin);
+    txt(p, 'движение — питание', 1180, 560, m('imm', .7), { size: 19, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'покой — без питания', 1430, 560, m('imm', .7), { size: 19, weight: 700, fill: COL.bad, anchor: 'middle' });
+    infoCard(p, 60, 300, 720, 140, 'наследственность', 'особенно кисти и тазобедренные суставы, отчасти колени', COL.real, m('gen'), { size: 22 });
+    txt(p, 'другие факторы риска:', 60, 500, m('risk'), { size: 23, weight: 700, fill: COL.chalk });
+    pillRow(p, ['ожирение', 'слабая четырёхглавая', 'удары по суставу'], 420, 560, m('risk', .3), { col: OA, size: 21, gap: .5, space: 12 });
+    pillRow(p, ['спорт: удары и скручивания', 'работа на коленях, приседания с грузом'], 470, 620, m('risk', 2), { col: OA, size: 21, gap: .7, space: 12 });
+    infoCard(p, 60, 680, 1480, 160, 'боль устроена сложно', 'местные факторы + центральные болевые пути + у части людей страх движения и его избегание', COL.bad, m('pain'), { size: 22 });
+  }],
+
+  ['char', 'Что происходит в суставе', (m, D) => {
+    const p = panel(0);
+    txt(p, 'течение остеоартрита', 800, 56, m('char'), { size: 28, weight: 700, anchor: 'middle', fill: OA });
+    const aj = arthroJoint(p, 280, 440, .72, m('char'));
+    prog(q => { const T = q * (m('con') - m('lax')); aj.set({ sublux: 10 * Math.sin(T * 4) }); }, m('lax'), Math.max(1, m('con') - m('lax')), lin);
+    prog(q => aj.set({ sublux: 0, syn: .3 * q }), m('con'), .6);
+    prog(q => aj.set({ cart: [1 - .3 * q, 1 - .9 * q], fiss: q }), m('cart'), 1.6);
+    prog(q => aj.set({ scler: q, cysts: q, osteo: q }), m('sub'), 1.6);
+    infoCard(p, 560, 100, 470, 170, 'нестабильность', 'капсула слабеет — гипермобильность в части объёма', COL.whole, m('lax'), { size: 20 });
+    infoCard(p, 1060, 100, 480, 170, 'контрактуры', 'меньше двигается из-за боли → объём всё меньше', COL.task, m('con'), { size: 20 });
+    infoCard(p, 560, 290, 470, 170, 'хрящ', 'расщепляется, истончается; хруст, свободные тела', CART, m('cart'), { size: 20 });
+    infoCard(p, 1060, 290, 480, 170, 'кость под хрящом', 'обнажается, уплотняется; рядом кисты и остеопороз', COL.chalk, m('sub'), { size: 20 });
+    // pain over the years (schematic): silent early, constant late
+    const X0 = 600, Y0 = 680, W = 420, H = 160;
+    chartAxes(p, X0, Y0, W, H, 'боль', 'годы →', m('pain'));
+    draw(path(p, fnPath(X0, Y0, W, H, u => .9 / (1 + Math.exp(-(u - .6) * 12)), 0, 1, 100), { stroke: PAIN, 'stroke-width': 4 }, { d: 0 }), m('pain', .3), 1.6);
+    txt(p, 'в хряще нет сосудов и нервов', X0 + 10, Y0 + 60, m('pain', .5), { size: 18, fill: COL.dim });
+    pill(p, 'схема', X0 + W - 20, Y0 - H - 10, m('pain'), { col: COL.dim, size: 17 });
+    const hm = handMap(p, 1230, 690, .82, m('nodes'));
+    hm.swell('DIP2', OA, m('nodes', .4), { rx: 12, ry: 9 }); hm.swell('DIP3', OA, m('nodes', .5), { rx: 12, ry: 9 }); hm.swell('DIP4', OA, m('nodes', .6), { rx: 12, ry: 9 });
+    hm.swell('PIP3', COL.whole, m('nodes', 2), { rx: 12, ry: 9 }); hm.swell('PIP4', COL.whole, m('nodes', 2.1), { rx: 12, ry: 9 });
+    lab(p, 'Геберден', 1450, 520, ...hm.at('DIP4'), OA, m('nodes', .7)); lab(p, 'Бушар', 1450, 600, ...hm.at('PIP4'), COL.whole, m('nodes', 2.2));
+    // where: weight-bearing joints, spine, DIP and thumb base
+    const f = frontStand(p, 480, 860, .62, m('where'), { muscles: false });
+    bodyDots(p, f, ['hipL', 'hipR', 'kneeL', 'kneeR', 'neck', 'lumbar', 'handL', 'handR'], OA, m('where', .5), { r: 9 });
+    txt(p, 'чаще всего', 480, 615, m('where'), { size: 19, weight: 700, fill: OA, anchor: 'middle' });
+  }],
+
+  ['cmp', 'Остеоартрит и ревматоидный артрит', (m, D) => {
+    const p = panel(0);
+    txt(p, 'остеоартрит и ревматоидный артрит (табл. 11.1)', 800, 56, m('cmp'), { size: 28, weight: 700, anchor: 'middle', fill: HEAD });
+    txt(p, 'остеоартрит', 520, 110, m('cmp'), { size: 26, weight: 700, fill: OA, anchor: 'middle' });
+    txt(p, 'ревматоидный артрит', 1170, 110, m('cmp'), { size: 26, weight: 700, fill: RA, anchor: 'middle' });
+    const R = [['age', 'начало', 'обычно после 40 лет; медленно, годами, от механической нагрузки', 'обычно 15–50 лет; может развиться за недели или месяцы'],
+      ['join', 'суставы', 'немного, обычно несимметрично', 'много, обычно с двух сторон'],
+      ['stiff', 'суставные признаки', 'утренняя скованность < 30 мин; боль от нагрузки весом и тяжёлой работы; хруст', 'покраснение, жар, отёк, долгая утренняя скованность'],
+      ['sys', 'общие симптомы', 'нет', 'недомогание, утомляемость, похудание, лихорадка, узелки, другие органы']];
+    R.forEach(([k, h, a, b], i) => {
+      const y = 150 + i * 130, g = G(p, { o: 0 });
+      put(para(g, h, 60, y + 40, null, { size: 19, weight: 700, fill: COL.dim, maxW: 170 }), { o: 1 });
+      roundBox(g, 240, y, 560, 115, OA, PANEL, 2); roundBox(g, 860, y, 620, 115, RA, PANEL, 2);
+      put(para(g, a, 260, y + 40, null, { size: 20, maxW: 520 }), { o: 1 }); put(para(g, b, 880, y + 40, null, { size: 20, maxW: 580 }), { o: 1 });
+      show(g, m(k));
+    });
+    const fo = frontStand(p, 500, 860, .48, m('join', .5), { muscles: false });
+    bodyDots(p, fo, ['kneeR', 'hipL', 'handL', 'lumbar'], OA, m('join', .8), { r: 8 });
+    const fr = frontStand(p, 1170, 860, .48, m('join', .5), { muscles: false });
+    bodyDots(p, fr, ['handL', 'handR', 'wrL', 'wrR', 'elbL', 'elbR', 'shL', 'shR', 'neck', 'footL', 'footR', 'ankleL', 'ankleR'], RA, m('join', 1.4), { r: 8 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-oa', prompt: ['Какой это артрит?'],
+    build: grid([
+      { parts: ['Начался после 50, развивался годами; болит при ходьбе'], ans: ['o'], why: 'Остеоартрит.' },
+      { parts: ['Утренняя скованность — минут 15, проходит от движения'], ans: ['o'], why: 'Остеоартрит: скованность обычно короче 30 минут.' },
+      { parts: ['Отёк и жар в пястно-фаланговых суставах обеих кистей'], ans: ['r'], why: 'Ревматоидный: симметрично, мелкие суставы кистей.' },
+      { parts: ['Лихорадка, похудание, утомляемость'], ans: ['r'], why: 'Ревматоидный: при остеоартрите общих симптомов нет.' },
+      { parts: ['Узелки на дистальных межфаланговых суставах'], ans: ['o'], why: 'Узелки Гебердена — остеоартрит.' },
+    ], [['o', 'Остеоартрит', OA], ['r', 'Ревматоидный', RA]], { multi: false, text: true }),
+  }], done) }],
+
+  ['mgmt', 'Ведение: обучение и боль', (m, D) => {
+    const p = panel(0);
+    txt(p, 'ведение остеоартрита (блок 11.4)', 800, 56, m('mgmt'), { size: 28, weight: 700, anchor: 'middle', fill: OA });
+    infoCard(p, 60, 100, 720, 170, 'обучение', 'суть болезни, защита суставов при активной жизни, симптомы; домашняя программа', COL.whole, m('edu'), { size: 21 });
+    // stiffness after rest: it melts with movement (schematic day)
+    const X0 = 120, Y0 = 560, W = 620, H = 200;
+    chartAxes(p, X0, Y0, W, H, 'скованность', 'день →', m('early'));
+    const st = u => { const a = u < .08 ? .9 : .9 * Math.exp(-(u - .08) * 25); const b = u > .55 ? .7 * Math.exp(-(u - .55) * 25) : 0; return Math.max(a, b) + .05; };
+    draw(path(p, fnPath(X0, Y0, W, H, st, 0, 1, 200), { stroke: OA, 'stroke-width': 4 }, { d: 0 }), m('early', .5), 2);
+    txt(p, 'утро', X0 + 70, Y0 - H * .62, m('early', .8), { size: 18, weight: 700, fill: OA });
+    txt(p, 'после сидения', X0 + W * .55, Y0 - H * .82, m('early', 1.6), { size: 18, weight: 700, fill: OA, anchor: 'middle' });
+    pill(p, 'схема', X0 + W - 30, Y0 - H - 12, m('early'), { col: COL.dim, size: 17 });
+    txt(p, 'движение снимает «застывание» сустава', 430, 620, m('move'), { size: 22, weight: 700, fill: COL.good, anchor: 'middle' });
+    infoCard(p, 60, 660, 720, 190, 'ранние стадии', 'боль от чрезмерной нагрузки, проходит в покое; баланс активности и отдыха, исправить биомеханику', COL.task, m('early'), { size: 21 });
+    infoCard(p, 820, 100, 720, 220, 'поздние стадии', 'боль и в покое; изменить активность, вспомогательные средства, ортезы; не помогают они и обезболивающие → вопрос об операции', COL.bad, m('late'), { size: 21 });
+    // devices
+    const GY = 620, f = fig(p, { s: .78, o: 0, pose: { t: 6 } }); plant(f, 'AN', 960, GY); show(f.g, m('dev'));
+    const cane = path(p, '', { stroke: '#b98a5a', 'stroke-width': 6 }, { o: 0 });
+    f.onSet.push(() => { const [wx, wy] = onStage(f, 'WN'); cane.setAttribute('d', `M${(wx - 6).toFixed(1)} ${(wy - 4).toFixed(1)}h14M${(wx + 2).toFixed(1)} ${(wy - 4).toFixed(1)}L${(wx + 18).toFixed(1)} ${GY}`); });
+    f.set({ aN: 22, eN: 22 }); show(cane, m('dev'));
+    ground(p, 860, 1100, GY, m('dev'));
+    const shoe = G(p, { o: 0 }); mk('path', { d: 'M1150 600Q1150 570 1190 570L1250 576Q1300 584 1310 606L1310 618H1150Z', fill: '#7f8c94', stroke: COL.chalk, 'stroke-width': 2 }, shoe);
+    mk('rect', { x: 1148, y: 612, width: 166, height: 12, rx: 5, fill: COL.good }, shoe); show(shoe, m('dev', 2));
+    const poolG = G(p, { o: 0 }); mk('rect', { x: 1360, y: 560, width: 170, height: 60, rx: 8, fill: WATER_T, 'fill-opacity': .5, stroke: SURF_C, 'stroke-width': 2 }, poolG); path(poolG, 'M1360 570q14 -8 28 0t28 0t28 0t28 0t28 0t30 0', { stroke: SURF_C, 'stroke-width': 3 }); show(poolG, m('dev', 3.5));
+    txt(p, 'трость, ходунки,', 975, 680, m('dev'), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'высокое сиденье', 975, 704, m('dev'), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'амортизирующая', 1230, 680, m('dev', 2), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'обувь', 1230, 704, m('dev', 2), { size: 19, fill: COL.chalk, anchor: 'middle' });
+    txt(p, 'вода, группы', 1445, 680, m('dev', 3.5), { size: 19, fill: COL.chalk, anchor: 'middle' });
+  }],
+
+  ['res', 'Упражнения с сопротивлением', (m, D) => {
+    const p = panel(0);
+    txt(p, 'сильные мышцы защищают сустав', 800, 56, m('res'), { size: 28, weight: 700, anchor: 'middle', fill: OA });
+    // seated knee extension: resistance only in the pain-free arc, not where compression is greatest (example)
+    bench(p, 90, 400, 500, .2, COL.dim, 300);
+    const f = fig(p, { s: 1.05, o: 0, pose: { ...SIT, aN: 10, eN: 30, aF: 10, eF: 30, kN: 90, kF: 90 } });
+    put(f.g, { x: 240, y: 500 - 22 * 1.05 }); f.set({}); show(f.g, .2);
+    const qd = muscleOn(f, ...MUSCLE.quads, { after: 'ftN', w: 13 });
+    const [kx, ky] = onStage(f, 'KN');
+    // the arc: knee flexion 90 → 0; the shank direction measured on screen
+    const angOf = k => { f.set({ kN: k }); const [ax, ay] = onStage(f, 'AN'); return Math.atan2(ay - ky, ax - kx) * 180 / Math.PI; };
+    const a90 = angOf(90), a50 = angOf(50), a20 = angOf(20), a0 = angOf(2); f.set({ kN: 90 });
+    const arcP = (A, B, col, w) => { let d = ''; for (let i = 0; i <= 30; i++) { const a = rad(lerp(A, B, i / 30)); d += `${i ? 'L' : 'M'}${(kx + 175 * Math.cos(a)).toFixed(1)} ${(ky + 175 * Math.sin(a)).toFixed(1)}`; } return path(p, d, { stroke: col, 'stroke-width': w }, { o: 0 }); };
+    show(arcP(a90, a50, COL.good, 10), m('adapt')); show(arcP(a50, a20, COL.bad, 10), m('prec')); show(arcP(a20, a0, COL.good, 10), m('adapt'));
+    txt(p, 'безболезненная дуга', kx + 195, ky + 160, m('adapt'), { size: 19, weight: 700, fill: COL.good });
+    txt(p, 'сжатие наибольшее —', kx + 190, ky + 40, m('prec', .5), { size: 19, weight: 700, fill: COL.bad });
+    txt(p, 'без максимума', kx + 190, ky + 64, m('prec', .5), { size: 19, weight: 700, fill: COL.bad });
+    NOTE(p, 330, 150, m('prec', .5));
+    txt(p, 'пример: разгибание колена сидя', 330, 190, m('prec', .5), { size: 19, fill: COL.dim, anchor: 'middle' });
+    prog(q => { const k = 90 * (1 - cyc(q, 3)); f.set({ kN: k }); qd.act(.6); }, m('res', .5), Math.max(2, D - m('res', .5)), lin);
+    infoCard(p, 820, 100, 720, 160, 'в пределах переносимости сустава', 'без деформирующих сил и весов, которые пациент не контролирует или которые болят', COL.task, m('avoid'), { size: 21 });
+    infoCard(p, 820, 280, 720, 200, 'варианты', 'изометрия под разными углами в безболезненных положениях; сопротивление только в безболезненных дугах; бассейн', COL.good, m('adapt'), { size: 21 });
+    infoCard(p, 820, 500, 720, 300, 'осторожно', 'сустав болит во время или после → вес велик или нагрузка не в той части объёма; найти, где сжатие наибольшее, и не давать там максимального сопротивления', COL.bad, m('prec'), { size: 21 });
+  }],
+
+  ['more', 'Растяжка, равновесие, выносливость', (m, D) => {
+    const p = panel(0);
+    txt(p, 'растяжка, равновесие, аэробная нагрузка', 800, 56, m('str'), { size: 28, weight: 700, anchor: 'middle', fill: OA });
+    infoCard(p, 60, 100, 720, 160, 'растяжка и мобилизация', 'плюс самостоятельная растяжка и движения во всём доступном объёме', COL.whole, m('str'), { size: 21 });
+    // hip OA trial: 81 % vs 50 %
+    const bars = [[81, COL.whole, 'мобилизация и манипуляции'], [50, COL.dim, 'активные упражнения']];
+    bars.forEach(([v, c, s], i) => {
+      const y = 330 + i * 80, g = G(p, { o: 0 });
+      mk('rect', { x: 330, y, width: v * 4.2, height: 46, rx: 10, fill: c }, g);
+      T(g, `${v} %`, { x: 340 + v * 4.2, y: y + 33, size: 24, weight: 700, fill: c });
+      T(g, s, { x: 320, y: y + 31, size: 19, fill: COL.chalk, anchor: 'end' });
+      show(g, m('ev1', .4 + i * .5));
+    });
+    txt(p, 'остеоартрит тазобедренного: стало лучше', 420, 300, m('ev1'), { size: 20, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 60, 520, 720, 150, 'равновесие', 'чувство положения сустава нарушено → тренировка равновесия; тай-чи', COL.good, m('bal'), { size: 21 });
+    // aerobic: low impact yes, jogging and jumping no
+    txt(p, 'аэробная нагрузка: сердце, лёгкие, боль, настроение', 1180, 120, m('aer'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pillRow(p, ['ходьба', 'велосипед', 'плавание'], 1180, 175, m('aer', .8), { col: COL.good, size: 22, gap: .4 });
+    pillRow(p, ['бег трусцой', 'прыжки'], 1180, 235, m('aer', 2.5), { col: COL.bad, size: 22, gap: .4 });
+    cross(p, 1330, 235, 12, m('aer', 3), 5);
+    infoCard(p, 820, 290, 720, 140, 'избыточный вес', 'диета + упражнения лучше, чем что-то одно', COL.task, m('ev2'), { size: 21 });
+    infoCard(p, 820, 450, 720, 180, 'падения', 'сила, тай-чи, аэробика улучшают равновесие и снижают риск; упражнения в воде на равновесие заметно не влияют', COL.whole, m('ev3'), { size: 21 });
+    txt(p, 'что защищает функцию в будущем:', 800, 720, m('ev4'), { size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    pillRow(p, ['сила', 'активность', 'психическое здоровье', 'уверенность в себе', 'поддержка'], 800, 780, m('ev4', .5), { col: COL.good, size: 21, gap: .4 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-oa2', prompt: ['Подходит ли это при остеоартрите колена?'],
+    build: grid([
+      { parts: ['Бег трусцой и прыжки для выносливости'], ans: ['n'], why: 'Нет: повторяющиеся интенсивные удары по суставу.' },
+      { parts: ['Изометрия под разными углами в безболезненных положениях'], ans: ['y'], why: 'Да.' },
+      { parts: ['Максимальное сопротивление там, где сустав болит'], ans: ['n'], why: 'Нет: в части объёма с наибольшим сжатием максимум не дают.' },
+      { parts: ['Тай-чи для равновесия'], ans: ['y'], why: 'Да.' },
+      { parts: ['Плавание или велосипед'], ans: ['y'], why: 'Да: малоударная аэробная нагрузка.' },
+    ], [['y', 'Подходит', COL.good], ['n', 'Нет', COL.bad]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Остеоартрит поражает суставной хрящ; кость разрастается по краям, капсула утолщается.', 'w1'],
+     ['Факторы: механические нагрузки, иммобилизация, наследственность, ожирение, слабая четырёхглавая, удары, работа на коленях.', 'w2'],
+     ['Ранняя боль — от нагрузки, скованность после покоя проходит от движения; на поздних стадиях — боль и в покое.', 'w3'],
+     ['Сопротивление — в безболезненных дугах, без максимума в зоне наибольшего сжатия; растяжка, мобилизация, равновесие, малоударная аэробика.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: OA }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 29, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-stairs', prompt: ['Остеоартрит коленей: больно подниматься и спускаться по лестнице, трудно вставать со стула. Что подходит?'],
+    build: choice([
+      ['Укрепление мышц в безболезненных дугах, изометрия, малоударная аэробика, при необходимости трость или высокое сиденье'],
+      ['Прыжки и бег, чтобы укрепить колени'],
+      ['Максимальные приседания со штангой'],
+      ['Покой и отказ от лестниц и вставаний'],
+    ], 0, 'Сильные мышцы защищают сустав; нагрузку дают в безболезненных дугах, аэробику — малоударную, вспомогательные средства уменьшают болезненную нагрузку.',
+    [null, 'Повторяющиеся удары по суставу при остеоартрите избегают.', 'Тяжёлые веса и максимальное сжатие сустава усиливают боль.', 'Неподвижность ослабляет мышцы и усиливает застывание сустава.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-gel', prompt: ['У пациента с остеоартритом тазобедренного сустава по утрам 10–15 минут скованность, которая проходит, когда он расходится. Как это объяснить?'],
+    build: choice([
+      ['Сустав «застывает» после неподвижности; движение снимает застой — нужен баланс активности и отдыха'],
+      ['Это признак ревматоидного артрита'],
+      ['Это обострение воспаления: нужен постельный режим'],
+      ['Это признак перелома шейки бедра'],
+    ], 0, 'На ранних стадиях остеоартрита бывает короткая скованность после неподвижности: сустав застывает, движение её снимает.',
+    [null, 'При ревматоидном скованность долгая и есть признаки воспаления.', 'Покой лишь усилит застывание.', 'Скованность, проходящая от движения, не похожа на перелом.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

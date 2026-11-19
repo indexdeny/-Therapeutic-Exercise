@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROM: тазобедренный, коленный, голеностопный суставы, стопа — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 24, title: 'ROM: тазобедренный, коленный, голеностопный суставы, стопа', minutes: 9, language: 'ru', next: '../ch025/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch024/cards.ru.json
+const CARDS_SHORT = {
+  "захват\nверхняя рука под коленом, нижняя — под голеностопом": "под коленом и голеностопом",
+  "полное приведение\nдругую ногу немного отводят": "другую ногу немного отводят",
+  "положение\nбедро и колено разогнуты, без ротации": "бедро и колено разогнуты, без ротации",
+};
+// cards-short end
+
+const SKIN = '#d8d1c1', HAND = '#b9cfe0';
+// Muscle colours on labels: hamstrings, rectus femoris, gastrocnemius.
+const MC = { ham: COL.nat, rf: COL.task, gas: COL.real };
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+// A patient lying on a table (supine, or prone with prone: true), a therapist behind it, and the two-joint leg muscles.
+// hands: [nearTarget, farTarget] — figure point names on the patient for the therapist's hands.
+function legScene(p, hx, TOP, s, t0, { prone = false, hands = ['KN', 'heelN'], thx = 120 } = {}) {
+  const legH = 155 * s;
+  const th = fig(p, { x: hx + (prone ? -thx : thx) * s, y: TOP + legH - 182 * s, s, dir: prone ? 1 : -1, col: HAND, o: 0, pose: { t: 24, hN: 26, hF: 22, kN: 8, kF: 8 } });
+  bench(p, hx - 330 * s, hx + 330 * s, TOP, t0, COL.dim, legH);
+  const pt = prone
+    ? fig(p, { x: hx, y: TOP - 25 * s, s, r: 90, o: 0, pose: { ...STAND, hN: 0, hF: 0, kN: 0, kF: 0, aN: 4, aF: 4, eN: 6, eF: 6, fN: -40, fF: -40 } })
+    : supine(p, hx, TOP, s, null);
+  show(pt.g, t0);
+  const mus = { ham: muscleOn(pt, ...MUSCLE.hamstrings, { after: 'ftN', w: 13 }), rf: muscleOn(pt, ...MUSCLE.rectus, { after: 'ftN', w: 13 }), gas: muscleOn(pt, ...MUSCLE.gastroc, { after: 'ftN', w: 11 }) };
+  show(th.g, t0);
+  holdHand(th, 'N', pt, () => onStage(pt, hands[0]));
+  holdHand(th, 'F', pt, () => onStage(pt, hands[1]));
+  return { pt, th, mus };
+}
+// A capsule between two stage points (for schematic views from above or from the feet).
+function seg(p, col, w) {
+  const e = mk('path', { fill: col, stroke: mix(col, '#000000', .35), 'stroke-width': 1.5 }, p);
+  return { e, set(A, B) { e.setAttribute('d', capsuleD(A, B, w, w * .8)); } };
+}
+const wave = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+
+// A foot in side view, toes to the right, sole on y = 0 (local units × s); the shank rises from the ankle.
+// set(k): the arch rises (k > 0) or flattens (k < 0); toe(a): the big toe bends at its base (+ = toward the sole).
+function footSide(p, x, y, s) {
+  const g = G(p, { x, y, s, o: 0 }), defs = mk('defs', {}, g), line = mix(SKIN, COL.board, .62);
+  limbEl(g, defs, SKIN, 30, 34, line).set([4, -230], [4, -70]);
+  const toe = limbEl(g, defs, SKIN, 13, 10, line);
+  const sh = shadeGrad(defs, SKIN), body = mk('path', { fill: sh.url, stroke: line, 'stroke-width': 2 }, g);
+  sh.aim([0, -40], [200, -40], 50);
+  const f = { g };
+  f.set = k => {
+    const c = (4 - 30 - 22 * k).toFixed(1);
+    body.setAttribute('d', `M-40 -24Q-48 2 -18 4Q70 ${c} 150 4Q176 4 178 -14Q176 -30 160 -32Q96 -52 34 -96L-22 -96Q-40 -64 -40 -24Z`);
+    return f;
+  };
+  f.toe = a => { const B = [168, -16]; toe.set(B, [B[0] + 46 * Math.cos(rad(a)), B[1] + 46 * Math.sin(rad(a))]); return f; };
+  f.set(0); f.toe(4);
+  return f;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Нога', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 3 · Урок 24', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Объём движений: тазобедренный, коленный,', { x: 800, y: 315, size: 50, weight: 600, anchor: 'middle' });
+    T(g, 'голеностопный суставы и стопа', { x: 800, y: 380, size: 44, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'двусуставные мышцы ноги', 800, 460, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const sc = legScene(art, 800, 700, .5, 0);
+    show(art, m('sub', .2));
+    prog(q => sc.pt.set({ hN: 100 * wave(q, 1), kN: 115 * wave(q, 1) }), m('sub', .4), Math.max(1.5, D - m('sub', .4) - 1.1), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['combo', 'Бедро и колено вместе', (m) => {
+    const p = panel(0), TOP = 520;
+    const sc = legScene(p, 760, TOP, 1.2, .2);
+    pill(p, 'верхняя рука — под коленом', 400, 120, m('grip'), { col: HAND, size: 23 });
+    pill(p, 'нижняя рука — под пяткой', 1160, 120, m('grip', .8), { col: HAND, size: 23 });
+    prog(q => sc.pt.set({ hN: 120 * wave(q, 1.5), kN: 135 * wave(q, 1.5) }), m('why', .3), m('grip') - m('why', .3), lin);
+    labelBox(p, 470, 220, 620, ['полное сгибание бедра — колено согнуто', 'задняя группа бедра не мешает'], MC.ham, m('why'), { size: 24 });
+    labelBox(p, 1130, 220, 620, ['полное сгибание колена — бедро согнуто', 'прямая мышца бедра не мешает'], MC.rf, m('rf'), { size: 24 });
+    prog(q => sc.pt.set({ hN: 120 * wave(q, 2), kN: 135 * wave(q, 2) }), m('grip', .5), m('swing', 3) - m('grip', .5), lin);
+    pill(p, 'в конце — пальцы на боковую поверхность бедра', 800, 790, m('swing'), { col: HAND, size: 23 });
+  }],
+
+  ['hipext', 'Разгибание бедра', (m) => {
+    const p = panel(0), TOP = 540;
+    const sc = legScene(p, 820, TOP, 1.2, .2, { prone: true, hands: ['KN', 'H'], thx: 160 });
+    txt(p, 'лёжа на животе', 820, 120, .2, { size: 26, weight: 700, fill: COL.whole, anchor: 'middle' });
+    pill(p, 'нижняя рука — под коленом, поднимает бедро', 560, 180, m('prone'), { col: HAND, size: 22 });
+    pill(p, 'верхняя рука — стабилизирует таз', 1120, 180, m('prone', .8), { col: HAND, size: 22 });
+    prog(q => sc.pt.set({ hN: -25 * wave(q, 2), kN: 20 }), m('prone', 1), m('knee') - m('prone', 1), lin);
+    // with the knee fully bent, the rectus femoris stops hip extension
+    prog(q => sc.pt.set({ kN: lerp(20, 125, q), hN: lerp(0, -8, q) }), m('knee', .4), 1.6, io);
+    labelBox(p, 820, 800, 1060, ['колено полностью не сгибать — иначе прямая мышца ограничит разгибание'], MC.rf, m('knee'), { size: 24 });
+    pill(p, 'или на боку: нижняя рука под бедром, верхняя — таз', 820, 250, m('side'), { col: COL.dim, size: 21 });
+  }],
+
+  ['ham', 'Задняя группа бедра', (m) => {
+    const p = panel(0), TOP = 540;
+    const sc = legScene(p, 760, TOP, 1.2, .2, { hands: ['KN', 'heelN'] });
+    pill(p, 'нижняя рука — под пяткой', 1180, 120, m('grip'), { col: HAND, size: 23 });
+    pill(p, 'верхняя — поперёк передней поверхности колена', 520, 120, m('grip', .8), { col: HAND, size: 23 });
+    prog(q => sc.pt.set({ hN: 75 * Math.sin(Math.PI * q) ** .7, kN: 0 }), m('lift'), m('tight') - m('lift'), lin);
+    txt(p, 'колено разогнуто, бедро сгибается — задняя группа натягивается (синяя)', 800, 200, m('lift', .6), { size: 24, weight: 700, fill: COL.whole, anchor: 'middle' });
+    pill(p, 'нужна поддержка — голень на предплечье под икрой', 800, 790, m('cradle'), { col: HAND, size: 22 });
+    prog(q => sc.pt.set({ hN: 0, kN: lerp(40, 22, q) }), m('tight', .4), 1.4, io);
+    labelBox(p, 800, 250, 960, ['очень тугие мышцы: разогнуть колено, насколько позволяют, бедро не двигать'], MC.ham, m('tight'), { size: 23 });
+  }],
+
+  ['rf', 'Прямая мышца бедра', (m) => {
+    const p = panel(0), TOP = 540;
+    const sc = legScene(p, 820, TOP, 1.2, .2, { prone: true, hands: ['heelN', 'H'], thx: 160 });
+    txt(p, 'лёжа на животе: верхняя рука стабилизирует таз', 820, 120, m('prone'), { size: 25, weight: 700, fill: HAND, anchor: 'middle' });
+    prog(q => sc.pt.set({ kN: 135 * Math.sin(Math.PI * q) ** .7 }), m('flex', -.2), m('flex', 5) - m('flex', -.2), lin);
+    labelBox(p, 820, 800, 860, ['сопротивление в передней части бедра — полный объём'], MC.rf, m('flex', 1.5), { size: 25 });
+    pill(p, 'или лёжа на спине, колено с края стола; другая нога согнута, стопа на столе', 820, 200, m('pos'), { col: COL.dim, size: 21 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-limit', prompt: ['Какая мышца ограничивает это движение?'],
+    build: grid([
+      { parts: ['Сгибание бедра при разогнутом колене'], ans: ['h'], why: 'Задняя группа бедра.' },
+      { parts: ['Сгибание колена при разогнутом бедре'], ans: ['r'], why: 'Прямая мышца бедра.' },
+      { parts: ['Тыльное сгибание стопы при разогнутом колене'], ans: ['g'], why: 'Икроножная мышца.' },
+      { parts: ['Разгибание бедра при полностью согнутом колене'], ans: ['r'], why: 'Прямая мышца бедра.' },
+      { parts: ['Разгибание колена при полностью согнутом бедре'], ans: ['h'], why: 'Задняя группа бедра.' },
+    ], [['h', 'Задняя группа бедра', MC.ham], ['r', 'Прямая мышца бедра', MC.rf], ['g', 'Икроножная', MC.gas]], { multi: false, text: true }),
+  }], done) }],
+
+  ['abd', 'Отведение и приведение', (m) => {
+    const p = panel(0), cx = 470, cy = 380, s = .9;
+    txt(p, 'вид сверху: пациент лёжа на спине', cx, 70, .2, { size: 23, fill: COL.dim, anchor: 'middle' });
+    tableTop(p, cx, cy, s, .2);
+    const f = flatFig(p, cx, cy, s, .2);
+    // the adductors run from the pubis to the inner thigh: they lengthen as the leg goes out
+    const P0 = [8, 10], thighPt = () => { const u = f.pts.uL, n = [-u[1], u[0]]; return [30 + 120 * u[0] - 14 * n[0], 120 * u[1] - 14 * n[1]]; };
+    f.leg(10);
+    const add = muscleEl(f.top, { rest: Math.hypot(...thighPt().map((v, i) => v - P0[i])), w: 13 });
+    // the therapist's hands: the upper under the knee, the lower under the ankle
+    const grip = () => { const e = mk('ellipse', { rx: 26, ry: 18, fill: HAND, 'fill-opacity': .9, stroke: '#7d93a3', 'stroke-width': 2 }, f.top); put(e, { o: 0 }); return e; };
+    const gK = grip(), gA = grip();
+    f.onSet.push(() => { add.set(P0, thighPt()); put(gK, { x: f.pts.K[0], y: f.pts.K[1], r: -f.thL }); put(gA, { x: f.pts.A[0], y: f.pts.A[1], r: -f.thL }); });
+    f.leg(3);
+    put(add.g, { o: 0 });
+    show(gK, m('grip', .2)); show(gA, m('grip', .6));
+    const swing = (a, b) => q => { const v = Math.sin(2 * Math.PI * q); f.leg(v > 0 ? a * v : b * v); };
+    prog(swing(40, 18), m('grip', 1), m('opp') - m('grip', 1), lin);
+    prog(q => f.legF(lerp(3, 16, q)), m('opp'), .8, io);
+    prog(q => { const v = Math.sin(2 * Math.PI * 1.25 * q); f.leg(v > 0 ? 40 * v : 30 * v); }, m('opp', 1), m('neu', 3) - m('opp', 1), lin);
+    show(add.g, m('grip', 2));
+    infoCard(p, 880, 120, 620, 150, 'захват', 'верхняя рука под коленом, нижняя — под голеностопом', HAND, m('grip'), { size: 23 });
+    infoCard(p, 880, 300, 620, 130, 'полное приведение', 'другую ногу немного отводят', COL.task, m('opp'), { size: 23 });
+    infoCard(p, 880, 460, 620, 130, 'положение', 'бедро и колено разогнуты, без ротации', COL.whole, m('neu'), { size: 23 });
+    txt(p, 'приводящие мышцы растягиваются при отведении', 1190, 660, m('grip', 2.2), { size: 23, weight: 700, fill: ANAT.stretch, anchor: 'middle' });
+    NOTE(p, 1190, 706, m('grip', 2.2));
+  }],
+
+  ['rot', 'Ротация бедра', (m) => {
+    const p = panel(0), defs = mk('defs', {}, p), line = mix(SKIN, COL.board, .62);
+    const rg = (c) => { const id = 'rg' + (++SHADE_ID), gr = mk('radialGradient', { id, cx: .38, cy: .3, r: .8 }, defs); [[0, mix(c, '#ffffff', .45)], [.55, c], [1, mix(c, '#000000', .45)]].forEach(([o, cc]) => mk('stop', { offset: o, 'stop-color': cc }, gr)); return `url(#${id})`; };
+    // left: the straight leg seen from the feet: the sole faces us, the toes point up and roll in and out
+    txt(p, 'разогнутая нога — вид со стороны стоп', 400, 110, m('ext'), { size: 24, weight: 700, fill: COL.whole, anchor: 'middle' });
+    const C = [400, 440], cs = G(p, { o: 0 });
+    mk('rect', { x: 180, y: C[1] + 70, width: 440, height: 16, rx: 6, fill: PANEL, stroke: COL.dim, 'stroke-width': 3 }, cs);
+    mk('circle', { cx: C[0], cy: C[1], r: 62, fill: rg(SKIN), stroke: line, 'stroke-width': 2 }, cs);
+    const footG = G(cs, { x: C[0], y: C[1] });
+    limbEl(footG, defs, SKIN, 34, 26, line).set([0, 10], [0, -150]);
+    mk('ellipse', { cx: 0, cy: 6, rx: 32, ry: 30, fill: rg(mix(SKIN, '#000000', .1)), stroke: line, 'stroke-width': 2 }, footG);   // the heel
+    T(footG, 'пальцы', { x: 0, y: -170, size: 20, fill: COL.dim, anchor: 'middle' });
+    const R = 205, ap = a => `${(C[0] + R * Math.sin(rad(a))).toFixed(1)} ${(C[1] - R * Math.cos(rad(a))).toFixed(1)}`;
+    path(cs, `M${ap(-45)}A${R} ${R} 0 0 1 ${ap(45)}`, { stroke: COL.dim, 'stroke-width': 3, 'stroke-dasharray': '6 8' });
+    show(cs, m('ext'));
+    prog(q => put(footG, { x: C[0], y: C[1], r: 40 * Math.sin(2 * Math.PI * 2 * q) }), m('ext', .5), m('flx') - m('ext', .5), lin);
+    txt(p, 'перекатывать бедро внутрь и наружу', 400, 590, m('ext', 1), { size: 23, fill: COL.whole, anchor: 'middle' });
+    // right: hip and knee at 90°, seen from above: the thigh points at us, the shank swings about the knee
+    txt(p, 'бедро и колено 90° — вид сверху', 1150, 110, m('flx'), { size: 24, weight: 700, fill: COL.task, anchor: 'middle' });
+    const K = [1150, 270], pg = G(p, { o: 0 });
+    const Rs = 250, sp = a => `${(K[0] + Rs * Math.sin(rad(a))).toFixed(1)} ${(K[1] + Rs * Math.cos(rad(a))).toFixed(1)}`;
+    path(pg, `M${sp(-38)}A${Rs} ${Rs} 0 0 0 ${sp(38)}`, { stroke: COL.dim, 'stroke-width': 3, 'stroke-dasharray': '6 8' });
+    const shank = limbEl(pg, defs, SKIN, 22, 15, line), foot = mk('ellipse', { rx: 20, ry: 30, fill: rg(SKIN), stroke: line, 'stroke-width': 2 }, pg);
+    mk('circle', { cx: K[0], cy: K[1], r: 34, fill: rg(SKIN), stroke: line, 'stroke-width': 2 }, pg);
+    const setSh = a => { const E = [K[0] + 220 * Math.sin(rad(a)), K[1] + 220 * Math.cos(rad(a))]; shank.set(K, E); put(foot, { x: E[0] + 10 * Math.sin(rad(a)), y: E[1] + 10 * Math.cos(rad(a)), r: -a }); };
+    setSh(0); show(pg, m('flx'));
+    prog(q => setSh(35 * Math.sin(2 * Math.PI * 2 * q)), m('flx', .5), m('caut', 3) - m('flx', .5), lin);
+    txt(p, 'колено (бедро направлено на нас)', 1150, 214, m('flx', .4), { size: 20, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'голень качается, как маятник', 1150, 590, m('flx', 1), { size: 23, fill: COL.task, anchor: 'middle' });
+    labelBox(p, 800, 720, 1120, ['нестабильное колено: обхватить бедро, поддержать голень и колено — осторожно'], COL.bad, m('caut'), { size: 23 });
+  }],
+
+  ['df', 'Тыльное сгибание', (m) => {
+    const p = panel(0), TOP = 520;
+    const sc = legScene(p, 760, TOP, 1.2, .2, { hands: ['AN', 'heelN'] });
+    pill(p, 'одна рука — область лодыжек', 470, 110, m('grip'), { col: HAND, size: 23 });
+    pill(p, 'другая — пятка, предплечье вдоль подошвы', 1090, 110, m('grip', .8), { col: HAND, size: 23 });
+    pill(p, 'тянуть пятку дистально, предплечьем — вверх', 800, 170, m('pull'), { col: HAND, size: 23 });
+    // knee flexed: full joint range; knee extended: the gastrocnemius limits dorsiflexion
+    prog(q => sc.pt.set({ hN: 45 * Math.min(1, q * 5), kN: 80 * Math.min(1, q * 5), fN: 30 * wave(q, 2) }), m('knee', -.3), m('gas') - m('knee', -.3), lin);
+    prog(q => sc.pt.set({ hN: 45 * (1 - Math.min(1, q * 5)), kN: 80 * (1 - Math.min(1, q * 5)), fN: 14 * wave(q, 2) }), m('gas'), m('gas', 6) - m('gas'), lin);
+    labelBox(p, 470, 800, 600, ['колено согнуто', 'полный объём сустава'], COL.good, m('knee'), { size: 25 });
+    labelBox(p, 1130, 800, 600, ['колено разогнуто', 'икроножная натянута и ограничивает'], MC.gas, m('gas'), { size: 25 });
+  }],
+
+  ['pf', 'Подошвенное сгибание', (m) => {
+    const p = panel(0), TOP = 560;
+    const sc = legScene(p, 760, TOP, 1.2, .2, { hands: ['heelN', 'toeN'] });
+    prog(q => sc.pt.set({ fN: -40 * wave(q, 2) }), m('pf', .3), 5, lin);
+    pill(p, 'пятку поддерживает нижняя рука, верхняя — на тыле стопы', 800, 140, m('pf'), { col: HAND, size: 23 });
+    // the weight of a blanket pushes the foot of a bed-bound patient into plantarflexion
+    const bl = mk('path', { fill: COL.whole, 'fill-opacity': .18, stroke: COL.whole, 'stroke-width': 3 }, p);
+    const [tx, ty] = onStage(sc.pt, 'toeN');
+    bl.setAttribute('d', `M${tx - 420} ${TOP - 40}Q${tx - 120} ${TOP - 60} ${tx + 10} ${ty - 10}L${tx + 60} ${TOP}L${tx - 420} ${TOP}Z`);
+    put(bl, { o: 0 }); show(bl, m('bed'));
+    arrowTo(p, [tx + 10, ty - 90], [tx + 10, ty - 20], m('bed', .5), { col: COL.whole, w: 4 });
+    labelBox(p, 800, 230, 900, ['у лежачих стопа и так в подошвенном сгибании (одеяло, сила тяжести)'], COL.whole, m('bed', .8), { size: 24 });
+  }],
+
+  ['foot', 'Стопа', (m) => {
+    const p = panel(0), defs = mk('defs', {}, p), line = mix(SKIN, COL.board, .62);
+    const grip = (g, x, y, t0, r = 0) => { const e = mk('ellipse', { rx: 24, ry: 17, fill: HAND, 'fill-opacity': .9, stroke: '#7d93a3', 'stroke-width': 2 }, g); put(e, { x, y, r, o: 0 }); show(e, t0); return e; };
+    // the heel seen from behind: it tilts in (inversion) and out (eversion) under the fixed leg
+    txt(p, 'подтаранный сустав — пятка сзади', 270, 110, m('st'), { size: 24, weight: 700, fill: COL.whole, anchor: 'middle' });
+    const hl = G(p, { x: 270, y: 470, o: 0 });
+    limbEl(hl, defs, SKIN, 40, 30, line).set([0, -280], [0, -60]);
+    const heel = G(hl, { y: -60 }), hs = shadeGrad(defs, SKIN);
+    hs.aim([0, 0], [0, 100], 55);
+    mk('path', { d: 'M-52 -6Q-58 84 0 96Q58 84 52 -6Q0 -24 -52 -6Z', fill: hs.url, stroke: line, 'stroke-width': 2 }, heel);
+    grip(heel, 0, 66, m('st', .6));
+    grip(hl, -38, -96, m('st', .6), 90);
+    show(hl, m('st'));
+    prog(q => put(heel, { y: -60, r: 25 * Math.sin(2 * Math.PI * 2 * q) }), m('st', .8), m('tt') - m('st', .8), lin);
+    txt(p, 'внутрь — инверсия · наружу — эверсия', 270, 570, m('st', 1.5), { size: 22, fill: COL.whole, anchor: 'middle' });
+    // the midfoot in side view: hindfoot held, navicular and cuboid moved — the arch rises and falls
+    txt(p, 'средняя часть стопы', 790, 110, m('tt'), { size: 24, weight: 700, fill: COL.task, anchor: 'middle' });
+    const mf = footSide(p, 680, 440, 1.2);
+    show(mf.g, m('tt'));
+    grip(mf.g, -10, -40, m('tt', .4), 90); grip(mf.g, 95, -66, m('tt', .8), -20);
+    prog(q => mf.set(2 * wave(q, 2) - .6), m('tt', 1), 5, lin);
+    para(p, 'держать таранную и пяточную, двигать ладьевидную и кубовидную: свод вверх и вниз', 790, 540, m('tt', .8), { size: 22, maxW: 440, anchor: 'middle', fill: COL.task });
+    // the toes: the proximal bone held, the distal one moved, as with the fingers
+    txt(p, 'пальцы стопы', 1300, 110, m('toes'), { size: 24, weight: 700, fill: COL.good, anchor: 'middle' });
+    const tf = footSide(p, 1190, 440, 1.2);
+    show(tf.g, m('toes'));
+    grip(tf.g, 150, -32, m('toes', .3), -10);
+    prog(q => tf.toe(lerp(-45, 40, wave(q, 1.5))), m('toes', .8), 5, lin);
+    para(p, 'как пальцы кисти: держать проксимальную кость, двигать дистальную', 1300, 540, m('toes', .3), { size: 22, maxW: 440, anchor: 'middle', fill: COL.good });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-knee', prompt: ['В каком положении колена это делать?'],
+    build: grid([
+      { parts: ['Полный объём голеностопного сустава при тыльном сгибании'], ans: ['f'], why: 'Колено согнуто — икроножная не мешает.' },
+      { parts: ['Удлинить икроножную мышцу'], ans: ['e'], why: 'Колено разогнуто.' },
+      { parts: ['Полное сгибание бедра'], ans: ['f'], why: 'Колено согнуто — задняя группа бедра не мешает.' },
+      { parts: ['Удлинить заднюю группу бедра'], ans: ['e'], why: 'Колено разогнуто, бедро сгибается.' },
+      { parts: ['Полное разгибание бедра лёжа на животе'], ans: ['e'], why: 'Колено полностью не сгибают — иначе мешает прямая мышца.' },
+    ], [['f', 'Колено согнуто', COL.good], ['e', 'Колено разогнуто', COL.whole]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Полное сгибание бедра — с согнутым коленом, полное сгибание колена — с согнутым бедром.', 'w1'],
+     ['Задняя группа: бедро сгибается при разогнутом колене; прямая мышца: колено сгибается при разогнутом бедре.', 'w2'],
+     ['Тыльное сгибание — при согнутом и разогнутом колене: сустав и икроножная мышца.', 'w3'],
+     ['Ротация бедра — перекатывание или маятник; осторожно при нестабильном колене.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-gas', prompt: ['Лежачему пациенту нужно сохранить длину икроножной мышцы. Как выполнить тыльное сгибание?'],
+    build: choice([
+      ['При разогнутом колене: тянуть пятку дистально и давить предплечьем на подошву'],
+      ['При согнутом колене'],
+      ['Давить только на пальцы стопы'],
+      ['Не нужно: у лежачих стопа и так в тыльном сгибании'],
+    ], 0, 'Икроножная удлиняется при разогнутом колене.',
+    [null, 'При согнутом колене икроножная расслаблена — так получают объём сустава.', 'Давят на подошву предплечьем, а пятку тянут дистально; на пальцы — нет.', 'Наоборот: у лежачих стопа уходит в подошвенное сгибание.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Для полного сгибания бедра колено тоже сгибают.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Для полного разгибания бедра колено сгибают полностью.'], ans: ['f'], why: 'Неверно: прямая мышца ограничит разгибание.' },
+      { parts: ['При согнутом колене тыльное сгибание даёт полный объём сустава.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['У лежачих пациентов стопа стремится в тыльное сгибание.'], ans: ['f'], why: 'Неверно: в подошвенное.' },
+      { parts: ['Для полного приведения бедра другую ногу немного отводят.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

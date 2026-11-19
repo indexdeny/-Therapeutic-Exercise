@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Нейродинамические тесты — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 122, title: 'Нейродинамические тесты и мобилизация', minutes: 9, language: 'ru', next: '../ch123/' };
+// bio begin: places of the biomechanics layer (B switches); made by tools/therapeutic-exercise/bio.py from content/therapeutic-exercise/ch122/bio.ru.json
+const BIO = [
+  {"beat": "slr", "fig": 0, "level": "angle", "joint": "hN", "load": {"type": "none"}},
+  {"beat": "slump", "fig": 0, "level": "angle", "joint": "kN", "load": {"type": "none"}},
+];
+// bio end
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch122/cards.ru.json
+const CARDS_SHORT = {
+  "осторожно с выводами\nэто здоровые добровольцы — переносить на пациентов напрямую нельзя": "здоровые добровольцы",
+  "приведение и внутренняя ротация бедра\nсильнее натяжение: нерв лежит латеральнее седалищного бугра": "сильнее натяжение",
+  "пассивное сгибание шеи\nтянет спинной мозг вверх — натягивает всю систему": "натягивает всю систему",
+  "один сустав туда и обратно\nголеностоп или колено на несколько градусов — так отличают нерв от укороченных мышц задней группы бедра": "отличают нерв от мышц",
+  "подъём прямой ноги — сидя\n+ сгибание позвоночника — больше натяжения всей системы": "+ сгибание позвоночника",
+  "при боли в пояснице\nтест хорошо выявляет нейропатическую боль; боль ниже колена повышает специфичность": "боль ниже колена — специфичнее",
+  "позвоночник нейтрален, бедро разогнуто до 0°\nколено сгибают до сопротивления и симптомов": "колено сгибают до сопротивления и симптомов",
+  "что значит ответ\nболь в пояснице или онемение передней поверхности бедра — верхние поясничные корешки и бедренный нерв; боль в бедре — может быть укороченная прямая мышца": "бедренный нерв или прямая мышца",
+  "не разгибать позвоночник\nиначе спутаем с давлением на корешок или болью межпозвонковых суставов": "иначе спутаем с корешком",
+  "вариант — лёжа на боку\nбольная нога сверху: таз фиксирован, бедро разгибают при согнутом колене": "больная нога сверху",
+};
+// cards-short end
+
+const HEAD = COL.whole, NV = NERVE_C, PAIN = '#ff5a3c';
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+function numLine(p, n, str, x, y, col, t0, { size = 22, maxW = 860 } = {}) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 20, cy: y - 8, r: 19, fill: col }, g);
+  T(g, String(n), { x: x + 20, y: y, size: 22, weight: 700, fill: COL.board, anchor: 'middle' });
+  put(para(g, str, x + 54, y, null, { size, maxW }), { o: 1 });
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+const f1 = v => v.toFixed(1);
+// A tension gauge at (x, y): g.set(v) 0..1.
+function gauge(p, x, y, label, col, t0) {
+  const g = G(p, { o: 0 });
+  T(g, label, { x, y: y - 12, size: 18, fill: COL.dim });
+  mk('rect', { x, y, width: 220, height: 22, rx: 8, fill: COL.board, stroke: COL.dim, 'stroke-width': 1.5 }, g);
+  const r = mk('rect', { x, y, width: 0, height: 22, rx: 8, fill: col }, g);
+  if (t0 !== null) show(g, t0);
+  return { g, set: v => r.setAttribute('width', f1(220 * clamp(v, 0, 1))) };
+}
+// The supine patient seen from above (flatFig) with a jointed near arm for the upper-limb tests and the nerve from the
+// neck to the fingers. set({ ab, elb, dep, lat, wr }): ab — shoulder abduction (deg, 0 = along the body); elb — elbow
+// flexion (deg, the forearm turns toward the head); dep 0..1 — shoulder girdle depression; lat — head side bend
+// (deg, − = away from the test arm); wr 0..1 — how far the wrist and fingers are taken into the test position.
+// Tension: abduction, elbow (k.elbExt: 1 = extension loads, −1 = flexion loads), wrist, depression and the head.
+function ulntRig(p, cx, cy, s, t0, { elbExt = 1 } = {}) {
+  const f = flatFig(p, cx, cy, s, null); f.face(true);
+  f.armN.forEach(a => a.e.setAttribute('opacity', 0));
+  const defs = mk('defs', {}, f.top), col = '#d8d1c1', line = mix(col, COL.board, .62);
+  const ua = limbEl(f.top, defs, col, 16, 13, line), fa = limbEl(f.top, defs, col, 13, 10, line), hd = limbEl(f.top, defs, col, 10, 9, line);
+  const nv = nerveLine(p, [[0, 0], [1, 0]], null, { w: 7, n: 16 }); put(nv.g, { o: 0 });
+  const S = { ab: 6, elb: 0, dep: 0, lat: 0, wr: 0 }, e = { f, nv, st: S, t: 0 };
+  e.set = o => {
+    Object.assign(S, o);
+    const S0 = [84, -168 + 14 * S.dep], a = rad(S.ab), u = [Math.sin(a), Math.cos(a)], E = [S0[0] + u[0] * 118, S0[1] + u[1] * 118];
+    const b = rad(-S.elb), v = [u[0] * Math.cos(b) - u[1] * Math.sin(b), u[0] * Math.sin(b) + u[1] * Math.cos(b)];
+    const W = [E[0] + v[0] * 104, E[1] + v[1] * 104], X = [W[0] + v[0] * 42 * (1 - .4 * S.wr), W[1] + v[1] * 42 * (1 - .4 * S.wr)];
+    ua.set(S0, E); fa.set(E, W); hd.set(W, X);
+    f.head(S.lat);
+    const P = [[0, -182], [44, -176], S0, E, W, X].map(q => f.stage(q));
+    nv.reroute(P);
+    const elbLoad = elbExt > 0 ? 1 - clamp(S.elb / 90, 0, 1) : clamp(S.elb / 140, 0, 1);
+    const t = clamp(S.ab / 110, 0, 1) * .3 + elbLoad * .25 + S.wr * .2 + S.dep * .1 + clamp(-S.lat / 25, 0, 1) * .15;
+    e.t = t;
+    nv.set({ taut: t, wave: 1 - t, hot: clamp((t - .78) / .2, 0, 1) });
+    return e;
+  };
+  e.set({});
+  if (t0 !== null) { show(f.g, t0); show(nv.g, t0); }
+  return e;
+}
+// Stage points of the sciatic (posterior) or femoral (anterior) nerve along a side-view figure.
+function legNervePts(f, kind) {
+  const P = f.pts, L2S = q => { const s0 = st(f.g), [x, y] = rotPt(q[0] * f.s, q[1] * f.s, s0.r || 0); return [s0.x + x, s0.y + y]; };
+  const off = (A, B, k, d) => { const dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy) || 1, n = [-dy / L * f.dir, dx / L * f.dir]; return [A[0] + dx * k + n[0] * d, A[1] + dy * k + n[1] * d]; };
+  const pts = kind === 'fem'
+    ? [off(P.H, P.Sh, .45, 14), off(P.H, P.Sh, .1, 16), off(P.H, P.KN, .05, -16), off(P.H, P.KN, .55, -17), off(P.KN, P.AN, .05, -13), off(P.KN, P.AN, .5, -10)]
+    : [off(P.H, P.Sh, 1, -10), off(P.H, P.Sh, .6, -14), off(P.H, P.Sh, .1, -14), off(P.H, P.KN, .05, 14), off(P.H, P.KN, .55, 13), off(P.KN, P.AN, .02, 11), off(P.KN, P.AN, .55, 9), off(P.KN, P.AN, .96, 7), P.heelN];
+  return pts.map(L2S);
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Нейродинамические тесты', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 13 · Урок 122', { x: 800, y: 130, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Нейродинамические тесты', { x: 800, y: 215, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'и мобилизация нервов', { x: 800, y: 280, size: 40, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'шаг за шагом удлинить нерв — до первых симптомов', 800, 360, m('sub'), { size: 30, fill: NV, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const r = ulntRig(art, 560, 760, .9, null); put(r.f.g, { o: 1 }); put(r.nv.g, { o: 1 });
+    bench(art, 860, 1340, 640, null, COL.dim, 110); put(art.lastChild, { o: 1 });
+    const sl = supine(art, 1080, 640, .72, null); put(sl.g, { o: 1 });
+    const sn = nerveLine(art, legNervePts(sl, 'sci'), null, { w: 7, n: 12 }); put(sn.g, { o: 1 });
+    prog(q => { const c = cyc(q, 2); r.set({ ab: 6 + 104 * c, elb: 90 * (1 - c), wr: c }); sl.set({ hN: 70 * c, fN: 20 * c }); sn.reroute(legNervePts(sl, 'sci')); sn.set({ taut: c, wave: 1 - c }); }, .6, Math.max(2, D - 1.6), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['ulnt1', 'Срединный нерв', (m, D) => {
+    const p = panel(0);
+    txt(p, 'тест натяжения срединного нерва (по мотивам рис. 13.13)', 800, 56, m('ulnt1'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const r = ulntRig(p, 370, 545, .8, m('pos'));
+    r.set({ ab: 6, elb: 0 });
+    const fist = G(p, { o: 0 }); mk('circle', { cx: 370 + 84 * .8, cy: 545 - 186 * .8, r: 15, fill: '#b9cfe0', stroke: '#6f8faa', 'stroke-width': 2 }, fist); show(fist, m('pos', 2));
+    const gT = gauge(p, 860, 830, 'натяжение нерва', ANAT.taut, m('ab'));
+    const step = (o, t, d = 1.2) => prog(q => { const S = r.st, cur = {}; for (const k in o) cur[k] = S['_' + k] === undefined ? (S['_' + k] = S[k]) : S['_' + k]; const nx = {}; for (const k in o) nx[k] = cur[k] + (o[k] - cur[k]) * q; r.set(nx); gT.set(r.t); if (q >= 1) for (const k in o) delete S['_' + k]; }, t, d);
+    step({ ab: 110, elb: 90 }, m('ab'));
+    step({ wr: .5 }, m('ext'));
+    step({ wr: .75 }, m('sup'));
+    step({ elb: 30 }, m('elb'), 2);
+    prog(q => { const c = Math.sin(q * Math.PI * 2); r.set({ lat: -20 * Math.max(0, c) + 20 * Math.max(0, -c) }); gT.set(r.t); }, m('sens'), Math.max(2, D - m('sens') - .5), lin);
+    const S = [['pos', 'на спине у края стола, без подушек; кулак прижимает надплечье'], ['ab', 'отведение ≈ 110°, локоть согнут под 90°'], ['ext', 'разгибание кисти и пальцев с большим'], ['sup', 'супинация и наружная ротация плеча'], ['elb', 'медленно разгибать локоть — до симптомов или натяжения'], ['sens', 'шея в другую сторону — сильнее? в свою — слабее?']];
+    S.forEach(([k, s], i) => numLine(p, i + 1, s, 820, 130 + i * 92, NV, m(k), { size: 21, maxW: 660 }));
+    const h = handSide(p, 1340, 760, .6, { tendons: true }); show(h.g, m('ext'));
+    prog(q => h.set({ w: -50 * q, mcp: -20 * q, pip: 0, dip: 0 }), m('ext', .3), 1);
+    txt(p, 'кисть сбоку', 1290, 840, m('ext'), { size: 17, fill: COL.dim, anchor: 'middle' });
+    pill(p, 'схема', 140, 870, m('ulnt1'), { col: COL.dim, size: 17 });
+  }],
+
+  ['ev', 'Скольжение или натяжение', (m, D) => {
+    const p = panel(0);
+    txt(p, 'смещение срединного нерва (здоровые добровольцы, ультразвук)', 800, 56, m('ev'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const AX = 520, MM = 70;
+    const ax = G(p, { o: 0 }); path(ax, `M${AX} 580H${AX + 12 * MM}`, { stroke: COL.dim, 'stroke-width': 2 });
+    [0, 2, 4, 6, 8, 10, 12].forEach(v => { path(ax, `M${AX + v * MM} 574V586`, { stroke: COL.dim, 'stroke-width': 2 }); T(ax, String(v), { x: AX + v * MM, y: 612, size: 17, fill: COL.dim, anchor: 'middle' }); });
+    T(ax, 'мм', { x: AX + 12 * MM + 20, y: 612, size: 17, fill: COL.dim }); show(ax, m('slide'));
+    const B = [['скольжение: локоть и шея в одну сторону', 10.2, COL.good, 'slide'], ['натяжение: в противоположные стороны', 1.8, COL.bad, 'tens'], ['только локоть', 5.6, COL.task, 'one'], ['только шея', 3.3, COL.whole, 'one']];
+    B.forEach(([s, v, c, k], i) => {
+      const y = 160 + i * 96, g0 = G(p, { o: 0 });
+      put(para(g0, s, AX - 16, y + 26, null, { size: 21, maxW: 440, anchor: 'end' }), { o: 1 });
+      const r = mk('rect', { x: AX, y, width: 0, height: 40, rx: 10, fill: c }, g0);
+      const tv = T(g0, `≈ ${String(v).replace('.', ',')} мм`, { x: AX + 12, y: y + 29, size: 22, weight: 700, fill: c });
+      show(g0, m(k, i === 3 ? 1.5 : 0)); prog(q => { r.setAttribute('width', f1(v * MM * q)); put(tv, { x: AX + v * MM * q + 12 }); }, m(k, (i === 3 ? 1.5 : 0) + .2), 1, out);
+    });
+    infoCard(p, 60, 660, 1480, 150, 'осторожно с выводами', 'это здоровые добровольцы — переносить на пациентов напрямую нельзя', COL.dim, m('one', 3), { size: 22 });
+  }],
+
+  ['ulnt2', 'Лучевой нерв', (m, D) => {
+    const p = panel(0);
+    txt(p, 'тест натяжения лучевого нерва (по мотивам рис. 13.14)', 800, 56, m('ulnt2'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const r = ulntRig(p, 370, 545, .8, m('ulnt2'));
+    const gT = gauge(p, 860, 830, 'натяжение нерва', ANAT.taut, m('seq'));
+    const t0 = m('seq'), span = Math.max(4, m('abd') - t0);
+    prog(q => { const k = q * 4; r.set({ dep: clamp(k, 0, 1), ab: 6 + 4 * clamp(k - .5, 0, 1), elb: 0, wr: clamp(k - 2, 0, 1) }); gT.set(r.t); }, t0, span);
+    prog(q => { r.set({ ab: 10 + 50 * q }); gT.set(r.t); }, m('abd'), 2);
+    prog(q => { const c = Math.sin(q * Math.PI * 2); r.set({ lat: -20 * Math.max(0, c) + 20 * Math.max(0, -c) }); gT.set(r.t); }, m('abd', 2.5), Math.max(1, D - m('abd', 3)), lin);
+    const S = ['опустить плечевой пояс', 'отвести плечо ≈ 10°, разогнуть локоть', 'внутренняя ротация руки и пронация', 'согнуть кисть, пальцы, большой; локтевое отведение', 'медленно отводить плечо до симптомов; шея — в другую сторону'];
+    S.forEach((s, i) => numLine(p, i + 1, s, 820, 140 + i * 100, '#f0a04b', i < 4 ? t0 + span * i / 4 : m('abd'), { size: 21, maxW: 660 }));
+    const h = handSide(p, 1340, 760, .6, { tendons: true }); show(h.g, t0 + span / 2);
+    prog(q => h.set({ w: 50 * q, mcp: 70 * q, pip: 70 * q, dip: 40 * q }), t0 + span / 2, 1);
+    pillRow(p, ['теннисный локоть или канал лучевого нерва?', 'де Кервен', 'поверхностная ветвь'], 1150, 650, m('ulnt2', .5), { col: '#f0a04b', size: 17, gap: .6, space: 8 });
+    pill(p, 'схема', 140, 870, m('ulnt2'), { col: COL.dim, size: 17 });
+  }],
+
+  ['ulnt3', 'Локтевой нерв', (m, D) => {
+    const p = panel(0);
+    txt(p, 'тест натяжения локтевого нерва (по мотивам рис. 13.15)', 800, 56, m('ulnt3'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const r = ulntRig(p, 370, 545, .8, m('ulnt3'), { elbExt: -1 });
+    const gT = gauge(p, 860, 830, 'натяжение нерва', ANAT.taut, m('seq'));
+    const t0 = m('seq'), span = Math.max(3, m('abd') - t0);
+    prog(q => { const k = q * 3; r.set({ wr: clamp(k, 0, 1), elb: 140 * clamp(k - .8, 0, 1), dep: clamp(k - 2, 0, 1), ab: 30 }); gT.set(r.t); }, t0, span);
+    prog(q => { r.set({ ab: 30 + 80 * q }); gT.set(r.t); }, m('abd'), 2);
+    prog(q => { r.set({ lat: -20 * q }); gT.set(r.t); }, m('abd', 2.5), 1);
+    const S = ['разогнуть кисть и пальцы, пронация', 'согнуть локоть', 'наружная ротация плеча, опустить пояс', 'отвести плечо ≈ 110° или до симптомов; шея — в другую сторону'];
+    S.forEach((s, i) => numLine(p, i + 1, s, 820, 150 + i * 110, '#bba8ee', i < 3 ? t0 + span * i / 3 : m('abd'), { size: 21, maxW: 660 }));
+    pill(p, 'нижняя часть сплетения и локтевой нерв', 1180, 110, m('ulnt3', .5), { col: '#bba8ee', size: 19 });
+    pill(p, 'схема', 140, 870, m('ulnt3'), { col: COL.dim, size: 17 });
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-ulnt', prompt: ['Какой нерв проверяет это положение?'],
+    build: grid([
+      { parts: ['Отведение 110°, супинация, разгибание кисти, затем разгибание локтя'], ans: ['m'], why: 'Срединный.' },
+      { parts: ['Опускание пояса, внутренняя ротация, сгибание кисти и пальцев, локтевое отведение'], ans: ['r'], why: 'Лучевой.' },
+      { parts: ['Разгибание кисти, пронация, сгибание локтя, отведение 110°'], ans: ['u'], why: 'Локтевой.' },
+      { parts: ['Отличить теннисный локоть от сдавления в канале лучевого нерва'], ans: ['r'], why: 'Лучевой.' },
+      { parts: ['Симптомы при синдроме запястного канала'], ans: ['m'], why: 'Срединный.' },
+    ], [['m', 'Срединный', COL.good], ['r', 'Лучевой', '#f0a04b'], ['u', 'Локтевой', '#bba8ee']], { multi: false, text: true }),
+  }], done) }],
+
+  ['slr', 'Подъём прямой ноги', (m, D) => {
+    const p = panel(0);
+    txt(p, 'седалищный нерв: подъём прямой ноги (по мотивам рис. 13.16)', 800, 56, m('slr'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    bench(p, 100, 760, 520, m('slr'), COL.dim, 110);
+    const f = supine(p, 430, 520, .95, m('slr'));
+    const nv = nerveLine(p, legNervePts(f, 'sci'), m('slr'), { w: 8, n: 14 });
+    const gT = gauge(p, 140, 680, 'натяжение', ANAT.taut, m('slr', .5));
+    const upd = (o, extra = 0) => { f.set(o); nv.reroute(legNervePts(f, 'sci')); const t = clamp(f.pose.hN / 70, 0, 1) * .55 + clamp(f.pose.fN / 20, 0, 1) * .2 + clamp(f.pose.hd / 30, 0, 1) * .15 + extra; nv.set({ taut: t, wave: 1 - t, hot: clamp((t - .85) / .15, 0, 1) }); gT.set(t); };
+    upd({});
+    prog(q => upd({ hN: 60 * q }), m('slr', .5), 1.5);
+    prog(q => upd({ hN: 60, fN: 20 * q }), m('slr', 2.3), 1);
+    prog(q => upd({ hN: 60, fN: 20 }, .1 * q), m('add'), 1);
+    prog(q => upd({ hN: 60, fN: 20, hd: 30 * q }, .1), m('neck'), 1);
+    prog(q => { const c = cyc(q, 3); upd({ hN: 60, fN: 20 * c, hd: 30 }, .1); }, m('osc'), Math.max(2, D - m('osc') - .5), lin);
+    const V = [['тыльное сгибание + пронация', 'большеберцовая часть', '#bba8ee'], ['тыльное сгибание + супинация', 'икроножный нерв', COL.whole], ['подошвенное сгибание + супинация', 'малоберцовая часть', '#f0a04b']];
+    V.forEach(([a, b, c], i) => { const g0 = G(p, { o: 0 }); put(pill(g0, a, 1000, 150 + i * 60, null, { col: c, size: 19 }), { o: 1 }); T(g0, '→ ' + b, { x: 1180, y: 157 + i * 60, size: 20, weight: 700, fill: c }); show(g0, m('df', i * 1.2)); });
+    infoCard(p, 820, 340, 720, 150, 'приведение и внутренняя ротация бедра', 'сильнее натяжение: нерв лежит латеральнее седалищного бугра', COL.task, m('add'), { size: 20 });
+    infoCard(p, 820, 510, 720, 130, 'пассивное сгибание шеи', 'тянет спинной мозг вверх — натягивает всю систему', COL.real, m('neck'), { size: 20 });
+    pill(p, 'подошвенные нервы — разгибание пальцев, сильнее при тыльном сгибании', 1180, 680, m('plant'), { col: COL.dim, size: 17 });
+    infoCard(p, 820, 720, 720, 150, 'один сустав туда и обратно', 'голеностоп или колено на несколько градусов — так отличают нерв от укороченных мышц задней группы бедра', COL.good, m('osc'), { size: 19 });
+  }],
+
+  ['slide', 'Скольжение седалищного нерва', (m, D) => {
+    const p = panel(0);
+    txt(p, 'скольжение седалищного нерва', 800, 56, m('slide'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    bench(p, 100, 760, 520, m('slide'), COL.dim, 110);
+    const f = supine(p, 430, 520, .95, m('slide'), { hN: 95, kN: 100 });
+    const nv = nerveLine(p, legNervePts(f, 'sci'), m('slide'), { w: 8, n: 14 });
+    const gT = gauge(p, 140, 680, 'натяжение', ANAT.taut, m('slide')), gS = gauge(p, 420, 680, 'скольжение', NV, m('slide'));
+    prog(q => { const c = cyc(q, 3), d = Math.sin(q * Math.PI * 6); f.set({ hN: 95 - 70 * c, kN: 100 - 95 * c }); nv.reroute(legNervePts(f, 'sci')); nv.set({ taut: .35, wave: .3, slide: 40 * c }); gT.set(.35); gS.set(Math.abs(d)); }, m('slide', 1), Math.max(2, m('ev') - m('slide', 1)), lin);
+    txt(p, 'разгибание колена нагружает, разгибание бедра разгружает', 430, 300, m('slide', 1.5), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    const B = [['бедро и колено вместе', 5, COL.good], ['один сустав', 2.5, COL.task], ['натягивающий приём', 1, COL.bad]];
+    txt(p, 'скольжение нерва (ультразвук), во сколько раз', 1180, 150, m('ev'), { size: 21, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    B.forEach(([s, v, c], i) => { const y = 200 + i * 90, g0 = G(p, { o: 0 }); T(g0, s, { x: 1060, y: y + 28, size: 20, fill: COL.chalk, anchor: 'end' }); const r = mk('rect', { x: 1080, y, width: 0, height: 40, rx: 10, fill: c }, g0); T(g0, `×${v}`.replace('.', ','), { x: 1090 + v * 80, y: y + 29, size: 22, weight: 700, fill: c }); show(g0, m('ev', .5 + i * .8)); prog(q => r.setAttribute('width', f1(v * 80 * q)), m('ev', .6 + i * .8), .8, out); });
+    pill(p, 'схема: натягивающий приём = 1', 1180, 500, m('ev', 2), { col: COL.dim, size: 17 });
+  }],
+
+  ['slump', 'Тест сгорбленного сидения', (m, D) => {
+    const p = panel(0);
+    txt(p, 'тест сгорбленного сидения (по мотивам рис. 13.17)', 800, 56, m('slump'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const f = fig(p, { s: 1.15, o: 0, pose: { ...SIT, t: 0, hd: 0, aN: 20, eN: 30, aF: 20, eF: 30 } }); plant(f, 'H', 360, 500);
+    show(path(p, 'M300 518H470M310 518V700M460 518V700', { stroke: COL.dim, 'stroke-width': 5 }, { o: 0 }), m('slump'));
+    show(f.g, m('slump'));
+    const nv = nerveLine(p, legNervePts(f, 'sci'), m('slump'), { w: 8, n: 14 });
+    const gT = gauge(p, 140, 820, 'натяжение', ANAT.taut, m('seq'));
+    const upd = o => { if (o.t !== undefined) { o.hN = 88 + o.t; o.hF = 88 + o.t; } f.set(o); plant(f, 'H', 360, 500); nv.reroute(legNervePts(f, 'sci')); const P = f.pose, t = clamp(P.t / 40, 0, 1) * .3 + clamp(P.hd / 35, 0, 1) * .15 + clamp((95 - P.kN) / 80, 0, 1) * .4 + clamp(P.fN / 25, 0, 1) * .15; nv.set({ taut: t, wave: 1 - t, hot: clamp((t - .85) / .15, 0, 1) }); gT.set(t); };
+    upd({});
+    const t0 = m('seq');
+    prog(q => upd({ t: 40 * q }), t0 + .3, 1.2); prog(q => upd({ hd: 35 * q }), t0 + 1.6, 1);
+    prog(q => upd({ fN: 25 * q }), t0 + 3, .8); prog(q => upd({ kN: 95 - 75 * q }), t0 + 4, 1.5);
+    prog(q => upd({ hd: 35 - 45 * q }), m('rel'), 1.2);
+    prog(q => upd({ kN: 20 + 15 * cyc(q, 3) }), m('rel', 2), Math.max(1.5, m('ev') - m('rel', 2)), lin);
+    infoCard(p, 760, 100, 780, 160, 'подъём прямой ноги — сидя', '+ сгибание позвоночника — больше натяжения всей системы', NV, m('slump'), { size: 22 });
+    const S = ['сгорбиться: грудной, поясничный отдел и шея', 'мягко прижать шею в сгибании', 'тыльное сгибание стопы, разогнуть колено до симптомов', 'отпустить шею — пациент сам её разгибает: меньше?'];
+    S.forEach((s, i) => numLine(p, i + 1, s, 760, 320 + i * 86, NV, i < 3 ? t0 + [0, 1.6, 3][i] : m('rel'), { size: 21, maxW: 720 }));
+    infoCard(p, 760, 690, 780, 160, 'при боли в пояснице', 'тест хорошо выявляет нейропатическую боль; боль ниже колена повышает специфичность', COL.good, m('ev'), { size: 21 });
+  }],
+
+  ['pkb', 'Бедренный нерв', (m, D) => {
+    const p = panel(0);
+    txt(p, 'бедренный нерв: сгибание колена лёжа на животе (по мотивам рис. 13.18)', 800, 56, m('pkb'), { size: 28, weight: 700, anchor: 'middle', fill: NV });
+    const ts = tableScene(p, { hx: 430, top: 470, s: .95, t0: m('pkb'), prone: true, hands: null });
+    const f = ts.pt, nv = nerveLine(p, legNervePts(f, 'fem'), m('pkb'), { w: 8, n: 10 });
+    const gT = gauge(p, 140, 760, 'натяжение', ANAT.taut, m('pkb'));
+    const upd = k => { f.set({ kN: k }); nv.reroute(legNervePts(f, 'fem')); const t = clamp(k / 120, 0, 1); nv.set({ taut: t, wave: 1 - t, hot: clamp((t - .85) / .15, 0, 1) }); gT.set(t); };
+    upd(0);
+    prog(q => upd(120 * q), m('pkb', 1), 2);
+    prog(q => upd(120 - 15 * cyc(q, 3)), m('ext', 2), Math.max(1.5, m('alt') - m('ext', 2)), lin);
+    infoCard(p, 820, 100, 720, 170, 'позвоночник нейтрален, бедро разогнуто до 0°', 'колено сгибают до сопротивления и симптомов', NV, m('pkb'), { size: 21 });
+    infoCard(p, 820, 290, 720, 200, 'что значит ответ', 'боль в пояснице или онемение передней поверхности бедра — верхние поясничные корешки и бедренный нерв; боль в бедре — может быть укороченная прямая мышца', COL.task, m('pos'), { size: 20 });
+    infoCard(p, 820, 510, 720, 160, 'не разгибать позвоночник', 'иначе спутаем с давлением на корешок или болью межпозвонковых суставов', COL.bad, m('ext'), { size: 21 });
+    infoCard(p, 820, 690, 720, 150, 'вариант — лёжа на боку', 'больная нога сверху: таз фиксирован, бедро разгибают при согнутом колене', COL.whole, m('alt'), { size: 21 });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-sens', prompt: ['Усиливает ли это натяжение нерва?'],
+    build: grid([
+      { parts: ['Подъём прямой ноги + пассивное сгибание шеи'], ans: ['y'], why: 'Да: натягивается вся система.' },
+      { parts: ['Подъём прямой ноги + приведение и внутренняя ротация бедра'], ans: ['y'], why: 'Да.' },
+      { parts: ['Тест срединного нерва + наклон шеи в сторону теста'], ans: ['n'], why: 'Нет: в сторону теста — ослабляет.' },
+      { parts: ['Сгорбленное сидение: пациент разгибает шею'], ans: ['n'], why: 'Нет: разгибание шеи снимает часть натяжения.' },
+      { parts: ['Подъём прямой ноги + тыльное сгибание стопы'], ans: ['y'], why: 'Да.' },
+    ], [['y', 'Усиливает', ANAT.taut], ['n', 'Ослабляет', COL.good]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Срединный: отведение 110°, разгибание кисти и пальцев, супинация, наружная ротация, разгибание локтя. Лучевой: опускание пояса, внутренняя ротация, сгибание кисти. Локтевой: разгибание кисти, пронация, сгибание локтя.', 'w1'],
+     ['Наклон шеи в противоположную сторону усиливает натяжение, в сторону теста — ослабляет.', 'w2'],
+     ['Подъём прямой ноги уточняют стопой, приведением и ротацией бедра, сгибанием шеи; сгорбленное сидение добавляет сгибание позвоночника.', 'w3'],
+     ['Скольжение — один сустав нагружает, другой разгружает — смещает нерв больше всего.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 190 + i * 170, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: NV }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 27, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-cts', prompt: ['При тесте срединного нерва в кисти появилось покалывание. Наклон шеи в другую сторону его усилил, в свою — ослабил; на другой руке так не было. Что дальше?'],
+    build: choice([
+      ['Тест положительный — дополнить обследование и начать мягкое скольжение нерва'],
+      ['Тест ничего не значит, пока нет боли'],
+      ['Сразу удерживать полное натяжение несколько минут'],
+      ['Это укорочение двуглавой мышцы'],
+    ], 0, 'Симптомы в зоне нерва, отличие сторон и изменение при сенсибилизации — признаки положительного теста; лечат мягким скольжением.',
+    [null, 'Покалывание в зоне нерва — значимый симптом.', 'Долгое полное натяжение — слишком агрессивно.', 'Сенсибилизация шеей меняет симптомы — значит, дело в нерве, а не в мышце.']),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-ham', prompt: ['При подъёме прямой ноги тянет по задней поверхности бедра. Как отличить нерв от укороченных мышц задней группы бедра?'],
+    build: choice([
+      ['Удерживая ногу, менять положение стопы или шеи: если ощущение меняется — это нерв'],
+      ['Поднять ногу выше'],
+      ['Попросить напрячь мышцы бедра'],
+      ['Отличить нельзя'],
+    ], 0, 'Тыльное сгибание стопы и сгибание шеи натягивают нерв, но не меняют длину мышц задней группы бедра.',
+    [null, 'Это нагрузит и мышцы, и нерв — не различит их.', 'Сокращение мышцы не отвечает на вопрос о нерве.', 'Сенсибилизирующие движения как раз помогают различить.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

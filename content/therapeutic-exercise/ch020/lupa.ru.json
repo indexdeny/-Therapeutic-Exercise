@@ -1,0 +1,12 @@
+[
+ {
+  "beat": "types",
+  "fig": 3,
+  "target": "m0",
+  "zoom": 3,
+  "enabled": true,
+  "why": "работает m0, фигура ×0.5",
+  "from": "arom",
+  "to": "aarom"
+ }
+]

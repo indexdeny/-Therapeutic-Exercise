@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ключевые понятия аэробной тренировки — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 78, title: 'Ключевые понятия аэробной тренировки', minutes: 9, language: 'ru', next: '../ch079/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch078/cards.ru.json
+const CARDS_SHORT = {
+  "физическая форма\nспособность выполнять физическую работу": "способность выполнять физическую работу",
+  "мышечная\nодна группа мышц повторяет сокращения долгое время": "одна группа мышц, долгое время",
+  "сердечно-сосудистая\nдолгая динамическая работа крупных мышц: ходьба, плавание, велосипед": "крупные мышцы: ходьба, плавание",
+  "зависит от частоты, интенсивности и длительности\nприспособление сердца, сосудов и мышц — видно по выносливости": "приспособление сердца, сосудов и мышц",
+  "нервные, физические и биохимические изменения\nитог один: ту же работу человек выполняет с меньшими физиологическими затратами": "та же работа — меньшие затраты",
+  "порог тренировочного стимула\nнаименьшая нагрузка, которая вызывает ответ": "наименьшая нагрузка, которая вызывает ответ",
+  "постнагрузка\nсила левого желудочка, нужная, чтобы открыть аортальный клапан; зависит от напряжения стенки и давления в аорте": "сила левого желудочка",
+  "коронарный кровоток\nдиастолическое давление в аорте, длительность диастолы, сопротивление коронарных артерий, коллатерали": "давление в аорте, диастола",
+};
+// cards-short end
+
+const ACT = COL.whole, EXC = COL.good, FIT = COL.task, O2C = '#9fe0f0', DEM = COL.bad, SUP = COL.good;
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+// Pills in a row centred on cx, each shown gap seconds after the previous one.
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col, size }); x += ws[i] + space; return g; });
+}
+// A swimmer doing the front crawl, side view, head to the right: sw.set(q) — q is the stroke phase in cycles.
+function swimmer(p, x, y, s, t0) {
+  const f = fig(p, { x, y, s, r: 90, o: 0, pose: { ...STAND, hN: 0, hF: 0, kN: 6, kF: 6, fN: -45, fF: -45, hd: -10 } });
+  const water = G(p, { o: 0 });
+  mk('rect', { x: x - 260 * s, y: y - 14 * s, width: 560 * s, height: 70 * s, rx: 10, fill: '#7fc4e8', 'fill-opacity': .22 }, water);
+  const wl = path(water, '', { stroke: '#7fc4e8', 'stroke-width': 3 });
+  const sw = { f, water };
+  sw.set = q => {
+    const a = 360 * q;
+    f.set({ aN: 180 - (a % 360), eN: 18, aF: 180 - ((a + 180) % 360), eF: 18, hN: 12 * Math.sin(rad(a * 3)), hF: -12 * Math.sin(rad(a * 3)) });
+    let d = '';
+    for (let i = 0; i <= 40; i++) { const xx = x - 260 * s + i * 14 * s; d += `${i ? 'L' : 'M'}${xx.toFixed(1)} ${(y - 14 * s + 3 * Math.sin(i * .8 + q * 12)).toFixed(1)}`; }
+    wl.setAttribute('d', d);
+  };
+  sw.set(0);
+  if (t0 !== null) { show(f.g, t0); show(water, t0); }
+  return sw;
+}
+// The cardiac cycle on a strip: systole (red) and diastole (green — the coronary arteries fill), win seconds wide.
+function cycleStrip(p, x0, y, w, bpm, sys, t0, { win = 3, h = 34 } = {}) {
+  const g = G(p, { o: 0 }), T0 = 60 / bpm;
+  for (let t = 0; t < win - 1e-6; t += T0) {
+    const a = x0 + t / win * w, b = x0 + Math.min(win, t + sys) / win * w, c = x0 + Math.min(win, t + T0) / win * w;
+    mk('rect', { x: a, y, width: b - a, height: h, fill: mix(DEM, COL.board, .35), stroke: DEM, 'stroke-width': 1.5 }, g);
+    if (c > b) mk('rect', { x: b, y, width: c - b, height: h, fill: mix(SUP, COL.board, .35), stroke: SUP, 'stroke-width': 1.5 }, g);
+  }
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Аэробная тренировка', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 7 · Урок 78', { x: 800, y: 150, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Аэробная тренировка', { x: 800, y: 235, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'ключевые понятия', { x: 800, y: 300, size: 44, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'активность, упражнение, выносливость, адаптация', 800, 380, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    const tm = treadmill(art, 700, 850, .8);
+    const h = heartEl(art, 1060, 640, .85);
+    prog(q => { tm.set({ ph: q * 7 }); h.beat(cyc(q, 11)); }, .4, Math.max(4, D - 1.4), lin);
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['act', 'Активность и упражнение', (m, D) => {
+    const p = panel(0);
+    txt(p, 'физическая активность, упражнение, физическая форма', 800, 62, m('act'), { size: 28, weight: 700, anchor: 'middle' });
+    // physical activity: the outer box; exercise: the box inside it
+    const outer = G(p, { o: 0 });
+    roundBox(outer, 60, 100, 860, 560, ACT, PANEL, 2.5);
+    T(outer, 'физическая активность', { x: 84, y: 144, size: 27, weight: 700, fill: ACT });
+    put(para(outer, 'любое движение скелетных мышц с заметным ростом расхода энергии', 84, 178, null, { size: 21, maxW: 370 }), { o: 1 });
+    show(outer, m('act'));
+    const f = stepUp(p, 250, 610, .62, m('act', 2));
+    put(f.g, { o: 0 }); show(f.g, m('act', .8));
+    const bag = carry(p, f, c => boxProp(c, 34, 46, '#c9a97a'), { turn: false, along: 16 }); put(bag, { o: 0 }); show(bag, m('act', .8));
+    pill(p, 'по лестнице с сумками', 240, 640, m('act', 2.5), { col: ACT, size: 19 });
+    const inner = G(p, { o: 0 });
+    roundBox(inner, 470, 240, 430, 400, EXC, COL.board, 2.5);
+    T(inner, 'упражнение', { x: 492, y: 282, size: 27, weight: 700, fill: EXC });
+    T(inner, 'запланировано, ради формы', { x: 492, y: 314, size: 21, fill: COL.chalk });
+    show(inner, m('ex'));
+    const bike = cycleErgo(p, 600, 610, .62, m('ex', .3));
+    prog(q => bike.crank(2 * Math.PI * 9 * q, .8), m('ex', .5), Math.max(4, D - m('ex', .8)), lin);
+    // physical fitness and its parts
+    infoCard(p, 950, 100, 590, 160, 'физическая форма', 'способность выполнять физическую работу', FIT, m('fit'), { size: 22 });
+    ['работа сердца и лёгких', 'мышечная сила', 'мышечная выносливость', 'гибкость', 'оптимальный состав тела'].forEach((s, i) =>
+      pill(p, s, 1245, 310 + i * 68, m('fit', 1.5 + i * .9), { col: FIT, size: 23 }));
+    txt(p, 'как улучшить: регулярно, крупные группы мышц, нагрузка на сердце и лёгкие', 800, 730, m('how'), { size: 24, weight: 600, anchor: 'middle' });
+    pillRow(p, ['ходьба', 'велосипед', 'бег', 'плавание', 'подъём по лестнице', 'лыжи', 'отягощения'], 800, 810, m('how', 3), { col: EXC, size: 22, gap: .45 });
+  }],
+
+  ['vo2', 'Максимальное потребление кислорода', (m, D) => {
+    const p = panel(0);
+    txt(p, 'максимальное потребление кислорода (VO₂max)', 800, 62, m('scale'), { size: 28, weight: 700, anchor: 'middle' });
+    // the fitness scale from poor to superior
+    const sg = G(p, { o: 0 }), id = 'fs' + (++SHADE_ID), defs = mk('defs', {}, sg), gr = mk('linearGradient', { id }, defs);
+    [[0, COL.bad], [.5, COL.int], [1, COL.good]].forEach(([o, c]) => mk('stop', { offset: o, 'stop-color': c }, gr));
+    mk('rect', { x: 260, y: 140, width: 1080, height: 22, rx: 11, fill: `url(#${id})` }, sg);
+    T(sg, 'плохой', { x: 240, y: 158, size: 22, fill: COL.bad, anchor: 'end', weight: 600 });
+    T(sg, 'превосходный', { x: 1360, y: 158, size: 22, fill: COL.good, weight: 600 });
+    T(sg, 'уровень формы — по расходу энергии во время работы', { x: 800, y: 100, size: 21, fill: COL.dim, anchor: 'middle' });
+    const mark = path(sg, 'M0 -14L-12 -32H12Z', { fill: COL.chalk, stroke: 'none' });
+    show(sg, m('scale'));
+    prog(q => put(mark, { x: 260 + 1080 * (.2 + .6 * cyc(q, 1.5)), y: 140 }), m('scale', .5), Math.max(3, m('def') - m('scale', .5)), io);
+    txt(p, 'влияют:', 330, 222, m('fac'), { size: 22, fill: COL.dim, anchor: 'end' });
+    pillRow(p, ['возраст', 'пол', 'наследственность', 'малоподвижность', 'болезни'], 830, 222, m('fac', .3), { col: COL.int, size: 21, gap: .45 });
+    // the definition and its unit
+    const dg = G(p, { o: 0 });
+    roundBox(dg, 300, 270, 1000, 200, COL.whole, PANEL, 2.5);
+    put(para(dg, 'наибольшее количество кислорода, потреблённое за минуту при максимальном усилии', 800, 316, null, { size: 25, weight: 600, maxW: 900, anchor: 'middle' }), { o: 1 });
+    show(dg, m('def'));
+    pill(p, 'мл O₂ / кг / мин', 800, 430, m('def', 4), { col: O2C, size: 30 });
+    txt(p, 'работа многих крупных мышц: ходьба, бег, плавание', 800, 500, m('def', 2.5), { size: 21, fill: COL.dim, anchor: 'middle' });
+    // the oxygen chain: lungs, blood, heart, extraction, the muscle's oxidative potential
+    const xs = [220, 510, 800, 1090, 1380], cy0 = 660;
+    const lu = lungsEl(p, xs[0], cy0 - 4, .48, m('chain'));
+    const rbc = G(p, { o: 0 });
+    [[-34, -16], [24, -26], [-6, 22], [36, 24]].forEach(([dx, dy]) => {
+      mk('ellipse', { cx: xs[1] + dx, cy: cy0 + dy, rx: 26, ry: 17, fill: BLOOD_A, stroke: mix(BLOOD_A, '#000000', .4), 'stroke-width': 2 }, rbc);
+      mk('ellipse', { cx: xs[1] + dx, cy: cy0 + dy, rx: 12, ry: 7, fill: mix(BLOOD_A, '#000000', .25) }, rbc);
+    });
+    show(rbc, m('chain', 1));
+    const ht = heartEl(p, xs[2], cy0 - 4, .52, m('chain', 2));
+    const cap = G(p, { o: 0 });
+    tube(cap, `M${xs[3] - 90} ${cy0}C${xs[3] - 30} ${cy0 - 50} ${xs[3] + 30} ${cy0 + 50} ${xs[3] + 90} ${cy0}`, BLOOD_A, 24);
+    mk('rect', { x: xs[3] - 90, y: cy0 + 36, width: 180, height: 40, rx: 12, fill: mix(ANAT.muscle, COL.board, .3), stroke: ANAT.muscle, 'stroke-width': 2 }, cap);
+    show(cap, m('chain', 3));
+    const o2d = [0, 1, 2].map(() => put(mk('circle', { r: 5, fill: O2C }, cap), { o: 0 }));
+    prog(q => o2d.forEach((d, i) => { const u = (q * 6 + i / 3) % 1; put(d, { x: xs[3] - 50 + i * 50, y: cy0 + 4 + 46 * u, o: q > 0 ? 1 - u : 0 }); }), m('chain', 3.5), Math.max(3, D - m('chain', 3.8)), lin);
+    const fb = fibreX(p, xs[4], cy0, 82, { t0: m('chain', 4) }); fb.set({ mito: 1, cap: .3, enz: .6 });
+    const labs = [['доставка', 'кислорода'], ['связывание', 'O₂ кровью'], ['работа', 'сердца'], ['извлечение', 'O₂ тканями'], ['окислительные', 'возможности мышц']];
+    labs.forEach(([a, b], i) => { txt(p, a, xs[i], 790, m('chain', i), { size: 20, weight: 700, fill: O2C, anchor: 'middle' }); txt(p, b, xs[i], 816, m('chain', i), { size: 20, fill: COL.chalk, anchor: 'middle' }); });
+    [0, 1, 2, 3].forEach(i => arrowTo(p, [xs[i] + 95, cy0 - 100], [xs[i + 1] - 95, cy0 - 100], m('chain', i + .6), { col: O2C, w: 3 }));
+    // oxygen moving along the chain
+    const dots = [0, 1, 2, 3].map(() => put(mk('circle', { r: 7, fill: O2C }, p), { o: 0 }));
+    prog(q => { lu.breathe(cyc(q, 4)); ht.beat(cyc(q, 10)); dots.forEach((d, i) => { const u = (q * 3 + i / 4) % 1; put(d, { x: lerp(xs[0], xs[4], u), y: cy0 - 100 - 18 * Math.sin(Math.PI * ((u * 4) % 1)), o: q > 0 ? .9 : 0 }); }); }, m('chain', 4.5), Math.max(3, D - m('chain', 4.8)), lin);
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-actex', prompt: ['Физическая активность или упражнение?'],
+    build: grid([
+      { parts: ['Подняться на третий этаж с пакетами'], ans: ['act'], why: 'Движение с заметным расходом энергии, но без плана и цели улучшить форму.' },
+      { parts: ['Велотренажёр 30 минут три раза в неделю, чтобы стать выносливее'], ans: ['ex'], why: 'Запланировано, выстроено и нацелено на форму — это упражнение.' },
+      { parts: ['Перекопать грядки на даче'], ans: ['act'], why: 'Работа в саду — физическая активность.' },
+      { parts: ['Программа ходьбы, которую составил физический терапевт'], ans: ['ex'], why: 'План с целью улучшить форму — упражнение.' },
+    ], [['act', 'Активность', ACT], ['ex', 'Упражнение', EXC]], { multi: false, text: true }),
+  }], done) }],
+
+  ['end', 'Выносливость', (m, D) => {
+    const p = panel(0);
+    txt(p, 'выносливость: долго работать и противостоять утомлению', 800, 62, m('end'), { size: 28, weight: 700, anchor: 'middle' });
+    // muscular endurance: one group, many repetitions
+    infoCard(p, 60, 110, 700, 150, 'мышечная', 'одна группа мышц повторяет сокращения долгое время', COL.nat, m('mus'), { size: 22 });
+    const c = curlFig(p, 330, 800, 1.2, 1, m('mus', .3));
+    curls(c, m('mus', .6), Math.max(4, D - m('mus', .9)), 13.5, { lvl: .8 });
+    const rep = txt(p, '', 560, 520, m('mus', .6), { size: 34, weight: 700, fill: COL.nat, anchor: 'middle' });
+    prog(q => { rep.textContent = `× ${Math.min(14, Math.floor(q * 14 + .5))}`; }, m('mus', .6), Math.max(4, D - m('mus', .9)), lin);
+    // cardiovascular endurance: large muscles, a long time
+    infoCard(p, 840, 110, 700, 150, 'сердечно-сосудистая', 'долгая динамическая работа крупных мышц: ходьба, плавание, велосипед', COL.whole, m('cv'), { size: 22 });
+    const tm = treadmill(p, 1170, 820, .95, m('cv', .3));
+    prog(q => tm.set({ ph: q * 9 }), m('cv', .5), Math.max(4, D - m('cv', .8)), lin);
+    const clock = txt(p, '', 1450, 380, m('cv', .5), { size: 34, weight: 700, fill: COL.whole, anchor: 'middle' });
+    prog(q => { clock.textContent = `${Math.round(q * 40)} мин`; }, m('cv', .5), Math.max(4, D - m('cv', .8)), lin);
+    const h = heartEl(p, 1450, 500, .42, m('cv', .5));
+    prog(q => h.beat(cyc(q, 14)), m('cv', .5), Math.max(4, D - m('cv', .8)), lin);
+  }],
+
+  ['train', 'Аэробная тренировка', (m, D) => {
+    const p = panel(0);
+    txt(p, 'аэробная тренировка: мышца лучше использует энергию', 800, 62, m('train'), { size: 28, weight: 700, anchor: 'middle' });
+    // a fascicle before and after training
+    txt(p, 'до', 230, 125, m('cell'), { size: 24, weight: 700, fill: COL.dim, anchor: 'middle' });
+    txt(p, 'после тренировки', 590, 125, m('cell'), { size: 24, weight: 700, fill: COL.good, anchor: 'middle' });
+    fibreX(p, 230, 300, 140, { t0: m('cell') });
+    const fb = fibreX(p, 590, 300, 140, { t0: m('cell') });
+    let enz = 0, mito = 0, cap = 0;
+    prog(q => { enz = q; fb.set({ enz, mito, cap }); }, m('enz'), 1.2);
+    prog(q => { mito = q; fb.set({ enz, mito, cap }); }, m('mito'), 1.2);
+    prog(q => { cap = q; fb.set({ enz, mito, cap }); }, m('cap'), 1.2);
+    pill(p, 'схема', 410, 470, m('cell'), { col: COL.dim, size: 18 });
+    const leg = [['окислительные ферменты ↑', ANAT.taut, 'enz'], ['митохондрии: больше и крупнее', '#e0904a', 'mito'], ['капилляры ↑', BLOOD_A, 'cap']];
+    leg.forEach(([s, c, k], i) => pill(p, s, 410, 515 + i * 50, m(k), { col: c, size: 21 }));
+    infoCard(p, 840, 110, 700, 175, 'зависит от частоты, интенсивности и длительности', 'приспособление сердца, сосудов и мышц — видно по выносливости', FIT, m('fit3'), { size: 22 });
+    // specificity: swimming trains swimming
+    txt(p, 'принцип специфичности', 1190, 345, m('spec'), { size: 26, weight: 700, fill: COL.whole, anchor: 'middle' });
+    const sw = swimmer(p, 1010, 470, .8, m('swim'));
+    prog(q => sw.set(q * 4), m('swim', .2), Math.max(4, D - m('swim', .5)), lin);
+    txt(p, 'тренировка: плавание', 1010, 575, m('swim'), { size: 21, fill: COL.dim, anchor: 'middle' });
+    pill(p, 'плавание ↑', 1400, 470, m('swim', 1), { col: COL.good, size: 24 });
+    checkMark(p, 1500, 470, m('swim', 1.4));
+    const tm = treadmill(p, 980, 860, .6, m('run'));
+    prog(q => tm.set({ ph: q * 6, run: true }), m('run', .2), Math.max(3, D - m('run', .5)), lin);
+    pill(p, 'бег на дорожке — может не улучшиться', 1330, 760, m('run', .5), { col: COL.int, size: 21 });
+  }],
+
+  ['adapt', 'Адаптация', (m, D) => {
+    const p = panel(0);
+    txt(p, 'адаптация: та же работа — меньшей ценой', 800, 62, m('adapt'), { size: 28, weight: 700, anchor: 'middle' });
+    // HR at the same workload over the weeks of training
+    const x0 = 130, y0 = 560, w = 620, h = 330;
+    chartAxes(p, x0, y0, w, h, 'ЧСС на той же нагрузке', 'недели', m('adapt'));
+    [0, 4, 8, 12].forEach(k => txt(p, String(k), x0 + k / 14 * w, y0 + 30, m('adapt'), { size: 19, fill: COL.dim, anchor: 'middle' }));
+    const band = put(mk('rect', { x: x0 + 10 / 14 * w, y: y0 - h, width: 2 / 14 * w, height: h, fill: COL.good, 'fill-opacity': .14 }, p), { o: 0 });
+    show(band, m('adapt', 2));
+    txt(p, '10–12 недель: изменения измеримы', x0 + 11 / 14 * w, y0 - h - 14, m('adapt', 2), { size: 20, fill: COL.good, anchor: 'middle', weight: 700 });
+    const fn = x => .9 - .32 * (1 - Math.exp(-x * 2.4));
+    draw(path(p, fnPath(x0, y0, w, h, fn), { stroke: COL.whole, 'stroke-width': 5 }, { d: 0 }), m('adapt', .5), 3);
+    pill(p, 'схема', x0 + w - 40, y0 - h + 30, m('adapt', .5), { col: COL.dim, size: 18 });
+    infoCard(p, 80, 640, 700, 200, 'нервные, физические и биохимические изменения', 'итог один: ту же работу человек выполняет с меньшими физиологическими затратами', COL.good, m('cost'), { size: 22 });
+    // the training threshold: low and high fitness
+    infoCard(p, 840, 110, 700, 150, 'порог тренировочного стимула', 'наименьшая нагрузка, которая вызывает ответ', COL.int, m('thr'), { size: 22 });
+    const col = (cx, lvl, thr, lab, colr, t0, room) => {
+      const g = G(p, { o: 0 }), bx = cx - 70, top = 320, hh = 420, Yv = v => top + hh * (1 - v);
+      mk('rect', { x: bx, y: top, width: 140, height: hh, rx: 12, fill: PANEL, stroke: COL.faint, 'stroke-width': 2 }, g);
+      mk('rect', { x: bx, y: Yv(lvl), width: 140, height: hh * lvl, rx: 12, fill: mix(colr, COL.board, .35), stroke: colr, 'stroke-width': 2 }, g);
+      path(g, `M${bx - 20} ${Yv(thr)}H${bx + 160}`, { stroke: COL.int, 'stroke-width': 4, 'stroke-dasharray': '10 8' });
+      T(g, 'порог', { x: bx + 172, y: Yv(thr) + 7, size: 20, fill: COL.int, weight: 700 });
+      T(g, 'предел', { x: bx + 172, y: top + 8, size: 20, fill: COL.dim });
+      path(g, `M${bx - 34} ${Yv(lvl)}V${top + 4}`, { stroke: COL.good, 'stroke-width': 4 });
+      path(g, `M${bx - 44} ${Yv(lvl)}H${bx - 24}M${bx - 44} ${top + 4}H${bx - 24}`, { stroke: COL.good, 'stroke-width': 4 });
+      T(g, room, { x: bx - 46, y: (Yv(lvl) + top) / 2 + 7, size: 20, fill: COL.good, weight: 700, anchor: 'end' });
+      T(g, lab, { x: cx, y: top + hh + 34, size: 22, fill: colr, weight: 700, anchor: 'middle' });
+      show(g, t0);
+    };
+    col(1070, .3, .45, 'низкая форма', COL.whole, m('low'), 'запас роста');
+    col(1400, .78, .9, 'высокая форма', COL.real, m('high'), 'запас');
+    txt(p, 'нужна более интенсивная нагрузка', 1400, 835, m('high', 1.5), { size: 21, fill: COL.int, anchor: 'middle', weight: 700 });
+    pill(p, 'схема', 1500, 290, m('low'), { col: COL.dim, size: 18 });
+  }],
+
+  ['mvo2', 'Кислород и миокард', (m, D) => {
+    const p = panel(0);
+    txt(p, 'потребление кислорода миокардом: спрос и доставка', 800, 62, m('mvo2'), { size: 28, weight: 700, anchor: 'middle' });
+    const ht = heartEl(p, 800, 290, 1, m('mvo2', .3));
+    prog(q => ht.beat(cyc(q, 30)), m('mvo2', .5), Math.max(4, D - m('mvo2', .8)), lin);
+    infoCard(p, 50, 100, 600, 210, 'постнагрузка', 'сила левого желудочка, нужная, чтобы открыть аортальный клапан; зависит от напряжения стенки и давления в аорте', DEM, m('after'), { size: 21 });
+    infoCard(p, 950, 100, 600, 210, 'коронарный кровоток', 'диастолическое давление в аорте, длительность диастолы, сопротивление коронарных артерий, коллатерали', SUP, m('sup', 3.5), { size: 21 });
+    // the balance: demand on the left pan, supply on the right
+    const PV = [800, 560], L = 450;
+    const stand = G(p, { o: 0 });
+    path(stand, `M${PV[0]} ${PV[1]}L${PV[0] - 40} ${PV[1] + 160}H${PV[0] + 40}Z`, { fill: PANEL, stroke: COL.dim, 'stroke-width': 3 });
+    const beam = path(stand, '', { stroke: COL.chalk, 'stroke-width': 8 });
+    mk('circle', { cx: PV[0], cy: PV[1], r: 10, fill: COL.chalk }, stand);
+    show(stand, m('dem'));
+    const pan = (colr, items, lab) => {
+      const g = G(p, { o: 0 }), blocks = [];
+      path(g, 'M-150 0H150', { stroke: colr, 'stroke-width': 6 });
+      path(g, 'M-150 0L0 -60L150 0', { stroke: COL.faint, 'stroke-width': 2 });
+      items.forEach((s, i) => { const b = G(g, { o: 0 }); mk('rect', { x: -140, y: -52 - i * 50, width: 280, height: 44, rx: 10, fill: mix(colr, COL.board, .55), stroke: colr, 'stroke-width': 2 }, b); T(b, s, { x: 0, y: -23 - i * 50, size: 19, weight: 600, anchor: 'middle' }); blocks.push(b); });
+      T(g, lab, { x: 0, y: -66 - items.length * 50, size: 26, weight: 700, fill: colr, anchor: 'middle' });
+      return { g, blocks };
+    };
+    const dm = pan(DEM, ['ЧСС', 'системное АД', 'сократимость', 'постнагрузка'], 'спрос');
+    const sp = pan(SUP, ['O₂ в артериальной крови', 'отдача O₂ гемоглобином', 'коронарный кровоток'], 'доставка');
+    show(dm.g, m('dem')); show(sp.g, m('sup'));
+    dm.blocks.forEach((b, i) => show(b, m('dem', .5 + i * 1)));
+    sp.blocks.forEach((b, i) => show(b, m('sup', .5 + i * 1)));
+    let ang = 0;
+    const setBeam = a => {
+      ang = a; const c = Math.cos(rad(a)), s = Math.sin(rad(a));
+      const A = [PV[0] - L * c, PV[1] - L * s], B = [PV[0] + L * c, PV[1] + L * s];
+      beam.setAttribute('d', `M${A[0].toFixed(1)} ${A[1].toFixed(1)}L${B[0].toFixed(1)} ${B[1].toFixed(1)}`);
+      put(dm.g, { x: A[0], y: A[1] + 60 }); put(sp.g, { x: B[0], y: B[1] + 60 });
+    };
+    setBeam(-6);
+    prog(q => setBeam(lerp(-6, 0, q)), m('bal'), 1.2);
+    prog(q => setBeam(lerp(0, -7, q)), m('isch'), 1.2);
+    const okl = txt(p, 'у здорового человека — равновесие даже на максимуме', 800, 770, m('bal', .4), { size: 24, weight: 600, fill: SUP, anchor: 'middle' });
+    hide(okl, m('isch', .2), .4);
+    const isl = txt(p, 'спрос > доставки → ишемия миокарда', 800, 770, m('isch', .6), { size: 26, weight: 700, fill: DEM, anchor: 'middle' });
+    hide(isl, m('ext'), .4);
+    // extraction at rest
+    const eg = G(p, { o: 0 });
+    mk('rect', { x: 330, y: 745, width: 940, height: 40, rx: 12, fill: PANEL, stroke: COL.faint, 'stroke-width': 2 }, eg);
+    mk('rect', { x: 330, y: 745, width: 940 * .75, height: 40, rx: 12, fill: mix(BLOOD_A, COL.board, .3), stroke: BLOOD_A, 'stroke-width': 2 }, eg);
+    T(eg, 'извлекается 70–80 % O₂ уже в покое', { x: 330 + 940 * .375, y: 773, size: 21, weight: 700, anchor: 'middle' });
+    T(eg, 'остаток', { x: 330 + 940 * .875, y: 773, size: 19, fill: COL.dim, anchor: 'middle' });
+    show(eg, m('ext'));
+    pill(p, 'при нагрузке → больше коронарного кровотока', 800, 830, m('ext', 3), { col: SUP, size: 21 });
+    ht.cor.querySelectorAll('path').forEach(e => tw(e, { 'a_stroke-width': +e.getAttribute('stroke-width') * 1.7 }, m('ext', 3), .8));
+  }],
+
+  ['angina', 'Стенокардия напряжения', (m, D) => {
+    const p = panel(0);
+    txt(p, 'стенокардия напряжения', 800, 62, m('ang'), { size: 28, weight: 700, anchor: 'middle' });
+    const ht = heartEl(p, 300, 400, 1.35, m('ang'));
+    // a narrowing of the anterior descending artery and the myocardium beyond it
+    const plq = G(ht.body, { o: 0 });
+    mk('ellipse', { cx: 26, cy: 4, rx: 11, ry: 7, fill: '#efe0a0', stroke: '#b8a860', 'stroke-width': 1.5, transform: 'rotate(68 26 4)' }, plq);
+    show(plq, m('ang', 1.5));
+    const isch = put(mk('path', { d: 'M34 30C46 60 60 100 78 140C60 136 40 128 22 118C24 90 26 60 34 30Z', fill: '#9a4fc0', 'fill-opacity': .55 }, ht.body), { o: 0 });
+    txt(p, 'сужение коронарной артерии', 300, 640, m('ang', 1.5), { size: 21, fill: '#efe0a0', anchor: 'middle', weight: 600 });
+    txt(p, 'в покое — без симптомов', 300, 676, m('ang', 2.5), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const t0b = m('ang'), th = m('hr'), durb = Math.max(4, D - t0b);
+    prog(q => { const t = t0b + q * durb, n = t < th ? t - t0b : th - t0b + (t - th) * 2.5, ph = n % 1; ht.beat(ph < .3 ? Math.sin(Math.PI * ph / .3) : 0); }, t0b, durb, lin);
+    // the cardiac cycle at rest and with exercise (shape only)
+    const x0 = 720, w = 760;
+    txt(p, 'в покое ≈ 60 / мин', x0, 190, m('ang', 3), { size: 22, weight: 700, fill: COL.chalk });
+    cycleStrip(p, x0, 210, w, 60, .3, m('ang', 3));
+    txt(p, 'при нагрузке ≈ 150 / мин', x0, 320, m('hr'), { size: 22, weight: 700, fill: COL.chalk });
+    cycleStrip(p, x0, 340, w, 150, .24, m('hr', .4));
+    [['систола', DEM], ['диастола: наполняются коронарные артерии', SUP]].forEach(([s, c], i) => pill(p, s, x0 + 110 + i * 360, 430, m('ang', 3.5), { col: c, size: 19 }));
+    txt(p, 'диастола укорачивается сильнее всего', x0 + w / 2, 480, m('hr', 1.5), { size: 23, weight: 700, fill: COL.int, anchor: 'middle' });
+    pill(p, 'схема', x0 + w - 40, 160, m('ang', 3), { col: COL.dim, size: 18 });
+    NOTE(p, x0 + w - 150, 520, m('hr', 1.5));
+    // the chain of events
+    const chain = ['нагрузка', 'ЧСС ↑', 'диастола короче', 'кровоток не успевает', 'ишемия → стенокардия'];
+    const cs = chain.map(s => uiW(s, 21) + 30), tot = cs.reduce((a, b) => a + b, 0) + 40 * 4;
+    let cx = 800 - tot / 2;
+    chain.forEach((s, i) => {
+      pill(p, s, cx + cs[i] / 2, 790, m(i < 2 ? 'hr' : 'isch', i < 2 ? i * .8 : (i - 2) * 1.2), { col: i < 2 ? COL.whole : i < 4 ? COL.int : DEM, size: 21 });
+      if (i < 4) txt(p, '→', cx + cs[i] + 20, 797, m(i < 1 ? 'hr' : 'isch', i < 1 ? .5 : (i - 1) * 1.2 - .4), { size: 26, fill: COL.dim, anchor: 'middle' });
+      cx += cs[i] + 40;
+    });
+    show(isch, m('isch', 1.5));
+    prog(q => put(isch, { o: .5 + .5 * Math.sin(q * 30) ** 2 }), m('isch', 2), Math.max(2, D - m('isch', 2.2)), lin);
+    const ring = G(ht.body, { x: 52, y: 92, s: 0, o: 0 });
+    mk('circle', { r: 26, fill: 'none', stroke: DEM, 'stroke-width': 4 }, ring);
+    pop(ring, m('isch', 2.5)); pulse(ring, m('isch', 3.2), 1.4); pulse(ring, m('isch', 4.2), 1.3);
+    txt(p, 'боль', 440, 560, m('isch', 2.7), { size: 22, weight: 700, fill: DEM });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-myo', prompt: ['Сердечная мышца и кислород. Верно или нет?'],
+    build: grid([
+      { parts: ['В покое миокард извлекает из крови 70–80 % кислорода.'], ans: ['t'], why: 'Верно — поэтому при нагрузке нужен больший коронарный кровоток.' },
+      { parts: ['При нагрузке сердце получает больше кислорода в основном за счёт большего извлечения.'], ans: ['f'], why: 'Извлечение уже высокое; растёт в основном коронарный кровоток.' },
+      { parts: ['Частота сокращений и системное давление повышают потребность миокарда в кислороде.'], ans: ['t'], why: 'Вместе с сократимостью и постнагрузкой.' },
+      { parts: ['Учащение пульса удлиняет диастолу.'], ans: ['f'], why: 'Наоборот: диастола укорачивается, и коронарным артериям меньше времени на наполнение.' },
+      { parts: ['Ишемия возникает, когда спрос на кислород превышает доставку.'], ans: ['t'], why: 'Верно.' },
+    ], TF, { multi: false, text: true }),
+  }], done) }],
+
+  ['decond', 'Детренированность', (m, D) => {
+    const p = panel(0);
+    txt(p, 'детренированность', 800, 62, m('dec'), { size: 28, weight: 700, anchor: 'middle' });
+    // a patient in bed
+    bench(p, 90, 690, 400, m('dec'), COL.dim, 130);
+    show(put(mk('rect', { x: 180, y: 374, width: 110, height: 26, rx: 12, fill: '#cfd8dc', 'fill-opacity': .8 }, p), { o: 0 }), m('dec'));
+    const f = supine(p, 400, 400, 1.05, m('dec'));
+    const days = txt(p, '', 390, 210, m('dec', 1), { size: 30, weight: 700, fill: COL.int, anchor: 'middle' });
+    prog(q => { days.textContent = `постельный режим: ${Math.round(1 + q * 20)} дн.`; }, m('dec', 1), Math.max(3, m('list') - m('dec', 1)), lin);
+    txt(p, 'затяжная острая болезнь, хроническое заболевание', 390, 260, m('dec', 2), { size: 21, fill: COL.dim, anchor: 'middle' });
+    // the fast losses
+    [['максимальное потребление O₂', 'fast'], ['сердечный выброс (ударный объём)', 'fast'], ['мышечная сила', 'fast']].forEach(([s, k], i) => {
+      const g = G(p, { o: 0 }), y = 120 + i * 78;
+      mk('rect', { x: 780, y, width: 760, height: 64, rx: 14, fill: PANEL, stroke: DEM, 'stroke-width': 2.5 }, g);
+      T(g, '↓', { x: 815, y: y + 45, size: 36, weight: 700, fill: DEM, anchor: 'middle' });
+      T(g, s, { x: 850, y: y + 42, size: 25, weight: 600 });
+      show(g, m(k, i * 1.4));
+    });
+    txt(p, 'то же, возможно слабее:', 390, 500, m('also'), { size: 22, fill: COL.dim, anchor: 'middle' });
+    ['постельный режим без болезни', 'малоподвижный образ жизни', 'возраст'].forEach((s, i) => pill(p, s, 390, 556 + i * 60, m('also', 1 + i * 1), { col: COL.int, size: 21 }));
+    // Box 7.2: what bed rest decreases
+    txt(p, 'постельный режим уменьшает:', 790, 395, m('list'), { size: 23, weight: 700, fill: COL.chalk });
+    const items = ['мышечную массу', 'силу', 'работу сердца и сосудов', 'общий объём крови', 'объём плазмы', 'объём сердца', 'ортостатическую устойчивость', 'переносимость нагрузки', 'минеральную плотность костей'];
+    items.forEach((s, i) => {
+      const g = G(p, { o: 0 }), x = 780 + (i % 2) * 385, y = 420 + Math.floor(i / 2) * 82;
+      mk('rect', { x, y, width: i === 8 ? 755 : 370, height: 66, rx: 12, fill: PANEL, stroke: mix(DEM, COL.board, .3), 'stroke-width': 2 }, g);
+      T(g, '↓', { x: x + 24, y: y + 43, size: 28, weight: 700, fill: DEM, anchor: 'middle' });
+      put(para(g, s, x + 48, y + 41, null, { size: 21, maxW: i === 8 ? 680 : 310 }), { o: 1 });
+      show(g, m('list', .5 + i * .55));
+    });
+  }],
+
+  ['sit', 'Сидение и смертность', (m, D) => {
+    const p = panel(0);
+    txt(p, 'сидячий образ жизни: данные исследований', 800, 62, m('sit'), { size: 28, weight: 700, anchor: 'middle' });
+    // Biswas et al: more sitting — higher risk; high physical activity — 30% lower all-cause mortality
+    infoCard(p, 60, 100, 700, 170, 'метаанализ (Бисвас и соавт.)', 'больше сидения → выше риск:', COL.whole, m('sit'), { size: 22 });
+    pillRow(p, ['смерть от всех причин', 'ССЗ', 'рак', 'диабет 2 типа'], 410, 240, m('sit', 3), { col: DEM, size: 19, gap: .5, space: 12 });
+    const bx = 200, by = 700, bh = 330;
+    const bars = [['высокая активность', .7, COL.good]];
+    const g0 = G(p, { o: 0 });
+    mk('rect', { x: bx, y: by - bh, width: 150, height: bh, rx: 10, fill: mix(DEM, COL.board, .4), stroke: DEM, 'stroke-width': 2 }, g0);
+    T(g0, 'низкая активность', { x: bx + 75, y: by + 34, size: 20, fill: COL.dim, anchor: 'middle' });
+    T(g0, 'риск смерти от всех причин', { x: bx + 200, y: by - bh - 60, size: 22, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    T(g0, '100 %', { x: bx + 75, y: by - bh - 14, size: 22, weight: 700, fill: DEM, anchor: 'middle' });
+    show(g0, m('act30'));
+    bars.forEach(([s, v, c]) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x: bx + 250, y: by - bh * v, width: 150, height: bh * v, rx: 10, fill: mix(c, COL.board, .4), stroke: c, 'stroke-width': 2 }, g);
+      T(g, s, { x: bx + 325, y: by + 34, size: 20, fill: COL.dim, anchor: 'middle' });
+      T(g, '−30 %', { x: bx + 325, y: by - bh * v - 14, size: 26, weight: 700, fill: c, anchor: 'middle' });
+      show(g, m('act30', .8));
+    });
+    path(p, `M${bx - 20} ${by}H${bx + 430}`, { stroke: COL.dim, 'stroke-width': 3 });
+    // Davis et al: breaks in sitting and leg function in older adults
+    infoCard(p, 840, 100, 700, 170, 'Дэвис и соавт.: 217 человек ≥ 70 лет', 'меньше сидения и больше перерывов — лучше функция ног по краткой батарее тестов (SPPB)', COL.int, m('brk'), { size: 22 });
+    const gy = 700, f = fig(p, { x: 0, y: 0, s: .85, o: 0, pose: { ...SIT } });
+    plant(f, 'AN', 1130, gy);
+    const an = onStage(f, 'AN'), hp = onStage(f, 'H');
+    chair(p, hp[0], hp[1] + 10, gy, m('brk'));
+    p.appendChild(f.g);
+    show(f.g, m('brk'));
+    ground(p, 960, 1260, gy, m('brk'));
+    const brk = [m('brk', 4), m('pts', .5), m('pts', 3)];
+    brk.forEach(t => { poseTo(f, STAND, t, .7, io, ['AN', an[0], an[1]]); poseTo(f, SIT, t + 1.3, .7, io, ['AN', an[0], an[1]]); });
+    // an hour of sitting with breaks
+    const hx = 880, hw = 640, hy = 790;
+    const hg = G(p, { o: 0 });
+    mk('rect', { x: hx, y: hy, width: hw, height: 26, rx: 10, fill: mix(COL.dim, COL.board, .5) }, hg);
+    T(hg, '1 час сидения', { x: hx, y: hy - 12, size: 20, fill: COL.dim });
+    show(hg, m('brk', 2));
+    const cnt = txt(p, '', 1420, 520, m('brk', 4), { size: 30, weight: 700, fill: COL.good, anchor: 'middle' });
+    brk.forEach((t, i) => {
+      const g = put(mk('rect', { x: hx + (i + 1) * hw / 4 - 8, y: hy - 6, width: 16, height: 38, rx: 6, fill: COL.good }, p), { o: 0 });
+      show(g, t);
+      whenAt(t + .2, () => { cnt.textContent = `перерывов: ${i + 1}`; });
+    });
+    txt(p, '+0,58 балла за каждый', 1420, 580, m('pts'), { size: 24, weight: 700, fill: COL.good, anchor: 'middle' });
+    txt(p, 'дополнительный перерыв в час', 1420, 614, m('pts'), { size: 21, fill: COL.chalk, anchor: 'middle' });
+  }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Физическая активность — любое движение мышц с заметным расходом энергии; упражнение — запланированная активность ради формы.', 'w1'],
+     ['VO₂max — главная мера аэробной формы, в мл O₂ на кг в минуту.', 'w2'],
+     ['Аэробная тренировка добавляет ферменты, митохондрии и капилляры; она специфична; адаптация — через 10–12 недель.', 'w3'],
+     ['Миокард уже в покое извлекает 70–80 % O₂, поэтому при нагрузке нужен больший коронарный кровоток; детренированность быстро снижает выносливость.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-demsup', prompt: ['Это определяет потребность миокарда в кислороде или его доставку?'],
+    build: grid([
+      { parts: ['Частота сердечных сокращений'], ans: ['dem'], why: 'Чем чаще пульс, тем больше потребность.' },
+      { parts: ['Длительность диастолы'], ans: ['sup'], why: 'В диастолу наполняются коронарные артерии.' },
+      { parts: ['Сократимость миокарда'], ans: ['dem'], why: 'Один из факторов потребности.' },
+      { parts: ['Содержание кислорода в артериальной крови'], ans: ['sup'], why: 'Доставка зависит от содержания O₂ и его отдачи гемоглобином.' },
+      { parts: ['Постнагрузка'], ans: ['dem'], why: 'Сила, нужная, чтобы открыть аортальный клапан, — часть потребности.' },
+    ], [['dem', 'Спрос', DEM], ['sup', 'Доставка', SUP]], { multi: false, text: true }),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-adapt', prompt: ['Одинаковую программу ходьбы начинают малоподвижный мужчина 55 лет и бегун-любитель. Чего ожидать?'],
+    build: choice([
+      ['У малоподвижного прирост будет больше; бегуну для заметных сдвигов нужна более интенсивная нагрузка'],
+      ['Прирост будет одинаковым — программа ведь одна'],
+      ['Больше улучшится бегун: он лучше тренирован'],
+      ['Через две недели оба заметно улучшат форму'],
+    ], 0, 'У человека с низким уровнем формы больше потенциал роста; чем выше исходный уровень, тем выше порог тренировочного стимула.',
+    [null, 'Адаптация зависит от исходного уровня формы и порога стимула.', 'Наоборот: у тренированного меньше запас роста и выше порог.', 'Заметные изменения измеряют через 10–12 недель.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

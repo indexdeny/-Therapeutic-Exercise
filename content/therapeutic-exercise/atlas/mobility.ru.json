@@ -1,0 +1,1204 @@
+{
+  "region": "mobility",
+  "exercises": [
+    {
+      "id": "rom-shoulder",
+      "ru": "Объём движений плеча и лопатки",
+      "en": "ROM exercises: shoulder and scapula",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "supine",
+        "prone",
+        "side",
+        "sit"
+      ],
+      "gear": [
+        "manual",
+        "none"
+      ],
+      "key": [
+        "пассивно, с помощью или активно",
+        "лопатка свободно поворачивается вверх",
+        "ротация: предплечье — как спица"
+      ],
+      "page": 64,
+      "moments": [
+        {
+          "n": 22,
+          "beat": "flex",
+          "mark": "sup",
+          "to": "scap",
+          "shot": 8,
+          "crop": [
+            420,
+            220,
+            900,
+            560
+          ]
+        },
+        {
+          "n": 22,
+          "beat": "ext",
+          "mark": "edge",
+          "to": "side"
+        },
+        {
+          "n": 22,
+          "beat": "abd",
+          "mark": "abd",
+          "to": "ur"
+        },
+        {
+          "n": 22,
+          "beat": "rot",
+          "mark": "pos",
+          "to": "spoke"
+        },
+        {
+          "n": 22,
+          "beat": "horiz",
+          "mark": "edge",
+          "to": "move"
+        },
+        {
+          "n": 22,
+          "beat": "scap",
+          "mark": "pos",
+          "to": "rot"
+        }
+      ],
+      "sand": "j=shoulder&m=flex&pos=supine"
+    },
+    {
+      "id": "rom-elbow",
+      "ru": "Объём движений локтя и предплечья",
+      "en": "ROM exercises: elbow and forearm",
+      "joint": [
+        "elbow"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "manual",
+        "none"
+      ],
+      "key": [
+        "сгибать в супинации и в пронации",
+        "двуглавая — плюс разгибание плеча",
+        "трёхглавая — плюс сгибание плеча"
+      ],
+      "warn": "пронация и супинация — лучевой костью вокруг локтевой, не скручивая кисть",
+      "page": 67,
+      "moments": [
+        {
+          "n": 23,
+          "beat": "elbow",
+          "mark": "grip",
+          "to": "scap"
+        },
+        {
+          "n": 23,
+          "beat": "biceps",
+          "mark": "two",
+          "to": "ext"
+        },
+        {
+          "n": 23,
+          "beat": "triceps",
+          "mark": "pos",
+          "to": "sh"
+        },
+        {
+          "n": 23,
+          "beat": "pron",
+          "mark": "both",
+          "to": "pre"
+        }
+      ],
+      "sand": "j=elbow&m=flex&pos=supine"
+    },
+    {
+      "id": "rom-hand",
+      "ru": "Объём движений запястья и пальцев",
+      "en": "ROM exercises: wrist and hand",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "manual",
+        "none"
+      ],
+      "key": [
+        "держать кисть сразу за суставом",
+        "пальцы — по одному суставу",
+        "длинные мышцы — от дальнего сустава"
+      ],
+      "page": 68,
+      "moments": [
+        {
+          "n": 23,
+          "beat": "wrist",
+          "mark": "wr",
+          "to": "free"
+        },
+        {
+          "n": 23,
+          "beat": "hand",
+          "mark": "arch",
+          "to": "thumb"
+        },
+        {
+          "n": 23,
+          "beat": "fingers",
+          "mark": "one",
+          "to": "ten"
+        },
+        {
+          "n": 23,
+          "beat": "extr",
+          "mark": "ext",
+          "to": "dist"
+        }
+      ],
+      "sand": "j=wrist&m=flex&pos=palmDown"
+    },
+    {
+      "id": "rom-hip",
+      "ru": "Объём движений бедра и колена",
+      "en": "ROM exercises: hip and knee",
+      "joint": [
+        "hip",
+        "knee"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "supine",
+        "prone",
+        "side"
+      ],
+      "gear": [
+        "manual",
+        "none"
+      ],
+      "key": [
+        "бедро и колено сгибают вместе",
+        "задняя группа — колено прямое",
+        "прямая мышца — бедро разогнуто"
+      ],
+      "page": 69,
+      "moments": [
+        {
+          "n": 24,
+          "beat": "combo",
+          "mark": "why",
+          "to": "swing",
+          "shot": 5,
+          "crop": [
+            300,
+            280,
+            960,
+            560
+          ]
+        },
+        {
+          "n": 24,
+          "beat": "hipext",
+          "mark": "pos",
+          "to": "knee"
+        },
+        {
+          "n": 24,
+          "beat": "ham",
+          "mark": "grip",
+          "to": "tight"
+        },
+        {
+          "n": 24,
+          "beat": "rf",
+          "mark": "pos",
+          "to": "flex"
+        },
+        {
+          "n": 24,
+          "beat": "abd",
+          "mark": "grip",
+          "to": "neu"
+        },
+        {
+          "n": 24,
+          "beat": "rot",
+          "mark": "ext",
+          "to": "caut"
+        }
+      ],
+      "sand": "j=hip&m=flex&pos=supine"
+    },
+    {
+      "id": "rom-ankle",
+      "ru": "Объём движений голеностопа и стопы",
+      "en": "ROM exercises: ankle and foot",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "manual",
+        "none"
+      ],
+      "key": [
+        "пятку тянуть вниз, стопу — вверх",
+        "колено согнуто — полный объём сустава",
+        "пальцы — как пальцы кисти"
+      ],
+      "page": 71,
+      "moments": [
+        {
+          "n": 24,
+          "beat": "df",
+          "mark": "grip",
+          "to": "gas",
+          "shot": 5,
+          "crop": [
+            300,
+            260,
+            960,
+            560
+          ]
+        },
+        {
+          "n": 24,
+          "beat": "pf",
+          "mark": "pf",
+          "to": "bed"
+        },
+        {
+          "n": 24,
+          "beat": "foot",
+          "mark": "st",
+          "to": "toes"
+        }
+      ],
+      "sand": "j=ankle&m=df&pos=supine"
+    },
+    {
+      "id": "rom-neck",
+      "ru": "Объём движений шеи",
+      "en": "ROM exercises: cervical spine",
+      "joint": [
+        "neck"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "голову держат обеими руками",
+        "сначала кивок, потом вся шея",
+        "наклоны и повороты — из нейтрали"
+      ],
+      "page": 72,
+      "moments": [
+        {
+          "n": 25,
+          "beat": "cflex",
+          "mark": "pos",
+          "to": "full",
+          "shot": 9,
+          "crop": [
+            380,
+            230,
+            960,
+            560
+          ]
+        },
+        {
+          "n": 25,
+          "beat": "cext",
+          "mark": "ext",
+          "to": "sup"
+        },
+        {
+          "n": 25,
+          "beat": "clat",
+          "mark": "lat",
+          "to": "rot"
+        }
+      ]
+    },
+    {
+      "id": "rom-lumbar",
+      "ru": "Объём движений поясницы",
+      "en": "ROM exercises: lumbar spine",
+      "joint": [
+        "trunk"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "supine",
+        "prone"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "оба колена к груди",
+        "лёжа на животе — поднять бёдра",
+        "колени в сторону, грудь держать"
+      ],
+      "page": 73,
+      "moments": [
+        {
+          "n": 25,
+          "beat": "lflex",
+          "mark": "knees",
+          "to": "sac",
+          "shot": 7,
+          "crop": [
+            420,
+            230,
+            960,
+            560
+          ]
+        },
+        {
+          "n": 25,
+          "beat": "lext",
+          "mark": "ext"
+        },
+        {
+          "n": 25,
+          "beat": "lrot",
+          "mark": "hook",
+          "to": "rep"
+        }
+      ]
+    },
+    {
+      "id": "rom-func",
+      "ru": "Объём в функциональных паттернах",
+      "en": "ROM in functional patterns",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "mobility",
+        "function"
+      ],
+      "pos": [
+        "supine",
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "manual",
+        "none"
+      ],
+      "key": [
+        "движения в нескольких плоскостях",
+        "как в делах: ложка, полка, расчёска",
+        "потом — сам в повседневной жизни"
+      ],
+      "page": 80,
+      "moments": [
+        {
+          "n": 27,
+          "beat": "func",
+          "mark": "pat",
+          "to": "own"
+        },
+        {
+          "n": 27,
+          "beat": "ul",
+          "mark": "u1",
+          "to": "u5"
+        },
+        {
+          "n": 27,
+          "beat": "ll",
+          "mark": "l1",
+          "to": "l3"
+        },
+        {
+          "n": 25,
+          "beat": "comb",
+          "mark": "comb",
+          "to": "pnf"
+        }
+      ]
+    },
+    {
+      "id": "self-arm",
+      "ru": "Здоровая рука ведёт больную",
+      "en": "self-assisted ROM of the arm",
+      "joint": [
+        "shoulder",
+        "elbow"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "взять больную руку за запястье",
+        "поднять над головой и вернуть",
+        "ротация — предплечье как спица"
+      ],
+      "page": 74,
+      "moments": [
+        {
+          "n": 26,
+          "beat": "arm",
+          "mark": "man",
+          "to": "pron",
+          "shot": 17,
+          "crop": [
+            100,
+            300,
+            880,
+            560
+          ]
+        }
+      ],
+      "sand": "j=shoulder&m=flex&pos=supine"
+    },
+    {
+      "id": "self-hand",
+      "ru": "Самопомощь для запястья и пальцев",
+      "en": "self-assisted ROM of the wrist and hand",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "запястье — во все стороны",
+        "большим пальцем разогнуть пальцы",
+        "ладонью сверху согнуть"
+      ],
+      "page": 74,
+      "moments": [
+        {
+          "n": 26,
+          "beat": "hand",
+          "mark": "wr",
+          "to": "th",
+          "shot": 4,
+          "crop": [
+            40,
+            140,
+            920,
+            520
+          ]
+        }
+      ]
+    },
+    {
+      "id": "self-leg",
+      "ru": "Самопомощь для ноги",
+      "en": "self-assisted ROM of the leg",
+      "joint": [
+        "hip",
+        "knee",
+        "ankle"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "none",
+        "band"
+      ],
+      "key": [
+        "здоровая стопа или ремень под коленом",
+        "колено подтянуть к груди руками",
+        "стопа на колене здоровой ноги"
+      ],
+      "page": 75,
+      "moments": [
+        {
+          "n": 26,
+          "beat": "leg",
+          "mark": "hip",
+          "to": "ank"
+        }
+      ]
+    },
+    {
+      "id": "finger-ladder",
+      "ru": "Скольжение по стене и лестница для пальцев",
+      "en": "wall climbing and finger ladder",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "stand"
+      ],
+      "gear": [
+        "none"
+      ],
+      "key": [
+        "отметки на стене — видимая цель",
+        "подниматься и подходить ближе",
+        "без наклона, носков и пожимания"
+      ],
+      "page": 77,
+      "moments": [
+        {
+          "n": 26,
+          "beat": "wall",
+          "mark": "wall",
+          "to": "pre",
+          "shot": 6,
+          "crop": [
+            660,
+            60,
+            800,
+            800
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pulley",
+      "ru": "Блок над головой",
+      "en": "overhead pulley",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "sit",
+        "stand"
+      ],
+      "gear": [
+        "machine"
+      ],
+      "key": [
+        "блок прямо над суставом",
+        "здоровая рука тянет верёвку",
+        "вперёд, вбок, в плоскости лопатки"
+      ],
+      "warn": "при неправильном выполнении плечевая кость сдавливается об акромион; при усилении боли — прекратить",
+      "page": 77,
+      "moments": [
+        {
+          "n": 26,
+          "beat": "pulley",
+          "mark": "set",
+          "to": "pre"
+        },
+        {
+          "n": 26,
+          "beat": "pulley",
+          "mark": "act"
+        }
+      ]
+    },
+    {
+      "id": "slide-board",
+      "ru": "Скользящая доска",
+      "en": "skate board / powder board",
+      "joint": [
+        "hip",
+        "shoulder"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "roll"
+      ],
+      "key": [
+        "без трения: ролики, тальк, полотенце",
+        "лёжа — отводить и приводить бедро",
+        "сидя — плечо по горизонтали"
+      ],
+      "page": 78,
+      "moments": [
+        {
+          "n": 26,
+          "beat": "other",
+          "mark": "sk"
+        }
+      ]
+    },
+    {
+      "id": "cpm",
+      "ru": "Аппарат непрерывного пассивного движения",
+      "en": "continuous passive motion (CPM)",
+      "joint": [
+        "knee",
+        "shoulder"
+      ],
+      "goal": [
+        "mobility"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "machine"
+      ],
+      "key": [
+        "дуга 20–30°, +10–15° в день",
+        "цикл — от 45 секунд до 2 минут",
+        "в перерывах — активные упражнения"
+      ],
+      "page": 78,
+      "moments": [
+        {
+          "n": 27,
+          "beat": "guide",
+          "mark": "g1",
+          "to": "g6"
+        },
+        {
+          "n": 27,
+          "beat": "cpm",
+          "mark": "def",
+          "to": "dev",
+          "shot": 6,
+          "crop": [
+            80,
+            360,
+            960,
+            480
+          ]
+        },
+        {
+          "n": 27,
+          "beat": "evid",
+          "mark": "short",
+          "to": "long"
+        }
+      ],
+      "thumb": 1
+    },
+    {
+      "id": "llps",
+      "ru": "Длительная растяжка малым грузом",
+      "en": "low-load prolonged mechanical stretch",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "weight"
+      ],
+      "key": [
+        "очень малая сила очень долго",
+        "манжета с грузом, ортез или шина",
+        "от 15–30 минут до многих часов"
+      ],
+      "page": 102,
+      "moments": [
+        {
+          "n": 34,
+          "beat": "mech",
+          "mark": "mech",
+          "to": "light"
+        },
+        {
+          "n": 34,
+          "beat": "mech",
+          "mark": "box"
+        },
+        {
+          "n": 237,
+          "beat": "flex",
+          "mark": "g",
+          "to": "use"
+        }
+      ]
+    },
+    {
+      "id": "pnf-stretch",
+      "ru": "ПНФ-растяжка",
+      "en": "PNF stretching (hold-relax, agonist contraction)",
+      "joint": [
+        "body"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "supine",
+        "prone",
+        "sit"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "напрячь укороченную мышцу 5 секунд",
+        "расслабить — и дальше в объём",
+        "или сократить противоположную"
+      ],
+      "warn": "повторные максимальные напряжения повышают давление — хватит умеренного, без натуживания",
+      "page": 103,
+      "moments": [
+        {
+          "n": 35,
+          "beat": "hr",
+          "mark": "pos",
+          "to": "pec",
+          "crop": [
+            150,
+            260,
+            960,
+            560
+          ]
+        },
+        {
+          "n": 35,
+          "beat": "ac",
+          "mark": "ac",
+          "to": "ex"
+        },
+        {
+          "n": 35,
+          "beat": "hrac",
+          "mark": "hrac",
+          "to": "knee"
+        },
+        {
+          "n": 35,
+          "beat": "prec",
+          "mark": "bp",
+          "to": "sub"
+        }
+      ]
+    },
+    {
+      "id": "mstr-shoulder",
+      "ru": "Ручная растяжка плеча",
+      "en": "manual stretching: shoulder",
+      "joint": [
+        "shoulder"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "supine",
+        "prone"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "лопатку обязательно стабилизировать",
+        "медленно до сопротивления и чуть дальше",
+        "держать 30 секунд и дольше"
+      ],
+      "warn": "при ротациях сила идёт через локоть: он должен быть стабильным и безболезненным",
+      "page": 113,
+      "moments": [
+        {
+          "n": 38,
+          "beat": "flex",
+          "mark": "flex",
+          "to": "move",
+          "shot": 8,
+          "crop": [
+            420,
+            240,
+            960,
+            560
+          ]
+        },
+        {
+          "n": 38,
+          "beat": "sh",
+          "mark": "scap",
+          "to": "tight"
+        },
+        {
+          "n": 38,
+          "beat": "ext",
+          "mark": "ext",
+          "to": "move"
+        },
+        {
+          "n": 38,
+          "beat": "abd",
+          "mark": "abd"
+        },
+        {
+          "n": 38,
+          "beat": "er",
+          "mark": "er",
+          "to": "prec"
+        },
+        {
+          "n": 38,
+          "beat": "ir",
+          "mark": "ir",
+          "to": "grip"
+        },
+        {
+          "n": 38,
+          "beat": "hab",
+          "mark": "hab",
+          "to": "scm"
+        },
+        {
+          "n": 36,
+          "beat": "app2",
+          "mark": "b1",
+          "to": "b4"
+        }
+      ]
+    },
+    {
+      "id": "mstr-elbow",
+      "ru": "Ручная растяжка локтя и предплечья",
+      "en": "manual stretching: elbow and forearm",
+      "joint": [
+        "elbow"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "supine"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "сгибание — растягивают разгибатели",
+        "разгибание — плечо лежит на столе",
+        "ротации — при 90° и с прямым локтем"
+      ],
+      "warn": "после травм и ожогов у локтя — растягивать очень мягко: риск гетеротопической кости",
+      "page": 115,
+      "moments": [
+        {
+          "n": 39,
+          "beat": "elbow",
+          "mark": "cons",
+          "to": "tri",
+          "shot": 13,
+          "crop": [
+            0,
+            100,
+            700,
+            600
+          ]
+        },
+        {
+          "n": 39,
+          "beat": "ext",
+          "mark": "ext",
+          "to": "ho"
+        },
+        {
+          "n": 39,
+          "beat": "pron",
+          "mark": "pron",
+          "to": "ext2"
+        }
+      ]
+    },
+    {
+      "id": "mstr-hand",
+      "ru": "Ручная растяжка запястья и пальцев",
+      "en": "manual stretching: wrist and hand",
+      "joint": [
+        "wrist"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "sit"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "пальцы расслаблены",
+        "длинные мышцы — сустав за суставом",
+        "отклонение — не за большой палец"
+      ],
+      "page": 116,
+      "moments": [
+        {
+          "n": 39,
+          "beat": "wrist",
+          "mark": "cross",
+          "to": "we",
+          "shot": 19,
+          "crop": [
+            120,
+            260,
+            800,
+            500
+          ]
+        },
+        {
+          "n": 39,
+          "beat": "dev",
+          "mark": "rd",
+          "to": "ud"
+        },
+        {
+          "n": 39,
+          "beat": "dig",
+          "mark": "ind",
+          "to": "ip"
+        }
+      ]
+    },
+    {
+      "id": "mstr-hip",
+      "ru": "Ручная растяжка бедра",
+      "en": "manual stretching: hip",
+      "joint": [
+        "hip"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "supine",
+        "prone",
+        "side"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "таз всегда стабилизирован",
+        "задняя группа — колено прямое",
+        "подвздошно-поясничная — у края стола"
+      ],
+      "warn": "тянуть за внутреннюю лодыжку — только при стабильном безболезненном колене",
+      "page": 117,
+      "moments": [
+        {
+          "n": 40,
+          "beat": "ham",
+          "mark": "ham",
+          "to": "kneel",
+          "shot": 8,
+          "crop": [
+            120,
+            240,
+            960,
+            560
+          ]
+        },
+        {
+          "n": 40,
+          "beat": "gen",
+          "mark": "pel",
+          "to": "why"
+        },
+        {
+          "n": 40,
+          "beat": "glut",
+          "mark": "glut",
+          "to": "opp"
+        },
+        {
+          "n": 40,
+          "beat": "ilio",
+          "mark": "ilio",
+          "to": "prone"
+        },
+        {
+          "n": 40,
+          "beat": "rf",
+          "mark": "rf",
+          "to": "no"
+        },
+        {
+          "n": 40,
+          "beat": "abd",
+          "mark": "abd",
+          "to": "mm"
+        },
+        {
+          "n": 40,
+          "beat": "add",
+          "mark": "add",
+          "to": "note"
+        },
+        {
+          "n": 40,
+          "beat": "rot",
+          "mark": "er",
+          "to": "knee"
+        }
+      ]
+    },
+    {
+      "id": "mstr-knee",
+      "ru": "Ручная растяжка колена",
+      "en": "manual stretching: knee",
+      "joint": [
+        "knee"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "prone",
+        "sit"
+      ],
+      "gear": [
+        "manual",
+        "roll"
+      ],
+      "key": [
+        "сгибание — лёжа на животе или сидя",
+        "валик под бедро над коленом",
+        "разгибание — валик под голень"
+      ],
+      "warn": "слишком энергичная растяжка лёжа на животе травмирует сустав и вызывает отёк",
+      "page": 120,
+      "moments": [
+        {
+          "n": 41,
+          "beat": "kf",
+          "mark": "kf",
+          "to": "range",
+          "shot": 6,
+          "crop": [
+            160,
+            240,
+            960,
+            560
+          ]
+        },
+        {
+          "n": 41,
+          "beat": "kgen",
+          "mark": "two"
+        },
+        {
+          "n": 41,
+          "beat": "ke",
+          "mark": "mid"
+        }
+      ]
+    },
+    {
+      "id": "mstr-ankle",
+      "ru": "Ручная растяжка голеностопа и стопы",
+      "en": "manual stretching: ankle and foot",
+      "joint": [
+        "ankle"
+      ],
+      "goal": [
+        "stretch"
+      ],
+      "pos": [
+        "supine",
+        "sit"
+      ],
+      "gear": [
+        "manual"
+      ],
+      "key": [
+        "колено прямое — икроножная",
+        "колено согнуто — камбаловидная",
+        "пятку тянуть вниз"
+      ],
+      "warn": "сильное давление на головки плюсневых растягивает продольный свод",
+      "page": 122,
+      "moments": [
+        {
+          "n": 41,
+          "beat": "df",
+          "mark": "df",
+          "to": "arch",
+          "shot": 8,
+          "crop": [
+            120,
+            260,
+            960,
+            560
+          ]
+        },
+        {
+          "n": 41,
+          "beat": "pf",
+          "mark": "pf",
+          "to": "inv"
+        },
+        {
+          "n": 41,
+          "beat": "spec",
+          "mark": "rule",
+          "to": "toes"
+        }
+      ]
+    }
+  ]
+}

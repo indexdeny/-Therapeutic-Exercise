@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Моторные стратегии равновесия — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 88, title: 'Моторные стратегии равновесия', minutes: 9, language: 'ru', next: '../ch089/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch088/cards.ru.json
+const CARDS_SHORT = {
+  "неподвижный пол\nтребования ниже": "требования ниже",
+  "движущийся автобус\nтребования выше": "требования выше",
+  "в лечении: менять задачу и условия\nчтобы вырабатывать стратегии для разных ситуаций": "чтобы вырабатывать стратегии для разных ситуаций",
+};
+// cards-short end
+
+const ANK_C = COL.good, HIP_C = COL.task, STEP_C = COL.whole, ACT = '#ff5a3c';
+const cyc = (q, n) => (1 - Math.cos(2 * Math.PI * n * q)) / 2;
+function pillRow(p, items, cx, y, t0, { gap = .35, size = 22, col = COL.whole, space = 18 } = {}) {
+  const ws = items.map(s => uiW(s, size) + 30), tot = ws.reduce((a, b) => a + b, 0) + space * (items.length - 1);
+  let x = cx - tot / 2;
+  return items.map((s, i) => { const c = Array.isArray(col) ? col[i] : col, g = pill(p, s, x + ws[i] / 2, y, t0 === null ? null : t0 + i * gap, { col: c, size }); x += ws[i] + space; return g; });
+}
+// A platform the figure stands on (top at y); slide it with put(plat, { x: dx }).
+function platform(p, x, y, w, t0, { h = 18, col = '#7f909c' } = {}) {
+  const g = G(p, { o: 0 });
+  mk('rect', { x: x - w / 2, y, width: w, height: h, rx: 6, fill: '#3d4a52', stroke: col, 'stroke-width': 3 }, g);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// Muscles on a side-view figure, drawn under the right body parts.
+const MUS_AFTER = { gastroc: 'shN', tibAnt: 'shN', hamstrings: 'thN', quads: 'thN', rectus: 'thN', parasp: 'torso', abdom: 'torso' };
+const muscles = (f, keys) => Object.fromEntries(keys.map(k => [k, muscleOn(f, ...MUSCLE[k], { w: k === 'parasp' || k === 'abdom' ? 11 : 12, after: MUS_AFTER[k] })]));
+// A step 0 → 1 → 0 around time t: on at a, held till b, off over the next `fade` seconds.
+const env = (T, a, b, rise = .25, fade = .6) => T < a ? 0 : T < a + rise ? (T - a) / rise : T < b ? 1 : T < b + fade ? 1 - (T - b) / fade : 0;
+// A numbered chip: the order a muscle switches on.
+function orderRow(p, x, y, n, s, sub, col, t0) {
+  const g = G(p, { o: 0 });
+  mk('circle', { cx: x + 22, cy: y - 8, r: 20, fill: col }, g);
+  T(g, String(n), { x: x + 22, y: y + 1, size: 24, weight: 700, fill: COL.board, anchor: 'middle' });
+  T(g, s, { x: x + 56, y, size: 24, weight: 700, fill: COL.chalk });
+  if (sub) T(g, sub, { x: x + 56, y: y + 28, size: 19, fill: COL.dim });
+  show(g, t0);
+  return g;
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Моторные стратегии', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 8 · Урок 88', { x: 800, y: 150, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Моторные стратегии', { x: 800, y: 235, size: 56, weight: 600, anchor: 'middle' });
+    T(g, 'как тело восстанавливает равновесие', { x: 800, y: 300, size: 42, weight: 600, anchor: 'middle', fill: COL.dim });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'голеностоп, таз и шаг — и порядок включения мышц', 800, 385, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 }), GY = 830, S = .7;
+    [[520, LEAN(6)], [800, HIPSTRAT(26, 10)], [1080, STRIDE]].forEach(([x, pose], i) => {
+      path(art, `M${x - 110} ${GY}H${x + 110}`, { stroke: COL.faint, 'stroke-width': 3 });
+      const f = fig(art, { x, y: GY - 182 * S, s: S });
+      const [ax] = onStage(f, 'AF');
+      prog(q => { const k = cyc(q, 2); f.set(blendPose(STAND, pose, k)); plant(f, 'AF', ax, GY); }, .6 + i * .5, Math.max(3, D - 2), lin);
+    });
+    show(art, .3);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['three', 'Три стратегии', (m, D) => {
+    const p = panel(0);
+    txt(p, 'держать центр масс над площадью опоры или вернуть его туда после толчка', 800, 60, m('keep'), { size: 25, weight: 700, anchor: 'middle' });
+    txt(p, 'Хорак и Нашнер (Horak, Nashner): ответ на внезапный сдвиг опоры', 800, 100, m('hn'), { size: 22, fill: COL.dim, anchor: 'middle' });
+    const S = .66, GY = 470;
+    [['голеностопная (ankle strategy)', ANK_C, 'ank', LEAN(6), 'AF'], ['тазобедренная (hip strategy)', HIP_C, 'hip', HIPSTRAT(28, 11), 'AF'], ['шаговая (stepping strategy)', STEP_C, 'step', STRIDE, 'AF']].forEach(([title, col, mark, pose, keep], i) => {
+      const x0 = 60 + i * 500, cx = x0 + 240, g = G(p, { o: 0 });
+      roundBox(g, x0, 130, 480, 410, col, PANEL, 2.5);
+      T(g, title, { x: cx, y: 172, size: 23, weight: 700, fill: col, anchor: 'middle' });
+      show(g, m(mark));
+      const pl = platform(p, cx - 20, GY, 300, m(mark));
+      const f = fig(p, { x: cx - 30, y: GY - 182 * S, s: S, o: 0 });
+      show(f.g, m(mark));
+      const [ax] = onStage(f, keep);
+      const ov = balanceOverlay(p, f, GY, m(mark, .3));
+      const t0 = m(mark, .5);
+      prog(q => {
+        const sl = -26 * Math.min(1, q * 5), k = q < .2 ? 0 : io(Math.min(1, (q - .2) / .35));
+        put(pl, { x: sl }); f.set(blendPose(STAND, pose, k)); plant(f, keep, ax + sl, GY);
+      }, t0, 3, lin);
+      arrowTo(p, [cx - 110, GY + 46], [cx - 170, GY + 46], t0, { col: COL.dim, w: 3 });
+      T(p, 'опора', { x: cx - 105, y: GY + 52, size: 18, fill: COL.dim, o: 0 });
+      show(p.lastChild, t0);
+    });
+    txt(p, 'выбор стратегии зависит от:', 60, 590, m('box'), { size: 23, weight: 700, fill: COL.chalk });
+    pillRow(p, ['скорости и силы толчка', 'свойств опоры', 'смещения центра масс'], 800, 640, m('box', 1.5), { col: COL.whole, size: 21, gap: 1.2 });
+    pillRow(p, ['знает ли о толчке', 'позы в момент толчка', 'прошлого опыта'], 800, 692, m('box', 5), { col: COL.whole, size: 21, gap: 1 });
+    infoCard(p, 160, 740, 1280, 104, 'синергия (synergy) — группа мышц, которые включаются вместе, как одно целое', 'это сильно упрощает задачу для нервной системы', ACT, m('syn'), { size: 21 });
+  }],
+
+  ['sys', 'Три системы ответа', (m, D) => {
+    const p = panel(0);
+    txt(p, 'три системы движений после толчка', 800, 56, m('sys'), { size: 28, weight: 700, anchor: 'middle' });
+    // the latency scale
+    const x0 = 300, k = 5.6, ay = 250, ms = v => x0 + v * k;
+    const ax = G(p, { o: 0 });
+    path(ax, `M${x0} ${ay}H${ms(205)}`, { stroke: COL.dim, 'stroke-width': 2.5 });
+    [0, 50, 100, 150, 200].forEach(v => { path(ax, `M${ms(v)} ${ay}V${ay + 10}`, { stroke: COL.dim, 'stroke-width': 2 }); T(ax, String(v), { x: ms(v), y: ay + 34, size: 19, fill: COL.dim, anchor: 'middle' }); });
+    T(ax, 'мс после толчка', { x: ms(205), y: ay + 60, size: 19, fill: COL.dim, anchor: 'end' });
+    T(ax, 'толчок', { x: x0, y: 112, size: 19, fill: COL.chalk, anchor: 'middle' });
+    path(ax, `M${x0} 120V${ay}`, { stroke: COL.chalk, 'stroke-width': 2, 'stroke-dasharray': '5 5' });
+    show(ax, m('sys'));
+    const C = ['#9fe0f0', COL.task, COL.real];
+    const band = (a, b, y, col, s, t0, open = false) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x: ms(a), y, width: ms(b) - ms(a), height: 32, rx: 8, fill: mix(col, COL.board, .45), stroke: col, 'stroke-width': 2 }, g);
+      if (open) path(g, `M${ms(b)} ${y + 16}h26M${ms(b) + 16} ${y + 6}l10 10l-10 10`, { stroke: col, 'stroke-width': 3 });
+      T(g, s, { x: ms(a) - 12, y: y + 23, size: 20, weight: 700, fill: col, anchor: 'end' });
+      show(g, t0);
+    };
+    band(0, 70, 130, C[0], 'рефлекс < 70', m('ref'));
+    band(80, 120, 170, C[1], 'автоматическая 80–120', m('aut'));
+    band(150, 200, 210, C[2], 'произвольная > 150', m('vol'), true);
+    // the table (after Nashner)
+    const cols = [[C[0], 'рефлекс', 'ref'], [C[1], 'автоматическая реакция', 'aut'], [C[2], 'произвольное движение', 'vol']];
+    const rowsL = ['путь', 'запуск', 'ответ', 'роль', 'что меняет ответ'];
+    const cells = [
+      ['спинной мозг', 'внешний стимул', 'локально, стереотипно', 'регулирует силу мышц', 'нарушения мышц, суставов или нервной системы'],
+      ['ствол мозга, подкорка', 'внешний стимул', 'ноги + туловище; стереотипно, но адаптируемо', 'противостоит возмущению — первым предотвращает падение', '+ конфигурация опоры, опыт'],
+      ['кора', 'внешний стимул или свой', 'согласованно, очень изменчиво', 'целенаправленные движения', '+ сознательное усилие, опыт, сложность задачи'],
+    ];
+    const RY = [380, 450, 520, 615, 715], CX = [300, 720, 1140];
+    rowsL.forEach((s, i) => txt(p, s, 60, RY[i] + 6, m('ref'), { size: 20, weight: 700, fill: COL.dim }));
+    cols.forEach(([col, t, mark], j) => {
+      const g = G(p, { o: 0 });
+      mk('rect', { x: CX[j] - 10, y: 300, width: 400, height: 500, rx: 16, fill: 'none', stroke: col, 'stroke-width': 2 }, g);
+      T(g, t, { x: CX[j] + 190, y: 334, size: 22, weight: 700, fill: col, anchor: 'middle' });
+      cells[j].forEach((s, i) => put(para(g, s, CX[j] + 8, RY[i] + 6, null, { size: 19, maxW: 370, fill: COL.chalk }), { o: 1 }));
+      show(g, m(mark));
+    });
+    txt(p, 'все три работают вместе: ответ под нагрузку на равновесие', 800, 852, m('all'), { size: 23, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['ankle', 'Голеностопная стратегия', (m, D) => {
+    const p = panel(0), GY = 740, S = 1.08, X0 = 360;
+    txt(p, 'голеностопная стратегия (ankle strategy)', 800, 56, m('ank'), { size: 28, weight: 700, anchor: 'middle', fill: ANK_C });
+    txt(p, 'спокойная стойка и небольшие медленные толчки, большая твёрдая опора', 800, 96, m('ank', 1), { size: 21, fill: COL.dim, anchor: 'middle' });
+    const pl = platform(p, X0 + 10, GY, 360, m('ank'));
+    const f = fig(p, { x: X0, y: GY - 182 * S, s: S, o: 0 });
+    show(f.g, m('ank'));
+    const M = muscles(f, ['gastroc', 'hamstrings', 'parasp', 'tibAnt', 'quads', 'abdom']);
+    const [ax] = onStage(f, 'AN');
+    const ov = balanceOverlay(p, f, GY, m('ank', .5));
+    const T0 = m('ank'), tF = m('fwd'), tB = m('bwd');
+    const ON = { gastroc: [m('gas'), m('par', 2.5)], hamstrings: [m('ham'), m('par', 2.5)], parasp: [m('par'), m('par', 2.5)], tibAnt: [m('bwd', .4), m('abd', 2.5)], quads: [m('quad'), m('abd', 2.5)], abdom: [m('abd'), m('abd', 2.5)] };
+    prog(q => {
+      const T = T0 + q * (D - T0);
+      const sl = T < tF ? 0 : T < tB ? -40 * Math.min(1, (T - tF) / .3) : -40 + 40 * Math.min(1, (T - tB) / .3);
+      const lean = 6 * env(T, tF + .1, m('par', 1.6), .5, 1.2) - 4 * env(T, tB + .1, m('abd', 1.6), .5, 1.2);
+      put(pl, { x: sl }); f.set(LEAN(lean)); plant(f, 'AN', ax + sl, GY);
+      for (const k in ON) M[k].act(.92 * env(T, ON[k][0], ON[k][1], .2, .8));
+    }, T0, Math.max(3, D - T0), lin);
+    // the forward sway: distal to proximal, the back of the body
+    txt(p, 'опору сдвинули назад → тело качнулось вперёд', 780, 170, m('fwd'), { size: 23, weight: 700, fill: COL.chalk });
+    txt(p, 'мышцы включаются снизу вверх ↑', 780, 206, m('fwd', 1), { size: 21, fill: ANK_C });
+    orderRow(p, 800, 270, 1, 'икроножная', '≈ 90–100 мс после начала толчка', ACT, m('gas'));
+    orderRow(p, 800, 350, 2, 'задняя группа бедра', '+ 20–30 мс', ACT, m('ham'));
+    orderRow(p, 800, 430, 3, 'мышцы, выпрямляющие позвоночник', null, ACT, m('par'));
+    // the backward sway: the front of the body
+    txt(p, 'тело качнулось назад', 780, 540, m('bwd'), { size: 23, weight: 700, fill: COL.chalk });
+    orderRow(p, 800, 600, 1, 'передняя большеберцовая', null, ACT, m('bwd', .4));
+    orderRow(p, 800, 670, 2, 'четырёхглавая', null, ACT, m('quad'));
+    orderRow(p, 800, 740, 3, 'мышцы живота', null, ACT, m('abd'));
+    txt(p, 'цвет мышцы — как она работает (легенда в углу)', 780, 830, m('gas', 1), { size: 19, fill: COL.dim });
+    ov.g.parentNode.appendChild(ov.g);
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-order', prompt: ['Голеностопная стратегия. Какой по счёту включается мышца?'],
+    build: grid([
+      { parts: ['Качание вперёд: икроножная'], ans: ['1'], why: 'Первая — через 90–100 мс.' },
+      { parts: ['Качание вперёд: задняя группа бедра'], ans: ['2'], why: 'Через 20–30 мс после икроножной.' },
+      { parts: ['Качание вперёд: мышцы, выпрямляющие позвоночник'], ans: ['3'], why: 'Последними — снизу вверх.' },
+      { parts: ['Качание назад: передняя большеберцовая'], ans: ['1'], why: 'Назад — тоже снизу вверх, но спереди.' },
+      { parts: ['Качание назад: мышцы живота'], ans: ['3'], why: 'После четырёхглавой.' },
+    ], [['1', 'Первой', ACT], ['2', 'Второй', COL.task], ['3', 'Третьей', COL.int]], { multi: false, text: true }),
+  }], done) }],
+
+  ['lat', 'Вбок и вниз', (m, D) => {
+    const p = panel(0), GY = 780;
+    txt(p, 'перенос веса (weight-shift strategy) — боковая плоскость', 420, 60, m('ws'), { size: 25, weight: 700, anchor: 'middle', fill: ANK_C });
+    ground(p, 160, 680, GY, m('ws'));
+    const fr = frontStand(p, 420, GY, 1.12, m('ws'), { pose: { w: 34 } });
+    const fc = comSym(p, 0, 0, 14);
+    put(fc, { o: 0 }); show(fc, m('ws', .5));
+    const T0 = m('ws');
+    prog(q => {
+      const T = T0 + q * (D - T0), sh = 30 * Math.sin((T - T0) * 1.4);
+      fr.set({ shift: sh });
+      const a = T > m('hips') ? .85 : 0;
+      ['medL', 'medR', 'addL', 'addR'].forEach(k => fr.mus[k].act(a));
+      const [x, y] = fr.com(); put(fc, { x, y });
+    }, T0, Math.max(3, D - T0), lin);
+    txt(p, 'отводящие', 300, 470, m('hips', .5), { size: 21, weight: 700, fill: ACT, anchor: 'end' });
+    txt(p, '(средняя ягодичная)', 300, 496, m('hips', .5), { size: 18, fill: COL.dim, anchor: 'end' });
+    txt(p, 'приводящие', 600, 560, m('hips', 1.2), { size: 21, weight: 700, fill: ACT });
+    txt(p, 'тазобедренные суставы — ключевое звено', 420, 120, m('hips'), { size: 21, fill: COL.chalk, anchor: 'middle' });
+    txt(p, '+ мышцы, поворачивающие стопу внутрь и наружу', 420, 830, m('inv'), { size: 20, fill: COL.dim, anchor: 'middle' });
+    const ank = G(p, { o: 0 });
+    [-1, 1].forEach(k => mk('circle', { cx: 420 + 34 * 1.12 * k, cy: GY - 12, r: 16, fill: 'none', stroke: ACT, 'stroke-width': 3 }, ank));
+    show(ank, m('inv'));
+    // suspension: the knees bend quickly and the COM drops
+    const S = 1, X0 = 1160;
+    txt(p, 'подвешивание (suspension strategy)', 1170, 60, m('susp'), { size: 25, weight: 700, anchor: 'middle', fill: STEP_C });
+    ground(p, 960, 1400, GY, m('susp'));
+    const f = fig(p, { x: X0, y: GY - 182 * S, s: S, o: 0 });
+    show(f.g, m('susp'));
+    const [ax] = onStage(f, 'AN');
+    const cs = comSym(p, 0, 0, 14), [c0x, c0y] = comOf(f);
+    put(cs, { o: 0 }); show(cs, m('susp', .5));
+    const ref = path(p, `M${c0x - 60} ${c0y}H${c0x + 60}`, { stroke: COL.dim, 'stroke-width': 2, 'stroke-dasharray': '6 6' }, { o: 0 });
+    show(ref, m('susp', .3));
+    const SUS = { ...STAND, t: 12, hN: 40, hF: 40, kN: 46, kF: 46, fN: 18, fF: 18, aN: 30, aF: 20 };
+    prog(q => { const k = q < .25 ? out(q / .25) : 1; f.set(blendPose(STAND, SUS, k)); plant(f, 'AN', ax, GY); const [x, y] = comOf(f); put(cs, { x, y }); }, m('susp', .5), 3, lin);
+    const dArr = G(p, { o: 0 });
+    path(dArr, `M${c0x + 80} ${c0y}V${c0y + 52}M${c0x + 70} ${c0y + 40}L${c0x + 80} ${c0y + 54}L${c0x + 90} ${c0y + 40}`, { stroke: STEP_C, 'stroke-width': 4 });
+    T(dArr, 'центр масс ниже', { x: c0x + 100, y: c0y + 34, size: 21, weight: 700, fill: STEP_C });
+    show(dArr, m('susp', 1.3));
+    txt(p, 'сгибаются колени, голеностопы, тазобедренные', 1170, 120, m('susp', 1), { size: 20, fill: COL.chalk, anchor: 'middle' });
+    pillRow(p, ['+ голеностопная', '+ перенос веса'], 1170, 840, m('comb', .5), { col: STEP_C, size: 20, gap: .8 });
+  }],
+
+  ['hip', 'Тазобедренная стратегия', (m, D) => {
+    const p = panel(0), GY = 760, S = 1.04, X0 = 380, BH = 42, BT = GY - BH;
+    txt(p, 'тазобедренная стратегия (hip strategy)', 800, 56, m('hip'), { size: 28, weight: 700, anchor: 'middle', fill: HIP_C });
+    txt(p, 'быстрые или большие толчки; центр масс у границы устойчивости', 800, 96, m('hip', 1), { size: 21, fill: COL.dim, anchor: 'middle' });
+    // standing crosswise on a narrow beam on a sliding platform
+    const pl = G(p, { o: 0 });
+    mk('rect', { x: X0 - 170, y: GY, width: 360, height: 16, rx: 6, fill: '#3d4a52', stroke: '#7f909c', 'stroke-width': 3 }, pl);
+    show(pl, m('hip'));
+    const f = fig(p, { x: X0, y: BT - 182 * S, s: S, o: 0 });
+    show(f.g, m('hip'));
+    const [ax] = onStage(f, 'AN'), [tx] = onStage(f, 'toeN'), [hx] = onStage(f, 'heelN');
+    const bx = (tx + hx) / 2 - 2;
+    mk('rect', { x: bx - 14, y: BT, width: 28, height: BH, rx: 4, fill: '#9b7b55', stroke: '#c9a97a', 'stroke-width': 2 }, pl);
+    txt(p, 'узкий брус', bx + 26, GY - 10, m('beam'), { size: 19, fill: '#c9a97a' });
+    const M = muscles(f, ['abdom', 'quads', 'parasp', 'hamstrings']);
+    const ov = balanceOverlay(p, f, BT, m('hip', .5));
+    const T0 = m('hip'), tF = m('fw'), tB = m('bw');
+    const ON = { abdom: [m('fw', .6), m('fw', 4.5)], quads: [m('fw', 2.5), m('fw', 4.5)], parasp: [m('bw', .3), m('bw', 3.6)], hamstrings: [m('bw', 1.6), m('bw', 3.6)] };
+    prog(q => {
+      const T = T0 + q * (D - T0);
+      const sl = T < tF ? 0 : T < tB ? -36 * Math.min(1, (T - tF) / .25) : -36 + 36 * Math.min(1, (T - tB) / .25);
+      const kf = env(T, tF + .2, m('fw', 4.5), .45, 1.1), kb = env(T, tB + .2, m('bw', 3.6), .45, 1.1);
+      const pose = kb > 0 ? blendPose(STAND, HIPSTRAT(-16, -9), kb) : blendPose(STAND, HIPSTRAT(28, 11), kf);
+      put(pl, { x: sl }); f.set(pose); plant(f, 'AN', ax + sl, BT);
+      for (const k in ON) M[k].act(.92 * env(T, ON[k][0], ON[k][1], .2, .8));
+    }, T0, Math.max(3, D - T0), lin);
+    // the mechanics: the trunk turns one way, the shear force pushes the other, the COM moves opposite the trunk
+    const mech = G(p, { o: 0 });
+    path(mech, 'M300 330A110 110 0 0 1 430 300', { stroke: HIP_C, 'stroke-width': 5 });
+    path(mech, 'M414 290L430 300L418 314', { stroke: HIP_C, 'stroke-width': 5 });
+    T(mech, 'туловище', { x: 470, y: 300, size: 20, weight: 700, fill: HIP_C });
+    path(mech, `M${bx + 60} ${BT - 4}H${bx - 30}M${bx - 16} ${BT - 14}L${bx - 30} ${BT - 4}L${bx - 16} ${BT + 6}`, { stroke: COL.bad, 'stroke-width': 5 });
+    T(mech, 'сдвиговая сила', { x: bx + 70, y: BT + 4, size: 19, weight: 700, fill: COL.bad });
+    show(mech, m('mech', 1));
+    txt(p, 'центр масс — в сторону, противоположную движению туловища', 800, 150, m('mech', 3), { size: 21, weight: 700, fill: COM_C, anchor: 'middle' });
+    // the order: proximal to distal
+    txt(p, 'мышцы включаются сверху вниз ↓', 800, 220, m('fw'), { size: 22, weight: 700, fill: HIP_C });
+    txt(p, 'качание вперёд', 800, 270, m('fw'), { size: 21, fill: COL.chalk });
+    orderRow(p, 820, 320, 1, 'мышцы живота', '≈ 90–100 мс', ACT, m('fw', .6));
+    orderRow(p, 820, 400, 2, 'четырёхглавая', null, ACT, m('fw', 2.5));
+    txt(p, 'качание назад', 800, 470, m('bw'), { size: 21, fill: COL.chalk });
+    orderRow(p, 820, 520, 1, 'разгибатели спины', null, ACT, m('bw', .3));
+    orderRow(p, 820, 590, 2, 'задняя группа бедра', null, ACT, m('bw', 1.6));
+    // slippery floor: the feet would slide
+    const sl = G(p, { o: 0 });
+    roundBox(sl, 800, 650, 740, 200, COL.bad, PANEL, 2.5);
+    path(sl, 'M840 800H1100', { stroke: '#9fd8ef', 'stroke-width': 10 });
+    path(sl, 'M850 812l30 -6M900 812l30 -6M950 812l30 -6M1000 812l30 -6', { stroke: '#d8f0fa', 'stroke-width': 2 });
+    const fs = fig(sl, { x: 970, y: 795 - 182 * .5, s: .5, pose: HIPSTRAT(28, 11) });
+    plant(fs, 'AN', 1010, 795);
+    path(sl, 'M990 830H930M944 820L930 830L944 840', { stroke: COL.bad, 'stroke-width': 4 });
+    T(sl, 'на скользком полу', { x: 1130, y: 712, size: 22, weight: 700, fill: COL.bad });
+    T(sl, 'большие горизонтальные силы →', { x: 1130, y: 750, size: 20, fill: COL.chalk });
+    T(sl, 'стопы скользят', { x: 1130, y: 780, size: 20, fill: COL.chalk });
+    show(sl, m('slip'));
+    cross(p, 1500, 690, 18, m('slip', 1));
+    ov.g.parentNode.appendChild(ov.g);
+  }],
+
+  ['step', 'Шаг и сочетания', (m, D) => {
+    const p = panel(0), GY = 760, S = 1.04, X0 = 340;
+    txt(p, 'шаговая стратегия (stepping strategy)', 800, 56, m('step'), { size: 28, weight: 700, anchor: 'middle', fill: STEP_C });
+    ground(p, 120, 700, GY, m('step'));
+    const f = fig(p, { x: X0, y: GY - 182 * S, s: S, o: 0 });
+    show(f.g, m('step'));
+    const ov = balanceOverlay(p, f, GY, m('step', .3));
+    const [afx] = onStage(f, 'AF');
+    const push = G(p, { o: 0 });
+    path(push, 'M180 420H250M236 410L250 420L236 430', { stroke: COL.bad, 'stroke-width': 6 });
+    T(push, 'сильный толчок', { x: 120, y: 400, size: 20, weight: 700, fill: COL.bad });
+    show(push, m('step', .5));
+    poseTo(f, LEAN(13), m('step', .8), .7, io, ['AF', afx, GY]);
+    poseTo(f, { ...STRIDE, t: 8 }, m('step', 1.6), .45, out, ['AF', afx, GY]);
+    txt(p, 'центр масс за границей → шаг', 410, 180, m('step', 1), { size: 22, weight: 700, fill: COL.bad, anchor: 'middle' });
+    txt(p, 'площадь опоры больше — равновесие восстановлено', 410, 214, m('step', 2.4), { size: 21, weight: 700, fill: COL.good, anchor: 'middle' });
+    // a stumble on uneven ground
+    const tr = G(p, { o: 0 });
+    roundBox(tr, 780, 130, 760, 250, EDGE, PANEL, 2);
+    path(tr, 'M820 330H1500', { stroke: COL.faint, 'stroke-width': 3 });
+    mk('path', { d: 'M1060 330Q1074 304 1092 330Z', fill: '#8a8476' }, tr);
+    T(tr, 'споткнулся на неровной земле → неловкий шаг', { x: 1160, y: 172, size: 21, weight: 700, fill: STEP_C, anchor: 'middle' });
+    show(tr, m('trip'));
+    const w = fig(tr, { x: 880, y: 330 - 182 * .45, s: .45 });
+    walk(w, m('trip', .2), 2, { cycles: 2, dx: 150 });
+    poseTo(w, LEAN(14), m('trip', 2.2), .35, out);
+    poseTo(w, STRIDE, m('trip', 2.55), .35, out);
+    tw(w.g, { x: st(w.g).x + 170 }, m('trip', 2.55), .35, out);
+    // strategies combine; vary the task and the conditions
+    pillRow(p, ['голеностоп', 'таз', 'шаг'], 1160, 430, m('comb', 1), { col: [ANK_C, HIP_C, STEP_C], size: 22, space: 24 });
+    txt(p, 'большинство здоровых людей сочетают стратегии', 1160, 486, m('comb', 1.5), { size: 21, fill: COL.chalk, anchor: 'middle' });
+    infoCard(p, 780, 530, 360, 120, 'неподвижный пол', 'требования ниже', COL.good, m('bus'), { size: 21 });
+    infoCard(p, 1180, 530, 360, 120, 'движущийся автобус', 'требования выше', COL.bad, m('bus', .8), { size: 21 });
+    infoCard(p, 780, 690, 760, 150, 'в лечении: менять задачу и условия', 'чтобы вырабатывать стратегии для разных ситуаций', COL.task, m('tx'), { size: 22 });
+    ov.g.parentNode.appendChild(ov.g);
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-strat', prompt: ['Какая стратегия скорее всего?'],
+    build: grid([
+      { parts: ['Медленный слабый толчок, широкая твёрдая опора'], ans: ['a'], why: 'Небольшие медленные толчки — голеностопная.' },
+      { parts: ['Быстрый толчок, человек стоит поперёк узкого бруса'], ans: ['h'], why: 'Быстрые толчки и узкая опора — тазобедренная.' },
+      { parts: ['Толчок вывел центр масс за границы устойчивости'], ans: ['s'], why: 'Нужно увеличить площадь опоры — шаг.' },
+      { parts: ['Споткнулся на неровной земле'], ans: ['s'], why: 'Неловкий шаг — пример шаговой стратегии.' },
+      { parts: ['Спокойная стойка'], ans: ['a'], why: 'Тело качается вокруг голеностопов.' },
+    ], [['a', 'Голеностопная', ANK_C], ['h', 'Тазобедренная', HIP_C], ['s', 'Шаговая', STEP_C]], { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Голеностопная, тазобедренная, шаговая; выбор зависит от толчка, опоры, позы и опыта.', 'w1'],
+     ['Рефлекс < 70 мс, автоматическая реакция 80–120 мс, произвольное движение > 150 мс.', 'w2'],
+     ['Голеностопная — мышцы снизу вверх, тазобедренная — сверху вниз.', 'w3'],
+     ['Вбок — перенос веса мышцами бедра; подвешивание опускает центр масс; шаг расширяет опору.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 210 + i * 160, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 30, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-ms', prompt: ['Толчок начался в момент 0. Посчитайте.'],
+    build: blanks([
+      { parts: ['Икроножная включилась через 95 мс, задняя группа бедра — на 25 мс позже: через ', { box: '120' }, ' мс'], why: '95 + 25 = 120 мс.' },
+      { parts: ['Рефлекс растяжения отвечает быстрее чем за ', { box: '70' }, ' мс'], why: 'Самая короткая латентность — меньше 70 мс.' },
+      { parts: ['Произвольный ответ — не раньше чем через ', { box: '150' }, ' мс'], why: 'Произвольные движения — дольше 150 мс.' },
+    ]),
+  }], done, 'Практика урока   1 из 2') }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-slip', prompt: ['Пациент поскользнулся на мокром кафеле и качнулся вперёд. Почему тазобедренная стратегия здесь плохой помощник?'],
+    build: choice([
+      ['Большие горизонтальные силы под стопами заставят их скользить'],
+      ['Она самая медленная из трёх'],
+      ['Она работает только сидя'],
+      ['При ней не включаются мышцы туловища'],
+    ], 0, 'Тазобедренная стратегия создаёт большую сдвиговую силу под стопами; на скользкой опоре стопы поедут.',
+    [null, 'Скорость не главное: она как раз для быстрых толчков.', 'Это стратегия в стойке — например, поперёк узкого бруса.', 'Наоборот: первыми включаются мышцы живота или разгибатели спины.']),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

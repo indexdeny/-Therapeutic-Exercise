@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Готовность к изменениям — Лечебные упражнения</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/te.js"></script>
+<script src="audio/ru/timings.js"></script>
+<script>
+'use strict';
+const CHAPTER = { number: 16, title: 'Готовность к изменениям', minutes: 8, language: 'ru', next: '../ch017/' };
+// cards-short begin: key-word lines of the info cards (T switches); made by tools/therapeutic-exercise/cards.py from content/therapeutic-exercise/ch016/cards.ru.json
+const CARDS_SHORT = {
+  "внутренняя\nстремление сделать лучшее, на что способен; трудность задачи и стимулы; способность учиться": "стремление сделать лучшее",
+  "выполнения\nпоощрение и подкрепление; успех или неудача": "поощрение и подкрепление",
+  "задачи\nзнание и обратная связь о выполнении — включая то, как стать лучше": "обратная связь о выполнении",
+};
+// cards-short end
+
+// Stages of change (transtheoretical model) — one colour each.
+const TTM = [['преднамерение', 'не собирается в ближайшие 6 мес.', COL.bad], ['намерение', 'собирается в ближайшие 6 мес.', COL.int], ['подготовка', 'первые шаги; начнёт в ближайшие 30 дней', COL.task], ['действие', 'изменил поведение < 6 мес. назад', COL.whole], ['поддержание', 'изменил поведение > 6 мес. назад', COL.good]];
+// Health belief model elements.
+const HBM = { thr: COL.bad, ben: COL.good, bar: COL.task, cue: COL.real, se: COL.whole };
+let STEPS = [];   // the staircase drawn in final1, read by its question
+const head = (p, str, t0 = .2, y = 86, col = COL.dim) => txt(p, str, 800, y, t0, { size: 30, weight: 600, fill: col, anchor: 'middle' });
+function bubble(p, x, y, w, str, col, t0, { size = 24 } = {}) {
+  const g = G(p, { o: 0 }), tt = para(g, str, x + 18, y + 36, null, { size, maxW: w - 36 }), h = tt._h + 24;
+  put(tt, { o: 1 });
+  const r = mk('path', { d: `M${x + 16} ${y}H${x + w - 16}Q${x + w} ${y} ${x + w} ${y + 16}V${y + h - 16}Q${x + w} ${y + h} ${x + w - 16} ${y + h}H${x + 56}L${x + 24} ${y + h + 26}L${x + 34} ${y + h}H${x + 16}Q${x} ${y + h} ${x} ${y + h - 16}V${y + 16}Q${x} ${y} ${x + 16} ${y}Z`, fill: PANEL, stroke: col, 'stroke-width': 2.5 }, g);
+  g.insertBefore(r, g.firstChild);
+  if (t0 !== null) show(g, t0);
+  return g;
+}
+// A balance: benefits on the left pan, barriers on the right. tip(t0, deg) tilts it.
+function benefitScale(p, cx, cy, t0) {
+  const g = G(p, { x: cx, y: cy, o: 0 });
+  path(g, 'M0 0V150M-70 150H70', { stroke: COL.dim, 'stroke-width': 5 });
+  const beam = G(g);
+  path(beam, 'M-200 0H200', { stroke: COL.chalk, 'stroke-width': 6 });
+  [[-200, 'польза', HBM.ben], [200, 'барьеры', HBM.bar]].forEach(([x, s, c]) => {
+    path(beam, `M${x} 0V40`, { stroke: COL.dim, 'stroke-width': 2 });
+    mk('rect', { x: x - 80, y: 40, width: 160, height: 56, rx: 12, fill: c, 'fill-opacity': .25, stroke: c, 'stroke-width': 3 }, beam);
+    T(beam, s, { x, y: 76, size: 24, weight: 700, fill: c, anchor: 'middle' });
+  });
+  show(g, t0);
+  g.tip = (t1, deg) => tw(beam, { r: deg }, t1, 1, back);
+  return g;
+}
+// A staircase of the five stages; returns the step boxes (for pickEls) in stage order.
+function stageStairs(p, x0, y0, t0, { w = 270, h = 64 } = {}) {
+  return TTM.map(([s, sub, c], i) => {
+    const x = x0 + i * (w + 14), y = y0 - i * h, g = G(p, { o: 0 });
+    mk('rect', { x, y, width: w, height: 70 + i * h, rx: 12, fill: c, 'fill-opacity': .16, stroke: c, 'stroke-width': 3 }, g);
+    T(g, `${i + 1}`, { x: x + 22, y: y + 44, size: 30, weight: 700, fill: c });
+    T(g, s, { x: x + 52, y: y + 44, size: 26, weight: 700, fill: c });
+    show(g, typeof t0 === 'function' ? t0(i) : t0);
+    return { g, box: [x - 4, y - 4, w + 8, 78], x, y };
+  });
+}
+
+/* ---------- beats ---------- */
+const BEATS = [
+  ['intro', 'Готовность к изменениям', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Глава 2 · Урок 16', { x: 800, y: 250, size: 28, fill: COL.dim, anchor: 'middle', weight: 600 });
+    T(g, 'Готовность к изменениям', { x: 800, y: 345, size: 66, weight: 600, anchor: 'middle' });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const sub = txt(scene, 'почему одни меняют привычки, а другие — нет', 800, 440, m('sub'), { size: 30, fill: COL.task, anchor: 'middle', weight: 600 });
+    const art = G(scene, { o: 0 });
+    TTM.forEach(([, , c], i) => mk('rect', { x: 560 + i * 100, y: 800 - 26 * (i + 1), width: 90, height: 26 * (i + 1), rx: 6, fill: c, 'fill-opacity': .5 }, art));
+    show(art, m('sub', .2));
+    const dot = mk('circle', { r: 14, fill: COL.chalk }, art);
+    prog(q => { const i = Math.min(4, Math.floor(q * 5)); put(dot, { x: 605 + i * 100, y: 800 - 26 * (i + 1) - 22 }); }, m('sub', .5), Math.max(1.5, D - m('sub', .5) - 1.2), lin);
+    tw(g, { o: 0, y: -24 }, D - .9, .8); hide(sub, D - .9, .8); hide(art, D - .9, .8);
+  }],
+
+  ['sct', 'Социально-когнитивная теория', (m) => {
+    const p = panel(0);
+    head(p, 'Социально-когнитивная теория', m('sct'), 70, COL.chalk);
+    const N = [['мышление', 400, 160], ['среда', 190, 470], ['поведение', 610, 470]];
+    N.forEach(([s, x, y], i) => { labelBox(p, x, y, 220, [s], COL.whole, m('sct', .4 + i * .4), { size: 27 }); });
+    [[0, 1], [1, 2], [2, 0]].forEach(([a, b], i) => {
+      const [, x1, y1] = N[a], [, x2, y2] = N[b], dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
+      arrowTo(p, [x1 + ux * 130, y1 + uy * 70], [x2 - ux * 130, y2 - uy * 70], m('sct', 1.8 + i * .3), { col: COL.whole, w: 3 });
+      arrowTo(p, [x2 - ux * 130 - uy * 14, y2 - uy * 70 + ux * 14], [x1 + ux * 130 - uy * 14, y1 + uy * 70 + ux * 14], m('sct', 1.9 + i * .3), { col: COL.whole, w: 3 });
+    });
+    txt(p, 'влияют друг на друга', 400, 570, m('sct', 2.6), { size: 24, fill: COL.dim, anchor: 'middle' });
+    bubble(p, 860, 130, 640, 'Я смогу изменить поведение, и польза перевесит минусы', COL.whole, m('bel'), { size: 25 });
+    const se = G(p, { o: 0 });
+    roundBox(se, 860, 300, 640, 170, HBM.se, PANEL, 3);
+    T(se, 'самоэффективность', { x: 890, y: 350, size: 32, weight: 700, fill: HBM.se });
+    T(se, 'вера в свой успех', { x: 890, y: 396, size: 25 });
+    T(se, 'пример: хочу похудеть — верю, что получится', { x: 890, y: 440, size: 22, fill: COL.dim });
+    show(se, m('ex'));
+    ['чёткие инструкции', 'как усложнять', 'обратная связь'].forEach((s, i) => pill(p, s, [985, 1212, 1420][i], 530, m('instr', .3 + i * .5), { col: COL.task, size: 24 }));
+    labelBox(p, 1180, 660, 640, ['ключ к регулярной физической активности'], HBM.se, m('key'), { size: 26 });
+  }],
+
+  ['hbm', 'Модель убеждений о здоровье', (m) => {
+    const p = panel(0);
+    head(p, 'Модель убеждений о здоровье: шесть элементов', m('hbm'), 70, COL.chalk);
+    labelBox(p, 230, 170, 300, ['подверженность'], HBM.thr, m('thr'), { size: 25 });
+    labelBox(p, 230, 260, 300, ['тяжесть'], HBM.thr, m('thr', .8), { size: 25 });
+    arrowTo(p, [390, 215], [470, 215], m('thr', 1.4), { col: HBM.thr, w: 4 });
+    labelBox(p, 600, 215, 220, ['угроза'], HBM.thr, m('thr', 1.6), { size: 28 });
+    labelBox(p, 1110, 215, 620, ['самоэффективность: смогу следовать советам'], HBM.se, m('se'), { size: 24 });
+    const b = benefitScale(p, 800, 420, m('ben'));
+    b.tip(m('bar', .6), -10);
+    txt(p, 'вероятность действия = польза − барьеры', 800, 650, m('bar', 1.2), { size: 27, weight: 700, fill: COL.chalk, anchor: 'middle' });
+    ['открытка от стоматолога', 'кампания в СМИ', 'болезнь близкого'].forEach((s, i) => pill(p, s, 330 + i * 470, 740, m('cue', .4 + i * .5), { col: HBM.cue, size: 24 }));
+    txt(p, 'сигналы к действию', 800, 700, m('cue'), { size: 24, weight: 700, fill: HBM.cue, anchor: 'middle' });
+  }],
+
+  ['hbmex', 'Пример: похудение', (m) => {
+    const p = panel(0), GY = 600;
+    ground(p, 120, 460, GY, .2);
+    const f = fig(p, { x: 290, y: GY - 182 * .65, s: .65, o: 0 }); show(f.g, .2);
+    bubble(p, 470, 120, 520, 'Лишний вес — риск болезни сердца', HBM.thr, m('t'), { size: 25 });
+    bubble(p, 1010, 120, 470, 'У отца было больное сердце', HBM.thr, m('fam'), { size: 25 });
+    bubble(p, 470, 290, 520, 'Питание поможет, но справлюсь ли?', HBM.se, m('doubt'), { size: 25 });
+    bubble(p, 1010, 290, 470, 'Платная программа — смогу ли оплачивать?', HBM.bar, m('barr'), { size: 25 });
+    const act = G(p, { o: 0 });
+    roundBox(act, 520, 520, 960, 150, HBM.ben, PANEL, 3);
+    T(act, 'угроза велика → действие', { x: 550, y: 572, size: 30, weight: 700, fill: HBM.ben });
+    T(act, 'записаться в программу или выбрать бесплатный способ (материалы в интернете)', { x: 550, y: 622, size: 23 });
+    show(act, m('act'));
+    poseTo(f, { aN: 30, eN: 80 }, m('doubt'), .8);
+    poseTo(f, REACH, m('act', .3), .8);
+  }],
+
+  ['q1', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-hbm', prompt: ['Какой это элемент модели убеждений о здоровье? (примеры не из книги)'],
+    build: grid([
+      { parts: ['«Боюсь, что у меня тоже будет инфаркт, как у отца»'], ans: ['t'], why: 'Воспринимаемая подверженность — часть угрозы.' },
+      { parts: ['«Еженедельный взнос слишком дорогой»'], ans: ['b'], why: 'Препятствие — барьер.' },
+      { parts: ['«Мне пришло напоминание из поликлиники»'], ans: ['c'], why: 'Сигнал к действию.' },
+      { parts: ['«Я уверен, что смогу гулять каждый день»'], ans: ['s'], why: 'Вера в свой успех — самоэффективность.' },
+      { parts: ['«Если похудею, станет легче подниматься по лестнице»'], ans: ['p'], why: 'Ожидаемая польза.' },
+    ], [['t', 'Угроза', HBM.thr], ['p', 'Польза', HBM.ben], ['b', 'Барьер', HBM.bar], ['c', 'Сигнал', HBM.cue], ['s', 'Самоэффективность', HBM.se]], { multi: false, text: true }),
+  }], done) }],
+
+  ['ttm', 'Стадии изменения', (m) => {
+    const p = panel(0);
+    head(p, 'Транстеоретическая модель (Прохаска, 1979)', m('ttm'), 70, COL.chalk);
+    const S = stageStairs(p, 80, 560, i => m('s' + (i + 1)), { w: 270, h: 70 });
+    S.forEach(({ x }, i) => para(p, TTM[i][1], x + 135, 680, m('s' + (i + 1), .3), { size: 21, maxW: 250, fill: TTM[i][2], anchor: 'middle' }));
+    const dot = mk('circle', { r: 16, fill: COL.chalk }, p);
+    put(dot, { o: 0 });
+    prog(q => { const i = Math.min(4, Math.floor(q * 5)); put(dot, { x: S[i].x + 240, y: S[i].y - 22, o: 1 }); }, m('s1', .2), m('use') - m('s1', .2), lin);
+    labelBox(p, 800, 795, 980, ['зная стадию, терапевт даёт нужную информацию в нужное время'], COL.chalk, m('use'), { size: 26 });
+  }],
+
+  ['algo', 'Как определить стадию', (m) => {
+    const p = panel(0);
+    const node = (x, y, w, s, c, t0) => labelBox(p, x, y, w, [s], c, t0, { size: 24 });
+    const yes = (x, y, t0) => txt(p, 'да', x, y, t0, { size: 22, weight: 700, fill: COL.good, anchor: 'middle' });
+    const no = (x, y, t0) => txt(p, 'нет', x, y, t0, { size: 22, weight: 700, fill: COL.bad, anchor: 'middle' });
+    node(800, 100, 460, '«Вы регулярно занимаетесь?»', COL.chalk, m('q1'));
+    // yes branch
+    arrowTo(p, [1000, 125], [1180, 200], m('yes'), { col: COL.good, w: 3 }); yes(1120, 150, m('yes'));
+    node(1200, 230, 420, 'больше 6 месяцев?', COL.chalk, m('yes', .3));
+    arrowTo(p, [1270, 255], [1370, 340], m('yes', 1.4), { col: COL.good, w: 3 }); yes(1350, 290, m('yes', 1.4));
+    arrowTo(p, [1130, 255], [1030, 340], m('yes', 2.4), { col: COL.bad, w: 3 }); no(1050, 290, m('yes', 2.4));
+    node(1390, 370, 260, 'поддержание', TTM[4][2], m('yes', 1.6));
+    node(1010, 370, 230, 'действие', TTM[3][2], m('yes', 2.6));
+    // no branch
+    arrowTo(p, [600, 125], [420, 200], m('no'), { col: COL.bad, w: 3 }); no(480, 150, m('no'));
+    node(400, 230, 520, 'начнёте в ближайшие 6 месяцев?', COL.chalk, m('no', .3));
+    arrowTo(p, [260, 255], [200, 340], m('no', 2.2), { col: COL.bad, w: 3 }); no(205, 290, m('no', 2.2));
+    node(200, 370, 300, 'преднамерение', TTM[0][2], m('no', 2.4));
+    arrowTo(p, [540, 255], [600, 470], m('d30'), { col: COL.good, w: 3 }); yes(600, 360, m('d30'));
+    node(600, 500, 460, 'в ближайшие 30 дней?', COL.chalk, m('d30', .2));
+    arrowTo(p, [700, 525], [800, 620], m('d30', 1.6), { col: COL.good, w: 3 }); yes(780, 570, m('d30', 1.6));
+    arrowTo(p, [500, 525], [400, 620], m('d30', 2.4), { col: COL.bad, w: 3 }); no(420, 570, m('d30', 2.4));
+    node(820, 650, 260, 'подготовка', TTM[2][2], m('d30', 1.8));
+    node(380, 650, 240, 'намерение', TTM[1][2], m('d30', 2.6));
+  }],
+
+  ['evid', 'Барьеры у пожилых', (m) => {
+    const p = panel(0);
+    head(p, 'Фокус на доказательствах: пожилые в учреждении ухода', m('st'), 70, COL.chalk);
+    const B5 = [['слабость, проблемы со здоровьем', 'b1'], ['страх упасть и травмироваться', 'b2'], ['мало активности в прошлом', 'b3'], ['мало знаний о физической активности', 'b4'], ['ограничения среды', 'b5']];
+    B5.forEach(([s, k], i) => {
+      const x = 90 + (i % 3) * 480, y = 150 + Math.floor(i / 3) * 200, g = G(p, { o: 0 });
+      roundBox(g, x, y, 450, 160, HBM.bar, PANEL, 2.5);
+      T(g, String(i + 1), { x: x + 30, y: y + 56, size: 40, weight: 700, fill: HBM.bar });
+      put(para(g, s, x + 80, y + 52, null, { size: 26, maxW: 340, weight: 600 }), { o: 1 });
+      show(g, m(k));
+    });
+    labelBox(p, 1275, 430, 450, ['барьеры можно изменить'], HBM.ben, m('rec'), { size: 27 });
+    ['планирование', 'обучение', 'вмешательства'].forEach((s, i) => pill(p, s, 400 + i * 400, 640, m('rec', .6 + i * .4), { col: HBM.ben, size: 26 }));
+  }],
+
+  ['motiv', 'Мотивация', (m) => {
+    const p = panel(0);
+    labelBox(p, 800, 100, 860, ['мотивация — как мы побуждаем к действию себя или других'], COL.chalk, m('def'), { size: 26 });
+    infoCard(p, 90, 190, 450, 330, 'внутренняя', 'стремление сделать лучшее, на что способен; трудность задачи и стимулы; способность учиться', COL.good, m('int'), { size: 24 });
+    infoCard(p, 575, 190, 450, 330, 'выполнения', 'поощрение и подкрепление; успех или неудача', COL.task, m('perf'), { size: 24 });
+    infoCard(p, 1060, 190, 450, 330, 'задачи', 'знание и обратная связь о выполнении — включая то, как стать лучше', COL.whole, m('task'), { size: 24 });
+    // low failure, high success
+    for (let i = 0; i < 10; i++) {
+      const ok = i !== 3, d = G(p, { x: 640 + i * 36, y: 620, o: 0 });
+      if (ok) mk('circle', { r: 13, fill: COL.good }, d); else path(d, 'M-9 -9L9 9M9 -9L-9 9', { stroke: COL.bad, 'stroke-width': 4 });
+      show(d, m('perf', 2 + i * .1), .2);
+    }
+    txt(p, 'мало неудач, много успехов', 800, 690, m('perf', 3), { size: 26, weight: 700, fill: COL.good, anchor: 'middle' });
+  }],
+
+  ['q2', 'Быстрая проверка', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'c-stage', prompt: ['Определите стадию изменения (примеры не из книги)'],
+    build: grid([
+      { parts: ['«Не занимаюсь и не собираюсь»'], ans: ['1'], why: 'Нет намерения в ближайшие 6 месяцев — преднамерение.' },
+      { parts: ['«Хожу в бассейн уже год»'], ans: ['5'], why: 'Больше 6 месяцев — поддержание.' },
+      { parts: ['«Начал бегать два месяца назад»'], ans: ['4'], why: 'Меньше 6 месяцев — действие.' },
+      { parts: ['«Купил кроссовки, начну на следующей неделе»'], ans: ['3'], why: 'Первые шаги и начало в ближайшие 30 дней — подготовка.' },
+      { parts: ['«Хочу начать в течение полугода, но не в этом месяце»'], ans: ['2'], why: 'В ближайшие 6 месяцев, но не в 30 дней — намерение.' },
+    ], TTM.map(([s, , c], i) => [String(i + 1), s[0].toUpperCase() + s.slice(1), c]), { multi: false, text: true }),
+  }], done) }],
+
+  ['wrap', 'Итоги', (m) => {
+    const p = panel(0);
+    txt(p, 'Итоги урока', 800, 110, .2, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    [['Самоэффективность — вера в свой успех — ключ к физической активности.', 'w1'],
+     ['Модель убеждений о здоровье: угроза, польза минус барьеры, сигналы, самоэффективность.', 'w2'],
+     ['Пять стадий: преднамерение, намерение, подготовка, действие, поддержание.', 'w3'],
+     ['Лучше всего мотивируют частые успехи и обратная связь о том, как стать лучше.', 'w4']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 220 + i * 140, o: 0 });
+      mk('circle', { cx: 200, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 200, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      put(para(g, str, 260, 0, null, { size: 32, weight: 600, maxW: 1150 }), { o: 1 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+    });
+  }],
+
+  ['final1', 'Практика урока', () => {
+    const p = panel(0);
+    STEPS = stageStairs(p, 80, 690, .1, { w: 270, h: 56 });
+  }, { ask: done => {
+    return quiz({ x: 200, y: 40, w: 1200, cls: 'side' }, [{
+      id: 'p-stage', prompt: ['Пациентка: «Я пока не занимаюсь, но начну в этом месяце — уже нашла группу ходьбы». Нажмите на её стадию.'],
+      build: pickEls(STEPS.map((s, i) => ({ el: s.g, box: s.box, label: TTM[i][0] })), 2,
+        'Первые шаги и начало в ближайшие 30 дней — подготовка.',
+        i => ['Она уже собирается начать в этом месяце.', 'Намерение — в ближайшие 6 месяцев, а она начнёт в ближайшие 30 дней.', '', 'Действие — когда поведение уже изменено.', 'Поддержание — больше 6 месяцев регулярных занятий.'][i]),
+    }], done, 'Практика урока   1 из 2');
+  } }],
+
+  ['final2', 'Практика урока', () => { panel(0); }, { ask: done => quiz(SCREEN, [{
+    id: 'p-tf', prompt: ['Верно или неверно?'],
+    build: grid([
+      { parts: ['Стадия «действие» — поведение изменено больше шести месяцев назад.'], ans: ['f'], why: 'Неверно: меньше 6 месяцев; больше — поддержание.' },
+      { parts: ['По модели убеждений о здоровье вероятность действия зависит от пользы за вычетом барьеров.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Напоминание от стоматолога — сигнал к действию.'], ans: ['t'], why: 'Верно.' },
+      { parts: ['Лучше всего мотивируют частые неудачи.'], ans: ['f'], why: 'Неверно: мало неудач и много успехов.' },
+      { parts: ['Если человек не готов меняться, терапевту нечего ему предложить.'], ans: ['f'], why: 'Неверно: зная стадию, терапевт даёт нужную информацию в нужное время.' },
+    ], TF, { multi: false, text: true }),
+  }], done, 'Практика урока   2 из 2') }],
+
+  ['finish', 'Готово', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+boot();
+</script>
+</body>
+</html>

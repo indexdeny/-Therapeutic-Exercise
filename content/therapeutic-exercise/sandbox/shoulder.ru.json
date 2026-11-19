@@ -1,0 +1,677 @@
+{
+  "joint": "shoulder",
+  "title": "плечо",
+  "structures": {
+    "utr": {
+      "ru": "трапециевидная, верхняя часть",
+      "en": "upper trapezius",
+      "kind": "muscle",
+      "limb": "utr"
+    },
+    "mtr": {
+      "ru": "трапециевидная, средняя часть",
+      "en": "middle trapezius",
+      "kind": "muscle",
+      "limb": "mtr"
+    },
+    "ltr": {
+      "ru": "трапециевидная, нижняя часть",
+      "en": "lower trapezius",
+      "kind": "muscle",
+      "limb": "ltr"
+    },
+    "rh": {
+      "ru": "ромбовидные",
+      "en": "rhomboids",
+      "kind": "muscle",
+      "limb": "rh"
+    },
+    "lev": {
+      "ru": "мышца, поднимающая лопатку",
+      "en": "levator scapulae",
+      "kind": "muscle",
+      "limb": "lev"
+    },
+    "sa": {
+      "ru": "передняя зубчатая",
+      "en": "serratus anterior",
+      "kind": "muscle",
+      "limb": "sa"
+    },
+    "ssp": {
+      "ru": "надостная",
+      "en": "supraspinatus",
+      "kind": "muscle",
+      "limb": "ssp",
+      "close": "ssp"
+    },
+    "ispB": {
+      "ru": "подостная",
+      "en": "infraspinatus",
+      "kind": "muscle",
+      "limb": "isp"
+    },
+    "del": {
+      "ru": "дельтовидная",
+      "en": "deltoid",
+      "kind": "muscle",
+      "limb": "del",
+      "close": "delt"
+    },
+    "bicT": {
+      "ru": "сухожилие длинной головки двуглавой",
+      "en": "long head of biceps tendon",
+      "kind": "muscle",
+      "close": "bic"
+    },
+    "latPec": {
+      "ru": "широчайшая и большая грудная",
+      "en": "latissimus dorsi and pectoralis major",
+      "kind": "muscle"
+    },
+    "capS": {
+      "ru": "верхняя капсула",
+      "en": "superior capsule",
+      "kind": "cap",
+      "close": "capS"
+    },
+    "capI": {
+      "ru": "нижняя капсула",
+      "en": "inferior capsule",
+      "kind": "cap",
+      "close": "capI"
+    },
+    "sub": {
+      "ru": "подлопаточная",
+      "en": "subscapularis",
+      "kind": "muscle",
+      "close": "sub"
+    },
+    "isp": {
+      "ru": "подостная и малая круглая",
+      "en": "infraspinatus and teres minor",
+      "kind": "muscle",
+      "close": "isp"
+    },
+    "capA": {
+      "ru": "передняя капсула",
+      "en": "anterior capsule",
+      "kind": "cap",
+      "close": "capA"
+    },
+    "capP": {
+      "ru": "задняя капсула",
+      "en": "posterior capsule",
+      "kind": "cap",
+      "close": "capP"
+    },
+    "bic": {
+      "ru": "двуглавая плеча",
+      "en": "biceps brachii",
+      "kind": "muscle",
+      "limb": "bic"
+    },
+    "tri": {
+      "ru": "трёхглавая плеча",
+      "en": "triceps brachii",
+      "kind": "muscle",
+      "limb": "tri"
+    },
+    "deltA": {
+      "ru": "передняя дельтовидная",
+      "en": "anterior deltoid",
+      "kind": "muscle"
+    },
+    "deltP": {
+      "ru": "задняя дельтовидная и широчайшая",
+      "en": "posterior deltoid and latissimus dorsi",
+      "kind": "muscle"
+    },
+    "brach": {
+      "ru": "плечевая",
+      "en": "brachialis",
+      "kind": "muscle"
+    },
+    "contactTrunk": {
+      "ru": "рука встретила туловище",
+      "en": "the trunk",
+      "kind": "contact"
+    },
+    "contactBelly": {
+      "ru": "предплечье встретило живот",
+      "en": "the belly",
+      "kind": "contact"
+    },
+    "contactF": {
+      "ru": "предплечье встретило плечо",
+      "en": "soft-tissue approximation",
+      "kind": "contact"
+    },
+    "endFlex": {
+      "ru": "плечевой сустав: конец сгибания",
+      "en": "end of shoulder flexion",
+      "kind": "contact"
+    },
+    "endExt": {
+      "ru": "плечевой сустав: конец разгибания",
+      "en": "end of shoulder extension",
+      "kind": "contact"
+    },
+    "elbowEnd": {
+      "ru": "локоть разогнут до конца",
+      "en": "full elbow extension",
+      "kind": "contact"
+    }
+  },
+  "motions": [
+    {
+      "id": "abd",
+      "title": "отведение",
+      "chip": "отведение",
+      "ids": ["utr", "mtr", "ltr", "rh", "lev", "sa", "ssp", "ispB", "del", "bicT", "latPec", "capS", "capI", "contactTrunk"],
+      "limb": {
+        "model": "scapBack"
+      },
+      "close": {
+        "model": "ghJoint",
+        "clip": [230, 280]
+      },
+      "main": "el",
+      "dof": [
+        {
+          "key": "el",
+          "ru": "плечо",
+          "act": "отведение плеча",
+          "range": [0, 180],
+          "norm": [0, 180],
+          "normNote": true,
+          "handle": {
+            "limb": 0.6,
+            "close": 0.6
+          }
+        }
+      ],
+      "groups": [
+        {
+          "id": "abd",
+          "dof": "el",
+          "dir": 1,
+          "ids": ["del", "ssp", "utr", "ltr", "sa"]
+        },
+        {
+          "id": "add",
+          "dof": "el",
+          "dir": -1,
+          "ids": ["latPec"]
+        }
+      ],
+      "positions": {
+        "stand": {
+          "r": 0,
+          "q0": {
+            "el": 0
+          },
+          "above": [],
+          "limb": [340, 430, 0.55],
+          "close": [790, 430, 0.8]
+        },
+        "prone": {
+          "r": 0,
+          "q0": {
+            "el": 0
+          },
+          "above": [],
+          "gravity": false,
+          "bed": [130, 112, 470, 770],
+          "limb": [340, 430, 0.55],
+          "close": [790, 430, 0.8]
+        }
+      },
+      "stops": [
+        {
+          "dof": "el",
+          "max": 180,
+          "ids": ["capI"],
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "el",
+          "min": 0,
+          "ids": ["contactTrunk"],
+          "feel": "soft"
+        }
+      ],
+      "refs": [
+        {
+          "pos": "stand",
+          "q": {
+            "el": 0
+          },
+          "dof": "el",
+          "to": 190,
+          "expect": 180,
+          "by": "capI",
+          "src": "note"
+        }
+      ],
+      "marks": [
+        {
+          "dof": "el",
+          "at": 55,
+          "short": "покой",
+          "ru": "положение покоя",
+          "page": 140
+        }
+      ]
+    },
+    {
+      "id": "rot",
+      "title": "наружная — внутренняя ротация",
+      "chip": "ротация",
+      "ids": ["sub", "isp", "capA", "capP", "contactBelly"],
+      "limb": {
+        "model": "topRot"
+      },
+      "close": {
+        "model": "ghAxial"
+      },
+      "main": "rot",
+      "dof": [
+        {
+          "key": "rot",
+          "ru": "плечо",
+          "act": "наружная ротация",
+          "range": [-70, 100],
+          "norm": [-70, 90],
+          "normNote": true,
+          "handle": {
+            "limb": 0.7,
+            "close": 0.75
+          }
+        }
+      ],
+      "groups": [
+        {
+          "id": "er",
+          "dof": "rot",
+          "dir": 1,
+          "ids": ["isp"]
+        },
+        {
+          "id": "ir",
+          "dof": "rot",
+          "dir": -1,
+          "ids": ["sub"]
+        }
+      ],
+      "positions": {
+        "stand": {
+          "r": 0,
+          "q0": {
+            "rot": 0
+          },
+          "above": [],
+          "gravity": false,
+          "limb": [250, 520, 0.85],
+          "close": [800, 420, 1.0]
+        }
+      },
+      "stops": [
+        {
+          "id": "capA",
+          "max": 0.247,
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "rot",
+          "min": -60,
+          "ids": ["contactBelly"],
+          "feel": "soft"
+        }
+      ],
+      "refs": [
+        {
+          "pos": "stand",
+          "q": {
+            "rot": 0
+          },
+          "dof": "rot",
+          "to": 100,
+          "expect": 90,
+          "by": "capA",
+          "src": "note"
+        },
+        {
+          "pos": "stand",
+          "q": {
+            "rot": 0
+          },
+          "dof": "rot",
+          "to": -70,
+          "expect": -60,
+          "by": "contactBelly",
+          "src": "note"
+        }
+      ],
+      "marks": []
+    },
+    {
+      "id": "flex",
+      "title": "сгибание — разгибание",
+      "chip": "сгибание",
+      "ids": ["bic", "tri", "deltA", "deltP", "brach", "contactF", "endFlex", "endExt", "elbowEnd"],
+      "limb": {
+        "model": "armSide",
+        "muscles": ["bic", "tri"]
+      },
+      "main": "fl",
+      "dof": [
+        {
+          "key": "fl",
+          "ru": "плечо",
+          "act": "сгибание плеча",
+          "range": [-70, 180],
+          "norm": [-50, 180],
+          "normNote": true,
+          "handle": {
+            "limb": 0.55
+          }
+        },
+        {
+          "key": "el",
+          "ru": "локоть",
+          "act": "сгибание локтя",
+          "range": [-5, 150],
+          "norm": [0, 145],
+          "normNote": true,
+          "handle": {
+            "limb": 0.6
+          }
+        }
+      ],
+      "groups": [
+        {
+          "id": "sflex",
+          "dof": "fl",
+          "dir": 1,
+          "ids": ["deltA", "bic"]
+        },
+        {
+          "id": "sext",
+          "dof": "fl",
+          "dir": -1,
+          "ids": ["deltP", "tri"]
+        },
+        {
+          "id": "eflex",
+          "dof": "el",
+          "dir": 1,
+          "ids": ["bic", "brach"]
+        },
+        {
+          "id": "eext",
+          "dof": "el",
+          "dir": -1,
+          "ids": ["tri"]
+        }
+      ],
+      "positions": {
+        "stand": {
+          "r": 0,
+          "q0": {
+            "fl": 0,
+            "el": 0
+          },
+          "above": [],
+          "limb": [470, 470, 0.8]
+        },
+        "supine": {
+          "r": -90,
+          "q0": {
+            "fl": 0,
+            "el": 0
+          },
+          "above": ["E", "W"],
+          "pad": 30,
+          "table": true,
+          "limb": [540, 600, 0.8],
+          "tableX": [60, 980]
+        }
+      },
+      "stops": [
+        {
+          "id": "tri",
+          "max": 0.37,
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "id": "bic",
+          "max": 0.052,
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "fl",
+          "max": 180,
+          "ids": ["endFlex"],
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "fl",
+          "min": -60,
+          "ids": ["endExt"],
+          "feel": "firm",
+          "note": true
+        },
+        {
+          "dof": "el",
+          "max": 145,
+          "ids": ["contactF"],
+          "feel": "soft",
+          "note": true
+        },
+        {
+          "dof": "el",
+          "min": 0,
+          "ids": ["elbowEnd"],
+          "feel": "hard",
+          "note": true
+        }
+      ],
+      "refs": [
+        {
+          "pos": "stand",
+          "q": {
+            "fl": 0,
+            "el": 0
+          },
+          "dof": "fl",
+          "to": -70,
+          "expect": -50,
+          "by": "bic",
+          "src": "note"
+        },
+        {
+          "pos": "stand",
+          "q": {
+            "fl": 0,
+            "el": 90
+          },
+          "dof": "fl",
+          "to": -70,
+          "expect": -60,
+          "by": "endExt",
+          "src": "note"
+        },
+        {
+          "pos": "stand",
+          "q": {
+            "fl": 0,
+            "el": 145
+          },
+          "dof": "fl",
+          "to": 180,
+          "expect": 158,
+          "by": "tri",
+          "src": "note"
+        },
+        {
+          "pos": "stand",
+          "q": {
+            "fl": 0,
+            "el": 0
+          },
+          "dof": "fl",
+          "to": 190,
+          "expect": 180,
+          "by": "endFlex",
+          "src": "note"
+        }
+      ],
+      "marks": []
+    }
+  ],
+  "facts": [
+    {
+      "ru": "Положение покоя плечевого сустава — 55° отведения, 30° горизонтального приведения, предплечье горизонтально.",
+      "page": 140
+    },
+    {
+      "motion": "abd",
+      "ru": "К концу подъёма руки плечевой сустав и лопатка дают движение в среднем 2:1; в первые 30° отведения движется в основном плечевой сустав.",
+      "page": 551
+    },
+    {
+      "motion": "abd",
+      "ru": "При подъёме руки плечо поворачивается наружу, чтобы большой бугорок прошёл под клювовидно-акромиальной дугой.",
+      "page": 551
+    },
+    {
+      "motion": "rot",
+      "ru": "Чтобы вернуть наружную ротацию, растягивают внутренние ротаторы, а внутреннюю — наружные.",
+      "page": 114
+    },
+    {
+      "motion": "flex",
+      "ru": "Длинную головку трёхглавой растягивают, сгибая локоть при согнутом плече.",
+      "page": 115
+    }
+  ],
+  "tasks": [
+    {
+      "id": "rest",
+      "text": "Поставьте плечо в положение покоя по отведению.",
+      "when": {
+        "motion": "abd",
+        "q": {
+          "el": [50, 60]
+        }
+      },
+      "hint": "Ищите зелёную метку «покой» на дуге у плеча.",
+      "show": {
+        "motion": "abd",
+        "pos": "stand",
+        "q": {
+          "el": 55
+        }
+      },
+      "why": "Положение покоя плечевого сустава — около 55° отведения (и 30° горизонтального приведения).",
+      "page": 140
+    },
+    {
+      "id": "rhythm",
+      "text": "Поднимите руку через сторону до конца. Сколько из этого дала лопатка?",
+      "when": {
+        "motion": "abd",
+        "q": {
+          "el": [170, 180]
+        }
+      },
+      "hint": "Смотрите строку «плечевой сустав …, лопатка …» в панели.",
+      "show": {
+        "motion": "abd",
+        "pos": "stand",
+        "q": {
+          "el": 180
+        }
+      },
+      "why": "К концу подъёма плечевой сустав и лопатка делят движение примерно 2:1: около 120° и 60°.",
+      "page": 551
+    },
+    {
+      "id": "erCap",
+      "text": "Поверните плечо наружу до упора. Что натягивается?",
+      "when": {
+        "motion": "rot",
+        "stop": "capA"
+      },
+      "hint": "Ведите предплечье наружу от живота.",
+      "show": {
+        "motion": "rot",
+        "pos": "stand",
+        "q": {
+          "rot": 100
+        }
+      },
+      "why": "Наружную ротацию держат передняя капсула и внутренние ротаторы — их и растягивают, чтобы её вернуть.",
+      "page": 114
+    },
+    {
+      "id": "triStretch",
+      "text": "Найдите позу, в которой поднять руку до конца мешает длинная головка трёхглавой.",
+      "when": {
+        "motion": "flex",
+        "stop": "tri"
+      },
+      "hint": "Сначала согните локоть до конца, потом поднимайте руку вперёд и вверх.",
+      "show": {
+        "motion": "flex",
+        "pos": "stand",
+        "path": [
+          {
+            "el": 145
+          }
+        ],
+        "q": {
+          "fl": 180
+        }
+      },
+      "why": "Длинная головка трёхглавой проходит через плечо и локоть: при согнутом локте она натягивается раньше и останавливает сгибание плеча.",
+      "page": 115
+    },
+    {
+      "id": "abdEcc",
+      "text": "Стоя в активном режиме медленно опускайте руку из отведения. Как работает дельтовидная?",
+      "when": {
+        "motion": "abd",
+        "pos": "stand",
+        "mode": "active",
+        "work": {
+          "abd": "ecc"
+        }
+      },
+      "hint": "Поднимите руку до 90°, затем медленно опускайте.",
+      "show": {
+        "motion": "abd",
+        "pos": "stand",
+        "mode": "active",
+        "path": [
+          {
+            "el": 90
+          }
+        ],
+        "q": {
+          "el": 30
+        },
+        "dur": 2.2
+      },
+      "hold": 0.6,
+      "why": "Опуская руку, дельтовидная и надостная удлиняются под нагрузкой — это уступающая работа.",
+      "page": 224
+    }
+  ]
+}

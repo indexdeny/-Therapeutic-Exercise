@@ -1,0 +1,266 @@
+{
+  "chapter": 3,
+  "terms": [
+    {
+      "id": "rom",
+      "ru": "Объём движений",
+      "en": "range of motion (ROM)",
+      "alt": [
+        "амплитуда движений"
+      ],
+      "def": "Полное возможное движение между двумя костями. Зависит от строения сустава и растяжимости мягких тканей; объём сустава измеряют гониометром.",
+      "page": 61,
+      "moments": [
+        {
+          "n": 20,
+          "beat": "rom",
+          "mark": "def",
+          "to": "joint"
+        }
+      ],
+      "see": [
+        "functional-excursion",
+        "prom",
+        "arom"
+      ]
+    },
+    {
+      "id": "functional-excursion",
+      "ru": "Функциональная экскурсия мышцы",
+      "en": "functional excursion",
+      "def": "Объём мышцы: насколько она может укоротиться после того, как была максимально удлинена.",
+      "page": 61,
+      "moments": [
+        {
+          "n": 20,
+          "beat": "rom",
+          "mark": "musc"
+        }
+      ],
+      "see": [
+        "two-joint-muscle"
+      ]
+    },
+    {
+      "id": "two-joint-muscle",
+      "ru": "Двусуставная мышца",
+      "en": "two-joint muscle",
+      "def": "Мышца, которая пересекает два сустава; её объём шире, чем у каждого из них. Обычно работает в середине своей экскурсии.",
+      "page": 61,
+      "moments": [
+        {
+          "n": 20,
+          "beat": "excur",
+          "mark": "two",
+          "to": "mid"
+        }
+      ],
+      "see": [
+        "active-insufficiency",
+        "passive-insufficiency"
+      ]
+    },
+    {
+      "id": "active-insufficiency",
+      "ru": "Активная недостаточность",
+      "en": "active insufficiency",
+      "def": "Мышца укоротилась настолько, что почти не развивает напряжение: например, задняя группа бедра, которая сразу сгибает колено и разгибает бедро.",
+      "page": 61,
+      "moments": [
+        {
+          "n": 20,
+          "beat": "insuf",
+          "mark": "act"
+        }
+      ],
+      "see": [
+        "passive-insufficiency",
+        "two-joint-muscle"
+      ]
+    },
+    {
+      "id": "passive-insufficiency",
+      "ru": "Пассивная недостаточность",
+      "en": "passive insufficiency",
+      "def": "Мышца растянута полностью и сама ограничивает движение: задняя группа бедра при разогнутом колене не даёт полностью согнуть бедро.",
+      "page": 61,
+      "moments": [
+        {
+          "n": 20,
+          "beat": "insuf",
+          "mark": "pas",
+          "to": "pas2"
+        }
+      ],
+      "see": [
+        "active-insufficiency"
+      ]
+    },
+    {
+      "id": "prom",
+      "ru": "Пассивные движения",
+      "en": "passive range of motion (PROM)",
+      "def": "Движение в свободном объёме целиком создаёт внешняя сила — сила тяжести, аппарат, другой человек или другая часть тела; мышцы почти не сокращаются.",
+      "page": 62,
+      "moments": [
+        {
+          "n": 20,
+          "beat": "types",
+          "mark": "prom"
+        },
+        {
+          "n": 20,
+          "beat": "promlim",
+          "mark": "hard",
+          "to": "no"
+        },
+        {
+          "n": 103,
+          "beat": "prom",
+          "mark": "prom",
+          "to": "gain"
+        }
+      ],
+      "see": [
+        "arom",
+        "aarom",
+        "maximum-protection-phase"
+      ]
+    },
+    {
+      "id": "arom",
+      "ru": "Активные движения",
+      "en": "active range of motion (AROM)",
+      "def": "Движение в свободном объёме создают сокращения мышц, пересекающих сустав.",
+      "page": 62,
+      "moments": [
+        {
+          "n": 20,
+          "beat": "types",
+          "mark": "arom"
+        },
+        {
+          "n": 20,
+          "beat": "arom",
+          "mark": "can"
+        }
+      ],
+      "see": [
+        "prom",
+        "aarom"
+      ]
+    },
+    {
+      "id": "aarom",
+      "ru": "Активно-вспомогательные движения",
+      "en": "active-assistive range of motion (A-AROM)",
+      "def": "Активное движение, которому помогают руками или аппаратом, потому что мышцам не хватает сил пройти весь объём.",
+      "page": 62,
+      "moments": [
+        {
+          "n": 20,
+          "beat": "types",
+          "mark": "aarom"
+        },
+        {
+          "n": 20,
+          "beat": "arom",
+          "mark": "weak"
+        }
+      ],
+      "see": [
+        "arom",
+        "prom"
+      ]
+    },
+    {
+      "id": "force-couple",
+      "ru": "Пара сил",
+      "en": "force couple",
+      "def": "Две силы в разных точках кости, направленные в противоположные стороны и вместе поворачивающие её: так поворачивают лопатку за нижний угол и акромион.",
+      "page": 64,
+      "moments": [
+        {
+          "n": 22,
+          "beat": "scap",
+          "mark": "rot"
+        },
+        {
+          "n": 157,
+          "beat": "rot",
+          "mark": "cuff"
+        }
+      ],
+      "see": [
+        "scapulohumeral-rhythm",
+        "rotator-cuff"
+      ]
+    },
+    {
+      "id": "self-assisted-rom",
+      "ru": "Самостоятельные вспомогательные движения",
+      "en": "self-assisted range of motion",
+      "def": "Движения, в которых пациент сам помогает слабой части тела — здоровой рукой, палкой, блоком, скольжением по стене; защищают заживающие ткани.",
+      "page": 73,
+      "moments": [
+        {
+          "n": 26,
+          "beat": "why",
+          "mark": "early",
+          "to": "dev"
+        }
+      ],
+      "see": [
+        "aarom"
+      ]
+    },
+    {
+      "id": "cpm",
+      "ru": "Непрерывное пассивное движение",
+      "en": "continuous passive motion (CPM)",
+      "def": "Пассивное движение, которое аппарат выполняет медленно и непрерывно в контролируемом объёме; появилось по итогам исследований Роберта Солтера.",
+      "page": 78,
+      "moments": [
+        {
+          "n": 27,
+          "beat": "cpm",
+          "mark": "def",
+          "to": "par"
+        },
+        {
+          "n": 27,
+          "beat": "guide",
+          "mark": "g1",
+          "to": "g6"
+        }
+      ],
+      "see": [
+        "prom"
+      ]
+    },
+    {
+      "id": "functional-patterns",
+      "ru": "Объём движений в функциональных паттернах",
+      "en": "range of motion through functional patterns",
+      "def": "Конечность проводят через движение повседневного дела — взять прибор, поднести руку ко рту, расчесаться, — чтобы связать объём с жизнью.",
+      "page": 80,
+      "moments": [
+        {
+          "n": 27,
+          "beat": "func",
+          "mark": "pat",
+          "to": "own"
+        },
+        {
+          "n": 27,
+          "beat": "ul",
+          "mark": "u1",
+          "to": "u5"
+        }
+      ],
+      "see": [
+        "rom"
+      ]
+    }
+  ]
+}
