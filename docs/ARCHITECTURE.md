@@ -50,3 +50,8 @@ Excluded: `localize_ru.py` includes a PDF-export entry point; `review.py scan` r
 ## Deployment
 
 Preserve the directory structure and relative asset URLs. Serve real MP3 payloads using a host that supports byte ranges. For a public deployment, first clear material-specific rights and hydrate LFS into a static artifact; separately test content type, partial responses, seeking and mobile rendering at the real URL. Local browser success is not hosted-audio proof.
+
+
+The isolated player copy initializes missing `d` state and normalized stroke attributes when `draw()` is called on an uninitialized path. This fixes NaN stroke offsets without changing lesson HTML, quiz answers or educational wording. Regression tests failed on lessons 221/226/231 before the correction and passed afterward; the full sweep passed all 253 lessons.
+
+Optional atlas authoring/checks also require Pillow; install `requirements-authoring.txt` in the separate environment. Use Python `-X utf8` for the existing player test on Windows consoles.

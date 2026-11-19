@@ -9,4 +9,4 @@
 | Quiz | ch001, first question | Immediate feedback after an answer in the actual lesson. |
 | Progress | Contents after finish-card test | Browser-local progress generated in an isolated test profile. |
 
-Screenshots are real interface captures, not generated mockups. Exact URLs, viewports and SHA-256 values are in the private screenshot manifest. Do not publish screenshots containing uncleared educational material. Portrait-player text is small; an overflow pass is not a readability claim.
+Screenshots are real interface captures, not generated mockups. Exact URLs, viewports and SHA-256 values are in the screenshot manifest. These captures accompany the owner-requested university submission; any broader reuse must retain attribution and review underlying content rights. Portrait-player text is small; an overflow pass is not a readability claim.

@@ -12,7 +12,7 @@
 
 A university learning project that turns therapeutic exercise concepts into short Russian-language lessons with animated SVG scenes, interactive questions, captions and local progress tracking. The full local candidate preserves 253 existing lesson directories across 26 thematic units.
 
-**Status: release candidate under technical and content review. Publication readiness is not established.** A lesson count measures the inventory, not medical, editorial or accessibility approval. This source package contains the interactive application only.
+**Status: university assessment candidate, shared at the project owner’s request with the limitations below.** A lesson count measures the inventory, not medical, editorial or accessibility approval. This source package contains the interactive application only.
 
 ## Problem Statement
 
@@ -66,12 +66,12 @@ Requirements: Python 3.10 or later, Git, Git LFS and a modern browser.
 
 ```powershell
 git clone --branch codex/interactive-portfolio https://github.com/indexdeny/-Therapeutic-Exercise.git
-cd -Therapeutic-Exercise
+cd .\-Therapeutic-Exercise
 git lfs install --local
 git lfs pull
 ```
 
-The candidate branch must exist before the clone command can work. Check the submission link supplied with this candidate; the original default branch may still contain a separate project. A ZIP containing approximately 130-byte MP3 pointer files is not an audio installation.
+Use the `codex/interactive-portfolio` branch for this independent application; the repository default branch may still contain a separate project until migration is approved. A ZIP containing approximately 130-byte MP3 pointer files is not an audio installation.
 
 ## Quick Start
 
@@ -110,7 +110,7 @@ python tools/open_lesson.py 1 --port 8765
 - Anatomy/position example: `/therapeutic-exercise/ch214/?beat=2&t=8`.
 - Atlas, sandbox, review and glossary: corresponding folders under `/therapeutic-exercise/`.
 
-Real screenshots, when cleared for sharing, are documented in [the portfolio manifest](docs/portfolio/SCREENSHOT_MANIFEST.json). They come from the actual application, not generated interface mockups.
+Real application screenshots are documented in [the portfolio manifest](docs/portfolio/SCREENSHOT_MANIFEST.json). They come from the actual application, not generated interface mockups.
 
 ## Verification
 
@@ -121,7 +121,7 @@ python -m venv .venv
 .venv\Scripts\python -m pip install -r requirements-qa.txt
 .venv\Scripts\python -m playwright install chromium
 .venv\Scripts\python tests/web_smoke.py --url http://127.0.0.1:8765/therapeutic-exercise/
-.venv\Scripts\python tools/therapeutic-exercise/e2e_player.py --url http://127.0.0.1:8765/therapeutic-exercise/ch001/
+.venv\Scripts\python -X utf8 tools/therapeutic-exercise/e2e_player.py --url http://127.0.0.1:8765/therapeutic-exercise/ch001/
 ```
 
 The candidate audit parsed 4350 site files, checked 528 script blocks/files for JavaScript syntax, and loaded all content JSON. Browser results currently record 253/253 lessons without captured load/scene errors, 3503 evaluated scenes and 26/26 passing sampled control checks. These figures are mechanical checks, not full visual or medical acceptance. See [verification](docs/VERIFICATION.md) for the final scope, defects and clean-clone evidence.
@@ -143,13 +143,13 @@ The project owner defined the product concept and requirements, interaction desi
 
 ## Project Status
 
-Standalone interactive candidate prepared for review. The original local workspace and its branches are outside this package. A clean source snapshot does not remove files from older GitHub branches or history. Default-branch migration and old-ref cleanup require a separately approved publication plan.
+Standalone interactive university assessment candidate prepared in an independent Git history. The original local workspace and its branches are outside this package. A clean source snapshot does not remove files from older GitHub branches or history. Default-branch migration and old-ref cleanup require a separately approved publication plan.
 
 ## Content Rights & Disclaimer
 
-Educational university project. Literature is a study reference; this is not an official publisher edition or a clinically certified treatment guide. The owner declares authorship of the project-specific implementation and learning design. No written publisher permission is asserted. Copyright in third-party literature and assets remains with the respective owners; unresolved material must be withheld from a general public release pending review. No blanket open-source license is granted over the educational corpus by these software notices.
+Educational university project. Literature is a study reference; this is not an official publisher edition or a clinically certified treatment guide. The owner declares authorship of the project-specific implementation and learning design. No written publisher permission is asserted. The owner declares the project-specific lessons, code and procedural visualizations to be their own AI-assisted work. The literary source is attributed, while full publisher PDFs, extracted pages and the separate translation corpus are excluded. Copyright in third-party literature remains with its owners. This assessment snapshot does not assert publisher permission or grant unrestricted downstream republication rights; broader portfolio, commercial or content-reuse scenarios require their own review. No blanket open-source license is granted over the educational corpus by these software notices.
 
-Reference: Kisner, C., Colby, L. A., & Borstad, J. *Therapeutic Exercise: Foundations and Techniques*, 7th edition. F. A. Davis. [Publisher](https://www.fadavis.com/).
+Reference: Kisner, C., Colby, L. A., & Borstad, J. *Therapeutic Exercise: Foundations and Techniques*, 7th edition. F. A. Davis. [Edition-specific catalogue](https://www.r2library.com/resource/title/0803658508) · [Publisher](https://www.fadavis.com/).
 
 The material does not replace an individual assessment by a physician or physiotherapist. Exercise selection requires consideration of contraindications and individual circumstances. No individual treatment advice is provided.
 
