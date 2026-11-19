@@ -104,6 +104,10 @@ python tools/open_lesson.py 1 --port 8765
 
 ## Interactive Examples
 
+![Actual anatomy visualization from lesson ch214](docs/portfolio/screenshots/04-anatomy-position.png)
+
+Actual application capture: lesson `ch214`, step 3, paused review mode. The interface is in Russian.
+
 - First lesson: `/therapeutic-exercise/ch001/`.
 - Middle lesson: `/therapeutic-exercise/ch127/`.
 - Last lesson: `/therapeutic-exercise/ch253/`.
@@ -111,6 +115,8 @@ python tools/open_lesson.py 1 --port 8765
 - Atlas, sandbox, review and glossary: corresponding folders under `/therapeutic-exercise/`.
 
 Real application screenshots are documented in [the portfolio manifest](docs/portfolio/SCREENSHOT_MANIFEST.json). They come from the actual application, not generated interface mockups.
+
+![Actual quiz feedback in lesson ch001](docs/portfolio/screenshots/05-quiz.png)
 
 ## Verification
 
