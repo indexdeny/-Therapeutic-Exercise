@@ -1,9 +1,11 @@
-# Instructor review
+# Run and review
 
-The requested destination is the owner's existing public repository, `indexdeny/-Therapeutic-Exercise`. No separate private GitHub repository is created. Use the exact independent candidate branch and commit supplied with the final delivery; the existing default branch may still show the earlier combined project until a separately approved migration.
+The default branch, `Interactive-Book`, contains the standalone interactive textbook. Follow README installation and Quick Start, including Git LFS hydration before checking audio.
 
-Follow README installation and Quick Start. Check lessons 001, 127 and 253, navigate between lessons, answer a quiz, enable captions, change speed and reload after completion. Progress is stored only in the browser used for the test. Check LFS installation if audio files contain pointer text or are about 130 bytes.
+For a short functional review, open lessons 001, 127 and 253. Start playback, pause and resume, seek within a step, change speed, enable captions and answer a question. Finish a lesson, reload and inspect the contents-page progress indicator. Progress is stored in that browser.
 
-A public repository can be reviewed through a direct branch URL without adding a collaborator. If private access is used in the future: the owner opens **Settings → Collaborators → Add people**, enters the instructor's GitHub username, selects the required access and sends the invitation. The instructor must accept it. Do not publish personal invitation details or credentials. No invitation is sent by this preparation task.
+Run `tests/web_smoke.py` for the first, middle and last lessons, or use `--all` to inspect every lesson. `tools/therapeutic-exercise/e2e_player.py` checks the player; on Windows use Python `-X utf8` for readable output.
 
-The application is educational, with the medical and content-rights limits stated in README. A local release candidate or a source branch is not proof that the hosted application has been deployed.
+This public repository can be reviewed through its URL without a collaborator invitation. Access to a future private copy can be managed through GitHub **Settings → Collaborators → Add people**; the invited person must accept the invitation. Do not publish invitation details or credentials.
+
+This is educational software. The material does not replace an individual assessment by a physician or physiotherapist. No clinical certification or complete accessibility conformance is claimed.

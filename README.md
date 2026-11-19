@@ -56,7 +56,7 @@ tools/serve.py             # Local HTTP server with single-range support
 tools/open_lesson.py       # Optional local launcher
 tools/therapeutic-exercise/ # Selected web-only authoring/testing tools
 tests/                    # Standalone web verification
-docs/                     # Architecture, verification and presentation drafts
+docs/                     # Architecture, usage instructions and interface screenshots
 LICENSES/                 # Applicable third-party software notices
 ```
 
@@ -71,7 +71,7 @@ git lfs install --local
 git lfs pull
 ```
 
-Use the `Interactive-Book` branch for this independent application; the repository default branch may still contain a separate project until migration is approved. A ZIP containing approximately 130-byte MP3 pointer files is not an audio installation.
+`Interactive-Book` is the default branch for this independent application. A ZIP containing approximately 130-byte MP3 pointer files is not an audio installation.
 
 ## Quick Start
 
@@ -114,7 +114,7 @@ Actual application capture: lesson `ch214`, step 3, paused review mode. The inte
 - Anatomy/position example: `/therapeutic-exercise/ch214/?beat=2&t=8`.
 - Atlas, sandbox, review and glossary: corresponding folders under `/therapeutic-exercise/`.
 
-Real application screenshots are documented in [the portfolio manifest](docs/portfolio/SCREENSHOT_MANIFEST.json). They come from the actual application, not generated interface mockups.
+Browse the [interface screenshots](docs/portfolio/screenshots/). They come from the actual application, not generated interface mockups.
 
 ![Actual quiz feedback in lesson ch001](docs/portfolio/screenshots/05-quiz.png)
 
@@ -130,7 +130,7 @@ python -m venv .venv
 .venv\Scripts\python -X utf8 tools/therapeutic-exercise/e2e_player.py --url http://127.0.0.1:8765/therapeutic-exercise/ch001/
 ```
 
-The candidate audit parsed 4350 site files, checked 528 script blocks/files for JavaScript syntax, and loaded all content JSON. Browser results currently record 253/253 lessons without captured load/scene errors, 3503 evaluated scenes and 26/26 passing sampled control checks. These figures are mechanical checks, not full visual or medical acceptance. See [verification](docs/VERIFICATION.md) for the final scope, defects and clean-clone evidence.
+Technical checks covered 528 JavaScript syntax units, all content JSON, all 253 lesson pages and 3,503 scene states. Sampled player controls and an independent GitHub clone passed their checks. These are software checks, not full visual or medical acceptance. Run the [standalone browser checks](tests/web_smoke.py) and player test using the commands above.
 
 ## Known Limitations
 
@@ -149,7 +149,7 @@ The project owner defined the product concept and requirements, interaction desi
 
 ## Project Status
 
-Standalone interactive university assessment candidate prepared in an independent Git history. The original local workspace and its branches are outside this package. A clean source snapshot does not remove files from older GitHub branches or history. Default-branch migration and old-ref cleanup require a separately approved publication plan.
+Standalone interactive university project in an independent Git history. The default branch is `Interactive-Book`. Earlier branches remain unchanged and are outside this application snapshot.
 
 ## Content Rights & Disclaimer
 
