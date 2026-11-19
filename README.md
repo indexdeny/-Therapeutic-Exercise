@@ -65,13 +65,13 @@ LICENSES/                 # Applicable third-party software notices
 Requirements: Python 3.10 or later, Git, Git LFS and a modern browser.
 
 ```powershell
-git clone --branch codex/interactive-portfolio https://github.com/indexdeny/-Therapeutic-Exercise.git
+git clone --branch Interactive-Book https://github.com/indexdeny/-Therapeutic-Exercise.git
 cd .\-Therapeutic-Exercise
 git lfs install --local
 git lfs pull
 ```
 
-Use the `codex/interactive-portfolio` branch for this independent application; the repository default branch may still contain a separate project until migration is approved. A ZIP containing approximately 130-byte MP3 pointer files is not an audio installation.
+Use the `Interactive-Book` branch for this independent application; the repository default branch may still contain a separate project until migration is approved. A ZIP containing approximately 130-byte MP3 pointer files is not an audio installation.
 
 ## Quick Start
 
